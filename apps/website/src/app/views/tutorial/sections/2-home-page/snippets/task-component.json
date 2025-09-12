@@ -1,0 +1,14 @@
+{
+	"id": 3,
+	"sectionId": 2,
+	"content": "import { Component } from '../../../core/index.js';\n\nconst templateFn = (task: Task) => `\n&lt;div \n\tclass=\"u-flex-center u-flex-column\"\n\tstyle=\"max-width;25vw;margin-top:1em;text-align:center;\"\n&gt;&lt;h2 \n\t\tclass=\"u-font-large u-bold\"\n\t\tdata-pipe=\"capitalizeAll\"\n\t&gt;${task.name}&lt;/h2&gt;\n\t&lt;p \n\t\tclass=\"u-font-small u-italic\"\n\t\tdata-pipe=\"date:en-US,long,time|capitalizeAll\"\n\t&gt;${task.date}&lt;/p&gt;\n&lt;/div&gt;\n`;\n\nexport class TaskComponent extends Component {\n\tprivate _task: Task;\n\n\tconstructor(mountTarget: HTMLElement, task: Task) {\n\t\tsuper({templateFn, config: task, mountTarget});\n\t\tthis._task = task;\n\t}\n}",
+	"type": "ts",
+	"en": {
+		"before": "Let's generate the TaskComponent that will be used in the app's main view with command \"npm run generate component task\".\nThe component's template arrow function will receive the same object as the one passed in constructor's super(config).",
+		"after": "Note : If the object you're working with has optional properties, nutin needs to be told with the data-optional attribute."
+	},
+	"fr": {
+		"before": "Générons maintenant le composant TaskComponent qui sera utilisé dans la vue du catalogue des tâches avec la commande \"npm run generate component task\".\nLa fonction fléchée du template du composant recevra en argument le même objet que celui passé au super(config) du constructeur.",
+		"after": "Note : Si l'objet a des propriétés optionelles, nutin doit en être informé avec l'attribut data-optional."
+	}
+}

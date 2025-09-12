@@ -1,0 +1,14 @@
+{
+	"id": 1,
+	"sectionId": 6,
+	"content": "public updateTask(task: Task) {\n\tif (isNaN(Date.parse(task.date.toString()))) {\n\t\treturn;\n\t};\n\n\tthis._tasks = this._tasks.map((t) => {\n\t\treturn t.id === task.id ? task : t\n\t});\n\n\tthis.tasksUpdated();\n}",
+	"type": "ts",
+	"en": {
+		"before": "Let's add the update logic in the service :",
+		"after": "We use the isNan check to ensure the \"Date\" property is handled correctly."
+	},
+	"fr": {
+		"before": "Ajoutons la logique de modification dans le service :",
+		"after": "Nous vérifions la condition isNan pour assurer un traitement correct de la propriété \"Date\"."
+	}
+}

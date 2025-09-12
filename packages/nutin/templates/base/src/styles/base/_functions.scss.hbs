@@ -1,0 +1,9 @@
+@function calcul_rem($size, $base) {
+	@return 1rem * $size / $base;
+}
+
+@function strip_unit($number) {
+	@if type-of($number) == 'number' and not unitless ($number) {
+		@return $number / ($number * 0 + 1);
+	}
+}

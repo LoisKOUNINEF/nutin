@@ -1,0 +1,32 @@
+name: 💡 Feature Request
+description: Suggest a new idea or improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    attributes:
+      label: Problem
+      description: Is your request related to a problem? Describe it.
+      placeholder: "I'm frustrated when..."
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Proposed solution
+      description: What would you like to happen?
+      placeholder: "I’d like to see..."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Alternatives considered
+      description: What other solutions have you thought about?
+      placeholder: "I also considered..."
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: Any other info (links, screenshots, references).

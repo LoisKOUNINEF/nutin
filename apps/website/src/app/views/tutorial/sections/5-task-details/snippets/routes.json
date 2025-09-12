@@ -1,0 +1,14 @@
+{
+	"id": 6,
+	"sectionId": 5,
+	"content": "export const appRoutes: Routes = {\n\t'/': () => new TaskCatalogView(),\n\t'/tasks/:id?': () => new TaskCatalogView(),\n\t'/404': () => new NotFoundView(),\n}",
+	"type": "ts",
+	"en": {
+		"before": "We'll need to modify routes.ts to handle route params. Since we can't have parameters on the default route, we'll need to duplicate TaskCatalogView's route.",
+		"after": "The question mark makes route param optional."
+	},
+	"fr": {
+		"before": "Nous allons modifier routes.ts pour gérer les paramètres de route. Considérant que nous ne pouvons pas passer de paramètres pour la route par défaut, nous devrons dupliquer la route de TaskCatalogView.",
+		"after": "Le point d'interrogation rend le paramètre de route optionnel."
+	}
+}

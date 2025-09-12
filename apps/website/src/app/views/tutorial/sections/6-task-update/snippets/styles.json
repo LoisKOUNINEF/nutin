@@ -1,0 +1,12 @@
+{
+	"id": 4,
+	"sectionId": 6,
+	"content": "input {\n\tborder: 0;\n\twidth: 100%;\n\ttext-align: center;\n\tpadding: 1rem;\n\t&:focus {\n\t\toutline: 1px solid $primary-color;\n\t\tborder-radius: 1rem;\n\t}\n}\n\ntextarea {\n\tpadding-top: .5rem;\n\t&:focus {\n\t\toutline: 1px solid $primary-color;\n\t\tborder-radius: 1rem;\n\t}\n}",
+	"type": "scss",
+	"en": {
+		"before": "Add some styling for input & textarea in src/styles/_styles.scss, in the :root properties."
+	},
+	"fr": {
+		"before": "Ajoutons la mise en forme pour template & input dans src/styles/_styles.scss, dans les propriétés :root."
+	}
+}

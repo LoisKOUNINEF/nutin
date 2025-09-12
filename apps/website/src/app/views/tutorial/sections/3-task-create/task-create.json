@@ -1,0 +1,10 @@
+{ "id": 3,
+	"en":	{
+		"name": "Create task",
+		"content": "We're now going to create a component to add a new task and integrate it in our view."
+	},
+	"fr":	{
+		"name": "Créer une tâche",
+		"content": "A présent, créons un composant pour ajouter une nouvelle tâche et intégrons-le dans notre vue."
+	}
+}

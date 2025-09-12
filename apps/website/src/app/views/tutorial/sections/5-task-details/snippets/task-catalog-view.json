@@ -1,0 +1,12 @@
+{
+	"id": 4,
+	"sectionId": 5,
+	"content": "const template = `\n&lt;div data-component=\"add-task\"&gt;&lt;/div&gt;\n&lt;div style=\"display:flex;\"&gt;\n\t&lt;div id=\"task-catalog\" class=\"task-catalog__sidebar\"&gt;&lt;/div&gt;\n\t&lt;div data-component=\"task-details\"&gt;&lt;/div&gt;\n&lt;/div&gt;\n`\n\n\tpublic childConfigs(): ComponentConfig[] { \n\t\tconst addTaskConfig: ComponentConfig = {\n\t\t\tselector: `add-task`,\n\t\t\tfactory: (el) => new AddTaskComponent(el)\n\t\t};\n\n\t\tconst configs = [addTaskConfig, ...this.catalogConfigs()];\n\n\t\tif (this.hasRouteParam('id')) {\n\t\t\tconfigs.push(...this.detailsConfigs());\n\t\t}\n\n\t\treturn configs;\n\t}\n\n\tprivate catalogConfigs(): ComponentConfig[] {\n\t\tconst tasksContainer = document.getElementById('task-catalog');\n\n\t\treturn this.catalogConfig({\n\t\t\tarray: this._tasks,\n\t\t\telementName: 'task',\n\t\t\tcontainer: tasksContainer,\n\t\t\tcomponent: TaskComponent\n\t\t});\n\n\t}\n\t\n\tprivate detailsConfigs(): ComponentConfig[] {\n\t\tconst taskId = this.getRouteParam('id') || 0;\n\t\tconst task = this._tasks.find((task) => task.id === +taskId);\n\t\tif (!task) return [];\n\n\t\treturn [\n\t\t\t{ \n\t\t\t\tselector: `task-details`,\n\t\t\t\tfactory: (el) => new TaskDetailsComponent(el, task)\n\t\t\t}\n\t\t]  \n\t}",
+	"type": "ts",
+	"en": {
+		"before": "Now, let's modify our view to handle route parameters, using inherited methods hasRouteParam and getRouteParam.\nWe're going to make the task catalog a left sidebar, and display the details on the right."
+	},
+	"fr": {
+		"before": "A présent, modifions notre vue pour prendre en charge les paramètres de route, en utilisant les méthodes héritées hasRouteParam et getRouteParam.\nNous allons faire du catalogue de tâches une sidebar positionnée à gauche, et afficher les détails sur la droite."
+	}
+}

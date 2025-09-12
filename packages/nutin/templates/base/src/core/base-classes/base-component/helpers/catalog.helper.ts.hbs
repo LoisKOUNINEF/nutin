@@ -1,0 +1,54 @@
+import { BaseComponent, ComponentConfig } from "../base-component.js";
+
+export interface CatalogConfig {
+  array: any[];
+  elementName: string;
+  elementTag?: keyof HTMLElementTagNameMap;
+  selector: string;
+  component: new (el: HTMLElement, data: any) => BaseComponent;
+};
+
+/**
+ * ```typescript
+interface CatalogConfig {
+  array: any[];
+  elementName: string;
+  elementTag?: keyof HTMLElementTagNameMap;
+  selector: string;
+  component: new (el: HTMLElement, data: any) => BaseComponent;
+};
+  ```
+*/
+export class CatalogHelper {
+  public static generateCatalog(config: CatalogConfig): ComponentConfig[] {
+    if (!config.array || config.array.length < 1) return [];
+
+    const container = document.querySelector(`[data-catalog="${config.selector}"]`);
+
+    if (!container || !(container instanceof HTMLElement)) return [];
+
+    const componentConfigs: ComponentConfig[] = [];
+
+    for (let i = 0; i < config.array.length; i++) { 
+      this.createElements(i, config, container);
+      this.pushConfig(i, componentConfigs, config);
+    }
+
+    return componentConfigs;
+  }
+
+  private static createElements(idx: number, config: CatalogConfig, container: HTMLElement) {
+    const el = document.createElement(config.elementTag || 'div');
+    el.setAttribute('data-component', `${config.elementName}-${idx}`);
+    container?.appendChild(el);
+  }
+
+  private static pushConfig(idx: number, componentConfigs: ComponentConfig[], config: CatalogConfig) {
+    componentConfigs.push(
+      { 
+        selector: `${config.elementName}-${idx}`,
+        factory: (el) => new config.component(el, config.array[idx])
+      },
+    )
+  }
+}

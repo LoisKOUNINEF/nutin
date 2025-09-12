@@ -1,0 +1,12 @@
+{
+	"id": 2,
+	"sectionId": 5,
+	"content": "public childConfigs(): ComponentConfig[] {\n\t\tconst btnClass = 'c-button u-rounded-pill u-padd-x-small u-padd-y-small u-marg-x-smallest u-marg-y-smallest';\n\t\treturn [\n\t\t\t{\n\t\t\t\tselector: 'details',\n\t\t\t\tfactory: (el) => new ButtonComponent(\n\t\t\t\t\tel, { \n\t\t\t\t\t\ttextContent: `task-catalog.tasks.details`, \n\t\t\t\t\t\tcallback: () => this.goToDetails(), \n\t\t\t\t\t\tclassName: `${btnClass} c-button-hover-prim`\n\t\t\t\t\t}\n\t\t\t\t)\n\t\t\t},\n\t\t\t{\n\t\t\t\tselector: 'delete',\n\t\t\t\tfactory: (el) => new ButtonComponent(\n\t\t\t\t\tel, \n\t\t\t\t\t{ \n\t\t\t\t\t\ttextContent: 'Delete', \n\t\t\t\t\t\tcallback: () => this.deleteTask(), \n\t\t\t\t\t\tclassName: `${btnClass} c-button-hover-sec`\n\t\t\t\t\t}\n\t\t\t\t)\n\t\t\t},\n\t\t]\n\t}\n\n\tgoToDetails() {\n\t\tAppEventBus.emit('navigate', `/${this._task.id}`);\n\t}\n\n/*\nIn template, before the delete button\n&lt;div data-component=\"details\"&gt;&lt;/div&gt;\n*/",
+	"type": "ts",
+	"en": {
+		"before": "In TaskComponent, we're going to add a new button, and a method to navigate to TaskDetailsComponent using the AppEventBus."
+	},
+	"fr": {
+		"before": "Dans TaskComponent, nous allons ajouter un nouveau bouton, ainsi qu'une méthode pour rediriger vers TaskDetailsComponent en utilisant le bus d'évènements."
+	}
+}

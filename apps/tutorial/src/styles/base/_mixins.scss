@@ -1,0 +1,372 @@
+@use "sass:map";
+@use "variables" as *;
+
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+@mixin flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@mixin flex-around {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+@mixin flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+@mixin grid($columns: 1, $gap: 1rem) {
+  display: grid;
+  grid-template-columns: repeat($columns, 1fr);
+  gap: $gap;
+}
+
+@mixin responsive-grid($default: 1, $breakpoints: (), $gap: 1rem) {
+  @include grid($default, $gap);
+  
+  @each $breakpoint, $columns in $breakpoints {
+    @media (min-width: $breakpoint) {
+      grid-template-columns: repeat($columns, 1fr);
+    }
+  }
+}
+
+@mixin grid-row($span: null, $start: null) {
+  @if $span {
+    grid-row-end: span $span;
+  }
+  @if $start {
+    grid-row-start: $start;
+  }
+}
+
+@mixin grid-column($span: null, $start: null) {
+  @if $span {
+    grid-column-end: span $span;
+  }
+  @if $start {
+    grid-column-start: $start;
+  }
+}
+
+@mixin fr-grid($columns: "1fr", $gap: 1rem) {
+  display: grid;
+  grid-template-columns: unquote($columns);
+  gap: $gap;
+}
+
+@mixin responsive-fr-grid($default: "1fr", $breakpoints: (), $gap: 1rem) {
+  @include fr-grid($default, $gap);
+  
+  @each $breakpoint, $columns in $breakpoints {
+    @media (min-width: $breakpoint) {
+      grid-template-columns: unquote($columns);
+    }
+  }
+}
+
+@mixin fr-grid-rows($rows: "1fr", $gap: 1rem) {
+  grid-template-rows: unquote($rows);
+  row-gap: $gap;
+}
+
+@mixin minmax-fr-grid($min: "200px", $max: "1fr", $repeat: 3, $gap: 1rem) {
+  display: grid;
+  grid-template-columns: repeat($repeat, minmax(unquote($min), unquote($max)));
+  gap: $gap;
+}
+
+@mixin mixed-fr-grid($fixed: null, $flexible: "1fr", $gap: 1rem) {
+  display: grid;
+  grid-template-columns: unquote("#{$fixed} #{$flexible}");
+  gap: $gap;
+}
+
+@mixin advanced-fr-grid(
+  $columns: "1fr",
+  $rows: null,
+  $gap: 1rem,
+  $dense: false
+) {
+  display: grid;
+  grid-template-columns: unquote($columns);
+  
+  @if $rows {
+    grid-template-rows: unquote($rows);
+  }
+  
+  gap: $gap;
+  
+  @if $dense {
+    grid-auto-flow: dense;
+  }
+}
+
+@mixin grid-area($area) {
+  grid-area: $area;
+}
+
+@mixin grid-template-areas($areas) {
+  grid-template-areas: $areas;
+}
+
+@mixin box($w, $h) {
+  width: $w;
+  height: $h;
+}
+
+@mixin margin-y($val) {
+  margin-top: $val;
+  margin-bottom: $val;
+}
+
+@mixin margin-x($val) {
+  margin-left: $val;
+  margin-right: $val;
+}
+
+@mixin padding-y($val) {
+  padding-top: $val;
+  padding-bottom: $val;
+}
+
+@mixin padding-x($val) {
+  padding-left: $val;
+  padding-right: $val;
+}
+
+@mixin text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin font($size, $weight: normal) {
+  font-size: $size;
+  font-weight: $weight;
+}
+
+@mixin line-clamp($lines) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@mixin fixed-full {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+@mixin pos($pos, $t: auto, $r: auto, $b: auto, $l: auto) {
+  position: $pos;
+  top: $t;
+  right: $r;
+  bottom: $b;
+  left: $l;
+}
+
+@mixin bg-cover {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+@mixin bg-gradient($dir, $from, $to) {
+  background: linear-gradient(to $dir, $from, $to);
+}
+
+@mixin box-shadow($shadow...) {
+  box-shadow: $shadow;
+}
+
+@mixin transition($props...) {
+  transition: $props;
+}
+
+@mixin hover-scale($scale: 1.05) {
+  transition: transform 0.2s;
+  &:hover {
+    transform: scale($scale);
+  }
+}
+
+@mixin border($color, $width: 1px, $style: solid) {
+  border: $width $style $color;
+}
+
+@mixin rounded($radius: 4px) {
+  border-radius: $radius;
+}
+
+@mixin hide {
+  display: none !important;
+}
+
+@mixin sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+}
+
+@mixin clearfix {
+  &::after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}
+
+@mixin cursor-pointer {
+  cursor: pointer;
+}
+
+@mixin image-cover {
+  -webkit-background-size: 100vw 100vh;
+  -moz-background-size: 100vw 100vh;
+  -o-background-size: 100vw 100vh;
+  background-size: 100vw 100vh;
+  background-attachment: fixed;
+};
+
+@mixin button-disabled {
+  button:disabled {
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+    a {
+      cursor: not-allowed !important;
+    }
+  }
+}
+
+@mixin respond-to($breakpoint) {
+  $value: map.get($breakpoints, $breakpoint);
+
+  @if $value {
+    @media (max-width: $value) {
+      @content;
+    }
+  }
+}
+
+@mixin fade-in($duration: 0.5s, $delay: 0s) {
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  & {
+    animation: fade-in $duration ease-in $delay forwards;
+  }
+}
+
+@mixin slide-in-left($distance: 100%, $duration: 0.6s, $delay: 0s) {
+  @keyframes slide-in-left {
+    from {
+      transform: translateX(-#{$distance});
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  & {
+    animation: slide-in-left $duration ease-out $delay forwards;
+  }
+}
+
+@mixin scale-up($from: 0.8, $to: 1, $duration: 0.4s, $delay: 0s) {
+  @keyframes scale-up {
+    from {
+      transform: scale(#{$from});
+      opacity: 0;
+    }
+    to {
+      transform: scale(#{$to});
+      opacity: 1;
+    }
+  }
+  & {
+    animation: scale-up $duration ease $delay forwards;
+  }
+}
+
+@mixin bounce-in($duration: 0.8s, $delay: 0s) {
+  @keyframes bounce-in {
+    0% { transform: scale(0.9); opacity: 0; }
+    60% { transform: scale(1.05); opacity: 1; }
+    80% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+  }
+
+  & {
+    animation: bounce-in $duration ease-out $delay forwards;
+  }
+}
+
+@mixin spin($duration: 1s, $delay: 0s, $direction: normal) {
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  & {
+    animation: spin $duration linear $delay infinite;
+    animation-direction: $direction;
+  }
+}
+
+@mixin pulse($duration: 1.5s, $delay: 0s) {
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  & {
+    animation: pulse $duration ease-in-out $delay infinite;
+  }
+}
+
+@mixin shake($duration: 0.5s, $delay: 0s) {
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-10px); }
+    40%, 80% { transform: translateX(10px); }
+  }
+
+  & {
+    animation: shake $duration ease-in-out $delay;
+  }
+}

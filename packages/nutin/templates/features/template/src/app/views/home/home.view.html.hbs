@@ -1,0 +1,58 @@
+<div 
+{{#if stylinNutin}}
+  class="u-flex-center u-flex-column u-padd-y-large"
+{{else}}
+  style="display:flex;justify-content:center;align-items:center;flex-direction:column"
+{{/if}}>
+  <h1 
+  {{#if i18n}}
+    data-i18n="home.title"
+  {{/if}} 
+  {{#if stylinNutin}}
+    class="u-color-prim u-font-largest u-bold u-font-secondary"
+    style="color:#6C8359;"
+  {{else}}
+    style="color:#6C8359;font-size:2rem;font-weight:bold;"
+  {{/if}}
+  >{{#unless i18n}}{{projectName}}{{/unless}}</h1>
+  <span 
+  {{#if stylinNutin}}
+    class="u-italic u-font-smallest u-font-secondary"
+  {{else}}
+    style="font-style:italic;font-size:0.75rem;"
+  {{/if}}
+  >nutin v1.0.0</span>
+  <img src="/assets/images/logo-trans.avif" width=250 height=250 alt="nutin's logo. A frame opened on the top left through which a plant grows.">
+  <div 
+  {{#if i18n}}
+    data-i18n="home.ready" 
+  {{/if}}
+  {{#if stylinNutin}}
+    class="u-font-large u-padd-y-medium" 
+    style="margin-top:-2rem;"
+  {{else}}
+    style="font-size:1.5rem;paddin-top:1rem;padding-bottom:1rem;margin-top:2rem;"
+  {{/if}}
+  >{{#unless i18n}}You're all set !{{/unless}}</div>
+  <div 
+  {{#if i18n}}
+    data-i18n="home.enjoy" 
+  {{/if}}
+  {{#if stylinNutin}}
+    class="u-font-large u-color-sec"
+    style="color:#C56648;"
+  {{else}}
+    style="color:#C56648;font-size:1.5rem;"
+  {{/if}}
+  }
+  }
+  >{{#unless i18n}}Happy Coding 🎉{{/unless}}</div>
+  <div 
+  {{#if stylinNutin}}
+    class="u-italic u-font-secondary u-font-small" 
+    {{#unless transition}}style="position:fixed;bottom:0;"{{/unless}}
+  {{else}}
+    style="font-size:.875rem;font-style:italic;{{#unless transition}}position:fixed;bottom:0;{{/unless}}"
+  {{/if}}
+  >so lightweight it's <span {{#if stylinNutin}}class="u-bold"{{else}}style="font-weight:bold;"{{/if}}>nutin</span>.</div>
+</div>

@@ -1,0 +1,14 @@
+{
+	"id": 1,
+	"sectionId": 7,
+	"content": "private fetchTasks() {\n\tthis._tasks = localStorage.tasks \n\t\t? JSON.parse(localStorage.tasks)\n\t\t: [];\n}\n\n// call it in the constructor and remove the default task\nconstructor() {\n\tsuper();\n\tthis.registerCleanup(this.clear);\n\tthis.fetchTasks();\n}\n\nprivate setTasks() {\n\tlocalStorage.setItem('tasks', JSON.stringify(this._tasks));\n}\n\n// call it in tasksUpdated method\nprivate tasksUpdated() {\n\tthis.setTasks();\n\tthis.emitReload();\n}",
+	"type": "ts",
+	"en": {
+		"before": "We're simply going to add fetchTasks and setTasks methods, using LocalStorage :",
+		"after": "Don't forget to call the fetchTasks method in the constructor and the setTasks one in tasksUpdated."
+	},
+	"fr": {
+		"before": "Nous allons simplement ajouter les méthodes fetchTasks et setTasks, qui utiliseront LocalStorage :",
+		"after": "N'oubliez pas d'appeler la méthode fetchTasks dans le constructor et la méthode setTasks dans tasksUpdated."
+	}
+}

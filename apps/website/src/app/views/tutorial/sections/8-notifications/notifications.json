@@ -1,0 +1,10 @@
+{ "id": 8,
+	"en": {
+		"name": "Notifications",
+		"content": "Although the to-do list is already working fine, we could improve the user experience."
+	},
+	"fr":	{
+		"name": "Notifications",
+		"content": "Bien que l'application fonctionne déjà correctement, nous pourrions améliorer l'expérience utilisateur."
+	}
+}

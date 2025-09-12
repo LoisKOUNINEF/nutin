@@ -1,0 +1,14 @@
+{
+	"id": 1,
+	"sectionId": 8,
+	"content": "import { notify, NotifyOptions } from '../../../libs/index.js';\n\nprivate notification(\n\tmessage: string, \n\ttype: NotifyOptions['type'] = 'success'\n) {\n\tnotify(message, { type: type });\n}\n\npublic addTask() {\n\t// existing code...\n\tthis.notification('New task created.');\n}\n\npublic deleteTask(id: number) {\n\t// existing code...\n\tthis.notification('Task deleted.')\n}\n\npublic updateTask(task: Task) {\n\tif (isNaN(Date.parse(task.date.toString()))) {\n\t\tthis.notication('Issue with \"Date\" property when updating task.', 'error');\n\t\treturn;\n\t};\n\n\t// existing code...\n\n\tthis.notication('Task updated.')\n}",
+	"type": "ts",
+	"en": {
+		"before": "To display a notification when a task is created, updated or deleted, we'll simply add a method in TasksService that uses the built-in snackbar library.",
+		"after": "Snackbar styling can be modified in src/styles/core/_libs.scss."
+	},
+	"fr": {
+		"before": "Pour afficher une notification quand une tâche est créée, modifiée ou supprimée, nous allons ajouter une méthode dans TasksService qui utilisera la bibliothèque snackbar incluse.",
+		"after": "Le style peut être modifié dans src/styles/core/_libs.scss."
+	}
+}

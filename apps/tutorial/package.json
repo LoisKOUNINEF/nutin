@@ -1,0 +1,22 @@
+{
+  "name": "tutorial",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "patch": "npm version patch -m 'CI/CD: Bump version to %s'",
+    "minor": "npm version minor -m 'CI/CD: Bump version to %s'",
+    "major": "npm version major -m 'CI/CD: Bump version to %s'",
+    "build:ts": "tsc --project tsconfig.json",
+    "build-static": "node tools/builder/builder.js",
+    "serve": "npm run build && live-server dist/src --port=9090 --entry-file=index.html",
+    "generate": "node tools/generator/generator.js",
+    "build:clear": "rm -rf dist",
+    "build": "npm run build:clear && npm run build:ts && npm run build-static",
+    "dev": "concurrently \"npm run watch\" \"npm run serve\"",
+    "watch:ts": "tsc --watch",
+    "watch:sass": "sass --watch src/styles:dist/css",
+    "watch": "concurrently \"npm:watch:*\""
+  }
+}

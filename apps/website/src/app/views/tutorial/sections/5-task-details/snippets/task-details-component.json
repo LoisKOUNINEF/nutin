@@ -1,0 +1,12 @@
+{
+	"id": 1,
+	"sectionId": 5,
+	"content": "import { Component } from '../../../core/index.js';\nconst templateFn = () => `&lt;div style=\"min-width:75vw;height:100vh;margin-top:1em;text-align:center;\"&gt;\n\t&lt;div class=\"u-flex-center u-flex-column\"&gt;\n\t\t&lt;p&gt;${task.name}&lt;/p&gt;\n\t\t&lt;p\n\t\t\tdata-pipe=\"capitalize\"\n\t\t&gt;${task.content}&lt;/p&gt;\n\t  &lt;p \n\t    class=\"u-font-small u-italic\"\n\t    data-pipe=\"date:en-US,long,time|capitalizeAll\"\n\t  &gt;${task.date}&lt;/p&gt;\n\t&lt;/div&gt;\n&lt;/div&gt;`;\n\nexport class TaskDetailsComponent extends Component {\n\tprivate _task: Task;\n\n\tconstructor(mountTarget: HTMLElement, task: Task) {\n\t\tsuper({templateFn, config: task, mountTarget});\n\t\tthis._task = task;\n\t}\n}",
+	"type": "ts",
+	"en": {
+		"before": "Generate the component with command npm run generate component task-details.\nFor the time being, it doesn't do much more than TaskComponent."
+	},
+	"fr": {
+		"before": "Générer le composant avec la commande npm run generate component task-details.\nPour le moment, il n'accomplit pas grand chose de plus que TaskComponent."
+	}
+}

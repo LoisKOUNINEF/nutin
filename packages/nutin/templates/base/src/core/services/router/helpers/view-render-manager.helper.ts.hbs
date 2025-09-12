@@ -1,0 +1,82 @@
+import { View, AppEventBus } from '../../../index.js';
+
+/**
+ * handles all view rendering{{#if transition}} and transition animation logic{{/if}}.
+ */
+export class ViewRenderManager {
+  {{#if transition}}
+  static renderAnimatedView(view: View): void {
+    const container = document.getElementById('app');
+    const el = view.render();
+    el.classList.add('app-view-transition');
+    container?.appendChild(el);
+    
+    requestAnimationFrame(() => {
+      el.classList.add('enter-active');
+    });
+  }
+
+  {{/if}}
+  static async transitionOutCurrentView(currentView: View | null): Promise<null> {
+    if (!currentView) return null;
+    {{#if transition}}
+    const container = document.getElementById('app');
+    const el = container?.firstElementChild as HTMLElement;
+
+    if (el) {
+      el.classList.add('exit-active');
+      await this.delay(300); // match transition duration in _libs.scss
+    }
+    {{/if}}
+    currentView.destroy();
+    this.emitEvent('view-unmount', currentView.viewName);
+    return null;
+  }
+
+  static renderNewView(
+    viewConstructor: () => View,
+    params: Record<string, string> = {}
+  ): View {
+    const view = viewConstructor();
+
+    // Set route parameters before rendering
+    view.setRouteParams(params);
+
+    {{#if transition}}
+    this.renderAnimatedView(view);
+
+    {{else}}
+    view.render();
+
+    {{/if}}
+    this.cleanupOptionalContent();
+
+    this.emitEvent('view-mount', view.viewName);
+    return view;
+  }
+
+  static cleanupOptionalContent() {
+    const isEmpty = (content: string | undefined | null): boolean => {
+    if (!content?.trim() || content === 'undefined') return true;
+      return false;
+    };
+
+    document.querySelectorAll<HTMLElement>('[data-optional]').forEach(el => {
+      const content = el.textContent?.trim();
+          
+      if (isEmpty(content)) {
+        el.remove();
+      }
+    });
+  }
+
+  static emitEvent(event: EventKey, viewName: string): void {
+    AppEventBus.emit(event, viewName);
+  }
+
+  {{#if transition}}
+  private static delay(ms: number): Promise<void> {
+    return new Promise(res => setTimeout(res, ms));
+  }
+  {{/if}}
+}

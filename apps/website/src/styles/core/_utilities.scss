@@ -1,0 +1,211 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+
+// Utility classes prefix : 'u-'
+
+// font size
+@each $name, $size in $font-sizes {
+  .u-font-#{$name} {
+    font-size: $size;
+  }
+}
+
+// padding
+@each $name, $space in $spacings {
+  .u-padd-x-#{$name} {
+    padding-left: $space;
+    padding-right: $space;
+  }
+}
+@each $name, $space in $spacings {
+  .u-padd-y-#{$name} {
+    padding-top: $space;
+    padding-bottom: $space;
+  }
+}
+
+//margin
+@each $name, $space in $spacings {
+  .u-marg-x-#{$name} {
+    margin-left: $space;
+    margin-right: $space;
+  }
+}
+@each $name, $space in $spacings {
+  .u-marg-y-#{$name} {
+    margin-top: $space;
+    margin-bottom: $space;
+  }
+}
+
+//border-radius
+@each $name, $radius in $border-radius {
+  .u-rounded-#{$name} {
+    border-radius: $radius;
+  }
+}
+
+// box-shadow
+@each $name, $shadow in $shadows {
+  .u-shadow-#{$name} {
+    box-shadow: $shadow;
+  }
+}
+
+// transition
+@each $name, $transition in $transitions {
+  .u-transition-#{$name} {
+    transition: $transition;
+  }
+}
+
+// color
+.u-color-base {
+  color: $text-color;
+}
+
+.u-color-prim {
+  color: $primary-color;
+}
+
+.u-color-sec {
+  color: $secondary-color;
+}
+
+.u-color-bg {
+  color: $background-color;
+}
+
+// font weight / style
+.u-italic {
+  font-style: italic;
+}
+
+.u-bold {
+  font-weight: bold;
+}
+
+.u-font-secondary {
+  font-family: $secondary-font;
+}
+
+// flex
+.u-flex-center {
+  @include mixins.flex-center;
+}
+
+.u-flex-column {
+  @include mixins.flex-column;
+}
+
+.u-flex-row {
+  @include mixins.flex-row;
+}
+
+.u-flex-between {
+  @include mixins.flex-between;
+}
+
+.u-flex-around {
+  @include mixins.flex-around;
+}
+
+.u-flex-wrap {
+  @include mixins.flex-wrap;
+}
+
+//
+.u-ellipsis {
+  @include mixins.text-ellipsis;
+}
+
+.u-clamp-2 {
+  @include mixins.line-clamp(2);
+}
+
+// positioning
+.u-absolute-center {
+  @include mixins.absolute-center;
+}
+
+.u-fixed-full {
+  @include mixins.fixed-full;
+}
+
+// backgrounds
+.u-bg-base {
+  background-color: $background-color;
+}
+
+.u-bg-inherit {
+  background-color: inherit;
+}
+
+.u-bg-primary {
+  background-color: $primary-color;
+}
+
+.u-bg-secondary {
+  background-color: $secondary-color;
+}
+
+.u-bg-gradient-to-right {
+  @include mixins.bg-gradient(right, rgba($primary-color, .7), rgba($secondary-color, .7));
+}
+
+.u-bg-cover {
+  @include mixins.bg-cover;
+}
+
+.u-img-cover {
+  @include mixins.image-cover;
+}
+
+// animations
+.u-transition {
+  @include mixins.transition(all 0.3s ease);
+}
+
+.u-hover-scale {
+  @include mixins.hover-scale;
+}
+
+// borders / radius
+.u-border {
+  @include mixins.border($primary-color);
+}
+
+.u-border-none {
+  border: 0px solid white;
+}
+
+.u-rounded {
+  @include mixins.rounded;
+}
+
+// utility
+.u-btn-disabled {
+  @include mixins.button-disabled;
+}
+
+.u-hide {
+  @include mixins.hide;
+}
+
+.u-sr-only {
+  @include mixins.sr-only;
+}
+
+.u-clearfix {
+  @include mixins.clearfix;
+}
+
+.u-pointer {
+  @include mixins.cursor-pointer;
+}
+
+.u-pre-wrap {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}

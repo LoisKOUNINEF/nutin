@@ -1,0 +1,14 @@
+{
+	"id": 2,
+	"sectionId": 1,
+	"content": "cd nutin-todo && npm run serve",
+	"type": "none",
+	"en": {
+		"before": "Check that it runs :",
+		"after": "Replace npm run serve with npm run dev to track changes.\nThe app is reachable on port 9090."
+	},
+	"fr": {
+		"before": "Vérifions que l'app fonctionne :",
+		"after": "Remplacer npm run serve par npm run dev pour suivre les changements.\nL'application est accessible sur le port 9090."
+	}
+}

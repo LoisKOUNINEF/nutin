@@ -1,0 +1,12 @@
+{
+	"id": 3,
+	"sectionId": 5,
+	"content": ".c-button-hover-prim {\n\t&:hover, &:focus {\n\t\tbackground-color: $primary-color;\n\t\tcolor: $background-color;\n\t\toutline: none;\n\t}\n}",
+	"type": "scss",
+	"en": {
+		"before": "Add this class in _custom-classes.scss :"
+	},
+	"fr": {
+		"before": "Ajoutons une classe dans _custom-classes.scss :"
+	}
+}

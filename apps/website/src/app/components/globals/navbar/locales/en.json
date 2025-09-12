@@ -1,0 +1,11 @@
+{ 
+	"home": "Home",
+	"documentation": "Documentation",
+	"tutorial": "Tutorial",
+	"core": "Core",
+	"services": "Services",
+	"libraries": "Libraries",
+	"stylin-nutin": "stylin-nutin",
+	"testin-nutin": "testin-nutin",
+	"tools": "Tools"
+}

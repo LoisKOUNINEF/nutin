@@ -1,0 +1,46 @@
+import { AppEventBus, ComponentConfig, View } from '../../../core/index.js';
+import { ButtonComponent } from '../../components/index.js';
+
+const template = `{{#if template}}__TEMPLATE_PLACEHOLDER__{{else}}<div 
+{{#if stylinNutin}}
+  class="u-flex-center u-flex-column u-padd-y-large"
+{{else}}
+  style="display:flex;justify-content:center;align-items:center;flex-direction:column"
+{{/if}}>
+  <h1 
+  {{#if i18n}}
+    data-i18n="not-found.content" 
+  {{/if}}
+  {{#if stylinNutin}}
+    class="u-color-sec u-font-largest u-bold u-font-secondary"
+  {{else}}
+    style="font-size:2rem;font-weight:bold;"
+  {{/if}}
+  >{{#unless i18n}}Page Not Found{{/unless}}</h1>
+  <img src="/assets/images/logo-small-trans.avif" width=250 height=250 alt="nutin's small logo with a growing plant.">
+  <div data-component="home"></div>
+</div>{{/if}}`;
+
+export class NotFoundView extends View {
+  constructor() {
+    super({template});
+  }
+
+  childConfigs(): ComponentConfig[] {
+    {{#if stylinNutin}}
+    const btnClass = 'u-bg-inherit u-font-large u-padd-y-medium u-color-prim u-italic';
+    {{else}}
+    const btnStyles = 'background-color:inherit;font-size:large;font-style:italic;padding-top:1rem;padding-bottom:1rem;'
+    {{/if}}
+    return [
+      { 
+        selector: 'home',
+        factory: (el) => new ButtonComponent(el, { {{#if i18n}}i18nKey: 'not-found.redirect'{{else}}textContent: 'Back to home'{{/if}}, callback: () => this.handleHome(), {{#if stylinNutin}}className: btnClass{{else}}styles: btnStyles{{/if}} })
+      },
+    ]
+  }
+
+  handleHome() {
+    AppEventBus.emit('navigate', '/');
+  }
+}

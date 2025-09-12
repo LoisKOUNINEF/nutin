@@ -1,0 +1,36 @@
+name: 🐛 Bug Report
+description: Report a reproducible issue
+labels: [bug]
+body:
+  - type: textarea
+    attributes:
+      label: What happened?
+      description: Clear and concise description of the bug.
+      placeholder: "When I do X, I expected Y, but Z happened..."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      description: Explain how we can reproduce the bug.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Version
+      description: Which version are you using?
+      placeholder: "v1.0.0"
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: Add screenshots, error logs, or any other details here.
+      placeholder: "Screenshot or logs..."

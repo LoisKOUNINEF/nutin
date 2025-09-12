@@ -1,0 +1,64 @@
+@use "variables" as *;
+@use "sass:map";
+@use "mixins";
+
+// css reset
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video, button,aside {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+// Global styles
+:root {
+	body {
+		background-color: $background-color;
+	  color: $text-color;
+		min-height: 100vh;
+		min-width: 100vw;
+		cursor: default;
+	  line-height: 1.6;
+		font-family: $primary-font;
+	  font-size: map.get($font-sizes, medium);
+	  display: flex; 
+	  flex-direction: column;
+  	overflow-y: scroll;
+  	overflow-x: hidden;
+  	scrollbar-gutter: stable;
+	}
+
+	main {
+		flex: 1;
+	}
+
+	h1 {
+		font-size: map.get($font-sizes, largest);
+	}
+
+	h1, h2, h3, h4, h5, h6 {
+		font-family: $secondary-font;
+	}
+
+	a, button {
+		cursor: pointer;
+	}
+
+	a {
+		text-decoration: none;
+		color: inherit;
+	}
+	
+	a:hover,
+	a:focus-visible {
+  	text-decoration: underline;
+	}
+}

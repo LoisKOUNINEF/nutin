@@ -1,0 +1,12 @@
+{
+	"id": 3,
+	"sectionId": 4,
+	"content": ".c-button {\n\ttransition: ease-in-out all .3s;\n\tbackground-color: inherit;\n}\n\n.c-button-hover-sec {\n\t&:hover, &:focus {\n\t\tbackground-color: $secondary-color;\n\t\tcolor: $background-color;\n\t\toutline: none;\n\t}\n}",
+	"type": "scss",
+	"en": {
+		"before": "Add those classes in _custom-classes.scss :"
+	},
+	"fr": {
+		"before": "Ajoutons ces classes dans _custom-classes.scss :"
+	}
+}

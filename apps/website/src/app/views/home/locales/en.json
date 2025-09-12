@@ -1,0 +1,12 @@
+{
+  "meta" : {
+    "title": "nutin toolkit",
+    "description": "nutin toolkit website (documentation, tutorial)."
+  },
+  "title": "nutin toolkit",
+  "catchphrase": "A lightweight, highly tweakable frontend toolkit, crafted for building lean, dynamic single-page applications without the complexity of full-scale frameworks.",
+  "presentation": "As minimalistic as it is, nutin comes with essential features out of the box : router, event bus, component lifecycle, singleton services...\nOptionaly, you can use the small testing toolkit testin-nutin, and the tiny 'tailwind-like' library stylin-nutin, both easily extensible, so that you can build, style and test apps without adding external dependencies.\nIt also has some quality of life features and tools, such as pipes, route guards, a small notification ('snackbar') system, etc...",
+  "pitch": "Frameworks are powerful, but with power comes complexity. Perhaps you'll share the opinion that using a renown framework to build a portfolio or a blog is slightly overkill. Nevertheless, it'll be fair to assume that you want your users to enjoy the SPA experience we're all used to nowadays, while also being able to reuse components and thus keep your code DRY.\nThis is why I chose to develop nutin.",
+  "philosophy": "I initially built nutin for my own personal projects, with the most pragmatic approach to avoid unnecessary complexity.\nThe goal has never been to be as dynamic as Vue or as robust and scalable as Angular, just to make development of small apps with limited complexity easy and smooth. I decided to use the bare minimum of devDependencies for the development and build steps, and absolutely no runtime dependencies. It obviously comes with limitations, but then again, that's the spirit.\nnutin isn't a dependency, all of the code is accessible within the app in src/core. I tried to maintain separation of concerns as much as I could, so I hope it'll make tweaking and extending the toolkit easy enough.\n\nThanks for reading this, and I hope you'll enjoy using nutin as much as I enjoyed making it !",
+  "tutorial-link": "👉 Build your first nutin app 👈"
+} 

@@ -1,0 +1,35 @@
+import { readFile } from 'fs/promises';
+import { exit } from 'process';
+import { print } from '../../utils/index.js';
+
+function errorExit(message) {
+  print.boldError(`[ERROR] ${message}`);
+  exit(1);
+}
+
+async function validateHtml() {
+  const filePath = 'dist/src/index.html';
+
+  let htmlContent;
+  try {
+    htmlContent = await readFile(filePath, 'utf-8');
+  } catch {
+    errorExit(`Failed to read ${filePath}`);
+  }
+
+  if (!htmlContent.includes('id="app"')) {
+    errorExit('Missing #app container in HTML');
+  }
+
+  if (!/<script[^>]*type=["']module["']/.test(htmlContent)) {
+    errorExit('No module scripts found in HTML');
+  }
+
+  if (!/<link[^>]*rel=["']stylesheet["']/.test(htmlContent)) {
+    errorExit('No stylesheet found in HTML');
+  }
+
+  print.info('HTML validation passed');
+}
+
+validateHtml();

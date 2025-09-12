@@ -1,0 +1,10 @@
+node_modules
+dist
+.github
+.gitignore
+.git
+
+*.md
+.env
+*.txt
+*.test

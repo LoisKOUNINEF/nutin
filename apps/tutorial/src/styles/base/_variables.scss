@@ -1,0 +1,83 @@
+/* 
+	Variables used in libs (snackbar, popover) and utility classes
+	Adapt to customize
+*/
+
+// colours (RGB)
+$background-color: rgb(255 255 255); // WHITE
+$text-color: rgb(0 0 0); // BLACK
+$primary-color: rgb(0 0 0); // BLACK
+$secondary-color: rgb(0 0 0); // BLACK
+
+// snackbar colours
+$snack-success: rgb(76 175 80);
+$snack-error: rgb(244 67 54);
+$snack-info: rgb(33 150 243);
+$snack-default: rgb(153 153 153);
+
+/* 
+	Variables used in utility classes
+	Adapt to customize
+*/
+
+// fonts
+$primary-font: Arial, Helvetica, sans-serif;
+$secondary-font: Arial, Helvetica, sans-serif;
+
+// font sizes
+$font-sizes: (
+	smallest: 0.75rem,    // 12px
+	small: 0.875rem,      // 14px
+	medium: 1rem,         // 16px (base)
+	large: 1.5rem,       // 24px
+	largest: 2rem,      // 32px
+);
+
+// spacing (margin / padding / gap)
+$spacings: (
+	smallest: 0.25rem,   // 4px
+	small: 0.5rem,       // 8px
+	medium: 1rem,        // 16px
+	large: 1.5rem,       // 24px
+	largest: 2rem,       // 32px
+);
+
+// border radius
+$border-radius: (
+	small: 2px,
+	medium: 4px,
+	large: 8px,
+	pill: 9999px,
+);
+
+// box sizes
+$box-sizes: (
+	small: 32px,
+	medium: 64px,
+	large: 128px,
+	largest: 256px,
+);
+
+// shadows
+$shadows: (
+	small: 0 1px 2px rgba(0, 0, 0, 0.05),
+	medium: 0 4px 6px rgba(0, 0, 0, 0.1),
+	large: 0 10px 15px rgba(0, 0, 0, 0.15),
+);
+
+// breakpoints
+$breakpoints: (
+	small: 576px,
+	medium: 768px,
+	large: 992px,
+	largest: 1201px,
+);
+
+// animations
+// transition Duration
+$transitions: (
+	fast: 0.2s,
+	normal: 0.3s,
+	slow: 0.5s,
+);
+

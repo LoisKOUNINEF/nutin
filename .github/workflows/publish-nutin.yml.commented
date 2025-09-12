@@ -1,0 +1,50 @@
+# Workflow disabled because of publishing issue.
+# Couldn't identify the cause so far; will publish manually for the time being.
+
+#name: Publish nutin Package To NPM
+#
+#on:
+#  push:
+#    branches:
+#      - main
+#    paths:
+#      - "packages/nutin/**"
+#      - ".github/workflows/publish-nutin.yml"
+
+#jobs:
+#  publish:
+#    name: Build & Publish Nutin Package
+#    runs-on: ubuntu-latest
+
+#    permissions:
+#      contents: read
+#      packages: write
+
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v4
+#        with:
+#          fetch-depth: 0
+
+#      - name: Ensure tag is on main
+#        run: |
+ #         if [ "$(git branch --contains $GITHUB_SHA | grep 'main')" = "" ]; then
+#            echo "❌ Tag is not on main. Aborting publish to npm workflow."
+#           exit 1
+#          fi
+
+#      - name: Set up Node.js
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: "20"
+#          cache: "npm"
+#          cache-dependency-path: "package-lock.json"
+#          registry-url: "https://registry.npmjs.org/"
+
+#     - name: Install dependencies
+#        run: npm ci
+
+#      - name: Publish to npm
+#        run: npm publish --workspace @nutin/cli --access public
+#        env:
+#          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

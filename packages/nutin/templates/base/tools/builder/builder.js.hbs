@@ -1,0 +1,37 @@
+#!/usr/bin/env node
+
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+import { spawnSync } from 'child_process';
+import process from 'process';
+import { print } from '../utils/index.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+import { BINARY_EXTENSIONS } from './variables/binary-extensions.js';
+
+print.boldHead(`Building static files...`);
+print.info(`File types that will be copied: ${Array.from(BINARY_EXTENSIONS)}`);
+
+function runScript(path, message) {
+  print.boldSection(`\n${message}`);
+  const result = spawnSync('node', [resolve(__dirname, path)], { stdio: 'inherit' });
+
+  if (result.status !== 0) {
+    print.boldError(`\nScript ${path} failed.`);
+    process.exit(result.status ?? 1);
+  }
+}
+
+runScript('./core/copy-static.js', 'Copying files...');
+{{#if i18n}}
+runScript('./core/build-i18n.js', 'Combining locales for production...');
+{{/if}}
+{{#if template}}
+runScript('./core/merge-templates.js', 'Merging HTML templates in JavaScript files...');
+{{/if}}
+runScript('./core/sass.config.js', 'Compiling styles from main.scss...');
+runScript('./core/validate-html.js', 'Validating tags in index.html...');
+
+print.boldSuccess(`\nBuild successful!\n`);

@@ -1,0 +1,12 @@
+{
+	"id": 5,
+	"sectionId": 2,
+	"content": "import { Routes } from '../core/index.js';\nimport { NotFoundView, TaskCatalogView } from './views/index.js';\n\nexport const appRoutes: Routes = {\n\t'/': () => new TaskCatalogView(),\n\t'/404': () => new NotFoundView(),\n}",
+	"type": "ts",
+	"en": {
+		"before": "Finally, let's add the view in src/app/routes.ts.\nWe can also remove HomeView and the home folder in src/app/views and its export in src/app/views/index.ts."
+	},
+	"fr": {
+		"before": "Enfin, ajoutons la vue dans src/app/routes.ts.\nNous pouvons également supprimer HomeView et le dossier home dans src/app/views et son export dans src/app/views/index.ts."
+	}
+}

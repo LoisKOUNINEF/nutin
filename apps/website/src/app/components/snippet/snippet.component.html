@@ -1,0 +1,21 @@
+<div class="u-padd-y-small">
+	<p
+		class="u-marg-x-medium u-pre-wrap"
+		style="padding-bottom:1rem;"
+		data-optional
+	>${_snippet.before}</p>
+	<div class="u-flex-center u-flex-column">
+		<pre 
+			data-highlight="prism"
+			class="snippet__code"
+		><code 
+				class="language-${_snippet.type}"
+			>${_snippet.content}</code>
+		</pre>
+		<p 
+			class="u-font-small u-italic u-marg-x-small u-pre-wrap"
+			style="text-align:center;"
+			data-optional
+		>${_snippet.after}</p>
+	</div>
+</div>

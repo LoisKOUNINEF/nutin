@@ -1,0 +1,51 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+
+/*
+	 Add your classes here
+	 Custom classes prefix : 'c-'
+	 Component- or view-specific classes prefix : '/name/__'
+*/
+
+.task-catalog__add-task-button {
+	transition: ease-in-out all .3s;
+	background-color: rgba($text-color, .7);
+	color: $background-color;
+	font-size: 1.5em;
+	font-style: italic;
+	padding: .5em;
+	margin: 1em;
+	border-radius: 1em;
+	&:hover, &:focus {
+		background-color: $text-color;
+		outline: none;
+	}
+}
+
+.task-catalog__sidebar {
+	@include mixins.flex-column;
+	padding: .5rem;
+	margin-right: 1rem;
+}
+
+.c-button {
+	transition: ease-in-out all .3s;
+	background-color: inherit;
+}
+
+.c-button-hover-prim {
+	&:hover, &:focus {
+		background-color: $primary-color;
+		color: $background-color;
+		outline: none;
+	}
+}
+
+.c-button-hover-sec {
+	&:hover, &:focus {
+		background-color: $secondary-color;
+		color: $background-color;
+		outline: none;
+	}
+}

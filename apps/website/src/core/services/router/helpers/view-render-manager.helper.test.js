@@ -1,0 +1,50 @@
+import { ViewRenderManager } from '#root/dist/src/core/services/router/helpers/view-render-manager.helper.js';
+import { AppEventBus } from '#root/dist/src/core/index.js';
+
+global.requestAnimationFrame = (cb) => setTimeout(cb, 0);
+
+describe('ViewRenderManager', () => {
+  let container;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    container.id = 'app';
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    container.remove();
+    container = null;
+  });
+
+  const mockView = (name = 'TestView') => {
+    return {
+      viewName: name,
+      render: () => {
+        const el = document.createElement('div');
+        el.className = 'mock-view';
+        return el;
+      },
+      destroy: () => {},
+    };
+  };
+
+
+  it('should do nothing if no current view is passed to transitionOutCurrentView', async () => {
+    const result = await ViewRenderManager.transitionOutCurrentView(null);
+    expect(result).toBe(null);
+  });
+
+  it('should emit view-unmount event on transition out', async () => {
+    const emitted = [];
+    AppEventBus.emit = (event, data) => emitted.push({ event, data });
+
+    const view = mockView('SettingsView');
+    const el = view.render();
+    container.appendChild(el);
+
+    await ViewRenderManager.transitionOutCurrentView(view);
+
+    expect(JSON.stringify(emitted)).toContain(JSON.stringify({ event: 'view-unmount', data: 'SettingsView' }));
+  });
+});

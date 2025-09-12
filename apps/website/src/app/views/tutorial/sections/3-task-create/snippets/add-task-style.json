@@ -1,0 +1,12 @@
+{
+	"id": 3,
+	"sectionId": 3,
+	"content": ".task-catalog__add-task-button {\n\ttransition: ease-in-out all .3s;\n\tbackground-color: rgba($text-color, .7);\n\tcolor: $background-color;\n\tfont-size: 1.5em;\n\tfont-style: italic;\n\tpadding: .5em;\n\tmargin: 1em;\n\tborder-radius: 1em;\n\t&:hover, &:focus {\n\t\tbackground-color: $text-color;\n\t\toutline: none;\n\t}\n}",
+	"type": "scss",
+	"en": {
+		"before": "Let's style our component by adding a class in src/styles/_custom-classes.scss."
+	},
+	"fr": {
+		"before": "Mettons en forme le composant en ajoutant une classe dans src/styles/_custom-classes.scss."
+	}
+}
