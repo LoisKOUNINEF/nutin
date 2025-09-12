@@ -1,0 +1,27 @@
+{
+  "name": "nutin-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "ws:version:patch": "npm run patch -w",
+    "ws:version:minor": "npm run minor -w",
+    "ws:version:major": "npm run major -w",
+    "ws:build": "npm run build -w",
+    "ws:serve": "npm run serve -w",
+    "ws:dev": "npm run dev -w",
+    "ws:generate": "npm run generate -w",
+    "ws:watch": "npm run watch -w",
+    "ws:test": "npm run test -w",
+    "nutin:publish": "npm run publish -w @nutin/cli"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "jsdom": "^26.1.0",
+    "live-server": "^1.2.2",
+    "sass": "^1.89.0",
+    "typescript": "^5.8.3"
+  }
+}
