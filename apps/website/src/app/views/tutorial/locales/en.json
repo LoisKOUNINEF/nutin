@@ -1,0 +1,12 @@
+{
+  "meta": {
+    "title": "Tutorial",
+    "description": "Build your first nutin app : a To-Do list."
+  },
+  "title": "Tutorial",
+  "presentation": "This is the very first app I built to familiarize myself with my own tool, since `[...] construction is a very different process from use` (hi, uncle Bob). Needless to say, this first project had to be something special, rememberable, something that I've never done before.\nIt ended up being a To-Do list. So much for originality, but it allows for another nutin-related pun, so that's a fair tradeoff.\nWe'll use default settings, cover components, views and services, children components, and dynamic routing. We'll also use pipes and the built-in libraries snackbar and popover.",
+  "live-link": "Browse a live version of the app.",
+  "table-of-content": "Table of content :",
+  "important": "Imports must use relative paths with the \".js\" suffix : import { MyClass } from './path/to/file.js';",
+  "conclusion": "Thank you for following this tutorial and trying out nutin ! You should now have enough resources to build simple apps. Thanks again, and happy coding 🚀 !"
+}

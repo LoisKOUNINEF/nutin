@@ -1,0 +1,10 @@
+{ "id": 4,
+	"en":	{
+		"name": "Delete task",
+		"content": "Now that we can add a task, we should also be able to delete one. Let's add a deleteTask method in TasksService, and the corresponding button in TaskComponent."
+	},
+	"fr":	{
+		"name": "Supprimer une tâche",
+		"content": "Maintenant que nous avons la possibilité d'ajouter une tâche, nous devrions aussi être capable d'en supprimer une. Ajoutons une méthode deleteTask dans TasksService, et le bouton associé dans TaskComponent."
+	}
+}

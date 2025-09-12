@@ -1,0 +1,16 @@
+// Libraries styles (snackbar, popover){{#if transition}}, view transition styles{{/if}}.
+@use "libs";
+
+{{#if stylinNutin}}
+// built-in classes
+@use "utilities";
+
+{{/if}}
+// global styles
+@use "styles";
+
+{{#if stylinNutin}}
+// custom classes
+@use "custom-classes";
+
+{{/if}}

@@ -1,0 +1,44 @@
+{
+  "name": "@nutin/cli",
+  "version": "1.0.0",
+  "description": "A lightweight, highly tweakable frontend toolkit, crafted for building lean, dynamic single-page applications without the complexity of full-scale frameworks.",
+  "main": "lib/index.mjs",
+  "bin": {
+    "create-nutin-app": "./bin/create-app.mjs",
+    "nutin-new": "./bin/create-app.mjs"
+  },
+  "scripts": {
+    "patch": "npm version patch -m 'CI/CD: Bump version to %s'",
+    "minor": "npm version minor -m 'CI/CD: Bump version to %s'",
+    "major": "npm version major -m 'CI/CD: Bump version to %s'",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "publish": "npm publish --access public"
+  },
+  "keywords": [
+    "nutin",
+    "Frontend",
+    "SPA",
+    "Minimalist",
+    "Lighweight",
+    "Customizable"
+  ],
+  "author": "Loïs Kouninef <loiskouninef@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^9.0.0",
+    "fs-extra": "^11.0.0",
+    "handlebars": "^4.7.8",
+    "inquirer": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loiskouninef/nutin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/loiskouninef/nutin/issues"
+  },
+  "homepage": "www.nutin.org"
+}

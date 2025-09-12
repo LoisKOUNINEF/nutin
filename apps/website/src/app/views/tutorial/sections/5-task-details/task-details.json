@@ -1,0 +1,10 @@
+{ "id": 5,
+	"en":	{
+		"name": "Task Details",
+		"content": "To display a task's details, we're going to create a dedicated component, and update the view and its route to handle optional route parameters."
+	},
+	"fr":	{
+		"name": "Détails des tâches",
+		"content": "Pour afficher les détails d'une tâche, nous allons créer un composant dédié, et modifier la vue et sa route pour gérer des paramètres de route optionnels."
+	}
+}

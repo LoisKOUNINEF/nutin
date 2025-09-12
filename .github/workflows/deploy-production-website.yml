@@ -1,0 +1,98 @@
+name: CI/CD Website production
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/website/**"
+      - ".github/workflows/deploy-production-website.yml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_NAME: "website"
+      STACK_NAME: "production"
+      CLIENT_PORT: "9090"
+      DOMAIN_NAME: "nutin.org"
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Ensure tag is on main
+        run: |
+          if [ "$(git branch --contains $GITHUB_SHA | grep 'main')" = "" ]; then
+            echo "❌ Tag is not on main. Aborting nutin website deployment."
+            exit 1
+          fi
+
+      - name: Ensure scripts are executable
+        run: chmod +x .github/workflows/scripts/jobs/*.sh
+
+      - name: Lowercase the repo name and project name
+        run: .github/workflows/scripts/jobs/format-name.sh
+
+      - name: Generate new stack file
+        run: .github/workflows/scripts/jobs/create-stack.sh
+
+      - name: Copy stack file to VPS
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASS }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "new-${{ env.SERVICE_NAME }}-${{ env.STACK_NAME }}.yml"
+          target: "${{ env.PROJECT_LOWER }}"
+
+      - name: Deploy to production
+        uses: appleboy/ssh-action@master
+        env:
+          DOCKER_AUTH: ${{ secrets.DOCKER_AUTH }}
+          REPO_LOWER: ${{ env.REPO_LOWER }}
+          PROJECT_LOWER: ${{ env.PROJECT_LOWER }}
+          STACK_NAME: ${{ env.STACK_NAME }}
+          SERVICE_NAME: ${{ env.SERVICE_NAME }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASS }}
+          port: ${{ secrets.SSH_PORT }}
+          envs: DOCKER_AUTH,REPO_LOWER,PROJECT_LOWER,STACK_NAME,SERVICE_NAME
+          script: |
+            cd $PROJECT_LOWER
+            ./scripts/deployment/deploy.sh
+            ./scripts/deployment/remove-staging.sh
+
+  delete-old-images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        image-name: ["website", "tutorial"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Ensure scripts are executable
+        run: chmod +x .github/workflows/scripts/jobs/*.sh
+
+      - name: Lowercase the repo name and project name
+        run: .github/workflows/scripts/jobs/format-name.sh
+
+      - name: Delete old container images
+        uses: actions/delete-package-versions@v4
+        with:
+          package-name: ${{ env.PROJECT_LOWER }}-${{ matrix.image-name }}
+          package-type: 'container'
+          min-versions-to-keep: 3
+          token: ${{ secrets.GITHUB_TOKEN }}

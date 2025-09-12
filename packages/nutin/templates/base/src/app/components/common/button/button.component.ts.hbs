@@ -1,0 +1,40 @@
+import { BaseButton, Component } from '../../../../core/index.js';
+
+/**
+ * ```typescript
+ interface IAttributesConfig {
+  {{#if i18n}}
+  i18nKey?: string;
+  {{/if}}
+  textContent?: string;
+  className?: string;
+  style?: string;
+// use regular pipe syntax for arguments / chaining
+  pipes?: string;
+}
+
+interface BaseButton extends IAttributesConfig {
+  callback: () => void;
+}
+
+interface ButtonContainerOptions {
+  containerClassName?: string;
+  containerStyles?: string;
+}
+  ```
+ * Note : To ensure 'this' is bound properly
+ * ```typescript
+ // Will handle 'this' inside doStuff
+ * { callback: () => this.doStuff() }
+ * // Will still work, but won't handle 'this' inside doStuff
+ * { callback: this.doStuff }
+ * ```
+*/
+export class ButtonComponent extends Component<HTMLButtonElement> {
+  constructor(mountTarget: HTMLElement, button: BaseButton) {
+    super({
+      mountTarget,
+      props: { buttons: [button] }
+    });
+  }
+}

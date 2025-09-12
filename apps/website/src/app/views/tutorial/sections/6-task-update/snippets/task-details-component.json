@@ -1,0 +1,14 @@
+{
+	"id": 2,
+	"sectionId": 6,
+	"content": "updateTask(field: keyof Task, value: string) { \n// const to handle date property properly\n// can be extended if necessary\n\tconst transformers: Partial<Record<keyof Task, (val: any) => any>> = {\n\t\tdate: (v: string) => new Date(v),\n\t};\n\n\tconst transformer = transformers[field];\n\tconst finalValue = transformer ? transformer(value) : value;\n\n\tthis._task = { ...this._task, [field]: finalValue };\n\tTasksService.updateTask(this._task);\n}",
+	"type": "ts",
+	"en": {
+		"before": "Use it in the component :",
+		"after": "We use the transformers arrow function to ensure the date property as the appropriate format.\nIt can be extended for other properties if needed."
+	},
+	"fr": {
+		"before": "Utilisons la nouvelle méthode dans le composant :",
+		"after": "Nous utilisons la fonction fléchée transformers pour s'assurer que la propriété date a le format adapté.\nElle peut être étendue à d'autres propriétés si nécessaire."
+	}
+}

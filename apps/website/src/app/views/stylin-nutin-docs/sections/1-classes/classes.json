@@ -1,0 +1,10 @@
+{ "id": 1,
+	"en": {
+		"name": "Classes",
+		"content": "Utility classes use variables defined in _variables.scss, as well as mixins defined in _mixins.scss."
+	},
+	"fr":	{
+		"name": "Classes",
+		"content": "Les classes utilisent les variables définies dans _variables.scss et les mixins définis dans _mixins.scss."
+	}
+}

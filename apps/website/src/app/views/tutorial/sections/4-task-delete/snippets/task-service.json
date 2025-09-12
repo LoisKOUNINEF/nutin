@@ -1,0 +1,12 @@
+{
+	"id": 1,
+	"sectionId": 4,
+	"content": "public deleteTask(id: number) {\n\tthis._tasks = this._tasks.filter((task) => task.id !== id);\n\t    this.tasksUpdated();\n}",
+	"type": "ts",
+	"en": {
+		"before": "Add a simple filter method in TasksService :"
+	},
+	"fr": {
+		"before": "Ajoutons une méthode simple utilisant filter() dans TasksService:"
+	}
+}

@@ -1,0 +1,14 @@
+{
+	"id": 2,
+	"sectionId": 8,
+	"content": "public deleteTask(id: number) {\n\tconst popoverConfirm = new PopoverView({ \n\t\ttemplate: `&lt;div style=\"padding:1rem;font-size:1.1rem;text-align:center;\"&gt;\n\t&lt;p&gt;Delete task.&lt;/p&gt;\n\t&lt;p&gt;Are you sure ?&lt;/p&gt;\n&lt;/div&gt;`, \n\t\tbuttons: [\n\t\t\t{\n\t\t\t\tcallback: () => this.deleteTaskConfirmed(id), \n\t\t\t\ttextContent: 'Yes'\n\t\t\t},\n\t\t\t{\n\t\t\t\tcallback: () => { return }, \n\t\t\t\ttextContent: 'No'\n\t\t\t}\n\t\t] \n\t});\n\tpopoverConfirm.render();\n}\n\nprivate deleteTaskConfirmed(id: number) {\n\tthis._tasks = this._tasks.filter((task) => task.id !== id);\n\tthis.tasksUpdated();\n\tthis.notify('Task deleted.')\n}",
+	"type": "ts",
+	"en": {
+		"before": "We should also add a confirmation step for the \"delete\" operation.\nWe'll use the built-in popover library to do this, because we obviously don't want to use window.alert nor window.confirm.\nTo keep most of the code as it currently is, we'll simply rename the deleteTask method and make it private, and write a new one that'll call it and use PopoverView.",
+		"after": "Popover styling can be modified in src/styles/core/_libs.scss."
+	},
+	"fr": {
+		"before": "Nous devrions également ajouter une étape de confirmation pour l'opération de suppression.\nNous utiliserons pour cela la bibliothèque incluse popover, tant il est évident que nous ne voulons pas utiliser window.alert ou window.confirm.\nPour ne pas avoir à trop modifier le code existant, nous allons simplement renommer la méthode existante deleteTask et la rendre privée, et en écrire une nouvelle qui l'appellera et utilisera PopoverView.",
+		"after": "Le style peut être modifié dans src/styles/core/_libs.scss."
+	}
+}

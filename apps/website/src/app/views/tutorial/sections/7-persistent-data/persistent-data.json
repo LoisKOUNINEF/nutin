@@ -1,0 +1,10 @@
+{ "id": 7,
+	"en":	{
+		"name": "Persistent data",
+		"content": "If we want to actally use this app, we're going to need some kind of data persistence. Since we're not using an API nor a database, we're going to simply rely on the browser's LocalStorage."
+	},
+	"fr":	{
+		"name": "Données persistantes",
+		"content": "Si nous voulons être en mesure d'utiliser cette application, il nous faudra un moyen de prendre en charge la persistance des données. Comme nous n'utilisons ni API ni base de données, nous allons simplement nous servir du LocalStorage du navigateur."
+	}
+}

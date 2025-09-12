@@ -1,0 +1,10 @@
+{ "id": 6,
+	"en":	{
+		"name": "Update task",
+		"content": "Now that we have the create, read and delete operations setup, the next step will be to implement the update one.\nNote that the date property will need some additional work to be properly handled."
+	},
+	"fr":	{
+		"name": "Modifier une tâche",
+		"content": "Maintenant que les opérations de création, de lecture et de suppression sont en place, la prochaine étape est d'implémenter la modification.\nIl est à noter que la propriété date demandera un effort supplémentaire pour être gérée correctement."
+	}
+}

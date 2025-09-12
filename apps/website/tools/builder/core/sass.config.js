@@ -1,0 +1,14 @@
+import * as sass from 'sass';
+import * as fs from 'fs';
+import { print } from '../../utils/index.js';
+
+const stylesOutput = 'dist-build/src';
+if (!fs.existsSync(stylesOutput)) fs.mkdirSync(stylesOutput);
+
+sass.compileAsync('src/styles/main.scss', {
+  loadPaths: ['src/styles/base', 'src/styles/core'],
+  style: 'compressed'
+}).then(result => {
+  print.info('Global styles compiled.');
+  fs.writeFileSync('dist-build/src/main.css', result.css);
+});

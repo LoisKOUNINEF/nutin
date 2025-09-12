@@ -1,0 +1,12 @@
+{
+	"id": 5,
+	"sectionId": 5,
+	"content": ".task-catalog__sidebar {\n\t@include mixins.flex-column;\n\tpadding: .5rem;\n\tmargin-right: 1rem;\n}",
+	"type": "scss",
+	"en": {
+		"before": "Let's add a class for the sidebar :"
+	},
+	"fr": {
+		"before": "Ajoutons une classe pour la barre des tâches :"
+	}
+}

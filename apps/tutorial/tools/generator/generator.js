@@ -1,0 +1,72 @@
+#!/usr/bin/env node
+
+import { allFormats, getLastWord, print } from "../utils/index.js";
+import { generateFile, appendToIndex } from "./handle-file.js";
+import { serviceTemplate, componentTemplate, viewTemplate } from "./templates/index.js";
+
+// Constants and Setup
+const [, , rawType, rawFullPath] = process.argv;
+
+if (!rawType || !rawFullPath) {
+  showUsageAndExit("Missing arguments.");
+}
+
+const type = allFormats(rawType);
+const fullPath = allFormats(rawFullPath);
+const name = allFormats(getLastWord(fullPath.kebab));
+const targetPath = `src/app/${type.kebab}s/${fullPath.kebab}`;
+
+// Creator Mapping
+const creators = {
+  service: (name, targetPath) => {
+    print.section(`Creating service: ${name.capitalized}`);
+    try {
+      generateFile({ name, targetPath, templateFn: serviceTemplate, suffix: 'service' });
+      appendToIndex({ name, targetPath, suffix: 'service' });
+    } catch (err) {
+      handleError("Failed to generate service", err);
+    }
+  },
+  component: (name, targetPath) => {
+    print.section(`Creating component: ${name.capitalized}`);
+    try {
+      generateFile({ name, targetPath, templateFn: componentTemplate, suffix: 'component' });
+      appendToIndex({ name, targetPath, suffix: 'component' });
+    } catch (err) {
+      handleError("Failed to generate component", err);
+    }
+  },
+  view: (name, targetPath) => {
+    print.section(`Creating view: ${name.capitalized}`);
+    try {
+      generateFile({ name, targetPath, templateFn: viewTemplate, suffix: 'view' });
+      appendToIndex({name, targetPath, suffix: 'view' });
+    } catch (err) {
+      handleError("Failed to generate view", err);
+    }
+  },
+};
+
+// Main Execution
+const create = creators[type.kebab];
+
+if (create) {
+  create(name, targetPath);
+  print.boldSuccess(`\n${type.capitalized} ${name.capitalized} has been generated.\n`)
+} else {
+  showUsageAndExit(`Unsupported type: '${type.kebab}'`);
+}
+
+// Helper Functions
+function showUsageAndExit(message) {
+  print.boldError(`\n❌ ${message}`);
+  print.boldError("Usage: npm run generate <type> <path>");
+  print.boldError(`Supported types: ${Object.keys(creators).join(", ")}`);
+  process.exit(1);
+}
+
+function handleError(context, error) {
+  print.boldError(`\n❌ ${context}`);
+  print.boldError(error instanceof Error ? error.message : error);
+  process.exit(1);
+}

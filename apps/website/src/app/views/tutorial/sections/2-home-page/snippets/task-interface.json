@@ -1,0 +1,12 @@
+{
+	"id": 1,
+	"sectionId": 2,
+	"content": "declare interface Task {\n\tid: number;\n\tname: string;\n\tcontent: string;\n\tdate: Date;\n}",
+	"type": "ts",
+	"en": {
+		"before": "First, let's define the task's object interface in globals.d.ts :"
+	},
+	"fr": {
+		"before": "Définissons tout d'abord l'interface de l'objet tâche dans le fichier globals.d.ts :"
+	}
+}
