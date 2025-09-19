@@ -37,8 +37,6 @@ export class TaskCatalogView extends View {
   }
 
   private catalogConfigs(): ComponentConfig[] {
-    const tasksContainer = document.getElementById('task-catalog');
-
     return this.catalogConfig({
       array: this._tasks,
       elementName: 'task',
