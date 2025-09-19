@@ -13,5 +13,5 @@ sass.compileAsync('src/styles/main.scss', {
   style: 'compressed'
 }).then(result => {
   print.info('Global styles compiled.');
-  fs.writeFileSync('dist/src/main.css', result.css);
+  fs.writeFileSync(`${stylesOutput}/main.css`, result.css);
 });
