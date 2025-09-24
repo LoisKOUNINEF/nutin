@@ -23,6 +23,13 @@
 		&:focus-visible {
 			outline: 2px solid $primary-color;
 		}
+		@media (hover: none) {
+	    &:hover {
+	      text-decoration: none;
+	      background-color: inherit;
+	      color: inherit;
+	    }
+		}
 	}
 }
 
@@ -39,7 +46,7 @@
 .navbar__dropdown-visible {
 	opacity: 1;
 	visibility: visible;
-	z-index:10;
+	z-index: 100;
 	@include mixins.fade-in;
 }
 
@@ -48,6 +55,22 @@
 	bottom: 0;
 	padding: 1rem;
 	width: 100vw;
+}
+
+.footer__body {
+  text-decoration: underline;
+  @include mixins.flex-between;
+
+  @include mixins.respond-to(small) {
+    display: block;
+    text-align: center;
+  }
+
+  section {
+  	@include mixins.respond-to(small) {
+    	padding-bottom: 1rem;
+  	}
+  }
 }
 
 .home__catchphrase {
@@ -122,7 +145,6 @@
 	padding-top: 2rem;
 	margin-right: 1rem;
 	width: 20vw;
-	z-index: 10;
 	@include mixins.bg-gradient(bottom, rgba($secondary-color, .5), $background-color);
 	@include mixins.rounded;
 
