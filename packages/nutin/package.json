@@ -1,6 +1,6 @@
 {
   "name": "@nutin/cli",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "A lightweight, highly tweakable frontend toolkit, crafted for building lean, dynamic single-page applications without the complexity of full-scale frameworks.",
   "preferGlobal": true,
   "main": "lib/index.mjs",
