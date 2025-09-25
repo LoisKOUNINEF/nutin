@@ -56,6 +56,7 @@ export class CatalogHelper {
   private static createElements(idx: number, config: CatalogConfig, container: HTMLElement) {
     const el = document.createElement(config.elementTag || 'div');
     el.setAttribute('data-component', `${config.elementName}-${idx}`);
+
     el.dataset.index = String(idx);
     container?.appendChild(el);
   }

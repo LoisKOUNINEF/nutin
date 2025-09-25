@@ -56,7 +56,6 @@ export class ProjectGenerator {
 
   buildContext(answers) {  
     const version = '1.1.0';
-
     return {
       projectName: answers.projectName,
       description: answers.description || `A modern web application`,
