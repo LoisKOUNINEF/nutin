@@ -7,7 +7,7 @@
 - **Staging STACK_NAME must be named "staging".** 
 - **Production workflow (main branch) needs the staging one**
 
-- Staging workflow (`staging` branch): 
+### Staging workflow (`staging` branch): 
 
 * Build app's docker image
 * Push the image to ghcr.io
@@ -16,7 +16,7 @@
 * Pull app's image
 * Deploy ( Docker Swarm / Traefik )
 
-- Production workflow (`main` branch):
+### Production workflow (`main` branch):
 
 * Copy image tags from website-staging.yml file.
 * Deploy ( Docker Swarm / Traefik )                                                  

@@ -52,7 +52,10 @@ export async function generatePackageJson(projectPath, answers) {
       ...baseScripts,
       "test": "node test/runner.js",
       "test--rebuild": "npm run build && npm run test",
-      "test:watch": "npm run build && node test/watch-tests.js"
+      "test:watch": "npm run build && node test/watch-tests.js",
+      "serve": "npm run build && npm run serve:only",
+      "serve:only": "live-server dist/src --port=9090 --entry-file=index.html --open",
+      "dev": "concurrently \"node tools/watcher.js\" \"npm run build && npm run serve:only > /dev/null 2>&1\""
     }
     : baseScripts;
 
@@ -61,19 +64,12 @@ export async function generatePackageJson(projectPath, answers) {
       ...scripts,
       "build:clear": "rm -rf dist/src/* dist-build",
       "build:finalize": "mkdir -p dist && mv dist-build/src dist/ && rm -rf dist-build",
-      "build": "npm run build:clear && npm run build:ts && npm run build-static && npm run build:finalize",
-      "serve:only": "live-server dist/src --port=9090 --entry-file=index.html --open",
-      "serve": "npm run build && npm run serve:only",
-      "dev": "concurrently \"node tools/watcher.js\" \"npm run build && npm run serve:only > /dev/null 2>&1\"",
+      "build": "npm run build:clear && npm run build:ts && npm run build-static && npm run build:finalize"
     }
     : {
       ...scripts,
       "build:clear": "rm -rf dist",
-      "build": "npm run build:clear && npm run build:ts && npm run build-static",
-      "dev": "concurrently \"npm run watch\" \"npm run serve\"",
-      "watch:ts": "tsc --watch",
-      "watch:sass": "sass --watch src/styles:dist/css",
-      "watch": "concurrently \"npm:watch:*\""
+      "build": "npm run build:clear && npm run build:ts && npm run build-static"
     };
 
   const packageJson = {

@@ -1,4 +1,4 @@
-# Library Docs
+# Libraries Docs
 
 ## Quick map
 
