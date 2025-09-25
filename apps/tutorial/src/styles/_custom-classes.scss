@@ -9,17 +9,20 @@
 */
 
 .task-catalog__add-task-button {
+		color: $background-color;
+		background-color: $text-color;
 	transition: ease-in-out all .3s;
-	background-color: rgba($text-color, .7);
-	color: $background-color;
 	font-size: 1.5em;
 	font-style: italic;
 	padding: .5em;
 	margin: 1em;
 	border-radius: 1em;
 	&:hover, &:focus {
-		background-color: $text-color;
 		outline: none;
+	}
+
+	@include mixins.respond-to(small) {
+		margin-left: 30%;
 	}
 }
 
@@ -27,11 +30,26 @@
 	@include mixins.flex-column;
 	padding: .5rem;
 	margin-right: 1rem;
+
+	@include mixins.respond-to(small) {
+		width: 40vw;
+		margin-right: 0;
+	}
+}
+
+.task-details__container {
+	width: 60vw;
+	height: 100%;
+	text-align: center;
+	@include mixins.respond-to(small) {
+		width: 55vw;
+	}
 }
 
 .c-button {
 	transition: ease-in-out all .3s;
 	background-color: inherit;
+	color: inherit;
 }
 
 .c-button-hover-prim {

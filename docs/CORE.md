@@ -13,7 +13,7 @@
 - 3. [View](#3-view)
 - 4. [Service](#4-service)
 - 5. [Event Token System](#5-event-token-system)
-- 6. [Key helpers — quick reference and examples](#6-key-helpers-quick-reference-and-examples)
+- 6. [Key helpers quick reference and examples](#6-key-helpers-quick-reference-and-examples)
 - 7. [Common Patterns and Recipes](#7-common-patterns-and-recipes)
 - 8. [Where to look in code](#8-where-to-look-in-code)
 
@@ -250,7 +250,7 @@ Use registerToken for one-off shortcuts (@foo)
 Use registerPrefix for repeatable patterns (@foo:bar)
 
 
-## 6. Key helpers — quick reference and examples
+## 6. Key helpers quick reference and examples
 
 
 ### PipeHelper
@@ -281,7 +281,9 @@ Example:
 ### ChildrenHelper & CatalogHelper
 
 * `ChildrenHelper` looks for `data-component="selector"` and instantiates child components using `ComponentConfig` produced by `childConfigs()`.
-* `CatalogHelper` helps render repeated component instances from arrays (useful for lists/grids). It generates `ComponentConfig[]` that the `BaseComponent` can consume.
+* `CatalogHelper` helps render repeated component instances from arrays (useful for lists/grids). It generates `ComponentConfig[]` that the `BaseComponent` can consume. ***Use index access with `config.index`***.
+
+**Notes:** *Primitive data arrays (string, number, etc) needs to be accessed with `config.value`.*
 * `BaseComponent` subclasses inherit the `catalogConfig` method that generates `ComponentConfig[]`.
 
 Small catalog pattern:
