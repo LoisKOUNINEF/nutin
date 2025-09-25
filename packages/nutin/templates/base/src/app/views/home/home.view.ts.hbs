@@ -23,7 +23,7 @@ const template = `{{#if template}}__TEMPLATE_PLACEHOLDER__{{else}}<div
   {{else}}
     style="font-style:italic;font-size:0.75rem;"
   {{/if}}
-  >nutin v1.0.0</span>
+  >nutin v{{version}}</span>
   <img src="/assets/images/logo-trans.avif" width=250 height=250 alt="nutin's logo. A frame opened on the top left through which a plant grows.">
   <div 
   {{#if i18n}}
@@ -46,8 +46,6 @@ const template = `{{#if template}}__TEMPLATE_PLACEHOLDER__{{else}}<div
   {{else}}
     style="color:#C56648;font-size:1.5rem;"
   {{/if}}
-  }
-  }
   >{{#unless i18n}}Happy Coding 🎉{{/unless}}</div>
   <div 
   {{#if stylinNutin}}

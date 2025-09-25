@@ -54,7 +54,9 @@ export class ProjectGenerator {
     await this.processFeatureTemplates(projectPath, context);
   }
 
-  buildContext(answers) {
+  buildContext(answers) {  
+    const version = '1.1.0';
+
     return {
       projectName: answers.projectName,
       description: answers.description || `A modern web application`,
@@ -68,7 +70,8 @@ export class ProjectGenerator {
       hasFeatures: answers.template || answers.stylinNutin || answers.i18n || answers.transition || answers.testinNutin,
       
       year: new Date().getFullYear(),
-      packageManager: answers.packageManager || 'npm'
+      packageManager: answers.packageManager || 'npm',
+      version: version
     };
   }
 
