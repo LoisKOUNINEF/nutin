@@ -1,7 +1,7 @@
 import { BaseComponent, ComponentConfig } from "../base-component.js";
 
 export interface CatalogConfig {
-  array: any[];
+  array: CatalogItemConfig[];
   elementName: string;
   elementTag?: keyof HTMLElementTagNameMap;
   selector: string;
@@ -9,7 +9,7 @@ export interface CatalogConfig {
 };
 
 export interface CatalogItemBase {
-  idx: number;
+  index: number;
 }
 
 export type CatalogItemObject<T extends object> = T & CatalogItemBase;
@@ -24,7 +24,7 @@ export type CatalogItemConfig<T = any> =
 /**
  * ```typescript
 interface CatalogConfig {
-  array: any[];
+  array: CatalogItemConfig[];
   elementName: string;
   elementTag?: keyof HTMLElementTagNameMap;
   selector: string;
@@ -53,24 +53,23 @@ export class CatalogHelper {
     return componentConfigs;
   }
 
-  private static createElements(idx: number, config: CatalogConfig, container: HTMLElement) {
+  private static createElements(index: number, config: CatalogConfig, container: HTMLElement) {
     const el = document.createElement(config.elementTag || 'div');
-    el.setAttribute('data-component', `${config.elementName}-${idx}`);
-
-    el.dataset.index = String(idx);
+    el.setAttribute('data-component', `${config.elementName}-${index}`);
+    el.dataset.index = String(index);
     container?.appendChild(el);
   }
 
-  private static pushConfig(idx: number, componentConfigs: ComponentConfig[], config: CatalogConfig) {
-    const item = config.array[idx];
+  private static pushConfig(index: number, componentConfigs: ComponentConfig[], config: CatalogConfig) {
+    const item = config.array[index];
 
     const configWithIndex: CatalogItemConfig = (item && typeof item === 'object')
-      ? { ...(item as object), index: idx }
-      : { value: item, index: idx };
+      ? { ...(item as object), index: index }
+      : { value: item, index: index };
     
     componentConfigs.push(
       { 
-        selector: `${config.elementName}-${idx}`,
+        selector: `${config.elementName}-${index}`,
         factory: (el) => new config.component(el, configWithIndex)
       },
     )

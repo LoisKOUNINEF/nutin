@@ -1,0 +1,8 @@
+import { runCommand, print } from "../../utils/index.js";
+
+async function compileTS() {
+	runCommand('tsc --project tsconfig.json');
+  print.info('TypeScript compiled.');
+}
+
+compileTS();

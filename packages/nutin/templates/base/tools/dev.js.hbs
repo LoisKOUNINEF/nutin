@@ -1,0 +1,43 @@
+#!/usr/bin/env node
+
+import { spawn } from 'child_process';
+import { print, runCommand } from './utils/index.js';
+
+function run(command, args = [], label = '') {
+  return new Promise((resolve, reject) => {
+    print.info(`\n▶ ${label || command}...`);
+
+    const child = spawn(command, args, { stdio: 'inherit', shell: true });
+
+    child.on('close', (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`${command} exited with code ${code}`));
+    });
+  });
+}
+
+async function startDev() {
+  try {
+    console.clear();
+    print.boldHead('🚀 Starting Dev Environment...');
+
+    await run('{{packageManager}}', ['run', 'build'], 'Running initial build');
+
+    const serve = spawn('{{packageManager}}', ['run', 'serve:only'], { stdio: 'inherit', shell: true });
+    const watcher = spawn('node', ['tools/watcher.js'], { stdio: 'inherit', shell: true });
+
+    print.boldSuccess('\nDev server and watcher running!\n');
+
+    serve.on('close', (code) => {
+      print.error(`live-server exited with code ${code}`);
+      process.exit(code);
+    });
+    watcher.on('close', (code) => {
+      print.error(`watcher exited with code ${code}`);
+    });
+  } catch (err) {
+    print.boldError(`Dev startup failed: ${err.message}`);
+  }
+}
+
+startDev();
