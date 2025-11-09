@@ -12,84 +12,92 @@ export async function installDependencies(projectPath, packageManager) {
   await promiseExec(installCommand, { cwd: projectPath });
 }
 
-export function getInstallCommand(packageManager) {
+export function getCiCommand(packageManager) {
+  switch (packageManager) {
+    case 'yarn':
+      return 'yarn install --frozen-lockfile';
+    case 'pnpm':
+      return 'pnpm install --frozen-lockfile';
+    case 'bun':
+      return 'bun install --frozen-lockfile'
+    default:
+      return 'npm ci';
+  }
+}
+
+function getInstallCommand(packageManager) {
   switch (packageManager) {
     case 'yarn':
       return 'yarn install';
     case 'pnpm':
       return 'pnpm install';
+    case 'bun':
+      return 'bun install'
     default:
       return 'npm install';
   }
 }
 
-export async function generatePackageJson(projectPath, answers) {
-  const { testinNutin, projectName, template } = answers;
-
-  const baseDevDeps = {
-    "concurrently": "^9.1.2",
-    "live-server": "^1.2.2",
-    "sass": "^1.89.0",
-    "typescript": "^5.8.3"
-  }; 
-
-  const devDependencies = testinNutin 
-    ? { ...baseDevDeps, "jsdom": "^26.1.0" } 
-    : baseDevDeps;
+function getScripts(answers) {
+  const { testinNutin, packageManager } = answers;
 
   const baseScripts = {
-    "patch": "npm version patch -m 'CI/CD: Bump version to %s'",
-    "minor": "npm version minor -m 'CI/CD: Bump version to %s'",
-    "major": "npm version major -m 'CI/CD: Bump version to %s'",
-    "build:ts": "tsc --project tsconfig.json",
-    "build-static": "node tools/builder/builder.js",
-    "serve": "npm run build && live-server dist/src --port=9090 --entry-file=index.html",
+    "patch": `${packageManager} version patch -m 'CI/CD: Bump version to %s'`,
+    "minor": `${packageManager} version minor -m 'CI/CD: Bump version to %s'`,
+    "major": `${packageManager} version major -m 'CI/CD: Bump version to %s'`,
+    "build": "node tools/builder/builder.js",
+    "build:prod": "NODE_ENV=production node tools/builder/builder.js",
+    "serve:only": "node tools/serve.js",
+    "serve": `${packageManager} run build && ${packageManager} run serve:only`,
+    "dev": "node tools/dev.js",
     "generate": "node tools/generator/generator.js"
-  }
+  };
 
-  let scripts = testinNutin
+  const testinNutinScripts = {
+      "test": "node test/runner.js",
+      "test:rebuild": `${packageManager} run build && ${packageManager} run test`,
+      "test:watch": `${packageManager} run build && node test/watch-tests.js`,
+      "serve": `${packageManager} run build && ${packageManager} run serve:only`
+    }
+
+  return testinNutin
     ? {
       ...baseScripts,
-      "test": "node test/runner.js",
-      "test--rebuild": "npm run build && npm run test",
-      "test:watch": "npm run build && node test/watch-tests.js",
-      "serve": "npm run build && npm run serve:only",
-      "serve:only": "live-server dist/src --port=9090 --entry-file=index.html --open",
-      "dev": "concurrently \"node tools/watcher.js\" \"npm run build && npm run serve:only > /dev/null 2>&1\""
+      ...testinNutinScripts
     }
     : baseScripts;
+}
 
-  scripts = template
-    ? {
-      ...scripts,
-      "build:clear": "rm -rf dist/src/* dist-build",
-      "build:finalize": "mkdir -p dist && mv dist-build/src dist/ && rm -rf dist-build",
-      "build": "npm run build:clear && npm run build:ts && npm run build-static && npm run build:finalize"
-    }
-    : {
-      ...scripts,
-      "build:clear": "rm -rf dist",
-      "build": "npm run build:clear && npm run build:ts && npm run build-static"
-    };
+export async function generatePackageJson(projectPath, answers) {
+  const { testinNutin, projectName, packageManager } = answers;
+
+  const devDependencies = {
+    "esbuild": "0.25.12",
+    "html-minifier-terser": "7.2.0",
+    "jsdom": "26.1.0",
+    "live-server": "1.2.2",
+    "sass": "1.89.0",
+    "typescript": "5.8.3"
+  };
+
+  const scripts = getScripts(answers);
 
   const packageJson = {
     "name": projectName,
     "version": "0.1.0",
-    "main": "index.js",
     "type": "module",
     "imports": testinNutin ? {
       "#root/*.js": "./*.js"
     } : {},
     scripts,
-    devDependencies
+    devDependencies,
+    "packageManager": `${packageManager}@latest`
   };
   
   await fs.writeJSON(path.join(projectPath, 'package.json'), packageJson, { spaces: 2 });
 }
 
 export async function generateTsconfigJson(projectPath, answers) {
-  const { template } = answers;
-
   const tsconfig = {
       "compilerOptions": {
       "baseUrl": "./",
@@ -98,12 +106,13 @@ export async function generateTsconfigJson(projectPath, answers) {
       "module": "NodeNext",
       "moduleResolution": "NodeNext",
       "rootDir": ".",
-      "outDir": template ? "dist-build" : 'dist',
+      "outDir": "dist-build",
       "strict": true,
       "esModuleInterop": true,
       "allowSyntheticDefaultImports": true,
       "lib": ["es2022", "DOM"],
       "types": [],
+      "removeComments": true,
       "resolveJsonModule": true,
       "typeRoots": ["src/types", "node_modules/@types"]
     },

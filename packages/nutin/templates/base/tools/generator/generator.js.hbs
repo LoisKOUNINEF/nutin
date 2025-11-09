@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { allFormats, getLastWord, print } from "../utils/index.js";
-import { generateFile, appendToIndex{{#if i18n}}, generateJson{{/if}} } from "./handle-file.js";
+import { allFormats, getLastWord, print{{#if stylinNutin}}, promptBoolean{{/if}} } from "../utils/index.js";
+import { generateFile, appendToIndex{{#if i18n}}, generateJson{{/if}}{{#if stylinNutin}}, generateStylesheet{{/if}} } from "./handle-file.js";
 import { serviceTemplate, componentTemplate, viewTemplate{{#if template}}, htmlTemplate{{/if}} } from "./templates/index.js";
 
 // Constants and Setup
@@ -29,6 +29,10 @@ const creators = {
   },
   component: (name, targetPath) => {
     print.section(`Creating component: ${name.capitalized}`);
+    {{#if stylinNutin}}
+    const doCreateStylesheet = await promptBoolean('Create component\'s stylesheet in styles/components ?');
+    {{/if}}
+
     try {
       generateFile({ name, targetPath, templateFn: componentTemplate, suffix: 'component' });
       {{#if template}}
@@ -36,6 +40,9 @@ const creators = {
       {{/if}}
       {{#if i18n}}
       generateJson({ targetPath, name });
+      {{/if}}
+      {{#if stylinNutin}}
+      if (doCreateStylesheet) generateStylesheet(name);
       {{/if}}
       appendToIndex({ name, targetPath, suffix: 'component' });
     } catch (err) {

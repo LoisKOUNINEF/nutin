@@ -60,3 +60,26 @@ export function generateJson({ targetPath, name }) {
 }
 
 {{/if}}
+{{#if stylinNutin}}
+export function generateStylesheet(name) {
+  const template = scssTemplate();
+  const componentsStylePath = path.join('src', 'styles', 'components');
+  const filePath = path.join(componentsStylePath, `_${name.kebab}.scss`);
+  const indexPath = path.join(componentsStylePath, `_index.scss`);
+
+  if (fs.existsSync(filePath)) {
+    print.boldError('A file with this name already exists');
+    process.exit(1);
+  }
+  fs.writeFileSync(filePath, template);
+
+  const lineToAppend = `@forward "${name.kebab}";\n`;
+
+  try {
+    fs.appendFileSync(indexPath, lineToAppend, 'utf8');
+  } catch (err) {
+    print.error(`Error appending line: ${err}`);
+  }
+}
+
+{{/if}}

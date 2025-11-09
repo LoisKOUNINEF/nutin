@@ -4,20 +4,19 @@
 ## Package.json scripts
 
 * Development server (SASS compile, TS compile):
+*NOTE: If you switch package manager in an existing nutin app, you'll need to modify : `tools/dev.js`, `tools/watcher.js`.*
 
 ```bash
 npm run serve
 
 # live reload
-# if external templates feature is enabled, 
-# you may have to reload the page manually from time to time
 npm run dev
 ```
 
 * Build for production:
 
 ```bash
-npm run build
+npm run build:prod
 ```
 
 * Generate a component, view or service:
@@ -25,6 +24,9 @@ npm run build
 ```bash
 # lowercase and dash-separated name
 # supports nested path
+npm run generate ELEMENT ELEMENT_NAME
+
+##
 npm run generate component my-component
 npm run generate view my-view
 npm run generate service my-service
@@ -32,7 +34,7 @@ npm run generate service my-service
 
 Runs generator: `npm run generate component widgets/my-widget` -> this creates `src/app/components/widgets/my-widget/my-widget.component.ts` (and `locales` fragments with i18n feature enabled).
 
-* Run tests (testin-nutin toolkit:
+* Run tests (testin-nutin toolkit):
 
 ```bash
 npm run test

@@ -8,6 +8,19 @@ export interface CatalogConfig {
   component: new (el: HTMLElement, data: any) => BaseComponent;
 };
 
+export interface CatalogItemBase {
+  idx: number;
+}
+
+export type CatalogItemObject<T extends object> = T & CatalogItemBase;
+
+export interface CatalogItemPrimitive extends CatalogItemBase {
+  value: string | number | boolean | null | undefined;
+}
+
+export type CatalogItemConfig<T = any> =
+  T extends object ? CatalogItemObject<T> : CatalogItemPrimitive;
+
 /**
  * ```typescript
 interface CatalogConfig {
@@ -40,14 +53,21 @@ export class CatalogHelper {
   private static createElements(idx: number, config: CatalogConfig, container: HTMLElement) {
     const el = document.createElement(config.elementTag || 'div');
     el.setAttribute('data-component', `${config.elementName}-${idx}`);
+    el.dataset.index = String(idx);
     container?.appendChild(el);
   }
 
   private static pushConfig(idx: number, componentConfigs: ComponentConfig[], config: CatalogConfig) {
+    const item = config.array[idx];
+
+    const configWithIndex: CatalogItemConfig = (item && typeof item === 'object')
+      ? { ...(item as object), index: idx }
+      : { value: item, index: idx };
+    
     componentConfigs.push(
       { 
         selector: `${config.elementName}-${idx}`,
-        factory: (el) => new config.component(el, config.array[idx])
+        factory: (el) => new config.component(el, configWithIndex)
       },
     )
   }

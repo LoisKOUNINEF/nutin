@@ -4,7 +4,7 @@ import * as fsExtra from 'fs-extra';
 import { TemplateCompiler } from './template-compiler.mjs';
 import { print } from './print.mjs';
 import { initializeGit } from './git-manager.mjs';
-import { installDependencies, generatePackageJson, generateTsconfigJson } from './package-manager.mjs';
+import { installDependencies, generatePackageJson, generateTsconfigJson, getCiCommand } from './package-manager.mjs';
 
 const fs = fsExtra.default;
 const __filename = fileURLToPath(import.meta.url);
@@ -55,7 +55,9 @@ export class ProjectGenerator {
   }
 
   buildContext(answers) {  
-    const version = '1.1.0';
+    const version = '1.2.0';
+    const ciCommand = getCiCommand(answers.packageManager);
+
     return {
       projectName: answers.projectName,
       description: answers.description || `A modern web application`,
@@ -70,6 +72,7 @@ export class ProjectGenerator {
       
       year: new Date().getFullYear(),
       packageManager: answers.packageManager || 'npm',
+      ciCommand: ciCommand,
       version: version
     };
   }
@@ -110,7 +113,7 @@ export class ProjectGenerator {
     if (BINARY_EXTENSIONS.has(fileExt)) {
       const outputPath = path.join(outputDir, fileName);
       await fs.copy(templatePath, outputPath);
-      print.info(`📄 Copied: ${fileName}`);
+      // print.info(`📄 Copied: ${fileName}`);
     } else if (fileName.endsWith('.hbs')) {
 
       const outputFileName = fileName.replace('.hbs', '');
@@ -119,7 +122,7 @@ export class ProjectGenerator {
       try {
         const compiledContent = await this.compiler.compileFile(templatePath, context);
         await fs.writeFile(outputPath, compiledContent);
-        print.info(`📝 Generated: ${outputFileName}`);
+        // print.info(`📝 Generated: ${outputFileName}`);
       } catch (error) {
         print.boldError(`❌ Failed to process template: ${fileName}`);
         throw error;
@@ -127,7 +130,7 @@ export class ProjectGenerator {
     } else {
       const outputPath = path.join(outputDir, fileName);
       await fs.copy(templatePath, outputPath);
-      print.info(`📄 Copied: ${fileName}`);
+      // print.info(`📄 Copied: ${fileName}`);
     }
   }
 

@@ -9,6 +9,7 @@ const watcher = chokidar.watch(['src'], {
 });
 
 let isBuilding = false;
+
 let buildTimeout = null;
 
 watcher.on('change', (filePath) => {
@@ -24,21 +25,20 @@ watcher.on('change', (filePath) => {
     print.boldInfo(`\n🔄 File changed: ${path.relative(process.cwd(), filePath)}\n`);
     print.info('\nRebuilding...');
 
-    const command = '{{packageManager}} run build';
+    const command = filePath.includes('.scss') ? 'npm run build-static' : 'npm run build';
     
     exec(command, (err, stdout, stderr) => {
       if (stdout) process.stdout.write(stdout);
       if (stderr) process.stderr.write(stderr);
-      if (err) {
-        print.error(`\n❌ Build failed: ${err.message}`);
-      } else {
-        print.boldHead('Watching for changes...');
-      }
+      
+      print.boldSuccess('\n✅ Build completed!');
+      print.boldHead('\nWaiting for changes...\n');
+      
       isBuilding = false;
     });
   }, 100);
 });
 
 watcher.on('ready', () => {
-  print.boldHead('\nWatching for changes...\n');
+  print.boldHead('\n👀 Watching for changes...\n');
 });

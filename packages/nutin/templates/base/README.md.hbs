@@ -1,1 +1,24 @@
 # {{projectName}} - Built with nutin
+
+## Start
+
+- `{{packageManager}} run serve` (rebuild), `{{packageManager}} run serve:only` (no rebuild), `{{packageManager}} run dev` (watch).
+
+## Build
+
+- `{{packageManager}} run build` (dev) or `{{packageManager}} run build:prod` (production)
+
+	Accepts `--bundle` (= build:prod) and `--log` (verbose output) flags
+
+## Generate Component, View, Service
+
+- `{{packageManager}} run generate ELEMENT ELEMENT_NAME`
+
+	Supports nested paths.
+
+{{#if testinNutin}}
+## Test
+
+- `{{packageManager}} run test:rebuild`, `{{packageManager}} run test`, `{{packageManager}} run test:watch`.
+
+{{/if}}
