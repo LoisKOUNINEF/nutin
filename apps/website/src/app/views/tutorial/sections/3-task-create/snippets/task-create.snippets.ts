@@ -1,18 +1,12 @@
-import taskCatalogView from './task-catalog-view.json' with { type: "json" };
-import addTaskComponent from './add-task-component.json' with { type: "json" };
-import addTaskStyle from './add-task-style.json' with { type: "json" };
-import taskService from './task-service.json' with { type: "json" };
+import TaskCatalogViewSnippet from './task-catalog-view.snippet.json' with { type: "json" };
+import AddTaskComponentSnippet from './add-task-component.snippet.json' with { type: "json" };
+import AddTaskStyleSnippet from './add-task-style.snippet.json' with { type: "json" };
+import TaskServiceSnippet from './task-service.snippet.json' with { type: "json" };
 import { snippetsManager } from '../../../../../helpers/index.js';
 
-const taskCreateLocalizedSnippets: LocalizedSnippet[] = [];
-
-taskCreateLocalizedSnippets.push(
-	taskCatalogView,
-	addTaskComponent,
-	taskService,
-	addTaskStyle
-);
-
-const TaskCreateSnippets: ISnippet[] = snippetsManager(taskCreateLocalizedSnippets);
-
-export default TaskCreateSnippets;
+export default snippetsManager([
+	TaskCatalogViewSnippet,
+	AddTaskComponentSnippet,
+	TaskServiceSnippet,
+	AddTaskStyleSnippet
+]);

@@ -1,6 +1,0 @@
-{
-	"id": 1,
-	"sectionId": 1,
-	"content": "// Utility classes prefix : 'u-'\n\n// font size\n@each $name, $size in $font-sizes {\n\t.u-font-#{$name}\n}\n\n// padding\n@each $name, $space in $spacings {\n\t.u-padd-x-#{$name}\n}\n@each $name, $space in $spacings {\n\t.u-padd-y-#{$name}\n}\n\n//margin\n@each $name, $space in $spacings {\n\t.u-marg-x-#{$name}\n}\n\n@each $name, $space in $spacings {\n\t.u-marg-y-#{$name}\n}\n\n//border-radius\n@each $name, $radius in $border-radius {\n\t.u-rounded-#{$name}\n}\n\n// box-shadow\n@each $name, $shadow in $shadows {\n\t.u-shadow-#{$name}\n}\n\n// transition\n@each $name, $transition in $transitions {\n\t.u-transition-#{$name}\n}\n\n.u-color-base\n\n.u-color-prim\n\n.u-color-sec\n\n.u-color-bg\n\n.u-italic\n\n.u-bold\n\n.u-font-secondary\n\n.u-flex-center\n\n.u-flex-column\n\n.u-flex-row\n\n.u-flex-between\n\n.u-flex-around\n\n.u-flex-wrap\n\n.u-ellipsis\n\n.u-clamp-2\n\n.u-absolute-center\n\n.u-fixed-full\n\n.u-bg-base\n\n.u-bg-inherit\n\n.u-bg-primary\n\n.u-bg-secondary\n\n.u-bg-gradient-to-right\n\n.u-bg-cover\n\n.u-img-cover\n\n.u-transition\n\n.u-hover-scale\n\n.u-border\n\n.u-border-none\n\n.u-rounded\n\n.u-btn-disabled\n\n.u-hide\n\n.u-sr-only\n\n.u-clearfix\n\n.u-pointer\n\n.u-pre-wrap",
-	"type": "scss"
-}

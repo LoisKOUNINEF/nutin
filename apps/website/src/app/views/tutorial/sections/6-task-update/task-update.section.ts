@@ -1,7 +1,5 @@
 import { sectionManager } from '../../../../helpers/index.js';
 import TaskUpdateSnippets from './snippets/task-update.snippets.js';
-import taskUpdateSection from './task-update.json' with { type: "json" };
+import TaskUpdateSection from './task-update.section.json' with { type: "json" };
 
-const TaskUpdateSection: ISection = sectionManager(taskUpdateSection, TaskUpdateSnippets);
-
-export default TaskUpdateSection;
+export default sectionManager(TaskUpdateSection, TaskUpdateSnippets);

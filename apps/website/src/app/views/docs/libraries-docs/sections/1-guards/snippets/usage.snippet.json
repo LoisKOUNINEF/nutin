@@ -1,0 +1,16 @@
+{
+	"id": 1,
+	"sectionId": 1,
+	"content": "// in app/routes.ts\n'/guarded-route': { view: () =&gt; new GuardedView(), guards: [] }",
+	"type": "ts",
+	"en": {
+		"title": "Usage",
+		"before": "",
+		"after": ""
+	},
+	"fr": {
+		"title": "Usage",
+		"before": "",
+		"after": ""
+	}
+}

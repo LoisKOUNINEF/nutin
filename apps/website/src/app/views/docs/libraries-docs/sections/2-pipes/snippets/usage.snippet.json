@@ -1,0 +1,16 @@
+{
+	"id": 1,
+	"sectionId": 2,
+	"content": "&lt;!-- basic usage --&gt;\n&lt;div data-pipe=\"capitalizeAll\"&gt;&lt;/div&gt;\n&lt;!-- passing arguments --&gt;\n&lt;div data-pipe=\"date:en-US,long,time\"&gt;&lt;/div&gt;\n&lt;!-- chaining pipes --&gt;\n&lt;div data-pipe=\"date|capitalizeAll\"&gt;&lt;/div&gt;\n&lt;!-- arguments & chaining --&gt;\n&lt;div data-pipe=\"date:en-US,long,time|capitalizeAll\"&gt;&lt;/div&gt;",
+	"type": "html",
+	"en": {
+		"title": "Usage",
+		"before": "",
+		"after": ""
+	},
+	"fr": {
+		"title": "Usage",
+		"before": "",
+		"after": ""
+	}
+}

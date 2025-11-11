@@ -1,0 +1,16 @@
+{
+	"id": 1,
+	"sectionId": 2,
+	"content": "// test.config.js\nexport default {\n// folders to scan for .test.js files\n\torigins: [],\n// verbose output\n\tverbose: false,\n}",
+	"type": "ts",
+	"en": {
+		"title": "Test config file",
+		"before": "",
+		"after": ""
+	},
+	"fr": {
+		"title": "Test config file",
+		"before": "",
+		"after": ""
+	}
+}

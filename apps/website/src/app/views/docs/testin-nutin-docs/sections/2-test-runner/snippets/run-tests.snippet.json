@@ -1,0 +1,16 @@
+{
+	"id": 2,
+	"sectionId": 2,
+	"content": "npm run test\n\n# watch\nnpm run test:watch\n\n# rebuild before running tests\nnpm run test:rebuild",
+	"type": "none",
+	"en": {
+		"title": "Run tests",
+		"before": "Tests run on compiled (.js) files.",
+		"after": ""
+	},
+	"fr": {
+		"title": "Run tests",
+		"before": "Les tests sont effectués sur les fichiers compilés (.js).",
+		"after": ""
+	}
+}

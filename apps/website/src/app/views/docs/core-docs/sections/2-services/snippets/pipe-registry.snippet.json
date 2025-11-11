@@ -1,0 +1,16 @@
+{
+	"id": 3,
+	"sectionId": 2,
+	"content": "type PipeFunction = (value: any, ...args: any[]) =&gt; string;\n\npublic register(name: string, fn: PipeFunction): void;\npublic apply(name: string, value: any, args: string[] = []): string;",
+	"type": "ts",
+	"en": {
+		"title": "PipeRegistry",
+		"before": "",
+		"after": "Add custom pipes in Pipes library or with AppPipeRegistry.register()."
+	},
+	"fr": {
+		"title": "PipeRegistry",
+		"before": "",
+		"after": "Ajoutez des pipes dans la bibliothèque Pipes ou utilisez AppPipeRegistry.register()."
+	}
+}

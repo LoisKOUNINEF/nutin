@@ -1,0 +1,16 @@
+{
+	"id": 3,
+	"sectionId": 1,
+	"content": "toBe(expected)\ntoEqual(expected)\ntoContain(substring)\ntoBeDefined()\ntoBeUndefined()\ntoBeInstanceOf(constructor)\ntoHaveBeenCalled()\ntoHaveBeenCalledWith(...expectedArgs)\ntoBeLessThan(expected)\ntoBeGreaterThan(expected)\n\n// 'not' variants\nnot.toBe(expected)\nnot.toEqual(expected)\nnot.toContain(substring)\nnot.toBeDefined()\nnot.toBeUndefined()\nnot.toBeInstanceOf(constructor)\nnot.toHaveBeenCalled()\nnot.toHaveBeenCalledWith(...expectedArgs)\nnot.toBeLessThan(expected)\nnot.toBeGreaterThan(expected)",
+	"type": "ts",
+	"en": {
+		"title": "Assertions",
+		"before": "",
+		"after": ""
+	},
+	"fr": {
+		"title": "Assertions",
+		"before": "",
+		"after": ""
+	}
+}

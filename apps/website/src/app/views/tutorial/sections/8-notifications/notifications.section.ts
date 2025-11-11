@@ -1,7 +1,5 @@
 import { sectionManager } from '../../../../helpers/index.js';
 import NotificationsSnippets from './snippets/notifications.snippets.js';
-import notificationsSection from './notifications.json' with { type: "json" };
+import NotificationsSection from './notifications.section.json' with { type: "json" };
 
-const NotificationsSection: ISection = sectionManager(notificationsSection, NotificationsSnippets);
-
-export default NotificationsSection;
+export default sectionManager(NotificationsSection, NotificationsSnippets);
