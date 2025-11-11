@@ -5,11 +5,10 @@ const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
 
 export class NavbarComponent extends Component<HTMLHeadingElement> {
   private readonly dropdownLinks = [
-    'core',
-    'services',
     'libraries',
     'stylin-nutin',
     'testin-nutin',
+    'core',
     'tools',
   ] as const;
 
