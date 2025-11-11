@@ -38,7 +38,7 @@
 	top: 100%;
 	@include mixins.bg-gradient(bottom, rgba($secondary-color, .5), $background-color);
 	background-color: $background-color;
-	margin-left: 1rem;
+	margin-left: 1.5rem;
 	opacity: 0;
 	visibility: hidden;
 }

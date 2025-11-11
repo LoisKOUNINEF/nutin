@@ -1,21 +1,12 @@
 import { setupJsdomEnvironment, registerTestGlobals, getTestFiles, runQueuedTests, print } from './core/index.js';
+import config from '#root/test.config.js';
 
 setupJsdomEnvironment();
 registerTestGlobals();
 
-let testFiles = [
-  // Uncomment to test toolkit core logic
-  // ...getTestFiles('../src/core'),
-
-  // Uncomment to test built-in libs
-  // ...getTestFiles('../src/libs'),
-
-  // Uncomment to test globals (describe, it) & assertions (expect)
-  // ...getTestFiles('core/tests'),
-
-  // actual application code
-  ...getTestFiles('../src/app')
-];
+let testFiles = config.origins.flatMap(
+  origin => getTestFiles(`../${origin}`)
+);
 
 const args = process.argv.slice(2);
 if (args.length) {
@@ -23,7 +14,7 @@ if (args.length) {
 }
 
 async function runTests() {
-  print.head('Test suites :');
+  if (config.verbose) print.head('Test suites :');
   for (const file of testFiles) {
     try {
       await import(file);

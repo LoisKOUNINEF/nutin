@@ -10,7 +10,7 @@
 	},
 	"fr": {
 		"title": "Router",
-		"before": "Le Router gère la navigation (ainsi que le popstate) et utilise l'évènement `navigate` de AppEventBus. Il s'occupe de rendre les vues (avec le nettoyage du contenu `data-optional`) et le rechargement de la page avec l'évènement `reload` de AppEventBus.\nIl redirige vers /404 si aucune route ne correspond à l'URL (la route `/404` doit être enregistrée) et vérifie les guardes.\nSupporte les paramètres de route (requis et optionels).",
-		"after": "Ajoutez des guardes dans la bibliothèque Guards ou utilisez Guards.custom()."
+		"before": "Le Router gère la navigation (ainsi que le popstate) et utilise l'évènement `navigate` de AppEventBus. Il s'occupe de rendre les vues (avec le nettoyage du contenu `data-optional`) et le rechargement de la page avec l'évènement `reload` de AppEventBus.\nIl redirige vers /404 si aucune route ne correspond à l'URL (la route `/404` doit être enregistrée) et vérifie les gardes.\nSupporte les paramètres de route (requis et optionels).",
+		"after": "Ajoutez des gardes dans la bibliothèque Guards ou utilisez Guards.custom()."
 	}
 }

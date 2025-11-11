@@ -2,7 +2,6 @@
   "name": "website",
   "version": "0.1.0",
   "private": true,
-  "main": "index.js",
   "type": "module",
   "imports": {
     "#root/*.js": "./*.js"
@@ -11,18 +10,15 @@
     "patch": "npm version patch -m 'CI/CD: Bump version to %s'",
     "minor": "npm version minor -m 'CI/CD: Bump version to %s'",
     "major": "npm version major -m 'CI/CD: Bump version to %s'",
-    "build:clear": "rm -rf dist/src/* dist-build",
-    "build:ts": "tsc --project tsconfig.json",
-    "build-static": "node tools/builder/builder.js",
-    "build:finalize": "mkdir -p dist && mv dist-build/src dist/ && rm -rf dist-build",
-    "build": "npm run build:clear && npm run build:ts && npm run build-static && npm run build:finalize",
-    "serve:only": "live-server dist/src --port=9090 --entry-file=index.html --open",
+    "build": "node tools/builder/builder.js",
+    "build:prod": "NODE_ENV=production node tools/builder/builder.js",
+    "serve:only": "node tools/serve.js",
     "serve": "npm run build && npm run serve:only",
-    "dev": "concurrently \"node tools/watcher.js\" \"npm run build && npm run serve:only > /dev/null 2>&1\"",
-    "test:watch": "npm run build && node test/watch-tests.js",
+    "dev": "node tools/dev.js",
     "generate": "node tools/generator/generator.js",
     "test": "node test/runner.js",
-    "test--rebuild": "npm run build && npm run test",
+    "test:rebuild": "npm run build && npm run test",
+    "test:watch": "npm run build && node test/watch-tests.js",
     "code-to-json": "node src/app/helpers/format-code/code-to-json.cjs"
   }
 }

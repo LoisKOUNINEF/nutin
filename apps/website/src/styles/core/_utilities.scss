@@ -90,6 +90,10 @@
   font-family: $secondary-font;
 }
 
+.u-font-primary {
+  font-family: $primary-font;
+}
+
 // flex
 .u-flex-center {
   @include mixins.flex-center;

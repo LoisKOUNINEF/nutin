@@ -1,4 +1,5 @@
 import { print, addTest } from '../../index.js';
+import config from '#root/test.config.js';
 import './assertion-lib.js';
 import './spyon.js';
 
@@ -14,7 +15,7 @@ export function registerTestGlobals() {
       afterEach: null,
       afterAll: null
     };
-    print.boldSuccess('📂 ' + name);
+    if (config.verbose) print.boldSuccess('📂 ' + name);
     fn();
   };
 

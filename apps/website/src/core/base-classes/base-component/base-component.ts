@@ -56,7 +56,7 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
 /**
  * ```typescript
 interface CatalogConfig {
-  array: any[];
+  array: CatalogItemConfig[];
   elementName: string;
   elementTag?: keyof HTMLElementTagNameMap;
   selector: string;

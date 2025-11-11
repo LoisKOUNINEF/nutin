@@ -1,7 +1,7 @@
 {
 	"id": 2,
 	"sectionId": 2,
-	"content": "npm run test\n\n# watch\nnpm run test:watch\n\n# rebuild before running tests\nnpm run test:rebuild",
+	"content": "npm run test\n\n# rebuild before running tests\nnpm run test:rebuild\n\n# watch\nnpm run test:watch",
 	"type": "none",
 	"en": {
 		"title": "Run tests",

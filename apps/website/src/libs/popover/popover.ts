@@ -1,4 +1,4 @@
-import { View, ButtonManager, BaseButton } from '../../core/index.js';
+import { View, ButtonManager, BaseButton, ViewRenderManager } from '../../core/index.js';
 
 export interface PopoverButton extends BaseButton {
   // if needed for Popover-specific properties
@@ -59,6 +59,7 @@ export class PopoverView extends View {
   private createContent(): HTMLElement {
     const content = super.render();
     content.classList.add('popover-content');
+    ViewRenderManager.cleanupOptionalContent();
     return content;
   }
 

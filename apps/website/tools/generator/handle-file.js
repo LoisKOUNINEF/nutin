@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { print } from '../utils/index.js';
 import { LANGUAGES } from '../../src/app/languages.js';
-import { jsonTemplate } from './templates/index.js';
+import { jsonTemplate, scssTemplate } from './templates/index.js';
 
 export function generateFile({
   name,
@@ -22,7 +22,7 @@ export function generateFile({
 }
 
 export function appendToIndex({ name, targetPath, suffix }) {
-  const absTargetPath = path.resolve(process.cwd(), targetPath);
+  const absTargetPath = path.resolve(targetPath);
 
   const parts = targetPath.split(path.sep);
   const basePath = parts.slice(0, 3).join(path.sep);
@@ -54,3 +54,23 @@ export function generateJson({ targetPath, name }) {
   });
 }
 
+export function generateStylesheet(name) {
+  const template = scssTemplate();
+  const componentsStylePath = path.join('src', 'styles', 'components');
+  const filePath = path.join(componentsStylePath, `_${name.kebab}.scss`);
+  const indexPath = path.join(componentsStylePath, `_index.scss`);
+
+  if (fs.existsSync(filePath)) {
+    print.boldError('A file with this name already exists');
+    process.exit(1);
+  }
+  fs.writeFileSync(filePath, template);
+
+  const lineToAppend = `@forward "${name.kebab}";\n`;
+
+  try {
+    fs.appendFileSync(indexPath, lineToAppend, 'utf8');
+  } catch (err) {
+    print.error(`Error appending line: ${err}`);
+  }
+}

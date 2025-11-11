@@ -9,19 +9,36 @@ const watcher = chokidar.watch(['src'], {
 });
 
 let isBuilding = false;
+let buildTimeout = null;
 
 watcher.on('change', (filePath) => {
-  if (isBuilding) return;
-  isBuilding = true;
+  if (buildTimeout) {
+    clearTimeout(buildTimeout);
+  }
+  
+  buildTimeout = setTimeout(() => {
+    if (isBuilding) return;
+    isBuilding = true;
 
-  console.clear();
-  print.boldInfo(`\n🔄 File changed: ${path.relative(process.cwd(), filePath)}\n`);
-  print.info('\nRebuilding...')
+    console.clear();
+    print.boldInfo(`\n🔄 File changed: ${path.relative(process.cwd(), filePath)}\n`);
+    print.info('\nRebuilding...');
 
-  exec('npm run build', (err, stdout, stderr) => {
-    if (stderr) process.stderr.write(stderr);
-    print.boldHead('\nWaiting for changes...');
-  });
+    const command = filePath.includes('.scss') ? 'npm run build' : 'npm run build';
+    
+    exec(command, (err, stdout, stderr) => {
+      if (stdout) process.stdout.write(stdout);
+      if (stderr) process.stderr.write(stderr);
+      if (err) {
+        print.error(`\n❌ Build failed: ${err.message}`);
+      } else {
+        print.boldHead('Watching for changes...');
+      }
+      isBuilding = false;
+    });
+  }, 100);
+});
 
-  isBuilding = false;
+watcher.on('ready', () => {
+  print.boldHead('\nWatching for changes...\n');
 });

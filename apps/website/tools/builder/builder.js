@@ -1,33 +1,26 @@
 #!/usr/bin/env node
 
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
-import { spawnSync } from 'child_process';
-import process from 'process';
-import { print } from '../utils/index.js';
+import path from 'path';
+import { print, isProd, runScript } from '../utils/index.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const scriptsDir = path.resolve(process.cwd(),'tools', 'builder', 'core');
 
-import { BINARY_EXTENSIONS } from './variables/binary-extensions.js';
+print.boldHead(`Starting build...`);
 
-print.boldHead(`Building static files...`);
-print.info(`File types that will be copied: ${Array.from(BINARY_EXTENSIONS)}`);
+runScript(path.join(scriptsDir, 'copy-static.js'), 'Copying files...');
+if(!isProd) runScript(path.join(scriptsDir, 'tsc.js'), 'Running TypeScript compiler...');
 
-function runScript(path, message) {
-  print.boldSection(`\n${message}`);
-  const result = spawnSync('node', [resolve(__dirname, path)], { stdio: 'inherit' });
+// external templates
+runScript(path.join(scriptsDir, 'merge-templates.js'), 'Merging HTML templates in JavaScript files...');
+// internal templates
+runScript(path.join(scriptsDir, 'minify-html.js'), 'Minifying inline templates...')
 
-  if (result.status !== 0) {
-    print.boldError(`\nScript ${path} failed.`);
-    process.exit(result.status ?? 1);
-  }
-}
-
-runScript('./core/copy-static.js', 'Copying files...');
-runScript('./core/build-i18n.js', 'Combining locales for production...');
-runScript('./core/merge-templates.js', 'Merging HTML templates in JavaScript files...');
-runScript('./core/sass.config.js', 'Compiling styles from main.scss...');
-runScript('./core/validate-html.js', 'Validating tags in index.html...');
+runScript(path.join(scriptsDir, 'build-i18n.js'), 'Combining locales for production...');
+runScript(path.join(scriptsDir, 'sass.config.js'), 'Compiling styles from main.scss...');
+runScript(path.join(scriptsDir, 'validate-html.js'), 'Validating tags in index.html...');
+if (isProd) runScript(path.join(scriptsDir, 'esbuild.js'), 'Running esbuild...');
+runScript(path.join(scriptsDir, 'finalize-build.js'), 'Finalizing build...')
 
 print.boldSuccess(`\nBuild successful!\n`);
+
+if (!isProd) print.boldInfo('For production, use build:prod.');

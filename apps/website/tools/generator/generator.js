@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-import { allFormats, getLastWord, print } from "../utils/index.js";
-import { generateFile, appendToIndex, generateJson } from "./handle-file.js";
+import path from "path";
+import { allFormats, getLastWord, print, promptBoolean } from "../utils/index.js";
+import { generateFile, appendToIndex, generateJson, generateStylesheet } from "./handle-file.js";
 import { serviceTemplate, componentTemplate, viewTemplate, htmlTemplate } from "./templates/index.js";
 
 // Constants and Setup
@@ -14,7 +15,7 @@ if (!rawType || !rawFullPath) {
 const type = allFormats(rawType);
 const fullPath = allFormats(rawFullPath);
 const name = allFormats(getLastWord(fullPath.kebab));
-const targetPath = `src/app/${type.kebab}s/${fullPath.kebab}`;
+const targetPath = path.join('src', 'app', `${type.kebab}s/${fullPath.kebab}`);
 
 // Creator Mapping
 const creators = {
@@ -27,12 +28,15 @@ const creators = {
       handleError("Failed to generate service", err);
     }
   },
-  component: (name, targetPath) => {
+  component: async (name, targetPath) => {
     print.section(`Creating component: ${name.capitalized}`);
+    const doCreateStylesheet = await promptBoolean('Create component\'s stylesheet in styles/components ?');
+    
     try {
       generateFile({ name, targetPath, templateFn: componentTemplate, suffix: 'component' });
       generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: 'component', extension: 'html' });
       generateJson({ targetPath, name });
+      if (doCreateStylesheet) generateStylesheet(name);
       appendToIndex({ name, targetPath, suffix: 'component' });
     } catch (err) {
       handleError("Failed to generate component", err);
@@ -55,7 +59,7 @@ const creators = {
 const create = creators[type.kebab];
 
 if (create) {
-  create(name, targetPath);
+  await create(name, targetPath);
   print.boldSuccess(`\n${type.capitalized} ${name.capitalized} has been generated.\n`)
 } else {
   showUsageAndExit(`Unsupported type: '${type.kebab}'`);

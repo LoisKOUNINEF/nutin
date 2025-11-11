@@ -36,6 +36,7 @@ export class TokenHelper {
 
   public static resolve(token: string, el: Element, event: Event): any {
     const htmlEl = el as HTMLElement;
+    event.preventDefault();
 
     return (
       this.resolveExact(token, htmlEl, event) ??

@@ -1,5 +1,6 @@
 node_modules
 dist
+dist-build
 .github
 .gitignore
 .git
@@ -8,3 +9,11 @@ dist
 .env
 *.txt
 *.test
+*.log
+
+npm-debug.log
+.nyc_output
+coverage
+.DS_Store
+.cache
+.parcel-cache

@@ -1,12 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { exit } from 'process';
-
+import { getFilesRecursive, print, isVerbose, isProd } from '../../utils/index.js';
 import { BINARY_EXTENSIONS } from '../variables/binary-extensions.js';
-import { getFilesRecursive, print } from '../../utils/index.js';
-
-const SOURCE_FOLDER = 'src';
-const DEST_FOLDER = `dist-build/${SOURCE_FOLDER}`;
+import { PATHS } from './paths.js';
 
 async function ensureDir(dir) {
   await fs.mkdir(dir, { recursive: true });
@@ -18,45 +15,48 @@ async function copyFile(src, dest) {
 }
 
 async function copyFavicon() {
-  const srcPath = path.join('public', 'favicon.ico');
-  const destPath = path.join( DEST_FOLDER, 'favicon.ico');
+  const srcPath = path.resolve(path.join('public', 'favicon.ico'));
+  const destPath = path.join(PATHS.tempSource, 'favicon.ico');
 
   try {
     await copyFile(srcPath, destPath);
-    print.info('✅ Copied: favicon.ico');
+    if (isVerbose) print.info('✅ Copied: favicon.ico');
   } catch {
-    print.boldError('⚠️  No favicon found at public/favicon.ico\x1b[0m');
+    print.boldError('⚠️  No favicon found at public/favicon.ico');
   }
 }
 
 async function copyPrism() {
-  const srcPath = path.join(SOURCE_FOLDER, 'app/helpers/prism/prism.js');
-  const destPath = path.join( DEST_FOLDER, 'app/helpers/prism/prism.js');
+  const srcPath = path.join(PATHS.sourceApp, 'helpers', 'prism', 'prism.js');
+  const destPath = path.join(PATHS.tempSource, 'prism.js');
 
   try {
     await copyFile(srcPath, destPath);
-    print.info('✅ Copied: prism.js');
+    if (isVerbose) print.info('✅ Copied: prism.js');
   } catch {
-    print.boldError('⚠️  No prism.js file\x1b[0m');
+    print.boldError('⚠️  No prism.js file');
   }
 }
 
 async function copyStatic() {
   const extensions = [...BINARY_EXTENSIONS, 'html'];
+  if (isProd) extensions.push('.ts');
 
-  await ensureDir(path.join(DEST_FOLDER));
+  print.info(`File types that will be copied: ${Array.from(extensions)}`);
+
+  await ensureDir(PATHS.tempSource);
   await copyFavicon();
 
   for (const extension of extensions) {
-    const files = await getFilesRecursive(SOURCE_FOLDER, extension);
+    const files = await getFilesRecursive(PATHS.source, extension);
 
     for (const file of files) {
-      const relative = path.relative(SOURCE_FOLDER, file);
-      const dest = path.join(DEST_FOLDER, relative);
+      const relative = path.relative(PATHS.source, file);
+      const dest = path.join(PATHS.tempSource, relative);
 
       try {
         await copyFile(file, dest);
-        print.info(`✅ Copied: ${file} → ${dest}`);
+        if (isVerbose) print.info(`✅ Copied: ${file} → ${dest}`);
       } catch (err) {
         print.error(`❌ Failed to copy: ${file}. ${err.message}`);
         exit(1);
@@ -64,7 +64,7 @@ async function copyStatic() {
     }
   }
 
-  await copyJsonFiles(SOURCE_FOLDER, DEST_FOLDER);
+  if (isProd) await copyJsonFiles(PATHS.source, PATHS.tempSource);
   await copyPrism();
 }
 
@@ -81,7 +81,7 @@ async function copyJsonFiles(sourceDir, destDir) {
     } else if (item.isFile() && path.extname(item.name) === '.json') {
       await fs.mkdir(path.dirname(destPath), { recursive: true });
       await fs.copyFile(sourcePath, destPath);
-      console.log(`Copied JSON: ${sourcePath} -> ${destPath}`);
+      if (isVerbose) print.info(`Copied JSON: ${sourcePath} -> ${destPath}`);
     }
   }
 }
