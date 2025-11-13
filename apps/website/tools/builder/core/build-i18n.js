@@ -72,7 +72,7 @@ async function removeJsonFiles(directory) {
 
   await removeEmptyDirectories(directory);
 
-  if (isVerbose) print.info(`✅ JSON files cleanup complete.`);
+  if (isVerbose) print.boldInfo(`JSON files cleanup complete.\n`);
 }
 
 async function removeEmptyDirectories(directory) {
@@ -121,7 +121,7 @@ async function mergeJson() {
       `${destDir}/${locale}.json`,
       JSON.stringify(combined, null, 2)
     );
-    print.info(`✅ Json files for locale ${locale} merged successfully`);
+    if (isVerbose) print.boldInfo(`Json files for locale ${locale} merged successfully`);
   }
   removeJsonFiles(PATHS.tempApp);
 }

@@ -4,7 +4,7 @@ import process from 'process';
 import { print } from './index.js';
 
 export function runScript(path, message) {
-  print.boldSection(`\n${message}`);
+  print.boldSection(message);
 
   const args = [resolve(path)];
 

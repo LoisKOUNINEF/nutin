@@ -1,5 +1,12 @@
-import { sectionManager } from '../../../../../helpers/index.js';
-import TestRunnerSnippets from './snippets/test-runner.snippets.js';
+import { BuildSectionHelper } from '../../../../../helpers/index.js';
+import RunTestSnippet from './snippets/run-tests.snippet.json' with { type: 'json' };
+import ConfigSnippet from './snippets/config.snippet.json' with { type: 'json' }
 import TestRunnerSection from './test-runner.section.json' with { type: "json" };
 
-export default sectionManager(TestRunnerSection, TestRunnerSnippets);
+export default BuildSectionHelper.buildSection(
+	TestRunnerSection,
+	[
+		RunTestSnippet,
+		ConfigSnippet,
+	]
+);

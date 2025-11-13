@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'fs/promises';
 import { JSDOM } from 'jsdom';
 import { exit } from 'process';
-import { print, isProd } from '../../utils/index.js';
+import { print, isProd, isVerbose } from '../../utils/index.js';
 import { PATHS } from './paths.js';
 import path from 'path';
 
@@ -11,7 +11,7 @@ function errorExit(message) {
 }
 
 async function addEntrypoint(htmlContent, filePath) {
-  print.info('Adding script in HTML...');
+  if (isVerbose) print.info('Adding script in HTML...');
 
   const dom = new JSDOM(htmlContent);
   const document = dom.window.document;
@@ -46,9 +46,9 @@ async function validateHtml() {
     errorExit('No stylesheet found in HTML');
   }
 
-  await addEntrypoint(htmlContent, filePath);
+  await addEntrypoint(htmlContent, filePath).catch(err => errorExit(err.message));
 
-  print.info('HTML validation passed');
+  if (isVerbose) print.boldInfo('HTML validation passed\n');
 }
 
 validateHtml();

@@ -20,7 +20,7 @@ async function copyFavicon() {
 
   try {
     await copyFile(srcPath, destPath);
-    if (isVerbose) print.info('✅ Copied: favicon.ico');
+    if (isVerbose) print.info('Copied: favicon.ico');
   } catch {
     print.boldError('⚠️  No favicon found at public/favicon.ico');
   }
@@ -32,20 +32,34 @@ async function copyPrism() {
 
   try {
     await copyFile(srcPath, destPath);
-    if (isVerbose) print.info('✅ Copied: prism.js');
+    if (isVerbose) print.info('Copied: prism.js');
   } catch {
     print.boldError('⚠️  No prism.js file');
+  }
+}
+
+async function copyConfig() {
+  const srcPath = path.resolve(path.join('config'));
+  const temp = isProd ? PATHS.temp : PATHS.tempSource;
+  const destPath = path.join(temp, 'config');
+  try {
+    await copyJsonFiles(srcPath, destPath);
+    if (isVerbose) print.info('Config files copied');
+  } catch {
+    print.boldError('Issue when copying config files.');
+    exit(1);
   }
 }
 
 async function copyStatic() {
   const extensions = [...BINARY_EXTENSIONS, 'html'];
   if (isProd) extensions.push('.ts');
-
-  print.info(`File types that will be copied: ${Array.from(extensions)}`);
+  if (isVerbose) print.info(`File types that will be copied: ${Array.from(extensions)}\n`);
 
   await ensureDir(PATHS.tempSource);
+
   await copyFavicon();
+  await copyConfig();
 
   for (const extension of extensions) {
     const files = await getFilesRecursive(PATHS.source, extension);
@@ -56,16 +70,18 @@ async function copyStatic() {
 
       try {
         await copyFile(file, dest);
-        if (isVerbose) print.info(`✅ Copied: ${file} → ${dest}`);
+        if (isVerbose) print.info(`Copied: ${file} → ${dest}`);
       } catch (err) {
-        print.error(`❌ Failed to copy: ${file}. ${err.message}`);
+        print.error(`Failed to copy: ${file}. ${err.message}`);
         exit(1);
       }
     }
   }
 
-  if (isProd) await copyJsonFiles(PATHS.source, PATHS.tempSource);
+  if (isProd) await copyJsonFiles(PATHS.source, PATHS.tempSource); 
   await copyPrism();
+
+  if (isVerbose) print.boldInfo(`Copy complete.\n`);
 }
 
 async function copyJsonFiles(sourceDir, destDir) {

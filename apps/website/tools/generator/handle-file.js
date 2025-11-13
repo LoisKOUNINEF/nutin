@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { print } from '../utils/index.js';
-import { LANGUAGES } from '../../src/app/languages.js';
+import { print, LANGUAGES } from '../utils/index.js';
 import { jsonTemplate, scssTemplate } from './templates/index.js';
 
 export function generateFile({
