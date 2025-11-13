@@ -1,34 +1,24 @@
 import esbuild from 'esbuild';
 import path from 'path';
 import { exit } from 'process';
-import { print } from '../../utils/index.js';
+import { print, isVerbose } from '../../utils/index.js';
 import { PATHS } from './paths.js';
+import builderConfig from '../../../builder.config.js';
 
 const ENTRY_FILE = path.join(PATHS.tempApp, 'main.ts');
 const OUT_FILE = path.join(PATHS.tempSource, 'bundle.js');
 
 async function build() {
   await esbuild.build({
+    ...builderConfig.esbuild,
     entryPoints: [ENTRY_FILE],
     outfile: OUT_FILE,
-    bundle: true,
-    minify: true,
     keepNames: true, // View names are used to update meta.title
-    sourcemap: false,
-    platform: 'browser',
-    format: 'esm',
-    target: ['es2015'],
-    legalComments: 'none',
-    loader: {
-      '.json': 'json',
-    },
-    define: {
-      'process.env.NODE_ENV': '"production"',
-    },
   });
 
-  print.info(`ESBuild complete.`);
+  if (isVerbose) print.boldInfo(`ESBuild complete.\n`);
 }
+
 
 build().catch((err) => {
   print.boldError(`ESBuild failed: ${err.message}`);

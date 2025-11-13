@@ -1,7 +1,7 @@
 {
   "name": "@nutin/cli",
-  "version": "1.1.0",
-  "description": "A lightweight, highly tweakable frontend toolkit, crafted for building lean, dynamic single-page applications without the complexity of full-scale frameworks.",
+  "version": "1.2.0",
+  "description": "Build SPAs by understanding SPAs. A minimal frontend toolkit crafted for learning and lean applications.",
   "preferGlobal": true,
   "main": "lib/index.mjs",
   "bin": {

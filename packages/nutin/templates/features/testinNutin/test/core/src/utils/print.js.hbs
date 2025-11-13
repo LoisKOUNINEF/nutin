@@ -1,3 +1,5 @@
+import config from '#root/test.config.js';
+
 export function printSummary(passed, failed, time) {
   const totalTime = time.toFixed(2);
   const total = passed + failed;
@@ -17,10 +19,10 @@ export function printResults(results) {
 
   sortedResults.forEach(result => {
     if (result.status === 'passed') {
-      console.log(`${chalk.green('✓')} ${chalk.cyan(`${result.suiteName}`)} - ${chalk.green(`${result.name}`)}`);
+      if (config.verbose ) console.log(`${chalk.green('✓')} ${chalk.cyan(`${result.suiteName}`)} - ${chalk.green(`${result.name}`)}`);
     } else {
       print.error(`✗ ${result.suiteName} - ${result.name}`);
-      print.grayError(result.error);
+      if (config.verbose ) print.grayError(result.error);
     }
   });
 }

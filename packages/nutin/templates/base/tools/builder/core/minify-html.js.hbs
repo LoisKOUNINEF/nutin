@@ -1,6 +1,5 @@
 import { minify } from 'html-minifier-terser';
 {{#unless template}}
-import path from 'path';
 import fs from 'fs';
 import { exit } from 'process';
 import { getFilesRecursive, print, isProd, isVerbose } from '../../utils/index.js';
@@ -50,11 +49,12 @@ async function minifyInlineHTML() {
       if (isVerbose) print.info(`Minified inline HTML in: ${file}`);
     }
   }
-  print.info('Inline templates minified.');
+  if (isVerbose) print.boldInfo('Inline templates minified.\n');
 }
 
 minifyInlineHTML().catch((err) => {
   print.boldError(`Unexpected error: ${err.message}`);
   exit(1);
 });
+
 {{/unless}}

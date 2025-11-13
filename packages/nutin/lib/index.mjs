@@ -6,7 +6,7 @@ import { displaySuccessMessage } from './src/utils.mjs';
 
 export async function createApp() {
   program
-    .version('1.1.0')
+    .version('1.2.0')
     .argument('[projectName]', 'Name of the project')
     .option('-d, --defaults', 'Use default options')
     .option('-pm, --package-manager <manager>', 'Specify package manager (npm, yarn, pnpm, bun)')
@@ -14,8 +14,8 @@ export async function createApp() {
     .option('--no-template', 'Do not use external templates')
     .option('--stylin-nutin', '(Default) Use built-in SCSS utility classes & mixins')
     .option('--no-stylin-nutin', 'Do not use built-in SCSS utility')
-    .option('--i18n', 'Use i18n & json-based content')
-    .option('--no-i18n', '(Default) Do not use i18n & json-based content')
+    .option('--i18n', '(Default) Use i18n & json-based content')
+    .option('--no-i18n', 'Do not use i18n & json-based content')
     .option('--testin-nutin', '(Default) Use testin-nutin toolkit')
     .option('--no-testin-nutin', 'Do not use testin-nutin toolkit')
     .option('--transition', 'Use animated view transitions\nNote: May interfere with CSS `position: fixed`, `z-index`...')

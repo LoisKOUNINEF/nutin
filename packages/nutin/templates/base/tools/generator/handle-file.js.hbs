@@ -1,8 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { print } from '../utils/index.js';
+import { print{{#if i18n}}, LANGUAGES{{/if}} } from '../utils/index.js';
 {{#if i18n}}
-import { LANGUAGES } from '../../src/app/languages.js';
 import { jsonTemplate } from './templates/index.js';
 {{/if}}
 

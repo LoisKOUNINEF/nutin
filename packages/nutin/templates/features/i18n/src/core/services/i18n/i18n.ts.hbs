@@ -1,4 +1,4 @@
-import { DEFAULT_LANGUAGE, LANGUAGES, Language, Translations } from '../../../app/languages.js';
+import { DEFAULT_LANGUAGE, LANGUAGES, Language, Translations } from './languages.js';
 import { Service } from '../../index.js';
 
 export class I18n extends Service<I18n> {
@@ -87,6 +87,14 @@ export class I18n extends Service<I18n> {
 
   public get currentLanguage(): Language {
     return this._currentLanguage;
+  }
+
+  public get defaultLanguage(): Language {
+    return this._DEFAULT_LANGUAGE;
+  }
+
+  public get languages(): Language[] {
+    return this._LANGUAGES;
   }
 
   public async initTranslations(): Promise<void> {

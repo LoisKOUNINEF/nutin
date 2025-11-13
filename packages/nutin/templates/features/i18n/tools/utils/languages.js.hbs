@@ -1,0 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
+const langs = fs.readFileSync(path.join(process.cwd(), 'config', 'languages.json'));
+export const LANGUAGES = langs.languages;
+export const DEFAULT_LANGUAGE = langs.defaultLanguage;

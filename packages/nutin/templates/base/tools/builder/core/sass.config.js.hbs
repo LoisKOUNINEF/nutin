@@ -1,7 +1,7 @@
 import * as sass from 'sass';
 import * as fs from 'fs';
 import path from 'path';
-import { print } from '../../utils/index.js';
+import { print, isVerbose } from '../../utils/index.js';
 import { PATHS } from './paths.js';
 
 const stylesInput = path.join(PATHS.source, 'styles');
@@ -20,5 +20,5 @@ sass.compileAsync(path.join(stylesInput, 'main.scss'), {
   style: 'compressed'
 }).then(result => {
   fs.writeFileSync(stylesOutput, result.css);
-  print.info('Global styles compiled.');
+  if (isVerbose) print.boldInfo('Global styles compiled.\n');
 });

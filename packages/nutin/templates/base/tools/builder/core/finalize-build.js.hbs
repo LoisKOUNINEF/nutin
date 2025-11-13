@@ -1,4 +1,4 @@
-import { print, isProd } from "../../utils/index.js";
+import { print, isProd, isVerbose } from "../../utils/index.js";
 import fs from 'fs';
 import path from 'path';
 import { PATHS } from "./paths.js";
@@ -18,7 +18,7 @@ function replaceDir(src, dest) {
 function finalizeBuild() {
   if (isProd) removeFoldersAfterBundle();
   replaceDir(PATHS.temp, PATHS.build);
-  print.info('Build finalized.');
+  if (isVerbose) print.boldInfo('Build finalized.\n');
 }
 
 finalizeBuild();

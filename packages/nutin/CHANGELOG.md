@@ -29,7 +29,7 @@ type CatalogItemConfig<T = any> =
 
 ## V1.2.0
 
-- Fixed `Cannot GET '/'` ponctual issue on changes with `npm run dev` command. Added middleware to reload nested routes.
+- Fixed `npm run dev` command. Added middleware to reload nested routes.
 
 - Improved `data-optional` tag:
   > Can now specify which attribute to check with `data-optional="attrName"` (`src`, `href`, ...)                           
@@ -47,8 +47,8 @@ type CatalogItemConfig<T = any> =
 
 - Improved builder
 
-  Implemented esbuild.                                 
-  Added flags `--bundle` (for production-ready build - equivalent to `npm run build:prod`) and `--log` (verbose output).                                 
+  Implemented `esbuild` & `html-minifier-terser`.                                 
+  Added flags `--bundle` (for production-ready build. *`npm run build --bundle` is equivalent to `npm run build:prod`)* and `--log` (verbose output). **Doesn't work with yarn or bun**.                                
   Commands: `npm run build`, `npm run build:prod`,  `npm run serve:only`, `npm run serve`, `npm run dev`.                            
 
   *Note: `--prod` or `--production` will set NODE_ENV to production, and have the same effect as `--bundle`.* `const isProd = process.env.npm_config_bundle || process.env.NODE_ENV === 'production';`

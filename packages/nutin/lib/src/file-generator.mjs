@@ -158,6 +158,18 @@ export class ProjectGenerator {
   async generateJsonFiles(projectPath, answers) {
     await generatePackageJson(projectPath, answers);
     await generateTsconfigJson(projectPath, answers);
+    if (answers.i18n) this.generateConfigFiles(projectPath);
+  }
+
+  async generateConfigFiles(projectPath) {
+    const configPath = path.join(projectPath, 'config');
+    await fs.ensureDir(configPath);
+    const languages = {
+      "languages": ["en"],
+      "defaultLanguage": "en"
+    };
+
+    await fs.writeJSON(path.join(configPath, 'languages.json'), languages, { spaces: 2 });
   }
 
   async runPostSetupTasks(projectPath, answers) {
@@ -173,7 +185,7 @@ export class ProjectGenerator {
     print.section('\n⚙️ Running setup scripts...');
     
     try {
-      const setupScriptsTemplate = path.join(__dirname, '../../templates/scripts');
+      const setupScriptsTemplate = path.join(__dirname, '..', '..', 'templates', 'scripts');
       
       if (await fs.pathExists(setupScriptsTemplate)) {
         const scriptsDir = path.join(projectPath, 'scripts');
