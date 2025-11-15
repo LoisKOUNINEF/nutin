@@ -4,6 +4,8 @@ import { SidebarComponent, SectionComponent } from '../../components/index.js';
 import { normalizeString } from '../../helpers/index.js';
 
 export abstract class TopicView extends ResourceView {
+  protected docsLinks: string | undefined;
+
   private getTopicConfig(configs: ComponentConfig[]): ComponentConfig[] {
     const topicName = normalizeString(this.getRouteParam('topic') || '');
     const topic = this.sections.find((topic) => normalizeString(topic.name) === topicName);

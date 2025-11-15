@@ -1,6 +1,6 @@
 import { normalizeString } from '../../helpers/index.js';
-import { AppEventBus, BaseButton, Component, ComponentConfig } from '../../../core/index.js';
-import { ButtonComponent } from '../index.js';
+import { AppEventBus, BaseButton, Component, ComponentConfig, IAnchorConfig } from '../../../core/index.js';
+import { AnchorComponent, ButtonComponent } from '../index.js';
 
 interface ISidebarConfig {
   sections: ISection[];
@@ -19,40 +19,38 @@ export class SidebarComponent extends Component {
     this._viewName = config.viewName;
   }
 
-  private nestSections(section: ISection): string {
-    const btnClassPadding = 'nest-sections';
-    const match = section.id.toString().match(/\d+(?:\.\d+)+/);
-
-    if (match) {
-      return btnClassPadding;
-/*
-// To handle deeply nested sections with 'styles' BaseButton property
-
-  const dotCount = (match[0].match(/\./g) || []).length;
-  return `padding: ${dotCount}rem;`; 
-*/ 
-    }
-
-    return '';
-  }
-
   private createSidebarButtons(): BaseButton[] {
     const btnClass = 'c-block-btn u-bg-inherit u-marg-y-small u-marg-x-small u-rounded';
 
     return this._sections.map((section) => ({
       textContent: `${section.id}- ${section.name}`, 
       callback:  () => this.navigateToTopic(section.name), 
-      className: this.nestSections(section) + ' ' + btnClass
+      className: btnClass
     }));
   }
 
+  private anchorToRepoDocs(): ComponentConfig {
+    const anchorConfig: IAnchorConfig = {
+        href: `https://github.com/LoisKOUNINEF/nutin/tree/main/docs`,
+        i18nKey: 'sidebar.link-to-docs',
+        target: 'blank',
+        className: 'u-padd-x-medium u-italic'
+      }
+    return  {
+      selector: 'anchor',
+      factory: (el) => new AnchorComponent(el, anchorConfig)
+    };
+  }
+
   public childConfigs(): ComponentConfig[] {
-    return this.catalogConfig({
+    const catalogConfigs = this.catalogConfig({
       array: this.createSidebarButtons(),
       elementName: `${this._viewName}-sidebar-element`,
       selector: 'resource-sidebar',
       component: ButtonComponent,
     });
+
+    return [ ...catalogConfigs, this.anchorToRepoDocs() ]
   }
 
   private navigateToTopic(name: ISection['name']) {

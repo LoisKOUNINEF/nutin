@@ -79,20 +79,20 @@ const englishBuilt1 = {
   id: 1,
   snippets: [
     {
-      before: 'Snippet before 12',
-      after: 'Snippet after 12',
-      id: 2,
-      sectionId: 1,
-      content: 'class Snippet12 {}',
-      type: 'ts'
-    },
-    {
       before: 'Snippet before 11',
       after: 'Snippet after 11',
       id: 1,
       sectionId: 1,
       content: 'npm run test',
       type: 'none'
+    },
+    {
+      before: 'Snippet before 12',
+      after: 'Snippet after 12',
+      id: 2,
+      sectionId: 1,
+      content: 'class Snippet12 {}',
+      type: 'ts'
     }
   ]
 }
@@ -119,20 +119,20 @@ const frenchBuilt1 = {
   id: 1,
   snippets: [
     {
-      before: 'Snippet avant 12',
-      after: 'Snippet après 12',
-      id: 2,
-      sectionId: 1,
-      content: 'class Snippet12 {}',
-      type: 'ts'
-    },
-    {
       before: 'Snippet avant 11',
       after: 'Snippet après 11',
       id: 1,
       sectionId: 1,
       content: 'npm run test',
       type: 'none'
+    },
+    {
+      before: 'Snippet avant 12',
+      after: 'Snippet après 12',
+      id: 2,
+      sectionId: 1,
+      content: 'class Snippet12 {}',
+      type: 'ts'
     }
   ]
 }
@@ -158,11 +158,11 @@ describe('BuildSectionHelper', () => {
 		const spy = spyOn(BuildSectionHelper, 'buildSection');
 		const built1 = BuildSectionHelper.buildSection(section1, snippets1);
 		expect(spy).toHaveBeenCalledWith(section1, snippets1);
-		expect(JSON.stringify(built1)).toBe(JSON.stringify(englishBuilt1));
+		expect(JSON.stringify(built1)).toEqual(JSON.stringify(englishBuilt1));
 
 		const built2 = BuildSectionHelper.buildSection(section2, snippets2);
 		expect(spy).toHaveBeenCalledWith(section2, snippets2);
-		expect(JSON.stringify(built2)).toBe(JSON.stringify(englishBuilt2));
+		expect(JSON.stringify(built2)).toEqual(JSON.stringify(englishBuilt2));
 	});
 	it('should use current language to build a translated section with its translated snippets', () => {
 		BuildSectionHelper['lang'] = 'fr';

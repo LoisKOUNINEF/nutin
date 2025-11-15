@@ -1,0 +1,12 @@
+{
+	"id": 1,
+	"sectionId": 4,
+	"content": "# -t flag adds a tag to the image\ndocker build -t my-tag -f tools/deployment/Dockerfile .\n# -p flag is for port LOCALHOST_PORT:EXPOSED_PORT\ndocker run -p 9090:9090 my-tag:latest",
+	"type": "none",
+	"en": {
+		"title": "Commands"
+	},
+	"fr": {
+		"title": "Commandes"
+	}
+}

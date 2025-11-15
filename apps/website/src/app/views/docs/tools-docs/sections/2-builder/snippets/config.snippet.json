@@ -1,0 +1,12 @@
+{
+	"id": 2,
+	"sectionId": 2,
+	"content": "export default {\n\tesbuild: {}, // esbuild config\n\tverbose: false, // verbose output. true is equivalent to running build commands with --log flag.\n}",
+	"type": "ts",
+	"en": {
+		"title": "Config file"
+	},
+	"fr": {
+		"title": "Fichier de configuration"
+	}
+}

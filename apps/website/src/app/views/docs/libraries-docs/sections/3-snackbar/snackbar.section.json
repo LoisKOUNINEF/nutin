@@ -1,10 +1,10 @@
 { "id": 3,
 	"en": {
 		"name": "Snackbar",
-		"content": ""
+		"content": "Simple queue: subsequent notify() calls enqueue messages; only one shows at a time.\n\t• Each snackbar is appended to the DOM and removed after duration (defaults to 3000 ms).\n\t• If actionText and onAction are provided, an action button is rendered and wired."
 	},
 	"fr":	{
 		"name": "Snackbar",
-		"content": ""
+		"content": "Queue simple: les appels successifs de notify() ajoutent des messages à la queue; un seul est visible à la fois.\n\t• Chaque snackbar est ajoutée au DOM et retirée après la durée (défaut: 3000ms).\n\t• Si actionText et onAction sont fournis, un boutton d'action est rendu et lié."
 	}
 }

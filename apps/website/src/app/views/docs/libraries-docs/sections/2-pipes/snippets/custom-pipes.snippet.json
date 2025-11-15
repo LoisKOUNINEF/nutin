@@ -4,13 +4,9 @@
 	"content": "// in libs/pipes/pipes.ts\nAppPipeRegistry.register('pipeName', (value) =&gt; {\n\t// do stuff\n\treturn value;\n});",
 	"type": "ts",
 	"en": {
-		"title": "Register custom Pipes",
-		"before": "",
-		"after": ""
+		"title": "Register custom Pipes"
 	},
 	"fr": {
-		"title": "Register custom Pipes",
-		"before": "",
-		"after": ""
+		"title": "Register custom Pipes"
 	}
 }

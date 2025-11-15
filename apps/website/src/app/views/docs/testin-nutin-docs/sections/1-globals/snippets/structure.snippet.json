@@ -4,13 +4,9 @@
 	"content": "describe = (name, fn) =&gt; {}\nit = (name, fn) =&gt; {}",
 	"type": "ts",
 	"en": {
-		"title": "Structure",
-		"before": "",
-		"after": ""
+		"title": "Structure"
 	},
 	"fr": {
-		"title": "Structure",
-		"before": "",
-		"after": ""
+		"title": "Structure"
 	}
 }

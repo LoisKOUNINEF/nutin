@@ -1,0 +1,10 @@
+{ "id": 3,
+	"en": {
+		"name": "Development",
+		"content": "The App is available on localhost:9090."
+	},
+	"fr":	{
+		"name": "Développement",
+		"content": "L'application est disponible à localhost:9090."
+	}
+}

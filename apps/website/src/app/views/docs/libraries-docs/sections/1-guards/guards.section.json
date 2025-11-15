@@ -1,10 +1,10 @@
 { "id": 1,
 	"en": {
 		"name": "Guards",
-		"content": ""
+		"content": "Each guard returns a RouteGuard usable by the router. Guards return a boolean value to allow / block navigation, or a path to redirect to if navigation was blocked.\n\t• Guards.custom : build custom guard from a predicate function; predicate can be sync or async and may return true or redirectPath.\n\t• Guards.requireAuth : simple example guard. Checks localStorage.getItem('user_token') and redirects to `/login` by default if missing.\n\t• You can also register guards directly in libs/guards."
 	},
 	"fr":	{
 		"name": "Gardes",
-		"content": ""
+		"content": "Chaque garde retourne un RouteGuard utilisable par le router. Les gardes retournent un booléen pour autoriser / bloquer la navigation, ou un chemin vers lequel rediriger si la navigation a été bloquée.\n\t• Guards.custom : ajouter un garde avec une fontion (sync ou async) qui retourne un booléen ou un chemin vers lequel rediriger.\n\t• Guards.requireAuth : exemple simple de garde. Vérifie que user_token existe dans le LocalStorage, et redirige vers /login dans le cas contraire.\n\t• Vous pouvez ajouter des gardes directement dans libs/guards."
 	}
 }

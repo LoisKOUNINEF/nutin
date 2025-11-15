@@ -4,13 +4,9 @@
 	"content": "// styles/base/_variables.scss\n// snackbar colours\n$snack-success: rgb(76 175 80);\n$snack-error: rgb(244 67 54);\n$snack-info: rgb(33 150 243);\n$snack-default: rgb(153 153 153);\n\n// styles/core/_libs.scss\n.app-snackbar {\n\tposition: fixed;\n\tleft: 50%;\n\ttransform: translateX(-50%);\n\tbackground: $snack-default;\n\tcolor: white;\n\tpadding: 0.75rem 1.5rem;\n\tborder-radius: 0.5rem;\n\tbox-shadow: 0 2px 6px rgba(0,0,0,0.3);\n\tdisplay: flex;\n\tgap: 1rem;\n\talign-items: center;\n\tanimation: fade-in 0.3s ease;\n}\n\n.app-snackbar--bottom { bottom: 1rem; }\n.app-snackbar--top { top: 1rem; }\n\n.app-snackbar--success { background: $snack-success; }\n.app-snackbar--error { background: $snack-error; }\n.app-snackbar--info { background: $snack-info; }\n\n.app-snackbar button {\n\tbackground: transparent;\n\tborder: none;\n\tcolor: #fff;\n\tfont-weight: bold;\n\tcursor: pointer;\n}\n\n@keyframes fade-in {\n\tfrom { opacity: 0; transform: translateX(-50%) translateY(10px); }\n\tto { opacity: 1; transform: translateX(-50%) translateY(0); }\n}",
 	"type": "scss",
 	"en": {
-		"title": "Default style",
-		"before": "",
-		"after": ""
+		"title": "Default style"
 	},
 	"fr": {
-		"title": "Style par défaut",
-		"before": "",
-		"after": ""
+		"title": "Style par défaut"
 	}
 }

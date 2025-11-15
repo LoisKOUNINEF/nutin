@@ -1,10 +1,10 @@
 { "id": 4,
 	"en": {
 		"name": "Popover",
-		"content": ""
+		"content": "PopoverView extends the core View class and is intended to be used as a simple modal-like popover.\n\t• It creates an overlay appended to DOM and inserts a .popover-wrapper element containing your template plus optionally rendered action buttons.\n\t• Clicking outside the wrapper (on the overlay) will close the popover.\n\t• Each button's callback is wrapped so the popover automatically destroy() after the callback runs.\n\t• onClose callback is called when the popover is destroyed."
 	},
 	"fr":	{
 		"name": "Popover",
-		"content": ""
+		"content": "PopoverView étend la classe View et est prévue pour être utilisée comme un simple modal.\n\t• Crée un overlay et insère un élément .popover-wrapper qui contient le template et les boutons d'action optionnels.\n\t• Un click sur l'overlay ferme le popover.\n\t• Le callback onClose est appelé quand le popover est détruit."
 	}
 }

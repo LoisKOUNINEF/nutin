@@ -4,13 +4,9 @@
 	"content": "const Guards = {\n\t// register guards directly\n\trequireAuth: (redirectTo: string = '/login'): RouteGuard =&gt; {\n\t\treturn () =&gt; {\n\t\t\tconst isAuthenticated = !!localStorage.getItem('user_token');\n\t\t\treturn isAuthenticated || redirectTo;\n\t\t};\n\t},\n\n\t// custom guards (without registration)\n\tcustom: (checkFn: () =&gt; boolean | string | Promise&lt;boolean | string&gt;, redirectTo?: string): RouteGuard =&gt; {\n\t\treturn checkFn || redirectTo;\n\t},\n};",
 	"type": "ts",
 	"en": {
-		"title": "Guards library",
-		"before": "",
-		"after": ""
+		"title": "Guards library"
 	},
 	"fr": {
-		"title": "Bibliothèque Guards",
-		"before": "",
-		"after": ""
+		"title": "Bibliothèque Guards"
 	}
 }

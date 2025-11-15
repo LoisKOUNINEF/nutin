@@ -1,1 +1,3 @@
-{ "default": "ResourceSidebar works !"}
+{ 
+	"link-to-docs": "Browse docs on repository."
+}

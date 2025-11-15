@@ -28,13 +28,14 @@ export class SectionComponent extends Component {
     this._catalogTocHref = config.catalogTocHref;
   }
 
-  private anchorToTop(): ComponentConfig {
+  private anchor(): ComponentConfig {
     const anchorConfig: IAnchorConfig = {
-      href: ('#' + this._catalogTocHref) || '',
-      i18nKey: 'section.back-to-toc'
-    };
+      href: `#${this._catalogTocHref}`,
+      i18nKey: 'section.back-to-toc', 
+    }
+
     return  {
-      selector: 'anchor-to-top',
+      selector: 'anchor',
       factory: (el) => new AnchorComponent(el, anchorConfig)
     };
   }
@@ -48,7 +49,7 @@ export class SectionComponent extends Component {
     });
 
     if (this._catalogTocHref) {
-      return [ this.anchorToTop(), ...catalogConfigs ];
+      return [ this.anchor(), ...catalogConfigs ];
     }
 
     return catalogConfigs;

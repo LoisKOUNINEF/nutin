@@ -1,0 +1,12 @@
+{
+	"id": 4,
+	"sectionId": 1,
+	"content": "global.spyOn = (obj, methodName);\n\nrestore()\nget calls()\nget callCount()\nget lastCall()\nandCallFake(fn)\nandReturn(value)",
+	"type": "ts",
+	"en": {
+		"title": "SpyOn"
+	},
+	"fr": {
+		"title": "SpyOn"
+	}
+}

@@ -4,13 +4,9 @@
 	"content": "type StoreState = Record&lt;string, any&gt;;\n\n// set value and calls AppEventBus.emit(`store:${key}`, value)\npublic set&lt;T = any&gt;(key: string, value: T): void;\n// get value\npublic get&lt;T = any&gt;(key: string): T | undefined;\n// calls AppEventBus.subscribe(`store:${key}`, callback)\npublic subscribe&lt;T = any&gt;(key: string, callback: (value: T) =&gt; void): void;\n// clear store state\npublic clear(): void;\n// calls AppEventBus.off(`store:${key}`, callback)\npublic unsubscribe&lt;T = any&gt;(key: string, callback: (value: T) =&gt; void): void;",
 	"type": "ts",
 	"en": {
-		"title": "Store",
-		"before": "",
-		"after": ""
+		"title": "Store"
 	},
 	"fr": {
-		"title": "Store",
-		"before": "",
-		"after": ""
+		"title": "Store"
 	}
 }

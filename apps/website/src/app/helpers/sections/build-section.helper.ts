@@ -1,4 +1,5 @@
 import { I18nService } from "../../../core/index.js";
+import { sortById } from "../sort/sort-by-id.helper.js";
 
 type ILocalizedSectionWithSnippets = {
   section: LocalizedSection,
@@ -31,8 +32,8 @@ export class BuildSectionHelper {
   }
 
   private static processSnippets(localizedSnippets: LocalizedSnippet[]): ISnippet[] {
-    return localizedSnippets.map(snippet => 
-      this.translateLocalized<ISnippet>(snippet, ['sectionId', 'content', 'type'])
+    return sortById(localizedSnippets.map(snippet => 
+      this.translateLocalized<ISnippet>(snippet, ['sectionId', 'content', 'type']))
     );
   }
 

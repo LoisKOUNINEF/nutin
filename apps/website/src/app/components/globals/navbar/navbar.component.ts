@@ -9,7 +9,7 @@ export class NavbarComponent extends Component<HTMLHeadingElement> {
     'stylin-nutin',
     'testin-nutin',
     'core',
-    'tools',
+    'tools'
   ] as const;
 
   constructor(mountTarget: HTMLElement) {

@@ -101,15 +101,23 @@ Displays the selected section on the right, using View class getRouteParam metho
 Used in ResourceView to apply Prism highlighting.                      
 Folder also contains the prism.js code to highlight Javascript, TypeScript, SASS and HTML.
 
-### Sections
+### BuildSection
 
-- Sections :
-Uses navigator language to translate a section's name, content and notes.                                 
-Takes a `LocalizedSection` argument and a `ISnippet` array argument, and returns an `ISection` object.
+```typescript
+buildSection(
+    localizedSection: LocalizedSection,
+    localizedSnippets: LocalizedSnippet[]
+  ): ISection
 
-- Snippets :
-Uses navigator language to translate an array of `ISnippet` objects before and after properties.                                 
-Takes a `LocalizedSnippet` array argument, and returns an `ISnippet` array sorted by id.
+// build multiple sections
+buildSectionBatch(
+    localizedSections: ILocalizedSectionWithSnippets[]
+  ): ISection[]
+type ILocalizedSectionWithSnippets = {
+  section: LocalizedSection,
+  snippets: LocalizedSnippet[]
+}
+```
 
 ### Sort
 

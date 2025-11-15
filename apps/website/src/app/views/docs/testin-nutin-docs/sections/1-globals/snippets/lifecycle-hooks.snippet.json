@@ -1,16 +1,12 @@
 {
 	"id": 2,
 	"sectionId": 1,
-	"content": "spyOn = (obj, methodName) =&gt; {}\n\nbeforeAll = (fn) =&gt; {}\nbeforeEach = (fn) =&gt; {}\nafterAll = (fn) =&gt; {}\nafterEach = (fn) =&gt; {}",
+	"content": "beforeAll = (fn) =&gt; {}\nbeforeEach = (fn) =&gt; {}\nafterAll = (fn) =&gt; {}\nafterEach = (fn) =&gt; {}",
 	"type": "ts",
 	"en": {
-		"title": "Lifecycle hooks",
-		"before": "",
-		"after": ""
+		"title": "Lifecycle hooks"
 	},
 	"fr": {
-		"title": "Lifecycle hooks",
-		"before": "",
-		"after": ""
+		"title": "Lifecycle hooks"
 	}
 }

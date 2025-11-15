@@ -1,0 +1,10 @@
+{ "id": 2,
+	"en": {
+		"name": "Builder",
+		"content": "Build operations are made in dist-build, a temporary build folder.\n\nBuild flow :\n\t• Copy files.\n\t• Development environment : Run TypeScript compiler.\n\t• Minify HTML content (with external templates feature enabled : Minify html content then merge it into scripts).\n\t• With i18n feature enabled : Combine locales into a single file.\n\t• Compile styles (sass).\n\t• Add the main script tag in index.html and validate tags (#app, stylesheet ref).\n\t• Production environment : Run esbuild\n\t• Renames dist-build to dist (final build output). Production environment : Remove unused (bundled) folders."
+	},
+	"fr":	{
+		"name": "Builder",
+		"content": "Les opérations du builder sont effectuées dans dist-build, un dossier temporaire.\n\nBuild flow :\n\t• Copie les fichiers.\n\t• Environnement de développement : Exécute le compilateur TypeScript.\n\t• Minifie le contenu HTML (avec les templates externes : Minifie le contenu html puis le combine aux scripts).\n\t• Avec la fonctionnalité i18n : Combine les locales dans un fichier unique.\n\t• Compile les styles (sass).\n\t• Ajoute le tag du script principal dans index.html et valide les tags (#app, stylesheet ref).\n\t• Environnement de production : Exécute esbuild\n\t• Renomme dist-build en dist (output final). Environnement de production : Supprime les dossiers inutiles (bundled)."
+	}
+}

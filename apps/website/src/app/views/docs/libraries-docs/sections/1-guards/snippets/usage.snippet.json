@@ -4,13 +4,9 @@
 	"content": "// in app/routes.ts\n'/guarded-route': { view: () =&gt; new GuardedView(), guards: [] }",
 	"type": "ts",
 	"en": {
-		"title": "Usage",
-		"before": "",
-		"after": ""
+		"title": "Usage"
 	},
 	"fr": {
-		"title": "Utilisation",
-		"before": "",
-		"after": ""
+		"title": "Utilisation"
 	}
 }

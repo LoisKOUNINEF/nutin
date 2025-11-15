@@ -4,13 +4,9 @@
 	"content": "// from src/app/languages.ts\nexport const LANGUAGES = ['en'] as const; // add languages here\nexport const DEFAULT_LANGUAGE: Language = 'en' as const;\nexport type Language = typeof LANGUAGES[number];\nexport type Translations = Record&lt;string, any&gt;;\n\n// based on browser language. Defaults to DEFAULT_LANGUAGE.\n// will look for language key in components and views 'locales' folder (ex: locales/en.json)\npublic async loadTranslations(lang: Language): Promise&lt;void&gt;;\npublic translate(key: string, params?: Record&lt;string, string&gt;): string;\npublic get currentLanguage(): Language;\npublic async initTranslations(): Promise&lt;void&gt;;\npublic resetTranslations(): void;",
 	"type": "ts",
 	"en": {
-		"title": "i18n",
-		"before": "",
-		"after": ""
+		"title": "i18n"
 	},
 	"fr": {
-		"title": "i18n",
-		"before": "",
-		"after": ""
+		"title": "i18n"
 	}
 }

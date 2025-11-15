@@ -5,12 +5,10 @@
 	"type": "ts",
 	"en": {
 		"title": "PipeRegistry",
-		"before": "",
-		"after": "Add custom pipes in Pipes library or with AppPipeRegistry.register()."
+		"after": "Add custom pipes in Pipes library with AppPipeRegistry.register()."
 	},
 	"fr": {
 		"title": "PipeRegistry",
-		"before": "",
-		"after": "Ajoutez des pipes dans la bibliothèque Pipes ou utilisez AppPipeRegistry.register()."
+		"after": "Ajoutez des pipes dans la bibliothèque Pipes avec AppPipeRegistry.register()."
 	}
 }
