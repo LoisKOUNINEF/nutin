@@ -3,7 +3,6 @@
 - [Classes](#classes)
 - [Mixins](#mixins)
 
-
 ## Classes
 
 ```scss

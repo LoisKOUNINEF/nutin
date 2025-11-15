@@ -10,10 +10,8 @@ Core services (subclasses of `Service`).
 * **[store](#4-store)** — tied to AppEventBus. Consumable objects.
 * **[pipe-registry](#5-pipe-registry)** — register & use pipes (formatters/transformers)
 
-
 ## 1. Router
 
-- **IMPORTANT : Routes' URL MUST match view's `viewName`.**                        
 - Exports: `Route`, `AppRouter` (singleton). Use the Router to declare routes (navigation is handled by `AppEventBus.emit('navigate')`).
 
 ### Routes — minimal example
@@ -30,13 +28,11 @@ const router = new Router({ routes, mountPoint: '#app' });
 router.start();
 ```
 
-
 ### Programmatic navigation (using `AppEventBus`)
 
 ```ts
 AppEventBus.emit('navigate', `/tasks/${this._task.id}`);
 ```
-
 
 ## 2. HTTP (HttpClient)
 
@@ -51,7 +47,6 @@ import { HttpClient } from 'libs/http';
 const api = new HttpClient({ baseUrl: '/api' });
 api.get('/users').then(res => console.log(res));
 ```
-
 
 ## 3. Event Bus
 
@@ -88,7 +83,6 @@ AppEventBus.off('view-mount', handlerRef);
 AppEventBus.subscribe('view-mount', fn())
 ```
 
-
 ## 4. Store
 
 Can be imported with `import { AppStore } from '../core/index.js';`
@@ -99,7 +93,6 @@ subscribe<T>(key: string, callback: (value: T));
 unsubscribe<T>(key: string, callback: (value: T));
 clear();
 ```
-
 
 ## 5. Pipe Registry
 
@@ -119,7 +112,6 @@ AppPipeRegistry.register('uppercase', v => String(v).toUpperCase());
 ```html
 <span data-pipe="currency:'$' | uppercase">0</span>
 ```
-
 
 ## 6. Where to look in code
 

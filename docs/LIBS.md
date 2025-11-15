@@ -14,7 +14,6 @@ You can import everything from the package root:
 import { notify, PopoverView, Guards, registerPipes } from '../libs/index.ts';
 ```
 
-
 # 1. Snackbar (notify)
 
 **File:** `libs/snackbar/snackbar.ts`
@@ -26,8 +25,8 @@ type NotifyOptions = {
   type?: 'info' | 'success' | 'error';
   position?: 'top' | 'bottom';
   duration?: number; // ms
-  actionText?: string;
-  onAction?: () => void;
+  actionText?: string; // button content
+  onAction?: () => void; // callback
 }
 
 export function notify(message: string, options?: NotifyOptions): void
@@ -57,7 +56,6 @@ notify('Failed to save', {
 Notes
 
 * CSS classes used: `app-snackbar`, `app-snackbar--{type}`, `app-snackbar--{position}` — style these in your app (`src/styles/core/_libs.scss`).
-
 
 # 2. PopoverView
 
@@ -115,7 +113,6 @@ Styling hooks
 
 * The overlay element and `.popover-wrapper` should be styled in your app CSS (`src/styles/core/_libs.scss`). If `view transition` feature was enabled on app setup, the implementation adds/removes a `show` class to animate entrance/exit — match transition duration if needed.
 
-
 # 3. Guards
 
 **File:** `libs/guards/guards.ts`
@@ -153,7 +150,6 @@ type RouteConfig = (() => View) | {
   guards: [requireAuth]
 }
 ```
-
 
 # 4. Pipes registration
 
@@ -194,8 +190,7 @@ Notes
 * Call `registerPipes()` during app bootstrap (before first render) to ensure pipes are available.
 * Can be extended with `AppPipeRegistry.register(name: string, fn: PipeFunction)`
 
-
-# 5. Re-exports
+# 5. Centralized exports (barrel file)
 
 `libs/index.ts` simply re-exports the modules:
 
@@ -207,7 +202,6 @@ export * from './pipes/pipes.js';
 ```
 
 So you can import from `'libs'` (depending on your bundler/tsconfig path mappings).
-
 
 # 6. Small recipes
 
@@ -234,7 +228,6 @@ Registered by default in main.ts `constructor`.
 import { registerPipes } from 'libs/pipes/pipes.js';
 registerPipes();
 ```
-
 
 # 7. Where to look in code
 

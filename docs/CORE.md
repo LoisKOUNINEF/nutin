@@ -41,7 +41,6 @@
 * `ChildrenHelper.addChildren` — instantiate child components found by `data-component`
 * `CatalogHelper.generateCatalog` — helper to render repeated components (list catalogs)
 
-
 ## 2. Component
 
 `Component` extends `BaseComponent` and adds common UI helpers:
@@ -88,7 +87,6 @@ export class AddTaskComponent extends Component {
   }
 }
 ```
-
 
 ## 3. View
 
@@ -174,13 +172,11 @@ export class Example extends Service<Example> {
 export const exampleService = Example.getInstance();
 ```
 
-
 ### Cleanup & testing hooks
 
 * `Service` provides `registerCleanup(fn)` so services can register teardown logic.
 * Services are disposed automatically on page unload (and can be manually cleaned in tests).
 * Test helpers exist (`testingReset`, `testingResetAll`) to clear instances during unit tests.
-
 
 ## 5. Event Token System
 
@@ -249,9 +245,7 @@ This example resolves @style:color → element’s CSS color.
 Use registerToken for one-off shortcuts (@foo)
 Use registerPrefix for repeatable patterns (@foo:bar)
 
-
 ## 6. Key helpers quick reference and examples
-
 
 ### PipeHelper
 
@@ -281,9 +275,11 @@ Example:
 ### ChildrenHelper & CatalogHelper
 
 * `ChildrenHelper` looks for `data-component="selector"` and instantiates child components using `ComponentConfig` produced by `childConfigs()`.
+
 * `CatalogHelper` helps render repeated component instances from arrays (useful for lists/grids). It generates `ComponentConfig[]` that the `BaseComponent` can consume. ***Use index access with `config.index`***.
 
 **Notes:** *Primitive data arrays (string, number, etc) needs to be accessed with `config.value`.*
+
 * `BaseComponent` subclasses inherit the `catalogConfig` method that generates `ComponentConfig[]`.
 
 Small catalog pattern:
@@ -296,7 +292,9 @@ this.catalogConfig({ array: users, elementName: 'user-item', component: UserItem
 ### SecurityHelper
 
 * Helpers for escaping/sanitising input and text to avoid injection when inserting text into the DOM.
+
 * Use `SecurityHelper.escapeHtml()` when you need to insert arbitrary strings into innerHTML or attributes.
+
 * Called by default by `TokenHelper` for all registered tokens for `input`, `textarea` and `contenteditable`.
 
 - **XSS Test Cases :**
@@ -357,8 +355,8 @@ export const TickerService = Ticker.getInstance();
 ### c) Testing notes
 
 * Services expose `testingReset()` / `testingResetAll()` helpers so tests can reset singletons between runs.
-* Components can be instantiated from HTML fixtures and `render()` called to exercise helpers.
 
+* Components can be instantiated from HTML fixtures and `render()` called to exercise helpers.
 
 ## 8. Where to look in code
 
@@ -367,3 +365,4 @@ export const TickerService = Ticker.getInstance();
 * `src/core/base-classes/view/` — view implementation
 * `src/core/base-classes/service/` — base Service + testing helpers
 * `src/core/base-classes/base-component/helpers/` — `event.helper.ts`, `token.helper.ts`, `pipe.helper.ts`, `i18n.helper.ts`, `children.helper.ts`, `catalog.helper.ts`, `security.helper.ts`.
+* `src/core/base-classes/component/helpers/` — `config.helper.ts`, `data-binding.helper.ts`

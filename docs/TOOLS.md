@@ -9,6 +9,9 @@
 ```bash
 npm run serve
 
+# without building
+npm run serve:only
+
 # live reload
 npm run dev
 ```
@@ -17,12 +20,14 @@ npm run dev
 
 ```bash
 npm run build:prod
+# or
+npm run build --bundle
 ```
 
 * Generate a component, view or service:
 
 ```bash
-# lowercase and dash-separated name
+# kebab-case name
 # supports nested path
 npm run generate ELEMENT ELEMENT_NAME
 
@@ -32,12 +37,17 @@ npm run generate view my-view
 npm run generate service my-service
 ```
 
-Runs generator: `npm run generate component widgets/my-widget` -> this creates `src/app/components/widgets/my-widget/my-widget.component.ts` (and `locales` fragments with i18n feature enabled).
+Runs generator: `npm run generate component widgets/my-widget` -> this creates: 
+- `src/app/components/widgets/my-widget/my-widget.component.ts`.
+- `locales` fragments with i18n feature enabled.
+- `src/app/components/widgets/my-widget/my-widget.component.html` with external templates feature enabled. 
+- optionally `styles/components/_my-widget.scss` with stylin-nutin feature enabled (forwarded by `styles/components/_index.scss`).
 
 * Run tests (testin-nutin toolkit):
 
 ```bash
 npm run test
+npm run test:rebuild
 npm run test:watch
 ```
 
@@ -48,7 +58,6 @@ npm run patch
 npm run minor
 npm run major
 ```
-
 
 ## Project layout
 
@@ -79,7 +88,6 @@ package.json
 tsconfig.json
 ```
 
-
 ## Builder
 
 ### Goals & features
@@ -101,9 +109,6 @@ tsconfig.json
 5. `./core/validate-html.js` — run lightweight checks over `public/index.html` (and/or `index.html` in `dist-build`) to ensure required tags exist.
 6. Prints `Build successful!` (unless it isn't).
 
-> **Note:** *If external template feature has been enabled on app creation*: `tools/watcher.js` is a small watcher which runs `npm run build` when files change (uses chokidar). It is separate from `builder.js`.
-
-
 ## Detailed notes on each core script
 
 ### `core/copy-static.js`
@@ -114,7 +119,7 @@ tsconfig.json
 * Uses: `tools/builder/variables/binary-extensions.js` (set of known binary extensions) and `tools/utils/get-files-recursive.js`.
 * Behavior :
 
-  * Creates `dist/src/` (or `dist-build/src/` with external templates feature) as the target.
+  * Creates `dist-build/src/` as the target.
   * Recursively traverses `src/` and copies files.
   * Copies JSON files in a way that preserves folder structure (there is an internal `copyJsonFiles` helper); used bt i18n feature.
   * Skips or handles binary files according to the `BINARY_EXTENSIONS` set.
@@ -122,12 +127,12 @@ tsconfig.json
 **What this means for you**
 
 * If you add new asset formats, update `binary-extensions.js`.
-* The script expects a `src/` tree and will place results into `dist/src/` (or `dist-build/src/` with external templates feature).
+* The script expects a `src/` tree and will place results into `dist-build/src/`.
 
 ### `core/build-i18n.js`
 
 * Present only if i18n feature has been enabled on app creation.
-* Purpose: merge many small locale JSON files scattered under `src/app` into unified locale files under `dist/src/locales/<lang>.json` (or `dist-build/src/locales/<lang>.json` with external templates feature).
+* Purpose: merge many small locale JSON files scattered under `src/app` into unified locale files under `dist-build/src/locales/<lang>.json`.
 * Behavior:
 
   * It uses `getFilesRecursive(sourceRoot, '.json')` to find JSON files.
@@ -147,7 +152,7 @@ tsconfig.json
 * Behavior:
 
   * The script operates on `dist-build/src/app` (constant `JS_DIR`). It looks for `.html` files and for JS files that contain the `__TEMPLATE_PLACEHOLDER__` token.
-  * For each matching HTML file it reads the HTML and writes a replacement into the corresponding JS module (writing the HTML string where the placeholder was found).
+  * For each matching HTML file it reads the HTML, minifies it, and writes a replacement into the corresponding JS module (writing the HTML string where the placeholder was found).
 * Important detail: the component & view generator templates create JS/TS files with the literal `__TEMPLATE_PLACEHOLDER__` in them (see `tools/generator/templates/component.template.js` and `view.template.js`) — this is the hook used by `merge-templates.js`.
 
 * Workflow expectation:
@@ -166,6 +171,16 @@ tsconfig.json
 
 * Purpose: run a few checks on HTML before finishing the build.
 * Behavior : it reads an `index.html` file and validates tags and errors out if expected nodes are missing.
+
+### `core/esbuild.js`
+
+Runs esbuild with config from `builder.config.js`.
+
+### `core/finalize-build.js`
+
+* If production build (esbuild) : removes unnecessary folders from `dist-build`.
+* Removes exisiting (if any) `dist` folder.
+* Renames `dist-build` to `dist`.
 
 ## Generator tool (scaffolding)
 
@@ -194,39 +209,4 @@ Files: `tools/generator/generator.js`, `tools/generator/handle-file.js`, `tools/
 
 * *If external templates feature has been enabled on app creation* : Generator-produced components and views intentionally include the `__TEMPLATE_PLACEHOLDER__` token. This is by design: the build step `merge-templates.js` uses this token to inject HTML templates into those files after the TypeScript -> JS transformation.
 * *If i18n feature has been enabled on app creation* : The generator will also create locale fragments when `generateJson` is invoked — but it relies on `LANGUAGES` exported from your project (the generator imports `../../src/app/languages.js`). If that file doesn't exist in your project, the generator will throw.
-
-## Feature combinations and differences
-
-Below are concrete differences and pitfalls depending on whether you enable/provide certain files or features in your project.
-
-### 1) External templates (HTML files)
-
-**Enabled (you provide `.html` alongside your TS sources)**
-
-* The generator leaves `__TEMPLATE_PLACEHOLDER__` in code; after build, `merge-templates.js` will pick up `.html` files and inject them into the JS modules.
-* Benefit: you can author templates as real `.html` files (easier to edit / syntax highlight) and keep logic in TypeScript.
-* Requirement: ensure that the template filenames and locations match the discovery rules used by `merge-templates.js` (the shipped script searches `dist-build/src/app` for `.html` files). Because some merging internals are abbreviated in the provided copy, I recommend verifying the exact name-matching rule (I can make it strict: e.g. `component-name.html` maps to `component-name.component.js` or similar).
-* Drawbacks : `npm run dev` will sometimes require you to manually reload the page on changes.
-
-**Disabled (no external `.html` files)**
-
-* If you prefer single-file components, even if external templates feature has been enabled on app creation, simply remove the .html file and write the HTML in `templateFn` / `template`.
-
-### 2) i18n
-
-* `build-i18n.js` will find these JSON files and merge them into `dist-build/src/locales/<locale>.json`.
-* `build-i18n.js` will merge JSONs as follows : 
-```
-FOLDER_NAME/locales/en.json
-will output in dist/src/locales/en.json : 
-{
-  "FOLDER_NAME": {
-    ...
-  }
-}
-```
-* The builder then removes the fragmented JSON files from `dist-build/src/app` so that only the final merged locale files exist in `dist-build/src/locales`.
-
-**Absent i18n feature disabled**
-
-* `build-i18n.js` will not be present in tools.
+* *If stylin-nutin feature has been enabled on app creation* : The component generator will ask for a `.scss` file creation in `styles/components`.
