@@ -5,16 +5,16 @@ FROM node:${NODE_VERSION} AS builder
 WORKDIR /usr/src/app
 COPY . .
 RUN npm ci && \
-    npm run build:prod
+    npm run -w tutorial build:prod
 
 FROM nginx:${NGINX_VERSION}
 
 RUN rm /etc/nginx/conf.d/default.conf
-COPY --from=builder /usr/src/app/tools/deployment/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /usr/src/app/tools/deployment/gzip.conf /etc/nginx/conf.d/gzip.conf
-COPY --from=builder /usr/src/app/dist/src /usr/share/nginx/html
+COPY --from=builder /usr/src/app/apps/tutorial/tools/deployment/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /usr/src/app/apps/tutorial/tools/deployment/gzip.conf /etc/nginx/conf.d/gzip.conf
+COPY --from=builder /usr/src/app/apps/tutorial/dist/src /usr/share/nginx/html
 
-EXPOSE 9090
+EXPOSE 9092
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:9090/health || exit 1
