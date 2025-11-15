@@ -1,7 +1,7 @@
 {
 	"id": 1,
 	"sectionId": 2,
-	"content": "// test.config.js\nexport default {\n// folders to scan for .test.js files\n\torigins: [],\n// verbose output\n\tverbose: false,\n}",
+	"content": "// test.config.js\nexport default {\n// folders to scan for .test.js files\n\torigins: [],\n// verbose output\n\tverbose: false,\n\tjsdomOptions: {}\n}",
 	"type": "ts",
 	"en": {
 		"title": "Config file"

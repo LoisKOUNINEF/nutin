@@ -1,18 +1,18 @@
 import fs from 'fs';
 import path from 'path';
 import { JSDOM } from 'jsdom';
-
+import { config } from '#root/testin-nutin.config.js';
 let currentDom = null;
 
-export function setupJsdom(htmlPath = 'dist/src/index.html', options = {}) {
+export function setupJsdom(htmlPath = 'dist/src/index.html') {
   const html = fs.readFileSync(path.resolve(process.cwd(), htmlPath), 'utf8');
 
   const {
-    runScripts = false,     // or true ("dangerously") if needed
-    resources = false,      // or true ("usable") if needed
-    freezeGlobals = false,
-    pretendToBeVisual = true,
-  } = options;
+    runScripts,
+    resources,
+    freezeGlobals,
+    pretendToBeVisual,
+  } = config.jsdomOptions;
 
   const dom = new JSDOM(html, {
     url: 'http://localhost',

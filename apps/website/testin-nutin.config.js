@@ -6,4 +6,10 @@ export default {
 		'testin-nutin/core/tests', // test globals
 	],
 	verbose: false,
+	jsdomOptions: {
+    runScripts: false,     // or true ("dangerously") if needed
+    resources: false,      // or true ("usable") if needed
+    freezeGlobals: false,
+    pretendToBeVisual: true,
+  }
 }

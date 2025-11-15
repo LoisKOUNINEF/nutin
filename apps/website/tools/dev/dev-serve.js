@@ -9,10 +9,10 @@ async function startDev() {
 
     await runCommand('npm', ['run', 'build']);
 
-    const serve = await runCommand('npm', ['run', 'serve:only']);
-    const watcher = await runCommand('node', ['tools/dev/watcher.js']);
-
-    print.boldSuccess('\nDev server and watcher running!\n');
+    const { serve, watcher } = await Promise.all([
+      runCommand('npm', ['run', 'serve:only']),
+      runCommand('node', ['tools/dev/watcher.js'])
+    ]);
 
     serve.on('close', (code) => {
       print.error(`live-server exited with code ${code}`);
@@ -26,7 +26,4 @@ async function startDev() {
   }
 }
 
-startDev().catch((err) => {
-  print.boldError(`Unexpected error: ${err.message}`);
-  exit(1);
-});
+startDev();
