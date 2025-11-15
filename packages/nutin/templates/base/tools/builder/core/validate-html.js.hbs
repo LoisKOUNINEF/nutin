@@ -1,5 +1,4 @@
 import { readFile, writeFile } from 'fs/promises';
-import { JSDOM } from 'jsdom';
 import { exit } from 'process';
 import { print, isProd, isVerbose } from '../../utils/index.js';
 import { PATHS } from './paths.js';
@@ -13,19 +12,21 @@ function errorExit(message) {
 async function addEntrypoint(htmlContent, filePath) {
   if (isVerbose) print.info('Adding script in HTML...');
 
-  const dom = new JSDOM(htmlContent);
-  const document = dom.window.document;
+  const scriptSrc = isProd ? "bundle.js" : "app/main.js";
+  const scriptTag = `<script type="module" src="/${scriptSrc}"></script>`;
 
-  const newScript = document.createElement("script");
-  newScript.type = "module";
-  newScript.src = isProd ? "/bundle.js" : "/app/main.js";
+  let modifiedHtml;
+  if (/<\/body>/i.test(htmlContent)) {
+    modifiedHtml = htmlContent.replace(/<\/body>/i, `${scriptTag}</body>`);
+  } else {
+    modifiedHtml = htmlContent + scriptTag;
+  }
 
-  document.body.appendChild(newScript);
-  const serialized = dom.serialize().replace(/>\s+</g, '><')
+  const minified = modifiedHtml.replace(/>\s+</g, '><');
 
-  writeFile(filePath, serialized, "utf8");
+  writeFile(filePath, minified, "utf8");
 
-  return htmlContent;
+  return modifiedHtml;
 }
 
 async function validateHtml() {
@@ -46,7 +47,11 @@ async function validateHtml() {
     errorExit('No stylesheet found in HTML');
   }
 
-  await addEntrypoint(htmlContent, filePath).catch(err => errorExit(err.message));
+  htmlContent = await addEntrypoint(htmlContent, filePath).catch(err => errorExit(err.message));
+
+  if (!/<script[^>]*type=["']module["']/.test(htmlContent)) {
+    errorExit('No module scripts found in HTML');
+  }
 
   if (isVerbose) print.boldInfo('HTML validation passed\n');
 }

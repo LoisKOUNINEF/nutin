@@ -36,7 +36,7 @@ export async function promptUser(initialName, cliOptions = {}) {
       stylinNutin: cliOptions.stylinNutin || true,
       template: cliOptions.template || true,
       i18n: cliOptions.i18n || true,
-      testinNutin: cliOptions.testinNutin || true,
+      testinNutin: cliOptions.testinNutin || false,
       transition: cliOptions.transitions || false
     };
   }
@@ -84,7 +84,7 @@ export async function promptUser(initialName, cliOptions = {}) {
       type: 'confirm',
       name: 'testinNutin',
       message: 'Use testin-nutin toolkit?',
-      default: true
+      default: false
     });
   }
 

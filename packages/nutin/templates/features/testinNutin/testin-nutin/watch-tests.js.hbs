@@ -14,7 +14,7 @@ watcher.on('change', (filePath) => {
   console.clear();
   print.boldInfo(`\n🔄 File changed: ${path.relative(process.cwd(), filePath)}\n`);
 
-  exec('node --experimental-modules test/runner.js', (err, stdout, stderr) => {
+  exec('node --experimental-modules testin-nutin/runner.js', (err, stdout, stderr) => {
     if (stdout) process.stdout.write(stdout);
     if (stderr) process.stderr.write(stderr);
   });

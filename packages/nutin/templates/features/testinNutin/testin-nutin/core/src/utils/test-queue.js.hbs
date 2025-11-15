@@ -34,9 +34,11 @@ export async function runQueuedTests() {
         previousSuiteAfterAll = test.afterAll;
       }
 
+      setupJsdom();
       if (test.beforeEach) await test.beforeEach();
       await test.testFn();
       if (test.afterEach) await test.afterEach();
+      teardownJsdom();
 
       passed++;
       results.push({ 
@@ -50,7 +52,7 @@ export async function runQueuedTests() {
         suiteName: test.suiteName, 
         status: 'failed', 
         name: test.testName, 
-        error: err.stack 
+        error: err.stack
       });
     }
   }

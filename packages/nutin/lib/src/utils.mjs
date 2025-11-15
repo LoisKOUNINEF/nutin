@@ -14,3 +14,5 @@ export function displaySuccessMessage(answers) {
   
   print.success('\nHappy coding! 🚀\n');
 }
+
+export const packageVersion = '1.2.1';

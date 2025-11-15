@@ -4,6 +4,9 @@ import { print{{#if i18n}}, LANGUAGES{{/if}} } from '../utils/index.js';
 {{#if i18n}}
 import { jsonTemplate } from './templates/index.js';
 {{/if}}
+{{#if stylinNutin}}
+import { scssTemplate } from './templates/index.js';
+{{/if}}
 
 export function generateFile({
   name,

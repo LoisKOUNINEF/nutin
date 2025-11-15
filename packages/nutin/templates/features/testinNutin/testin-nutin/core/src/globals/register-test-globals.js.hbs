@@ -1,5 +1,6 @@
 import { print, addTest } from '../../index.js';
-import config from '#root/test.config.js';
+import config from '#root/testin-nutin.config.js';
+import { setupJsdom, teardownJsdom, resetDom, flushPromises } from './jsdom-setup.js';
 import './assertion-lib.js';
 import './spyon.js';
 
@@ -43,4 +44,16 @@ export function registerTestGlobals() {
   global.afterEach = (fn) => {
     currentSuiteHooks.afterEach = fn;
   };
+
+  global.setupJsdom = setupJsdom;
+  global.teardownJsdom = teardownJsdom;
+  global.resetDom = resetDom;
+  global.flushPromises = flushPromises;
+
+  global.$ = (selector) => document.querySelector(selector);
+  global.$$ = (selector) => [...document.querySelectorAll(selector)];
+
+  global.click = (el) => el.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  global.type = (el, text) => { el.value = text; el.dispatchEvent(new window.InputEvent("input", { bubbles: true })); };
+
 }

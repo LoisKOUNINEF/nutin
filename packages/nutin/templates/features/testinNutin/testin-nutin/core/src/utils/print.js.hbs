@@ -1,4 +1,4 @@
-import config from '#root/test.config.js';
+import config from '#root/testin-nutin.config.js';
 
 export function printSummary(passed, failed, time) {
   const totalTime = time.toFixed(2);
@@ -22,7 +22,7 @@ export function printResults(results) {
       if (config.verbose ) console.log(`${chalk.green('✓')} ${chalk.cyan(`${result.suiteName}`)} - ${chalk.green(`${result.name}`)}`);
     } else {
       print.error(`✗ ${result.suiteName} - ${result.name}`);
-      if (config.verbose ) print.grayError(result.error);
+      print.grayError(result.error);
     }
   });
 }

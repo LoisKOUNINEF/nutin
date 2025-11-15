@@ -4,6 +4,8 @@
 Includes essential features out of the box, with zero runtime dependencies.                          
 *TypeScript / Javascript, SASS, HTML*
 
+- Required : Node >=18 **If using testin-nutin: Node >=20.19.0 (JSDOM requirement : `{ node: '^20.19.0 || ^22.12.0 || >=24.0.0' }`)**
+
 ## Install
 
 ```bash
@@ -29,7 +31,7 @@ nutin-new
 
 --no-template # Use inline templates
 --no-stylin-nutin # Do not use built-in SCSS utility
---no-testin-nutin # (Default) Do not use testin-nutin toolkit
+--testin-nutin # Use testin-nutin toolkit
 --no-i18n # Do not use i18n & json-based content
 --transition # Use animated view transitions. Note: May interfere with CSS `position: fixed`, `z-index`...
 
@@ -37,7 +39,7 @@ nutin-new
 --template # (Default) Use external templates
 --stylin-nutin # (Default) Use built-in SCSS utility classes & mixins
 --i18n # (Default) Use i18n & json-based content
---testin-nutin # (Default) Use testin-nutin toolkit
+--no-testin-nutin # (Default) Do not use testin-nutin toolkit
 --no-transition # (Default) Do not use animated view transitions
 
 # Help
