@@ -10,6 +10,9 @@ export class EventHelper {
     element.querySelectorAll('[data-event]').forEach(el => {
       const parts = el.getAttribute('data-event')!.split(':');
       const [eventName, handlerName, argsString] = parts;
+
+      if (!handlerName || !eventName) return;
+
       const handler = (component as any)[handlerName];
 
       if (typeof handler === 'function') {

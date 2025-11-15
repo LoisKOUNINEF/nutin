@@ -1,7 +1,7 @@
 import chokidar from 'chokidar';
 import { exec } from 'child_process';
 import path from 'path';
-import { print } from './utils/index.js'
+import { print } from '../utils/index.js'
 
 const watcher = chokidar.watch(['src'], {
   ignored: /(^|[/\\])\../,
@@ -9,7 +9,6 @@ const watcher = chokidar.watch(['src'], {
 });
 
 let isBuilding = false;
-
 let buildTimeout = null;
 
 watcher.on('change', (filePath) => {
@@ -25,20 +24,21 @@ watcher.on('change', (filePath) => {
     print.boldInfo(`\n🔄 File changed: ${path.relative(process.cwd(), filePath)}\n`);
     print.info('\nRebuilding...');
 
-    const command = filePath.includes('.scss') ? 'npm run build-static' : 'npm run build';
+    const command = 'npm run build';
     
     exec(command, (err, stdout, stderr) => {
       if (stdout) process.stdout.write(stdout);
       if (stderr) process.stderr.write(stderr);
-      
-      print.boldSuccess('\n✅ Build completed!');
-      print.boldHead('\nWaiting for changes...\n');
-      
+      if (err) {
+        print.error(`\n❌ Build failed: ${err.message}`);
+      } else {
+        print.boldHead('Watching for changes...');
+      }
       isBuilding = false;
     });
   }, 100);
 });
 
 watcher.on('ready', () => {
-  print.boldHead('\n👀 Watching for changes...\n');
+  print.boldHead('\nWatching for changes...\n');
 });

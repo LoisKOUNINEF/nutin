@@ -59,8 +59,9 @@ export class NavigationManager {
 
     const params: Record<string, string> = {};
     paramNames.forEach((name, i) => {
-      if (match[i + 1]) {
-        params[name] = match[i + 1];
+      const value = match[i + 1];
+      if (value) {
+        params[name] = value;
       }
     });
 

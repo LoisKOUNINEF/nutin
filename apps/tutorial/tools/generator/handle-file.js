@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { print } from '../utils/index.js';
+import { scssTemplate } from './templates/index.js';
 
 export function generateFile({
   name,
@@ -37,6 +38,27 @@ export function appendToIndex({ name, targetPath, suffix }) {
   try {
     fs.appendFileSync(indexFilePath, lineToAppend, 'utf8');
     print.info(`${suffix}s/index.ts updated.`);
+  } catch (err) {
+    print.error(`Error appending line: ${err}`);
+  }
+}
+
+export function generateStylesheet(name) {
+  const template = scssTemplate();
+  const componentsStylePath = path.join('src', 'styles', 'components');
+  const filePath = path.join(componentsStylePath, `_${name.kebab}.scss`);
+  const indexPath = path.join(componentsStylePath, `_index.scss`);
+
+  if (fs.existsSync(filePath)) {
+    print.boldError('A file with this name already exists');
+    process.exit(1);
+  }
+  fs.writeFileSync(filePath, template);
+
+  const lineToAppend = `@forward "${name.kebab}";\n`;
+
+  try {
+    fs.appendFileSync(indexPath, lineToAppend, 'utf8');
   } catch (err) {
     print.error(`Error appending line: ${err}`);
   }
