@@ -14,6 +14,7 @@ Monorepo for the nutin toolkit project `A minimal frontend toolkit crafted for l
 - [stylin-nutin Docs](docs/STYLIN_NUTIN.md)
 - [testin-nutin Docs](docs/TESTIN_NUTIN.md)
 - [Tools Docs](docs/TOOLS.md)
+- [nginx Config docs](docs/NGINX_CONFIG.md)
 
 ## 📝 Contributing
 
