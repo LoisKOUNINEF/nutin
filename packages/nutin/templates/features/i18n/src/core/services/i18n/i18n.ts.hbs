@@ -11,6 +11,7 @@ export class I18n extends Service<I18n> {
   constructor() {
     super();
     this.registerCleanup(this.resetTranslations);
+    this._currentLanguage = this.getBrowserLanguage();
   }
 
   private getBrowserLanguage() {

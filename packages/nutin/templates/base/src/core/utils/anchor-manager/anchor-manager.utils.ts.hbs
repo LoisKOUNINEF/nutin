@@ -3,9 +3,9 @@ import { AttributesHelper, IAttributesConfig } from "../helpers/attributes.helpe
 /**
  * ```typescript
 interface IAttributesConfig {
-  {{#if i18n}}
+{{#if i18n}}
   i18nKey?: string;
-  {{/if}}
+{{/if}}
   textContent?: string;
   className?: string;
   style?: string;
@@ -15,14 +15,15 @@ interface IAttributesConfig {
 interface IAnchorConfig extends IAttributesConfig {
 // prefix href with '#' for internal anchor
   href: string;
-// _blank, etc
   target?: string;
+  tagName?: keyof HTMLElementTagNameMap;
 }
 ```
 */
 export interface IAnchorConfig extends IAttributesConfig {
   href: string;
   target?: string;
+  tagName?: keyof HTMLElementTagNameMap;
 }
 
 export class AnchorManager {

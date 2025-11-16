@@ -33,6 +33,10 @@ async function copyConfig() {
   const destPath = path.join(temp, 'config');
   try {
     await copyJsonFiles(srcPath, destPath);
+{{#if testinNutin}}
+    // for tests to run
+    if (!isProd) await copyJsonFiles(srcPath, path.join(PATHS.temp, 'config'))
+{{/if}}
     if (isVerbose) print.info('Config files copied');
   } catch {
     print.boldError('Issue when copying config files.');

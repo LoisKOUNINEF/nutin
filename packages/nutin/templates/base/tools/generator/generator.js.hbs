@@ -43,15 +43,19 @@ const creators = {
       generateJson({ targetPath, name });
       {{/if}}
       {{#if stylinNutin}}
-      if (doCreateStylesheet) generateStylesheet(name);
+      if (doCreateStylesheet) generateStylesheet({ name, suffix: 'component' });
       {{/if}}
       appendToIndex({ name, targetPath, suffix: 'component' });
     } catch (err) {
       handleError("Failed to generate component", err);
     }
   },
-  view: (name, targetPath) => {
+  view: {{#if stylinNutin}}async {{/if}}(name, targetPath) => {
     print.section(`Creating view: ${name.capitalized}`);
+    {{#if stylinNutin}}
+    const doCreateStylesheet = await promptBoolean('Create component\'s stylesheet in styles/components ?');
+    {{/if}}
+
     try {
       generateFile({ name, targetPath, templateFn: viewTemplate, suffix: 'view' });
       {{#if template}}
@@ -59,6 +63,9 @@ const creators = {
       {{/if}}
       {{#if i18n}}
       generateJson({ targetPath, name });
+      {{/if}}
+      {{#if stylinNutin}}
+      if (doCreateStylesheet) generateStylesheet({ name, suffix: 'view' });
       {{/if}}
       appendToIndex({name, targetPath, suffix: 'view' });
     } catch (err) {

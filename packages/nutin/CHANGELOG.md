@@ -24,7 +24,7 @@
     - Moved Dockerfile and deployment config files (`nginx.conf`, `gzip.conf`) into their own folder `tools/deployment`.
     - Added `docker:build` and `docker:run` scripts in package.json.
 
-  See [DEPLOYMENT.md file](../../docs/DEPLOYMENT.md) for details.
+  See [DEPLOYMENT.md file](../../docs/DEPLOYMENT_HELPERS.md) for details.
 
 - Moved dev tools (`serve.js`, `dev-serve.js`, `watcher.js`) into their own `tools/dev` folder.
 
@@ -58,7 +58,7 @@
 
 - Improved deployment tools Dockerfile (nginx conf + gzip)
 
-  See [DEPLOYMENT.md file](../../docs/DEPLOYMENT.md) for details.
+  See [DEPLOYMENT.md file](../../docs/DEPLOYMENT_HELPERS.md) for details.
 
 - stylin-nutin (generator)
     - When generating a component, prompts (boolean) to generate a `_component-name.scss` file in `styles/components` (forwarded by `stymes/components/_index.scss`).

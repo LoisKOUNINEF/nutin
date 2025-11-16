@@ -20,7 +20,7 @@ runScript(path.join(scriptsDir, 'minify-html.js'), 'Minifying inline templates..
 {{#if i18n}}
 runScript(path.join(scriptsDir, 'build-i18n.js'), 'Combining locales for production...');
 {{/if}}
-runScript(path.join(scriptsDir, 'sass.config.js'), 'Compiling styles from main.scss...');
+runScript(path.join(scriptsDir, 'sass.js'), 'Compiling styles from main.scss...');
 runScript(path.join(scriptsDir, 'validate-html.js'), 'Validating tags in index.html...');
 
 if (isProd) runScript(path.join(scriptsDir, 'esbuild.js'), 'Running esbuild...');

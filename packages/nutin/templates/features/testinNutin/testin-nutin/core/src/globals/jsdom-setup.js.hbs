@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { JSDOM } from 'jsdom';
-import { config } from '#root/testin-nutin.config.js';
+import config from '#root/testin-nutin.config.js';
 let currentDom = null;
 
 export function setupJsdom(htmlPath = 'dist/src/index.html') {
