@@ -3,7 +3,6 @@ import { AttributesHelper, IAttributesConfig } from "../helpers/attributes.helpe
 /**
  * ```typescript
 interface IAttributesConfig {
-  i18nKey?: string;
   textContent?: string;
   className?: string;
   style?: string;
@@ -14,24 +13,26 @@ interface IAnchorConfig extends IAttributesConfig {
 // prefix href with '#' for internal anchor
   href: string;
   target?: string;
+  tagName?: keyof HTMLElementTagNameMap;
 }
 ```
 */
 export interface IAnchorConfig extends IAttributesConfig {
   href: string;
   target?: string;
+  tagName?: keyof HTMLElementTagNameMap;
 }
 
 export class AnchorManager {
-	private config: IAnchorConfig;
+  private config: IAnchorConfig;
 
-	constructor(
-		config: IAnchorConfig,
-		target: HTMLElement
-	) {
-		this.config = config;
-		this.appendAnchorElement(target);
-	}
+  constructor(
+    config: IAnchorConfig,
+    target: HTMLElement
+  ) {
+    this.config = config;
+    this.appendAnchorElement(target);
+  }
 
   private appendAnchorElement(target: HTMLElement): void {
     const container = this.createAnchorContainer();
@@ -64,7 +65,7 @@ export class AnchorManager {
   private setAnchorRef(anchor: HTMLAnchorElement) {
     anchor.setAttribute('href', this.config.href);
     if (this.config.target) {
-    	anchor.setAttribute('target', this.config.target);
+      anchor.setAttribute('target', this.config.target);
     }
   }
 

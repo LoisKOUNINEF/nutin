@@ -31,8 +31,8 @@ export class NavigationManager {
     if (!currentView.shouldUpdateMetaContent()) return;
 
     const strippedName = currentView.viewName.replace('-view', '');
-
-    document.title = strippedName;
+    
+    document.title = strippedName.charAt(0).toUpperCase() + strippedName.slice(1).toLowerCase();
   }
 
   static getCurrentPath(): string {
@@ -64,7 +64,6 @@ export class NavigationManager {
         params[name] = value;
       }
     });
-
     return params;
   }
 }

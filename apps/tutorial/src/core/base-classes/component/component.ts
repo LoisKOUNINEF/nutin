@@ -9,7 +9,7 @@ export interface ComponentButton extends BaseButton {
 export interface ComponentProps {
   // Common HTML attributes - extend as needed
   className?: string;
-  style?: string,
+  style?: string;
   textContent?: string;
   
   // Form field bindings - extend as needed
@@ -80,6 +80,7 @@ export abstract class Component<T extends HTMLElement = HTMLElement, K = any> ex
     if (this.props.className) {
       this.element.classList.add(this.props.className);
     }
+
     if (this.props.style) {
       this.element.style = this.props.style;
     }

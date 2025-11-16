@@ -28,7 +28,9 @@ export class PipeHelper {
 
     for (const pipe of pipes) {
       const [pipeName, ...argParts] = pipe.split(':');
+
       if(!pipeName) return;
+
       const args = argParts.length ? argParts.join(':').split(',') : [];
       value = AppPipeRegistry.apply(pipeName.trim(), value, args.map(a => a.trim()));
     }

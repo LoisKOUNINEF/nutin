@@ -1,17 +1,14 @@
 export interface IAttributesConfig {
-  i18nKey?: string;
   textContent?: string;
   className?: string;
   style?: string;
+// use regular pipe syntax for arguments / chaining
   pipes?: string;
 }
 
 export class AttributesHelper {
   static setContent(element: HTMLElement, config: IAttributesConfig) {
     element.textContent = config.textContent || '';
-    if (config.i18nKey) {
-      element.setAttribute('data-i18n', config.i18nKey);
-    }
   }
 
   static setPipes(element: HTMLElement, config: IAttributesConfig) {

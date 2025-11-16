@@ -1,22 +1,38 @@
 import { BaseComponent, ComponentConfig } from "../base-component.js";
 
 export interface CatalogConfig {
-  array: any[];
+  array: CatalogItemConfig[];
   elementName: string;
   elementTag?: keyof HTMLElementTagNameMap;
   selector: string;
   component: new (el: HTMLElement, data: any) => BaseComponent;
 };
 
+export interface CatalogItemBase {
+  index: number;
+}
+
+export type CatalogItemObject<T extends object> = T & CatalogItemBase;
+
+export interface CatalogItemPrimitive extends CatalogItemBase {
+  value: string | number | boolean | null | undefined;
+}
+
+export type CatalogItemConfig<T = any> =
+  T extends object ? CatalogItemObject<T> : CatalogItemPrimitive;
+
 /**
  * ```typescript
 interface CatalogConfig {
-  array: any[];
+  array: CatalogItemConfig[];
   elementName: string;
   elementTag?: keyof HTMLElementTagNameMap;
   selector: string;
   component: new (el: HTMLElement, data: any) => BaseComponent;
 };
+
+type CatalogItemConfig<T = any> =
+  T extends object ? CatalogItemObject<T> : CatalogItemPrimitive;
   ```
 */
 export class CatalogHelper {
@@ -37,17 +53,24 @@ export class CatalogHelper {
     return componentConfigs;
   }
 
-  private static createElements(idx: number, config: CatalogConfig, container: HTMLElement) {
+  private static createElements(index: number, config: CatalogConfig, container: HTMLElement) {
     const el = document.createElement(config.elementTag || 'div');
-    el.setAttribute('data-component', `${config.elementName}-${idx}`);
+    el.setAttribute('data-component', `${config.elementName}-${index}`);
+    el.dataset.index = String(index);
     container?.appendChild(el);
   }
 
-  private static pushConfig(idx: number, componentConfigs: ComponentConfig[], config: CatalogConfig) {
+  private static pushConfig(index: number, componentConfigs: ComponentConfig[], config: CatalogConfig) {
+    const item = config.array[index];
+
+    const configWithIndex: CatalogItemConfig = (item && typeof item === 'object')
+      ? { ...(item as object), index: index }
+      : { value: item, index: index };
+    
     componentConfigs.push(
       { 
-        selector: `${config.elementName}-${idx}`,
-        factory: (el) => new config.component(el, config.array[idx])
+        selector: `${config.elementName}-${index}`,
+        factory: (el) => new config.component(el, configWithIndex)
       },
     )
   }

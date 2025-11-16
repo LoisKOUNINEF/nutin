@@ -12,11 +12,11 @@ export interface IRequestConfig {
 }
 
 export class HttpBuilder {
-	static buildRequestBody(data: unknown): string | undefined {
+  static buildRequestBody(data: unknown): string | undefined {
     return data ? JSON.stringify(data) : undefined;
   }
 
-	static buildRequestUrl(endpoint: string, queryParams?: Record<string, string>): URL {
+  static buildRequestUrl(endpoint: string, queryParams?: Record<string, string>): URL {
     const url = new URL(endpoint);
     
     if (queryParams) {

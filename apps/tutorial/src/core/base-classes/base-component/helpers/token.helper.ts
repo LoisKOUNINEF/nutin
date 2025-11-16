@@ -36,6 +36,7 @@ export class TokenHelper {
 
   public static resolve(token: string, el: Element, event: Event): any {
     const htmlEl = el as HTMLElement;
+    event.preventDefault();
 
     return (
       this.resolveExact(token, htmlEl, event) ??
@@ -81,7 +82,7 @@ export class TokenHelper {
   }
 
 /** Register a new exact token like "@foo" */
-  public static registerToken(
+  public static registerCustomToken(
     name: string,
     resolver: (el: HTMLElement, ev: Event) => any
   ) {
@@ -89,7 +90,7 @@ export class TokenHelper {
   }
 
 /** Register a new prefixed token like "@style:" */
-  public static registerPrefixed(
+  public static registerPrefixedToken(
     prefix: string,
     resolver: (suffix: string, el: HTMLElement) => any
   ) {
