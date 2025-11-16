@@ -14,5 +14,13 @@ export default {
       'process.env.NODE_ENV': '"production"',
     },
 	},
+  sass: {
+    paths: [ 
+      'base', 
+      'core',
+      'components',
+      'views',
+    ],
+  },
 	verbose: false,
 }

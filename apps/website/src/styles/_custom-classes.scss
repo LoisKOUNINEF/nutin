@@ -138,6 +138,11 @@
 }
 
 .c-sidebar {
+	// anchor
+	:first-child {
+		order: 1;
+	}
+	@include mixins.flex-column;
 	position: sticky;
 	left: 0;
 	top: 0;
@@ -173,6 +178,10 @@
 		margin-top: 1rem;
 	}
 }
+
+// .c-sidebar > :first-child {
+// 	order: 1;
+// }
 
 .c-block-btn {
   display: block;

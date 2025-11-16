@@ -5,6 +5,8 @@ import { AnchorComponent, ButtonComponent } from '../index.js';
 interface ISidebarConfig {
   sections: ISection[];
   viewName: string;
+  externalHref: string;
+  hrefI18nKey: string;
 }
 
 const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
@@ -12,11 +14,15 @@ const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
 export class SidebarComponent extends Component {
   private _sections: ISection[];
   private _viewName: string;
+  private _externalHref: string;
+  private _hrefI18nKey: string;
 
   constructor(mountTarget: HTMLElement, config: ISidebarConfig ) {
     super({templateFn, mountTarget});
     this._sections = config.sections;
     this._viewName = config.viewName;
+    this._externalHref = config.externalHref;
+    this._hrefI18nKey = config.hrefI18nKey;
   }
 
   private createSidebarButtons(): BaseButton[] {
@@ -29,13 +35,15 @@ export class SidebarComponent extends Component {
     }));
   }
 
-  private anchorToRepoDocs(): ComponentConfig {
+  private anchor(): ComponentConfig {
     const anchorConfig: IAnchorConfig = {
-        href: `https://github.com/LoisKOUNINEF/nutin/tree/main/docs`,
-        i18nKey: 'sidebar.link-to-docs',
-        target: 'blank',
-        className: 'u-padd-x-medium u-italic'
-      }
+      href: this._externalHref,
+      i18nKey: this._hrefI18nKey,
+      target: '_blank',
+      className: 'c-block-btn u-marg-y-small u-marg-x-small u-italic u-padd-x-small',
+      tagName: 'aside',
+    }
+
     return  {
       selector: 'anchor',
       factory: (el) => new AnchorComponent(el, anchorConfig)
@@ -50,7 +58,7 @@ export class SidebarComponent extends Component {
       component: ButtonComponent,
     });
 
-    return [ ...catalogConfigs, this.anchorToRepoDocs() ]
+    return [ ...catalogConfigs, this.anchor() ]
   }
 
   private navigateToTopic(name: ISection['name']) {

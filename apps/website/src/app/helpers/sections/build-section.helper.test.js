@@ -96,7 +96,8 @@ const englishBuilt1 = {
     }
   ]
 }
- const englishBuilt2 = {
+
+const englishBuilt2 = {
   name: 'English 2',
   content: 'English content 2',
   id: 2,
@@ -154,8 +155,13 @@ const frenchBuilt2 = {
 }
 
 describe('BuildSectionHelper', () => {
+	beforeEach(() => {
+		BuildSectionHelper['lang'] = 'de';
+	});
+
 	it('should use default language to build a translated section with its translated snippets', () => {
 		const spy = spyOn(BuildSectionHelper, 'buildSection');
+
 		const built1 = BuildSectionHelper.buildSection(section1, snippets1);
 		expect(spy).toHaveBeenCalledWith(section1, snippets1);
 		expect(JSON.stringify(built1)).toEqual(JSON.stringify(englishBuilt1));
@@ -167,25 +173,38 @@ describe('BuildSectionHelper', () => {
 	it('should use current language to build a translated section with its translated snippets', () => {
 		BuildSectionHelper['lang'] = 'fr';
 		const spy = spyOn(BuildSectionHelper, 'buildSection');
+
 		const built1 = BuildSectionHelper.buildSection(section1, snippets1);
 		expect(spy).toHaveBeenCalledWith(section1, snippets1);
 		expect(JSON.stringify(built1)).toBe(JSON.stringify(frenchBuilt1));
+
 		const built2 = BuildSectionHelper.buildSection(section2, snippets2);
 		expect(spy).toHaveBeenCalledWith(section2, snippets2);
 		expect(JSON.stringify(built2)).toBe(JSON.stringify(frenchBuilt2));
 	})
 	it('should use default language to build a batch of translated section with their translated snippets', () => {
-		BuildSectionHelper['lang'] = 'en';
+		const sectionArr = [
+			{section: section1, snippets: snippets1}, 
+			{section: section2, snippets: snippets2}
+		];
+		const expectedArr = [ englishBuilt1, englishBuilt2 ];
 		const spy = spyOn(BuildSectionHelper, 'buildSectionBatch');
-		const built = BuildSectionHelper.buildSectionBatch([{section: section1, snippets: snippets1}, {section: section2, snippets: snippets2}]);
-		expect(spy).toHaveBeenCalledWith([{section: section1, snippets: snippets1}, {section: section2, snippets: snippets2}]);
-		expect(JSON.stringify(built)).toBe(JSON.stringify([ englishBuilt1, englishBuilt2 ]));
+
+		const builtArr = BuildSectionHelper.buildSectionBatch(sectionArr);
+		expect(spy).toHaveBeenCalledWith(sectionArr);
+		expect(JSON.stringify(builtArr)).toBe(JSON.stringify(expectedArr));
 	});
 	it('should use current language to build a batch of translated section with their translated snippets', () => {
 		BuildSectionHelper['lang'] = 'fr';
+		const sectionArr = [
+			{section: section1, snippets: snippets1}, 
+			{section: section2, snippets: snippets2}
+		];
+		const expectedArr = [ frenchBuilt1, frenchBuilt2 ];
 		const spy = spyOn(BuildSectionHelper, 'buildSectionBatch');
-		const built = BuildSectionHelper.buildSectionBatch([{section: section1, snippets: snippets1}, {section: section2, snippets: snippets2}]);
-		expect(spy).toHaveBeenCalledWith([{section: section1, snippets: snippets1}, {section: section2, snippets: snippets2}]);
-		expect(JSON.stringify(built)).toBe(JSON.stringify([ frenchBuilt1, frenchBuilt2 ]));
+
+		const builtArr = BuildSectionHelper.buildSectionBatch(sectionArr);
+		expect(spy).toHaveBeenCalledWith(sectionArr);
+		expect(JSON.stringify(builtArr)).toBe(JSON.stringify(expectedArr));
 	})
 })

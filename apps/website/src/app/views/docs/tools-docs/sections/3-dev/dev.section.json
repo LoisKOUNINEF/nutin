@@ -1,10 +1,10 @@
 { "id": 3,
 	"en": {
 		"name": "Development",
-		"content": "The App is available on localhost:9090."
+		"content": "The App is available on localhost:9090.\nCommands accept --bundle flag (production build)."
 	},
 	"fr":	{
 		"name": "Développement",
-		"content": "L'application est disponible à localhost:9090."
+		"content": "L'application est disponible sur localhost:9090.\nLes commandes supportent le flag --bundle (build de production)."
 	}
 }
