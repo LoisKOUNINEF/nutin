@@ -1,0 +1,12 @@
+{
+	"id": 1,
+	"sectionId": 1,
+	"content": "describe = (name, fn) =&gt; {}\nit = (name, fn) =&gt; {}",
+	"type": "ts",
+	"en": {
+		"title": "Structure"
+	},
+	"fr": {
+		"title": "Structure"
+	}
+}

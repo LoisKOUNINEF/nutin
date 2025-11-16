@@ -1,0 +1,12 @@
+{
+	"id": 2,
+	"sectionId": 1,
+	"content": "beforeAll = (fn) =&gt; {}\nbeforeEach = (fn) =&gt; {}\nafterAll = (fn) =&gt; {}\nafterEach = (fn) =&gt; {}",
+	"type": "ts",
+	"en": {
+		"title": "Lifecycle hooks"
+	},
+	"fr": {
+		"title": "Lifecycle hooks"
+	}
+}

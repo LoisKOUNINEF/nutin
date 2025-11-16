@@ -1,0 +1,12 @@
+{
+	"id": 3,
+	"sectionId": 1,
+	"content": "toBe(expected)\ntoEqual(expected)\ntoContain(substring)\ntoBeTruthy()\ntoBeFalsy()\ntoBeDefined()\ntoBeUndefined()\ntoBeInstanceOf(constructor)\ntoHaveBeenCalled()\ntoHaveBeenCalledWith(...expectedArgs)\ntoBeLessThan(expected)\ntoBeGreaterThan(expected)\ntoThrow(expectedMessage)\n\n// plus 'not' counterparts",
+	"type": "ts",
+	"en": {
+		"title": "Assertions"
+	},
+	"fr": {
+		"title": "Assertions"
+	}
+}

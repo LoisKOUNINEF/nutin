@@ -3,7 +3,6 @@ import { ComponentConfig } from '../../../core/index.js';
 import { SectionComponent, TableOfContentComponent } from '../../components/index.js';
 
 export abstract class SinglePageCatalogView extends ResourceView {
-
   protected tocHref: string | undefined;
 
   private renderSinglePage(): ComponentConfig[] {

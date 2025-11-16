@@ -109,7 +109,7 @@ describe('ButtonManager', () => {
 
   it('should set button className correctly', () => {
     const mockComponent = {};    
-    const manager = new ButtonManager(mockComponent, [], options);
+    const manager = new ButtonManager(mockComponent, []);
     const btn = { 
       i18nKey: 'save',
       className: 'btn-primary'

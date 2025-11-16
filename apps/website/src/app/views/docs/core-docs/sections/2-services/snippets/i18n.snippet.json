@@ -1,0 +1,14 @@
+{
+	"id": 5,
+	"sectionId": 2,
+	"content": "// config/locales.json\n{\n\t\"languages\": [\n\t\t\"en\"\n\t],\n\t\"defaultLanguage\": \"en\"\n}\n\nconst LANGUAGES = CONFIG.langs.languages;\nconst DEFAULT_LANGUAGE = CONFIG.langs.defaultLanguage as (typeof LANGUAGES)[number];\ntype Language = typeof LANGUAGES[number];\n\n// based on browser language. Defaults to DEFAULT_LANGUAGE.\n// will look for language key in components and views 'locales' folder (ex: locales/en.json)\nasync loadTranslations(lang: Language): Promise&lt;void&gt;;\ntranslate(key: string, params?: Record&lt;string, string&gt;): string;\nget currentLanguage(): Language;\nget defaultLanguage(): Language;\nget languages(): Language[];\nasync initTranslations(): Promise&lt;void&gt;;\nresetTranslations(): void;",
+	"type": "ts",
+	"en": {
+		"title": "i18n",
+		"before": "Handles translation. Looks for `data-i18n` attributes in HTML templates and for corresponding keys in `locales` JSON files."
+	},
+	"fr": {
+		"title": "i18n",
+		"before": "Gère les traductions. Cherche les attributs `data-i18n` dans les templates HTML et les clés correspondantes dans les fichiers JSON `locales`."
+	}
+}

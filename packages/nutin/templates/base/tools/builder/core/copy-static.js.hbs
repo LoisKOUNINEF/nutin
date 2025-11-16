@@ -20,20 +20,43 @@ async function copyFavicon() {
 
   try {
     await copyFile(srcPath, destPath);
-    if (isVerbose) print.info('✅ Copied: favicon.ico');
+    if (isVerbose) print.info('Copied: favicon.ico');
   } catch {
     print.boldError('⚠️  No favicon found at public/favicon.ico');
   }
 }
 
+{{#if i18n}}
+async function copyConfig() {
+  const srcPath = path.resolve(path.join('config'));
+  const temp = isProd ? PATHS.temp : PATHS.tempSource;
+  const destPath = path.join(temp, 'config');
+  try {
+    await copyJsonFiles(srcPath, destPath);
+{{#if testinNutin}}
+    // for tests to run
+    if (!isProd) await copyJsonFiles(srcPath, path.join(PATHS.temp, 'config'))
+{{/if}}
+    if (isVerbose) print.info('Config files copied');
+  } catch {
+    print.boldError('Issue when copying config files.');
+    exit(1);
+  }
+}
+
+{{/if}}
 async function copyStatic() {
   const extensions = [...BINARY_EXTENSIONS, 'html'];
   if (isProd) extensions.push('.ts');
 
-  print.info(`File types that will be copied: ${Array.from(extensions)}`);
+  if (isVerbose) print.info(`File types that will be copied: ${Array.from(extensions)}`);
 
   await ensureDir(PATHS.tempSource);
+
   await copyFavicon();
+  {{#if i18n}}
+  await copyConfig();
+  {{/if}}
 
   for (const extension of extensions) {
     const files = await getFilesRecursive(PATHS.source, extension);
@@ -53,6 +76,8 @@ async function copyStatic() {
   }
 
   if (isProd) await copyJsonFiles(PATHS.source, PATHS.tempSource);
+
+  if (isVerbose) print.boldInfo(`Copy complete.\n`);
 }
 
 async function copyJsonFiles(sourceDir, destDir) {

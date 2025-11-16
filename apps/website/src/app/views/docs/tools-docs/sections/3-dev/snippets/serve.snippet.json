@@ -1,0 +1,12 @@
+{
+	"id": 1,
+	"sectionId": 3,
+	"content": "# build and serve (dev environment).\nnpm run serve\n\n# serve without building (use existing dist/ folder)\nnpm run serve:only",
+	"type": "none",
+	"en": {
+		"title": "Static serving"
+	},
+	"fr": {
+		"title": "Serveur statique"
+	}
+}

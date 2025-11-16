@@ -1,0 +1,16 @@
+{
+	"id": 3,
+	"sectionId": 4,
+	"content": "server {\n\t\t# ---------------------------\n\t\t# LISTEN PORTS\n\t\t# ---------------------------\n\t\tlisten 9090;\n\t\tlisten 9091;\n\t\tserver_name _;\n\n\t\t# ---------------------------\n\t\t# ROOT + ROUTING\n\t\t# ---------------------------\n\t\troot /usr/share/nginx/html;\n\t\tindex index.html;\n\n\t\t# SPA routing: serve index.html for unknown paths\n\t\tlocation / {\n\t\t\t\ttry_files $uri $uri/ /index.html;\n\t\t}\n\n\t\t# ---------------------------\n\t\t# SECURITY HEADERS\n\t\t# ---------------------------\n\n\t\t# Prevent clickjacking\n\t\tadd_header X-Frame-Options \"SAMEORIGIN\" always;\n\n\t\t# Block MIME type sniffing\n\t\tadd_header X-Content-Type-Options \"nosniff\" always;\n\n\t\t# Legacy XSS filter\n\t\tadd_header X-XSS-Protection \"1; mode=block\" always;\n\n\t\t# Limit referrer leakage\n\t\tadd_header Referrer-Policy \"strict-origin-when-cross-origin\" always;\n\n\t\t# Restrict powerful browser APIs\n\t\tadd_header Permissions-Policy \"geolocation=(), microphone=(), camera=()\" always;\n\n\t\t# Content Security Policy\n\t\tadd_header Content-Security-Policy \"default-src 'self'; \\\n\t\t\t\tscript-src 'self'; \\\n\t\t\t\tstyle-src 'self' 'unsafe-inline'; \\\n\t\t\t\timg-src 'self' data: https:; \\\n\t\t\t\tfont-src 'self'; \\\n\t\t\t\tconnect-src 'self'; \\\n\t\t\t\tobject-src 'none'; \\\n\t\t\t\tbase-uri 'self'; \\\n\t\t\t\tform-action 'self'; \\\n\t\t\t\tframe-ancestors 'none';\" always;\n\n\t\t# Hide nginx version\n\t\tserver_tokens off;\n\n\t\t# ---------------------------\n\t\t# STATIC ASSETS CACHING\n\t\t# ---------------------------\n\n\t\t# Immutable cache for static assets\n\t\tlocation ~* \\.(js|css|png|jpg|jpeg|gif|avif|ico|svg|woff|woff2|ttf|eot)$ {\n\t\t\t\texpires 1y;\n\t\t\t\tadd_header Cache-Control \"public, immutable\";\n\t\t}\n\n\t\t# No caching for HTML files (SPA shell)\n\t\tlocation ~* \\.html$ {\n\t\t\t\texpires -1;\n\t\t\t\tadd_header Cache-Control \"no-cache, no-store, must-revalidate\";\n\t\t\t\tadd_header Pragma \"no-cache\";\n\t\t}\n\n\t\t# ---------------------------\n\t\t# HEALTH ENDPOINT\n\t\t# ---------------------------\n\t\tlocation /health {\n\t\t\t\taccess_log off;\n\t\t\t\tadd_header Content-Type text/plain;\n\t\t\t\treturn 200 \"healthy\\n\";\n\t\t}\n}",
+	"type": "none",
+	"en": {
+		"title": "Nginx config",
+		"before": "A minimal Nginx setup including :\n\t• SPA routing (try_files)\n\t• Strong security headers\n\t• Modern Content Security Policy (and legacy security headers)\n\t• Immutable static asset caching\n\t• index.html no-cache strategy\n\t• Health endpoint (/health)",
+		"after": "This configuration is designed specifically for SPAs built with nutin."
+	},
+	"fr": {
+		"title": "Configuration Nginx",
+		"before": "Un setup Nginx minimal incluant :\n\t• Un routing SPA (try_files)\n\t• Des headers de sécurité robustes\n\t• Une Content Security Policy moderne (et des headers de sécurité pour les navigateurs anciens)\n\t• Cache des ressources statiques immuables\n\t• Health endpoint (/health)",
+		"after": "Cette configuration est conçue spécifiquement pour les SPAs développées avec nutin."
+	}
+}

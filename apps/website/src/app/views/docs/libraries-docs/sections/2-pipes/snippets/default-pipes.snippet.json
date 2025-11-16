@@ -1,0 +1,12 @@
+{
+	"id": 2,
+	"sectionId": 2,
+	"content": "// currency\ncurrency (\n\tvalue: number, \n\tcurrency = 'USD', \n\tlocale = 'en-US'\n);\n\t\t\n// date\ndate (\n\tvalue: string | number | Date,\n\tlocale = navigator.language,\n\tformat = 'long',\n\ttime = false,\n);\n\n// number (toFixed)\nnumber (value, decimals = 0) =&gt; {});\n\n// string pipes\nuppercase;\nlowercase;    \ncapitalize;\ncapitalizeAll;\ntruncate (value, length = 50, suffix = '...');\n\t\t\n// utility pipes\ndefault (value, defaultValue = '');\njson;",
+	"type": "ts",
+	"en": {
+		"title": "Built-in Pipes"
+	},
+	"fr": {
+		"title": "Built-in Pipes"
+	}
+}

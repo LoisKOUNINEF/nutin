@@ -1,0 +1,14 @@
+{
+	"id": 2,
+	"sectionId": 4,
+	"content": "ARG NODE_VERSION=22.3.0\nARG NGINX_VERSION=1.27-alpine\n\nFROM node:${NODE_VERSION} AS builder\nWORKDIR /usr/src/app\nCOPY . .\nRUN npm ci && \\\n\t\tnpm run build:prod\n\nFROM nginx:${NGINX_VERSION}\n\nRUN rm /etc/nginx/conf.d/default.conf\nCOPY --from=builder /usr/src/app/tools/deploy/nginx.conf /etc/nginx/conf.d/default.conf\nCOPY --from=builder /usr/src/app/tools/deploy/gzip.conf /etc/nginx/conf.d/gzip.conf\nCOPY --from=builder /usr/src/app/dist/src /usr/share/nginx/html\n\nEXPOSE 9090\n\nHEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \\\n\t\tCMD curl -f http://localhost:9090/health || exit 1\n\nCMD [\"nginx\", \"-g\", \"daemon off;\"]",
+	"type": "none",
+	"en": {
+		"title": "Dockerfile",
+		"before": "A preconfigured, multi-stage Dockerfile that\n\t• Builds your application in a Node environment\n\t• Serves the final assets using Nginx\n\t• Includes an optional container healthcheck\n\t• Exposes the proper ports for reverse proxies like Traefik\n\t• Is optimized for speed, small image size, and security."
+	},
+	"fr": {
+		"title": "Dockerfile",
+		"before": "Un Dockerfile préconfiguré et multi-stage qui :\n\t• Compile votre application dans un environnement Node\n\t• Sert les ressources finales en utilisant Nginx\n\t• Inclut un contrôle de santé optionnel du conteneur\n\t• Expose les ports appropriés pour les reverse proxies comme Traefik\n\t• Est optimisé pour la rapidité, une taille d'image réduite et la sécurité."
+	}
+}

@@ -1,0 +1,16 @@
+{
+	"id": 2,
+	"sectionId": 2,
+	"content": "npm run test\n\n# rebuild before running tests\nnpm run test:rebuild\n\n# watch test files changes\nnpm run test:watch\n\n# filter\nnpm run test foo bar # will only run test files which name contain foo or bar",
+	"type": "none",
+	"en": {
+		"title": "Run tests",
+		"before": "Test runner supports filter.",
+		"after": "Tests run on compiled (.js) files.\nWill not work with bundled files (build:prod)."
+	},
+	"fr": {
+		"title": "Run tests",
+		"before": "Le test runner supporte les filtres.",
+		"after": "Les tests sont effectués sur les fichiers compilés (.js).\nNe fonctionnera pas sur les fichiers bundled (build:prod)."
+	}
+}

@@ -1,0 +1,12 @@
+{
+	"id": 5,
+	"sectionId": 1,
+	"content": "// called before each test\nsetupJsdom(htmlPath = 'dist/src/index.html', options = {\n\t\trunScripts = false,     // or true (\"dangerously\") if needed\n\t\tresources = false,      // or true (\"usable\") if needed\n\t\tfreezeGlobals = false,\n\t\tpretendToBeVisual = true,\n\t}\n)\n// expose globals\nglobal.window\nglobal.document\n\n// DOM globals\nObject.getOwnPropertyNames(dom.window)\n\t.filter(prop =&gt; !(prop in global))\n\t.forEach(prop =&gt; {\n\t\tglobal[prop] = dom.window[prop];\n})\n\nglobal.localStorage\n// browser APIs\nwindow.matchMedia\nwindow.scrollTo\nwindow.requestAnimationFrame\nwindow.cancelAnimationFrame\nwindow.IntersectionObserver\nwindow.ResizeObserver\n\n// called after each test\nteardownJsdom()\n\n// globals\nglobal.setupJsdom\nglobal.teardownJsdom\nglobal.resetDom\nglobal.flushPromises\n\nglobal.$ = (selector) =&gt; {}\nglobal.$$ = (selector) =&gt; {}\n\nglobal.click = (el) =&gt; {}\nglobal.type = (el, text) =&gt; {}\n",
+	"type": "ts",
+	"en": {
+		"title": "JSDOM"
+	},
+	"fr": {
+		"title": "JSDOM"
+	}
+}
