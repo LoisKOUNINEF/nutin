@@ -8,24 +8,27 @@ Core services (subclasses of `Service`).
 * **[http-client](#2-http-client)** — lightweight fetch wrapper with interceptors and JSON helpers
 * **[event-bus](#3-event-bus)** — pub/sub service for app-wide events
 * **[store](#4-store)** — tied to AppEventBus. Consumable objects.
-* **[pipe-registry](#5-pipe-registry)** — register & use pipes (formatters/transformers)
+* **[i18n](#5-i18n)** — handles translations of locales JSON files
+* **[pipe-registry](#6-pipe-registry)** — register & use pipes (formatters/transformers)
 
 ## 1. Router
 
-- Exports: `Route`, `AppRouter` (singleton). Use the Router to declare routes (navigation is handled by `AppEventBus.emit('navigate')`).
+- Exports: `Route`, `Router`. Use the Router to declare routes (navigation is handled by `AppEventBus.emit('navigate')`).
 
 ### Routes — minimal example
 
 ```ts
-import { Router } from 'libs/router';
+// src/app/routes.ts
+export const appRoutes: Routes = {
+  '/': () => new HomeView(),
+  '/404': () => new NotFoundView(),
 
-const routes = [
-  { path: '/', component: HomeView },
-  { path: '/users/:id', component: UserView },
-];
-
-const router = new Router({ routes, mountPoint: '#app' });
-router.start();
+  // with guards (see below)
+  '/protected': {
+    view: () => new ProtectedView(),
+    guards: [requireAuth]
+  }
+}
 ```
 
 ### Programmatic navigation (using `AppEventBus`)
@@ -38,15 +41,7 @@ AppEventBus.emit('navigate', `/tasks/${this._task.id}`);
 
 Light wrapper around `fetch` with request/response interceptors and JSON handling.                                  
 Has `baseUrl: string;` and `defaultHeaders: Record<string, string>;`
-
-### Basic usage
-
-```ts
-import { HttpClient } from 'libs/http';
-
-const api = new HttpClient({ baseUrl: '/api' });
-api.get('/users').then(res => console.log(res));
-```
+').then(res => console.log(res));
 
 ## 3. Event Bus
 
@@ -94,7 +89,47 @@ unsubscribe<T>(key: string, callback: (value: T));
 clear();
 ```
 
-## 5. Pipe Registry
+## 5. i18n
+
+Handles translation. Looks for `data-i18n` attributes in HTML templates and for corresponding keys in `locales` JSON files.
+
+### Locales config file
+
+`config/locales.json`
+```json
+{
+  "languages": [
+    "en"
+  ],
+  "defaultLanguage": "en"
+}
+```
+This is consumed by i18nService, by builder and by component / view generator.
+
+### Types
+
+```ts
+const LANGUAGES = CONFIG.langs.languages;
+const DEFAULT_LANGUAGE = CONFIG.langs.defaultLanguage as (typeof LANGUAGES)[number];
+type Language = typeof LANGUAGES[number];
+```
+
+### Exposed methods
+
+- Based on browser language. Defaults to DEFAULT_LANGUAGE.
+- Will look for language key in components and views 'locales' 
+
+```ts
+async loadTranslations(lang: Language): Promise<void>;
+translate(key: string, params?: Record<string, string>): string;
+get currentLanguage(): Language;
+get defaultLanguage(): Language;
+get languages(): Language[];
+async initTranslations(): Promise<void>;
+resetTranslations(): void;
+```
+
+## 6. Pipe Registry
 
 Register formatting/transformation functions used by the `data-pipe` system (Core consumes these).
 

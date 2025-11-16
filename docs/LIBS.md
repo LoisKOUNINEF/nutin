@@ -6,15 +6,12 @@
 * `libs/popover/popover.ts` → `PopoverView` — small View for popovers (templated, with buttons)
 * `libs/guards/guards.ts` → `Guards` — route guard helpers
 * `libs/pipes/pipes.ts` → `registerPipes()` — registers a set of common pipes into `AppPipeRegistry`
-* `libs/index.ts` → re-exports the modules above for easy import
-
-You can import everything from the package root:
-
+* `libs/index.ts` → barrel file for easy import
 ```ts
 import { notify, PopoverView, Guards, registerPipes } from '../libs/index.ts';
 ```
 
-# 1. Snackbar (notify)
+## 1. Snackbar (notify)
 
 **File:** `libs/snackbar/snackbar.ts`
 
@@ -146,7 +143,7 @@ type RouteConfig = (() => View) | {
 // in routes.ts
 
 '/protected': {
-  view: () => new TaskCatalogView(),
+  view: () => new ProtectedView(),
   guards: [requireAuth]
 }
 ```
@@ -192,16 +189,7 @@ Notes
 
 # 5. Centralized exports (barrel file)
 
-`libs/index.ts` simply re-exports the modules:
-
-```ts
-export * from './snackbar/snackbar.js';
-export * from './popover/popover.js';
-export * from './guards/guards.js';
-export * from './pipes/pipes.js';
-```
-
-So you can import from `'libs'` (depending on your bundler/tsconfig path mappings).
+`libs/index.ts` 
 
 # 6. Small recipes
 
@@ -212,10 +200,10 @@ import { PopoverView } from 'libs';
 import { notify } from 'libs';
 
 const pop = new PopoverView({
-  template: '<p>Delete item?</p>',
+  template: '<p>Confirm ?</p>',
   buttons: [
     { text: 'Cancel' },
-    { text: 'OK', callback: () => notify('Deleted', { type: 'success' }) }
+    { text: 'OK', callback: () => notify('Confirmed', { type: 'success' }) }
   ]
 });
 pop.render();
@@ -235,4 +223,4 @@ registerPipes();
 * `src/libs/popover/popover.ts` — `PopoverView` implementation (overlay, wrapper, button wiring)
 * `src/libs/guards/guards.ts` — simple guard helpers - extend as needed, or register customs.
 * `src/libs/pipes/pipes.ts` — registration of app pipes - extend as needed, or register customs.
-* `src/libs/index.ts` — root re-export
+* `src/libs/index.ts` — barrel file

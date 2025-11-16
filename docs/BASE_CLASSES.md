@@ -19,10 +19,10 @@
 
 ## 1. BaseComponent
 
-`BaseComponent` is the initial building block. `Component` and `View` are its subclasses; it's not meant to be extended when developing an app. It handles:
+`BaseComponent` is the initial building block. `Component` and `View` are its subclasses; it's not meant to be directly extended when developing an app. It handles:
 
 * mounting a root element
-* a lifecycle (`render`, `destroy`) you can extend
+* a lifecycle (`render`, `destroy`)
 * helper integrations (event binding, pipes, i18n, children, catalog)
 
 ### Typical lifecycle
@@ -40,15 +40,15 @@
 * `I18nHelper.parseI18nAttributes` — resolves `data-i18n` into text/placeholder
 * `ChildrenHelper.addChildren` — instantiate child components found by `data-component`
 * `CatalogHelper.generateCatalog` — helper to render repeated components (list catalogs)
+* `SecurityHelper` - sanitize inputs
 
 ## 2. Component
 
 `Component` extends `BaseComponent` and adds common UI helpers:
 
 * props / attributes mapping (apply simple `props` to element)
-* automatic `data-*` parsing on render (events, pipes, i18n, data-binding)
 * small button management utilities
-* data-binding helpers for form values
+* data-binding helpers
 
 ### Example
 
@@ -141,7 +141,7 @@ v.render();
 '/404': () => new NotFoundView()
 ```
 
-> `render()` calls `onEnter()` automatically and `destroy()` will call `onExit()`.
+> `render()` calls `onEnter()` and `destroy()` calls `onExit()`.
 
 
 ## 4. Service
@@ -242,6 +242,7 @@ Usage:
 This example resolves @style:color → element’s CSS color.
 
 - When to Use What?
+
 Use registerToken for one-off shortcuts (@foo)
 Use registerPrefix for repeatable patterns (@foo:bar)
 
@@ -285,8 +286,12 @@ Example:
 Small catalog pattern:
 
 ```ts
-this.catalogConfig({ array: users, elementName: 'user-item', component: UserItemComponent, selector: 'user-item' });
-// container will get created child placeholders and child components instantiated automatically
+this.catalogConfig({ 
+  array: users,
+  elementName: 'user-item', 
+  component: UserItemComponent, 
+  selector: 'user-item' 
+});
 ```
 
 ### SecurityHelper
@@ -297,7 +302,7 @@ this.catalogConfig({ array: users, elementName: 'user-item', component: UserItem
 
 * Called by default by `TokenHelper` for all registered tokens for `input`, `textarea` and `contenteditable`.
 
-- **XSS Test Cases :**
+- **XSS Test Cases Examples :**
 
 Basic script injection :
 `"><script>alert('XSS')</script>`

@@ -8,13 +8,14 @@ Monorepo for the nutin toolkit project `A minimal frontend toolkit crafted for l
 *Visit the [website](https://www.nutin.org) or the [NPM package page](https://www.npmjs.com/org/nutin).*                                                                      
 ## 📄 Docs
 
-- [Core Docs](docs/CORE.md)
-- [Native Services Docs](docs/SERVICES.md)
-- [Libraries Docs](docs/LIBS.md)
-- [stylin-nutin Docs](docs/STYLIN_NUTIN.md)
-- [testin-nutin Docs](docs/TESTIN_NUTIN.md)
-- [Tools Docs](docs/TOOLS.md)
-- [nginx Config docs](docs/NGINX_CONFIG.md)
+- [stylin-nutin](docs/STYLIN_NUTIN.md)
+- [Libraries](docs/LIBS.md)
+- [testin-nutin](docs/TESTIN_NUTIN.md)
+- [Tools](docs/TOOLS.md)
+- [Deployment Helpers](docs/DEPLOYMENT_HELPERS.md)
+- [Base Classes](docs/BASE_CLASSES.md)
+- [Native Services](docs/SERVICES.md)
+- [Monorepo Workflows](docs/WORKFLOWS.md)
 
 ## 📝 Contributing
 

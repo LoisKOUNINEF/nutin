@@ -1,6 +1,6 @@
-# Deployment
+# Deployment Helpers ( Dockerfile / Nginx config )
 
-- You may use the config files and Dockerfile exactly as-is for production deployments. Modify only if you need custom caching rules or add external APIs to CSP.
+- You may use the config files and Dockerfile exactly as-is for production deployments. Modify if you need custom caching rules or add external APIs to CSP.
 - Adapt ports as needed.
 
 ## Dockerfile
@@ -42,8 +42,8 @@ Only load JS from your own domain. Prevents loading third-party or injected scri
 
 - `style-src 'self' 'unsafe-inline'`
 
-Allows your own CSS and inline \<style\> tags.                      
-The 'unsafe-inline' weakens security slightly but is needed for inline styles. Remove it if you only use external CSS files.               
+Allows inline `style=""` attributes and `<style\>` tags.                              
+**The 'unsafe-inline' weakens security slightly but is needed for inline styles. Remove it if you only use external CSS files.**                                 
 **Whitelist third-party:** `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;`
 
 - `img-src 'self' data: https:`
@@ -292,4 +292,4 @@ Specifies MIME types eligible for compression. (HTML, CSS, JS, XML, JSON, SVG, W
 
 - `gzip_min_length 1000`
 
-Avoids compressing tiny responses (error messages, redirects, small JSON payloads).
+Avoids compressing tiny responses (error messages, redirects, small JSON payloads). (in bytes)
