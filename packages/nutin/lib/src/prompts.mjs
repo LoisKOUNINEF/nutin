@@ -22,7 +22,7 @@ export async function promptUser(initialName, cliOptions = {}) {
         type: 'list',
         name: 'packageManager',
         message: 'Package manager:',
-        choices: ['npm', 'yarn', 'pnpm'],
+        choices: ['npm', 'yarn', 'pnpm', 'bun'],
         default: 'npm'
       }
     ]);
@@ -34,10 +34,10 @@ export async function promptUser(initialName, cliOptions = {}) {
       projectName,
       packageManager,
       stylinNutin: cliOptions.stylinNutin || true,
-      template: cliOptions.template || false,
-      i18n: cliOptions.i18n || false,
-      transition: cliOptions.transitions || false,
-      testinNutin: cliOptions.testinNutin || false
+      template: cliOptions.template || true,
+      i18n: cliOptions.i18n || true,
+      testinNutin: cliOptions.testinNutin || false,
+      transition: cliOptions.transitions || false
     };
   }
 
@@ -47,7 +47,7 @@ export async function promptUser(initialName, cliOptions = {}) {
     questions.push({
       type: 'confirm',
       name: 'stylinNutin',
-      message: 'Use built-in SCSS utility classes?',
+      message: 'Use built-in SCSS utility classes ?',
       default: true
     });
   }
@@ -56,8 +56,8 @@ export async function promptUser(initialName, cliOptions = {}) {
     questions.push({
       type: 'confirm',
       name: 'template',
-      message: 'Use external templates?',
-      default: false
+      message: 'Use external templates ?',
+      default: true
     });
   }
 
@@ -65,8 +65,8 @@ export async function promptUser(initialName, cliOptions = {}) {
     questions.push({
       type: 'confirm',
       name: 'i18n',
-      message: 'Use i18n & json-based content?',
-      default: false
+      message: 'Use i18n with json-based content ?',
+      default: true
     });
   }
 

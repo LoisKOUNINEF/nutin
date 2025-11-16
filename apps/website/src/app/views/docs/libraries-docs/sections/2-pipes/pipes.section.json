@@ -1,0 +1,10 @@
+{ "id": 2,
+	"en": {
+		"name": "Pipes",
+		"content": "These pipes are registered against the toolkit's AppPipeRegistry so the core data-pipe parser will pick them up automatically when running pipe parsing on render().\n\t• Call registerPipes() during app bootstrap (before first render) to ensure pipes are available.\n\t• Can be extended with AppPipeRegistry.register(name: string, fn: PipeFunction)."
+	},
+	"fr":	{
+		"name": "Pipes",
+		"content": "Ces pipes sont enregistrées dans AppPipeRegistry, et sont appliquées automatiquement lors de render().\n\t• Appeler registerPipes() pendant l'initialisation de l'application (avant le premier render()) pour s'assurer que les pipes sont disponibles dans l'app.\n\t• Peut être étendu avec AppPipeRegistry.register(name: string, fn: PipeFunction)."
+	}
+}

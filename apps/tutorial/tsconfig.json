@@ -5,16 +5,19 @@
     "target": "ESNext",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "rootDir": ".",
-    "outDir": "dist",
+    "rootDir": "src",
+    "outDir": "dist-build/src",
     "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUncheckedIndexedAccess": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "lib": [
       "es2022",
       "DOM"
     ],
-    "types": [],
+    "removeComments": true,
     "resolveJsonModule": true,
     "typeRoots": [
       "src/types",

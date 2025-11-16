@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-import { allFormats, getLastWord, print } from "../utils/index.js";
-import { generateFile, appendToIndex{{#if i18n}}, generateJson{{/if}} } from "./handle-file.js";
+import path from "path";
+import { allFormats, getLastWord, print{{#if stylinNutin}}, promptBoolean{{/if}} } from "../utils/index.js";
+import { generateFile, appendToIndex{{#if i18n}}, generateJson{{/if}}{{#if stylinNutin}}, generateStylesheet{{/if}} } from "./handle-file.js";
 import { serviceTemplate, componentTemplate, viewTemplate{{#if template}}, htmlTemplate{{/if}} } from "./templates/index.js";
 
 // Constants and Setup
@@ -14,7 +15,7 @@ if (!rawType || !rawFullPath) {
 const type = allFormats(rawType);
 const fullPath = allFormats(rawFullPath);
 const name = allFormats(getLastWord(fullPath.kebab));
-const targetPath = `src/app/${type.kebab}s/${fullPath.kebab}`;
+const targetPath = path.join('src', 'app', `${type.kebab}s/${fullPath.kebab}`);
 
 // Creator Mapping
 const creators = {
@@ -27,8 +28,12 @@ const creators = {
       handleError("Failed to generate service", err);
     }
   },
-  component: (name, targetPath) => {
+  component: {{#if stylinNutin}}async {{/if}}(name, targetPath) => {
     print.section(`Creating component: ${name.capitalized}`);
+    {{#if stylinNutin}}
+    const doCreateStylesheet = await promptBoolean('Create component\'s stylesheet in styles/components ?');
+    {{/if}}
+
     try {
       generateFile({ name, targetPath, templateFn: componentTemplate, suffix: 'component' });
       {{#if template}}
@@ -37,13 +42,20 @@ const creators = {
       {{#if i18n}}
       generateJson({ targetPath, name });
       {{/if}}
+      {{#if stylinNutin}}
+      if (doCreateStylesheet) generateStylesheet({ name, suffix: 'component' });
+      {{/if}}
       appendToIndex({ name, targetPath, suffix: 'component' });
     } catch (err) {
       handleError("Failed to generate component", err);
     }
   },
-  view: (name, targetPath) => {
+  view: {{#if stylinNutin}}async {{/if}}(name, targetPath) => {
     print.section(`Creating view: ${name.capitalized}`);
+    {{#if stylinNutin}}
+    const doCreateStylesheet = await promptBoolean('Create component\'s stylesheet in styles/components ?');
+    {{/if}}
+
     try {
       generateFile({ name, targetPath, templateFn: viewTemplate, suffix: 'view' });
       {{#if template}}
@@ -51,6 +63,9 @@ const creators = {
       {{/if}}
       {{#if i18n}}
       generateJson({ targetPath, name });
+      {{/if}}
+      {{#if stylinNutin}}
+      if (doCreateStylesheet) generateStylesheet({ name, suffix: 'view' });
       {{/if}}
       appendToIndex({name, targetPath, suffix: 'view' });
     } catch (err) {
@@ -63,7 +78,7 @@ const creators = {
 const create = creators[type.kebab];
 
 if (create) {
-  create(name, targetPath);
+  {{#if stylinNutin}}await {{/if}}create(name, targetPath);
   print.boldSuccess(`\n${type.capitalized} ${name.capitalized} has been generated.\n`)
 } else {
   showUsageAndExit(`Unsupported type: '${type.kebab}'`);

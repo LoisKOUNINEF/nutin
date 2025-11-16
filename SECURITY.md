@@ -154,7 +154,7 @@ This security policy does not grant any rights or permissions beyond those expli
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: 09/09/2025  
+**Version**: 1.2.0  
+**Last Updated**: 11/05/2025  
 
 Thank you for helping keep our project and users safe! 🔒

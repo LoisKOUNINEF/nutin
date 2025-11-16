@@ -1,19 +1,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { exit } from 'process';
-import { getFilesRecursive, print } from '../../utils/index.js';
+import { getFilesRecursive, print, isVerbose } from '../../utils/index.js';
+import { PATHS } from './paths.js';
 
-const sourceRoot = './src/app';
-{{#if template}}
-const destDir = './dist-build/src/locales';
-const cleanupDir = './dist-build/src/app';
-{{else}}
-const destDir = './dist/src/locales';
-const cleanupDir = './dist/src/app';
-{{/if}}
+const destDir = path.join(PATHS.tempSource, 'locales');
 
 function findLocaleFiles() {
-  const allFiles = getFilesRecursive(sourceRoot, '.json');
+  const allFiles = getFilesRecursive(PATHS.sourceApp, '.json');
   const localeFileMap = {};
 
   allFiles.forEach(file => {
@@ -66,18 +60,19 @@ async function removeJsonFiles(directory) {
     if (file.includes(`${path.sep}locales${path.sep}`)) {
       try {
         await fs.promises.unlink(file);
-        print.info(`Deleted locale JSON file: ${file}`);
+        if (isVerbose) print.info(`Deleted locale JSON file: ${file}`);
       } catch (err) {
         print.error(`Failed to remove ${file}: ${err.message}`);
       }
-    } else {
+    } 
+    else if (isVerbose) {
       print.info(`Skipping non-locale JSON file: ${file}`);
     }
   }
 
   await removeEmptyDirectories(directory);
 
-  print.info(`✅ JSON files cleanup complete.`);
+  if (isVerbose) print.boldInfo(`JSON files cleanup complete.`);
 }
 
 async function removeEmptyDirectories(directory) {
@@ -102,12 +97,12 @@ async function removeEmptyDirectories(directory) {
     }
   }
 
-  if (directory !== cleanupDir) {
+  if (directory !== PATHS.tempApp) {
     try {
       const updatedItems = await fs.promises.readdir(directory);
       if (updatedItems.length === 0) {
         await fs.promises.rmdir(directory, { recursive: false });
-        print.info(`📁 Removed empty directory: ${directory}`);
+        if (isVerbose) print.info(`📁 Removed empty directory: ${directory}`);
       }
     } catch (err) {
       print.error(`Failed to remove empty directory ${directory}: ${err.message}`);
@@ -126,9 +121,9 @@ async function mergeJson() {
       `${destDir}/${locale}.json`,
       JSON.stringify(combined, null, 2)
     );
-    print.info(`✅ Json files for locale ${locale} merged successfully`);
+    if (isVerbose) print.boldInfo(`Json files for locale ${locale} merged successfully`);
   }
-  removeJsonFiles(cleanupDir);
+  removeJsonFiles(PATHS.tempApp);
 }
 
 mergeJson().catch((err) => {

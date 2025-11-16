@@ -1,16 +1,17 @@
-import { DEFAULT_LANGUAGE, LANGUAGES, Language, Translations } from '../../../app/languages.js';
+import { DEFAULT_LANGUAGE, LANGUAGES, Language, Translations } from './languages.js';
 import { Service } from '../../index.js';
 
 export class I18n extends Service<I18n> {
-  private readonly _DEFAULT_LANGUAGE: Language = DEFAULT_LANGUAGE;
-  private readonly _LANGUAGES = LANGUAGES;
-  private _currentLanguage: Language = this._DEFAULT_LANGUAGE;
-  private _translations: Translations = {};
-  private _defaultTranslations: Translations = {};
+  protected readonly _DEFAULT_LANGUAGE: Language = DEFAULT_LANGUAGE;
+  protected readonly _LANGUAGES = LANGUAGES;
+  protected _currentLanguage: Language = this._DEFAULT_LANGUAGE;
+  protected _translations: Translations = {};
+  protected _defaultTranslations: Translations = {};
 
   constructor() {
     super();
     this.registerCleanup(this.resetTranslations);
+    this._currentLanguage = this.getBrowserLanguage();
   }
 
   private getBrowserLanguage() {
@@ -87,6 +88,14 @@ export class I18n extends Service<I18n> {
 
   public get currentLanguage(): Language {
     return this._currentLanguage;
+  }
+
+  public get defaultLanguage(): Language {
+    return this._DEFAULT_LANGUAGE;
+  }
+
+  public get languages(): Language[] {
+    return this._LANGUAGES;
   }
 
   public async initTranslations(): Promise<void> {

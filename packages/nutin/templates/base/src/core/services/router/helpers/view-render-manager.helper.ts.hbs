@@ -56,25 +56,40 @@ export class ViewRenderManager {
   }
 
   static cleanupOptionalContent() {
-    const isEmpty = (content: string | undefined | null): boolean => {
-    if (!content?.trim() || content === 'undefined') return true;
-      return false;
+    const isEmpty = (el: HTMLElement): boolean => {
+      const attrName = el.dataset.optional?.trim();
+
+      if (attrName && attrName !== "") {
+        const attrValue = el.getAttribute(attrName);
+        return !attrValue || attrValue.trim() === "" || attrValue === "undefined";
+      }
+
+      if (el instanceof HTMLImageElement) {
+        return !el.src || el.src.trim() === "";
+      }
+
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+        return !el.value?.trim();
+      }
+
+      if (el instanceof HTMLMediaElement || el instanceof HTMLSourceElement) {
+        return !el.getAttribute("src");
+      }
+
+      const content = el.textContent?.trim();
+      return !content || content === "undefined";
     };
 
-    document.querySelectorAll<HTMLElement>('[data-optional]').forEach(el => {
-      const content = el.textContent?.trim();
-          
-      if (isEmpty(content)) {
-        el.remove();
-      }
+    document.querySelectorAll<HTMLElement>("[data-optional]").forEach(el => {
+      if (isEmpty(el)) el.remove();
     });
   }
 
   static emitEvent(event: EventKey, viewName: string): void {
     AppEventBus.emit(event, viewName);
   }
-
   {{#if transition}}
+
   private static delay(ms: number): Promise<void> {
     return new Promise(res => setTimeout(res, ms));
   }

@@ -1,4 +1,4 @@
-import { sortById } from '../../../../dist/src/app/helpers/sections/sort-by-id.js';
+import { sortById } from '#root/dist/src/app/helpers/index.js';
 
 describe('sortById', () => {
 	it('should sort an array by id', () => {

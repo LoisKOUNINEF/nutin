@@ -16,7 +16,7 @@ export class HttpError extends Error {
 }
 
 export class HttpManager {
-	static createAbortController(timeout?: number): IAbortControllerSetup {
+  static createAbortController(timeout?: number): IAbortControllerSetup {
     const controller = new AbortController();
     const timeoutId = timeout ? 
       setTimeout(() => controller.abort(), timeout) : 
@@ -53,7 +53,7 @@ export class HttpManager {
     return await response.text() as unknown as T;
   }
 
-	static isTimeoutError(error: unknown): boolean {
+  static isTimeoutError(error: unknown): boolean {
     return error instanceof DOMException && error.name === 'AbortError';
   }
 

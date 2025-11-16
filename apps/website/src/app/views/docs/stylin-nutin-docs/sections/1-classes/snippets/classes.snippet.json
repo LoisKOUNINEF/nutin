@@ -1,0 +1,6 @@
+{
+	"id": 1,
+	"sectionId": 1,
+	"content": "// Utility classes prefix : 'u-'\n\n// $name = smallest || small || medium || large || largest\n// font size\n@each $name, $size in $font-sizes { .u-font-#{$name} }\n// padding\n@each $name, $space in $spacings { .u-padd-x-#{$name} }\n@each $name, $space in $spacings { .u-padd-y-#{$name} }\n//margin\n@each $name, $space in $spacings { .u-marg-x-#{$name} }\n@each $name, $space in $spacings { .u-marg-y-#{$name} }\n//border-radius\n// $name = small || medium || large || pill\n@each $name, $radius in $border-radius { .u-rounded-#{$name} }\n// box-shadow\n// $name = small | medium || large\n@each $name, $shadow in $shadows { .u-shadow-#{$name} }\n// transition\n// $name = fast || normal || slow\n@each $name, $transition in $transitions { .u-transition-#{$name} }\n\n.u-color-base\n.u-color-prim\n.u-color-sec\n.u-color-bg\n.u-italic\n.u-bold\n.u-font-secondary\n.u-flex-center\n.u-flex-column\n.u-flex-row\n.u-flex-between\n.u-flex-around\n.u-flex-wrap\n.u-ellipsis\n.u-clamp-2\n.u-absolute-center\n.u-fixed-full\n.u-bg-base\n.u-bg-inherit\n.u-bg-primary\n.u-bg-secondary\n.u-bg-gradient-to-right\n.u-bg-cover\n.u-img-cover\n.u-transition\n.u-hover-scale\n.u-border\n.u-border-none\n.u-rounded\n.u-btn-disabled\n.u-hide\n.u-sr-only\n.u-clearfix\n.u-pointer\n.u-pre-wrap",
+	"type": "scss"
+}

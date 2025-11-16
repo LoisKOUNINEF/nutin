@@ -1,5 +1,6 @@
 node_modules
 dist
+dist-build
 .github
 .gitignore
 .git
@@ -7,6 +8,15 @@ dist
 *.md
 .env
 *.txt
-{{#if i18n}}
-*.test
+{{#if testinNutin}}
+*.test.js
+testin-nutin
 {{/if}}
+*.log
+
+npm-debug.log
+.nyc_output
+coverage
+.DS_Store
+.cache
+.parcel-cache

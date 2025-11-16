@@ -1,0 +1,10 @@
+{ "id": 1,
+	"en": {
+		"name": "Generator",
+		"content": "Elements generated exports are centralized in index.ts files.\n\nnpm run generate component widgets/my-widget creates :\n\t• src/app/components/widgets/my-widget/my-widget.component.ts (exported by src/app/components/index.ts).\n\t• With i18n feature enabled : locales fragments in src/app/components/my-widget/locales.\n\t• With external templates feature enabled: src/app/components/widgets/my-widget/my-widget.component.html.\n\t• With stylin-nutin feature enabled : (optional) styles/components/_my-widget.scss (forwarded by styles/components/_index.scss)."
+	},
+	"fr":	{
+		"name": "Générateur",
+		"content": "Les exports des éléments générés sont centralisés dans les fichiers index.ts.\n\nnpm run generate component widgets/my-widget crée :\n\tsrc/app/components/widgets/my-widget/my-widget.component.ts (exporté par src/app/components/index.ts).\n\t• Avec la fonctionnalité i18n : fichiers locales in src/app/components/my-widget/locales.\n\t• Avec les templates externes : src/app/components/widgets/my-widget/my-widget.component.html.\n\t• Avec stylin-nutin : (optionel) styles/components/_my-widget.scss (propagé par styles/components/_index.scss)."
+	}
+}

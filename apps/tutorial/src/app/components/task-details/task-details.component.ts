@@ -2,7 +2,7 @@ import { Component } from '../../../core/index.js';
 import { TasksService } from '../../services/index.js';
 
 const templateFn = (task: Task) => `
-<div style="min-width:75vw;height:100vh;margin-top:1em;text-align:center;">
+<div class="task-details__container">
   <div class="u-flex-column">
     <input
       class="u-font-large u-bold u-bg-inherit"
@@ -22,7 +22,7 @@ const templateFn = (task: Task) => `
       data-pipe="capitalize"
     >${task.content}</textarea>
     <input 
-      class="u-bg-inherit"
+      class="u-bg-inherit u-color-base"
       type="datetime-local" 
       value="${new Date(new Date(task.date).getTime() - new Date(task.date).getTimezoneOffset() * 60000).toISOString().slice(0, 16)}"
       data-event="blur:updateTask:date,@value"
@@ -39,7 +39,7 @@ export class TaskDetailsComponent extends Component {
     this._task = task;
   }
 
-  updateTask(field: keyof Task, value: string) { 
+  updateTask = (field: keyof Task, value: string) => { 
     const transformers: Partial<Record<keyof Task, (val: any) => any>> = {
       date: (v: string) => new Date(v),
     };

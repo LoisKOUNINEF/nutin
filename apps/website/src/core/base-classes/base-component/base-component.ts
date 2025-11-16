@@ -4,6 +4,7 @@ import { I18nHelper } from './helpers/i18n.helper.js';
 import { PipeHelper } from './helpers/pipe.helper.js';
 import { ChildrenHelper } from './helpers/children.helper.js';
 import { CatalogHelper, CatalogConfig } from './helpers/catalog.helper.js';
+export { CatalogItemConfig } from './helpers/catalog.helper.js';
 
 /**```typescript
  * export interface ComponentConfig {
@@ -55,7 +56,7 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
 /**
  * ```typescript
 interface CatalogConfig {
-  array: any[];
+  array: CatalogItemConfig[];
   elementName: string;
   elementTag?: keyof HTMLElementTagNameMap;
   selector: string;

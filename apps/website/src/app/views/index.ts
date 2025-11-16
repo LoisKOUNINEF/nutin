@@ -1,9 +1,5 @@
 export * from './home/home.view.js';
 export * from './not-found/not-found.view.js';
 export * from './tutorial/tutorial.view.js';
-export * from './core-docs/core-docs.view.js';
-export * from './tools-docs/tools-docs.view.js';
-export * from './services-docs/services-docs.view.js';
-export * from './libraries-docs/libraries-docs.view.js';
-export * from './stylin-nutin-docs/stylin-nutin-docs.view.js';
-export * from './testin-nutin-docs/testin-nutin-docs.view.js';
+
+export * from './docs/index.js';

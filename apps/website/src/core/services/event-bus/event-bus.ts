@@ -1,63 +1,91 @@
 import { Service } from "../../index.js";
 
-/**
-  IEventBus is a type alias for the instance of EventBus, not a true interface 
-*/
 export type IEventBus = InstanceType<typeof EventBus>;
 
+type Subscription<K extends EventKey = EventKey> = {
+  event: K;
+  callback: (data: EventMap[K]) => void;
+  once?: boolean;
+};
+
 export class EventBus extends Service<EventBus> {
-  private _subscriptions: EventKey[] = [];
-  
+  private _subscriptions: Subscription[] = [];
+
   constructor() {
     super();
     this.registerCleanup(this.cleanupEventListeners);
   }
 
   private handlers: {
-    [K in EventKey]?: Array<(data: EventMap[K]) => void>
+    [K in EventKey]?: Array<(data: EventMap[K]) => void>;
   } = {};
-  
-  public subscribe<K extends EventKey>(event: K, callback: (data: EventMap[K]) => void): void {
-    AppEventBus.on(event, callback);
-    this._subscriptions.push(event);
+
+  public subscribe<K extends EventKey>(
+    event: K,
+    callback: (data: EventMap[K]) => void
+  ): void {
+    this.addHandler(event, callback, false);
   }
 
-  private on<K extends EventKey>(event: K, callback: (data: EventMap[K]) => void): void {
+  public once<K extends EventKey>(
+    event: K,
+    callback: (data: EventMap[K]) => void
+  ): void {
+    this.addHandler(event, callback, true);
+  }
+
+  private addHandler<K extends EventKey>(
+    event: K,
+    callback: (data: EventMap[K]) => void,
+    once: boolean
+  ) {
     if (!this.handlers[event]) {
       this.handlers[event] = [];
     }
     this.handlers[event]!.push(callback);
+    this._subscriptions.push({ event, callback, once });
   }
 
-  public emit<K extends EventKey>(event: K, data: EventMap[K]): void;
-  public emit<K extends EventKey>(event: K): void;
   public emit<K extends EventKey>(event: K, data?: EventMap[K]): void {
-    this._subscriptions.push(event);
     const callbacks = this.handlers[event];
-    if (callbacks) {
-      callbacks.forEach(callback => callback(data!));
-    }
+    if (!callbacks) return;
+
+    callbacks.slice().forEach(callback => {
+      callback(data!);
+
+      const subIndex = this._subscriptions.findIndex(
+        sub => sub.event === event && sub.callback === callback && sub.once
+      );
+      if (subIndex > -1) {
+        this.off(event, callback);
+      }
+    });
   }
 
-  public off<K extends EventKey>(event: K, callback: (data: EventMap[K]) => void): void {
+  public off<K extends EventKey>(
+    event: K,
+    callback?: (data: EventMap[K]) => void
+  ): void {
     const handlers = this.handlers[event];
     if (!handlers) return;
 
-    this.handlers[event] = handlers.filter(handler => 
-      handler !== callback
-    ) as typeof handlers;
+    if (callback) {
+      this.handlers[event] = handlers.filter(h => h !== callback);
+    } else {
+      delete this.handlers[event];
+    }
+
+    this._subscriptions = this._subscriptions.filter(
+      sub => sub.event !== event || (callback && sub.callback !== callback)
+    );
   }
 
   private cleanupEventListeners = () => {
-    this._subscriptions.forEach(event => {
-      AppEventBus.off(event, () => {});
+    this._subscriptions.forEach(({ event, callback }) => {
+      this.off(event, callback);
     });
     this._subscriptions = [];
   };
-
-  onDestroy<T extends Service<T>>(this: () => T): void {
-    
-  }
 }
 
 export const AppEventBus = EventBus.getInstance();

@@ -1,0 +1,12 @@
+{
+	"id": 2,
+	"sectionId": 3,
+	"content": "# live reload / rebuild.\nnpm run dev",
+	"type": "none",
+	"en": {
+		"title": "Watch mode"
+	},
+	"fr": {
+		"title": "Watch mode"
+	}
+}

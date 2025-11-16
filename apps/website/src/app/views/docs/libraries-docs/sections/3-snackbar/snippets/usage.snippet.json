@@ -1,0 +1,12 @@
+{
+	"id": 1,
+	"sectionId": 3,
+	"content": "type NotifyOptions = {\n\ttype?: 'info' | 'success' | 'error'; // default: 'info'\n\tposition?: 'top' | 'bottom'; // default: 'bottom'\n\tduration?: number; // ms. default: 3000\n\tactionText?: string;\n\tonAction?: () =&gt; void;\n};\nfunction notify(message: string, options: NotifyOptions = {})\n\n// usage\nimport { notify } from 'relative/path/to/libs/index.js';\n\nnotifyStuff() {\n\t// basic\n\tnotify('Doing stuff');\n\t// modify default\n\tnotify('Successful', { type: 'success', position: 'top', duration: 2000 });\n\t// include callback\n\tnotify('Execute callback ?', { onAction: () =&gt; this.callback(), actionText: 'Proceed' })\n}",
+	"type": "ts",
+	"en": {
+		"title": "Usage"
+	},
+	"fr": {
+		"title": "Utilisation"
+	}
+}

@@ -1,4 +1,4 @@
-import { normalizeString } from '../../../../dist/src/app/helpers/normalize/normalize-string.js';
+import { normalizeString } from '#root/dist/src/app/helpers/index.js';
 
 describe('normalizeString', () => {
 	it('should normalize', () => {

@@ -36,6 +36,7 @@ export class TokenHelper {
 
   public static resolve(token: string, el: Element, event: Event): any {
     const htmlEl = el as HTMLElement;
+    event.preventDefault();
 
     return (
       this.resolveExact(token, htmlEl, event) ??
@@ -52,9 +53,9 @@ export class TokenHelper {
   }
 
   private static resolvePrefixed(token: string, el: HTMLElement): any | null {
-    for (const prefix in PREFIXED_TOKEN_RESOLVERS) {
+    for (const [prefix, resolver] of Object.entries(PREFIXED_TOKEN_RESOLVERS)) {
       if (token.startsWith(prefix)) {
-        return PREFIXED_TOKEN_RESOLVERS[prefix](token.slice(prefix.length), el);
+        return resolver(token.slice(prefix.length), el);
       }
     }
     return null;
@@ -81,7 +82,7 @@ export class TokenHelper {
   }
 
 /** Register a new exact token like "@foo" */
-  public static registerToken(
+  public static registerCustomToken(
     name: string,
     resolver: (el: HTMLElement, ev: Event) => any
   ) {
@@ -89,7 +90,7 @@ export class TokenHelper {
   }
 
 /** Register a new prefixed token like "@style:" */
-  public static registerPrefixed(
+  public static registerPrefixedToken(
     prefix: string,
     resolver: (suffix: string, el: HTMLElement) => any
   ) {

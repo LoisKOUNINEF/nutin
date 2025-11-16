@@ -58,12 +58,12 @@ export class RouteGuardsManager {
     const guardResult = await this.runGuards(guards, params);
 
     if (guardResult === false) {
-      console.log(`Navigation to ${targetPath} blocked by route guard`);
+      // console.log(`Navigation to ${targetPath} blocked by route guard`);
       return { allowed: false };
     }
 
     if (typeof guardResult === 'string') {
-      console.log(`Navigation to ${targetPath} redirected to ${guardResult} by route guard`);
+      // console.log(`Navigation to ${targetPath} redirected to ${guardResult} by route guard`);
       return { allowed: false, redirectTo: guardResult };
     }
 
