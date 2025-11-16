@@ -1,5 +1,5 @@
 import { SinglePageCatalogView } from '../resource/single-page-catalog.view.class.js';
-import TutorialSections from './sections/tutorial-sections.js';
+import TutorialSections from './sections/tutorial.sections.js';
 
 const template = `__TEMPLATE_PLACEHOLDER__`;
 

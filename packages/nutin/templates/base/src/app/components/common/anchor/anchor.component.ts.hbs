@@ -2,21 +2,19 @@ import { AnchorManager, Component, IAnchorConfig } from '../../../../core/index.
 
 /**
  * ```typescript
-interface IAttributesConfig {
-  {{#if i18n}}
-  i18nKey?: string;
-  {{/if}}
+ * interface IAnchorConfig {
+  // prefix href with '#' for internal anchor
+  href: string;
+  target?: string;
   textContent?: string;
+{{#if i18n}}
+  i18nKey?: string;
+{{/if}}
   className?: string;
   style?: string;
-// use regular pipe syntax for arguments / chaining
+  // use regular pipe syntax for arguments / chaining
   pipes?: string;
-}
-interface IAnchorConfig extends IAttributesConfig {
-// prefix href with '#' for internal anchor
-  href: string;
-// _blank, etc
-  target?: string;
+  tagName?: keyof HTMLElementTagNameMap;
 }
 ```
 */
@@ -25,6 +23,7 @@ export class AnchorComponent extends Component<HTMLAnchorElement, IAnchorConfig>
   constructor(mountTarget: HTMLElement, config: IAnchorConfig) {
     super({
       mountTarget,
+      tagName: config.tagName,
       config,
       normalizeKeys: ['style', 'pipes', 'className']
     });

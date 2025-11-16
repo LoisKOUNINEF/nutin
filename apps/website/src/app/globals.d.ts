@@ -47,6 +47,7 @@ declare interface ISnippet {
   sectionId: number;
   content: string;
   type: string;
+  title?: string;
   before?: string;
   after?: string;
 }

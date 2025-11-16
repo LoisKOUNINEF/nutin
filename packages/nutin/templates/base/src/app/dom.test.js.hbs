@@ -1,6 +1,13 @@
 describe('App container', () => {
-  it('should exist', () => {
+  it('should be defined', () => {
     const appContainer = document.getElementById('app');
     expect(appContainer).toBeDefined();
+  });
+  it('should have title', () => {
+    expect(document.title).toEqual('{{projectName}}');
+  });
+  it('should have meta description', () => {
+    const desc = document.querySelector('meta[name="description"]').content;
+    expect(desc).toEqual('{{projectName}}');
   });
 });

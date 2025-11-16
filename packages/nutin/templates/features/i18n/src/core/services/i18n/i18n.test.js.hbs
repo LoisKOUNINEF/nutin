@@ -65,6 +65,8 @@ describe('i18n module', async () => {
       configurable: true,
       value: "en-US"
     });
+    I18nService['_LANGUAGES'] = [ 'en', 'fr' ];
+    I18nService['_DEFAULT_LANGUAGE'] = 'en';
   });
   afterAll(() => {    
     Object.defineProperty(navigator, 'language', {

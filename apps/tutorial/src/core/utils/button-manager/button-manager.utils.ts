@@ -12,7 +12,6 @@ export interface ButtonContainerOptions {
 /**
  * ```typescript
  interface IAttributesConfig {
-  i18nKey?: string;
   textContent?: string;
   className?: string;
   style?: string;

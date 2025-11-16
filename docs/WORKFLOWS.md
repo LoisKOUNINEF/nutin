@@ -1,31 +1,31 @@
 # Workflows Docs
 
-## Website
+- **`DOCKER_AUTH` GitHub Actionssecret must be regenerated & updated when PAT changes** 
+    - generate with `echo -n "username:PAT" | base64`.
+    - *note : PAT* Profile Pic -> Settings -> Left sidebar : Developer Settings -> Personal Access Tokens.
 
-- **Scripts require env variables :** `STACK_NAME`, `DOMAIN_NAME`, `SERVER_PORT`, `CLIENT_PORT`    
-            
-- **Staging STACK_NAME must be named "staging".** 
-- **Production workflow (main branch) needs the staging one**
+- `.github/workflows/jobs/create-stack.sh` generates a new .yaml file with `envsubst` from file `.github/workflows/stacks/stack.yml` and ENV variables :
+    - `STACK_NAME`, `DOMAIN_NAME`, `SERVER_PORT`, `CLIENT_PORT`. (*`REPO_LOWER`, `PROJECT_LOWER`* are set by `format-name.sh`).
 
-### Staging workflow (`staging` branch): 
+- **Production workflow (main branch)**
+    - A `staging` workflow must have been completed beforehand.
+    - Removes old images (keep newest 3) from ghcr.io (website / tutorial).
+    - Stops staging instance (website).
 
+## Staging workflow (`staging` branch): 
+
+* **Staging STACK_NAME must be named "staging".** 
 * Build app's docker image
 * Push the image to ghcr.io
 * Generate YAML file with image tag
-* Copy created YAML file to VPS
+* Copy generated YAML file to VPS
 * Pull app's image
 * Deploy ( Docker Swarm / Traefik )
 
-### Production workflow (`main` branch):
+## Production workflow (`main` branch):
 
 * Copy image tags from website-staging.yml file.
-* Deploy ( Docker Swarm / Traefik )                                                  
-
-- YAML file generation
-
- `.github/workflows/jobs/create-stack.sh` generates a new .yaml file with `envsubst` and file `.github/workflows/stacks/stack.yml`.
-
-- *Some scripts use variables set in `format-name.sh` (`REPO_LOWER`, `PROJECT_LOWER`).*
+* Deploy ( Docker Swarm / Traefik )
 
 ## Deployment scripts (Ubuntu server)
 
@@ -34,13 +34,13 @@
 - docker-login.sh
 
 Writes `.docker/config.json` file and logs in to ghcr.io.           
-Uses `DOCKER_AUTH` GitHub secret, generated with `echo -n "username:PAT" | base64`. Must be re-generated when `PAT` changes.                   
+Uses `DOCKER_AUTH` GitHub secret, generated with `echo -n "username:PAT" | base64`. Must be re-generated when `PAT` changes.
 
 - replace-placeholders.sh
 
 Replaces `image-placeholder` in new .yml file. 
 
-* For staging : if no new image were created for a service, copies the corresponding image tag from prev-website-staging.yml file.           
+* For staging : if image tag is default `:image-placeholder`, copies the corresponding image tag from prev-website-staging.yml file.           
 * For production: copies the image tags for all services from website-staging.yml file.
 
 - check-services-health.sh

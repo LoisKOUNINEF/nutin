@@ -1,0 +1,12 @@
+{
+	"id": 1,
+	"sectionId": 4,
+	"content": "const popover = new PopoverView({\n\ttemplate: `&lt;div&gt;\n\t&lt;p&gt;Do stuff.&lt;/p&gt;\n\t&lt;p&gt;Do you confirm ?&lt;/p&gt;\n&lt;/div&gt;`,\n\t// optional: popover buttons\n\tbuttons: [\n\t{\n\t\tcallback: () =&gt; this.confirm(),\n\t\ttextContent: 'Yes'\n\t},\n\t{\n\t\tcallback: () =&gt; { return },\n\t\ttextContent: 'No'\n\t}]\n\t// optional: callback on popover close\n\tonClose: () =&gt; { console.log('Popover closed') }\n\t// optional: view name. default: 'popover'\n\tviewName: 'popoverConfirm'\n});\n\n// call inherited render()\npopover.render();",
+	"type": "ts",
+	"en": {
+		"title": "Usage"
+	},
+	"fr": {
+		"title": "Utilisation"
+	}
+}

@@ -3,7 +3,6 @@
 - [Classes](#classes)
 - [Mixins](#mixins)
 
-
 ## Classes
 
 ```scss
@@ -486,3 +485,4 @@
 * `src/styles/core/` - utility classes (using mixins and variables defined in `src/styles/base/`) and libraries classes.
 * `src/styles/_styles.scss` - css reset and global styles.
 * `src/styles/main.scss` - imports (`use`) styles from `src/styles/core/`, `src/styles/_styles.scss`, `src/styles/_custom-classes`. 
+* `src/styles/components` `src/styles/views` - exported by barrel files `_index.ts`

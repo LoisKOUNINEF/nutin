@@ -14,12 +14,14 @@ interface IAnchorConfig extends IAttributesConfig {
 // prefix href with '#' for internal anchor
   href: string;
   target?: string;
+  tagName?: keyof HTMLElementTagNameMap;
 }
 ```
 */
 export interface IAnchorConfig extends IAttributesConfig {
   href: string;
   target?: string;
+  tagName?: keyof HTMLElementTagNameMap;
 }
 
 export class AnchorManager {

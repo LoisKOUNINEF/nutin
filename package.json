@@ -18,9 +18,11 @@
     "ws:watch": "npm run watch -w",
     "ws:test": "npm run test -w",
     "ws:test:rebuild": "npm run test:rebuild -w",
+    "ws:test:watch": "npm run test:watch -w",
     "nutin:publish": "npm run publish -w @nutin/cli"
   },
   "devDependencies": {
+    "chokidar": "^4.0.3",
     "esbuild": "^0.25.12",
     "html-minifier-terser": "^7.2.0",
     "jsdom": "^26.1.0",

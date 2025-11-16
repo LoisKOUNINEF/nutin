@@ -1,0 +1,12 @@
+{
+	"id": 1,
+	"sectionId": 2,
+	"content": "# development\nnpm run build\n\n# production\nnpm run build:prod\n# or\nnpm run build --bundle",
+	"type": "none",
+	"en": {
+		"title": "Package.json scripts"
+	},
+	"fr": {
+		"title": "Package.json scripts"
+	}
+}

@@ -39,7 +39,7 @@ export class TaskDetailsComponent extends Component {
     this._task = task;
   }
 
-  updateTask(field: keyof Task, value: string) { 
+  updateTask = (field: keyof Task, value: string) => { 
     const transformers: Partial<Record<keyof Task, (val: any) => any>> = {
       date: (v: string) => new Date(v),
     };

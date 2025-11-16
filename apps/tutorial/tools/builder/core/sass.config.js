@@ -1,13 +1,24 @@
 import * as sass from 'sass';
 import * as fs from 'fs';
-import { print } from '../../utils/index.js';
-const stylesOutput = 'dist/src';
-if (!fs.existsSync(stylesOutput)) fs.mkdirSync(stylesOutput);
+import path from 'path';
+import { print, isVerbose } from '../../utils/index.js';
+import { PATHS } from './paths.js';
 
-sass.compileAsync('src/styles/main.scss', {
-  loadPaths: ['src/styles/base', 'src/styles/core'],
+const stylesInput = path.join(PATHS.source, 'styles');
+const stylesOutput = path.join(PATHS.tempSource, 'main.css');
+
+const scssPath = (origin) => path.join(stylesInput, origin);
+const scssOrigins = [ 
+  'base', 
+  'core',
+  'components'
+];
+const pathsToLoad = scssOrigins.map(origin => scssPath(origin));
+
+sass.compileAsync(path.join(stylesInput, 'main.scss'), {
+  loadPaths: [ ...pathsToLoad ],
   style: 'compressed'
 }).then(result => {
-  print.info('Global styles compiled.');
-  fs.writeFileSync('dist/src/main.css', result.css);
+  fs.writeFileSync(stylesOutput, result.css);
+  if (isVerbose) print.boldInfo('Global styles compiled.\n');
 });

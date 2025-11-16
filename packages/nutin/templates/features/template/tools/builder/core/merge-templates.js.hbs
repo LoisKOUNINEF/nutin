@@ -40,7 +40,7 @@ async function mergeTemplates() {
       print.boldError(`ERROR: Failed to read ${htmlFilename}. ${err.message}`);
     }
   }
-  print.info(`HTML templates minified and merged in scripts.`)
+  if (isVerbose) print.info(`HTML templates minified and merged in scripts.\n`)
 }
 
 mergeTemplates().catch((err) => {

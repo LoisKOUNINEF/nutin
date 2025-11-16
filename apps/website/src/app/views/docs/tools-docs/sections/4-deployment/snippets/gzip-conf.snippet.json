@@ -1,0 +1,16 @@
+{
+	"id": 4,
+	"sectionId": 4,
+	"content": "gzip on;\ngzip_vary on;\ngzip_proxied any;\n# balance between CPU usage / file size reduction\ngzip_comp_level 6;\n# do not compress files smaller than 1kb\ngzip_min_length 1000;\n\ngzip_types\n\t\ttext/plain\n\t\ttext/css\n\t\ttext/xml\n\t\ttext/javascript\n\t\tapplication/json\n\t\tapplication/javascript\n\t\tapplication/xml+rss\n\t\tapplication/rss+xml\n\t\tfont/truetype\n\t\tfont/opentype\n\t\tapplication/vnd.ms-fontobject\n\t\timage/svg+xml;",
+	"type": "none",
+	"en": {
+		"title": "gzip compression",
+		"before": "A small, dedicated config file enabling gzip compression for production assets.\nCompletely optional — remove or replace it depending on your hosting setup.",
+		"after": "If your hosting allows, consider enabling Brotli for even smaller assets."
+	},
+	"fr": {
+		"title": "Compression gzip",
+		"before": "Un petit fichier de configuration dédié permettant la compression gzip pour les ressources de production.\nComplètement optionnel — supprimez-le ou remplacez-le en fonction de votre configuration d'hébergement.",
+		"after": "Si votre hébergement le permet, envisagez d'activer Brotli pour des ressources encore plus légères."
+	}
+}

@@ -25,7 +25,7 @@ services:
         window: 120s
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.rule=Host(`${DOMAIN_NAME}`, `www.${DOMAIN_NAME}`) && PathPrefix(`/`)"
+        - "traefik.http.routers.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.rule=(Host(`${DOMAIN_NAME}`) || Host(`www.${DOMAIN_NAME}`)) && PathPrefix(`/`)"
         - "traefik.http.routers.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.entrypoints=websecure"
         - "traefik.http.routers.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.tls.certresolver=letsencrypt"
         - "traefik.http.routers.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.service=${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}"

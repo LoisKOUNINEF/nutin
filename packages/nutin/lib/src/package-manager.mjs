@@ -39,7 +39,7 @@ function getInstallCommand(packageManager) {
 }
 
 function getScripts(answers) {
-  const { testinNutin, packageManager } = answers;
+  const { testinNutin, packageManager, projectName } = answers;
 
   const baseScripts = {
     "patch": `${packageManager} version patch -m 'CI/CD: Bump version to %s'`,
@@ -47,17 +47,18 @@ function getScripts(answers) {
     "major": `${packageManager} version major -m 'CI/CD: Bump version to %s'`,
     "build": "node tools/builder/builder.js",
     "build:prod": "NODE_ENV=production node tools/builder/builder.js",
-    "serve:only": "node tools/serve.js",
+    "serve:only": "node tools/dev/serve.js",
     "serve": `${packageManager} run build && ${packageManager} run serve:only`,
-    "dev": "node tools/dev.js",
-    "generate": "node tools/generator/generator.js"
+    "dev": "node tools/dev/dev-serve.js",
+    "generate": "node tools/generator/generator.js",
+    "docker:build": `docker build -t ${projectName} -f tools/deployment/Dockerfile .`,
+    "docker:run": `docker run -p 9090:9090 ${projectName}:latest`
   };
 
   const testinNutinScripts = {
-      "test": "node test/runner.js",
-      "test:rebuild": `${packageManager} run build && ${packageManager} run test`,
-      "test:watch": `${packageManager} run build && node test/watch-tests.js`,
-      "serve": `${packageManager} run build && ${packageManager} run serve:only`
+    "test": "node testin-nutin/runner.js",
+    "test:rebuild": `${packageManager} run build && ${packageManager} run test`,
+    "test:watch": `${packageManager} run build && node testin-nutin/watch-tests.js`
     }
 
   return testinNutin
@@ -72,12 +73,15 @@ export async function generatePackageJson(projectPath, answers) {
   const { testinNutin, projectName, packageManager } = answers;
 
   const devDependencies = {
-    "esbuild": "0.25.12",
-    "html-minifier-terser": "7.2.0",
-    "jsdom": "26.1.0",
-    "live-server": "1.2.2",
-    "sass": "1.89.0",
-    "typescript": "5.8.3"
+    "chokidar": "^4.0.3",
+    "esbuild": "^0.25.12",
+    "html-minifier-terser": "^7.2.0",
+    "live-server": "^1.2.2",
+    "sass": "^1.89.0",
+    "typescript": "^5.8.3",
+    ...(testinNutin && {
+      "jsdom": "^26.1.0",
+    })
   };
 
   const scripts = getScripts(answers);
@@ -86,12 +90,18 @@ export async function generatePackageJson(projectPath, answers) {
     "name": projectName,
     "version": "0.1.0",
     "type": "module",
-    "imports": testinNutin ? {
-      "#root/*.js": "./*.js"
-    } : {},
+    ...(testinNutin && {
+      "imports": {
+        "#root/*.js": "./*.js"
+      }
+    }),
     scripts,
     devDependencies,
-    "packageManager": `${packageManager}@latest`
+    ...(testinNutin && {
+      "engines": {
+        "node": ">=20.19.0"
+      }
+    })
   };
   
   await fs.writeJSON(path.join(projectPath, 'package.json'), packageJson, { spaces: 2 });
@@ -105,13 +115,15 @@ export async function generateTsconfigJson(projectPath, answers) {
       "target": "ESNext",
       "module": "NodeNext",
       "moduleResolution": "NodeNext",
-      "rootDir": ".",
-      "outDir": "dist-build",
+      "rootDir": "src",
+      "outDir": "dist-build/src",
       "strict": true,
+      "skipLibCheck": true,
+      "forceConsistentCasingInFileNames": true,
+      "noUncheckedIndexedAccess": true,
       "esModuleInterop": true,
       "allowSyntheticDefaultImports": true,
       "lib": ["es2022", "DOM"],
-      "types": [],
       "removeComments": true,
       "resolveJsonModule": true,
       "typeRoots": ["src/types", "node_modules/@types"]

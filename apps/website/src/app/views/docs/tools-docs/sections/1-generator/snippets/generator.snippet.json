@@ -1,0 +1,12 @@
+{
+	"id": 1,
+	"sectionId": 1,
+	"content": "# kebab-case name\n# supports nested path\nnpm run generate ELEMENT ELEMENT_NAME\n\n##\nnpm run generate component my-component\nnpm run generate view my-view\nnpm run generate service my-service",
+	"type": "none",
+	"en": {
+		"after": "With external templates feature enabled, generator-produced components and views include the __TEMPLATE_PLACEHOLDER__ token.\nBuilder uses this token to inject HTML templates into scripts."
+	},
+	"fr": {
+		"after": "Si les templates externes sont utilisés, les composants et vues générés incluent le token __TEMPLATE_PLACEHOLDER__.\nLe builder utilise ce token pour injecter les templates HTML dans les scripts."
+	}
+}
