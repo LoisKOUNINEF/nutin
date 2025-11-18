@@ -1,5 +1,9 @@
 # Changelog
 
+## V1.2.3
+
+- `nginx.conf` : fixed multi-line CSP map warning (single line map)
+
 ## V1.2.2
 
 - Fixed Nginx security headers in child location blocks.
