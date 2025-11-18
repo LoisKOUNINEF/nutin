@@ -48,5 +48,7 @@ nutin-new
 
 ## [First app tutorial](https://www.nutin.org/tutorial)
 
-- Visit the [website](https://www.nutin.org)
-- [Project repository](https://github.com/LoisKOUNINEF/nutin)
+## 📄 Docs
+
+- Docs on [website](https://www.nutin.org).
+- Docs on [Project repository](https://github.com/LoisKOUNINEF/nutin/tree/main/docs).

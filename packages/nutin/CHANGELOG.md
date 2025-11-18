@@ -1,5 +1,13 @@
 # Changelog
 
+## V1.2.2
+
+- Fixed Nginx security headers in child location blocks.
+
+- Fixed package manager variable in `dev-serve.js.hbs` runCommand
+
+- Removed ghost files
+
 ## V1.2.1
 
 - Builder
@@ -23,8 +31,6 @@
     - Extracted gzip config from Dockerfile (removed `sed` command)
     - Moved Dockerfile and deployment config files (`nginx.conf`, `gzip.conf`) into their own folder `tools/deployment`.
     - Added `docker:build` and `docker:run` scripts in package.json.
-
-  See [DEPLOYMENT.md file](../../docs/DEPLOYMENT_HELPERS.md) for details.
 
 - Moved dev tools (`serve.js`, `dev-serve.js`, `watcher.js`) into their own `tools/dev` folder.
 
@@ -57,8 +63,6 @@
   *Note: `--prod` or `--production` will set NODE_ENV to production, and have the same effect as `--bundle`.* `const isProd = process.env.npm_config_bundle || process.env.NODE_ENV === 'production';`
 
 - Improved deployment tools Dockerfile (nginx conf + gzip)
-
-  See [DEPLOYMENT.md file](../../docs/DEPLOYMENT_HELPERS.md) for details.
 
 - stylin-nutin (generator)
     - When generating a component, prompts (boolean) to generate a `_component-name.scss` file in `styles/components` (forwarded by `stymes/components/_index.scss`).

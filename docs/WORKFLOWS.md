@@ -1,11 +1,11 @@
 # Workflows Docs
 
-- **`DOCKER_AUTH` GitHub Actionssecret must be regenerated & updated when PAT changes** 
+- **`DOCKER_AUTH` GitHub Actions secret must be regenerated & updated when PAT changes** 
     - generate with `echo -n "username:PAT" | base64`.
-    - *note : PAT* Profile Pic -> Settings -> Left sidebar : Developer Settings -> Personal Access Tokens.
+    - *note : generate PAT* : Profile Pic -> Settings -> Left sidebar : Developer Settings -> Personal Access Tokens.
 
 - `.github/workflows/jobs/create-stack.sh` generates a new .yaml file with `envsubst` from file `.github/workflows/stacks/stack.yml` and ENV variables :
-    - `STACK_NAME`, `DOMAIN_NAME`, `SERVER_PORT`, `CLIENT_PORT`. (*`REPO_LOWER`, `PROJECT_LOWER`* are set by `format-name.sh`).
+    - ENV variables : `STACK_NAME`, `DOMAIN_NAME`, `SERVER_PORT`, `CLIENT_PORT`. (*`REPO_LOWER` and `PROJECT_LOWER`* are set by `format-name.sh`).
 
 - **Production workflow (main branch)**
     - A `staging` workflow must have been completed beforehand.
@@ -14,13 +14,13 @@
 
 ## Staging workflow (`staging` branch): 
 
-* **Staging STACK_NAME must be named "staging".** 
 * Build app's docker image
 * Push the image to ghcr.io
 * Generate YAML file with image tag
 * Copy generated YAML file to VPS
 * Pull app's image
 * Deploy ( Docker Swarm / Traefik )
+* *Note : Staging STACK_NAME must be named "staging".* 
 
 ## Production workflow (`main` branch):
 

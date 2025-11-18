@@ -10,7 +10,7 @@ async function startDev() {
     await runCommand('{{packageManager}}', ['run', 'build']);
 
     const { serve, watcher } = await Promise.all([
-      runCommand('npm', ['run', 'serve:only']),
+      runCommand('{{packageManager}}', ['run', 'serve:only']),
       runCommand('node', ['tools/dev/watcher.js'])
     ]);
 

@@ -1,7 +1,7 @@
 {
 	"id": 1,
 	"sectionId": 4,
-	"content": "# -t flag adds a tag to the image\ndocker build -t my-tag -f tools/deployment/Dockerfile .\n# -p flag is for port LOCALHOST_PORT:EXPOSED_PORT\ndocker run -p 9090:9090 my-tag:latest",
+	"content": "# Build docker image\n## -t flag adds a tag to the image\n## -f flag : path to Dockerfile\n## the dot at the end indicates the build context (input)\ndocker build -t my-tag -f tools/deployment/Dockerfile .\n\n# Run docker container\n## -p flag is for port LOCALHOST_PORT:EXPOSED_PORT\n## --name flag gives container a name\ndocker run -p 9090:9090 --name my-name my-tag:latest\n\n# You can also use package.json scripts\nnpm run docker:build\nnpm run docker:run",
 	"type": "none",
 	"en": {
 		"title": "Commands"

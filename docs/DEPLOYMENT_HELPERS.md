@@ -20,6 +20,10 @@ A preconfigured, multi-stage Dockerfile that
 
 ### Headers
 
+*Note : when you use `add_header` in a child location block, it replaces ALL headers from the parent context rather than merging them.*
+- You need to repeat the security headers in each location block that uses add_header. 
+- This config uses nginx `map` directives to define headers once, then reuse them.
+
 #### Content-Security-Policy
 
 One of the most effective defenses against Cross-Site Scripting (XSS), data injection, and content hijacking.                               
@@ -134,6 +138,7 @@ You can validate your CSP and Permissions-Policy with:
 
 - https://securityheaders.com — scans and scores your live site.
 - https://csp-evaluator.withgoogle.com — Google tool that checks for unsafe directives.
+- https://tools.keycdn.com/curl - inspect response headers.
 - Browser DevTools → Network tab → Response Headers — inspect if headers are being sent correctly.
 
 ### Main route handler

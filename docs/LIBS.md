@@ -3,7 +3,7 @@
 ## Quick map
 
 * `libs/snackbar/snackbar.ts` → `notify(message, options)` — simple queued snackbars/toasts
-* `libs/popover/popover.ts` → `PopoverView` — small View for popovers (templated, with buttons)
+* `libs/popover/popover.ts` → `PopoverView` — small View for popovers
 * `libs/guards/guards.ts` → `Guards` — route guard helpers
 * `libs/pipes/pipes.ts` → `registerPipes()` — registers a set of common pipes into `AppPipeRegistry`
 * `libs/index.ts` → barrel file for easy import
