@@ -4,7 +4,7 @@ Core services (subclasses of `Service`).
 
 ## Quick map
 
-* **[router](#1-router)** — declarative client router + navigation helpers
+* **[router](#1-router)** — declarative client router + navigation helpers & view render manager
 * **[http-client](#2-http-client)** — lightweight fetch wrapper with interceptors and JSON helpers
 * **[event-bus](#3-event-bus)** — pub/sub service for app-wide events
 * **[store](#4-store)** — tied to AppEventBus. Consumable objects.
@@ -116,7 +116,7 @@ type Language = typeof LANGUAGES[number];
 
 ### Exposed methods
 
-- Based on browser language. Defaults to DEFAULT_LANGUAGE.
+- Based on browser language. If no language match browser language, defaults to DEFAULT_LANGUAGE.
 - Will look for language key in components and views 'locales' 
 
 ```ts

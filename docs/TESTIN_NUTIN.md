@@ -8,11 +8,14 @@ JSDOM Node version requirement : `{ node: '^20.19.0 || ^22.12.0 || >=24.0.0' }`
 
 ```js
 // testin-nutin.config.js
+
 export default {
 // folders to scan for .test.js files
   origins: [],
+
 // verbose output
   verbose: false,
+
   jsdomOptions: {}
 }
 ```
@@ -22,12 +25,14 @@ export default {
 Tests run on compiled (.js) files.
 
 ```sh
-npm run test
 # node testin-nutin/runner.js
-npm run test:watch # NOTE: will rerun all tests on change.
+npm run test # needs a build output
+
 # npm run build && node testin-nutin/watch-tests.js
+npm run test:watch # NOTE: will rerun all tests on change.
+
+# npm run build && npm run test
 npm run test--rebuild 
-# npm run build && npm run test 
 ``` 
 
 Accepts filter arguments *ex: e2e, unit, FILE_NAME*.     
@@ -66,7 +71,7 @@ andReturn(value)
 ## How to use
 
 Syntax is very similar to Jest, only with (way) less features.               
-Import statements from 'dist' folder can be simplified by adding `"imports": { "#root/*.js": "./*.js" }` in package.json to use `#root/dist/src` and by regrouping exports in indexes.
+Import statements from 'dist' folder can be simplified by adding `"imports": { "#root/*.js": "./*.js" }` in package.json, then use `#root/dist/src`. Group exports in barrel files (`index.ts`).
 
 ## Quick orientation
 
@@ -112,7 +117,7 @@ global.type = (el, text) => {}
 
 * Built-in `spyOn` utility.
 
-* CLI: `npm run test` (runs single-run), `npm run test:watch` (watch mode) and `npm run test--rebuild` (builds and runs single-run).
+* CLI: `npm run test` (runs single-run), `npm run test:watch` (watch mode) and `npm run test:rebuild` (builds and runs single-run).
 
 ## Basic syntax (describe / it / expect)
 
@@ -138,8 +143,8 @@ describe('sum()', () => {
 ## Where to look in code
 
 * `testin-nutin/core/src/globals/` - assertion library, globals, spyOn, JSDOM.
-* `testin-nutin/core/src/utils/` - queue class, test-discovery, test-queue, print (chalk-like util)
+* `testin-nutin/core/src/utils/` - queue class, test-discovery, test-queue, print (chalk-like util + output helper functions).
 * `testin-nutin/core/tests` - testing assertions and globals.
-* `testin-nutin/runner.js` - paths registrations.
+* `testin-nutin/runner.js` - runner.
 
-***The test runner uses a Queue data structure, for which all credit goes to               ThePrimeagen and his [amazing Data Structures and Algorithms course on frontendmasters.com](https://frontendmasters.com/courses/algorithms/)*** 
+***The test runner uses a Queue data structure, for which all credit goes to ThePrimeagen and his [amazing Data Structures and Algorithms course on frontendmasters.com](https://frontendmasters.com/courses/algorithms/)*** 

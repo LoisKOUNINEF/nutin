@@ -1,10 +1,10 @@
 { "id": 2,
 	"en": {
 		"name": "Mixins",
-		"content": "Mixins use variables defined in _variables.scss."
+		"content": "Mixins use variables defined in styles/base/_variables.scss."
 	},
 	"fr":	{
 		"name": "Mixins",
-		"content": "Les mixins utilisent les variables définies dans _variables.scss."
+		"content": "Les mixins utilisent les variables définies dans styles/base/_variables.scss."
 	}
 }
