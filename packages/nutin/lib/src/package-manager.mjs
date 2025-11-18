@@ -42,9 +42,6 @@ function getScripts(answers) {
   const { testinNutin, packageManager, projectName } = answers;
 
   const baseScripts = {
-    "patch": `${packageManager} version patch -m 'CI/CD: Bump version to %s'`,
-    "minor": `${packageManager} version minor -m 'CI/CD: Bump version to %s'`,
-    "major": `${packageManager} version major -m 'CI/CD: Bump version to %s'`,
     "build": "node tools/builder/builder.js",
     "build:prod": "NODE_ENV=production node tools/builder/builder.js",
     "serve:only": "node tools/dev/serve.js",
@@ -52,7 +49,10 @@ function getScripts(answers) {
     "dev": "node tools/dev/dev-serve.js",
     "generate": "node tools/generator/generator.js",
     "docker:build": `docker build -t ${projectName} -f tools/deployment/Dockerfile .`,
-    "docker:run": `docker run -p 9090:9090 ${projectName}:latest`
+    "docker:run": `docker run -p 9090:9090 --name ${projectName}-container ${projectName}:latest`,
+    "patch": `${packageManager} version patch -m 'CI/CD: Bump version to %s'`,
+    "minor": `${packageManager} version minor -m 'CI/CD: Bump version to %s'`,
+    "major": `${packageManager} version major -m 'CI/CD: Bump version to %s'`
   };
 
   const testinNutinScripts = {

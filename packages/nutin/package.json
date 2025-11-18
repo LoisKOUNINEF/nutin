@@ -1,6 +1,6 @@
 {
   "name": "@nutin/cli",
-  "version": "1.2.1",
+  "version": "1.2.3",
   "description": "Build SPAs by understanding SPAs. A minimal frontend toolkit crafted for learning and lean applications.",
   "preferGlobal": true,
   "main": "lib/index.mjs",

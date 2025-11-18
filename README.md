@@ -1,6 +1,7 @@
 # nutin-toolkit Monorepo
 
-Monorepo for the nutin toolkit project `A minimal frontend toolkit crafted for learning and lean applications.`. Contains the toolkit's NPM package, the project's website and the tutorial app.
+Monorepo for the nutin toolkit project - `A minimal frontend toolkit crafted for learning and lean applications` -. Contains the toolkit's NPM package, the project's website and the tutorial app.
+
 - [nutin](packages/nutin/README.md)
 - [website](apps/website/README.md)
 - [tutorial app](apps/tutorial)

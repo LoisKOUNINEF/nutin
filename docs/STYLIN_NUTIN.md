@@ -5,9 +5,12 @@
 
 ## Classes
 
+Utility classes use variables defined in `styles/base/_variables.scss`, as well as mixins defined in `styles/base/_mixins.scss`.
+
 ```scss
 // Utility classes prefix : 'u-'
 
+// $name = smallest || small || medium || large || largest
 // font size
 @each $name, $size in $font-sizes {
 	.u-font-#{$name}
@@ -31,16 +34,19 @@
 }
 
 //border-radius
+// $name = small || medium || large || pill
 @each $name, $radius in $border-radius {
 	.u-rounded-#{$name}
 }
 
 // box-shadow
+// $name = small | medium || large
 @each $name, $shadow in $shadows {
 	.u-shadow-#{$name}
 }
 
 // transition
+// $name = fast || normal || slow
 @each $name, $transition in $transitions {
 	.u-transition-#{$name}
 }
@@ -117,6 +123,8 @@
 ```
 
 ## Mixins
+
+Mixins use variables defined in `styles/base/_variables.scss`.
 
 ```scss
 @mixin flex-center {
@@ -484,5 +492,5 @@
 * `src/styles/base/` - variables, mixins, functions, fonts registration.
 * `src/styles/core/` - utility classes (using mixins and variables defined in `src/styles/base/`) and libraries classes.
 * `src/styles/_styles.scss` - css reset and global styles.
-* `src/styles/main.scss` - imports (`use`) styles from `src/styles/core/`, `src/styles/_styles.scss`, `src/styles/_custom-classes`. 
-* `src/styles/components` `src/styles/views` - exported by barrel files `_index.ts`
+* `src/styles/main.scss` - imports (`use`) styles from `src/styles/core/`, `src/styles/_styles.scss`, `src/styles/_custom-classes`, `src/styles/components/`, `src/styles/views/`. 
+* `src/styles/components` `src/styles/views` - exported by barrel files `_index.scss`

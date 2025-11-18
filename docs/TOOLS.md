@@ -2,17 +2,21 @@
 
 ## Package.json scripts
 
-* Development server (SASS compile, TS compile):
-*NOTE: If you switch package manager in an existing nutin app, you'll need to modify : `tools/dev.js`, `tools/watcher.js`.*
+* Development server :
+*NOTE: If you switch package manager in an existing nutin app, you'll need to modify : `tools/dev-serve.js`, `tools/watcher.js`.*
 
 ```bash
+# build (dev environment) and serve
 npm run serve
 
-# without building
+# without build (use existing 'dist' output)
 npm run serve:only
 
-# live reload
 npm run dev
+
+## `serve` and `dev` commands can be executed with flags
+### `--bundle` : prod (bundled) output
+### `--log` : verbose builder output
 ```
 
 * Build for production:
@@ -21,6 +25,8 @@ npm run dev
 npm run build:prod
 # or
 npm run build --bundle
+
+## both commands can be executed with flag `--log` : verbose output
 ```
 
 * Generate a component, view or service:
@@ -36,11 +42,11 @@ npm run generate view my-view
 npm run generate service my-service
 ```
 
-Runs generator: `npm run generate component widgets/my-widget` -> this creates: 
-- `src/app/components/widgets/my-widget/my-widget.component.ts`.
-- `locales` fragments with i18n feature enabled.
-- `src/app/components/widgets/my-widget/my-widget.component.html` with external templates feature enabled. 
-- optionally `styles/components/_my-widget.scss` with stylin-nutin feature enabled (forwarded by `styles/components/_index.scss`).
+- Runs generator: `npm run generate component widgets/my-widget` -> this creates: 
+    - `src/app/components/widgets/my-widget/my-widget.component.ts`.
+    - `locales` fragments with i18n feature enabled.
+    - `src/app/components/widgets/my-widget/my-widget.component.html` with external templates feature enabled. 
+    - optionally `styles/components/_my-widget.scss` with stylin-nutin feature enabled (forwarded by `styles/components/_index.scss`).
 
 * Run tests (testin-nutin toolkit):
 
@@ -106,8 +112,8 @@ tsconfig.json
 5. `validate-html.js` 
      — run lightweight checks over `public/index.html` (and/or `index.html` in `dist-build`) to ensure required tags exist.
 6. `esbuild.js`
-    - 
-7. Finalize build
+    - run esbuild
+7. `finalize-build.js`
     - remove existing dist/ folder.
     - rename dist-build to dist
     - *production*: remove unused folder beforehand.
@@ -150,8 +156,8 @@ tsconfig.json
 
 ### `core/validate-html.js`
 
-* Purpose: run a few checks on HTML before finishing the build.
-* Behavior : it reads an `index.html` file and validates tags and errors out if expected nodes are missing.
+* Purpose: inject the main script tag and run a few checks on HTML before finishing the build.
+* Behavior : it reads `index.html` file, add app's entrypoint script tag, validates tags and errors out if expected nodes are missing.
 
 ### `core/esbuild.js`
 
@@ -173,8 +179,8 @@ Runs esbuild with config from `builder.config.js`.
 
 * `generateFile({ name, targetPath, templateFn, suffix, extension = 'ts' })` 
     — creates the target directory and writes a file `${targetPath}/${name.kebab}.${suffix}.${extension}` using `templateFn(name, targetPath)` as content.
-* `generateJson({ targetPath, name })` 
-    — creates a `locales` directory beneath the target and writes JSON files for each language present in `src/app/languages.js`'s exported `LANGUAGES` array. For `view` targets, *if i18n feature is used*, the JSON template includes `meta` keys; for other targets a minimal default JSON is written.
+* `generateJson({ targetPath, name })` *only with i18n feature*
+    — creates a `locales` directory beneath the target and writes JSON files for each language present in `src/app/languages.js`'s exported `LANGUAGES` array. For `view` targets, the JSON template includes `meta` keys; for other targets a minimal default JSON is written.
 
 ### Templates
 
@@ -182,7 +188,7 @@ Runs esbuild with config from `builder.config.js`.
 * `view.template.js` — similar to component but for `View`; sets `const template = \'__TEMPLATE\_PLACEHOLDER__\';\`.
 * `service.template.js` — simple singleton `Service` pattern.
 * *If external templates are used* `html.template.js` — minimal HTML snippet (*If i18n is used* : references i18n key by kebab name: `<div data-i18n="<name>.default"></div>`).
-* *If i18n is used* : `json.template.js` — basic JSON
+* *If i18n is used* : `json.template.js` — default JSON
 * `scss.template.js` — `@use` variables, mixins, and sass:map.
 
 **Notes**
