@@ -1,0 +1,12 @@
+{
+	"id": 2,
+	"sectionId": 1,
+	"content": "nutin-new\n\n// or\ncreate-nutin-app",
+	"type": "none",
+	"en": {
+		"title": "Create a new app"
+	},
+	"fr": {
+		"title": "Créer une nouvelle application"
+	}
+}

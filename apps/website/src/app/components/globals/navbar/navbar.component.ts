@@ -12,25 +12,32 @@ export class NavbarComponent extends Component<HTMLHeadingElement> {
     'tools'
   ] as const;
 
+  private readonly fixedLinks = [
+    'home',
+    'tutorial',
+    'get-started',
+    'changelog'
+  ] as const;
+
   constructor(mountTarget: HTMLElement) {
     super({templateFn, mountTarget, tagName: 'header'});
   }
 
   childConfigs(): ComponentConfig[] {
+    const fixedButtons = this.createFixedButtons();
     const dropdownButtonsCatalog = this.getDropdownButtonsCatalog();
-    const fixedButtons = [
-      this.createFixedButton('home'),
-      this.createFixedButton('tutorial'),
-      this.createDropdownButton()
-    ];
     return [ ...fixedButtons, ...dropdownButtonsCatalog ];
   }
 
-  private createFixedButton(name: string): ComponentConfig {
-    return {
-      selector: name,
-      factory: (el) => new ButtonComponent(el, this.getBtnConfig(name))
-    }
+  private createFixedButtons(): ComponentConfig[] {
+    const fixedButtons: ComponentConfig[] = this.fixedLinks.map((name) =>{
+      return {
+          selector: name,
+          factory: (el) => new ButtonComponent(el, this.getBtnConfig(name))
+        }
+      }
+    )
+    return [ ...fixedButtons, this.createDropdownButton() ]
   }
 
   private getBtnConfig(name: string): BaseButton {
@@ -44,16 +51,16 @@ export class NavbarComponent extends Component<HTMLHeadingElement> {
   }
 
   private handleNavigation(path: string) {
-    const navigateTo = this.returnUrl(path);
+    const isDocs = (this.dropdownLinks as ReadonlyArray<string>).includes(path);
+    const navigateTo = this.returnUrl(path, isDocs);
     AppEventBus.emit('navigate', `/${navigateTo}`);
-    const isDocs = navigateTo.includes('docs');
     this.toggleDropdown(isDocs);
   }
 
-  private returnUrl(path: string): string {
+  private returnUrl(path: string, isDocs: boolean): string {
     if (path === 'home') return '';
-    if (path === 'tutorial') return path;
-    return `${path}-docs`; 
+    if (isDocs) return `${path}-docs`;
+    return path;
   }
 
   private createDropdownButton(): ComponentConfig {
@@ -79,18 +86,15 @@ export class NavbarComponent extends Component<HTMLHeadingElement> {
   }
 
   private getDropdownButtonsCatalog(): ComponentConfig[] {
-    const dropdownButtons = this.createDropdownButtons();
+    const dropdownButtons = this.dropdownLinks.map((link) => {
+      return this.getBtnConfig(link);
+    });
+
     return this.catalogConfig({
         array: dropdownButtons,
         selector: 'dropdown-buttons',
         component: ButtonComponent,
         elementName: 'dropdown-btn'
-    });
-  }
-
-  private createDropdownButtons(): BaseButton[] {
-    return this.dropdownLinks.map((link) => {
-      return this.getBtnConfig(link);
     });
   }
 }

@@ -1,0 +1,6 @@
+{ "id": 3,
+	"en": {
+		"name": "1.1.0",
+		"content": "Added index access in CatalogConfig. Use with `config.index`."
+	}
+}

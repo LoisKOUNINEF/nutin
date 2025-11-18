@@ -69,7 +69,7 @@
 - Improved deployment tools Dockerfile (nginx conf + gzip)
 
 - stylin-nutin (generator)
-    - When generating a component, prompts (boolean) to generate a `_component-name.scss` file in `styles/components` (forwarded by `stymes/components/_index.scss`).
+    - When generating a component, prompts (boolean) to generate a `_component-name.scss` file in `styles/components` (forwarded by `styles/components/_index.scss`).
 
 ## V1.1.0
 

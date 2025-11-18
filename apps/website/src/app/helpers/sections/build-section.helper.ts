@@ -3,7 +3,7 @@ import { sortById } from "../sort/sort-by-id.helper.js";
 
 type ILocalizedSectionWithSnippets = {
   section: LocalizedSection,
-  snippets: LocalizedSnippet[]
+  snippets?: LocalizedSnippet[]
 }
 
 export class BuildSectionHelper {
@@ -62,6 +62,6 @@ export class BuildSectionHelper {
   static buildSectionBatch(
     localizedSections: ILocalizedSectionWithSnippets[]
   ): ISection[] {
-    return localizedSections.map((section) => this.buildSection(section.section, section.snippets) )
+    return sortById(localizedSections.map((section) => this.buildSection(section.section, section.snippets || []) ))
   }
 }

@@ -1,0 +1,7 @@
+{ "id": 4,
+	"en": {
+		"name": "1.2.0",
+		"content": "• Fixed `npm run dev` command. Added middleware to reload nested routes.\n\n• Improved `data-optional` tag:\n\t• Can now specify which attribute to check with `data-optional=\"attrName\"` (`src`, `href`, ...)\n\t• Now works for `img`, `input`, etc\n\n• Event Bus : \n\t• Tracks both event name + callback.\n\t• cleanupEventListeners now works correctly.\n\t• New property: `once`. `once` subscriptions automatically remove themselves after first call.\n\n• HTTP client : \n\t• Optional request / response interceptors.\n\t• Full timeout / abort controller support preserved.                           \n\t• onDestroy now clears interceptors to prevent memory leaks.\n\n• Improved builder\n\t• Implemented `esbuild` & `html-minifier-terser`.\n\t• Added flags : \n\t\t• --bundle for production-ready build (`npm run build --bundle` is equivalent to `npm run build:prod`)\n\t\t• --log (verbose output).\n\n• Improved deployment tools Dockerfile (nginx conf + gzip)\n\n• stylin-nutin (generator)\n\t• When generating a component, prompts (boolean) to generate a `_component-name.scss` file in `styles/components` (forwarded by `styles/components/_index.scss`).",
+		"notes": "\n`--prod` or `--production` will set NODE_ENV to production, and have the same effect as `--bundle`.`"
+	}
+}
