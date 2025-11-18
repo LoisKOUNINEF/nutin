@@ -14,6 +14,7 @@
 
 ## Staging workflow (`staging` branch): 
 
+* **Staging STACK_NAME must be named "staging".** 
 * Build app's docker image
 * Push the image to ghcr.io
 * Generate YAML file with image tag

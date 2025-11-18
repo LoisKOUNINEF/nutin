@@ -12,7 +12,6 @@ npm run serve
 # without build (use existing 'dist' output)
 npm run serve:only
 
-# live reload and rebuild on change
 npm run dev
 
 ## `serve` and `dev` commands can be executed with flags

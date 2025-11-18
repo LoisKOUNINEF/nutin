@@ -32,7 +32,7 @@ services:
         - "traefik.http.middlewares.hsts-header.headers.stsSeconds=31536000"
         - "traefik.http.middlewares.hsts-header.headers.stsIncludeSubdomains=true"
         - "traefik.http.middlewares.hsts-header.headers.stsPreload=true"
-        - "traefik.http.routers.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.middlewares=hsts-header@docker"
+        - "traefik.http.routers.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.middlewares=hsts-header@swarm"
         - "traefik.http.services.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.loadbalancer.server.port=${CLIENT_PORT}"
 
 networks:

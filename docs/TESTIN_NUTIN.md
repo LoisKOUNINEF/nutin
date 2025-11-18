@@ -32,7 +32,7 @@ npm run test # needs a build output
 npm run test:watch # NOTE: will rerun all tests on change.
 
 # npm run build && npm run test
-npm run test--rebuild 
+npm run test--rebuild
 ``` 
 
 Accepts filter arguments *ex: e2e, unit, FILE_NAME*.     
@@ -147,4 +147,4 @@ describe('sum()', () => {
 * `testin-nutin/core/tests` - testing assertions and globals.
 * `testin-nutin/runner.js` - runner.
 
-***The test runner uses a Queue data structure, for which all credit goes to ThePrimeagen and his [amazing Data Structures and Algorithms course on frontendmasters.com](https://frontendmasters.com/courses/algorithms/)*** 
+***The test runner uses a Queue data structure, for which all credit goes to ThePrimeagen and his [amazing Data Structures and Algorithms course on frontendmasters.com](https://frontendmasters.com/courses/algorithms/)***
