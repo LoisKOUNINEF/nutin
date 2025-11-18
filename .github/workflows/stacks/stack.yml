@@ -29,6 +29,10 @@ services:
         - "traefik.http.routers.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.entrypoints=websecure"
         - "traefik.http.routers.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.tls.certresolver=letsencrypt"
         - "traefik.http.routers.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.service=${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}"
+        - "traefik.http.middlewares.hsts-header.headers.stsSeconds=31536000"
+        - "traefik.http.middlewares.hsts-header.headers.stsIncludeSubdomains=true"
+        - "traefik.http.middlewares.hsts-header.headers.stsPreload=true"
+        - "traefik.http.routers.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.middlewares=hsts-header@docker"
         - "traefik.http.services.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.loadbalancer.server.port=${CLIENT_PORT}"
 
 networks:
