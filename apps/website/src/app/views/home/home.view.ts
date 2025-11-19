@@ -19,10 +19,9 @@ export class HomeView extends View {
     },{
       selector: 'snippet',
       factory: (el) => new SnippetComponent(el, {
-        id:1,
-        sectionId:1,
-        // title: 'Get Started',
-        content:'npm i -g @nutin/cli\n\nnutin-new\n## or\ncreate-nutin-app',
+        id: 0,
+        sectionId: 0,
+        content: 'npm i -g @nutin/cli\n\nnutin-new',
         type: 'none'
       })
     }]

@@ -1,0 +1,41 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+
+.resource {
+	width: 100vw;
+	@include mixins.flex-row;
+	@include mixins.respond-to(small) {
+		@include mixins.flex-column;
+	}
+	@include mixins.respond-to(medium) {
+		@include mixins.flex-column;
+	}
+}
+
+.resource__section {
+	width: 80vw;
+	@include mixins.respond-to(small) {
+		width: 100vw;
+	}
+	@include mixins.respond-to(medium) {
+		width: 100vw;
+	}
+}
+.resource__single {
+	line-height: map.get($spacings, 'largest');
+	padding-left: map.get($spacings, 'largest');
+	padding-right: map.get($spacings, 'largest');
+	h1 {
+		padding-top: map.get($spacings, 'largest');
+		padding-bottom: map.get($spacings, 'largest');
+		text-align: center;
+	}
+	h2 {
+		font-weight: bold;
+	}
+	@include mixins.respond-to(medium) {
+		padding-left: map.get($spacings, 'small');
+		padding-right: map.get($spacings, 'small');
+	}
+}

@@ -11,13 +11,14 @@ export class NavbarComponent extends Component<HTMLHeadingElement> {
     'core',
     'tools'
   ] as const;
-
   private readonly fixedLinks = [
     'home',
     'tutorial',
     'get-started',
     'changelog'
   ] as const;
+  private readonly btnClass = 'c-round-btn' as const;
+  private readonly dropdownClass = 'navbar__dropdown-visible' as const;
 
   constructor(mountTarget: HTMLElement) {
     super({templateFn, mountTarget, tagName: 'header'});
@@ -41,7 +42,7 @@ export class NavbarComponent extends Component<HTMLHeadingElement> {
   }
 
   private getBtnConfig(name: string): BaseButton {
-    const btnClass = 'u-bg-inherit u-marg-y-small u-padd-x-small u-rounded';
+    const btnClass = this.btnClass;
 
     return { 
       i18nKey: `navbar.${name}`, 
@@ -67,7 +68,7 @@ export class NavbarComponent extends Component<HTMLHeadingElement> {
     const dropdownBtn = { 
       i18nKey: `navbar.documentation`, 
       callback: () => this.toggleDropdown(),
-      className: 'u-bg-inherit u-marg-y-small u-padd-x-small u-rounded'
+      className: this.btnClass,
     };
 
     return {
@@ -79,9 +80,9 @@ export class NavbarComponent extends Component<HTMLHeadingElement> {
   private toggleDropdown(isDocs: boolean = true) {
     const dropdown = document.getElementById('dropdown');
     if (!isDocs) {
-      dropdown?.classList.remove('navbar__dropdown-visible');
+      dropdown?.classList.remove(this.dropdownClass);
     } else {
-      dropdown?.classList.toggle('navbar__dropdown-visible');
+      dropdown?.classList.toggle(this.dropdownClass);
     }
   }
 

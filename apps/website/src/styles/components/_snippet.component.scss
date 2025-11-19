@@ -1,0 +1,17 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+
+.snippet__code {
+	overflow-x: auto;
+	width: 75vw;
+	@include mixins.respond-to(small) {
+   	min-width: 95vw;
+ 	}
+	@include mixins.respond-to(medium) {
+   	min-width: 90vw;
+ 	}
+	@include mixins.respond-to(largest) {
+   	width: 70vw;
+ 	}
+}

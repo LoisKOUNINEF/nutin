@@ -4,7 +4,7 @@
 	"content": "npx @nutin/cli create-nutin-app nutin-todo -d --no-template --no-i18n\n# or\nnpx @nutin/cli nutin-new nutin-todo -d --no-template --no-i18n\n\n# or install package globally\nnpm install -g @nutin/cli\n\ncreate-nutin-app nutin-todo -d --no-template --no-i18n\n# or\nnutin-new nutin-todo -d --no-template --no-i18n",
 	"type": "none",
 	"en": {
-		"before": "Flags :\n\t• -d (ou --defaults) : default settings\n\t• --no-template : use inline templates (html)\n\t• --no-i18n : do not use i18n (json-based content)",
+		"before": "Flags :\n\t• -d (or --defaults) : default settings\n\t• --no-template : use inline templates (html)\n\t• --no-i18n : do not use i18n (json-based content)",
 		"after": "Run nutin-new or create-nutin-app with flag -h or --help flag to see options & default values."
 	},
 	"fr": {

@@ -1,0 +1,63 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+
+.home__title {
+  font-family: $secondary-font;
+	color: $primary-color;
+	font-size: map.get($font-sizes, 'large');
+	font-weight: bold;
+	@include mixins.respond-to(medium) {
+		padding-top: map.get($spacings, 'small');
+	}
+}
+
+.home__main-content {
+	line-height: map.get($spacings, 'largest');
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+	@include mixins.flex-center;
+	@include mixins.flex-column;
+	padding: map.get($spacings, 'large');
+	margin-top: map.get($spacings, 'large');
+	margin-bottom: map.get($spacings, 'large');
+
+	@include mixins.respond-to(medium) {
+		padding: map.get($spacings, 'medium');
+	}
+}
+
+.home__catchphrase {
+	text-align: center;
+	max-width: 80vw;
+	@include mixins.respond-to(small) {
+   	width: 100vw;
+ 	}
+	@include mixins.respond-to(medium) {
+   	width: 90vw;
+ 	}
+	@include mixins.respond-to(largest) {
+   	width: 70vw;
+ 	}
+}
+
+.home___snippet {
+	text-align: center;
+	font-weight: bold;
+	font-style: italic;
+	font-size: map.get($font-sizes, 'large');
+	padding-top: map.get($spacings, 'large');
+	pre {
+		background: linear-gradient(to top, rgba($background-color, 1), rgba($secondary-color, .4));
+		border-radius: 1rem;
+		font-size: map.get($font-sizes, 'medium');
+		font-style: normal;
+		text-align: center;
+		padding-top: map.get($spacings, 'large');
+		padding-bottom: map.get($spacings, 'large');
+		background-color: inherit;
+		code {
+			color: $text-color;
+		}
+	}
+}

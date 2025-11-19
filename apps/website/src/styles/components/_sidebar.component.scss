@@ -1,0 +1,34 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+
+.c-sidebar {
+	// anchor
+	:first-child {
+		order: 1;
+	}
+	@include mixins.flex-column;
+	position: sticky;
+	left: 0;
+	top: 0;
+	overflow-y: auto;
+	padding-top: map.get($spacings, 'largest');
+	margin-right: map.get($spacings, 'medium');
+	width: 20vw;
+	@include mixins.bg-gradient(bottom, rgba($secondary-color, .5), $background-color);
+	@include mixins.rounded;
+
+	@include mixins.respond-to(medium) {
+		@include mixins.flex-row;
+		@include mixins.flex-wrap;
+		@include mixins.flex-center;
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		background-color: $background-color;
+		padding-bottom: map.get($spacings, 'medium');
+		width: 100vw;
+		height: auto;
+		margin-right: 0;
+		margin-top: map.get($spacings, 'medium');
+	}
+}
