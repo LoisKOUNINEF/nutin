@@ -3,7 +3,8 @@ ARG NGINX_VERSION=1.27-alpine
 
 FROM node:${NODE_VERSION} AS builder
 WORKDIR /usr/src/app
-COPY . .
+COPY ./apps/tutorial/ ./apps/tutorial/
+COPY ./package*.json ./
 RUN npm ci && \
     npm run -w tutorial build:prod
 

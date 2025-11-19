@@ -4,7 +4,7 @@ import config from '#root/testin-nutin.config.js';
 registerTestGlobals();
 
 let testFiles = config.origins.flatMap(
-  origin => getTestFiles(`../${origin}`)
+  origin => getTestFiles(path.join('../', origin))
 );
 
 const args = process.argv.slice(2);
