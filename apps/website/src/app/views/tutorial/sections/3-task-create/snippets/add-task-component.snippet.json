@@ -1,12 +1,14 @@
 {
 	"id": 2,
 	"sectionId": 3,
-	"content": "import { Component, ComponentConfig } from '../../../core/index.js';\nimport { TasksService } from '../../services/index.js';\nimport { ButtonComponent } from '../index.js';\n\nconst templateFn = () => `\n&lt;div data-component=\"add-task\"&gt;&lt;/div&gt;\n`;\n\nexport class AddTaskComponent extends Component {\n\tconstructor(mountTarget: HTMLElement) {\n\t\tsuper({templateFn, mountTarget});\n\t}\n\n\tprivate addTask() {\n\t\tTasksService.addTask();\n\t}\n\n\tpublic childConfigs(): ComponentConfig[] {\n\t\treturn [\n\t\t\t{\n\t\t\t\tselector: `add-task`,\n\t\t\t\tfactory: (el) => new ButtonComponent(\n\t\t\t\t\tel, \n\t\t\t\t\t{\n\t\t\t\t\t\ttextContent: 'New Task',\n\t\t\t\t\t\tcallback: () => this.addTask(),\n\t\t\t\t\t\tclassName: 'task-catalog__add-task-button'\n\t\t\t\t\t}\n\t\t\t\t)\n\t\t\t}\n\t\t]\n\t}\n}",
+	"content": "import { Component, ComponentConfig } from '../../../core/index.js';\nimport { TasksService } from '../../services/index.js';\nimport { ButtonComponent } from '../index.js';\n\nconst templateFn = () => `\n&lt;div data-component=\"add-task-btn\"&gt;&lt;/div&gt;\n`;\n\nexport class AddTaskComponent extends Component {\n\tconstructor(mountTarget: HTMLElement) {\n\t\tsuper({templateFn, mountTarget});\n\t}\n\n\tprivate addTask() {\n\t\tTasksService.addTask();\n\t}\n\n\tpublic childConfigs(): ComponentConfig[] {\n\t\treturn [\n\t\t\t{\n\t\t\t\tselector: `add-task-btn`,\n\t\t\t\tfactory: (el) => new ButtonComponent(\n\t\t\t\t\tel, \n\t\t\t\t\t{\n\t\t\t\t\t\ttextContent: 'New Task',\n\t\t\t\t\t\tcallback: () => this.addTask(),\n\t\t\t\t\t\tclassName: 'task-catalog__add-task-button'\n\t\t\t\t\t}\n\t\t\t\t)\n\t\t\t}\n\t\t]\n\t}\n}",
 	"type": "ts",
 	"en": {
-		"before": "Next, generate the component with npm run generate component add-task which will call the TasksService function.\nThe \"selector\" property refers to the template's data-component attribute, where we're going to use the ButtonComponent."
+		"before": "Next, generate the component with npm run generate component add-task, where we'll use TasksService.",
+		"after": "The `selector` property refers to the template's data-component attribute."
 	},
 	"fr": {
-		"before": "Ensuite, générons le composant avec npm run generate component add-task qui appellera la fonction de TaskService.\nLa propriété \"selector\" correspond à l'attribut data-component du template, où nous allons utiliser le composant Button."
+		"before": "Ensuite, générons le composant avec npm run generate component add-task, où nous utiliserons TaskService.",
+		"after": "La propriété `selector` correspond à l'attribut data-component du template."
 	}
 }

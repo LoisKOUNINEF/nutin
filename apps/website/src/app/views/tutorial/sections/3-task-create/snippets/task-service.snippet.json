@@ -4,9 +4,11 @@
 	"content": "// Use AppEventBus so that AppRouter handles dynamic DOM update\n\tprivate emitReload() {\n\t\tAppEventBus.emit('reload');\n\t}\n\n\tprivate tasksUpdated() {\n\t\tthis.emitReload();\n\t}\n\n\tpublic addTask() {\n\t\tconst id = this._tasks.length === 0 \n\t\t\t? 0 \n\t\t\t: Math.max(...this._tasks.map(task => task.id)) + 1;\n\n\t\tconst newTask: Task = {\n\t\t\tid: id,\n\t\t\tname: `Untitled ${id + 1}`,\n\t\t\tcontent: '',\n\t\t\tdate: new Date(),\n\t\t};\n\n\t\tthis._tasks.push(newTask);\n\t\tthis.tasksUpdated();\n\t}",
 	"type": "ts",
 	"en": {
-		"before": "First, let's add a task creation method in TasksService.\nSince nutin doesn't have a change detection system, we'll rely on the AppEventBus to update the DOM dynamically."
+		"before": "First, let's add a task creation method in TasksService.",
+		"after": "Since nutin doesn't have a change detection system, we'll rely on the AppEventBus to trigger DOM re-rendering."
 	},
 	"fr": {
-		"before": "Tout d'abord, ajoutons une méthode pour gérer la création de tâche dans TasksService.\nComme nutin n'a pas de système de détection des changements, nous nous reposerons sur le bus d'évènements pour mettre à jour le DOM dynamiquement."
+		"before": "Tout d'abord, ajoutons une méthode pour gérer la création de tâche dans TasksService.",
+		"after": "Comme nutin n'a pas de système de détection des changements, nous nous reposerons sur le bus d'évènements pour déclencher le re-rendu du DOM."
 	}
 }

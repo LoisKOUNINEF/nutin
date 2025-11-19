@@ -1,12 +1,12 @@
 { "id": 1,
 	"en": {
 		"name": "Setup",
-		"content": "Basic TypeScript knowledge should be sufficient to follow along this guide.\n\nFirst, we're going to create a new nutin app with default settings (\"-d\" flag).\nRun command with \"-h\" or \"--help\" flag to see available options.\nTemplates are styled using built-in stylin-nutin library classes.",
-		"notes": "See the documentation for features' details."
+		"content": "Basic TypeScript knowledge should be sufficient to follow along this guide.\nTemplates are styled using built-in stylin-nutin library classes (`u-` prefix).",
+		"notes": "See the documentation for details."
 	},
 	"fr":	{
 		"name": "Préparation",
-		"content": "Une connaissance basique de TypeScript sera suffisante pour suivre ce guide.\nCommençons par créer une nouvelle application nutin avec les paramètres par défaut (flag \"-d\").\nExécutez la commande avec le flag \"-h\" or \"--help\" pour voir les options disponibles.\nLes templates sont mis en forme avec les classes de la bibliothèque incluse stylin-nutin.",
-		"notes": "Se référer à la documentation pour le détail des fonctionnalités."
+		"content": "Une connaissance basique de TypeScript sera suffisante pour suivre ce guide.\nLes templates sont mis en forme avec les classes de la bibliothèque incluse stylin-nutin (prefix `u-`).",
+		"notes": "Se référer à la documentation pour des détails."
 	}
 }
