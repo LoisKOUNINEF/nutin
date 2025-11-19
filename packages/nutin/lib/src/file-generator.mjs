@@ -3,9 +3,7 @@ import { fileURLToPath } from 'url';
 import * as fsExtra from 'fs-extra';
 import { TemplateCompiler } from './template-compiler.mjs';
 import { print } from './print.mjs';
-import { initializeGit } from './git-manager.mjs';
-import { installDependencies, generatePackageJson, generateTsconfigJson, getCiCommand } from './package-manager.mjs';
-import { packageVersion } from './utils.mjs';
+import { generatePackageJson, generateTsconfigJson } from './package-manager.mjs';
 
 const fs = fsExtra.default;
 const __filename = fileURLToPath(import.meta.url);
@@ -18,36 +16,13 @@ const BINARY_EXTENSIONS = new Set([
   '.pdf', '.zip', '.tar', '.gz'
 ]);
 
-export class ProjectGenerator {
+export class FileGenerator {
   constructor() {
     this.compiler = new TemplateCompiler();
   }
 
-  async createProject(answers) {
-    const { projectName } = answers;
-    const projectPath = path.join(process.cwd(), projectName);
-
-    await this.validateProjectPath(projectPath, projectName);
-    await this.setupProjectStructure(projectPath, answers);
-    await this.runPostSetupTasks(projectPath, answers);
-  }
-
-  async validateProjectPath(projectPath, projectName) {
-    if (await fs.pathExists(projectPath)) {
-      throw new Error(`Directory ${projectName} already exists`);
-    }
-  }
-
-  async setupProjectStructure(projectPath, answers) {
-    print.boldHead(`\n📁 Creating project in ${projectPath}...`);
-    
-    await fs.ensureDir(projectPath);
-    await this.generateProjectFromTemplates(projectPath, answers);
-  }
-
-  async generateProjectFromTemplates(projectPath, answers) {
-    const context = this.buildContext(answers);
-    const templateDir = this.getTemplateDirectory(answers);
+  async generateProjectFromTemplates(projectPath, context) {
+    const templateDir = this.getTemplateDirectory(context);
     
     print.section('📝 Processing templates...');
     await this.processTemplateDirectory(templateDir, projectPath, context);
@@ -55,30 +30,7 @@ export class ProjectGenerator {
     await this.processFeatureTemplates(projectPath, context);
   }
 
-  buildContext(answers) { 
-    const version = packageVersion;
-    const ciCommand = getCiCommand(answers.packageManager);
-
-    return {
-      projectName: answers.projectName,
-      description: answers.description || `A modern web application`,
-      
-      template: answers.template || false,
-      stylinNutin: answers.stylinNutin || false,
-      i18n: answers.i18n || false,
-      transition: answers.transition || false,
-      testinNutin: answers.testinNutin || false,
-
-      hasFeatures: answers.template || answers.stylinNutin || answers.i18n || answers.transition || answers.testinNutin,
-      
-      year: new Date().getFullYear(),
-      packageManager: answers.packageManager || 'npm',
-      ciCommand: ciCommand,
-      version: version
-    };
-  }
-
-  getTemplateDirectory(answers) {
+  getTemplateDirectory(context) {
     return path.join(__dirname, '../../templates/base');
   }
 
@@ -156,10 +108,10 @@ export class ProjectGenerator {
     }
   }
 
-  async generateJsonFiles(projectPath, answers) {
-    await generatePackageJson(projectPath, answers);
-    await generateTsconfigJson(projectPath, answers);
-    if (answers.i18n) this.generateConfigFiles(projectPath);
+  async generateJsonFiles(projectPath, context) {
+    await generatePackageJson(projectPath, context);
+    await generateTsconfigJson(projectPath, context);
+    if (context.i18n) this.generateConfigFiles(projectPath);
   }
 
   async generateConfigFiles(projectPath) {
@@ -173,37 +125,4 @@ export class ProjectGenerator {
     await fs.writeJSON(path.join(configPath, 'languages.json'), languages, { spaces: 2 });
   }
 
-  async runPostSetupTasks(projectPath, answers) {
-    await this.generateJsonFiles(projectPath, answers);
-    await initializeGit(projectPath);
-    
-    await installDependencies(projectPath, answers.packageManager);
-
-    await this.runSetupScripts(projectPath, answers);
-  }
-
-  async runSetupScripts(projectPath, answers) {
-    print.section('⚙️ Running setup scripts...');
-    
-    try {
-      const setupScriptsTemplate = path.join(__dirname, '..', '..', 'templates', 'scripts');
-      
-      if (await fs.pathExists(setupScriptsTemplate)) {
-        const scriptsDir = path.join(projectPath, 'scripts');
-        const context = this.buildContext(answers);
-        
-        await fs.ensureDir(scriptsDir);
-        await this.processTemplateDirectory(setupScriptsTemplate, scriptsDir, context);
-      }
-    } catch (error) {
-      print.boldError('⚠️ Warning: Could not set up build scripts');
-      console.error(error);
-    }
-  }
-}
-
-export const projectGenerator = new ProjectGenerator();
-
-export async function createProject(answers) {
-  return projectGenerator.createProject(answers);
 }

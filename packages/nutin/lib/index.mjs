@@ -1,8 +1,9 @@
 import { program } from 'commander';
 import { print } from './src/print.mjs';
 import { promptUser } from './src/prompts.mjs';
-import { createProject } from './src/file-generator.mjs';
-import { displaySuccessMessage, packageVersion } from './src/utils.mjs';
+import { createProject } from './src/project-generator.mjs';
+import { displaySuccessMessage } from './src/utils.mjs';
+import { packageVersion } from './src/version.mjs';
 
 export async function createApp() {
   program

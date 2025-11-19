@@ -38,8 +38,8 @@ function getInstallCommand(packageManager) {
   }
 }
 
-function getScripts(answers) {
-  const { testinNutin, packageManager, projectName } = answers;
+function getScripts(context) {
+  const { testinNutin, packageManager, projectName } = context;
 
   const baseScripts = {
     "build": "node tools/builder/builder.js",
@@ -69,8 +69,8 @@ function getScripts(answers) {
     : baseScripts;
 }
 
-export async function generatePackageJson(projectPath, answers) {
-  const { testinNutin, projectName, packageManager } = answers;
+export async function generatePackageJson(projectPath, context) {
+  const { testinNutin, projectName } = context;
 
   const devDependencies = {
     "chokidar": "^4.0.3",
@@ -84,7 +84,7 @@ export async function generatePackageJson(projectPath, answers) {
     })
   };
 
-  const scripts = getScripts(answers);
+  const scripts = getScripts(context);
 
   const packageJson = {
     "name": projectName,
@@ -107,7 +107,7 @@ export async function generatePackageJson(projectPath, answers) {
   await fs.writeJSON(path.join(projectPath, 'package.json'), packageJson, { spaces: 2 });
 }
 
-export async function generateTsconfigJson(projectPath, answers) {
+export async function generateTsconfigJson(projectPath, context) {
   const tsconfig = {
       "compilerOptions": {
       "baseUrl": "./",
