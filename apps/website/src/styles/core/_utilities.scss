@@ -171,6 +171,18 @@
   @include mixins.bg-gradient(right, rgba($primary-color, .7), rgba($secondary-color, .7));
 }
 
+.u-bg-gradient-to-top {
+  @include mixins.bg-gradient(top, rgba($primary-color, .7), rgba($secondary-color, .7));
+}
+
+.u-bg-gradient-to-bottom {
+  @include mixins.bg-gradient(bottom, rgba($primary-color, .7), rgba($secondary-color, .7));
+}
+
+.u-bg-gradient-to-left {
+  @include mixins.bg-gradient(left, rgba($primary-color, .7), rgba($secondary-color, .7));
+}
+
 .u-bg-cover {
   @include mixins.bg-cover;
 }

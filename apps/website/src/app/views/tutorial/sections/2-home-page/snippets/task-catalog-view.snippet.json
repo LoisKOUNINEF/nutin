@@ -1,7 +1,7 @@
 {
 	"id": 4,
 	"sectionId": 2,
-	"content": "import { ComponentConfig, View } from '../../../core/index.js';\nimport { TaskComponent } from '../../components/index.js';\nimport { TasksService } from '../../services/index.js';\n\nconst template = `\n&lt;div data-catalog=\"task-catalog\" class=\"u-flex-center u-flex-column\"&gt;&lt;/div&gt;\n`;\n\nexport class TaskCatalogView extends View {\n\tprivate _tasks: Task[] = [];\n\n\tconstructor() {\n\t\tsuper({template});\n\t}\n\n\tpublic onEnter() {\n\t\tthis._tasks = TasksService.tasks;\n\t}\n\n\tpublic childConfigs(): ComponentConfig[] {\n\t\treturn this.catalogConfig({\n\t\t\tarray: this._tasks,\n\t\t\telementName: 'task',\n\t\t\tselector: 'task-catalog',\n\t\t\tcomponent: TaskComponent\n\t\t});\n\t}\n\n}\n",
+	"content": "import { ComponentConfig, View } from '../../../core/index.js';\nimport { TaskComponent } from '../../components/index.js';\nimport { TasksService } from '../../services/index.js';\n\nconst template = `\n&lt;div data-catalog=\"task-catalog\" class=\"u-flex-center u-flex-column\"&gt;&lt;/div&gt;\n`;\n\nexport class TaskCatalogView extends View {\n\tprivate _tasks: Task[] = [];\n\n\tconstructor() {\n\t\tsuper({template});\n\t}\n\n\tpublic onEnter() {\n\t\tthis._tasks = TasksService.tasks;\n\t}\n\n\tpublic childConfigs(): ComponentConfig[] {\n\t\treturn this.catalogConfig({\n\t\t\tarray: this._tasks,\n\t\t\telementName: 'task',\n\t\t\tselector: 'task-catalog',\n\t\t\tcomponent: TaskComponent\n\t\t});\n\t}\n\n}",
 	"type": "ts",
 	"en": {
 		"before": "Finally, generate the main view with command `npm run generate view task-catalog`, where we'll be able to use the service and the component.\nWe'll use the catalogConfig inherited method to generate children components from the Tasks array.",

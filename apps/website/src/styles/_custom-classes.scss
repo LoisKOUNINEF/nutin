@@ -22,7 +22,6 @@
   @include mixins.rounded;
 }
 
-.c-apart {
-	font-size: 1.05rem;
-	padding-top: map.get($spacings, 'medium');
+.c-padd-list {
+	padding-left: 4rem;
 }

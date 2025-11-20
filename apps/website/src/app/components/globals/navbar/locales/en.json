@@ -5,8 +5,8 @@
 	"core": "Core",
 	"services": "Services",
 	"libraries": "Libraries",
-	"stylin-nutin": "stylin-nutin",
-	"testin-nutin": "testin-nutin",
+	"stylin-nutin": "StylinNutin",
+	"testin-nutin": "TestinNutin",
 	"tools": "Tools",
 	"get-started": "Get Started",
 	"changelog": "Changelog"

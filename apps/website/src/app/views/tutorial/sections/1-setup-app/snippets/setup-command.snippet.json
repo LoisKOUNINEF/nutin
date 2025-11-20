@@ -1,16 +1,14 @@
 {
 	"id": 1,
 	"sectionId": 1,
-	"content": "npx @nutin/cli create-nutin-app nutin-todo -d --no-template --no-i18n\n# or\nnpx @nutin/cli nutin-new nutin-todo -d --no-template --no-i18n\n\n# or install package globally\nnpm install -g @nutin/cli\n\ncreate-nutin-app nutin-todo -d --no-template --no-i18n\n# or\nnutin-new nutin-todo -d --no-template --no-i18n",
+	"content": "npx @nutin/cli nutin-todo -d --no-template --no-i18n\n\n# or install package globally\nnpm install -g @nutin/cli\n\nnutin-new nutin-todo -d --no-template --no-i18n\n# or\ncreate-nutin-app nutin-todo -d --no-template --no-i18n",
 	"type": "none",
 	"en": {
-		"title": "Create a new nutin app",
-		"before": "Use flag -h or --help for more infos.",
+		"before": "First, let's create a new nutin app :",
 		"after": "-d : default settings; --no-template : use inline HTML templates; --no-i18n : do not use i18n"
 	},
 	"fr": {
-		"title": "Créer une nouvelle app nutin",
-		"before": "Utiliser le flag -h ou --help pour plus d'informations.",
+		"before": "Commençons par créer une nouvelle app nutin :",
 		"after": "-d : paramètres par défaut; --no-template : utilise des templates HTML inline; --no-i18n : n'utilise pas i18n"
 	}
 }

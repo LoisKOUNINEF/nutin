@@ -1,12 +1,6 @@
 {
 	"id": 1,
 	"sectionId": 1,
-	"content": "npm i -g @nutin/cli",
-	"type": "none",
-	"en": {
-		"title": "Installation"
-	},
-	"fr": {
-		"title": "Installation"
-	}
+	"content": "// install globally\nnpm i -g @nutin/cli",
+	"type": "none"
 }

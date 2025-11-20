@@ -13,7 +13,6 @@
 }
 
 .home__main-content {
-	line-height: map.get($spacings, 'largest');
   white-space: pre-wrap;
   overflow-wrap: break-word;
 	@include mixins.flex-center;
@@ -28,23 +27,38 @@
 }
 
 .home__catchphrase {
+	color: $secondary-color;
+	font-size: map.get($font-sizes, 'large');
+	font-style: italic;
 	text-align: center;
-	max-width: 80vw;
+	max-width: 80%;
 	@include mixins.respond-to(small) {
-   	width: 100vw;
+   	width: 100%;
  	}
 	@include mixins.respond-to(medium) {
-   	width: 90vw;
+   	width: 90%;
  	}
 	@include mixins.respond-to(largest) {
-   	width: 70vw;
+   	width: 70%;
  	}
 }
 
-.home___snippet {
+.home__snippet-container {
+	min-width: 100%;
+	background-color: rgba($primary-color, .2);
 	text-align: center;
+	font-family: $secondary-font;
+	color: $primary-color;
 	font-weight: bold;
-	font-style: italic;
+	font-size: map.get($font-sizes, 'large');
+	padding-top: map.get($spacings, 'large');
+	margin-top: map.get($font-sizes, 'large');
+	margin-bottom: map.get($font-sizes, 'large');
+	border-radius: 1rem;
+	box-shadow: 0 .5rem 1rem rgba($primary-color, 0.15);
+}
+
+.home__snippet {
 	font-size: map.get($font-sizes, 'large');
 	padding-top: map.get($spacings, 'large');
 	pre {
@@ -59,5 +73,31 @@
 		code {
 			color: $text-color;
 		}
+	}
+}
+
+.home__tutorial-link {
+  @include mixins.rounded;
+  box-shadow: 0 10px 15px rgba($primary-color, .5);
+  font-family: $secondary-font;
+  font-size: map.get($font-sizes, 'large');
+  font-weight: bold;
+  background-color: $primary-color;
+  padding: map.get($spacings, 'medium');
+	transition: ease-in-out 0.3s;
+	&:hover {
+  	background-color: rgba($primary-color, 0);
+  	color: $primary-color;
+  	box-shadow: 0 10px 15px rgba($primary-color, 1);
+	}
+	&:focus-visible {
+		outline: 2px solid $primary-color;
+	}
+	@media (hover: none) {
+	  &:hover {
+	    text-decoration: none;
+	    background-color: inherit;
+	    color: inherit;
+	  }
 	}
 }

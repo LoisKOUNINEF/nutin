@@ -5,12 +5,12 @@
 	"type": "none",
 	"en": {
 		"title": "Nginx config",
-		"before": "A Nginx setup including :\n\t• SPA routing (try_files)\n\t• Strong security headers\n\t• Modern Content Security Policy (and legacy security headers)\n\t• Immutable static asset caching\n\t• index.html no-cache strategy\n\t• Health endpoint (/health)\nThis config uses nginx map directives to define headers once, then reuse them.\n\nAdapt port(s) as needed in both Dockerfile and nginx.conf.",
+		"before": "A Nginx setup including :\n\t• SPA routing (try_files)\n\t• Strong security headers\n\t• Modern Content Security Policy (and legacy security headers)\n\t• Immutable static asset caching\n\t• index.html no-cache strategy\n\t• Health endpoint (/health)\nThis config uses nginx map directives to define headers once, then reuse them.\nAdapt port(s) as needed in both Dockerfile and nginx.conf.",
 		"after": "When you use add_header in a child location block, it replaces ALL headers from the parent context rather than merging them.\nYou need to repeat the security headers in each location block that uses add_header."
 	},
 	"fr": {
 		"title": "Configuration Nginx",
-		"before": "Un setup Nginx incluant :\n\t• Un routing SPA (try_files)\n\t• Des headers de sécurité robustes\n\t• Une Content Security Policy moderne (et des headers de sécurité pour les navigateurs anciens)\n\t• Cache des ressources statiques immuables\n\t• Health endpoint (/health)\nCette configuration utilise la directive nginx map pour définir les headers une seul fois, puis les réutiliser.\n\nAdapter le(s) port(s) selon vos besoins dans Dockerfile et nginx.conf.",
+		"before": "Un setup Nginx incluant :\n\t• Un routing SPA (try_files)\n\t• Des headers de sécurité robustes\n\t• Une Content Security Policy moderne (et des headers de sécurité pour les navigateurs anciens)\n\t• Cache des ressources statiques immuables\n\t• Health endpoint (/health)\nCette configuration utilise la directive nginx map pour définir les headers une seul fois, puis les réutiliser.\nAdapter le(s) port(s) selon vos besoins dans Dockerfile et nginx.conf.",
 		"after": "Quand vous utilisez add_header dans le block de location d'un enfant, cela remplace TOUS les headers du contexte parent et ne les combine pas.\nVous devez répéter les headers de sécurité dans chaque bloc qui utilise add_header."
 	}
 }

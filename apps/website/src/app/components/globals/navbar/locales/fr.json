@@ -5,7 +5,7 @@
 	"core": "Core",
 	"services": "Services",
 	"libraries": "Bibliothèques",
-	"stylin-nutin": "stylin-nutin",
-	"testin-nutin": "testin-nutin",
+	"stylin-nutin": "StylinNutin",
+	"testin-nutin": "TestinNutin",
 	"tools": "Outils"
 }

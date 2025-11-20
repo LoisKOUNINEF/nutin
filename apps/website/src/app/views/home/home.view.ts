@@ -14,14 +14,14 @@ export class HomeView extends View {
       factory: (el) => new ButtonComponent(el, {
         callback: () => this.goToTutorial(),
         i18nKey: 'home.tutorial-link',
-        className: 'u-rounded u-bold u-italic u-font-large u-color-bg u-bg-primary u-padd-y-medium u-padd-x-medium'
+        className: 'home__tutorial-link'
       })
     },{
       selector: 'snippet',
       factory: (el) => new SnippetComponent(el, {
         id: 0,
         sectionId: 0,
-        content: 'npm i -g @nutin/cli\n\nnutin-new',
+        content: 'npx @nutin/cli',
         type: 'none'
       })
     }]

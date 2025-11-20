@@ -1,36 +1,39 @@
 <div class="resource__single">
-	<header class="u-shadow-small u-padd-x-medium u-padd-y-medium">
+	<header class="u-shadow-small">
 		<h1
 			data-pipe="capitalize" 
 			data-i18n="tutorial.title"
 		></h1>
-		<article 
-			class="u-pre-wrap u-padd-x-small"
-			style="line-height:2rem;font-size:1.1rem;"
-			data-i18n="tutorial.presentation"
-		></article>
-		<article>
-			<p class="u-padd-y-medium">
-				<a
-					href="https://www.nutin-todo.nutin.org"
-					target="_blank"
-					data-i18n="tutorial.live-link"
-					class="u-italic u-bold u-padd-x-small"
-				></a>
-			</p>
-			<p
-				class="c-apart u-bold u-marg-x-medium"
-				data-i18n="tutorial.table-of-content"
-			></p>
-			<div 
-				data-component="table-of-content"
-				class="u-padd-y-medium u-padd-x-medium"
-			></div>
-			<p 
-				class="c-apart u-bold u-italic u-padd-y-medium u-text-center u-border u-rounded-large u-shadow-medium"
-				data-i18n="tutorial.important"
-			></p>
-		</article>
+		<div class="u-shadow-large">
+			<article 
+				class="u-pre-wrap u-padd-x-small u-padd-y-medium"
+				style="font-size:1.1rem;"
+				data-i18n="tutorial.presentation"
+			></article>
+			<article>
+				<p class="u-padd-x-small u-color-prim u-italic">
+					<a
+						href="https://www.nutin-todo.nutin.org"
+						target="_blank"
+						data-i18n="tutorial.live-link"
+					></a>
+				</p>
+				<div class="u-padd-y-medium">
+					<p
+						id="tutorial-toc"
+						class="u-marg-x-medium u-padd-x-medium u-font-secondary u-font-large u-color-prim"
+						data-i18n="tutorial.table-of-content"
+					></p>
+					<div class="c-padd-list">
+						<span data-component="table-of-content"></span>
+					</div>
+				</div>
+				<p 
+					class="tutorial__important"
+					data-i18n="tutorial.important"
+				></p>
+			</article>
+		</div>
 	</header>
 	<div data-catalog="section-catalog"></div>
 	<aside class="u-padd-x-medium u-padd-y-medium u-marg-y-medium">

@@ -2,11 +2,11 @@
 	"en": {
 		"name": "Setup",
 		"content": "Basic TypeScript knowledge should be sufficient to follow along this guide.\nTemplates are styled using built-in stylin-nutin library classes (`u-` prefix).",
-		"notes": "See the documentation for details."
+		"notes": "Use flag -h or --help for more infos."
 	},
 	"fr":	{
 		"name": "Préparation",
 		"content": "Une connaissance basique de TypeScript sera suffisante pour suivre ce guide.\nLes templates sont mis en forme avec les classes de la bibliothèque incluse stylin-nutin (prefix `u-`).",
-		"notes": "Se référer à la documentation pour des détails."
+		"notes": "Utiliser le flag -h ou --help pour plus d'informations."
 	}
 }
