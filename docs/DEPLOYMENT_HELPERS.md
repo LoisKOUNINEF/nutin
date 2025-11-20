@@ -1,7 +1,7 @@
 # Deployment Helpers ( Dockerfile / Nginx config )
 
 - You may use the config files and Dockerfile exactly as-is for production deployments. Modify if you need custom caching rules or add external APIs to CSP.
-- Adapt ports as needed in both `Dockerfile` and `nginx.conf` (must match).
+- Adapt ports as needed in both `Dockerfile` and `nginx.conf`.
 - **If used in a non-nutin project :**
     - Adapt paths and commands in `Dockerfile` (COPY / RUN).
 
