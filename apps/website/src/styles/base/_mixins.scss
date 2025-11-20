@@ -370,3 +370,9 @@
     animation: shake $duration ease-in-out $delay;
   }
 }
+
+@mixin display-svg {
+  display: block;
+  height: 1.5rem;
+  width: auto;
+}

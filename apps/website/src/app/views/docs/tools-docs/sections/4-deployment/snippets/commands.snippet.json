@@ -1,12 +1,14 @@
 {
 	"id": 1,
 	"sectionId": 4,
-	"content": "# Build docker image\n## -t flag adds a tag to the image\n## -f flag : path to Dockerfile\n## the dot at the end indicates the build context (input)\ndocker build -t my-tag -f tools/deployment/Dockerfile .\n\n# Run docker container\n## -p flag is for port LOCALHOST_PORT:EXPOSED_PORT\n## --name flag gives container a name\ndocker run -p 9090:9090 --name my-name my-tag:latest\n\n# You can also use package.json scripts\nnpm run docker:build\nnpm run docker:run",
+	"content": "# Build docker image\ndocker build -t my-tag -f tools/deployment/Dockerfile .\n\n# Run docker container\ndocker run -p 9090:9090 -n my-name my-tag:latest\n\n# You can also use package.json scripts\nnpm run docker:build\nnpm run docker:run",
 	"type": "none",
 	"en": {
-		"title": "Commands"
+		"title": "Commands",
+		"after": "-t --tag : add a tag to the image; -f --file : path to Dockerfile; dot at the end indicates build context\n-p --publish : LISTEN_PORT:EXPOSED_PORT; -n --name : gives container a name\n-d --detach : run in background;"
 	},
 	"fr": {
-		"title": "Commandes"
+		"title": "Commandes",
+		"after": "-t --tag : ajoute un tag à l'image; -f --file : chemin du Dockerfile; le point à la fin spécifie le contexte\n-p --publish : NGINX_LISTEN_PORT:EXPOSED_DOCKERFILE_PORT; -n --name : donne un nom au container"
 	}
 }

@@ -1,0 +1,6 @@
+{ "id": 2,
+	"en": {
+		"name": "1.0.2",
+		"content": "Partially fixed npm run dev command. Page still needs to be reload manually from time to time, but less often."
+	}
+}

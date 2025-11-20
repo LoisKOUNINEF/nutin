@@ -1,10 +1,10 @@
-import { BuildSectionHelper, sortById } from '../../../../helpers/index.js';
+import { BuildSectionHelper } from '../../../../helpers/index.js';
 import ClassesSection from './1-classes/classes.section.json' with { type: 'json' };
 import ClassesSnippet from './1-classes/snippets/classes.snippet.json' with { type: 'json' };
 import MixinsSection from './2-mixins/mixins.section.json' with { type: "json" };
 import MixinsSnippet from './2-mixins/snippets/mixins.snippet.json' with { type: 'json' };
 
-export default sortById(BuildSectionHelper.buildSectionBatch([
+export default BuildSectionHelper.buildSectionBatch([
 	{
 	section: MixinsSection,
 	snippets: [MixinsSnippet]
@@ -13,4 +13,4 @@ export default sortById(BuildSectionHelper.buildSectionBatch([
 	section: ClassesSection,
 	snippets: [ClassesSnippet]
 	},
-]));
+]);

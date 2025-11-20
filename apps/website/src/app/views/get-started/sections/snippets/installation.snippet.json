@@ -1,0 +1,6 @@
+{
+	"id": 1,
+	"sectionId": 1,
+	"content": "// install globally\nnpm i -g @nutin/cli",
+	"type": "none"
+}

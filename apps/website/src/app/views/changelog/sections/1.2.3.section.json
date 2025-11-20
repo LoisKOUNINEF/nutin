@@ -1,0 +1,6 @@
+{ "id": 7,
+	"en": {
+		"name": "1.2.3",
+		"content": "• `nginx.conf` : fixed multi-line CSP map warning (single line map)"
+	}
+}

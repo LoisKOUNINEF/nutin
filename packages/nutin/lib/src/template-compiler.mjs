@@ -36,7 +36,7 @@ export class TemplateCompiler {
 
     Handlebars.registerHelper('hasAnyFeature', function(options) {
       const context = options.data.root;
-      return context.i18n || context.template || context.testing
+      return context.i18n || context.template || context.testinNutin || context.stylinNutin
     });
   }
 

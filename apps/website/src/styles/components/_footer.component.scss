@@ -1,0 +1,26 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+
+.footer {
+	position: sticky;
+	bottom: 0;
+	padding: map.get($spacings, 'medium');
+	width: 100%;
+}
+
+.footer__body {
+  text-decoration: underline;
+  @include mixins.flex-between;
+
+  @include mixins.respond-to(medium) {
+    display: block;
+    text-align: center;
+  }
+
+  section {
+  	@include mixins.respond-to(medium) {
+    	padding-bottom: map.get($spacings, 'medium');
+  	}
+  }
+}

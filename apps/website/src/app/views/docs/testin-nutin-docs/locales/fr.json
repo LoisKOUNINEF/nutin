@@ -3,5 +3,5 @@
     "title": "TestinNutin",
     "description": "TestinNutin"
   },
-  "default": "TestinNutin works !"
+  "sidebar-title": "TestinNutin"
 }

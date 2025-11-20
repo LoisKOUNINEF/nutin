@@ -1,0 +1,103 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+
+.home__title {
+  font-family: $secondary-font;
+	color: $primary-color;
+	font-size: map.get($font-sizes, 'large');
+	font-weight: bold;
+	@include mixins.respond-to(medium) {
+		padding-top: map.get($spacings, 'small');
+	}
+}
+
+.home__main-content {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+	@include mixins.flex-center;
+	@include mixins.flex-column;
+	padding: map.get($spacings, 'large');
+	margin-top: map.get($spacings, 'large');
+	margin-bottom: map.get($spacings, 'large');
+
+	@include mixins.respond-to(medium) {
+		padding: map.get($spacings, 'medium');
+	}
+}
+
+.home__catchphrase {
+	color: $secondary-color;
+	font-size: map.get($font-sizes, 'large');
+	font-style: italic;
+	text-align: center;
+	max-width: 80%;
+	@include mixins.respond-to(small) {
+   	width: 100%;
+ 	}
+	@include mixins.respond-to(medium) {
+   	width: 90%;
+ 	}
+	@include mixins.respond-to(largest) {
+   	width: 70%;
+ 	}
+}
+
+.home__snippet-container {
+	min-width: 100%;
+	background-color: rgba($primary-color, .2);
+	text-align: center;
+	font-family: $secondary-font;
+	color: $primary-color;
+	font-weight: bold;
+	font-size: map.get($font-sizes, 'large');
+	padding-top: map.get($spacings, 'large');
+	margin-top: map.get($font-sizes, 'large');
+	margin-bottom: map.get($font-sizes, 'large');
+	border-radius: 1rem;
+	box-shadow: 0 .5rem 1rem rgba($primary-color, 0.15);
+}
+
+.home__snippet {
+	font-size: map.get($font-sizes, 'large');
+	padding-top: map.get($spacings, 'large');
+	pre {
+		background: linear-gradient(to top, rgba($background-color, 1), rgba($secondary-color, .4));
+		border-radius: 1rem;
+		font-size: map.get($font-sizes, 'medium');
+		font-style: normal;
+		text-align: center;
+		padding-top: map.get($spacings, 'large');
+		padding-bottom: map.get($spacings, 'large');
+		background-color: inherit;
+		code {
+			color: $text-color;
+		}
+	}
+}
+
+.home__tutorial-link {
+  @include mixins.rounded;
+  box-shadow: 0 10px 15px rgba($primary-color, .5);
+  font-family: $secondary-font;
+  font-size: map.get($font-sizes, 'large');
+  font-weight: bold;
+  background-color: $primary-color;
+  padding: map.get($spacings, 'medium');
+	transition: ease-in-out 0.3s;
+	&:hover {
+  	background-color: rgba($primary-color, 0);
+  	color: $primary-color;
+  	box-shadow: 0 10px 15px rgba($primary-color, 1);
+	}
+	&:focus-visible {
+		outline: 2px solid $primary-color;
+	}
+	@media (hover: none) {
+	  &:hover {
+	    text-decoration: none;
+	    background-color: inherit;
+	    color: inherit;
+	  }
+	}
+}

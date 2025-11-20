@@ -2,11 +2,11 @@
 	"en":	{
 		"name": "Home Page",
 		"content": "Let's start by generating the task's service, the main view of the application and our first component.\n",
-		"notes": "By default, views use the \"article\" HTML tag and components the \"div\" HTML tag. You can pass any tag you want in the super() ComponentOptions with the tagName property."
+		"notes": "By default, views use `section` HTML tag and components `div` HTML tag."
 	},
 	"fr":	{
 		"name": "Page d'accueil",
 		"content": "Commençons par générer le service qui gérera les tâches, la vue principale de notre application ainsi que notre premier composant.\n",
-		"notes": "Par défaut, les vues utilisent le tag HTML \"article\" et les composants le tag \"div\". N'importe quel tag peut être passé dans les ComponentOptions du super() avec la propriété tagName."
+		"notes": "Par défaut, les vues utilisent le tag HTML `section` et les composants le tag `div`."
 	}
 }

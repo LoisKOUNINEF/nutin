@@ -94,6 +94,19 @@
   font-family: $primary-font;
 }
 
+// text
+.u-text-center {
+  text-align: center;
+}
+
+.u-text-right {
+  text-align: right;
+}
+
+.u-text-left {
+  text-align: left;
+}
+
 // flex
 .u-flex-center {
   @include mixins.flex-center;
@@ -156,6 +169,18 @@
 
 .u-bg-gradient-to-right {
   @include mixins.bg-gradient(right, rgba($primary-color, .7), rgba($secondary-color, .7));
+}
+
+.u-bg-gradient-to-top {
+  @include mixins.bg-gradient(top, rgba($primary-color, .7), rgba($secondary-color, .7));
+}
+
+.u-bg-gradient-to-bottom {
+  @include mixins.bg-gradient(bottom, rgba($primary-color, .7), rgba($secondary-color, .7));
+}
+
+.u-bg-gradient-to-left {
+  @include mixins.bg-gradient(left, rgba($primary-color, .7), rgba($secondary-color, .7));
 }
 
 .u-bg-cover {

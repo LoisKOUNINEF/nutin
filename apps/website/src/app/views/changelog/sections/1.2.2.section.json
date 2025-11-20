@@ -1,0 +1,6 @@
+{ "id": 6,
+	"en": {
+		"name": "1.2.2",
+		"content": "• Fixed Nginx security headers in child location blocks.\n\n• Fixed package manager variable in `dev-serve.js.hbs` runCommand\n\n• Removed ghost files"
+	}
+}
