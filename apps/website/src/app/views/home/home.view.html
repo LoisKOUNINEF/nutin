@@ -1,28 +1,30 @@
-<div 
-  class="u-flex-center u-flex-column u-padd-y-large"
->
+<div class="u-flex-center u-flex-column">
   <h1 
     data-i18n="home.title"
-    class="u-color-prim u-font-largest u-bold u-font-secondary"
+    class="home__title"
   ></h1>
   <span 
     class="u-italic u-font-smallest u-font-secondary"
-  >nutin v1.2.1</span>
+  >nutin v1.2.3</span>
   <img src="/assets/images/logo-trans.avif" width=250 height=250 alt="nutin's logo. A frame opened on the top left through which a plant grows.">
   <p 
     data-i18n="home.catchphrase"
-    class="u-font-large u-italic"
-    style="text-align:center;max-width:80vw;"
+    class="home__catchphrase"
   ></p>
 </div>
 <div 
-  class="u-padd-y-large u-padd-x-large u-pre-wrap" 
+  class="home__main-content" 
   style="font-size:1.1rem;"
 >
   <p data-i18n="home.pitch"></p>
   <p data-i18n="home.presentation"></p>
+  <div class="home__snippet-container"><p data-i18n="home.snippet">
+    <div class="home__snippet">
+      <span data-component="snippet"></span>
+    </div>
+  </p></div>
   <p data-i18n="home.philosophy"></p>
-  <div class="u-flex-center">
+  <div class="u-flex-center u-color-bg">
     <div data-component="tutorial-link"></div>
   </div>
 </div>

@@ -1,0 +1,19 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+
+.tutorial__important {
+	font-size: 1.2rem;
+	padding-top: map.get($spacings, 'medium');
+	padding-bottom: map.get($spacings, 'medium');
+	text-align: center;
+	font-family: $secondary-font;
+	color: $secondary-color;
+	font-style: italic;
+	font-weight: bold;
+  @include mixins.border($primary-color);
+  @include mixins.rounded;
+  @include mixins.respond-to(medium) {
+  	padding: map.get($spacings, 'medium');
+  }
+}

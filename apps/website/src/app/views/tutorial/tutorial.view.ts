@@ -7,7 +7,7 @@ export class TutorialView extends SinglePageCatalogView {
   protected sections: ISection[] = TutorialSections;
   protected sectionsIndexSelector = 'table-of-content';
   protected sectionComponentSelector = 'section-catalog';
-  protected tocHref = 'tutorial-title';
+  protected tocHref = 'tutorial-toc';
 
   constructor() {
     super({template});

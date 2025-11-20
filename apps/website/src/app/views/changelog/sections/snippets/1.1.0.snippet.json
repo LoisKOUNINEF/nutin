@@ -1,0 +1,6 @@
+{
+	"id": 1,
+	"sectionId": 3,
+	"content": "interface CatalogItemBase {\n\tindex: number;\n}\ntype CatalogItemObject&lt;T extends object&gt; = T & CatalogItemBase;\ninterface CatalogItemPrimitive extends CatalogItemBase {\n\tvalue: string | number | boolean | null | undefined;\n}\n\n// type safety\ntype CatalogItemConfig&lt;T = any&gt; =\n\tT extends object ? CatalogItemObject&lt;T&gt; : CatalogItemPrimitive;",
+	"type": "ts"
+}

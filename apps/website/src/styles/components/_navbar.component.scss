@@ -1,0 +1,88 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+
+.navbar {
+	@include mixins.flex-between;
+	position: relative;
+	padding-top: map.get($spacings, 'small');
+	padding-left: map.get($spacings, 'small');
+	padding-right: map.get($spacings, 'medium');
+	button {
+		transition: ease-in-out 0.3s;
+		&:hover {
+			background-color: rgba($secondary-color, .7);
+			color: $background-color;
+		}
+		&:focus-visible {
+			outline: 2px solid $primary-color;
+		}
+		@media (hover: none) {
+	    &:hover {
+	      text-decoration: none;
+	      background-color: inherit;
+	      color: inherit;
+	    }
+		}
+	}
+	@include mixins.respond-to(medium) {
+		@include mixins.flex-column;
+		@include mixins.flex-center;
+		padding:0;
+	}
+}
+
+.navbar__header {
+	svg {
+		display: none;
+	}
+	@include mixins.respond-to(medium) {
+		@include mixins.flex-between;
+		padding-right: map.get($spacings, 'medium');
+		padding-left: map.get($spacings, 'small');
+		width: 100%;
+		svg {
+			@include mixins.display-svg;
+		}
+	}
+}
+
+.navbar__home-btn {
+	@include mixins.respond-to(medium) {
+		padding-top: map.get($spacings, 'small');
+	}
+}
+
+.navbar__resources {
+	@include mixins.flex-wrap;
+	svg {
+		@include mixins.display-svg;
+		margin-top: map.get($spacings, 'small');
+		margin-left: map.get($spacings, 'small');
+		padding-right: map.get($spacings, 'small');
+	}
+	@include mixins.respond-to(medium) {
+		justify-content: center;
+		svg {
+			display: none;
+		}
+	}
+}
+
+.navbar__dropdown {
+	position: absolute;
+	top: 100%;
+	border-radius: map.get($border-radius, 'medium');
+	@include mixins.bg-gradient(bottom, rgba($secondary-color, .5), $background-color);
+	background-color: $background-color;
+	margin-left: map.get($spacings, 'large');
+	opacity: 0;
+	visibility: hidden;
+}
+
+.navbar__dropdown-visible {
+	opacity: 1;
+	visibility: visible;
+	z-index: 100;
+	@include mixins.fade-in;
+}

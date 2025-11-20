@@ -24,11 +24,11 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 		background-color: $background-color;
 	  color: $text-color;
 		min-height: 100vh;
-		min-width: 100vw;
+		width: 100%;
 		cursor: default;
-	  line-height: 1.6;
+	  line-height: 1.8;
 		font-family: $primary-font;
-	  font-size: map.get($font-sizes, medium);
+	  font-size: 17px;
 	  display: flex; 
 	  flex-direction: column;
   	overflow-y: scroll;

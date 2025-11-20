@@ -4,9 +4,9 @@
 	"content": "/*\nIn template, before the last closing div\n&lt;div class=\"u-flex-row\"&gt;\n\t&lt;div data-component=\"delete\"&gt;&lt;/div&gt;\n&lt;/div&gt;\n*/\n\tpublic childConfigs(): ComponentConfig[] {\n\t\tconst btnClass = 'c-button u-rounded-pill u-padd-x-small u-padd-y-small u-marg-x-smallest u-marg-y-smallest';\n\t\treturn [\n\t\t\t{\n\t\t\t\tselector: 'delete',\n\t\t\t\tfactory: (el) => new ButtonComponent(\n\t\t\t\t\tel, \n\t\t\t\t\t{ \n\t\t\t\t\t\ttextContent: 'Delete', \n\t\t\t\t\t\tcallback: () => this.deleteTask(), \n\t\t\t\t\t\tclassName: `${btnClass} c-button-hover-sec`\n\t\t\t\t\t}\n\t\t\t\t)\n\t\t\t},\n\t\t]\n\t}\n\n\tdeleteTask() {\n\t\tTasksService.deleteTask(this._task.id);\n\t}",
 	"type": "ts",
 	"en": {
-		"before": "Using the ButtonComponent again, add a data-component attribute in TaskComponent using this function in the callback :"
+		"before": "Add a ButtonComponent child in TaskComponent to bind this method :"
 	},
 	"fr": {
-		"before": "En utilisant le ButtonComponent à nouveau, ajoutons un attribut data-component dans TaskComponent qui appelle cette fonction dans le callback :"
+		"before": "Ajoutons un enfant ButtonComponent dans TaskComponent pour appeler cette méthode :"
 	}
 }

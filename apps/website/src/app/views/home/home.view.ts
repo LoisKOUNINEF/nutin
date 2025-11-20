@@ -1,5 +1,5 @@
 import { AppEventBus, ComponentConfig, View } from '../../../core/index.js';
-import { ButtonComponent } from '../../components/index.js';
+import { ButtonComponent, SnippetComponent } from '../../components/index.js';
 
 const template = `__TEMPLATE_PLACEHOLDER__`;
 
@@ -14,7 +14,15 @@ export class HomeView extends View {
       factory: (el) => new ButtonComponent(el, {
         callback: () => this.goToTutorial(),
         i18nKey: 'home.tutorial-link',
-        className: 'u-rounded u-italic u-color-bg u-bg-primary u-font-bold u-padd-y-medium u-padd-x-medium'
+        className: 'home__tutorial-link'
+      })
+    },{
+      selector: 'snippet',
+      factory: (el) => new SnippetComponent(el, {
+        id: 0,
+        sectionId: 0,
+        content: 'npx @nutin/cli',
+        type: 'none'
       })
     }]
   }

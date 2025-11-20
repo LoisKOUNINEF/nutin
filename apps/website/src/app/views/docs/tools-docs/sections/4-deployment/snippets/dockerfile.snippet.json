@@ -5,10 +5,12 @@
 	"type": "none",
 	"en": {
 		"title": "Dockerfile",
-		"before": "A preconfigured, multi-stage Dockerfile that\n\t• Builds your application in a Node environment\n\t• Serves the final assets using Nginx\n\t• Includes an optional container healthcheck\n\t• Exposes the proper ports for reverse proxies like Traefik\n\t• Is optimized for speed, small image size, and security."
+		"before": "A preconfigured, multi-stage Dockerfile that\n\t• Builds your application in a Node environment\n\t• Serves the final assets using Nginx\n\t• Includes an optional container healthcheck\n\t• Exposes the proper ports for reverse proxies like Traefik\n\t• Is optimized for speed, small image size, and security.",
+		"after": "Adapt port(s) as needed in both Dockerfile and nginx.conf."
 	},
 	"fr": {
 		"title": "Dockerfile",
-		"before": "Un Dockerfile préconfiguré et multi-stage qui :\n\t• Compile votre application dans un environnement Node\n\t• Sert les ressources finales en utilisant Nginx\n\t• Inclut un contrôle de santé optionnel du conteneur\n\t• Expose les ports appropriés pour les reverse proxies comme Traefik\n\t• Est optimisé pour la rapidité, une taille d'image réduite et la sécurité."
+		"before": "Un Dockerfile préconfiguré et multi-stage qui :\n\t• Compile votre application dans un environnement Node\n\t• Sert les ressources finales en utilisant Nginx\n\t• Inclut un contrôle de santé optionnel du conteneur\n\t• Expose les ports appropriés pour les reverse proxies comme Traefik\n\t• Est optimisé pour la rapidité, une taille d'image réduite et la sécurité.",
+		"after": "Adapter le(s) port(s) selon vos besoins dans Dockerfile et nginx.conf."
 	}
 }

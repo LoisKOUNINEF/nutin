@@ -5,10 +5,10 @@
 	"type": "ts",
 	"en": {
 		"before": "Use it in the component :",
-		"after": "We use the transformers arrow function to ensure the date property as the appropriate format.\nIt can be extended for other properties if needed."
+		"after": "We use the transformers arrow function to ensure the date property as the appropriate format. It can be extended for other properties if needed."
 	},
 	"fr": {
 		"before": "Utilisons la nouvelle méthode dans le composant :",
-		"after": "Nous utilisons la fonction fléchée transformers pour s'assurer que la propriété date a le format adapté.\nElle peut être étendue à d'autres propriétés si nécessaire."
+		"after": "Nous utilisons la fonction fléchée transformers pour s'assurer que la propriété date a le format adapté. Elle peut être étendue à d'autres propriétés si nécessaire."
 	}
 }

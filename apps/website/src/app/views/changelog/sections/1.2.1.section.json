@@ -1,0 +1,6 @@
+{ "id": 5,
+	"en": {
+		"name": "1.2.1",
+		"content": "• Builder\n\t• Added config file `builder.config.js` file (esbuild, verbose, sass)\n\n• I18N\n\t• Added JSON config file for centralized languages (`config/languages.json`)\n\n• testin-nutin\n\t• Added config file `test.config.js` (origins array, verbose boolean)\n\t• Added assertions + automated 'not' counterparts\n\t• Improved spyOn\n\t• Improved JSDOM setup & global registration\n\n• Improved deployment tools Dockerfile (nginx conf + gzip)\n\t• Fixed typo and added comments in `nginx.conf`.\n\t• Extracted gzip config from Dockerfile (removed `sed` command)\n\t• Moved Dockerfile and deployment config files (`nginx.conf`, `gzip.conf`) into their own folder `tools/deployment`.\n\t• Added `docker:build` and `docker:run` scripts in package.json.\n\n• Moved dev tools (`serve.js`, `dev-serve.js`, `watcher.js`) into their own `tools/dev` folder.\n\n• Added explicit chokidar devDependency (sass & live-server transitive)."
+	}
+}

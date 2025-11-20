@@ -8,182 +8,20 @@
 	 Component- or view-specific classes prefix : '/name/__'
 */
 
-.header__nav {
-	@include mixins.flex-between;
-	position: relative;
-	padding-left: .5em;
-	padding-right: .5em;
-	margin-right: 1em;
-	button {
-		transition: ease-in-out 0.3s;
-		&:hover {
-			background-color: rgba($secondary-color, .7);
-			color: $background-color;
-		}
-		&:focus-visible {
-			outline: 2px solid $primary-color;
-		}
-		@media (hover: none) {
-	    &:hover {
-	      text-decoration: none;
-	      background-color: inherit;
-	      color: inherit;
-	    }
-		}
-	}
-}
-
-.navbar__dropdown {
-	position: absolute;
-	top: 100%;
-	@include mixins.bg-gradient(bottom, rgba($secondary-color, .5), $background-color);
-	background-color: $background-color;
-	margin-left: 1.5rem;
-	opacity: 0;
-	visibility: hidden;
-}
-
-.navbar__dropdown-visible {
-	opacity: 1;
-	visibility: visible;
-	z-index: 100;
-	@include mixins.fade-in;
-}
-
-.footer {
-	position: sticky;
-	bottom: 0;
-	padding: 1rem;
-	width: 100vw;
-}
-
-.footer__body {
-  text-decoration: underline;
-  @include mixins.flex-between;
-
-  @include mixins.respond-to(small) {
-    display: block;
-    text-align: center;
-  }
-
-  section {
-  	@include mixins.respond-to(small) {
-    	padding-bottom: 1rem;
-  	}
-  }
-}
-
-.home__catchphrase {
-	text-align: center;
-	max-width: 80vw;
-	@include mixins.respond-to(small) {
-   	width: 100vw;
- 	}
-	@include mixins.respond-to(medium) {
-   	width: 90vw;
- 	}
-	@include mixins.respond-to(largest) {
-   	width: 70vw;
- 	}
-}
-
-.tutorial__article {
-	line-height: 2rem;
-	font-size: 1.1rem;
-}
-
-.snippet__code {
-	overflow-x: auto;
-	width: 75vw;
-	@include mixins.respond-to(small) {
-   	min-width: 95vw;
- 	}
-	@include mixins.respond-to(medium) {
-   	min-width: 90vw;
- 	}
-	@include mixins.respond-to(largest) {
-   	width: 70vw;
- 	}
-}
-
-.resource {
-	width: 100vw;
-	@include mixins.flex-row;
-	@include mixins.respond-to(small) {
-		@include mixins.flex-column;
-	}
-	@include mixins.respond-to(medium) {
-		@include mixins.flex-column;
-	}
-}
-
-.resource-section {
-	width: 80vw;
-	@include mixins.respond-to(small) {
-		width: 100vw;
-	}
-	@include mixins.respond-to(medium) {
-		width: 100vw;
-	}
-}
-
-.nest-sections {
-	padding-left: 1rem;
-	@include mixins.respond-to(small) {
-		padding-left: 0;
-	}
-	@include mixins.respond-to(medium) {
-		padding-left: 0;
-	}
-}
-
-.c-sidebar {
-	// anchor
-	:first-child {
-		order: 1;
-	}
-	@include mixins.flex-column;
-	position: sticky;
-	left: 0;
-	top: 0;
-	overflow-y: auto;
-	padding-top: 2rem;
-	margin-right: 1rem;
-	width: 20vw;
-	@include mixins.bg-gradient(bottom, rgba($secondary-color, .5), $background-color);
-	@include mixins.rounded;
-
-	@include mixins.respond-to(small) {
-		@include mixins.flex-row;
-		@include mixins.flex-wrap;
-		backdrop-filter: blur(8px);
-		-webkit-backdrop-filter: blur(8px);
-		background-color: $background-color;
-		padding-bottom: 1rem;
-		width: 100vw;
-		height: auto;
-		margin-right: 0;
-		margin-top: 1rem;
-	}
-	@include mixins.respond-to(medium) {
-		@include mixins.flex-row;
-		@include mixins.flex-wrap;
-		backdrop-filter: blur(8px);
-		-webkit-backdrop-filter: blur(8px);
-		background-color: $background-color;
-		padding-bottom: 1rem;
-		width: 100vw;
-		height: auto;
-		margin-right: 0;
-		margin-top: 1rem;
-	}
-}
-
-// .c-sidebar > :first-child {
-// 	order: 1;
-// }
-
 .c-block-btn {
   display: block;
   text-align: left;
+}
+
+.c-round-btn {
+	background-color: inherit;
+	margin-top: map.get($spacings, "small");
+	margin-bottom: map.get($spacings, "small");
+	padding-left: map.get($spacings, "small");
+	padding-right: map.get($spacings, "small");
+  @include mixins.rounded;
+}
+
+.c-padd-list {
+	padding-left: 4rem;
 }

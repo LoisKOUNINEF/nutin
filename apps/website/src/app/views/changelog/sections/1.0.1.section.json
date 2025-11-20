@@ -1,0 +1,6 @@
+{ "id": 1,
+	"en": {
+		"name": "1.0.1",
+		"content": "Fixed typo issue when using i18n feature."
+	}
+}

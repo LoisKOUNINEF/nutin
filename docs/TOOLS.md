@@ -72,15 +72,15 @@ src/
 	app/
 	  components/
 	    my-component/
-	      my-component.ts
-	      my-component.html
+	      my-component.component.ts
+	      my-component.component.html
 	  services/
 	  	my-service/
-	  		my-service.ts
+	  		my-service.service.ts
 	  views/
 	    home/
-	      home.ts
-	      home.html
+	      home.view.ts
+	      home.view.html
   	routes.ts
   	main.ts
 	assets/

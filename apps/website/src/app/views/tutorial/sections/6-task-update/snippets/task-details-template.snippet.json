@@ -4,11 +4,11 @@
 	"content": "&lt;div style=\"min-width:75vw;height:100vh;margin-top:1em;text-align:center;\"&gt;\n\t&lt;div class=\"u-flex-column\"&gt;\n\t\t&lt;input\n\t\t\tclass=\"u-font-large u-bold u-bg-inherit\"\n\t\t\ttype=\"text\"\n\t\t\tid=\"name\"\n\t\t\tplaceholder=\"Name\"\n\t\t\tvalue=\"${task.name}\"\n\t\t\tdata-event=\"change:updateTask:name,@value\"\n\t\t\tdata-pipe=\"capitalizeAll\"\n\t\t\tautoFocus\n\t\t/&gt;\n\t\t&lt;textarea\n\t\t\tstyle=\"resize:none;height:60vh;width:100%;padding-left:.5em;background-color:inherit;\"\n\t\t\tid=\"body\"\n\t\t\tplaceholder=\"Task details...\"\n\t\t\tdata-event=\"change:updateTask:content,@value\"\n\t\t\tdata-pipe=\"capitalize\"\n\t\t&gt;${task.content}&lt;/textarea&gt;\n\t\t&lt;input \n\t\t\tclass=\"u-bg-inherit\"\n\t\t\ttype=\"datetime-local\" \n\t\t\tvalue=\"${new Date(new Date(task.date).getTime() - new Date(task.date).getTimezoneOffset() * 60000).toISOString().slice(0, 16)}\"\n\t\t\tdata-event=\"blur:updateTask:date,@value\"\n\t\t/&gt;\n\t&lt;/div&gt;\n&lt;/div&gt;",
 	"type": "html",
 	"en": {
-		"before": "We need to modify the template accordingly.\nWe'll use the data-event attribute with the \"change\" event, except for the date where we'll use \"blur\" event to prevent premature trigger.\nThe input value argument must be passed with \"@value\".",
-		"after": "data-event attribute syntax is EVENT:FUNCTION_NAME:COMMA_SEPARATED_ARGS."
+		"before": "We need to modify the template accordingly.\nWe'll use the data-event attribute with the `change` event, except for the date where we'll use `blur` event to prevent premature trigger.\nThe input value argument must be passed with `@value`.",
+		"after": "data-event attribute syntax is EVENT_NAME:FUNCTION_NAME:COMMA_SEPARATED_ARGS."
 	},
 	"fr": {
-		"before": "Modifions le template en conséquence.\nNous utiliserons l'attribut data-event avec l'évènement \"change\", excepté pour la date où nous utiliserons l'évènement \"blur\" pour prévenir tout appel prématuré de la fonction update.\nLa valeur de l'input doit être passée avec @value.",
-		"after": "La syntaxe pour l'attribut data-event est EVENT:FUNCTION_NAME:COMMA_SEPARATED_ARGS."
+		"before": "Nous devons modifier le template en conséquence.\nNous utiliserons l'attribut data-event avec l'évènement `change`, excepté pour la date où nous utiliserons l'évènement `blur` pour prévenir tout appel prématuré de la fonction update.\nLa valeur de l'input doit être passée avec `@value`.",
+		"after": "La syntaxe pour l'attribut data-event est EVENT_NAME:FUNCTION_NAME:COMMA_SEPARATED_ARGS."
 	}
 }
