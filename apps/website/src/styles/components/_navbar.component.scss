@@ -29,8 +29,6 @@
 		}
 	}
 	@include mixins.respond-to(medium) {
-		border-bottom: .3rem solid $primary-color;
-		border-style: groove;
 		@include mixins.flex-column;
 		@include mixins.flex-center;
 		padding: 0;
