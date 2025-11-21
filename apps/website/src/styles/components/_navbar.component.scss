@@ -8,6 +8,9 @@
 	padding-top: map.get($spacings, 'small');
 	padding-left: map.get($spacings, 'small');
 	padding-right: map.get($spacings, 'medium');
+	border-bottom: .3rem solid $primary-color;
+	border-style: groovy;
+	@include mixins.rounded;
 	button {
 		transition: ease-in-out 0.3s;
 		&:hover {
@@ -26,20 +29,24 @@
 		}
 	}
 	@include mixins.respond-to(medium) {
+		border-bottom: .3rem solid $primary-color;
+		border-style: groove;
 		@include mixins.flex-column;
 		@include mixins.flex-center;
-		padding:0;
+		padding: 0;
+		padding-bottom: map.get($spacings, 'smallest');
 	}
 }
 
 .navbar__header {
+	// svg is displayed in .navbar__resources on wider screens
 	svg {
 		display: none;
 	}
 	@include mixins.respond-to(medium) {
 		@include mixins.flex-between;
-		padding-right: map.get($spacings, 'medium');
-		padding-left: map.get($spacings, 'small');
+		padding-right: map.get($spacings, 'small');
+		padding-left: map.get($spacings, 'smallest');
 		width: 100%;
 		svg {
 			@include mixins.display-svg;
@@ -62,22 +69,46 @@
 		padding-right: map.get($spacings, 'small');
 	}
 	@include mixins.respond-to(medium) {
-		justify-content: center;
+		width: 100%;
+		@include mixins.flex-between;
+		// svg is displayed in .navbar__header on wider screens
 		svg {
 			display: none;
 		}
+		& > div {
+    	width: 50%;
+  	}
+		& > div:nth-child(even) {
+			padding-right: map.get($spacings, 'smallest');
+			& button {
+				text-align: right;
+			}
+  	}
+		& > div:nth-child(odd) {
+			padding-left: map.get($spacings, 'smallest');
+  	}
 	}
 }
 
 .navbar__dropdown {
 	position: absolute;
 	top: 100%;
+	min-width: 10%;
 	border-radius: map.get($border-radius, 'medium');
 	@include mixins.bg-gradient(bottom, rgba($secondary-color, .5), $background-color);
 	background-color: $background-color;
-	margin-left: map.get($spacings, 'large');
+	padding-left: map.get($spacings, 'smallest');
 	opacity: 0;
 	visibility: hidden;
+	@include mixins.respond-to(medium) {
+		width: 35%;
+		text-align: left;
+		top: 67%;
+		right: 0%;
+		& button {
+			text-align: left !important;
+		}
+	}
 }
 
 .navbar__dropdown-visible {
