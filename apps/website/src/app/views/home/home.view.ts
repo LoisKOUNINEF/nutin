@@ -28,7 +28,7 @@ export class HomeView extends View {
   }
 
   goToTutorial() {
-    AppEventBus.emit('navigate', 'tutorial');
+    AppEventBus.emit('navigate', '/tutorial');
     window.scrollTo({ top: 0 });
   }
 }

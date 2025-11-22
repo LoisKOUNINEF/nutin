@@ -10,16 +10,22 @@
 
 .c-block-btn {
   display: block;
-  text-align: left;
 }
 
 .c-round-btn {
+	width: 100%;
+	text-align: left;
 	background-color: inherit;
 	margin-top: map.get($spacings, "small");
 	margin-bottom: map.get($spacings, "small");
 	padding-left: map.get($spacings, "small");
 	padding-right: map.get($spacings, "small");
   @include mixins.rounded;
+  @include mixins.respond-to(medium) {
+  	margin-top: 0;
+		padding-left: map.get($spacings, "smallest");
+		padding-right: map.get($spacings, "smallest");
+	}
 }
 
 .c-padd-list {

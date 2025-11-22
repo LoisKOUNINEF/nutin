@@ -38,7 +38,8 @@ export abstract class TopicView extends ResourceView {
         sections: this.sections, 
         viewName: this.viewName, 
         externalHref: this.externalHref, 
-        hrefI18nKey: this.hrefI18nKey
+        hrefI18nKey: this.hrefI18nKey,
+        routeParams: this.routeParams
       })
     }
   }
