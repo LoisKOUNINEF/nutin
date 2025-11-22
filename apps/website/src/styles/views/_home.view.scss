@@ -13,6 +13,12 @@
 	}
 }
 
+.home__technos {
+	font-size: map.get($font-sizes, 'small');
+	font-style: italic;
+	color: $primary-color;
+}
+
 .home__main-content {
   white-space: pre-wrap;
   overflow-wrap: break-word;
