@@ -4,7 +4,8 @@
 Includes essential features out of the box, with zero runtime dependencies.                          
 *TypeScript / Javascript, SASS, HTML*
 
-- Required : Node >=18 **If using testin-nutin: Node >=20.19.0 (JSDOM requirement : `{ node: '^20.19.0 || ^22.12.0 || >=24.0.0' }`)**
+- Required : Node >=18 
+- **JSDOM requirement** (testin-nutin companion) : `{ node: '^20.19.0 || ^22.12.0 || >=24.0.0' }`
 
 ## Install
 
@@ -19,6 +20,9 @@ npm install -g @nutin/cli
 # create a new app
 create-nutin-app # or
 nutin-new
+
+# without global installation
+npx @nutin/cli
 ```
 
 - Flags
@@ -51,4 +55,4 @@ nutin-new
 ## 📄 Docs
 
 - Docs on [website](https://www.nutin.org).
-- Docs on [Project repository](https://github.com/LoisKOUNINEF/nutin/tree/main/docs).
+- Docs on [repository](https://github.com/LoisKOUNINEF/nutin/tree/main/docs).
