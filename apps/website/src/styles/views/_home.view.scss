@@ -7,9 +7,16 @@
 	color: $primary-color;
 	font-size: map.get($font-sizes, 'large');
 	font-weight: bold;
+	padding-top: map.get($spacings, 'small');
 	@include mixins.respond-to(medium) {
-		padding-top: map.get($spacings, 'small');
+		padding-top: map.get($spacings, 'medium');
 	}
+}
+
+.home__technos {
+	font-size: map.get($font-sizes, 'small');
+	font-style: italic;
+	color: $primary-color;
 }
 
 .home__main-content {
@@ -52,10 +59,10 @@
 	font-weight: bold;
 	font-size: map.get($font-sizes, 'large');
 	padding-top: map.get($spacings, 'large');
-	margin-top: map.get($font-sizes, 'large');
-	margin-bottom: map.get($font-sizes, 'large');
+	margin-top: map.get($spacings, 'large');
+	margin-bottom: map.get($spacings, 'largest');
 	border-radius: 1rem;
-	box-shadow: 0 .5rem 1rem rgba($primary-color, 0.15);
+  box-shadow: 0 10px 15px rgba($primary-color, .7);
 }
 
 .home__snippet {
@@ -99,5 +106,10 @@
 	    background-color: inherit;
 	    color: inherit;
 	  }
+	}
+	@include mixins.respond-to(medium) {
+		width: 95vw;
+		padding-left: 0;
+		padding-right: 0;
 	}
 }

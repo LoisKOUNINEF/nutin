@@ -3,10 +3,6 @@
 @use "mixins";
 
 .sidebar__nav {
-	// anchor
-	// :first-child {
-	// 	order: 1;
-	// }
 	@include mixins.flex-column;
 	position: sticky;
 	left: 0;
@@ -16,7 +12,7 @@
 	margin-right: map.get($spacings, 'medium');
 	padding-bottom: map.get($spacings, 'largest');
 	width: 20vw;
-	@include mixins.bg-gradient(bottom, rgba($secondary-color, .5), $background-color);
+	@include mixins.bg-gradient(bottom, rgba($primary-color, .6), $background-color);
 	@include mixins.rounded;
 
 	@include mixins.respond-to(medium) {
@@ -27,16 +23,15 @@
 		width: 100%;
 		height: auto;
 		margin-right: 0;
-		margin-top: map.get($spacings, 'medium');
 	}
 }
 
 .sidebar__head {
-	background-color: rgba($background-color, .3);
+	background-color: rgba($background-color, .5);
 	padding-left: map.get($spacings, 'large');
 	padding-bottom: map.get($spacings, 'small');
 	margin-bottom: map.get($spacings, 'medium');
-	color: $secondary-color;
+	color: $primary-color;
 	font-size: map.get($font-sizes, 'large');
 	font-weight: bold;
 	width: 100%;
@@ -50,11 +45,26 @@
 .sidebar__btn {
 	padding-left: map.get($spacings, 'large');
 	&:hover {
+		background-color: rgba($background-color, .5);
 		color: $secondary-color;
+		font-weight: bold;
 	}
 	&:focus-visible {
 		outline: 2px solid $primary-color;
 	}
+	@media (hover: none) {
+	  &:hover {
+	    background-color: inherit;
+	    color: inherit;
+	  }
+	}
+}
+
+.sidebar__current-btn {
+	background-color: rgba($background-color, .5);
+	color: $primary-color !important;
+	font-weight: bold;
+	box-shadow: 1.2rem .3rem .3rem rgba($primary-color, .5);
 }
 
 .sidebar__anchor {
@@ -63,7 +73,9 @@
 	padding-left: map.get($spacings, 'medium');
 	a {
 		&:hover {
+			background-color: inherit;
 			color: $primary-color;
+			font-weight: normal;
 		}
 	}
 }

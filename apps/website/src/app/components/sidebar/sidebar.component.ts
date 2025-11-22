@@ -7,6 +7,7 @@ interface ISidebarConfig {
   viewName: string;
   externalHref: string;
   hrefI18nKey: string;
+  routeParams: Record<string, string>;
 }
 
 const templateFn = (_config: ISidebarConfig) => `__TEMPLATE_PLACEHOLDER__`;
@@ -16,7 +17,8 @@ export class SidebarComponent extends Component {
   private _viewName: string;
   private _externalHref: string;
   private _hrefI18nKey: string;
-  private readonly btnClass = 'c-block-btn c-round-btn sidebar__btn'
+  private _routeParams: Record<string, string>;
+  private readonly btnClass = 'c-block-btn c-round-btn sidebar__btn';
 
   constructor(mountTarget: HTMLElement, config: ISidebarConfig ) {
     super({templateFn, mountTarget, config});
@@ -24,14 +26,29 @@ export class SidebarComponent extends Component {
     this._viewName = config.viewName;
     this._externalHref = config.externalHref;
     this._hrefI18nKey = config.hrefI18nKey;
+    this._routeParams = config.routeParams;
   }
 
   private createSidebarButtons(): BaseButton[] {
-    return this._sections.map((section) => ({
-      textContent: `${section.id}- ${section.name}`, 
-      callback:  () => this.navigateToTopic(section.name), 
-      className: this.btnClass
-    }));
+    return this._sections.map((section) => {
+      const className = this.highlightCurrent(section) ?? this.btnClass;
+      return {
+        textContent: `${section.id}- ${section.name}`, 
+        callback:  () => this.navigateToTopic(section.name), 
+        className: className
+      }
+    });
+  }
+
+  private highlightCurrent(section: ISection): string | undefined {
+    const highlightClass = `${this.btnClass} sidebar__current-btn`;
+    const normalizedName = section.name.split(' ').join('-').toLowerCase();
+    const isCurrent = this._routeParams['topic']?.includes(normalizedName);
+    const hasNoTopic = !this._routeParams['topic'];
+
+    if (isCurrent) return highlightClass;
+    if (hasNoTopic && section.id === 1) return highlightClass;
+    return;
   }
 
   private anchor(): ComponentConfig {
