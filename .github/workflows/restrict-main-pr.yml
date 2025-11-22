@@ -1,0 +1,18 @@
+name: Enforce Staging Branch for Main Pull Requests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  restrict-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure PR is from staging
+        if: github.base_ref == 'main'
+        run: |
+          if [ "${{ github.head_ref }}" != "staging" ]; then
+            echo "Pull requests to main must come from the staging branch!"
+            exit 1
+          fi
