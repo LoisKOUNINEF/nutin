@@ -114,7 +114,11 @@ tsconfig.json
     — run lightweight checks over `dist-build/src/index.html`  to ensure required tags exist.
 6. `esbuild.js`
     - run esbuild
-7. `finalize-build.js`
+7. `hash-files.js`
+    - hash `.js` and `.css` files
+8. `compress-files.js`
+    - compress files with gzip (`.js` `.css` `.json` `.svg` `ttf` `otf` `eot`)
+9. `finalize-build.js`
     - remove existing dist/ folder.
     - rename dist-build to dist
     - *production*: remove unused folder beforehand.
@@ -163,6 +167,15 @@ tsconfig.json
 ### `core/esbuild.js`
 
 Runs esbuild with config from `builder.config.js`.
+
+### `core/hash-files.js`
+
+Hash `.js` and `.css` files.
+
+### `core/compress-files.js`
+
+Compress files with gzip (`.js` `.css` `.json` `.svg` `ttf` `otf` `eot`).                                     
+*Note: Uncomment Brotli compression if you intend to use it.*
 
 ### `core/finalize-build.js`
 

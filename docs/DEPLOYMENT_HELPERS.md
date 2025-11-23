@@ -284,6 +284,22 @@ Enables gzip compression for responses.
 
 Prevents caching issues when some clients accept gzip and others do not.
 
+- `gzip_static on`
+
+Serves `.gz` files if they are present                           
+*Note : You can enable / disable gzip_static only for specific locations in nginx.conf if you don't want it enabled globally.*
+```
+# enable
+location ~* \.(css|js|svg)$ {
+    gzip_static on;
+}
+
+# disable 
+location ~* \.html$ {
+    gzip_static off;
+}
+```
+
 - `gzip_proxied any`
 
 Makes gzip work even when the request is forwarded through a proxy.
