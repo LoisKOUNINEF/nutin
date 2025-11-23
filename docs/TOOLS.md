@@ -109,8 +109,9 @@ tsconfig.json
     - *when using external templates* : `merge-templates.js` — minify HTML template then replace `__TEMPLATE_PLACEHOLDER__` tokens with minified template.
 4. `sass.js` 
     — compile `src/styles/main.scss` and write `dist-build/src/main.css`.
-5. `validate-html.js` 
-     — run lightweight checks over `public/index.html` (and/or `index.html` in `dist-build`) to ensure required tags exist.
+5. `validate-html.js`
+	- add app entrypoint script tag and stylesheet link tag in index.html
+    — run lightweight checks over `dist-build/src/index.html`  to ensure required tags exist.
 6. `esbuild.js`
     - run esbuild
 7. `finalize-build.js`
@@ -156,8 +157,8 @@ tsconfig.json
 
 ### `core/validate-html.js`
 
-* Purpose: inject the main script tag and run a few checks on HTML before finishing the build.
-* Behavior : it reads `index.html` file, add app's entrypoint script tag, validates tags and errors out if expected nodes are missing.
+* Purpose: inject the main script tag and main stylesheet ref, then run a few checks on HTML before finishing the build.
+* Behavior : it reads `index.html` file, add app's entrypoint script tag and stylesheet link tag, validates tags and errors out if expected nodes are missing.
 
 ### `core/esbuild.js`
 
