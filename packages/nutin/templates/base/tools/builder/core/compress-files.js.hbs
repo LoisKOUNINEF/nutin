@@ -1,0 +1,28 @@
+import { readFileSync, writeFileSync } from 'fs';
+import { gzipSync/*, brotliCompressSync*/ } from 'zlib';
+import { print, getFilesRecursive, isVerbose } from '../../utils/index.js';
+import { PATHS } from './paths.js';
+
+function compressStaticAssets() {
+  const files = getFilesRecursive(PATHS.tempSource, ['.js', '.css', '.json', '.svg', 'ttf', 'otf', 'eot']);
+  
+  files.forEach(file => {
+    const content = readFileSync(file);
+    
+    // Gzip
+    const gzipped = gzipSync(content, { level: 9 });
+    writeFileSync(`${file}.gz`, gzipped);
+    
+    // Brotli
+    // const brotlied = brotliCompressSync(content, {
+    //   params: {
+    //     [zlib.constants.BROTLI_PARAM_QUALITY]: 11
+    //   }
+    // });
+    // writeFileSync(`${file}.br`, brotlied);
+    
+    if (isVerbose) print.info(`Compressed: ${file}`);
+  });
+}
+
+compressStaticAssets();

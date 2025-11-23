@@ -5,15 +5,16 @@
 Version 1.3.0 marks a stability milestone with various improvements and refinements, making this the recommended version for new projects.
 
 - Builder
-    - Added file hashing (js & css)
-    - Now adds stylesheet & script tags in `index.html` on build time
+    - Now adds stylesheet & script tags in `index.html` on build time (`add-tags.js`)
+    - (Production) Added file hashing (js & css) (`hash-files.js`)
+    - (Production) Added gzip compression (`compress-files.js`)
 
 - Deployment tools
     - Added gzip_static in gzip config.
 
 - StylinNutin
     - Added utility classes `u-text-center`, `u-text-right`, `u-text-left`, `u-font-primary`
-    - Box-shadow variables now use `$primary-color`
+    - box-shadow variables now use `$primary-color`
 
 - TestinNutin
     - Now applies `setupJsdom()` as beforeAll (was beforeEach) and `teardownJsdom()` as afterAll (was afterEach) in `test-queue.js` (improved efficiency / speed).
