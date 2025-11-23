@@ -1,7 +1,7 @@
 {
 	"id": 4,
 	"sectionId": 4,
-	"content": "gzip on;\ngzip_vary on;\ngzip_proxied any;\n# balance between CPU usage / file size reduction\ngzip_comp_level 6;\n# do not compress files smaller than 1kb\ngzip_min_length 1000;\n\ngzip_types\n\t\ttext/plain\n\t\ttext/css\n\t\ttext/xml\n\t\ttext/javascript\n\t\tapplication/json\n\t\tapplication/javascript\n\t\tapplication/xml+rss\n\t\tapplication/rss+xml\n\t\tfont/truetype\n\t\tfont/opentype\n\t\tapplication/vnd.ms-fontobject\n\t\timage/svg+xml;",
+	"content": "gzip on;\ngzip_vary on;\ngzip_static on;\ngzip_proxied any;\n# balance between CPU usage / file size reduction\ngzip_comp_level 6;\n# do not compress files smaller than 1kb\ngzip_min_length 1000;\n\ngzip_types\n\t\ttext/plain\n\t\ttext/css\n\t\ttext/xml\n\t\ttext/javascript\n\t\tapplication/json\n\t\tapplication/javascript\n\t\tapplication/xml+rss\n\t\tapplication/rss+xml\n\t\tfont/truetype\n\t\tfont/opentype\n\t\tapplication/vnd.ms-fontobject\n\t\timage/svg+xml;",
 	"type": "none",
 	"en": {
 		"title": "gzip compression",

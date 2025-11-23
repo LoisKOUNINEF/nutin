@@ -48,6 +48,7 @@
 		width: 100%;
 		svg {
 			@include mixins.display-svg;
+			padding-right: map.get($spacings, 'small');
 		}
 	}
 }
@@ -74,13 +75,10 @@
 			display: none;
 		}
 		& > div {
-    	width: 50%;
+    	flex-basis: 35%;
   	}
 		& > div:nth-child(even) {
 			padding-right: map.get($spacings, 'smallest');
-			& button {
-				text-align: right;
-			}
   	}
 		& > div:nth-child(odd) {
 			padding-left: map.get($spacings, 'smallest');

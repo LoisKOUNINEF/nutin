@@ -16,7 +16,11 @@ runScript(path.join(scriptsDir, 'build-i18n.js'), 'Combining locales for product
 runScript(path.join(scriptsDir, 'sass.js'), 'Compiling styles from main.scss...');
 runScript(path.join(scriptsDir, 'validate-html.js'), 'Validating tags in index.html...');
 
-if (isProd) runScript(path.join(scriptsDir, 'esbuild.js'), 'Running esbuild...');
+if (isProd) {
+	runScript(path.join(scriptsDir, 'esbuild.js'), 'Running esbuild...');
+	runScript(path.join(scriptsDir, 'hash-files.js'), 'Hashing files...');
+	runScript(path.join(scriptsDir, 'compress-files.js'), 'Compressing files...');
+}
 
 runScript(path.join(scriptsDir, 'finalize-build.js'), 'Finalizing build...')
 
