@@ -186,7 +186,8 @@ Example:
 ```html
 <input 
   type="text" 
-  id="username" 
+  id="username"
+  value="John" 
   data-event="change:updateUser:@id,@value" 
 />
 ```
@@ -264,7 +265,7 @@ Pipes are applied left-to-right; `data-pipe-source` can choose which attribute p
 
 ### I18nHelper
 
-* Use `data-i18n="KEY"` (optionally `data-i18n-params` with a JSON object) to set translated text/placeholder.
+* Use `data-i18n="KEY"` to set translated text/placeholder.
 
 Example:
 
@@ -318,7 +319,6 @@ Template literal escape (if using backticks) :
 
 Event handler attributes:
 `" onmouseover="alert('XSS')"`
-
 
 ## 7. Common patterns and recipes
 
