@@ -1,5 +1,31 @@
 # Changelog
 
+## V1.3.0
+
+Version 1.3.0 marks a stability milestone with various improvements and refinements, making this the recommended version for new projects.
+
+- Builder
+    - Added file hashing (js & css)
+    - Now adds stylesheet & script tags in `index.html` on build time
+
+- Deployment tools
+    - Added gzip_static in gzip config.
+
+- StylinNutin
+    - Added utility classes `u-text-center`, `u-text-right`, `u-text-left`, `u-font-primary`
+    - Box-shadow variables now use `$primary-color`
+
+- TestinNutin
+    - Now applies `setupJsdom()` as beforeAll (was beforeEach) and `teardownJsdom()` as afterAll (was afterEach) in `test-queue.js` (improved efficiency / speed).
+    - Added missing `path` import in `jsdom-setup.js`
+
+- Global improvements
+    - Reorganized methods in classes to improve readability
+    - getFilesRecursive metod now accepts both string and array of string for `extension` argument
+    - CLI : 
+        - Fixed CLI prompts (no longer overrides answers in `build-context.mjs`)
+        - Cleaned `file-generator.mjs` (extracted methods in `project-generator.mjs` and `json-generator.mjs`)
+
 ## V1.2.3
 
 - `nginx.conf` : fixed multi-line CSP map warning (single line map)

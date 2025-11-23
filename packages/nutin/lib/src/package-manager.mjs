@@ -6,7 +6,7 @@ import * as path from 'path';
 const fs = fsExtra.default;
 
 export async function installDependencies(projectPath, packageManager) {
-  print.section(`\n📦 Installing dependencies with ${packageManager}...`);
+  print.section(`📦 Installing dependencies with ${packageManager}...`);
   
   const installCommand = getInstallCommand(packageManager);
   await promiseExec(installCommand, { cwd: projectPath });

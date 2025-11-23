@@ -84,7 +84,7 @@ export async function promptUser(initialName, cliOptions = {}) {
       type: 'confirm',
       name: 'testinNutin',
       message: 'Use testin-nutin toolkit?',
-      default: true
+      default: false
     });
   }
 
