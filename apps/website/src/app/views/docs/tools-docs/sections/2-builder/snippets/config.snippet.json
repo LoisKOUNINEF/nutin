@@ -1,7 +1,7 @@
 {
 	"id": 2,
 	"sectionId": 2,
-	"content": "export default {\n\tesbuild: {}, // esbuild config\n\tsass: {\n\t\tpaths: []\n\t}\n\tverbose: false, // verbose output. true is equivalent to running build commands with --log flag.\n}",
+	"content": "export default {\n\tesbuild: {}, // esbuild config\n\tsass: {\n\t\tpaths: []\n\t}\n\tcompression: {}, // compress files for production\n\tverbose: false, // verbose output. true is equivalent to running build commands with --log flag.\n}",
 	"type": "ts",
 	"en": {
 		"title": "Config file"

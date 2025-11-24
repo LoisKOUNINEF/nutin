@@ -41,7 +41,7 @@ export class AnchorManager {
   }
 
   private createAnchorContainer() {
-    const container = document.createElement('div');
+    const container = document.createElement('span');
     const anchor = this.createAnchor();
 
     container.appendChild(anchor);

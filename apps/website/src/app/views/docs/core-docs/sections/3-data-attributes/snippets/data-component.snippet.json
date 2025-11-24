@@ -1,0 +1,14 @@
+{
+	"id": 1,
+	"sectionId": 3,
+	"content": "// html\n&lt;div class=\"my-class\"&gt;\n\t\t&lt;span data-component=\"my-first-selector\"&gt;&lt;/span&gt;\n&lt;/div&gt;\n&lt;div data-component=\"my-second-selector\"&gt;&lt;/div&gt;\n\nclass MyParent {\n\tchildConfigs(): ComponentConfig[] {\n\t\treturn [{\n\t\t\tselector: 'my-first-selector',\n\t\t\t\tfactory: (el) =&gt; new MyComponent(el, {\n\t\t\t\t\t// config?\n\t\t\t\t})\n\t\t\t},\n\t\t\t{\n\t\t\tselector: 'my-second-selector',\n\t\t\t\tfactory: (el) =&gt; new MyComponent(el, {\n\t\t\t\t\t// config?\n\t\t\t\t})\n\t\t\t}\n\t\t]\n\t}\n}",
+	"type": "ts",
+	"en": {
+		"title": "data-component"
+	},
+	"fr": {
+		"title": "data-component"
+	}
+}
+
+

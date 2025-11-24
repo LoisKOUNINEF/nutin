@@ -60,7 +60,7 @@ export class NavbarComponent extends Component<HTMLHeadingElement> {
 
   private returnUrl(path: string, isDocs: boolean): string {
     if (path === 'home') return '';
-    if (isDocs) return `${path}-docs`;
+    if (isDocs) return `docs/${path}-docs`;
     return path;
   }
 

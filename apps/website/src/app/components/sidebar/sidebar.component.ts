@@ -79,7 +79,7 @@ export class SidebarComponent extends Component {
 
   private navigateToTopic(name: ISection['name']) {
     const normalizedName = normalizeString(name);
-    AppEventBus.emit('navigate', `/${this._viewName}/${normalizedName}`);
+    AppEventBus.emit('navigate', `/docs/${this._viewName}/${normalizedName}`);
     window.scrollTo({ top: 0 });
   }
 }
