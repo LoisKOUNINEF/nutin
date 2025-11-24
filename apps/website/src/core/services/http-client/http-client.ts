@@ -17,6 +17,22 @@ export class HttpClient extends Service<HttpClient> {
     this._defaultHeaders = { 'Content-Type': 'application/json', ...defaultHeaders };
   }
 
+  public get<T = unknown>(endpoint: string, config?: IRequestConfig): Promise<T> { 
+    return this.request<T>('GET', endpoint, null, config);
+  }
+  public post<T = unknown>(endpoint: string, data?: unknown, config?: IRequestConfig): Promise<T> { 
+    return this.request<T>('POST', endpoint, data, config);
+  }
+  public put<T = unknown>(endpoint: string, data?: unknown, config?: IRequestConfig): Promise<T> { 
+    return this.request<T>('PUT', endpoint, data, config);
+  }
+  public patch<T = unknown>(endpoint: string, data?: unknown, config?: IRequestConfig): Promise<T> { 
+    return this.request<T>('PATCH', endpoint, data, config);
+  }
+  public delete<T = unknown>(endpoint: string, config?: IRequestConfig): Promise<T> { 
+    return this.request<T>('DELETE', endpoint, undefined, config);
+  }
+
   public addRequestInterceptor(fn: (url: string, options: RequestInit) => void): void {
     this._requestInterceptors.push(fn);
   }
@@ -25,7 +41,7 @@ export class HttpClient extends Service<HttpClient> {
     this._responseInterceptors.push(fn);
   }
 
-  onDestroy(): void {
+  protected onDestroy(): void {
     this._baseUrl = '';
     this._defaultHeaders = {};
     this._requestInterceptors = [];
@@ -59,22 +75,6 @@ export class HttpClient extends Service<HttpClient> {
     } finally {
       HttpManager.cleanupTimeout(timeoutId);
     }
-  }
-
-  public get<T = unknown>(endpoint: string, config?: IRequestConfig): Promise<T> { 
-    return this.request<T>('GET', endpoint, null, config);
-  }
-  public post<T = unknown>(endpoint: string, data?: unknown, config?: IRequestConfig): Promise<T> { 
-    return this.request<T>('POST', endpoint, data, config);
-  }
-  public put<T = unknown>(endpoint: string, data?: unknown, config?: IRequestConfig): Promise<T> { 
-    return this.request<T>('PUT', endpoint, data, config);
-  }
-  public patch<T = unknown>(endpoint: string, data?: unknown, config?: IRequestConfig): Promise<T> { 
-    return this.request<T>('PATCH', endpoint, data, config);
-  }
-  public delete<T = unknown>(endpoint: string, config?: IRequestConfig): Promise<T> { 
-    return this.request<T>('DELETE', endpoint, undefined, config);
   }
 }
 

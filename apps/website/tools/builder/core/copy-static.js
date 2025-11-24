@@ -5,6 +5,40 @@ import { getFilesRecursive, print, isVerbose, isProd } from '../../utils/index.j
 import { BINARY_EXTENSIONS } from '../variables/binary-extensions.js';
 import { PATHS } from './paths.js';
 
+async function copyStatic() {
+  const extensions = [...BINARY_EXTENSIONS, 'html'];
+  if (isProd) extensions.push('.ts');
+
+  if (isVerbose) print.info(`File types that will be copied: ${Array.from(extensions)}`);
+
+  await ensureDir(PATHS.tempSource);
+
+  await copyFavicon();
+  await copyConfig();
+
+  for (const extension of extensions) {
+    const files = await getFilesRecursive(PATHS.source, extension);
+
+    for (const file of files) {
+      const relative = path.relative(PATHS.source, file);
+      const dest = path.join(PATHS.tempSource, relative);
+
+      try {
+        await copyFile(file, dest);
+        if (isVerbose) print.info(`✅ Copied: ${file} → ${dest}`);
+      } catch (err) {
+        print.error(`❌ Failed to copy: ${file}. ${err.message}`);
+        exit(1);
+      }
+    }
+  }
+
+  if (isProd) await copyJsonFiles(PATHS.source, PATHS.tempSource);
+  await copyPrism();
+
+  if (isVerbose) print.boldInfo(`Copy complete.\n`);
+}
+
 async function ensureDir(dir) {
   await fs.mkdir(dir, { recursive: true });
 }
@@ -51,39 +85,6 @@ async function copyConfig() {
     print.boldError('Issue when copying config files.');
     exit(1);
   }
-}
-
-async function copyStatic() {
-  const extensions = [...BINARY_EXTENSIONS, 'html'];
-  if (isProd) extensions.push('.ts');
-  if (isVerbose) print.info(`File types that will be copied: ${Array.from(extensions)}\n`);
-
-  await ensureDir(PATHS.tempSource);
-
-  await copyFavicon();
-  await copyConfig();
-
-  for (const extension of extensions) {
-    const files = await getFilesRecursive(PATHS.source, extension);
-
-    for (const file of files) {
-      const relative = path.relative(PATHS.source, file);
-      const dest = path.join(PATHS.tempSource, relative);
-
-      try {
-        await copyFile(file, dest);
-        if (isVerbose) print.info(`Copied: ${file} → ${dest}`);
-      } catch (err) {
-        print.error(`Failed to copy: ${file}. ${err.message}`);
-        exit(1);
-      }
-    }
-  }
-
-  if (isProd) await copyJsonFiles(PATHS.source, PATHS.tempSource); 
-  await copyPrism();
-
-  if (isVerbose) print.boldInfo(`Copy complete.\n`);
 }
 
 async function copyJsonFiles(sourceDir, destDir) {

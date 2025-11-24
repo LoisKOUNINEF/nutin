@@ -10,10 +10,6 @@ export class Store extends Service<Store> {
     this.registerCleanup(this.clear);
   }
 
-  protected onDestroy(): void {
-    this.clear();
-  }
-
   public set<T = any>(key: string, value: T): void {
     this._state[key] = value;
     AppEventBus.emit(`store:${key}`, value);
@@ -27,12 +23,16 @@ export class Store extends Service<Store> {
     AppEventBus.subscribe(`store:${key}`, callback);
   }
 
+  public unsubscribe<T = any>(key: string, callback: (value: T) => void): void {
+    AppEventBus.off(`store:${key}`, callback);
+  }
+
   public clear(): void {
     this._state = {};
   }
 
-  public unsubscribe<T = any>(key: string, callback: (value: T) => void): void {
-    AppEventBus.off(`store:${key}`, callback);
+  protected onDestroy(): void {
+    this.clear();
   }
 }
 

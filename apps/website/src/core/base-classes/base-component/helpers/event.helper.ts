@@ -23,6 +23,15 @@ export class EventHelper {
     });
   }
 
+  public static destroyEvents(
+    element: HTMLElement, 
+    eventListeners: Array<[string, EventListener]>
+  ): void {
+    eventListeners.forEach(([event, listener]) => {
+      element.removeEventListener(event, listener);
+    });
+  }
+
   private static createBoundHandler(
     el: Element, 
     component: BaseComponent, 
@@ -44,14 +53,5 @@ export class EventHelper {
   ): void {
     target.addEventListener(event, listener);
     eventListeners.push([event, listener]);
-  }
-
-  public static destroyEvents(
-    element: HTMLElement, 
-    eventListeners: Array<[string, EventListener]>
-  ): void {
-    eventListeners.forEach(([event, listener]) => {
-      element.removeEventListener(event, listener);
-    });
   }
 }

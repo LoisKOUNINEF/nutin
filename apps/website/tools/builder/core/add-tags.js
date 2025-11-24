@@ -1,4 +1,4 @@
-import { print, isProd, isVerbose } from '../../utils/index.js';
+import { print, isProd } from '../../utils/index.js';
 import { writeFile } from 'fs/promises';
 
 export async function addTags(htmlContent, filePath) {

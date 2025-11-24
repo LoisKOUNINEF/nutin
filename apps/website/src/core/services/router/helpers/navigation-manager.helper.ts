@@ -4,20 +4,12 @@ import { I18nService, View } from "../../../index.js";
  * Navigation - handles path normalization and history management
  */
 export class NavigationManager {
-  static normalizePath(path: string): string {
+  public static normalizePath(path: string): string {
     const url = new URL(path, window.location.origin);
     return (url.pathname || '/').replace(/\/+$/, '') || '/';
   }
 
-  static shouldPushState(
-    pushState: boolean,
-    currentPath: string,
-    normalizedPath: string
-  ): boolean {
-    return pushState && currentPath !== normalizedPath;
-  }
-
-  static updateHistory(
+  public static updateHistory(
     normalizedPath: string,
     currentPath: string,
     pushState: boolean
@@ -27,7 +19,7 @@ export class NavigationManager {
     }
   }
 
-  static updateMetaContent(currentView: View): void {
+  public static updateMetaContent(currentView: View): void {
     if (!currentView.shouldUpdateMetaContent()) return;
 
     const strippedName = currentView.viewName.replace('-view', '');
@@ -39,11 +31,11 @@ export class NavigationManager {
       ?.setAttribute('content', I18nService.translate(description));
   }
 
-  static getCurrentPath(): string {
+  public static getCurrentPath(): string {
     return this.normalizePath(window.location.pathname);
   }
 
-  static matchPattern(pattern: string, path: string): Record<string, string> | null {
+  public static matchPattern(pattern: string, path: string): Record<string, string> | null {
     const paramNames: string[] = [];
 
     const regexPattern = pattern
@@ -68,7 +60,14 @@ export class NavigationManager {
         params[name] = value;
       }
     });
-
     return params;
+  }
+
+  private static shouldPushState(
+    pushState: boolean,
+    currentPath: string,
+    normalizedPath: string
+  ): boolean {
+    return pushState && currentPath !== normalizedPath;
   }
 }

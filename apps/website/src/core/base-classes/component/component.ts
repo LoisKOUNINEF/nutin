@@ -9,7 +9,7 @@ export interface ComponentButton extends BaseButton {
 export interface ComponentProps {
   // Common HTML attributes - extend as needed
   className?: string;
-  style?: string,
+  style?: string;
   textContent?: string;
   
   // Form field bindings - extend as needed
@@ -76,10 +76,23 @@ export abstract class Component<T extends HTMLElement = HTMLElement, K = any> ex
     );
   }
 
+  public getValues(): Record<string, string> {
+    return DataBindingHelper.getDataBindingValues(this.element);
+  }
+
+  public override render(): HTMLElement {
+    this.applyProps();
+    this.appendDynamicButtons();
+    this.autoBindEvents();
+    this.parseDataAttributes();
+    return super.render();
+  }
+
   private applyProps(): void {
     if (this.props.className) {
       this.element.classList.add(this.props.className);
     }
+
     if (this.props.style) {
       this.element.style = this.props.style;
     }
@@ -93,17 +106,5 @@ export abstract class Component<T extends HTMLElement = HTMLElement, K = any> ex
 
   private applyDataBindings(): void {
     DataBindingHelper.applyDataBindings(this.element, this.props);
-  }
-
-  public getValues(): Record<string, string> {
-    return DataBindingHelper.getDataBindingValues(this.element);
-  }
-
-  public override render(): HTMLElement {
-    this.applyProps();
-    this.appendDynamicButtons();
-    this.autoBindEvents();
-    this.parseDataAttributes();
-    return super.render();
   }
 }

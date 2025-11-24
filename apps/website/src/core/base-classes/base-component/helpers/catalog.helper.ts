@@ -53,14 +53,14 @@ export class CatalogHelper {
     return componentConfigs;
   }
 
-  private static createElements(index: number, config: CatalogConfig, container: HTMLElement) {
+  private static createElements(index: number, config: CatalogConfig, container: HTMLElement): void {
     const el = document.createElement(config.elementTag || 'div');
     el.setAttribute('data-component', `${config.elementName}-${index}`);
     el.dataset.index = String(index);
     container?.appendChild(el);
   }
 
-  private static pushConfig(index: number, componentConfigs: ComponentConfig[], config: CatalogConfig) {
+  private static pushConfig(index: number, componentConfigs: ComponentConfig[], config: CatalogConfig): void {
     const item = config.array[index];
 
     const configWithIndex: CatalogItemConfig = (item && typeof item === 'object')

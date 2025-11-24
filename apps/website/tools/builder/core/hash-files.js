@@ -4,11 +4,6 @@ import crypto from 'crypto';
 import { PATHS } from './paths.js';
 import { print, isVerbose, getFilesRecursive } from '../../utils/index.js';
 
-function hashFile(filePath) {
-  const content = fs.readFileSync(filePath);
-  return crypto.createHash('sha256').update(content).digest('hex').substring(0, 8);
-}
-
 function addHashToFiles(distDir) {
   const files = getFilesRecursive(distDir, ['.js', '.css']);
 
@@ -36,6 +31,11 @@ function addHashToFiles(distDir) {
   });
 
   updateHtmlReferences(path.join(distDir, 'index.html'), fileMap);
+}
+
+function hashFile(filePath) {
+  const content = fs.readFileSync(filePath);
+  return crypto.createHash('sha256').update(content).digest('hex').substring(0, 8);
 }
 
 function updateHtmlReferences(htmlPath, fileMap) {

@@ -18,13 +18,6 @@ export abstract class Service<T extends Service<T>> {
     window.addEventListener('beforeunload', this.dispose);
   }
 
-  /**
-   * For async and custom cleanup operations
-   */
-  protected onDestroy<T extends Service<T>>(this: () => T): void {
-    console.log(`No onDestroy operations.`)
-  }
-
   public static createInstance<T extends Service<T>>(
     constructor: new (...args: any[]) => T,
     ...args: any[]
@@ -62,11 +55,7 @@ export abstract class Service<T extends Service<T>> {
     }
   }
 
-  protected registerCleanup(callback: () => void) {
-    this._cleanupCallbacks.push(callback);
-  }
-
-  public dispose = () => {
+  public dispose = (): void => {
     this._cleanupCallbacks.forEach(fn => fn());
     this._cleanupCallbacks = [];
     Service._instances.delete(this.constructor);
@@ -79,6 +68,17 @@ export abstract class Service<T extends Service<T>> {
     await Promise.all(destroyPromises);
     Service._instances.clear();
     Service._instantiating.clear();
+  }
+
+  protected registerCleanup(callback: () => void): void {
+    this._cleanupCallbacks.push(callback);
+  }
+
+  /**
+   * For async and custom cleanup operations
+   */
+  protected onDestroy<T extends Service<T>>(this: () => T): void {
+    console.log(`No onDestroy operations.`)
   }
 
   /**
