@@ -18,12 +18,6 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
     this.viewName = viewName || this.getKebabCaseViewName();
   }
 
-  private getKebabCaseViewName(): string {
-    const className = this.constructor.name;
-    const baseName = className.replace(/View$/, '');
-    return baseName.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
-  }
-
    /**
    * Set route parameters for this view instance
    * Called by the router when the view is instantiated
@@ -73,5 +67,11 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
   public override destroy(): void {
     super.destroy();
     this.onExit();
+  }
+
+  private getKebabCaseViewName(): string {
+    const className = this.constructor.name;
+    const baseName = className.replace(/View$/, '');
+    return baseName.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
   }
 }

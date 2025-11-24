@@ -45,19 +45,19 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
     DomHelper.mountElement(this.element, mountTarget);
   }
 
-  protected parseDataAttributes(): void {
-    {{#if i18n}}
-    I18nHelper.parseI18nAttributes(this.element);
-    {{/if}}
-    PipeHelper.parsePipeAttributes(this.element);
+  public childConfigs(): ComponentConfig[] {
+    return [];
   }
 
-  protected autoBindEvents(): void {
-    EventHelper.bindEvents(this, this.element, this.eventListeners);
+  public destroy(): void {
+    EventHelper.destroyEvents(this.element, this.eventListeners);
+    ChildrenHelper.destroyChildren(this._children);
+    this.element.remove();
   }
 
-  protected addChildren(): void {
-    ChildrenHelper.addChildren(this, this.element, this._children);
+  public render(): HTMLElement {
+    this.addChildren();
+    return this.element;
   }
 
 /**
@@ -75,18 +75,18 @@ interface CatalogConfig {
     return CatalogHelper.generateCatalog(config);
   }
 
-  public childConfigs(): ComponentConfig[] {
-    return [];
+  protected parseDataAttributes(): void {
+    {{#if i18n}}
+    I18nHelper.parseI18nAttributes(this.element);
+    {{/if}}
+    PipeHelper.parsePipeAttributes(this.element);
   }
 
-  public destroy(): void {
-    EventHelper.destroyEvents(this.element, this.eventListeners);
-    ChildrenHelper.destroyChildren(this._children);
-    this.element.remove();
+  protected autoBindEvents(): void {
+    EventHelper.bindEvents(this, this.element, this.eventListeners);
   }
 
-  public render(): HTMLElement {
-    this.addChildren();
-    return this.element;
+  protected addChildren(): void {
+    ChildrenHelper.addChildren(this, this.element, this._children);
   }
 }

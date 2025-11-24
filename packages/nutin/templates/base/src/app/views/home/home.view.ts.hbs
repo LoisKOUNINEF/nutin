@@ -4,7 +4,7 @@ const template = `{{#if template}}__TEMPLATE_PLACEHOLDER__{{else}}<div
 {{#if stylinNutin}}
   class="u-flex-center u-flex-column u-padd-y-large"
 {{else}}
-  style="display:flex;justify-content:center;align-items:center;flex-direction:column"
+  style="display:flex;justify-content:center;align-items:center;flex-direction:column;padding-top:1rem;padding-bottom: 1rem;"
 {{/if}}>
   <h1 
   {{#if i18n}}
@@ -33,7 +33,7 @@ const template = `{{#if template}}__TEMPLATE_PLACEHOLDER__{{else}}<div
     class="u-font-large u-padd-y-medium" 
     style="margin-top:-2rem;"
   {{else}}
-    style="font-size:1.5rem;paddin-top:1rem;padding-bottom:1rem;margin-top:2rem;"
+    style="font-size:1.5rem;paddin-top:1rem;padding-bottom:1rem;margin-top:-2rem;"
   {{/if}}
   >{{#unless i18n}}You're all set !{{/unless}}</div>
   <div 

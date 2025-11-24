@@ -18,11 +18,11 @@ export class ChildrenHelper {
     });
   }
 
-  private static registerChild(child: BaseComponent, children: BaseComponent[]): void {
-    children.push(child);
-  }
-
   public static destroyChildren(children: BaseComponent[]): void {
     children.forEach(child => child.destroy());
+  }
+
+  private static registerChild(child: BaseComponent, children: BaseComponent[]): void {
+    children.push(child);
   }
 }

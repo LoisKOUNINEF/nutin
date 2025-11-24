@@ -1,5 +1,5 @@
 export class ConfigHelper {
-  static normalize<T extends Record<string, any>>(
+  public static normalize<T extends Record<string, any>>(
     config: T, 
     defaults: Partial<T>
   ): T {
@@ -9,7 +9,7 @@ export class ConfigHelper {
     } as T;
   }
 
-  static normalizeStrings<T extends Record<string, any>>(
+  public static normalizeStrings<T extends Record<string, any>>(
     config: T,
     stringKeys: (keyof T)[]
   ): T {

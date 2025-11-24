@@ -14,34 +14,16 @@ export class I18n extends Service<I18n> {
     this._currentLanguage = this.getBrowserLanguage();
   }
 
-  private getBrowserLanguage() {
-    return navigator.language.split('-')[0] as Language;
-  };
-
-  private async loadDefaultTranslations(): Promise<void> {
-    try {
-      const response = await fetch(`/locales/${this._DEFAULT_LANGUAGE}.json`);
-      
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      
-      this._defaultTranslations = await response.json();
-    } catch (error) {
-      console.error('Default translation load error:', error);
-    }
+  public get currentLanguage(): Language {
+    return this._currentLanguage;
   }
 
-  private getNestedValue(obj: any, keys: string[]): any {
-    let value = obj;
-    for (const key of keys) {
-      value = value?.[key];
-      if (!value) break;
-    }
-    return value;
+  public get defaultLanguage(): Language {
+    return this._DEFAULT_LANGUAGE;
   }
 
-  protected onDestroy(): void | Promise<void> {
-    this.resetTranslations();
-    this.dispose();
+  public get languages(): Language[] {
+    return this._LANGUAGES;
   }
 
   public async loadTranslations(lang: Language): Promise<void> {
@@ -86,18 +68,6 @@ export class I18n extends Service<I18n> {
     return result;
   }
 
-  public get currentLanguage(): Language {
-    return this._currentLanguage;
-  }
-
-  public get defaultLanguage(): Language {
-    return this._DEFAULT_LANGUAGE;
-  }
-
-  public get languages(): Language[] {
-    return this._LANGUAGES;
-  }
-
   public async initTranslations(): Promise<void> {
     const browserLang = this.getBrowserLanguage();
     const lang = this._LANGUAGES.includes(browserLang) ? browserLang : this._DEFAULT_LANGUAGE;
@@ -114,6 +84,36 @@ export class I18n extends Service<I18n> {
     this._translations = {};
     this._defaultTranslations = {};
     this._currentLanguage = this._DEFAULT_LANGUAGE;
+  }
+
+  protected onDestroy(): void | Promise<void> {
+    this.resetTranslations();
+    this.dispose();
+  }
+
+  private getBrowserLanguage() {
+    return navigator.language.split('-')[0] as Language;
+  };
+
+  private async loadDefaultTranslations(): Promise<void> {
+    try {
+      const response = await fetch(`/locales/${this._DEFAULT_LANGUAGE}.json`);
+      
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      
+      this._defaultTranslations = await response.json();
+    } catch (error) {
+      console.error('Default translation load error:', error);
+    }
+  }
+
+  private getNestedValue(obj: any, keys: string[]): any {
+    let value = obj;
+    for (const key of keys) {
+      value = value?.[key];
+      if (!value) break;
+    }
+    return value;
   }
 }
 

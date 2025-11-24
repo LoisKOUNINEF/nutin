@@ -31,6 +31,54 @@ export class PopoverView extends View {
     );
   }
 
+  public override shouldUpdateMetaContent(): boolean {
+    return false;
+  }
+
+  public override render(): HTMLElement {
+    document.body.classList.add('no-scroll');
+    this.overlay = this.createOverlay();
+
+    const wrapper = this.createWrapper();
+    const content = this.createContent();
+
+    this.appendCloseButton(content);
+    this.appendFooterButtons(content);
+
+    wrapper.appendChild(content);
+    this.overlay.appendChild(wrapper);
+    document.body.appendChild(this.overlay);
+
+    this.autoBindEvents();
+    this.parseDataAttributes();
+    this.animateIn(wrapper);
+
+    this.bindOverlayClose();
+
+    return this.overlay;
+  }
+
+  public override destroy(): void {
+    if (this.overlay) {
+      const wrapper = this.overlay.querySelector('.popover-wrapper');
+      this.overlay.classList.remove('show');
+      wrapper?.classList.remove('show');
+
+      setTimeout(() => {
+        wrapper?.remove()
+        this.overlay?.remove();
+        this.overlay = null;
+      }, 250); // match transition duration
+    }
+
+    document.body.classList.remove('no-scroll');
+    super.destroy();
+
+    if (typeof this.onClose === 'function') {
+      this.onClose();
+    }
+  }
+
 // Wraps button callbacks to include destroy() call
   private wrapButtonCallbacks(buttons: PopoverButton[]): PopoverButton[] {
     return buttons.map(btn => ({
@@ -93,53 +141,5 @@ export class PopoverView extends View {
       this.overlay?.classList.add('show');
       wrapper.classList.add('show');
     });
-  }
-
-  public override shouldUpdateMetaContent(): boolean {
-    return false;
-  }
-
-  public override render(): HTMLElement {
-    document.body.classList.add('no-scroll');
-    this.overlay = this.createOverlay();
-
-    const wrapper = this.createWrapper();
-    const content = this.createContent();
-
-    this.appendCloseButton(content);
-    this.appendFooterButtons(content);
-
-    wrapper.appendChild(content);
-    this.overlay.appendChild(wrapper);
-    document.body.appendChild(this.overlay);
-
-    this.autoBindEvents();
-    this.parseDataAttributes();
-    this.animateIn(wrapper);
-
-    this.bindOverlayClose();
-
-    return this.overlay;
-  }
-
-  public override destroy(): void {
-    if (this.overlay) {
-      const wrapper = this.overlay.querySelector('.popover-wrapper');
-      this.overlay.classList.remove('show');
-      wrapper?.classList.remove('show');
-
-      setTimeout(() => {
-        wrapper?.remove()
-        this.overlay?.remove();
-        this.overlay = null;
-      }, 250); // match transition duration
-    }
-
-    document.body.classList.remove('no-scroll');
-    super.destroy();
-
-    if (typeof this.onClose === 'function') {
-      this.onClose();
-    }
   }
 }
