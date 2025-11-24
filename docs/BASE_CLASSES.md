@@ -297,7 +297,11 @@ this.catalogConfig({
 
 ### SecurityHelper
 
-* Helpers for escaping/sanitising input and text to avoid injection when inserting text into the DOM.
+* Helpers for escaping/sanitising input and text to avoid injection when inserting text into the DOM. DOM Helper calls `sanitizeTemplate` before inserting it to innerHTML (trustLevel : '' | '' | '', default: 'normal').
+    - trustLevel can be passed to component's `super()`.
+        - trusted : no template sanitization
+        - normal : remove scripts and inline event handlers
+        - strict : remove iframe, object, embed, href, data: protocol, scripts and inline event handlers
 
 * Use `SecurityHelper.escapeHtml()` when you need to insert arbitrary strings into innerHTML or attributes.
 

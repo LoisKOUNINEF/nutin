@@ -316,3 +316,25 @@ Specifies MIME types eligible for compression. (HTML, CSS, JS, XML, JSON, SVG, W
 - `gzip_min_length 1000`
 
 Avoids compressing tiny responses (error messages, redirects, small JSON payloads). (in bytes)
+
+## Brotli compression
+
+**Default deployment helpers do NOT support Brotli compression.**                     
+If you want to use it :
+    - uncomment brotli-related sections (`BROTLI OPTIONAL`) in `builder.config.js` and `tools/builder/core/compress-files.js`
+    - enable brotli in nginx.conf
+    - You'll also need to use an existing Brotli-enabled nginx image or build your own from source.
+
+### Build nginx from source
+
+```
+FROM alpine
+RUN apk add --no-cache nginx nginx-mod-http-brotli
+```
+
+### Enable brotli in `nginx.conf`
+
+```
+brotli on;
+brotli_static on;
+```
