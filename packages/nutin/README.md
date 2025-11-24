@@ -1,7 +1,7 @@
 # [nutin](https://www.nutin.org)
 
 **Build SPAs by understanding SPAs. A minimal frontend toolkit crafted for learning and lean applications.**                    
-Includes essential features out of the box, with zero runtime dependencies.                          
+Includes essential features out of the box.                          
 *Pure TypeScript, SASS, and DOM-driven components — zero runtime dependencies.*
 
 - Required : Node >=18 
