@@ -9,9 +9,9 @@
 
 A preconfigured, multi-stage Dockerfile that
 - Builds your application in a Node environment
-- Serves the final assets using Nginx
+- Serves the final assets using Nginx Alpine image
 - Includes an optional container healthcheck
-- Exposes the proper ports for reverse proxies like Traefik
+- Exposes ports for reverse proxies like Traefik
 - Is optimized for speed, small image size, and security.
 
 ## Nginx Config
@@ -19,6 +19,27 @@ A preconfigured, multi-stage Dockerfile that
 - **This Nginx config is for production.**
 - *Note: using non-standard ports because I personally use Traefik as a reverse proxy. Adapt to your setup.*
 - ***This Nginx config does not include `add_header Strict-Transport-Security  "max-age=63072000" always;` for the same reason (Traefik reverse proxy). HSTS should be applied at the reverse proxy layer. Do not add it here unless Nginx is exposed directly over HTTPS.***
+
+### Enabling Gzip
+
+Gzip is globally enabled. *Note: Brotli is not enabled because nginx alpine image doesn't support it.*
+
+- `gzip on`
+
+Enables gzip compression for responses
+
+- `gzip_static on`, 
+
+Serves `.gz` files if they are present.                     
+*Note : you can enable / disable gzip_static only for specific locations in nginx.conf if you don't want it to be enabled globally.*
+
+- `gzip_proxied any`
+
+Makes gzip work even when the request is forwarded through a proxy.
+
+- `gzip_vary on`
+
+Prevents caching issues when some clients accept gzip and others do not.
 
 ### Headers
 
@@ -274,48 +295,32 @@ Reduces information leakage: attackers can’t fingerprint your exact Nginx vers
 
 ## Gzip compression
 
-*Note: If your hosting allows, consider enabling Brotli for even smaller assets.*
+**Gzip compression is handled by the builder, and enabled globally in `nginx.conf`. Example provided for information purpose.**
 
-- `gzip on`
+### Example Gzip configuration
 
-Enables gzip compression for responses.
-
-- `gzip_vary on`
-
-Prevents caching issues when some clients accept gzip and others do not.
-
-- `gzip_static on`
-
-Serves `.gz` files if they are present                           
-*Note : You can enable / disable gzip_static only for specific locations in nginx.conf if you don't want it enabled globally.*
 ```
-# enable
-location ~* \.(css|js|svg)$ {
-    gzip_static on;
-}
+gzip on;
+gzip_vary on;
+gzip_static on;
+gzip_proxied any;
+gzip_comp_level 6;
+gzip_min_length 1000;
 
-# disable 
-location ~* \.html$ {
-    gzip_static off;
-}
+gzip_types
+    text/plain
+    text/css
+    text/xml
+    text/javascript
+    application/json
+    application/javascript
+    application/xml+rss
+    application/rss+xml
+    font/truetype
+    font/opentype
+    application/vnd.ms-fontobject
+    image/svg+xml;
 ```
-
-- `gzip_proxied any`
-
-Makes gzip work even when the request is forwarded through a proxy.
-
-- `gzip_comp_level 6`
-
-Compression levels: 1: large file size, low CPU usage. 2: (recommended balance) small file size, reasonable CPU usage. 3: smaller file size, wastes CPU.
-
-- `gzip_types ...`
-
-Specifies MIME types eligible for compression. (HTML, CSS, JS, XML, JSON, SVG, Web fonts (TTF, OTF, WOFF, etc.)).
-*Images like PNG, JPEG, AVIF, WebP should not be compressed*.
-
-- `gzip_min_length 1000`
-
-Avoids compressing tiny responses (error messages, redirects, small JSON payloads). (in bytes)
 
 ## Brotli compression
 
@@ -337,4 +342,70 @@ RUN apk add --no-cache nginx nginx-mod-http-brotli
 ```
 brotli on;
 brotli_static on;
+```
+
+### Example Brotli configuration
+
+```
+# Enable Brotli compression
+brotli on;
+brotli_static on;
+
+# Compression level (0-11)
+# Recommended values:
+# - 4-6 for dynamic content (balance between speed and compression)
+# - 11 for pre-compressed static files
+brotli_comp_level 6;
+
+# Minimum file size to compress (in bytes)
+brotli_min_length 256;
+
+# Buffer size and count for compression
+# Format: number size
+# 16 buffers of 8k each = 128KB total
+brotli_buffers 16 8k;
+
+# Window size for compression
+# Larger values = better compression but more memory usage
+# Can be specified in bytes (e.g., 512k) or as a power of 2 (10-24)
+# Default: 24 (16MB)
+brotli_window 512k;
+
+# MIME types to compress
+brotli_types
+    # Text files
+    text/plain
+    text/css
+    text/xml
+    text/javascript
+    text/x-component
+    text/x-cross-domain-policy
+    
+    # Application files
+    application/javascript
+    application/x-javascript
+    application/json
+    application/ld+json
+    application/xml
+    application/rss+xml
+    application/atom+xml
+    application/xhtml+xml
+    application/x-font-ttf
+    application/x-font-opentype
+    application/vnd.ms-fontobject
+    application/manifest+json
+    application/x-web-app-manifest+json
+    
+    # Font files
+    font/ttf
+    font/eot
+    font/otf
+    font/opentype
+    font/woff
+    font/woff2
+    
+    # Image files
+    image/svg+xml
+    image/x-icon
+    image/vnd.microsoft.icon;
 ```
