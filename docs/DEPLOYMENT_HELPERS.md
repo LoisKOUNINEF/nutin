@@ -13,6 +13,7 @@ A preconfigured, multi-stage Dockerfile that
 - Includes an optional container healthcheck
 - Exposes ports for reverse proxies like Traefik
 - Is optimized for speed, small image size, and security.
+- NOTE : if using pnpm or bun as package manager, you'll need to tweak the Dockerfile.
 
 ## Nginx Config
 

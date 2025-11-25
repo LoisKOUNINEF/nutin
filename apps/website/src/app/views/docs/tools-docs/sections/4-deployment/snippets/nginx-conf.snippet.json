@@ -10,7 +10,7 @@
 	},
 	"fr": {
 		"title": "Configuration Nginx",
-		"before": "Un setup Nginx incluant :\n\t• Un routing SPA (try_files)\n\t• Des headers de sécurité robustes\n\t• Une Content Security Policy moderne (et des headers de sécurité pour les navigateurs anciens)\n\t• Cache des ressources statiques immuables\n\t• Health endpoint (/health)\nCette configuration utilise la directive nginx map pour définir les headers une seul fois, puis les réutiliser.\nAdapter le(s) port(s) selon vos besoins dans Dockerfile et nginx.conf.",
+		"before": "Un setup Nginx incluant :\n\t• Un routing SPA (try_files)\n\t• Des headers de sécurité robustes\n\t• Une Content Security Policy moderne (et des headers de sécurité pour les navigateurs anciens)\n\t• Cache des ressources statiques immuables\n\t• Health endpoint (/health)\nCette configuration utilise la directive nginx map pour définir les headers une seule fois, puis les réutiliser.\nAdapter le(s) port(s) selon vos besoins dans Dockerfile et nginx.conf.",
 		"after": "Quand vous utilisez add_header dans le block de location d'un enfant, cela remplace TOUS les headers du contexte parent et ne les combine pas.\nVous devez répéter les headers de sécurité dans chaque bloc qui utilise add_header."
 	}
 }

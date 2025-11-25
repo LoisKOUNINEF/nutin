@@ -1,10 +1,10 @@
 { "id": 4,
 	"en": {
 		"name": "Deployment",
-		"content": "The deployment helpers in tools/deployment are isolated from your application logic and designed for simplcity. They serve two main purposes :\n\t• Provide a safe, production-ready default.\n\t• Allow customization without learning Docker or Nginx.\n\nThe files are short, readable, and commented. You can adapt them to your environment without needing advanced infrastructure knowledge.\nYou can use those tools as-is, but it's not mandatory. If your hosting platform handles static deployment, you can ignore them completely."
+		"content": "The deployment helpers in tools/deployment are isolated from your application logic and designed for simplcity. They serve two main purposes :\n\t• Provide a safe, production-ready default.\n\t• Allow customization without learning Docker or Nginx.\n\nThe files are short, readable, and commented. You can adapt them to your environment without needing advanced infrastructure knowledge.\nYou can use those tools as-is, but it's not mandatory. If your hosting platform handles static deployment, you can ignore them completely.\nNOTE : if using pnpm or bun as package manager, you'll need to tweak the Dockerfile."
 	},
 	"fr":	{
 		"name": "Déploiement",
-		"content": "Les assistants de déploiement dans tools/deployment sont isolés de la logique de votre application et conçus pour la simplicité. Ils ont deux objectifs principaux :\n\t• Fournir une configuration par défaut sûre et prête pour la production.\n\t• Permettre la personnalisation sans avoir à apprendre Docker ou Nginx.\n\nLes fichiers sont courts, lisibles et commentés. Vous pouvez les adapter à votre environnement sans avoir besoin de connaissances avancées en infrastructure."
+		"content": "Les assistants de déploiement dans tools/deployment sont isolés de la logique de votre application et conçus pour la simplicité. Ils ont deux objectifs principaux :\n\t• Fournir une configuration par défaut sûre et prête pour la production.\n\t• Permettre la personnalisation sans avoir à apprendre Docker ou Nginx.\n\nLes fichiers sont courts, lisibles et commentés. Vous pouvez les adapter à votre environnement sans avoir besoin de connaissances avancées en infrastructure.\nNOTE : si vous utilisez pnpm ou bun comme package manager, vous devrez modifier le Dockerfile."
 	}
 }
