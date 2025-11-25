@@ -1,6 +1,6 @@
 {
 	"id": 2,
-	"sectionId": 2,
+	"sectionId": 3,
 	"content": "type CoreEventMap = {\n\t'navigate': string;\n\t'reload': string;\n\t'view-mount': string;\n\t'view-render': string;\n\t'view-unmount': string;\n\t'track-pageview': { page: string };\n\t// Add other events and their payload types here\n};\n\ntype StoreEventMap = {[ K in `store:${string}` ]: any; };\n\n// Merged event map\ntype EventMap = CoreEventMap & StoreEventMap;\ntype EventKey = keyof EventMap;\n\ntype Subscription&lt;K extends EventKey = EventKey&gt; = { event: K; callback: (data: EventMap[K]) =&gt; void; once?: boolean; };\n\npublic subscribe&lt;K extends EventKey&gt;( event: K, callback: (data: EventMap[K]) =&gt; void ): void;\npublic emit&lt;K extends EventKey&gt;(event: K, data?: EventMap[K]): void;\npublic off&lt;K extends EventKey&gt;( event: K, callback?: (data: EventMap[K]) =&gt; void ): void;\npublic once&lt;K extends EventKey&gt;( event: K, callback: (data: EventMap[K]) =&gt; void ): void;\n// usage\nAppEventBus.emit('navigate', '/path'):",
 	"type": "ts",
 	"en": {

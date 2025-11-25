@@ -1,6 +1,6 @@
 {
 	"id": 6,
-	"sectionId": 3,
+	"sectionId": 1,
 	"content": "&lt;!-- Will remove div if myOptionalData is undefined --&gt;\n&lt;div data-optional&gt;${ myOptionalData }&lt;/div&gt;\n&lt;!-- Will remove div if src is undefined --&gt;\n&lt;div data-optional=\"src\" src=\"\"&gt;Will be removed&lt;/div&gt;",
 	"type": "html",
 	"en": {

@@ -1,6 +1,6 @@
 {
 	"id": 4,
-	"sectionId": 1,
+	"sectionId": 2,
 	"content": "abstract class Service&lt;T extends Service&lt;T&gt;&gt;;\n\n// For async and custom cleanup operations\nprotected onDestroy&lt;T extends Service&lt;T&gt;&gt;(this: () =&gt; T): void;\n\n// singleton pattern\n// expose instance\npublic static getInstance&lt;T extends Service&lt;T&gt;&gt;(this: new () =&gt; T): T;\npublic static createInstance&lt;T extends Service&lt;T&gt;&gt;( constructor: new (...args: any[]) =&gt; T, ...args: any[] ): T;\n\n// cleanup\npublic static async destroy&lt;T extends Service&lt;T&gt;&gt;( this: new (...args: any[]) =&gt; T ): Promise&lt;void&gt;;\npublic static async destroyAll(): Promise&lt;void&gt;;\nprotected registerCleanup(callback: () => void)\n\n// exposed methods for testing\n// Resets instance without cleanup.\npublic static testingReset&lt;T extends Service&lt;T&gt;&gt;( this: new (...args: any[]) =&gt; T ): void;\npublic static testingResetAll(): void;",
 	"type": "ts",
 	"en": {

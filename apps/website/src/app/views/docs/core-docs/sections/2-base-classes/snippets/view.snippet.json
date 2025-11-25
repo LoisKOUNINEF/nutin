@@ -1,6 +1,6 @@
 {
 	"id": 3,
-	"sectionId": 1,
+	"sectionId": 2,
 	"content": "abstract class View&lt;T extends HTMLElement = HTMLElement&gt; extends BaseComponent&lt;T&gt;;\n\nexport interface ViewOptions extends BaseComponentOptions { viewName?: string; }\n\n// template const\nconst template = ``;\n\n// kebab-cased\npublic viewName: string;\n\n/**\n* Set route parameters for this view instance\n* Called by the router when the view is instantiated\n*/\npublic setRouteParams(params: Record&lt;string, string&gt;): void;\n\n// Get all route parameters\npublic getRouteParams(): Record&lt;string, string&gt;;\n// Get a specific route parameter\npublic getRouteParam(key: string): string | undefined;\n// Check if a route parameter exists and has a value\npublic hasRouteParam(key: string): boolean;\n// for meta.title (and meta.description if using i18n content)\npublic shouldUpdateMetaContent(): boolean;\n\npublic onEnter(): void;\npublic onExit(): void;",
 	"type": "ts",
 	"en": {

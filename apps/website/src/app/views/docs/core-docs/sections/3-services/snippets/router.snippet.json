@@ -1,6 +1,6 @@
 {
 	"id": 1,
-	"sectionId": 2,
+	"sectionId": 3,
 	"content": "// route configuration\ntype RouteConfig = \n\t// view constructor\n\t(() =&gt; View) \n\t// object with guards\n\t| { view: () =&gt; View; guards?: RouteGuard[]; };\n\n// usage in app/routes.ts\n'/my-route': () =&gt; new MyView()\n'/guarded-route': { view: () =&gt; new GuardedView(), guards: [] }\n'/route-with-optional-param:param?': () =&gt; new ViewWithOptionalParam()\n'/route-with-required-param:param': () =&gt; new ViewWithRequiredParam()\n\ntype RouteGuard = (params: Record&lt;string, string&gt;) =&gt; boolean | string | Promise&lt;boolean | string&gt;;\ntype GuardResult = { allowed: boolean, redirectTo?: string, viewConstructor?: () =&gt; View }\ntype Routes = Record&lt;string, RouteConfig&gt;;",
 	"type": "ts",
 	"en": {

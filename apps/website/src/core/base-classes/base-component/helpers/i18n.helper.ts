@@ -13,9 +13,9 @@ export class I18nHelper {
     key: string
   ): void {
     if (el instanceof HTMLInputElement) {
-      el.placeholder = I18nService.translate(key);
+      el.placeholder = I18nService.translate(key, el.textContent);
     } else {
-      el.textContent = I18nService.translate(key);
+      el.textContent = I18nService.translate(key, el.textContent);
     }
   }
 }

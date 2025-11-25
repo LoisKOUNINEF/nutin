@@ -1,6 +1,6 @@
 {
 	"id": 4,
-	"sectionId": 3,
+	"sectionId": 1,
 	"content": "&lt;!-- will set textContent with key value from my-component/locales/*.json --&gt;\n&lt;div data-i18n=\"my-component.key\"&gt;&lt;/div&gt;",
 	"type": "html",
 	"en": {

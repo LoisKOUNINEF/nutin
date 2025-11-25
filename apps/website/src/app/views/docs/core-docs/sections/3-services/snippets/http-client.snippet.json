@@ -1,6 +1,6 @@
 {
 	"id": 4,
-	"sectionId": 2,
+	"sectionId": 3,
 	"content": "interface IRequestConfig {\n\theaders?: Record&lt;string, string&gt;;\n\tqueryParams?: Record&lt;string, string&gt;;\n\ttimeout?: number;\n}\n\n// request\npublic get&lt;T = unknown&gt;(endpoint: string, config?: IRequestConfig): Promise&lt;T&gt;;\npublic post&lt;T = unknown&gt;(endpoint: string, data?: unknown, config?: IRequestConfig): Promise&lt;T&gt;;\npublic put&lt;T = unknown&gt;(endpoint: string, data?: unknown, config?: IRequestConfig): Promise&lt;T&gt;;\npublic patch&lt;T = unknown&gt;(endpoint: string, data?: unknown, config?: IRequestConfig): Promise&lt;T&gt;;\npublic delete&lt;T = unknown&gt;(endpoint: string, config?: IRequestConfig): Promise&lt;T&gt;;\n\n// register interceptors\npublic addRequestInterceptor(fn: (url: string, options: RequestInit) =&gt; void): void;\npublic addResponseInterceptor(fn: (response: Response) =&gt; void): void;",
 	"type": "ts",
 	"en": {

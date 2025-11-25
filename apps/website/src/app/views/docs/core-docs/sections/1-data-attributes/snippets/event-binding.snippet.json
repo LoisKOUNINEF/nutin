@@ -1,6 +1,6 @@
 {
 	"id": 5,
-	"sectionId": 3,
+	"sectionId": 1,
 	"content": "&lt;!-- data-event --&gt;\n&lt;!-- direct argument --&gt;\n&lt;div data-event=\"change:callbackFn:fnArg\"&gt;&lt;/div&gt;\n&lt;!-- set argument --&gt;\n&lt;div value=\"my-value\" data-event=\"change:callbackFn:@value\"&gt;&lt;/div&gt;\n\n&lt;!-- data-bind --&gt;\n&lt;!-- Consumes component's `props` argument.\ninput and textarea : el.value = String(value); // foo\nother elements (fallback) : el.textContent = String(value); // bar\n--&gt;\n&lt;input data-bind=\"foo\"&gt;&lt;/input&gt;\n&lt;div data-bind=\"bar\"&gt;&lt;/div&gt;",
 	"type": "html",
 	"en": {

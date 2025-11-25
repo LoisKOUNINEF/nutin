@@ -1,6 +1,6 @@
 {
 	"id": 2,
-	"sectionId": 3,
+	"sectionId": 1,
 	"content": "// html\n&lt;div data-catalog=\"my-catalog\"&gt;&lt;/div&gt;\n\nclass MyParent {\n\tchildConfigs(): ComponentConfig[] {\n\t// catalogConfig inherited method returns ComponentConfig[]\n\t\tconst catalog =  this.catalogConfig({\n\t\t\tarray: myArray, // Array of elements with the same shape as component's 'config', from which components will be generated\n\t\t\telementName: 'first-element',\n\t\t\tselector: `my-catalog`,\n\t\t\tcomponent: MyComponent\n\t\t});\n\n\t\treturn catalog;\n\t}\n}",
 	"type": "ts",
 	"en": {
