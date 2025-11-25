@@ -50,7 +50,7 @@
 * small button management utilities
 * data-binding helpers
 
-### Example
+### Example Implementation
 
 ```ts
 import { Component, ComponentConfig } from '../../../core/index.js';
@@ -97,7 +97,7 @@ export class AddTaskComponent extends Component {
 * lifecycle hooks: `onEnter()` (called when the view mounts) and `onExit()` (when it unmounts)
 * route params methods: `hasRouteParam(string)`, `setRouteParam(string)`, `getRouteParam(string)`, `getRouteParams()`
 
-### Example
+### Example Implementation
 
 ```ts
 import { AppEventBus, ComponentConfig, View } from '../../../core/index.js';
@@ -149,14 +149,15 @@ v.render();
 Services are **enforced singletons**. You must obtain a service via its `getInstance()` static accessor (each concrete service exposes that). Direct `new` on a subclass will throw — the `Service` base class prevents accidental multiple instances.                     
 ***Services generated with generator `npm run generate service` will export the `getInstance` return value directly.***
 
-### Example
+### Example Implementation
 
 ```ts
 import { Service } from "../../../core/index.js";
 
-export class Example extends Service<Example> {
+export class MyExample extends Service<Example> {
   constructor() {
     super();
+    // Parent class automatically binds 'this' 
     this.registerCallback();
   }
 
@@ -169,8 +170,10 @@ export class Example extends Service<Example> {
   }
 }
 
-export const exampleService = Example.getInstance();
+export const MyExampleService = Example.getInstance();
 ```
+
+- Service abstract class auto-binds methods so that 'this' is not undefined.
 
 ### Cleanup & testing hooks
 
