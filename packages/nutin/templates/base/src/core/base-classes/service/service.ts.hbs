@@ -15,6 +15,7 @@ export abstract class Service<T extends Service<T>> {
         `${constructor.name} is a Service. Use ${constructor.name}.getInstance() instead.`
       );
     }
+    this.autoBindMethods();
     window.addEventListener('beforeunload', this.dispose);
   }
 
@@ -79,6 +80,28 @@ export abstract class Service<T extends Service<T>> {
    */
   protected onDestroy<T extends Service<T>>(this: () => T): void {
     console.log(`No onDestroy operations.`)
+  }
+
+  private autoBindMethods(): void {
+    let proto = Object.getPrototypeOf(this);
+
+    while (proto && proto !== Service.prototype) {
+      const propertyNames = Object.getOwnPropertyNames(proto);
+
+      for (const key of propertyNames) {
+        const descriptor = Object.getOwnPropertyDescriptor(proto, key);
+
+        if (
+          key !== 'constructor' &&
+          descriptor &&
+          typeof descriptor.value === 'function'
+        ) {
+          (this as any)[key] = descriptor.value.bind(this);
+        }
+      }
+
+      proto = Object.getPrototypeOf(proto);
+    }
   }
 
   /**

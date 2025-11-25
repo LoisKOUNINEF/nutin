@@ -1,6 +1,17 @@
 import { getCiCommand } from './package-manager.mjs';
 import { packageVersion } from './version.mjs';
 
+export const defaults = {
+  projectName: 'my-nutin-app',
+  packageManager: 'npm',
+  stylinNutin: true,
+  template: true,
+  i18n: true,
+  deployHelper: false,
+  testinNutin: false,
+  transition: false
+};
+
 export class ContextBuilder {
 	buildContext(answers) { 
     const version = packageVersion;
@@ -10,11 +21,12 @@ export class ContextBuilder {
       projectName: answers.projectName,
       packageManager: answers.packageManager,
       
-      template: answers.template,
-      stylinNutin: answers.stylinNutin,
-      i18n: answers.i18n,
-      transition: answers.transition,
-      testinNutin: answers.testinNutin,
+      template: answers.template ?? defaults.template,
+      stylinNutin: answers.stylinNutin ?? defaults.stylinNutin,
+      i18n: answers.i18n ?? defaults.i18n,
+      deployHelper: answers.deployHelper ?? defaults.deployHelper,
+      testinNutin: answers.testinNutin ?? defaults.testinNutin,
+      transition: answers.transition ?? defaults.transition,
 
       ciCommand: ciCommand,
       version: version

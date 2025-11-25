@@ -62,14 +62,14 @@ export class FileGenerator {
       return;
     }
 
-    const features = [ 'template', 'i18n', 'stylinNutin', 'testinNutin' ];
+    const features = [ 'template', 'i18n', 'stylinNutin', 'testinNutin', 'deployHelper' ];
     
     for (const feature of features) {
       if (context[feature]) {
         const featureTemplateDir = path.join(featuresDir, feature);
         
         if (await fs.pathExists(featureTemplateDir)) {
-          print.info(`🔧 Adding ${feature} feature...`);
+          print.info(`  🔧 Adding ${feature} feature...`);
           await this.processTemplateDirectory(featureTemplateDir, projectPath, context);
         }
       }

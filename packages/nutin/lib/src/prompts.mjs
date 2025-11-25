@@ -1,6 +1,8 @@
 import inquirer from 'inquirer';
+import { defaults } from './context-builder.mjs';
 
 export async function promptUser(initialName, cliOptions = {}) {
+
   let projectName = initialName;
   if (!projectName) {
     const nameAnswer = await inquirer.prompt([
@@ -8,7 +10,7 @@ export async function promptUser(initialName, cliOptions = {}) {
         type: 'input',
         name: 'projectName',
         message: 'Project name:',
-        default: 'my-nutin-app',
+        default: defaults.projectName,
         validate: validateProjectName
       }
     ]);
@@ -23,7 +25,7 @@ export async function promptUser(initialName, cliOptions = {}) {
         name: 'packageManager',
         message: 'Package manager:',
         choices: ['npm', 'yarn', 'pnpm', 'bun'],
-        default: 'npm'
+        default: defaults.packageManager
       }
     ]);
     packageManager = pmAnswer.packageManager;
@@ -33,11 +35,12 @@ export async function promptUser(initialName, cliOptions = {}) {
     return {
       projectName,
       packageManager,
-      stylinNutin: cliOptions.stylinNutin || true,
-      template: cliOptions.template || true,
-      i18n: cliOptions.i18n || true,
-      testinNutin: cliOptions.testinNutin || false,
-      transition: cliOptions.transitions || false
+      stylinNutin: cliOptions.stylinNutin,
+      template: cliOptions.template,
+      i18n: cliOptions.i18n,
+      deployHelper: cliOptions.deployHelper,
+      testinNutin: cliOptions.testinNutin,
+      transition: cliOptions.transitions
     };
   }
 
@@ -48,7 +51,7 @@ export async function promptUser(initialName, cliOptions = {}) {
       type: 'confirm',
       name: 'stylinNutin',
       message: 'Use built-in SCSS utility classes ?',
-      default: true
+      default: defaults.stylinNutin
     });
   }
 
@@ -57,7 +60,7 @@ export async function promptUser(initialName, cliOptions = {}) {
       type: 'confirm',
       name: 'template',
       message: 'Use external templates ?',
-      default: true
+      default: defaults.template
     });
   }
 
@@ -66,16 +69,16 @@ export async function promptUser(initialName, cliOptions = {}) {
       type: 'confirm',
       name: 'i18n',
       message: 'Use i18n with json-based content ?',
-      default: true
+      default: defaults.i18n
     });
   }
 
-  if (cliOptions.transition === undefined) {
+  if (cliOptions.deployHelper === undefined) {
     questions.push({
       type: 'confirm',
-      name: 'transition',
-      message: 'Use animated view transitions?',
-      default: false
+      name: 'deployHelper',
+      message: 'Use Docker & deployment helpers ?',
+      default: defaults.deployHelper
     });
   }
 
@@ -84,7 +87,16 @@ export async function promptUser(initialName, cliOptions = {}) {
       type: 'confirm',
       name: 'testinNutin',
       message: 'Use testin-nutin toolkit?',
-      default: false
+      default: defaults.testinNutin
+    });
+  }
+
+  if (cliOptions.transition === undefined) {
+    questions.push({
+      type: 'confirm',
+      name: 'transition',
+      message: 'Use animated view transitions?',
+      default: defaults.transition
     });
   }
 
@@ -96,6 +108,7 @@ export async function promptUser(initialName, cliOptions = {}) {
     template: cliOptions.template ?? answers.template,
     stylinNutin: cliOptions.stylinNutin ?? answers.stylinNutin,
     i18n: cliOptions.i18n ?? answers.i18n,
+    deployHelper: cliOptions.deployHelper ?? answers.deployHelper,
     transition: cliOptions.transition ?? answers.transition,
     testinNutin: cliOptions.testinNutin ?? answers.testinNutin
   };

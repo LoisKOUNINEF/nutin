@@ -17,6 +17,8 @@ export async function createApp() {
     .option('--no-stylin-nutin', 'Do not use built-in SCSS utility')
     .option('--i18n', '(Default) Use i18n & json-based content')
     .option('--no-i18n', 'Do not use i18n & json-based content')
+    .option('--deploy-helper', 'Use Docker & deployment helpers')
+    .option('--no-deploy-helper', '(Default) Do not use Docker & deployment helpers')
     .option('--testin-nutin', 'Use testin-nutin toolkit')
     .option('--no-testin-nutin', '(Default) Do not use testin-nutin toolkit')
     .option('--transition', 'Use animated view transitions\nNote: May interfere with CSS `position: fixed`, `z-index`...')

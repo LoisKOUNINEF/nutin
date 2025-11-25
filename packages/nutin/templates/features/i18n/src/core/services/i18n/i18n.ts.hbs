@@ -45,7 +45,7 @@ export class I18n extends Service<I18n> {
     } 
   }
 
-  public translate(key: string, params?: Record<string, string>): string {
+  public translate(key: string, textContent?: string | null): string {
     const keys = key.split('.');
     
     // Try to get value from current language translations
@@ -56,16 +56,7 @@ export class I18n extends Service<I18n> {
       value = this.getNestedValue(this._defaultTranslations, keys);
     }
     
-    // If still not found, return the key as fallback
-    let result = value || key;
-    
-    if (params) {
-      Object.entries(params).forEach(([k, v]) => {
-        result = result.replace(`{${k}}`, v);
-      });
-    }
-    
-    return result;
+    return value || textContent || key;
   }
 
   public async initTranslations(): Promise<void> {

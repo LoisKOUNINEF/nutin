@@ -40,17 +40,17 @@ npx @nutin/cli
 -pm --package-manager <manager> # npm (Default), yarn, pnpm, bun
 
 # Features
+--template # (Default) Use external templates
 --no-template # Use inline templates
+--stylin-nutin # (Default) Use built-in SCSS utility classes & mixins
 --no-stylin-nutin # Do not use built-in SCSS utility
 --testin-nutin # Use testin-nutin toolkit
---no-i18n # Do not use i18n & json-based content
---transition # Use animated view transitions. Note: May interfere with CSS `position: fixed`, `z-index`...
-
-# Features Defaults
---template # (Default) Use external templates
---stylin-nutin # (Default) Use built-in SCSS utility classes & mixins
---i18n # (Default) Use i18n & json-based content
 --no-testin-nutin # (Default) Do not use testin-nutin toolkit
+--i18n # (Default) Use i18n & json-based content
+--no-i18n # Do not use i18n & json-based content
+--deploy-helper # Use Docker & deployment helpers
+--no-deploy-helper, # (Default) Do not use Docker & deployment helpers
+--transition # Use animated view transitions. Note: May interfere with CSS `position: fixed`, `z-index`...
 --no-transition # (Default) Do not use animated view transitions
 ```
 

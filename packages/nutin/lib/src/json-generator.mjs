@@ -13,8 +13,11 @@ export class JsonGenerator {
 
   async generateConfigFiles(projectPath, context) {
     const configPath = path.join(projectPath, 'config');
-    await fs.ensureDir(configPath);
-    if (context.i18n) await this.generateLanguageConfig(configPath)
+    
+    if (context.i18n) {
+      await fs.ensureDir(configPath); 
+      await this.generateLanguageConfig(configPath);
+    }
   }
 
   async generateLanguageConfig(configPath) {

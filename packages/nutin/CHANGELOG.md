@@ -4,22 +4,28 @@
 
 Version 1.3.0 marks a stability milestone with various improvements and refinements, making this the recommended version for new projects.
 
-- Security
-    - Added template sanitization with trustLevel (`'strict' | 'normal' | 'trusted'` default: `'normal'`) that can be passed to component's `super()`.
-        - trusted : no template sanitization
-        - normal : remove scripts and inline event handlers
-        - strict : remove iframe, object, embed, href, data: protocol, scripts and inline event handlers
+- Global
+    - `Service` abstract class now auto-binds methods with `this`, preventing `"this" is undefined` potential warning on initial page load.
+    - Added HTML template sanitization with trustLevel that can be passed to component's `super()`.
+        - trusted : no template sanitization (returns original)
+        - normal (default) : remove scripts and inline event handlers
+        - strict : remove iframe, object, embed, href (javascript), data: protocol, scripts and inline event handlers
 
-- Builder
+- I18n
+    - Removed `data-i18n-params` pipe : Default values (fallback) must now be inlined text content in component's HTML template. 
+
+- CLI :
+    - Deployment helpers is now optional (default : disabled). Flags : `--deploy-helper`  `--no-deploy-helper`
+    - Fixed CLI prompts (no longer overrides answers)
+
+- Deployment Helper / Builder
     - Now adds stylesheet & script tags in `index.html` on build time (`add-tags.js`)
     - (Production) Added file hashing (js & css) (`hash-files.js`)
     - (Production) Added Gzip and Brotli compression (`compress-files.js`). Configurable in `builder.config.js`
-        - **Note : default deployment helpers do NOT support Brotli compression.** If you want to use it :
+        - **Note : default nginx alpine image does NOT support Brotli compression.** If you want to use it :
             - uncomment brotli-related sections (`BROTLI OPTIONAL`) in `builder.config.js` and `tools/builder/core/compress-files.js`
             - enable brotli in nginx.conf
             - You'll also need to use an existing Brotli-enabled nginx image or build your own from source.
-
-- Deployment tools
     - Enabled gzip globally in `nginx.conf` and removed `gzip.conf` (compress during build).
 
 - StylinNutin
@@ -28,13 +34,6 @@ Version 1.3.0 marks a stability milestone with various improvements and refineme
 
 - TestinNutin
     - Now applies `setupJsdom()` as beforeAll (was beforeEach) and `teardownJsdom()` as afterAll (was afterEach) in `test-queue.js` (improved efficiency / speed)
-
-- Global minor improvements & fixes
-    - Reorganized methods in classes to improve readability and added function return types where missing
-    - `getFilesRecursive` method (tools/utils) now accepts both string and array of strings for `extension` argument
-    - CLI : 
-        - Fixed CLI prompts (`build-context.mjs` no longer overrides answers)
-        - Cleaned `file-generator.mjs` (extracted methods in `project-generator.mjs` and `json-generator.mjs`)
 
 ## V1.2.3
 
