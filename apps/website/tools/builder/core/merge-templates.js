@@ -19,7 +19,7 @@ async function mergeTemplates() {
     try {
       const htmlContent = await fs.readFile(htmlPath, 'utf-8');
       const minifiedHtml = await minifyHTML(htmlContent);
-      if (isVerbose) print.info(`Minified HTML: ${file}`);
+      if (isVerbose) print.info(`Minified HTML: ${htmlPath}`);
 
       try {
         let jsContent = await fs.readFile(jsPath, 'utf-8');

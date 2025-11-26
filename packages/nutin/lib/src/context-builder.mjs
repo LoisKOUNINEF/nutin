@@ -6,7 +6,7 @@ export const defaults = {
   packageManager: 'npm',
   stylinNutin: true,
   template: true,
-  i18n: true,
+  i18n: false,
   deployHelper: false,
   testinNutin: false,
   transition: false

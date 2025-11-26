@@ -23,7 +23,7 @@ function escapeWhitespace(str, options = {}) {
   return result;
 }
 
-function formatHtml(str) {
+function replaceEscapedChars(str) {
   return str
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -124,18 +124,11 @@ async function main() {
 
     let result = '';
 
-    if (options.inputFile && options.inputFile.endsWith('.html')) {
-      result = formatHtml(input);
-      result = escapeWhitespace(result, {
-        spacesToTab: options.spacesToTab,
-        convertSpacesToTabs: options.convertSpacesToTabs
-      });
-    } else {
-      result = escapeWhitespace(input, {
-        spacesToTab: options.spacesToTab,
-        convertSpacesToTabs: options.convertSpacesToTabs
-      });
-    }
+    result = replaceEscapedChars(input);
+    result = escapeWhitespace(result, {
+      spacesToTab: options.spacesToTab,
+      convertSpacesToTabs: options.convertSpacesToTabs
+    });
 
     if (options.outputFile) {
       const output = `"content": "${result}"`;

@@ -46,8 +46,8 @@ npx @nutin/cli
 --no-stylin-nutin # Do not use built-in SCSS utility
 --testin-nutin # Use testin-nutin toolkit
 --no-testin-nutin # (Default) Do not use testin-nutin toolkit
---i18n # (Default) Use i18n & json-based content
---no-i18n # Do not use i18n & json-based content
+--i18n # Use i18n & json-based content
+--no-i18n # (Default) Do not use i18n & json-based content
 --deploy-helper # Use Docker & deployment helpers
 --no-deploy-helper, # (Default) Do not use Docker & deployment helpers
 --transition # Use animated view transitions. Note: May interfere with CSS `position: fixed`, `z-index`...

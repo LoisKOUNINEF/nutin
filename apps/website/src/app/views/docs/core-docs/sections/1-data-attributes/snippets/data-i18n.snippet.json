@@ -1,7 +1,7 @@
 {
 	"id": 4,
 	"sectionId": 1,
-	"content": "&lt;!-- will set textContent with key value from my-component/locales/*.json --&gt;\n&lt;div data-i18n=\"my-component.key\"&gt;&lt;/div&gt;",
+	"content": "&lt;!-- will set textContent with key value from my-component/locales/*.json --&gt;\n&lt;div data-i18n=\"my-component.key\"&gt;&lt;/div&gt;\n&lt;!-- if no value is found, textContent will remain --&gt;\n&lt;div data-i18n=\"my-component.existing-key\"&gt;This will be replaced&lt;/div&gt;\n&lt;div data-i18n=\"my-component.no-existing-key\"&gt;This will remain&lt;/div&gt;\n&lt;!-- if no value is found and there is no textContent, will return key --&gt;",
 	"type": "html",
 	"en": {
 		"title": "data-i18n"

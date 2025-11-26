@@ -18,7 +18,7 @@ Version 1.3.0 marks a stability milestone with various improvements and refineme
     - Deployment helpers is now optional (default : disabled). Flags : `--deploy-helper`  `--no-deploy-helper`
     - Fixed CLI prompts (no longer overrides answers)
 
-- Deployment Helper / Builder
+- Builder / Deployment Helper
     - Now adds stylesheet & script tags in `index.html` on build time (`add-tags.js`)
     - (Production) Added file hashing (js & css) (`hash-files.js`)
     - (Production) Added Gzip and Brotli compression (`compress-files.js`). Configurable in `builder.config.js`
@@ -33,7 +33,7 @@ Version 1.3.0 marks a stability milestone with various improvements and refineme
     - box-shadow variables now use `$primary-color`
 
 - TestinNutin
-    - Now applies `setupJsdom()` as beforeAll (was beforeEach) and `teardownJsdom()` as afterAll (was afterEach) in `test-queue.js` (improved efficiency / speed)
+    - Now applies `setupJsdom()` beforeAll (was beforeEach) and `teardownJsdom()` afterAll (was afterEach) in `test-queue.js` (improved efficiency / speed)
 
 ## V1.2.3
 

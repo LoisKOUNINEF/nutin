@@ -1,6 +1,6 @@
 {
 	"id": 1,
 	"sectionId": 3,
-	"content": "// Builder\nnpm run build  // build (dev)\nnpm run build:prod  // build (prod)\n\n// Development Server\nnpm run serve:only  // serve without build (use existing build output)\nnpm run serve  // build and serve\nnpm run dev  // live reload / rebuild\n\n// Generator (ELEMENT = component | view | service); ELEMENT-NAME --> kebab-case\nnpm run generate ELEMENT ELEMENT-NAME\nnpm run generate ELEMENT PATH/TO/ELEMENT-NAME\n\n// Docker\ndocker:build\ndocker:prod\n\n// Versioning\nnpm run patch\nnpm run minor\nnpm run major\n\n// testin-nutin\nnpm run test  // test without build (use existing build output)\nnpm run test:rebuild  // build and test\nnpm run test:watch  // watch tests",
+	"content": "// Builder\nnpm run build  // build (dev)\nnpm run build:prod  // build (prod)\n\n// Development Server\nnpm run serve:only  // serve without build (use existing build output)\nnpm run serve  // build and serve\nnpm run dev  // live reload / rebuild\n\n// Generator (ELEMENT = component | view | service); ELEMENT-NAME --> kebab-case\nnpm run generate ELEMENT ELEMENT-NAME\nnpm run generate ELEMENT PATH/TO/ELEMENT-NAME\n\n// Deployment helpers\nnpm run docker:build\nnpm run docker:prod\n\n// testin-nutin\nnpm run test  // test without build (use existing build output)\nnpm run test:rebuild  // build and test\nnpm run test:watch  // watch tests\n\n// Versioning\nnpm run patch\nnpm run minor\nnpm run major",
 	"type": "none"
 }
