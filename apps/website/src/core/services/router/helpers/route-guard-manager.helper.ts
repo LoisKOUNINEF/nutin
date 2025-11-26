@@ -25,31 +25,11 @@ export type RouteConfig = (() => View) | {
 export type Routes = Record<string, RouteConfig>;
 
 export class RouteGuardsManager {
-  static getViewConstructor(routeConfig: RouteConfig): () => View {
+  public static getViewConstructor(routeConfig: RouteConfig): () => View {
     return typeof routeConfig === 'function' ? routeConfig : routeConfig.view;
   }
 
-  static getRouteGuards(routeConfig: RouteConfig): RouteGuard[] {
-    return typeof routeConfig === 'function' ? [] : (routeConfig.guards || []);
-  }
-
-  /**
-   * Runs all guards in sequence with route parameters and returns the result
-   */
-  static async runGuards(
-    guards: RouteGuard[], 
-    params: Record<string, string>
-  ): Promise<boolean | string> {
-    for (const guard of guards) {
-      const result = await guard(params);
-      if (result !== true) {
-        return result; // false or redirect path
-      }
-    }
-    return true;
-  }
-
-  static async processRouteGuards(
+  public static async processRouteGuards(
     routeConfig: RouteConfig,
     targetPath: string,
     params: Record<string, string> = {}
@@ -70,5 +50,25 @@ export class RouteGuardsManager {
     // Guards passed
     const viewConstructor = this.getViewConstructor(routeConfig);
     return { allowed: true, viewConstructor };
+  }
+
+  private static getRouteGuards(routeConfig: RouteConfig): RouteGuard[] {
+    return typeof routeConfig === 'function' ? [] : (routeConfig.guards || []);
+  }
+
+  /**
+   * Runs all guards in sequence with route parameters and returns the result
+   */
+  private static async runGuards(
+    guards: RouteGuard[], 
+    params: Record<string, string>
+  ): Promise<boolean | string> {
+    for (const guard of guards) {
+      const result = await guard(params);
+      if (result !== true) {
+        return result; // false or redirect path
+      }
+    }
+    return true;
   }
 }

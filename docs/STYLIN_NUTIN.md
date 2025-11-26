@@ -65,6 +65,14 @@ Utility classes use variables defined in `styles/base/_variables.scss`, as well 
 
 .u-font-secondary
 
+.u-font-primary 
+
+.u-text-center
+
+.u-text-right
+
+.u-text-left
+
 .u-flex-center
 
 .u-flex-column

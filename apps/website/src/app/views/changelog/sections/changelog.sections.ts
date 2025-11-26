@@ -7,6 +7,7 @@ import FourthVersion from './1.2.0.section.json' with { type: 'json' };
 import FifthVersion from './1.2.1.section.json' with { type: 'json' };
 import SixthVersion from './1.2.2.section.json' with { type: 'json' };
 import SeventhVersion from './1.2.3.section.json' with { type: 'json' };
+import EighthVersion from './1.3.0.section.json' with { type: 'json' };
 
 export default BuildSectionHelper.buildSectionBatch([
   { section : FirstVersion },
@@ -16,4 +17,5 @@ export default BuildSectionHelper.buildSectionBatch([
   { section : FifthVersion },
   { section : SixthVersion },
   { section : SeventhVersion },
+  { section : EighthVersion },
 ]).reverse();

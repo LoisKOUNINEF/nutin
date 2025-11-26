@@ -1,5 +1,40 @@
 # Changelog
 
+## V1.3.0
+
+Version 1.3.0 marks a stability milestone with various improvements and refinements, making this the recommended version for new projects.
+
+- Global
+    - `Service` abstract class now auto-binds methods with `this`, preventing `"this" is undefined` potential warning on initial page load.
+    - Added HTML template sanitization with trustLevel that can be passed to component's `super()`.
+        - trusted : no template sanitization (returns original)
+        - normal (default) : remove scripts and inline event handlers
+        - strict : remove iframe, object, embed, href (javascript), data: protocol, scripts and inline event handlers
+
+- I18n
+    - Removed `data-i18n-params` pipe : Default values (fallback) must now be inlined text content in component's HTML template. 
+
+- CLI :
+    - Deployment helpers is now optional (default : disabled). Flags : `--deploy-helper`  `--no-deploy-helper`
+    - Fixed CLI prompts (no longer overrides answers)
+
+- Builder / Deployment Helper
+    - Now adds stylesheet & script tags in `index.html` on build time (`add-tags.js`)
+    - (Production) Added file hashing (js & css) (`hash-files.js`)
+    - (Production) Added Gzip and Brotli compression (`compress-files.js`). Configurable in `builder.config.js`
+        - **Note : default nginx alpine image does NOT support Brotli compression.** If you want to use it :
+            - uncomment brotli-related sections (`BROTLI OPTIONAL`) in `builder.config.js` and `tools/builder/core/compress-files.js`
+            - enable brotli in nginx.conf
+            - You'll also need to use an existing Brotli-enabled nginx image or build your own from source.
+    - Enabled gzip globally in `nginx.conf` and removed `gzip.conf` (compress during build).
+
+- StylinNutin
+    - Added utility classes `u-text-center`, `u-text-right`, `u-text-left`, `u-font-primary`
+    - box-shadow variables now use `$primary-color`
+
+- TestinNutin
+    - Now applies `setupJsdom()` beforeAll (was beforeEach) and `teardownJsdom()` afterAll (was afterEach) in `test-queue.js` (improved efficiency / speed)
+
 ## V1.2.3
 
 - `nginx.conf` : fixed multi-line CSP map warning (single line map)

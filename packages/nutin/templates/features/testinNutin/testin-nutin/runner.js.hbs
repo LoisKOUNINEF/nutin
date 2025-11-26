@@ -1,4 +1,5 @@
 import { registerTestGlobals, getTestFiles, runQueuedTests, print } from './core/index.js';
+import path from 'path';
 import config from '#root/testin-nutin.config.js';
 
 registerTestGlobals();

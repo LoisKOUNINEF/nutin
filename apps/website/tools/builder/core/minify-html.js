@@ -13,3 +13,4 @@ export async function minifyHTML(html) {
     minifyJS: true,
   });
 }
+

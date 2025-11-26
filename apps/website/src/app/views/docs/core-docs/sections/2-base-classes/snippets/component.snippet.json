@@ -1,0 +1,14 @@
+{
+	"id": 2,
+	"sectionId": 2,
+	"content": "abstract class Component&lt;T extends HTMLElement = HTMLElement, K = any&gt; extends BaseComponent&lt;T&gt;;\n\ninterface ComponentOptions&lt;K = any&gt; extends BaseComponentOptions {\n\t// object or primitive value to use in HTML template\n\tconfig?: K;\n\tprops?: ComponentProps; // className?: string; style?: string, [key: string]: any;\n\tdefaults?: Partial&lt;K&gt;;\n\ttemplateFn?: (config?: K) =&gt; string;\n\tnormalizeKeys?: (keyof K)[];\n}\n\n// template arrow function\nconst templateFn = (): string =&gt; ``;\nconst templateFn = (config: MyObject): string =&gt; ``;\n// type CatalogItemConfig&lt;T = any&gt; = T extends object ? CatalogItemObject&lt;T&gt; : CatalogItemPrimitive;\nconst templateFn = (config: CatalogItemConfig&lt;MyObject&gt;): string =&gt; ``; // config.myObjprop, config.value, config.index",
+	"type": "ts",
+	"en": {
+		"title": "Component",
+		"before": "Component is the parent class of the app's components. It's a subclass of BaseComponent.\nIt handles data passed to component ('config' - object or primitive value), data-binding helpers...\nComponent's expect an arrow function as HTML template. The shape of this function's argument is the same as 'config' (ComponentOptions).\nDefault HTMLTag (tagName) for components is 'div'."
+	},
+	"fr": {
+		"title": "Component",
+		"before": "Component est la classe parent des components de l'application. Elle est une sous-classe de BaseComponent.\nIl s'occupe des données passées au composant ('config' - objet ou valeur primitive), de lier les données...\nComponent attend une fonction fléchée pour le template HTML. L'argument de cette fonction aura la même forme que celle de 'config' (ComponentOptions).\nLe HTMLTag (tagName) par défaut pour les composants est 'div'."
+	}
+}

@@ -24,5 +24,12 @@ export default {
 {{/if}}
     ], // in styles/
   },
+{{#if deployHelper}}
+  compression: {
+    gzip: true,
+    // BROTLI OPTIONAL
+    // brotli: false,
+  },
+{{/if}}
 	verbose: false,
 }

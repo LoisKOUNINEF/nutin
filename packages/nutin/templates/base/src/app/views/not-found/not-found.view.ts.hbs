@@ -35,7 +35,7 @@ export class NotFoundView extends View {
     return [
       { 
         selector: 'home',
-        factory: (el) => new ButtonComponent(el, { {{#if i18n}}i18nKey: 'not-found.redirect'{{else}}textContent: 'Back to home'{{/if}}, callback: () => this.handleHome(), {{#if stylinNutin}}className: btnClass{{else}}styles: btnStyles{{/if}} })
+        factory: (el) => new ButtonComponent(el, { {{#if i18n}}i18nKey: 'not-found.redirect'{{else}}textContent: 'Back to home'{{/if}}, callback: () => this.handleHome(), {{#if stylinNutin}}className: btnClass{{else}}style: btnStyles{{/if}} })
       },
     ]
   }

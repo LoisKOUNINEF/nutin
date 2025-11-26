@@ -109,11 +109,16 @@ tsconfig.json
     - *when using external templates* : `merge-templates.js` — minify HTML template then replace `__TEMPLATE_PLACEHOLDER__` tokens with minified template.
 4. `sass.js` 
     — compile `src/styles/main.scss` and write `dist-build/src/main.css`.
-5. `validate-html.js` 
-     — run lightweight checks over `public/index.html` (and/or `index.html` in `dist-build`) to ensure required tags exist.
+5. `validate-html.js`
+	- add app entrypoint script tag and stylesheet link tag in index.html
+    — run lightweight checks over `dist-build/src/index.html`  to ensure required tags exist.
 6. `esbuild.js`
     - run esbuild
-7. `finalize-build.js`
+7. `hash-files.js`
+    - hash `.js` and `.css` files
+8. `compress-files.js`
+    - compress files with gzip (`.js` `.css` `.json` `.svg` `ttf` `otf` `eot`)
+9. `finalize-build.js`
     - remove existing dist/ folder.
     - rename dist-build to dist
     - *production*: remove unused folder beforehand.
@@ -156,12 +161,21 @@ tsconfig.json
 
 ### `core/validate-html.js`
 
-* Purpose: inject the main script tag and run a few checks on HTML before finishing the build.
-* Behavior : it reads `index.html` file, add app's entrypoint script tag, validates tags and errors out if expected nodes are missing.
+* Purpose: inject the main script tag and main stylesheet ref, then run a few checks on HTML before finishing the build.
+* Behavior : it reads `index.html` file, add app's entrypoint script tag and stylesheet link tag, validates tags and errors out if expected nodes are missing.
 
 ### `core/esbuild.js`
 
 Runs esbuild with config from `builder.config.js`.
+
+### `core/hash-files.js`
+
+Hash `.js` and `.css` files.
+
+### `core/compress-files.js`
+
+Compress files with gzip (`.js` `.css` `.json` `.svg` `ttf` `otf` `eot`).                                     
+*Note: Uncomment Brotli compression if you intend to use it.*
 
 ### `core/finalize-build.js`
 

@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import { print, LANGUAGES } from '../utils/index.js';
-import { jsonTemplate, scssTemplate } from './templates/index.js';
+import { jsonTemplate } from './templates/index.js';
+import { scssTemplate } from './templates/index.js';
 
 export function generateFile({
   name,
@@ -13,15 +14,17 @@ export function generateFile({
   fs.mkdirSync(targetPath, { recursive: true });
   const template = templateFn(name, targetPath);
   const filePath = `${targetPath}/${name.kebab}.${suffix}.${extension}`;
+
   if (fs.existsSync(filePath)) {
     print.boldError('A file with this name already exists');
     process.exit(1);
   }
+
   fs.writeFileSync(filePath, template);
 }
 
 export function appendToIndex({ name, targetPath, suffix }) {
-  const absTargetPath = path.resolve(targetPath);
+  const absTargetPath = path.resolve(process.cwd(), targetPath);
 
   const parts = targetPath.split(path.sep);
   const basePath = parts.slice(0, 3).join(path.sep);
@@ -78,3 +81,4 @@ export function generateStylesheet({ name, suffix }) {
     print.error(`Error appending line: ${err}`);
   }
 }
+

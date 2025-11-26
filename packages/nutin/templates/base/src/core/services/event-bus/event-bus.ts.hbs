@@ -34,18 +34,6 @@ export class EventBus extends Service<EventBus> {
     this.addHandler(event, callback, true);
   }
 
-  private addHandler<K extends EventKey>(
-    event: K,
-    callback: (data: EventMap[K]) => void,
-    once: boolean
-  ) {
-    if (!this.handlers[event]) {
-      this.handlers[event] = [];
-    }
-    this.handlers[event]!.push(callback);
-    this._subscriptions.push({ event, callback, once });
-  }
-
   public emit<K extends EventKey>(event: K, data?: EventMap[K]): void {
     const callbacks = this.handlers[event];
     if (!callbacks) return;
@@ -80,7 +68,19 @@ export class EventBus extends Service<EventBus> {
     );
   }
 
-  private cleanupEventListeners = () => {
+  private addHandler<K extends EventKey>(
+    event: K,
+    callback: (data: EventMap[K]) => void,
+    once: boolean
+  ): void {
+    if (!this.handlers[event]) {
+      this.handlers[event] = [];
+    }
+    this.handlers[event]!.push(callback);
+    this._subscriptions.push({ event, callback, once });
+  }
+
+  private cleanupEventListeners = (): void => {
     this._subscriptions.forEach(({ event, callback }) => {
       this.off(event, callback);
     });

@@ -1,0 +1,16 @@
+{
+	"id": 1,
+	"sectionId": 2,
+	"content": "abstract class BaseComponent&lt;T extends HTMLElement = HTMLElement&gt;;\n\ninterface BaseComponentOptions {\n\ttemplate?: string;\n\tmountTarget?: string | HTMLElement;\n\ttagName?: keyof HTMLElementTagNameMap;\n\ttrustLevel?: TrustLevel // 'strict' | 'normal' | 'trusted' Default: 'normal'\n}\n\n// children registration\npublic childConfigs(): ComponentConfig[];\n\ninterface ComponentConfig {\n\tselector: string; // data-component attribute value\n\tfactory: (element: HTMLElement) =&gt; BaseComponent;\n}\n\n// returns ComponentConfig[] ready for childConfigs() from an array\n// registration is still handled by childConfigs().\nprotected catalogConfig(config: CatalogConfig): ComponentConfig[];\n\ninterface CatalogConfig {\n\tarray: CatalogItemConfig[];\n\telementName: string;\n\telementTag?: keyof HTMLElementTagNameMap;\n\tselector: string; // data-catalog attribute value\n\tcomponent: new (el: HTMLElement, data: any) =&gt; BaseComponent;\n}\ninterface CatalogItemBase { index: number; }\ntype CatalogItemObject&lt;T extends object&gt; = T & CatalogItemBase;\ninterface CatalogItemPrimitive extends CatalogItemBase { value: string | number | boolean | null | undefined }\n// When using catalogConfig : shape of templateFn argument (in Component subclass)\ntype CatalogItemConfig&lt;T = any&gt; = T extends object ? CatalogItemObject&lt;T&gt; : CatalogItemPrimitive;\n\n// exposed methods\npublic destroy(): void;\npublic render(): HTMLElement;",
+	"type": "ts",
+	"en": {
+		"title": "BaseComponent",
+		"before": "BaseComponent is the initial building block. Component and View are its subclasses.\nIt handles component's lifecycle, children registration, and event binding.",
+		"after": "BaseComponent is not meant to be used as a direct parent when developing an app."
+	},
+	"fr": {
+		"title": "BaseComponent",
+		"before": "BaseComponent est le module de base. Component et View sont ses sous-classes.\nIl gère le cycle de vie du composant, l'enregistrement des enfants, et la prise en charge des évènements.",
+		"after": "BaseComponent n'a pas vocation à être utilisé comme parent direct au cours du développement d'une app."
+	}
+}

@@ -24,9 +24,11 @@ export async function runQueuedTests() {
       test = testQueue.deque();
 
       if (test.suiteName !== previousSuite) {
+        teardownJsdom();
         if (previousSuiteAfterAll) {
           await previousSuiteAfterAll();
         }
+        setupJsdom();
         if (test.beforeAll) {
           await test.beforeAll();
         }
@@ -34,11 +36,9 @@ export async function runQueuedTests() {
         previousSuiteAfterAll = test.afterAll;
       }
 
-      setupJsdom();
       if (test.beforeEach) await test.beforeEach();
       await test.testFn();
       if (test.afterEach) await test.afterEach();
-      teardownJsdom();
 
       passed++;
       results.push({ 

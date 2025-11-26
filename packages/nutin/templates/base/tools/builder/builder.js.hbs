@@ -3,7 +3,7 @@
 import path from 'path';
 import { print, isProd, runScript } from '../utils/index.js';
 
-const scriptsDir = path.join(process.cwd(),'tools', 'builder', 'core');
+const scriptsDir = path.join(process.cwd(), 'tools', 'builder', 'core');
 
 if (!isProd) print.boldInfo('For production, use build:prod.\n');
 print.boldHead(`Starting build...\n`);
@@ -21,9 +21,15 @@ runScript(path.join(scriptsDir, 'minify-html.js'), 'Minifying inline templates..
 runScript(path.join(scriptsDir, 'build-i18n.js'), 'Combining locales for production...');
 {{/if}}
 runScript(path.join(scriptsDir, 'sass.js'), 'Compiling styles from main.scss...');
-runScript(path.join(scriptsDir, 'validate-html.js'), 'Validating tags in index.html...');
+runScript(path.join(scriptsDir, 'validate-html.js'), 'Adding and validating tags in index.html...');
 
-if (isProd) runScript(path.join(scriptsDir, 'esbuild.js'), 'Running esbuild...');
+if (isProd) {
+	runScript(path.join(scriptsDir, 'esbuild.js'), 'Running esbuild...');
+	runScript(path.join(scriptsDir, 'hash-files.js'), 'Hashing files...');
+{{#if deployHelper}}
+	runScript(path.join(scriptsDir, 'compress-files.js'), 'Compressing files...');
+{{/if}}
+}
 
 runScript(path.join(scriptsDir, 'finalize-build.js'), 'Finalizing build...')
 

@@ -1,0 +1,127 @@
+# ---------------------------
+# HEADER VARIABLES (outside server block)
+# ---------------------------
+map $uri $frame_options {
+    default "SAMEORIGIN";
+}
+
+map $uri $content_type_options {
+    default "nosniff";
+}
+
+map $uri $xss_protection {
+    default "1; mode=block";
+}
+
+map $uri $referrer_policy {
+    default "strict-origin-when-cross-origin";
+}
+
+map $uri $permissions_policy {
+    default "geolocation=(), microphone=(), camera=()";
+}
+
+map $uri $csp_policy {
+    default "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';";
+}
+
+# ---------------------------
+# COMPRESSION (applies globally)
+# ---------------------------
+gzip on;
+gzip_static on;
+gzip_vary on;
+gzip_proxied any;
+
+server {
+    # ---------------------------
+    # LISTEN PORTS
+    # ---------------------------
+    listen 9090;
+    server_name _;
+
+    # ---------------------------
+    # ROOT + ROUTING
+    # ---------------------------
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Hide nginx version
+    server_tokens off;
+
+    # SPA routing: serve index.html for unknown paths
+    location / {
+        try_files $uri $uri/ /index.html;
+        
+        # Security headers
+        add_header X-Frame-Options $frame_options always;
+        add_header X-Content-Type-Options $content_type_options always;
+        add_header X-XSS-Protection $xss_protection always;
+        add_header Referrer-Policy $referrer_policy always;
+        add_header Permissions-Policy $permissions_policy always;
+        add_header Content-Security-Policy $csp_policy always;
+    }
+
+    # ---------------------------
+    # STATIC ASSETS CACHING
+    # ---------------------------
+
+    # Immutable cache for static assets
+    location ~* \.(js|css|png|jpg|jpeg|gif|avif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable" always;
+        
+        # Security headers
+        add_header X-Frame-Options $frame_options always;
+        add_header X-Content-Type-Options $content_type_options always;
+        add_header X-XSS-Protection $xss_protection always;
+        add_header Referrer-Policy $referrer_policy always;
+        add_header Permissions-Policy $permissions_policy always;
+        add_header Content-Security-Policy $csp_policy always;
+    }
+
+    # No caching for HTML files (SPA shell)
+    location ~* \.html$ {
+        expires -1;
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+        add_header Pragma "no-cache" always;
+        
+        # Security headers
+        add_header X-Frame-Options $frame_options always;
+        add_header X-Content-Type-Options $content_type_options always;
+        add_header X-XSS-Protection $xss_protection always;
+        add_header Referrer-Policy $referrer_policy always;
+        add_header Permissions-Policy $permissions_policy always;
+        add_header Content-Security-Policy $csp_policy always;
+    }
+
+    # ---------------------------
+    # HEALTH ENDPOINT
+    # ---------------------------
+    location /health {
+        access_log off;
+        add_header Content-Type text/plain always;
+        add_header Cache-Control "no-store" always;
+        return 200 "healthy\n";
+    }
+    
+    # ---------------------------
+    # ERROR PAGE 404 (rare but possible for SPAs)
+    # --------------------------
+    error_page 404 /404.html;
+
+    location = /404.html {
+        internal;
+        try_files /404.html =404;
+        expires -1;
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+        
+        # Security headers
+        add_header X-Frame-Options $frame_options always;
+        add_header X-Content-Type-Options $content_type_options always;
+        add_header X-XSS-Protection $xss_protection always;
+        add_header Referrer-Policy $referrer_policy always;
+        add_header Permissions-Policy $permissions_policy always;
+        add_header Content-Security-Policy $csp_policy always;
+    }
+}

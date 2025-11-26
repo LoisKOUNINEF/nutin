@@ -34,5 +34,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 window.addEventListener('beforeunload', async () => {
-  Service.destroyAll();
+  await Service.destroyAll();
 });

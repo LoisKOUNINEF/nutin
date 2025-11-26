@@ -5,10 +5,10 @@
 	"type": "html",
 	"en": {
 		"before": "We need to modify the template accordingly.\nWe'll use the data-event attribute with the `change` event, except for the date where we'll use `blur` event to prevent premature trigger.\nThe input value argument must be passed with `@value`.",
-		"after": "data-event attribute syntax is EVENT_NAME:FUNCTION_NAME:COMMA_SEPARATED_ARGS."
+		"after": "data-event attribute syntax is EVENT:FUNCTION:COMMA_SEPARATED_ARGS."
 	},
 	"fr": {
 		"before": "Nous devons modifier le template en conséquence.\nNous utiliserons l'attribut data-event avec l'évènement `change`, excepté pour la date où nous utiliserons l'évènement `blur` pour prévenir tout appel prématuré de la fonction update.\nLa valeur de l'input doit être passée avec `@value`.",
-		"after": "La syntaxe pour l'attribut data-event est EVENT_NAME:FUNCTION_NAME:COMMA_SEPARATED_ARGS."
+		"after": "La syntaxe pour l'attribut data-event est EVENT:FUNCTION:COMMA_SEPARATED_ARGS."
 	}
 }

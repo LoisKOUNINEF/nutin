@@ -1,7 +1,6 @@
 import { RouteGuardsManager } from '#root/dist/src/core/services/router/helpers/route-guard-manager.helper.js';
 import { View } from '#root/dist/src/core/index.js';
 
-
 describe('RouteGuardsManager', () => {
   const MockView = class extends View {};
 

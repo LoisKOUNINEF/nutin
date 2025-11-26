@@ -1,6 +1,5 @@
 import { NavigationManager } from '#root/dist/src/core/services/router/helpers/navigation-manager.helper.js';
 
-
 describe('NavigationManager', () => {
   it('should normalize paths by removing trailing slashes', () => {
     expect(NavigationManager.normalizePath('/about/')).toBe('/about');

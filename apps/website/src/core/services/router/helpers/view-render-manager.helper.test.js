@@ -29,7 +29,6 @@ describe('ViewRenderManager', () => {
     };
   };
 
-
   it('should do nothing if no current view is passed to transitionOutCurrentView', async () => {
     const result = await ViewRenderManager.transitionOutCurrentView(null);
     expect(result).toBe(null);

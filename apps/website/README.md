@@ -40,6 +40,7 @@ interface ISnippet {
   sectionId: number;
   content: string;
   type: string;
+  title?: string;
   before?: string;
   after?: string;
 }
@@ -61,10 +62,12 @@ Takes an ISnippet argument, handles snippet's content, before and after. Snippet
 interface ISidebarConfig {
   sections: ISection[];
   viewName: string;
+  externalHref: string;
+  hrefI18nKey: string;
+  routeParams: Record<string, string>;
 }
 ```
-Takes an ISidebarConfig argument. Used for navigation (with viewName property) in TopicParamView.                                  
-Adds a padding-left if section's id contains a dot (e.g. 1.2).
+Takes an ISidebarConfig argument. Used for navigation (with viewName property) in TopicParamView.
 
 ### TableOfContent
 
@@ -127,9 +130,8 @@ type ILocalizedSectionWithSnippets = {
 
 Used in TopicParamView to ensure that the URL has the correct format when rendering a specific section.
 
-### Translate code (ts, html, scss) to JSON format
+### Format code to JSON (ts, html, scss)
 
 - Usage : `npm run code-to-json -- SOURCE_FILE --output DEST_FILE`
-Translates newlines and tabs to JSON format.                      
-When SOURCE_FILE has the .html extension, also translates `<` and `>` to `&lt;` and `&gt;`.                                                                  
-*It requires some manual copy / pasting, but should be sufficient for such a small project.*
+Translates newlines to `\n` and tabs to `\t`. Also escapes double quotes `"` and translates `<` and `>` to `&lt;` and `&gt;`.                                                                  
+*Requires some manual copy / pasting, but is good enough for such a project.*
