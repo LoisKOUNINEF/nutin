@@ -5,7 +5,7 @@ import { View, AppEventBus } from '../../../index.js';
  */
 export class ViewRenderManager {
   {{#if transition}}
-  static renderAnimatedView(view: View): void {
+  public static renderAnimatedView(view: View): void {
     const container = document.getElementById('app');
     const el = view.render();
     el.classList.add('app-view-transition');
@@ -17,7 +17,7 @@ export class ViewRenderManager {
   }
 
   {{/if}}
-  static async transitionOutCurrentView(currentView: View | null): Promise<null> {
+  public static async transitionOutCurrentView(currentView: View | null): Promise<null> {
     if (!currentView) return null;
     {{#if transition}}
     const container = document.getElementById('app');
@@ -33,7 +33,7 @@ export class ViewRenderManager {
     return null;
   }
 
-  static renderNewView(
+  public static renderNewView(
     viewConstructor: () => View,
     params: Record<string, string> = {}
   ): View {
@@ -49,13 +49,14 @@ export class ViewRenderManager {
     view.render();
 
     {{/if}}
+
     this.cleanupOptionalContent();
 
     this.emitEvent('view-mount', view.viewName);
     return view;
   }
 
-  static cleanupOptionalContent() {
+  public static cleanupOptionalContent(): void {
     const isEmpty = (el: HTMLElement): boolean => {
       const attrName = el.dataset.optional?.trim();
 
@@ -85,7 +86,7 @@ export class ViewRenderManager {
     });
   }
 
-  static emitEvent(event: EventKey, viewName: string): void {
+  private static emitEvent(event: EventKey, viewName: string): void {
     AppEventBus.emit(event, viewName);
   }
   {{#if transition}}

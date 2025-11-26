@@ -8,9 +8,8 @@
     - ENV variables : `STACK_NAME`, `DOMAIN_NAME`, `SERVER_PORT`, `CLIENT_PORT`. (*`REPO_LOWER` and `PROJECT_LOWER`* are set by `format-name.sh`).
 
 - **Production workflow (main branch)**
+    - **Pull requests to `main` must come from `staging`**
     - A `staging` workflow must have been completed beforehand.
-    - Removes old images (keep newest 3) from ghcr.io (website / tutorial).
-    - Stops staging instance (website).
 
 ## Staging workflow (`staging` branch): 
 
@@ -27,6 +26,9 @@
 
 * Copy image tags from website-staging.yml file.
 * Deploy ( Docker Swarm / Traefik )
+* Removes old images (keep newest 3) from ghcr.io (website / tutorial).
+* Stop staging instance (website)
+* Delete and recreate `staging` branch
 
 ## Deployment scripts (Ubuntu server)
 
@@ -66,7 +68,7 @@ Logs available images.
 
 Keeps only the most recent (3) images.
 
-## nutin
+## @nutin/cli
 
 **`main` branch workflow**
 

@@ -4,14 +4,14 @@ import { View, AppEventBus } from '../../../index.js';
  * handles all view rendering.
  */
 export class ViewRenderManager {
-  static async transitionOutCurrentView(currentView: View | null): Promise<null> {
+  public static async transitionOutCurrentView(currentView: View | null): Promise<null> {
     if (!currentView) return null;
     currentView.destroy();
     this.emitEvent('view-unmount', currentView.viewName);
     return null;
   }
 
-  static renderNewView(
+  public static renderNewView(
     viewConstructor: () => View,
     params: Record<string, string> = {}
   ): View {
@@ -21,14 +21,15 @@ export class ViewRenderManager {
     view.setRouteParams(params);
 
     view.render();
-    
+
+
     this.cleanupOptionalContent();
 
     this.emitEvent('view-mount', view.viewName);
     return view;
   }
 
-  static cleanupOptionalContent() {
+  public static cleanupOptionalContent(): void {
     const isEmpty = (el: HTMLElement): boolean => {
       const attrName = el.dataset.optional?.trim();
 
@@ -58,7 +59,7 @@ export class ViewRenderManager {
     });
   }
 
-  static emitEvent(event: EventKey, viewName: string): void {
+  private static emitEvent(event: EventKey, viewName: string): void {
     AppEventBus.emit(event, viewName);
   }
 }

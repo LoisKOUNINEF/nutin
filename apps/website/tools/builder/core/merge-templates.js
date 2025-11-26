@@ -19,30 +19,28 @@ async function mergeTemplates() {
     try {
       const htmlContent = await fs.readFile(htmlPath, 'utf-8');
       const minifiedHtml = await minifyHTML(htmlContent);
-      if (isVerbose) print.info(`Minified HTML: ${htmlFilename}`);
+      if (isVerbose) print.info(`Minified HTML: ${htmlPath}`);
 
       try {
         let jsContent = await fs.readFile(jsPath, 'utf-8');
         if (!jsContent.includes(PLACEHOLDER)) {
-          print.boldError(`⚠️  WARNING: No matching placeholder in ${jsFilename}`);
+          print.boldError(`WARNING: No matching placeholder in ${jsFilename}`);
           print.error(`Make sure the template const is \`${PLACEHOLDER}\`.`);
           exit(1);
         }
 
         jsContent = jsContent.replace(PLACEHOLDER, minifiedHtml);
         await fs.writeFile(jsPath, jsContent);
-        if (isVerbose) print.info(`Updated ${jsFilename} with template from ${htmlFilename}.`);
+        await fs.unlink(htmlPath);
+        if (isVerbose) print.info(`✅ Updated ${jsFilename} with template from ${htmlFilename}.`);
       } catch (err) {
         print.boldError(`ERROR: Cannot update ${jsFilename}. ${err.message}`);
-        exit(1);
       }
     } catch (err) {
       print.boldError(`ERROR: Failed to read ${htmlFilename}. ${err.message}`);
-      exit(1);
     }
-    await fs.unlink(htmlPath);
   }
-  if (isVerbose) print.boldInfo(`HTML templates minified and merged in scripts.\n`);
+  if (isVerbose) print.info(`HTML templates minified and merged in scripts.\n`)
 }
 
 mergeTemplates().catch((err) => {

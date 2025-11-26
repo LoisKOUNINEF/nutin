@@ -4,13 +4,15 @@ import { print } from './print.mjs';
 import { initializeGit } from './git-manager.mjs';
 import { installDependencies } from './package-manager.mjs';
 import { FileGenerator } from './file-generator.mjs';
+import { JsonGenerator } from './json-generator.mjs';
 import { ContextBuilder } from './context-builder.mjs';
 
 const fs = fsExtra.default;
 
 export class ProjectGenerator {
   constructor() {
-    this.generator = new FileGenerator();
+    this.fileGenerator = new FileGenerator();
+    this.jsonGenerator = new JsonGenerator();
     this.builder = new ContextBuilder();
   }
 
@@ -31,37 +33,16 @@ export class ProjectGenerator {
   }
 
   async setupProjectStructure(projectPath, context) {
-    print.boldHead(`\n📁 Creating project in ${projectPath}...`);
+    print.boldHead(`\n📁 Creating project in ${projectPath}...\n`);
     
     await fs.ensureDir(projectPath);
-    await this.generator.generateProjectFromTemplates(projectPath, context);
+    await this.fileGenerator.generateProjectFromTemplates(projectPath, context);
   }
 
   async runPostSetupTasks(projectPath, context) {
-    await this.generator.generateJsonFiles(projectPath, context);
-    await initializeGit(projectPath);
-    
+    await this.jsonGenerator.generateJsonFiles(projectPath, context);
+    await initializeGit(projectPath);    
     await installDependencies(projectPath, context.packageManager);
-
-    await this.runSetupScripts(projectPath, context);
-  }
-
-  async runSetupScripts(projectPath, context) {
-    print.section('⚙️ Running setup scripts...');
-    
-    try {
-      const setupScriptsTemplate = path.join(__dirname, '..', '..', 'templates', 'scripts');
-      
-      if (await fs.pathExists(setupScriptsTemplate)) {
-        const scriptsDir = path.join(projectPath, 'scripts');
-        
-        await fs.ensureDir(scriptsDir);
-        await this.generator.processTemplateDirectory(setupScriptsTemplate, scriptsDir, context);
-      }
-    } catch (error) {
-      print.boldError('⚠️ Warning: Could not set up build scripts');
-      console.error(error);
-    }
   }
 }
 

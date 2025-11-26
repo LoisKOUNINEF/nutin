@@ -22,6 +22,7 @@ class App {
   }
 
   private renderBaseLayout() {
+    // e
     // document.body.prepend(this.header.render());
     // document.body.append(this.footer.render());
   }
@@ -36,5 +37,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 window.addEventListener('beforeunload', async () => {
-  Service.destroyAll();
+  await Service.destroyAll();
 });

@@ -3,7 +3,6 @@ import { fileURLToPath } from 'url';
 import * as fsExtra from 'fs-extra';
 import { TemplateCompiler } from './template-compiler.mjs';
 import { print } from './print.mjs';
-import { generatePackageJson, generateTsconfigJson } from './package-manager.mjs';
 
 const fs = fsExtra.default;
 const __filename = fileURLToPath(import.meta.url);
@@ -22,7 +21,7 @@ export class FileGenerator {
   }
 
   async generateProjectFromTemplates(projectPath, context) {
-    const templateDir = this.getTemplateDirectory(context);
+    const templateDir = this.getTemplateDirectory();
     
     print.section('📝 Processing templates...');
     await this.processTemplateDirectory(templateDir, projectPath, context);
@@ -30,8 +29,8 @@ export class FileGenerator {
     await this.processFeatureTemplates(projectPath, context);
   }
 
-  getTemplateDirectory(context) {
-    return path.join(__dirname, '../../templates/base');
+  getTemplateDirectory() {
+    return path.join(__dirname, '..', '..', 'templates', 'base');
   }
 
   async processTemplateDirectory(templateDir, outputDir, context) {
@@ -52,6 +51,27 @@ export class FileGenerator {
         await this.processTemplateDirectory(templatePath, outputPath, context);
       } else {
         await this.processTemplateFile(templatePath, outputDir, entry.name, context);
+      }
+    }
+  }
+
+  async processFeatureTemplates(projectPath, context) {
+    const featuresDir = path.join(__dirname, '..', '..', 'templates', 'features');
+    
+    if (!(await fs.pathExists(featuresDir))) {
+      return;
+    }
+
+    const features = [ 'template', 'i18n', 'stylinNutin', 'testinNutin', 'deployHelper' ];
+    
+    for (const feature of features) {
+      if (context[feature]) {
+        const featureTemplateDir = path.join(featuresDir, feature);
+        
+        if (await fs.pathExists(featureTemplateDir)) {
+          print.info(`  🔧 Adding ${feature} feature...`);
+          await this.processTemplateDirectory(featureTemplateDir, projectPath, context);
+        }
       }
     }
   }
@@ -86,43 +106,4 @@ export class FileGenerator {
       // print.info(`📄 Copied: ${fileName}`);
     }
   }
-
-  async processFeatureTemplates(projectPath, context) {
-    const featuresDir = path.join(__dirname, '../../templates/features');
-    
-    if (!(await fs.pathExists(featuresDir))) {
-      return;
-    }
-
-    const features = [ 'template', 'i18n', 'stylinNutin', 'testinNutin' ];
-    
-    for (const feature of features) {
-      if (context[feature]) {
-        const featureTemplateDir = path.join(featuresDir, feature);
-        
-        if (await fs.pathExists(featureTemplateDir)) {
-          print.info(`🔧 Adding ${feature} feature...`);
-          await this.processTemplateDirectory(featureTemplateDir, projectPath, context);
-        }
-      }
-    }
-  }
-
-  async generateJsonFiles(projectPath, context) {
-    await generatePackageJson(projectPath, context);
-    await generateTsconfigJson(projectPath, context);
-    if (context.i18n) this.generateConfigFiles(projectPath);
-  }
-
-  async generateConfigFiles(projectPath) {
-    const configPath = path.join(projectPath, 'config');
-    await fs.ensureDir(configPath);
-    const languages = {
-      "languages": ["en"],
-      "defaultLanguage": "en"
-    };
-
-    await fs.writeJSON(path.join(configPath, 'languages.json'), languages, { spaces: 2 });
-  }
-
 }

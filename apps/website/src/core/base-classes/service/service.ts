@@ -15,14 +15,8 @@ export abstract class Service<T extends Service<T>> {
         `${constructor.name} is a Service. Use ${constructor.name}.getInstance() instead.`
       );
     }
+    this.autoBindMethods();
     window.addEventListener('beforeunload', this.dispose);
-  }
-
-  /**
-   * For async and custom cleanup operations
-   */
-  protected onDestroy<T extends Service<T>>(this: () => T): void {
-    console.log(`No onDestroy operations.`)
   }
 
   public static createInstance<T extends Service<T>>(
@@ -62,11 +56,7 @@ export abstract class Service<T extends Service<T>> {
     }
   }
 
-  protected registerCleanup(callback: () => void) {
-    this._cleanupCallbacks.push(callback);
-  }
-
-  public dispose = () => {
+  public dispose = (): void => {
     this._cleanupCallbacks.forEach(fn => fn());
     this._cleanupCallbacks = [];
     Service._instances.delete(this.constructor);
@@ -79,6 +69,39 @@ export abstract class Service<T extends Service<T>> {
     await Promise.all(destroyPromises);
     Service._instances.clear();
     Service._instantiating.clear();
+  }
+
+  protected registerCleanup(callback: () => void): void {
+    this._cleanupCallbacks.push(callback);
+  }
+
+  /**
+   * For async and custom cleanup operations
+   */
+  protected onDestroy<T extends Service<T>>(this: () => T): void {
+    console.log(`No onDestroy operations.`)
+  }
+
+  private autoBindMethods(): void {
+    let proto = Object.getPrototypeOf(this);
+
+    while (proto && proto !== Service.prototype) {
+      const propertyNames = Object.getOwnPropertyNames(proto);
+
+      for (const key of propertyNames) {
+        const descriptor = Object.getOwnPropertyDescriptor(proto, key);
+
+        if (
+          key !== 'constructor' &&
+          descriptor &&
+          typeof descriptor.value === 'function'
+        ) {
+          (this as any)[key] = descriptor.value.bind(this);
+        }
+      }
+
+      proto = Object.getPrototypeOf(proto);
+    }
   }
 
   /**

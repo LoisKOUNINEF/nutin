@@ -9,6 +9,7 @@ Monorepo for the nutin toolkit project - `A minimal frontend toolkit crafted for
 *Visit the [website](https://www.nutin.org) or the [NPM package page](https://www.npmjs.com/org/nutin).*                                                                      
 ## 📄 Docs
 
+- [data-\* Attributes](docs/DATA_ATTRIBUTES.md)
 - [stylin-nutin](docs/STYLIN_NUTIN.md)
 - [Libraries](docs/LIBS.md)
 - [testin-nutin](docs/TESTIN_NUTIN.md)

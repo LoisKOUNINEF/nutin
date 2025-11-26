@@ -6,7 +6,7 @@ import * as path from 'path';
 const fs = fsExtra.default;
 
 export async function installDependencies(projectPath, packageManager) {
-  print.section(`\n📦 Installing dependencies with ${packageManager}...`);
+  print.section(`📦 Installing dependencies with ${packageManager}...`);
   
   const installCommand = getInstallCommand(packageManager);
   await promiseExec(installCommand, { cwd: projectPath });
@@ -39,7 +39,7 @@ function getInstallCommand(packageManager) {
 }
 
 function getScripts(context) {
-  const { testinNutin, packageManager, projectName } = context;
+  const { testinNutin, packageManager, projectName, deployHelper } = context;
 
   const baseScripts = {
     "build": "node tools/builder/builder.js",
@@ -47,26 +47,29 @@ function getScripts(context) {
     "serve:only": "node tools/dev/serve.js",
     "serve": `${packageManager} run build && ${packageManager} run serve:only`,
     "dev": "node tools/dev/dev-serve.js",
-    "generate": "node tools/generator/generator.js",
+    "generate": "node tools/generator/generator.js"
+  };
+
+  const deployHelperScripts = {
     "docker:build": `docker build -t ${projectName} -f tools/deployment/Dockerfile .`,
-    "docker:run": `docker run -p 9090:9090 --name ${projectName}-container ${projectName}:latest`,
+    "docker:run": `docker run -p 9090:9090 ${projectName}:latest`,
     "patch": `${packageManager} version patch -m 'CI/CD: Bump version to %s'`,
     "minor": `${packageManager} version minor -m 'CI/CD: Bump version to %s'`,
     "major": `${packageManager} version major -m 'CI/CD: Bump version to %s'`
-  };
+  }
 
   const testinNutinScripts = {
     "test": "node testin-nutin/runner.js",
     "test:rebuild": `${packageManager} run build && ${packageManager} run test`,
     "test:watch": `${packageManager} run build && node testin-nutin/watch-tests.js`
-    }
+  }
 
-  return testinNutin
-    ? {
-      ...baseScripts,
-      ...testinNutinScripts
-    }
-    : baseScripts;
+  let scripts = { ...baseScripts };
+
+  if (testinNutin) scripts = { ...scripts, ...testinNutinScripts };
+  if (deployHelper) scripts = { ...scripts, ...deployHelperScripts };
+
+  return scripts;
 }
 
 export async function generatePackageJson(projectPath, context) {

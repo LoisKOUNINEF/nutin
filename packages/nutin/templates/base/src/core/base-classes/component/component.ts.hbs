@@ -76,6 +76,18 @@ export abstract class Component<T extends HTMLElement = HTMLElement, K = any> ex
     );
   }
 
+  public getValues(): Record<string, string> {
+    return DataBindingHelper.getDataBindingValues(this.element);
+  }
+
+  public override render(): HTMLElement {
+    this.applyProps();
+    this.appendDynamicButtons();
+    this.autoBindEvents();
+    this.parseDataAttributes();
+    return super.render();
+  }
+
   private applyProps(): void {
     if (this.props.className) {
       this.element.classList.add(this.props.className);
@@ -94,17 +106,5 @@ export abstract class Component<T extends HTMLElement = HTMLElement, K = any> ex
 
   private applyDataBindings(): void {
     DataBindingHelper.applyDataBindings(this.element, this.props);
-  }
-
-  public getValues(): Record<string, string> {
-    return DataBindingHelper.getDataBindingValues(this.element);
-  }
-
-  public override render(): HTMLElement {
-    this.applyProps();
-    this.appendDynamicButtons();
-    this.autoBindEvents();
-    this.parseDataAttributes();
-    return super.render();
   }
 }

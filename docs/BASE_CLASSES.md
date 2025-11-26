@@ -50,7 +50,7 @@
 * small button management utilities
 * data-binding helpers
 
-### Example
+### Example Implementation
 
 ```ts
 import { Component, ComponentConfig } from '../../../core/index.js';
@@ -97,7 +97,7 @@ export class AddTaskComponent extends Component {
 * lifecycle hooks: `onEnter()` (called when the view mounts) and `onExit()` (when it unmounts)
 * route params methods: `hasRouteParam(string)`, `setRouteParam(string)`, `getRouteParam(string)`, `getRouteParams()`
 
-### Example
+### Example Implementation
 
 ```ts
 import { AppEventBus, ComponentConfig, View } from '../../../core/index.js';
@@ -149,14 +149,15 @@ v.render();
 Services are **enforced singletons**. You must obtain a service via its `getInstance()` static accessor (each concrete service exposes that). Direct `new` on a subclass will throw — the `Service` base class prevents accidental multiple instances.                     
 ***Services generated with generator `npm run generate service` will export the `getInstance` return value directly.***
 
-### Example
+### Example Implementation
 
 ```ts
 import { Service } from "../../../core/index.js";
 
-export class Example extends Service<Example> {
+export class MyExample extends Service<Example> {
   constructor() {
     super();
+    // Parent class automatically binds 'this' 
     this.registerCallback();
   }
 
@@ -169,8 +170,10 @@ export class Example extends Service<Example> {
   }
 }
 
-export const exampleService = Example.getInstance();
+export const MyExampleService = Example.getInstance();
 ```
+
+- Service abstract class auto-binds methods so that 'this' is not undefined.
 
 ### Cleanup & testing hooks
 
@@ -186,7 +189,8 @@ Example:
 ```html
 <input 
   type="text" 
-  id="username" 
+  id="username"
+  value="John" 
   data-event="change:updateUser:@id,@value" 
 />
 ```
@@ -264,7 +268,7 @@ Pipes are applied left-to-right; `data-pipe-source` can choose which attribute p
 
 ### I18nHelper
 
-* Use `data-i18n="KEY"` (optionally `data-i18n-params` with a JSON object) to set translated text/placeholder.
+* Use `data-i18n="KEY"` to set translated text/placeholder.
 
 Example:
 
@@ -296,7 +300,11 @@ this.catalogConfig({
 
 ### SecurityHelper
 
-* Helpers for escaping/sanitising input and text to avoid injection when inserting text into the DOM.
+* Helpers for escaping/sanitising input and text to avoid injection when inserting text into the DOM. DOM Helper calls `sanitizeTemplate` before inserting it to innerHTML (trustLevel : '' | '' | '', default: 'normal').
+    - trustLevel can be passed to component's `super()`.
+        - trusted : no template sanitization
+        - normal : remove scripts and inline event handlers
+        - strict : remove iframe, object, embed, href, data: protocol, scripts and inline event handlers
 
 * Use `SecurityHelper.escapeHtml()` when you need to insert arbitrary strings into innerHTML or attributes.
 
@@ -318,7 +326,6 @@ Template literal escape (if using backticks) :
 
 Event handler attributes:
 `" onmouseover="alert('XSS')"`
-
 
 ## 7. Common patterns and recipes
 

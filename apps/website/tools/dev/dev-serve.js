@@ -26,4 +26,7 @@ async function startDev() {
   }
 }
 
-startDev();
+startDev().catch((err) => {
+  print.boldError(`Unexpected error: ${err.message}`);
+  exit(1);
+});

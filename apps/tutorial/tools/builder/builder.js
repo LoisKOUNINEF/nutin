@@ -16,7 +16,11 @@ runScript(path.join(scriptsDir, 'minify-html.js'), 'Minifying inline templates..
 runScript(path.join(scriptsDir, 'sass.config.js'), 'Compiling styles from main.scss...');
 runScript(path.join(scriptsDir, 'validate-html.js'), 'Validating tags in index.html...');
 
-if (isProd) runScript(path.join(scriptsDir, 'esbuild.js'), 'Running esbuild...');
+if (isProd) {
+	runScript(path.join(scriptsDir, 'esbuild.js'), 'Running esbuild...');
+	runScript(path.join(scriptsDir, 'hash-files.js'), 'Hashing files...');
+	runScript(path.join(scriptsDir, 'compress-files.js'), 'Compressing files...');
+}
 
 runScript(path.join(scriptsDir, 'finalize-build.js'), 'Finalizing build...')
 

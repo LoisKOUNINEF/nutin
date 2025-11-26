@@ -13,7 +13,4 @@
 	font-weight: bold;
   @include mixins.border($primary-color);
   @include mixins.rounded;
-  @include mixins.respond-to(medium) {
-  	padding: map.get($spacings, 'medium');
-  }
 }

@@ -3,20 +3,47 @@
 @use "mixins";
 
 .home__title {
+	text-align: center;
   font-family: $secondary-font;
 	color: $primary-color;
 	font-size: map.get($font-sizes, 'large');
 	font-weight: bold;
 	padding-top: map.get($spacings, 'small');
+}
+
+.home__header {
+	@include mixins.flex-center;
+	@include mixins.flex-column;
+	margin-top: -(map.get($spacings, 'largest'));
 	@include mixins.respond-to(medium) {
-		padding-top: map.get($spacings, 'medium');
+		width: 100%;
 	}
 }
 
+.home__catchphrase {
+	color: $secondary-color;
+	font-size: map.get($font-sizes, 'large');
+	font-style: italic;
+	text-align: center;
+	@include mixins.respond-to(small) {
+   	width: 100%;
+ 	}
+	@include mixins.respond-to(medium) {
+   	width: 90%;
+ 	}
+	@include mixins.respond-to(largest) {
+   	width: 70%;
+ 	}
+}
+
 .home__technos {
+	text-align: center;
 	font-size: map.get($font-sizes, 'small');
 	font-style: italic;
 	color: $primary-color;
+	@include mixins.respond-to(medium) {
+		padding: map.get($spacings, 'small') map.get($spacings, 'medium') 0;
+	}
 }
 
 .home__main-content {
@@ -31,23 +58,6 @@
 	@include mixins.respond-to(medium) {
 		padding: map.get($spacings, 'medium');
 	}
-}
-
-.home__catchphrase {
-	color: $secondary-color;
-	font-size: map.get($font-sizes, 'large');
-	font-style: italic;
-	text-align: center;
-	max-width: 80%;
-	@include mixins.respond-to(small) {
-   	width: 100%;
- 	}
-	@include mixins.respond-to(medium) {
-   	width: 90%;
- 	}
-	@include mixins.respond-to(largest) {
-   	width: 70%;
- 	}
 }
 
 .home__snippet-container {

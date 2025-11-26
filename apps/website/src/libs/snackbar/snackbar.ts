@@ -37,7 +37,7 @@ export function notify(message: string, options: NotifyOptions = {}): void {
   }
 }
 
-function displayNext() {
+function displayNext(): void {
   if (queue.length === 0) {
     isDisplaying = false;
     return;

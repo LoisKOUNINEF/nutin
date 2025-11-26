@@ -1,10 +1,11 @@
 import { registerTestGlobals, getTestFiles, runQueuedTests, print } from './core/index.js';
+import path from 'path';
 import config from '#root/testin-nutin.config.js';
 
 registerTestGlobals();
 
 let testFiles = config.origins.flatMap(
-  origin => getTestFiles(path.join('../', origin))
+  origin => getTestFiles(`../${origin}`)
 );
 
 const args = process.argv.slice(2);

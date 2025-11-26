@@ -72,7 +72,7 @@ async function removeJsonFiles(directory) {
 
   await removeEmptyDirectories(directory);
 
-  if (isVerbose) print.boldInfo(`JSON files cleanup complete.\n`);
+  if (isVerbose) print.boldInfo(`JSON files cleanup complete.`);
 }
 
 async function removeEmptyDirectories(directory) {

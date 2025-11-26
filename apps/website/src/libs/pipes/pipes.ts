@@ -1,6 +1,6 @@
 import { AppPipeRegistry } from "../../core/index.js";
 
-export const registerPipes = () => {    
+export const registerPipes = (): void => {    
   // currency
   AppPipeRegistry.register('currency', (
     value: number, 

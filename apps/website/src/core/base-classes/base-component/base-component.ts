@@ -4,6 +4,7 @@ import { I18nHelper } from './helpers/i18n.helper.js';
 import { PipeHelper } from './helpers/pipe.helper.js';
 import { ChildrenHelper } from './helpers/children.helper.js';
 import { CatalogHelper, CatalogConfig } from './helpers/catalog.helper.js';
+import { TrustLevel } from './helpers/security.helper.js';
 export { CatalogItemConfig } from './helpers/catalog.helper.js';
 
 /**```typescript
@@ -22,6 +23,7 @@ export interface BaseComponentOptions {
   template?: string;
   mountTarget?: string | HTMLElement;
   tagName?: keyof HTMLElementTagNameMap;
+  trustLevel?: TrustLevel;
 }
 
 export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
@@ -32,25 +34,28 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
   constructor({
     template = '',
     mountTarget = '#app',
-    tagName = 'div'
+    tagName = 'div',
+    trustLevel
   }: BaseComponentOptions) {
-    this.element = DomHelper.createElement<T>(tagName, template);
+    this.element = DomHelper.createElement<T>(tagName, template, trustLevel);
     this.parseDataAttributes();
     this.autoBindEvents();
     DomHelper.mountElement(this.element, mountTarget);
   }
 
-  protected parseDataAttributes(): void {
-    I18nHelper.parseI18nAttributes(this.element);
-    PipeHelper.parsePipeAttributes(this.element);
+  public childConfigs(): ComponentConfig[] {
+    return [];
   }
 
-  protected autoBindEvents(): void {
-    EventHelper.bindEvents(this, this.element, this.eventListeners);
+  public destroy(): void {
+    EventHelper.destroyEvents(this.element, this.eventListeners);
+    ChildrenHelper.destroyChildren(this._children);
+    this.element.remove();
   }
 
-  protected addChildren(): void {
-    ChildrenHelper.addChildren(this, this.element, this._children);
+  public render(): HTMLElement {
+    this.addChildren();
+    return this.element;
   }
 
 /**
@@ -68,18 +73,16 @@ interface CatalogConfig {
     return CatalogHelper.generateCatalog(config);
   }
 
-  public childConfigs(): ComponentConfig[] {
-    return [];
+  protected parseDataAttributes(): void {
+    I18nHelper.parseI18nAttributes(this.element);
+    PipeHelper.parsePipeAttributes(this.element);
   }
 
-  public destroy(): void {
-    EventHelper.destroyEvents(this.element, this.eventListeners);
-    ChildrenHelper.destroyChildren(this._children);
-    this.element.remove();
+  protected autoBindEvents(): void {
+    EventHelper.bindEvents(this, this.element, this.eventListeners);
   }
 
-  public render(): HTMLElement {
-    this.addChildren();
-    return this.element;
+  protected addChildren(): void {
+    ChildrenHelper.addChildren(this, this.element, this._children);
   }
 }

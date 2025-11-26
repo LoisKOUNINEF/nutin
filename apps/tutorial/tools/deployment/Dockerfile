@@ -12,7 +12,6 @@ FROM nginx:${NGINX_VERSION}
 
 RUN rm /etc/nginx/conf.d/default.conf
 COPY --from=builder /usr/src/app/apps/tutorial/tools/deployment/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /usr/src/app/apps/tutorial/tools/deployment/gzip.conf /etc/nginx/conf.d/gzip.conf
 COPY --from=builder /usr/src/app/apps/tutorial/dist/src /usr/share/nginx/html
 
 EXPOSE 9092

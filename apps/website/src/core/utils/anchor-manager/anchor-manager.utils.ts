@@ -25,23 +25,23 @@ export interface IAnchorConfig extends IAttributesConfig {
 }
 
 export class AnchorManager {
-	private config: IAnchorConfig;
+  private config: IAnchorConfig;
 
-	constructor(
-		config: IAnchorConfig,
-		target: HTMLElement
-	) {
-		this.config = config;
-		this.appendAnchorElement(target);
-	}
+  constructor(
+    config: IAnchorConfig,
+    target: HTMLElement
+  ) {
+    this.config = config;
+    this.appendAnchorElement(target);
+  }
 
   private appendAnchorElement(target: HTMLElement): void {
     const container = this.createAnchorContainer();
     target.appendChild(container);
   }
 
-  private createAnchorContainer() {
-    const container = document.createElement('div');
+  private createAnchorContainer(): HTMLSpanElement {
+    const container = document.createElement('span');
     const anchor = this.createAnchor();
 
     container.appendChild(anchor);
@@ -54,19 +54,17 @@ export class AnchorManager {
 
     this.setAnchorRef(anchor);
     
-    AttributesHelper.setContent(anchor, this.config);
-    AttributesHelper.setStyle(anchor, this.config);
-    AttributesHelper.setPipes(anchor, this.config);
+    AttributesHelper.setAttributes(anchor, this.config);
 
     this.handleClick(anchor);
 
     return anchor;
   }
 
-  private setAnchorRef(anchor: HTMLAnchorElement) {
+  private setAnchorRef(anchor: HTMLAnchorElement): void {
     anchor.setAttribute('href', this.config.href);
     if (this.config.target) {
-    	anchor.setAttribute('target', this.config.target);
+      anchor.setAttribute('target', this.config.target);
     }
   }
 

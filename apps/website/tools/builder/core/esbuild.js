@@ -19,7 +19,6 @@ async function build() {
   if (isVerbose) print.boldInfo(`ESBuild complete.\n`);
 }
 
-
 build().catch((err) => {
   print.boldError(`ESBuild failed: ${err.message}`);
   exit(1);

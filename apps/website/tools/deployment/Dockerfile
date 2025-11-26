@@ -5,7 +5,6 @@ FROM node:${NODE_VERSION} AS builder
 WORKDIR /usr/src/app
 COPY ./apps/website/ ./apps/website/
 COPY ./package*.json ./
-
 RUN npm ci && \
     npm run -w website build:prod
 
@@ -13,7 +12,6 @@ FROM nginx:${NGINX_VERSION}
 
 RUN rm /etc/nginx/conf.d/default.conf
 COPY --from=builder /usr/src/app/apps/website/tools/deployment/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /usr/src/app/apps/website/tools/deployment/gzip.conf /etc/nginx/conf.d/gzip.conf
 COPY --from=builder /usr/src/app/apps/website/dist/src /usr/share/nginx/html
 
 EXPOSE 9090 9091

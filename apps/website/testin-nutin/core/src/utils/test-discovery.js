@@ -8,7 +8,6 @@ const levelsUp = relativeToCwd.split(path.sep).length-1;
 const projectRoot = path.resolve(__dirname, ...Array(levelsUp).fill('..'));
 
 export function getTestFiles(dir) {
-  // const fullDir = path.resolve(__dirname,'..', '..', '..', dir);
   const fullDir = path.join(projectRoot, dir);
   
   if (!fs.existsSync(fullDir)) return [];

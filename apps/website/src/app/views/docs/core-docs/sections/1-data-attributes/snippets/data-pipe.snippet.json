@@ -1,0 +1,14 @@
+{
+	"id": 3,
+	"sectionId": 1,
+	"content": "&lt;!-- basic usage --&gt;\n&lt;div data-pipe=\"capitalizeAll\"&gt;&lt;/div&gt;\n&lt;!-- passing arguments --&gt;\n&lt;div data-pipe=\"date:fr-FR,long,time\"&gt;&lt;/div&gt;\n&lt;!-- chaining pipes --&gt;\n&lt;div data-pipe=\"date|capitalizeAll\"&gt;&lt;/div&gt;\n&lt;!-- arguments & chaining --&gt;\n&lt;div data-pipe=\"date:en-US,long,time|capitalizeAll\"&gt;&lt;/div&gt;\n\n&lt;!-- with data-pipe-source attribute --&gt;\n&lt;div \n\t\tdata-pipe=\"capitalizeAll\"\n\t\tdata-pipe-source=\"this will be capitalized and set as textcontent\"\n&gt;&lt;/div&gt;",
+	"type": "html",
+	"en": {
+		"title": "data-pipe"
+	},
+	"fr": {
+		"title": "data-pipe"
+	}
+}
+
+

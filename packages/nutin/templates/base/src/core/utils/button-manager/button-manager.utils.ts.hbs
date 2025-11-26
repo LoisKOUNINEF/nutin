@@ -69,19 +69,24 @@ export class ButtonManager {
     return container;
   }
 
+  public appendTo(target: HTMLElement): void {
+    const container = this.createButtonContainer();
+    if (container) {
+      target.appendChild(container);
+    }
+  }
+
   private createButton(config: BaseButton, index: number): HTMLElement {
     const button = document.createElement('button');
     
-    AttributesHelper.setContent(button, config);
-    AttributesHelper.setStyle(button, config);
-    AttributesHelper.setPipes(button, config);
+    AttributesHelper.setAttributes(button, config);
 
     this.setDataEvent(button, index);
 
     return button;
   }
 
-  private setDataEvent(button: HTMLButtonElement, index: number) {
+  private setDataEvent(button: HTMLButtonElement, index: number): void {
     button.setAttribute('data-event', `click:onButtonClick_${index}`);
   }
 
@@ -93,13 +98,6 @@ export class ButtonManager {
         config.callback();
       }
     };
-  }
-
-  public appendTo(target: HTMLElement): void {
-    const container = this.createButtonContainer();
-    if (container) {
-      target.appendChild(container);
-    }
   }
 
 /** Note : doesn't track container

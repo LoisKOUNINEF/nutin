@@ -6,6 +6,7 @@ pnpm-debug.log*
 .yarn-integrity
 
 /dist/
+/dist-build/
 
 .DS_Store
 .DS_Store?

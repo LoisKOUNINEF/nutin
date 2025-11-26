@@ -26,6 +26,51 @@ class Router {
     this.navigate(NavigationManager.getCurrentPath());
   }
 
+  public async reload(): Promise<void> {
+    const currentRoute = NavigationManager.getCurrentPath();
+    await this.navigate(currentRoute, false);
+  }
+
+  public async navigate(path: string | '', pushState: boolean = true): Promise<void> {
+    const normalizedPath = NavigationManager.normalizePath(path);
+    const currentPath = NavigationManager.getCurrentPath();
+    
+    // Try to match the route with parameters
+    const routeMatch = this.matchRoute(normalizedPath);
+
+    if (!routeMatch) {
+      await this.handleNotFound(normalizedPath, currentPath, pushState);
+      return;
+    }
+
+    const guardResult = await this.handleGuards(
+      normalizedPath, 
+      routeMatch.route, 
+      routeMatch.params, 
+      pushState
+    );
+    
+    if (!guardResult) return;
+
+    this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
+    this._currentParams = routeMatch.params;
+    this._currentView = ViewRenderManager.renderNewView(
+      guardResult.viewConstructor!, 
+      routeMatch.params
+    );
+    
+    NavigationManager.updateMetaContent(this._currentView);
+    NavigationManager.updateHistory(normalizedPath, currentPath, pushState);
+  }
+
+  public getCurrentParams(): Record<string, string> {
+    return { ...this._currentParams };
+  }
+
+  public getParam(key: string): string | undefined {
+    return this._currentParams[key];
+  }
+
   private initializeEventListeners(): void {
     window.addEventListener('popstate', () => this.handlePopState());
     AppEventBus.subscribe('navigate', (path: string) => this.navigate(path));
@@ -94,51 +139,6 @@ class Router {
     }
 
     return guardResult;
-  }
-
-  public async reload(): Promise<void> {
-    const currentRoute = NavigationManager.getCurrentPath();
-    await this.navigate(currentRoute, false);
-  }
-
-  public async navigate(path: string | '', pushState: boolean = true): Promise<void> {
-    const normalizedPath = NavigationManager.normalizePath(path);
-    const currentPath = NavigationManager.getCurrentPath();
-    
-    // Try to match the route with parameters
-    const routeMatch = this.matchRoute(normalizedPath);
-
-    if (!routeMatch) {
-      await this.handleNotFound(normalizedPath, currentPath, pushState);
-      return;
-    }
-
-    const guardResult = await this.handleGuards(
-      normalizedPath, 
-      routeMatch.route, 
-      routeMatch.params, 
-      pushState
-    );
-    
-    if (!guardResult) return;
-
-    this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
-    this._currentParams = routeMatch.params;
-    this._currentView = ViewRenderManager.renderNewView(
-      guardResult.viewConstructor!, 
-      routeMatch.params
-    );
-    
-    NavigationManager.updateMetaContent(this._currentView);
-    NavigationManager.updateHistory(normalizedPath, currentPath, pushState);
-  }
-
-  public getCurrentParams(): Record<string, string> {
-    return { ...this._currentParams };
-  }
-
-  public getParam(key: string): string | undefined {
-    return this._currentParams[key];
   }
 }
 

@@ -1,33 +1,33 @@
 import { getCiCommand } from './package-manager.mjs';
 import { packageVersion } from './version.mjs';
 
-export class ContextBuilder {
-	defaultAnswers = {
-	  template: true,
-    stylinNutin: true,
-    i18n: true,
-    transition: false,
-    testinNutin: false,
-    packageManager: 'npm',
-	};
+export const defaults = {
+  projectName: 'my-nutin-app',
+  packageManager: 'npm',
+  stylinNutin: true,
+  template: true,
+  i18n: false,
+  deployHelper: false,
+  testinNutin: false,
+  transition: false
+};
 
+export class ContextBuilder {
 	buildContext(answers) { 
     const version = packageVersion;
     const ciCommand = getCiCommand(answers.packageManager);
 
     return {
       projectName: answers.projectName,
+      packageManager: answers.packageManager,
       
-      template: answers.template || this.defaultAnswers.template,
-      stylinNutin: answers.stylinNutin || this.defaultAnswers.stylinNutin,
-      i18n: answers.i18n || this.defaultAnswers.i18n,
-      transition: answers.transition || this.defaultAnswers.transition,
-      testinNutin: answers.testinNutin || this.defaultAnswers.testinNutin,
+      template: answers.template ?? defaults.template,
+      stylinNutin: answers.stylinNutin ?? defaults.stylinNutin,
+      i18n: answers.i18n ?? defaults.i18n,
+      deployHelper: answers.deployHelper ?? defaults.deployHelper,
+      testinNutin: answers.testinNutin ?? defaults.testinNutin,
+      transition: answers.transition ?? defaults.transition,
 
-      hasFeatures: answers.template || answers.stylinNutin || answers.i18n || answers.transition || answers.testinNutin,
-      
-      year: new Date().getFullYear(),
-      packageManager: answers.packageManager || this.defaultAnswers.packageManager,
       ciCommand: ciCommand,
       version: version
     };
