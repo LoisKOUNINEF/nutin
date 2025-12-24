@@ -1,41 +1,49 @@
-/* Outfit font */
+/* Work Sans font (secondary) */
 @font-face {
-  font-family: 'Outfit';
-  src: url('/assets/fonts/Outfit-Regular.ttf') format('truetype');
+  font-family: 'Work Sans';
+  src: url('/assets/fonts/WorkSans-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Outfit';
-  src: url('/assets/fonts/Outfit-Medium.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Outfit';
-  src: url('/assets/fonts/Outfit-Bold.ttf') format('truetype');
+  font-family: 'Work Sans';
+  src: url('/assets/fonts/WorkSans-Bold.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
-/* Playfair Display font */
+/* Source Sans Pro font (primary) */
 @font-face {
-  font-family: 'Playfair Display';
-  src: url('/assets/fonts/PlayfairDisplay-Regular.ttf') format('truetype');
+  font-family: 'Source Sans Pro';
+  src: url('/assets/fonts/SourceSansPro-Regular.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Playfair Display';
-  src: url('/assets/fonts/PlayfairDisplay-Bold.ttf') format('truetype');
+  font-family: 'Source Sans Pro';
+  src: url('/assets/fonts/SourceSansPro-It.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Source Sans Pro';
+  src: url('/assets/fonts/SourceSansPro-Bold.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Source Sans Pro';
+  src: url('/assets/fonts/SourceSansPro-BoldIt.otf') format('opentype');
+  font-weight: 700;
+  font-style: italic;
   font-display: swap;
 }
