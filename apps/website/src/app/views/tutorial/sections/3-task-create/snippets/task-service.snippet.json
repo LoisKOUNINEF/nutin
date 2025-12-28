@@ -1,7 +1,7 @@
 {
-	"id": 1,
+	"id": 2,
 	"sectionId": 3,
-	"content": "// Use AppEventBus so that AppRouter handles dynamic DOM update\n\tprivate emitReload() {\n\t\tAppEventBus.emit('reload');\n\t}\n\n\tprivate tasksUpdated() {\n\t\tthis.emitReload();\n\t}\n\n\tpublic addTask() {\n\t\tconst id = this._tasks.length === 0 \n\t\t\t? 0 \n\t\t\t: Math.max(...this._tasks.map(task => task.id)) + 1;\n\n\t\tconst newTask: Task = {\n\t\t\tid: id,\n\t\t\tname: `Untitled ${id + 1}`,\n\t\t\tcontent: '',\n\t\t\tdate: new Date(),\n\t\t};\n\n\t\tthis._tasks.push(newTask);\n\t\tthis.tasksUpdated();\n\t}",
+	"content": "// Use AppEventBus to handle dynamic DOM update\n\tprivate emitTaskEvent() {\n\t\tAppEventBus.emit('task-updated');\n\t}\n\n\tprivate tasksUpdated() {\n\t\tthis.emitTaskEvent();\n\t}\n\n\tpublic addTask() {\n\t\tconst id = this._tasks.length === 0 \n\t\t\t? 0 \n\t\t\t: Math.max(...this._tasks.map(task => task.id)) + 1;\n\n\t\tconst newTask: Task = {\n\t\t\tid: id,\n\t\t\tname: `Untitled ${id + 1}`,\n\t\t\tcontent: '',\n\t\t\tdate: new Date(),\n\t\t};\n\n\t\tthis._tasks.push(newTask);\n\t\tthis.tasksUpdated();\n\t}",
 	"type": "ts",
 	"en": {
 		"before": "First, let's add a task creation method in TasksService.",

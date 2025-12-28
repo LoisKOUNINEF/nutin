@@ -48,7 +48,7 @@
 		width: 100%;
 		svg {
 			@include mixins.display-svg;
-			padding-right: map.get($spacings, 'small');
+			padding-right: map.get($spacings, 'smallest');
 		}
 	}
 }
@@ -76,12 +76,17 @@
 		}
 		& > div {
     	flex-basis: 35%;
+    	@include mixins.flex-column;
   	}
 		& > div:nth-child(even) {
-			padding-right: map.get($spacings, 'smallest');
+			padding-right: map.get($spacings, 'small');
+			align-items: flex-end;
+			text-align: right;
   	}
 		& > div:nth-child(odd) {
 			padding-left: map.get($spacings, 'smallest');
+			align-items: flex-start;
+			text-align: left;
   	}
 	}
 }
@@ -110,6 +115,6 @@
 .navbar__dropdown-visible {
 	opacity: 1;
 	visibility: visible;
-	z-index: 100;
+	z-index: 2;
 	@include mixins.fade-in;
 }
