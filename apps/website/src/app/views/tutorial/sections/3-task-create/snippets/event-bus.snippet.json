@@ -1,0 +1,14 @@
+{
+	"id": 1,
+	"sectionId": 3,
+	"content": "// in globals.d.ts\ndeclare type CoreEventMap = {\n\t// existing events\n\t'task-updated': string;\n}",
+	"type": "ts",
+	"en": {
+		"before": "We'll add a new event to handle dynamic DOM update.",
+		"after": "Event 'reload' (consumed by router) could also be used, but it means destroying and rebuilding the entire DOM."
+	},
+	"fr": {
+		"before": "Nous allons ajouter un nouvel évènement pour gérer la mise à jour dynamique du DOM.",
+		"after": "Nous pourrions utiliser l'évènement 'reload' (consumé par le router), mais cela signifierait détruire et reconstruire le DOM entièrement."
+	}
+}

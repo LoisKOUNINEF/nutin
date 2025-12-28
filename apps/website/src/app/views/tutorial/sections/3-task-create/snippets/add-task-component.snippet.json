@@ -1,5 +1,5 @@
 {
-	"id": 2,
+	"id": 3,
 	"sectionId": 3,
 	"content": "import { Component, ComponentConfig } from '../../../core/index.js';\nimport { TasksService } from '../../services/index.js';\nimport { ButtonComponent } from '../index.js';\n\nconst templateFn = () => `\n&lt;div data-component=\"add-task-btn\"&gt;&lt;/div&gt;\n`;\n\nexport class AddTaskComponent extends Component {\n\tconstructor(mountTarget: HTMLElement) {\n\t\tsuper({templateFn, mountTarget});\n\t}\n\n\tprivate addTask() {\n\t\tTasksService.addTask();\n\t}\n\n\tpublic childConfigs(): ComponentConfig[] {\n\t\treturn [\n\t\t\t{\n\t\t\t\tselector: `add-task-btn`,\n\t\t\t\tfactory: (el) => new ButtonComponent(\n\t\t\t\t\tel, \n\t\t\t\t\t{\n\t\t\t\t\t\ttextContent: 'New Task',\n\t\t\t\t\t\tcallback: () => this.addTask(),\n\t\t\t\t\t\tclassName: 'task-catalog__add-task-button'\n\t\t\t\t\t}\n\t\t\t\t)\n\t\t\t}\n\t\t]\n\t}\n}",
 	"type": "ts",

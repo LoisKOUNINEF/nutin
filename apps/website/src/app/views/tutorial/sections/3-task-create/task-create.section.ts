@@ -3,6 +3,7 @@ import TaskCatalogViewSnippet from './snippets/task-catalog-view.snippet.json' w
 import AddTaskComponentSnippet from './snippets/add-task-component.snippet.json' with { type: "json" };
 import AddTaskStyleSnippet from './snippets/add-task-style.snippet.json' with { type: "json" };
 import TaskServiceSnippet from './snippets/task-service.snippet.json' with { type: "json" };
+import EventBusSnippet from './snippets/event-bus.snippet.json' with { type: "json" };
 import TaskCreateSection from './task-create.section.json' with { type: "json" };
 
 export default BuildSectionHelper.buildSection(
@@ -12,5 +13,6 @@ export default BuildSectionHelper.buildSection(
 		AddTaskComponentSnippet,
 		AddTaskStyleSnippet,
 		TaskServiceSnippet,
+		EventBusSnippet
 	]
 );

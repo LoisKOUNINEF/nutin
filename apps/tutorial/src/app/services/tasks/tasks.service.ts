@@ -45,7 +45,7 @@ export class Tasks extends Service<Tasks> {
   }
 
   private emitReload() {
-    AppEventBus.emit('reload');
+    AppEventBus.emit('task-updated');
   }
 
   private tasksUpdated() {
