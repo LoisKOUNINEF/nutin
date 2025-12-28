@@ -31,3 +31,16 @@
 .c-padd-list {
 	padding-left: 4rem;
 }
+
+.external-svg {
+	[href^="http"]::after {
+    content: "";
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    background-color: currentColor;
+    mask-image: url(/assets/images/external-link.svg);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+  }
+}

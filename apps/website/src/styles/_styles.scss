@@ -20,6 +20,7 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 
 // Global styles
 :root {
+	font-size: 17px;
 	body {
 		background-color: $background-color;
 	  color: $text-color;
@@ -28,7 +29,6 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 		cursor: default;
 	  line-height: 1.8;
 		font-family: $primary-font;
-	  font-size: 17px;
 	  display: flex; 
 	  flex-direction: column;
   	overflow-y: scroll;

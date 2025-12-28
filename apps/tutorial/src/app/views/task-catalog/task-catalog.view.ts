@@ -1,4 +1,4 @@
-import { ComponentConfig, View } from '../../../core/index.js';
+import { AppEventBus, ComponentConfig, View } from '../../../core/index.js';
 import { TaskComponent, AddTaskComponent, TaskDetailsComponent } from '../../components/index.js';
 import { TasksService } from '../../services/index.js';
 
@@ -15,6 +15,12 @@ export class TaskCatalogView extends View {
 
   constructor() {
     super({template});
+    AppEventBus.subscribe('task-updated', () => this.forceRender());
+  }
+
+  protected override forceRender(): void {
+    this._tasks = TasksService.tasks;
+    return super.forceRender();
   }
 
   public onEnter() {

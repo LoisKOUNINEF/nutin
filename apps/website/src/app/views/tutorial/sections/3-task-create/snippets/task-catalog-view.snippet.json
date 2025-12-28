@@ -1,7 +1,7 @@
 {
-	"id": 4,
+	"id": 5,
 	"sectionId": 3,
-	"content": "// In template, on top :\n&lt;div data-component=\"add-task\"&gt;&lt;/div&gt;\n\npublic childConfigs(): ComponentConfig[] {\n\t\tconst tasksContainer = document.getElementById('task-catalog');\n\n\t\tconst addTaskConfig: ComponentConfig = {\n\t\t\tselector: `add-task`,\n\t\t\tfactory: (el) => new AddTaskComponent(el)\n\t\t};\n\n\t\tconst tasksConfigs = this.catalogConfig({\n\t\t\tarray: this._tasks,\n\t\t\telementName: 'task',\n\t\t\tcontainer: tasksContainer,\n\t\t\tcomponent: TaskComponent\n\t\t});\n\n\t\treturn [addTaskConfig, ...tasksConfigs];\n\t}",
+	"content": "// In template, on top :\n&lt;div data-component=\"add-task\"&gt;&lt;/div&gt;\n\n// subscribe to the newly created event to trigger rendering\nconstructor() {\n\tAppEventBus.subscribe('task-updated', () => this.render());\n}\n\nprotected override forceRender(): void {\n\tthis._tasks = TasksService.tasks;\n\treturn super.forceRender();\n}\n\npublic childConfigs(): ComponentConfig[] {\n\t\tconst tasksContainer = document.getElementById('task-catalog');\n\n\t\tconst addTaskConfig: ComponentConfig = {\n\t\t\tselector: `add-task`,\n\t\t\tfactory: (el) => new AddTaskComponent(el)\n\t\t};\n\n\t\tconst tasksConfigs = this.catalogConfig({\n\t\t\tarray: this._tasks,\n\t\t\telementName: 'task',\n\t\t\tcontainer: tasksContainer,\n\t\t\tcomponent: TaskComponent\n\t\t});\n\n\t\treturn [ addTaskConfig, ...tasksConfigs ];\n\t}",
 	"type": "ts",
 	"en": {
 		"before": "Finally, let's modify TaskCatalogView childConfigs method to include the new component."

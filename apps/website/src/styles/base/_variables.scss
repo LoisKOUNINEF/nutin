@@ -1,7 +1,4 @@
-/* 
-	Variables used in libs (snackbar, popover) and utility classes
-	Adapt to customize
-*/
+@use "fonts";
 
 // colours (RGB)
 $background-color: rgb(246 242 233); // EGG WHITE (?)
@@ -21,8 +18,8 @@ $snack-default: rgb(153 153 153);
 */
 
 // fonts
-$primary-font: Outfit, Arial, sans-serif;
-$secondary-font: 'Playfair Display', serif;
+$primary-font: 'Source Sans Pro', Arial, sans-serif;
+$secondary-font: 'Work Sans', serif;
 
 // font sizes
 $font-sizes: (

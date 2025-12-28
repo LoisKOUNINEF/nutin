@@ -5,6 +5,7 @@ declare type CoreEventMap = {
   'view-render': string;
   'view-unmount': string;
   'track-pageview': { page: string };
+  'task-updated': string;
 
   // Add other events and their payload types here
 };
