@@ -60,6 +60,16 @@
   }
 }
 
+.u-hide-on-small {
+  @include mixins.respond-to(medium) {
+    display: none;
+  }
+}
+
+.u-hide {
+    display: none;
+}
+
 // color
 .u-color-base {
   color: $text-color;
@@ -71,6 +81,10 @@
 
 .u-color-sec {
   color: $secondary-color;
+}
+
+.u-color-acc {
+  color: $accent-color;
 }
 
 .u-color-bg {

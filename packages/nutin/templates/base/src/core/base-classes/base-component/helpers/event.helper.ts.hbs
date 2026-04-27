@@ -3,9 +3,9 @@ import { TokenHelper } from './token.helper.js';
 
 export class EventHelper {
   public static bindEvents(
-    component: BaseComponent, 
-    element: HTMLElement, 
-    eventListeners: Array<[string, EventListener]>
+    component: BaseComponent,
+    element: HTMLElement,
+    eventListeners: Array<[EventTarget, string, EventListener]>
   ): void {
     element.querySelectorAll('[data-event]').forEach(el => {
       const parts = el.getAttribute('data-event')!.split(':');
@@ -24,11 +24,10 @@ export class EventHelper {
   }
 
   public static destroyEvents(
-    element: HTMLElement, 
-    eventListeners: Array<[string, EventListener]>
+    eventListeners: Array<[EventTarget, string, EventListener]>
   ): void {
-    eventListeners.forEach(([event, listener]) => {
-      element.removeEventListener(event, listener);
+    eventListeners.forEach(([target, event, listener]) => {
+      target.removeEventListener(event, listener);
     });
   }
 
@@ -46,12 +45,12 @@ export class EventHelper {
   }
 
   private static addEvent(
-    target: EventTarget, 
-    event: string, 
-    listener: EventListener, 
-    eventListeners: Array<[string, EventListener]>
+    target: EventTarget,
+    event: string,
+    listener: EventListener,
+    eventListeners: Array<[EventTarget, string, EventListener]>
   ): void {
     target.addEventListener(event, listener);
-    eventListeners.push([event, listener]);
+    eventListeners.push([target, event, listener]);
   }
 }
