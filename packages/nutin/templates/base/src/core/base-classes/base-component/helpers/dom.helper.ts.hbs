@@ -27,13 +27,6 @@ export class DomHelper {
   
   public static cleanupOptionalContent(): void {
     const isEmpty = (el: HTMLElement): boolean => {
-      const attrName = el.dataset.optional?.trim();
-
-      if (attrName && attrName !== "" && attrName !== "undefined") {
-        const attrValue = el.getAttribute(attrName);
-        return !attrValue || attrValue.trim() === "" || attrValue === "undefined";
-      }
-
       if (el instanceof HTMLImageElement) {
         return !el.src || el.src.trim() === "";
       }
@@ -50,8 +43,19 @@ export class DomHelper {
       return !content || content === "undefined";
     };
 
+    const isValueUndefined = (el: HTMLElement): boolean => {
+      const value = el.getAttribute("data-optional");
+      if (!value) return false;
+      return (
+        value.trim() === '' ||
+        value === "undefined" ||
+        value === "null"
+      );
+    }
+
     document.querySelectorAll<HTMLElement>("[data-optional]").forEach(el => {
-      if (isEmpty(el)) el.remove();
+      if (isValueUndefined(el) || isEmpty(el)) el.remove();
+      el.removeAttribute("data-optional");
     });
   }
 
