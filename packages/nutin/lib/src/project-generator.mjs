@@ -16,10 +16,10 @@ export class ProjectGenerator {
     this.builder = new ContextBuilder();
   }
 
-	async createProject(answers) {
-    const { projectName } = answers;
+	async createProject(preferences) {
+    const { projectName } = preferences;
     const projectPath = path.join(process.cwd(), projectName);
-    const context = this.builder.buildContext(answers);
+    const context = this.builder.buildContext(preferences);
 
     await this.validateProjectPath(projectPath, projectName);
     await this.setupProjectStructure(projectPath, context);
@@ -48,6 +48,6 @@ export class ProjectGenerator {
 
 export const projectGenerator = new ProjectGenerator();
 
-export async function createProject(answers) {
-  return projectGenerator.createProject(answers);
+export async function createProject(preferences) {
+  return projectGenerator.createProject(preferences);
 }
