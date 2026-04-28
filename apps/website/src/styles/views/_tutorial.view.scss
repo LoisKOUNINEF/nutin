@@ -16,7 +16,6 @@
 }
 
 .tutorial__container {
-  padding: 0 map.get($spacings, largest);
   a {
     &:hover {
       color: rgba($primary-color, .8);

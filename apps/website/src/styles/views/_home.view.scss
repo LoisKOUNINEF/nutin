@@ -8,6 +8,7 @@
 }
 
 .home__title {
+	letter-spacing: .3rem;
 	text-align: center;
   font-family: $secondary-font;
 	color: $primary-color;
@@ -29,16 +30,11 @@
 	max-width: 80ch;
 	color: color.scale($secondary-color, $lightness: -50%);
 	font-size: map.get($font-sizes, 'large');
-	font-style: italic;
 	text-align: center;
-	@include mixins.respond-to(small) {
-   	width: 100%;
- 	}
+	padding-bottom: map.get($spacings, small);
 	@include mixins.respond-to(medium) {
-   	width: 90%;
- 	}
-	@include mixins.respond-to(largest) {
-   	width: 70%;
+   	max-width: 90%;
+		font-size: 1.2rem;
  	}
 }
 
