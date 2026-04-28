@@ -4,7 +4,7 @@
     "description": "nutin toolkit website (documentation, tutorial)."
   },
   "title": "nutin toolkit",
-  "catchphrase": "Build SPAs by understanding SPAs. A minimal frontend toolkit crafted for learning and lean applications.",
+  "catchphrase": "Build SPAs by understanding SPAs. A minimal frontend framework crafted for learning and lean applications.",
   "technos": "Pure TypeScript, SASS, and DOM-driven components — zero runtime dependencies.",
   "pitch": "Have you ever wondered what happens under the hood of the frameworks you use daily? nutin started as a learning journey to deepen my understanding the core concepts that power modern frontend development.\n\nThis isn't about replacing Vue or Angular —it's about understanding them better. nutin gives you the SPA experience without the framework overhead —and more importantly, without the hidden magic.",
   "presentation": "nutin provides the essential building blocks for single-page applications —router, component lifecycle, state management, and event system— all in one lightweight, dependency-light package.\n\nOptional companions:\n\t• testin-nutin: A simple testing toolkit that grows with your needs\n\t• stylin-nutin: Tailwind-inspired styling that you can customize\n\t• deployment helpers : A Dockerfile + Nginx config with secure defaults.\n\t• i18n support\n\nEverything is designed for transparency and tweakability. The code lives in your `src/core/` folder, not hidden in node_modules.",

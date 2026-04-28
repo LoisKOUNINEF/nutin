@@ -25,7 +25,14 @@
     - Snackbar messages are now properly sanitized
 
 - CLI
-    - Less feature prompts - enable with flags
+    - Rework: App creation flow
+        - No features enabled by default
+        - Presets `--preset <minimal|standard|full|cicd>`
+            Minimal: External templates
+            Standard: Minimal + i18n & built-in SCSS utilities.
+            Full: Standard + deployment helpers & built-in testing toolkit
+            CI/CD: Minimal + deployment helpers
+        - Remaining flags: `--i18n`, `--deploy-helper`, `--testin-nutin`, `--transition`
 
 ## V1.3.0
 
