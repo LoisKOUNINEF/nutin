@@ -1,6 +1,8 @@
 @use "sass:map";
-@use "mixins";
 @use "variables" as *;
+{{#if stylinNutin}}
+@use "mixins";
+{{/if}}
 
 .app-snackbar {
   position: fixed;
