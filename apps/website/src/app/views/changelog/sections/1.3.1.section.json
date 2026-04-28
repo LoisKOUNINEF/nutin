@@ -1,0 +1,6 @@
+{ "id": 9,
+    "en": {
+        "name": "1.3.1",
+        "content": "• Minor features:\n\t• New BaseComponent protected method:\n\t\tlistenToRenderEvents(events: EventKey[], force: boolean = false): void\n\t\tRegister events that will trigger re-render. Call this in component's constructor.\n\t• data-optional now supports JS values\n\t\tdata-optional='${myValue}'\n\t• PopoverView and AnchorComponents now have accessibility features\n\t• ButtonManager now handles checkboxes as well\n\t• i18nService now emits `language-changed` event and exposes related methods\n\n• Fixes:\n\t• CatalogConfig no longer renders multiple containers when render() or forceRender() are triggered by events\n\t• Event Listeners are now destroyed properly before triggering a re-render\n\t• Router now correctly redirects to 404 page when URL starts with two slashes `//`.\n\t• Popover no longer flickers on close\n\t• Snackbar messages are now properly sanitized"
+    }
+}

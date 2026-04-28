@@ -3,11 +3,12 @@
 @use "mixins";
 
 .navbar {
+	font-weight: bold;
 	@include mixins.flex-between;
 	position: relative;
 	padding-top: map.get($spacings, 'small');
-	padding-left: map.get($spacings, 'small');
-	padding-right: map.get($spacings, 'medium');
+	padding-left: map.get($spacings, 'large');
+	padding-right: map.get($spacings, 'large');
 	border-bottom: .3rem solid $primary-color;
 	border-style: groovy;
 	@include mixins.rounded;

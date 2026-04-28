@@ -24,6 +24,9 @@
     - Popover no longer flickers on close
     - Snackbar messages are now properly sanitized
 
+- CLI
+    - Less feature prompts - enable with flags
+
 ## V1.3.0
 
 Version 1.3.0 marks a stability milestone with various improvements and refinements, making this the recommended version for new projects.
