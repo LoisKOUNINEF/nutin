@@ -39,19 +39,18 @@ npx @nutin/cli
 # Package manager
 -pm --package-manager <manager> # npm (Default), yarn, pnpm, bun
 
+# Presets
+--preset <minimal|standard|full|cicd>
+	# minimal: external templates
+	# standard: minimal + i18n & built-in SCSS classes
+	# full: standard + deployment helpers & built-in testing toolkit
+	# cicd: minimal + deployment helpers
+
 # Features
---template # (Default) Use external templates
---no-template # Use inline templates
---stylin-nutin # (Default) Use built-in SCSS utility classes & mixins
---no-stylin-nutin # Do not use built-in SCSS utility
---testin-nutin # Use testin-nutin toolkit
---no-testin-nutin # (Default) Do not use testin-nutin toolkit
 --i18n # Use i18n & json-based content
---no-i18n # (Default) Do not use i18n & json-based content
 --deploy-helper # Use Docker & deployment helpers
---no-deploy-helper, # (Default) Do not use Docker & deployment helpers
+--testin-nutin # Use testin-nutin toolkit
 --transition # Use animated view transitions. Note: May interfere with CSS `position: fixed`, `z-index`...
---no-transition # (Default) Do not use animated view transitions
 ```
 
 ## [First app tutorial](https://www.nutin.org/tutorial)

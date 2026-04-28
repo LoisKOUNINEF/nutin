@@ -1,3 +1,5 @@
+import {SecurityHelper} from "../../core/base-classes/base-component/helpers/security.helper.js";
+
 export type NotifyOptions = {
   type?: 'info' | 'success' | 'error';
   position?: 'top' | 'bottom';
@@ -44,9 +46,10 @@ function displayNext(): void {
   }
 
   isDisplaying = true;
-  const { message, options } = queue.shift()!;
-  const { type = 'info', position = 'bottom', duration = 3000, actionText, onAction } = options;
-
+  let { message, options } = queue.shift()!;
+  let { type = 'info', position = 'bottom', duration = 3000, actionText, onAction } = options;
+  message = SecurityHelper.sanitizeTemplate(message);
+  actionText = SecurityHelper.sanitizeTemplate(actionText);
   const snackbar = document.createElement('div');
   snackbar.className = `app-snackbar app-snackbar--${type} app-snackbar--${position}`;
   snackbar.innerHTML = `

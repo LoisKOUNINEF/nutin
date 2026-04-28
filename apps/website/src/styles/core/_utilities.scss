@@ -60,6 +60,12 @@
   }
 }
 
+.u-hide-on-small {
+  @include mixins.respond-to(medium) {
+    display: none;
+  }
+}
+
 // color
 .u-color-base {
   color: $text-color;

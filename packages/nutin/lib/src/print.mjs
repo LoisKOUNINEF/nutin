@@ -12,6 +12,7 @@ export const chalk = {
   boldYellow: (s) => `\x1b[1;33m${s}\x1b[0m`,
   boldCyan: (s) => `\x1b[1;36m${s}\x1b[0m`,
   boldPurple: (s) => `\x1b[1;35m${s}\x1b[0m`,
+  boldGray: (s) => `\x1b[1;90m${s}\x1b[0m`,
 };
 
 export const print = {

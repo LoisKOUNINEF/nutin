@@ -40,5 +40,5 @@ watcher.on('change', (filePath) => {
 });
 
 watcher.on('ready', () => {
-  print.boldHead('\nWatching for changes...\n');
+  print.boldHead('\nWatching for changes on http://localhost:9090...\n');
 });

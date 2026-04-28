@@ -1,10 +1,20 @@
 @use "fonts";
 
 // colours (RGB)
-$background-color: rgb(246 242 233); // EGG WHITE (?)
-$text-color: rgb(0 0 0); // BLACK
-$primary-color: rgb(108 131 89); // GREEN
-$secondary-color: rgb(197 102 72); // RED
+$background-color: rgb(247 249 246);
+$text-color: rgb(22 28 24);
+$primary-color: rgb(71, 85, 105);
+$secondary-color: rgb(148, 163, 184);
+
+// $background-color: rgb(255,251,240);
+// $text-color: rgb(44,36,30);
+// $primary-color: rgb(230,126,34);
+// $secondary-color: rgb(168,67,29);
+
+// $background-color: rgb(253,246,232);
+// $text-color: rgb(31,27,23);
+// $primary-color: rgb(194,59,34);
+// $secondary-color: rgb(222,138,74);
 
 // snackbar colours
 $snack-success: rgb(76 175 80);

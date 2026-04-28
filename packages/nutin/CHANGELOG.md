@@ -1,5 +1,39 @@
 # Changelog
 
+## V1.3.1
+
+- Minor features:
+    - New BaseComponent protected method.
+    Register events that will trigger re-render. Call this in component's constructor.
+    ```ts
+    // force = true: calls forceRender() instead of render()
+    listenToRenderEvents(events: EventKey[], force: boolean = false): void
+    ```
+    - data-optional now supports JS values
+    ```html
+    data-optional="${myValue}"
+    ```
+    - PopoverView and AnchorComponents now have accessibility features
+    - ButtonManager now handles checkboxes as well
+    - i18nService now emits `language-changed` event and exposes related methods
+
+- Fixes:
+    - CatalogConfig no longer renders multiple containers when render() or forceRender() are triggered by events
+    - Event Listeners are now destroyed properly before triggering a re-render
+    - Router now correctly redirects to 404 page when URL starts with two slashes `//`.
+    - Popover no longer flickers on close
+    - Snackbar messages are now properly sanitized
+
+- CLI
+    - Rework: App creation flow
+        - No features enabled by default
+        - Presets `--preset <minimal|standard|full|cicd>`
+            Minimal: External templates
+            Standard: Minimal + i18n & built-in SCSS utilities.
+            Full: Standard + deployment helpers & built-in testing toolkit
+            CI/CD: Minimal + deployment helpers
+        - Remaining flags: `--i18n`, `--deploy-helper`, `--testin-nutin`, `--transition`
+
 ## V1.3.0
 
 Version 1.3.0 marks a stability milestone with various improvements and refinements, making this the recommended version for new projects.
