@@ -15,10 +15,10 @@ export async function createApp() {
     .option('-pm, --package-manager <manager>', 'Specify package manager (npm, yarn, pnpm, bun)')
     .option('--preset <preset>', 
       `${chalk.yellow('Project preset configuration:')}
-      ${chalk.cyan('• minimal')}${chalk.gray('   - external templates')}
-      ${chalk.cyan('• standard')}${chalk.gray('  - minimal + i18n & built-in SCSS utilities')}
-      ${chalk.cyan('• full')}${chalk.gray('      - standard + deployment helpers & built-in testing toolkit')}
-      ${chalk.cyan('• cicd')}${chalk.gray('      - minimal + deployment helpers')}`
+      ${chalk.cyan('• minimal')}${chalk.boldGray('   - external templates')}
+      ${chalk.cyan('• standard')}${chalk.boldGray('  - minimal + i18n & built-in SCSS utilities')}
+      ${chalk.cyan('• full')}${chalk.boldGray('      - standard + deployment helpers & built-in testing toolkit')}
+      ${chalk.cyan('• cicd')}${chalk.boldGray('      - minimal + deployment helpers')}`
     )
     .option('--i18n', 'Use i18n & json-based content')
     .option('--deploy-helper', 'Use Docker & deployment helpers')
