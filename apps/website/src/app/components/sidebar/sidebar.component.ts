@@ -42,7 +42,7 @@ export class SidebarComponent extends Component {
 
   private highlightCurrent(section: ISection): string | undefined {
     const highlightClass = `${this.btnClass} sidebar__current-btn`;
-    const normalizedName = section.name.split(' ').join('-').toLowerCase();
+    const normalizedName = section.name.split(' ').join('-').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     const isCurrent = this._routeParams['topic']?.includes(normalizedName);
     const hasNoTopic = !this._routeParams['topic'];
 
