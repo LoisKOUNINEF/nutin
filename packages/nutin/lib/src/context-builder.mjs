@@ -1,7 +1,7 @@
 import { getCiCommand } from './package-manager.mjs';
 import { packageVersion } from './version.mjs';
 
-export const PRESET_MAP = {
+const PRESET_MAP = {
   default: { template: false, stylinNutin: false, i18n: false, deployHelper: false, testinNutin: false },
   minimal: { template: true, stylinNutin: false, i18n: false, deployHelper: false, testinNutin: false },
   standard: { template: true, stylinNutin: true,  i18n: true,  deployHelper: false, testinNutin: false },
