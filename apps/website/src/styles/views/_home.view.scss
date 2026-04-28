@@ -68,7 +68,9 @@
 }
 
 .home__snippet-container {
-	min-width: 100%;
+	@include mixins.flex-center;
+	@include mixins.flex-column;
+	max-width: 120ch;
 	background-color: rgba($primary-color, .2);
 	text-align: center;
 	font-family: $secondary-font;
