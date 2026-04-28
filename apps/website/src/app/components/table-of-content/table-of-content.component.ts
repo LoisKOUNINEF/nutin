@@ -15,7 +15,7 @@ export class TableOfContentComponent extends Component {
     return this._sections.map((section) => ({
       href: `#section${section.id}`,
       textContent: `${section.id}- ${section.name}`, 
-      style: 'color:inherit;',
+      className: 'table-of-content__anchors',
       pipes: 'capitalizeAll'
     }));
   }

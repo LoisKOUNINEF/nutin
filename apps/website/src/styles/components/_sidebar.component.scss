@@ -10,6 +10,8 @@
 	overflow-y: auto;
 	padding-top: map.get($spacings, 'largest');
 	margin-right: map.get($spacings, 'medium');
+	// Negative margin-left to compensate for padding on main (_styles.scss)
+	margin-left: -(map.get($spacings, 'largest'));
 	padding-bottom: map.get($spacings, 'largest');
 	width: 20vw;
 	@include mixins.bg-gradient(bottom, rgba($primary-color, .6), $background-color);
@@ -23,6 +25,7 @@
 		width: 100%;
 		height: auto;
 		margin-right: 0;
+		margin-left: 0;
 	}
 }
 
@@ -43,6 +46,7 @@
 }
 
 .sidebar__btn {
+	transition: all ease-in-out .2s;
 	padding-left: map.get($spacings, 'large');
 	&:hover {
 		background-color: rgba($background-color, .5);
@@ -68,14 +72,25 @@
 }
 
 .sidebar__anchor {
+	transition: all ease-in-out .2s;
 	order: 1;
 	color: $primary-color;
 	padding-left: map.get($spacings, 'medium');
-	a {
-		&:hover {
+  a {
+    &:hover {
+      color: rgba($primary-color, .8);
 			background-color: inherit;
-			color: $primary-color;
 			font-weight: normal;
-		}
-	}
+    }
+    &:focus-visible {
+      outline: 2px solid $primary-color;
+    }
+    @media (hover: none) {
+      &:hover {
+        text-decoration: none;
+        background-color: inherit;
+        color: inherit;
+      }
+    }
+  }
 }

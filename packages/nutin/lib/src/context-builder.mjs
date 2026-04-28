@@ -1,32 +1,37 @@
 import { getCiCommand } from './package-manager.mjs';
 import { packageVersion } from './version.mjs';
 
+const PRESET_MAP = {
+  default: { template: false, stylinNutin: false, i18n: false, deployHelper: false, testinNutin: false },
+  minimal: { template: true, stylinNutin: false, i18n: false, deployHelper: false, testinNutin: false },
+  standard: { template: true, stylinNutin: true,  i18n: true,  deployHelper: false, testinNutin: false },
+  full:     { template: true, stylinNutin: true,  i18n: true,  deployHelper: true,  testinNutin: true  },
+  cicd:     { template: true, stylinNutin: false, i18n: false, deployHelper: true,  testinNutin: false },
+};
+
 export const defaults = {
   projectName: 'my-nutin-app',
   packageManager: 'npm',
-  stylinNutin: true,
-  template: true,
-  i18n: false,
-  deployHelper: false,
-  testinNutin: false,
-  transition: false
+  ...PRESET_MAP['default']
 };
 
 export class ContextBuilder {
-	buildContext(answers) { 
+	buildContext(preferences) { 
     const version = packageVersion;
-    const ciCommand = getCiCommand(answers.packageManager);
+    const ciCommand = getCiCommand(preferences.packageManager);
+
+    const preset = PRESET_MAP[preferences.preset] ?? PRESET_MAP['default'];
 
     return {
-      projectName: answers.projectName,
-      packageManager: answers.packageManager,
+      projectName: preferences.projectName,
+      packageManager: preferences.packageManager,
       
-      template: answers.template ?? defaults.template,
-      stylinNutin: answers.stylinNutin ?? defaults.stylinNutin,
-      i18n: answers.i18n ?? defaults.i18n,
-      deployHelper: answers.deployHelper ?? defaults.deployHelper,
-      testinNutin: answers.testinNutin ?? defaults.testinNutin,
-      transition: answers.transition ?? defaults.transition,
+      template: preset.template,
+      stylinNutin: preset.stylinNutin,
+      i18n: preferences.i18n ?? preset.i18n,
+      deployHelper: preferences.deployHelper ?? preset.deployHelper,
+      testinNutin: preferences.testinNutin ?? preset.testinNutin,
+      transition: preferences.transition,
 
       ciCommand: ciCommand,
       version: version

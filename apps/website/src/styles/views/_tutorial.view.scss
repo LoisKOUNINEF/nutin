@@ -14,3 +14,21 @@
   @include mixins.border($primary-color);
   @include mixins.rounded;
 }
+
+.tutorial__container {
+  a {
+    &:hover {
+      color: rgba($primary-color, .8);
+    }
+    &:focus-visible {
+      outline: 2px solid $primary-color;
+    }
+    @media (hover: none) {
+      &:hover {
+        text-decoration: none;
+        background-color: inherit;
+        color: inherit;
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+
+.table-of-content__anchors {
+  a {
+    &:hover {
+      color: rgba($primary-color, .8);
+    }
+    &:focus-visible {
+      outline: 2px solid $primary-color;
+    }
+    @media (hover: none) {
+      &:hover {
+        text-decoration: none;
+        background-color: inherit;
+        color: inherit;
+      }
+    }
+  }
+}
