@@ -30,7 +30,7 @@
 .resource__single {
 	padding-left: map.get($spacings, 'largest');
 	padding-right: map.get($spacings, 'largest');
-	margin-left: clamp(1rem, 10vw, 20rem);
+	margin-left: clamp(1rem, 5vw, 10rem);
   margin-right: clamp(1rem, 5vw, 10rem);
 	h1 {
 		padding-top: map.get($spacings, 'largest');
