@@ -1,0 +1,9 @@
+{
+	"id": 4,
+	"sectionId": 2,
+	"content": "\n&lt;div \n\tclass=\"u-flex-center u-flex-column\"\n\tstyle=\"max-width;25vw;margin-top:1em;text-align:center;\"\n&gt;&lt;h2 \n\t\tclass=\"u-font-large u-bold\"\n\t\tdata-pipe=\"capitalizeAll\"\n\t&gt;${task.name}&lt;/h2&gt;\n\t&lt;p \n\t\tclass=\"u-font-small u-italic\"\n\t\tdata-pipe=\"date:en-US,long,time|capitalizeAll\"\n\t&gt;${task.date}&lt;/p&gt;\n&lt;/div&gt;\n",
+	"type": "html",
+	"en": {
+		"after": "task.component.html"
+	}
+}

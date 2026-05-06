@@ -1,5 +1,5 @@
 {
-	"id": 6,
+	"id": 8,
 	"sectionId": 5,
 	"content": "export const appRoutes: Routes = {\n\t'/': () => new TaskCatalogView(),\n\t'/tasks/:id?': () => new TaskCatalogView(),\n\t'/404': () => new NotFoundView(),\n}",
 	"type": "ts",
