@@ -1,14 +1,14 @@
 {
 	"id": 1,
 	"sectionId": 1,
-	"content": "npx @nutin/cli nutin-todo -d --no-template --no-i18n\n\n# or install package globally\nnpm install -g @nutin/cli\n\nnutin-new nutin-todo -d --no-template\n# or\ncreate-nutin-app nutin-todo -d --no-template",
+	"content": "npx @nutin/cli nutin-todo --preset standard\n\n# or install package globally\nnpm install -g @nutin/cli\nnutin-new nutin-todo --preset standard",
 	"type": "none",
 	"en": {
 		"before": "First, let's create a new nutin app :",
-		"after": "-d : default settings; --no-template : use inline HTML templates;"
+		"after": "Run command with --help for a list of available options."
 	},
 	"fr": {
 		"before": "Commençons par créer une nouvelle app nutin :",
-		"after": "-d : paramètres par défaut; --no-template : utilise des templates HTML inline;"
+		"after": "Exécuter la commande avec --help pour une liste des options disponibles."
 	}
 }

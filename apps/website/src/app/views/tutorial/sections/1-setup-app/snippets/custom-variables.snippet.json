@@ -1,0 +1,14 @@
+{
+	"id": 3,
+	"sectionId": 1,
+	"content": "$background-color: rgb();\n$text-color: rgb();\n$primary-color: rgb();\n$secondary-color: rgb();",
+	"type": "scss",
+	"en": {
+		"before": "Customize variables in src/styles/base/_variables.scss with your desired colours.",
+		"after": "Optional, it'll be  black and white by default."
+	},
+	"fr": {
+		"before": "Personnalisez les variables dans src/styles/base/_variables.scss avec vos propres couleurs.",
+		"after": "Optionnel, ce sera en noir et blanc par défaut."
+	}
+}

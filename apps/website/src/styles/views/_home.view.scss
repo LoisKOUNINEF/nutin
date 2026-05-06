@@ -49,6 +49,8 @@
 }
 
 .home__main-content {
+	margin-left: clamp(1rem, 10vw, 20rem);
+  margin-right: clamp(1rem, 5vw, 10rem);
   white-space: pre-wrap;
   overflow-wrap: break-word;
 	padding: map.get($spacings, 'large');
@@ -60,6 +62,8 @@
 
 	@include mixins.respond-to(medium) {
 		padding: map.get($spacings, 'medium');
+		margin-left: 0;
+		margin-right: 0;
 	}
 }
 

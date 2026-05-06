@@ -1,0 +1,9 @@
+{
+	"id": 6,
+	"sectionId": 5,
+	"content": "&lt;div data-component=\"add-task\"&gt;&lt;/div&gt;\n&lt;div style=\"display:flex;\"&gt;\n\t&lt;div id=\"task-catalog\" class=\"task-catalog__sidebar\"&gt;&lt;/div&gt;\n\t&lt;div data-component=\"task-details\"&gt;&lt;/div&gt;\n&lt;/div&gt;",
+	"type": "html",
+	"en": {
+		"before": "task-details.component.html"
+	}
+}
