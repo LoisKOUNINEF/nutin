@@ -1,5 +1,5 @@
 {
-	"id": 5,
+	"id": 7,
 	"sectionId": 2,
 	"content": "import { Routes } from '../core/index.js';\nimport { NotFoundView, TaskCatalogView } from './views/index.js';\n\nexport const appRoutes: Routes = {\n\t'/': () => new TaskCatalogView(),\n\t'/404': () => new NotFoundView(),\n}",
 	"type": "ts",

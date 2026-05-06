@@ -5,10 +5,10 @@
 	"type": "ts",
 	"en": {
 		"before": "To display a notification when a task is created, updated or deleted, we'll simply add a method in TasksService that uses the built-in snackbar library.",
-		"after": "Snackbar styling can be modified in src/styles/core/_libs.scss."
+		"after": "Snackbar styling can be modified in src/styles/core/_snackbar.scss."
 	},
 	"fr": {
 		"before": "Pour afficher une notification quand une tâche est créée, modifiée ou supprimée, nous allons ajouter une méthode dans TasksService qui utilisera la bibliothèque snackbar incluse.",
-		"after": "Le style peut être modifié dans src/styles/core/_libs.scss."
+		"after": "Le style peut être modifié dans src/styles/core/_snackbar.scss."
 	}
 }

@@ -1,5 +1,5 @@
 {
-	"id": 5,
+	"id": 7,
 	"sectionId": 5,
 	"content": ".task-catalog__sidebar {\n\t@include mixins.flex-column;\n\tpadding: .5rem;\n\tmargin-right: 1rem;\n}",
 	"type": "scss",

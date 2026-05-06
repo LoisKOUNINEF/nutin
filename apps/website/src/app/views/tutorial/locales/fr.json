@@ -8,5 +8,5 @@
   "live-link": "Voir une version live de l'application.",
   "important": "Les imports doivent utiliser des chemins relatifs avec l'extension' `.js` : import { MyClass } from './path/to/my-class.js';",
   "table-of-content": "Table des matières :",
-  "conclusion": "Merci d'avoir suivi ce tutoriel et pour avoir essayé nutin ! Vous devriez maintenant avoir les ressources nécessaires au développement d'applications simples. Encore merci, et happy coding 🚀 !"
+  "conclusion": "Merci d'avoir suivi ce tutoriel et pour avoir essayé nutin! Vous devriez maintenant pouvoir développer des applications simples et explorer nutin davantage. Happy coding 🚀!"
 }

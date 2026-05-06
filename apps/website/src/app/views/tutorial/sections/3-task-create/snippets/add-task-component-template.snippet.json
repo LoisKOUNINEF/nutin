@@ -1,0 +1,9 @@
+{
+	"id": 4,
+	"sectionId": 3,
+	"content": "\n&lt;div data-component=\"add-task-btn\"&gt;&lt;/div&gt;\n",
+	"type": "html",
+	"en": {
+		"after": "add-task.component.html"
+	}
+}

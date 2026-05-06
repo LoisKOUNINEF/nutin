@@ -1,0 +1,9 @@
+{
+	"id": 6,
+	"sectionId": 2,
+	"content": "\n&lt;div data-catalog=\"task-catalog\" class=\"u-flex-center u-flex-column\"&gt;&lt;/div&gt;",
+	"type": "html",
+	"en": {
+		"after": "task-catalog.view.html"
+	}
+}

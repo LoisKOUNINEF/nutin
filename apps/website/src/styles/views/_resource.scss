@@ -30,6 +30,8 @@
 .resource__single {
 	padding-left: map.get($spacings, 'largest');
 	padding-right: map.get($spacings, 'largest');
+	margin-left: clamp(1rem, 5vw, 10rem);
+  margin-right: clamp(1rem, 5vw, 10rem);
 	h1 {
 		padding-top: map.get($spacings, 'largest');
 		padding-bottom: map.get($spacings, 'largest');
@@ -44,5 +46,7 @@
 	@include mixins.respond-to(medium) {
 		padding-left: map.get($spacings, 'small');
 		padding-right: map.get($spacings, 'small');
+		margin-left: 0;
+		margin-right: 0;
 	}
 }

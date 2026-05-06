@@ -4,6 +4,7 @@
 
 .navbar {
 	font-weight: bold;
+	font-size: 1.05rem;
 	@include mixins.flex-between;
 	position: relative;
 	padding-top: map.get($spacings, 'small');
