@@ -1,6 +1,6 @@
 {
-	"catchphrase": "Un framework frontend minimaliste conçu pour l'apprentissage et les applications légères.",
-  "technos": "Pure TypeScript, SASS et composants pilotés par le DOM — aucune dépendance runtime.",
+	"catchphrase": "Un framework que vous pouvez réellement comprendre.",
+  "technos": "Explicite. Sans magie. Des choix assumés là où ils comptent.",
   "pitch": "nutin est né d'un désir d'apprendre — comprendre les concepts fondamentaux qui alimentent le développement frontend moderne. Non pas pour remplacer Vue ou Angular, mais pour mieux les comprendre.",
   "presentation": "Il offre l'expérience SPA sans la lourdeur des frameworks ni la magie cachée, en fournissant les briques essentielles — routeur, cycle de vie des composants, gestion d'état et système d'événements — dans un package léger, aux dépendances minimales.\n\nLes compagnons optionnels incluent un kit de test, un système de styles inspiré de Tailwind, des outils de déploiement (Dockerfile + Nginx) et le support i18n. Tout est transparent et modifiable, avec un code qui vit dans votre dossier src/core/ plutôt qu'enfoui dans les node_modules.",
   "philosophy": "nutin démystifie les frameworks frontend en implémentant from scratch les concepts fondamentaux — réactivité, cycles de vie des composants, routage côté client.\nLe code est volontairement minimal et accessible : chaque élément est là pour être examiné, modifié et compris.\n\nIdéal pour les développeurs souhaitant comprendre les bases des frameworks, les petits projets où un framework complet semble excessif, ou les situations nécessitant zéro dépendance à l'exécution.\nLes limitations sont des fonctionnalités, pas des bugs — elles maintiennent le focus sur l'essentiel.\n\n",

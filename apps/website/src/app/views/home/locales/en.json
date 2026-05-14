@@ -1,11 +1,11 @@
 {
   "meta" : {
-    "title": "nutin toolkit",
-    "description": "nutin toolkit website (documentation, tutorial)."
+    "title": "nutin",
+    "description": "nutin website (documentation, tutorial)."
   },
-  "title": "nutin toolkit",
-  "catchphrase": "A minimal frontend framework crafted for learning and lean applications.",
-  "technos": "Pure TypeScript, SASS, and DOM-driven components — zero runtime dependencies.",
+  "title": "nutin",
+  "catchphrase": "A framework you can actually understand.",
+  "technos": "Explicit. No magic. Opiniated where it matters.",
   "pitch": "nutin started as a learning journey to understand the core concepts powering modern frontend development — not to replace Vue or Angular, but to understand them better.",
   "presentation": "It delivers the SPA experience without framework overhead or hidden magic, providing essential building blocks — router, component lifecycle, state management, and event system — in one lightweight, dependency-light package.\n\nOptional companions include a testing toolkit, Tailwind-inspired styling, deployment helpers (Dockerfile + Nginx), and i18n support. Everything is transparent and tweakable, with code living in your src/core/ folder rather than buried in node_modules.",
   "philosophy": "nutin demystifies frontend frameworks by implementing core concepts — reactivity, component lifecycles, client-side routing — from scratch.\nThe code is intentionally minimal and accessible: everything is there to examine, modify, and learn from. \n\nPerfect for developers wanting to understand framework fundamentals, small projects where full frameworks feel heavy, or situations requiring zero runtime dependencies.\nThe limitations are features, not bugs — they keep the focus on what's essential.\n\n",

@@ -15,6 +15,9 @@
 
 .resource__section {
 	width: 80%;
+	p {
+		max-width: 100ch;
+	}
 	h2 {
 		font-weight: bold;
 		color: $primary-color;
@@ -35,7 +38,6 @@
 	h1 {
 		padding-top: map.get($spacings, 'largest');
 		padding-bottom: map.get($spacings, 'largest');
-		text-align: center;
 		color: $primary-color;
 		font-weight: bold;
 	}
@@ -43,10 +45,16 @@
 		color: $primary-color;
 		font-weight: bold;
 	}
+	p {
+		max-width: 100ch;
+	}
 	@include mixins.respond-to(medium) {
 		padding-left: map.get($spacings, 'small');
 		padding-right: map.get($spacings, 'small');
 		margin-left: 0;
 		margin-right: 0;
+		h1 {
+			padding-top: map.get($spacings, 'medium');			
+		}
 	}
 }

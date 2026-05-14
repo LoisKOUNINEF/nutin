@@ -3,10 +3,17 @@
 @use "mixins";
 
 .navbar {
+	z-index: 2;
 	font-weight: bold;
 	font-size: 1.05rem;
 	@include mixins.flex-between;
-	position: relative;
+	align-items: flex-end;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 3rem;
+	background: $background-color;
 	padding-top: map.get($spacings, 'small');
 	padding-left: map.get($spacings, 'largest');
 	padding-right: map.get($spacings, 'large');
@@ -14,7 +21,7 @@
 	border-style: groovy;
 	@include mixins.rounded;
 	button {
-		transition: ease-in-out 0.3s;
+		transition: ease-in-out 0.2s;
 		&:hover {
 			background-color: rgba($secondary-color, .7);
 			color: $background-color;
@@ -30,11 +37,45 @@
 	    }
 		}
 	}
+	img {
+		align-self: center;
+		transition: ease-in-out .2s;
+		width: 75px;
+		height: 75px;
+		cursor: pointer;
+		margin-bottom: -1.8rem;
+		@include mixins.respond-to(medium) {
+			width: 60px;
+			height: 60px;
+			margin-left: -0.8rem;
+			margin-bottom: -1.5rem;
+		}
+		&:hover {
+			transform: translateY(-2px);
+		}
+		@media (hover: none) {
+	    &:hover {
+				transform: translateY(0);
+	    }
+		}
+	}
+	svg {
+		&:hover {
+			transform: translateY(-2px);
+		}
+		@media (hover: none) {
+	    &:hover {
+				transform: translateY(0);
+	    }
+		}
+	}
 	@include mixins.respond-to(medium) {
 		@include mixins.flex-column;
 		@include mixins.flex-center;
 		padding: 0;
 		padding-bottom: map.get($spacings, 'smallest');
+		height: auto;
+		border-bottom: .4rem solid $primary-color;
 	}
 }
 
@@ -96,17 +137,29 @@
 .navbar__dropdown {
 	position: absolute;
 	top: 100%;
-	min-width: 10%;
+	min-width: 11%;
 	border-radius: map.get($border-radius, 'medium');
 	@include mixins.bg-gradient(bottom, rgba($secondary-color, .5), $background-color);
 	background-color: $background-color;
 	padding-left: map.get($spacings, 'smallest');
 	opacity: 0;
 	visibility: hidden;
+	& button {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+	  &::after {
+	    content: '';
+	  }
+	  
+	  &:hover::after {
+	    content: '>';
+	  }
+	}
 	@include mixins.respond-to(medium) {
 		width: 35%;
 		text-align: left;
-		top: 67%;
+		top: 69%;
 		right: 0%;
 		& button {
 			text-align: left !important;

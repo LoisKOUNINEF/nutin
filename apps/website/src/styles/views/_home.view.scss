@@ -3,61 +3,102 @@
 @use "mixins";
 @use "sass:color";
 
+.home__wrapper {
+	margin-left: clamp(1rem, 5vw, 10rem);
+  margin-right: clamp(1rem, 5vw, 10rem);
+  h1 {
+		font-size: map.get($font-sizes, largest)*1.5;
+		padding-top: map.get($spacings, 'medium');
+	}
+	@include mixins.respond-to(medium) {
+		h1{
+			padding-top: 0;
+		}
+		margin-left: 0;
+	  margin-right: 0;
+	}
+
+}
+
 .home__container {
 	text-align: left;
+	@include mixins.flex-column;
+}
+
+.home__title-wrapper {
+	padding-left: map.get($spacings, largest);
+	padding-bottom: map.get($spacings, large);
+	@include mixins.respond-to(medium) {
+		padding-left: map.get($spacings, small);
+		padding-bottom: map.get($spacings, small);
+	}
 }
 
 .home__title {
 	letter-spacing: .3rem;
-	text-align: center;
   font-family: $secondary-font;
 	color: $primary-color;
 	font-size: map.get($font-sizes, 'large');
 	font-weight: bold;
 	padding-top: map.get($spacings, 'small');
+	margin-bottom: -1rem;
+}
+
+.home__version {
+	margin-left: map.get($spacings, small);
+	padding-left: map.get($spacings, smallest);
+	padding-right: map.get($spacings, small);
+	font-family: $secondary-font;
+	font-style: italic;
+	font-size: map.get($font-sizes, smallest);
+	border-radius: map.get($border-radius, pill);
+	background: color.scale($background-color, $lightness: -10%);
+}
+
+.home__version-live {
+	color: green;
 }
 
 .home__header {
-	@include mixins.flex-center;
+	padding-left: map.get($spacings, largest);
 	@include mixins.flex-column;
-	margin-top: -(map.get($spacings, 'largest'));
 	@include mixins.respond-to(medium) {
+		padding-left: map.get($spacings, medium);
 		width: 100%;
 	}
 }
 
 .home__catchphrase {
-	max-width: 80ch;
+	max-width: 60ch;
 	color: color.scale($secondary-color, $lightness: -50%);
-	font-size: map.get($font-sizes, 'large');
-	text-align: center;
+	font-size: map.get($font-sizes, 'largest');
+	font-weight: bold;
 	padding-bottom: map.get($spacings, small);
+	padding-top: map.get($spacings, small);
 	@include mixins.respond-to(medium) {
-   	max-width: 90%;
-		font-size: 1.2rem;
+   	width: 100%;
+		font-size: map.get($font-sizes, 'large');
  	}
 }
 
 .home__technos {
-	text-align: center;
-	font-size: map.get($font-sizes, 'small');
-	font-style: italic;
+	max-width: 60ch;
+	font-size: map.get($font-sizes, 'largest');
 	color: $primary-color;
 	@include mixins.respond-to(medium) {
-		padding: map.get($spacings, 'small') map.get($spacings, 'medium') 0;
+   	width: 100%;
+		font-size: map.get($font-sizes, 'large');
 	}
 }
 
 .home__main-content {
-	margin-left: clamp(1rem, 5vw, 10rem);
-  margin-right: clamp(1rem, 5vw, 10rem);
   white-space: pre-wrap;
   overflow-wrap: break-word;
 	padding: map.get($spacings, 'large');
 	margin-top: map.get($spacings, 'large');
 	margin-bottom: map.get($spacings, 'large');
 	p {
-		max-width: 120ch;
+		max-width: 80ch;
 	}
 
 	@include mixins.respond-to(medium) {
@@ -68,36 +109,50 @@
 }
 
 .home__snippet-container {
-	@include mixins.flex-center;
-	@include mixins.flex-column;
-	max-width: 120ch;
+	max-width: 45ch;
 	background-color: rgba($primary-color, .2);
-	text-align: center;
 	font-family: $secondary-font;
 	color: $primary-color;
 	font-weight: bold;
 	font-size: map.get($font-sizes, 'large');
 	padding-top: map.get($spacings, 'large');
+	padding-bottom: map.get($spacings, 'medium');
 	margin-top: map.get($spacings, 'large');
 	margin-bottom: map.get($spacings, 'largest');
 	border-radius: 1rem;
   box-shadow: 0 10px 15px rgba($primary-color, .7);
+  p {
+		padding-left: map.get($spacings, 'large');
+		@include mixins.respond-to(medium) {
+		padding-left: 0;
+		}
+	}
+	@include mixins.respond-to(medium) {
+		max-width: 100%;
+		@include mixins.flex-center;
+		@include mixins.flex-column;
+	}
 }
 
 .home__snippet {
 	font-size: map.get($font-sizes, 'large');
 	padding-top: map.get($spacings, 'large');
+	width: 100%;
 	pre {
 		background: linear-gradient(to top, rgba($background-color, 1), rgba($secondary-color, .4));
 		border-radius: 1rem;
 		font-size: map.get($font-sizes, 'medium');
 		font-style: normal;
-		text-align: center;
+		width: 95%;
 		padding-top: map.get($spacings, 'large');
 		padding-bottom: map.get($spacings, 'large');
+		padding-left: map.get($spacings, 'large');
 		background-color: inherit;
 		code {
 			color: $text-color;
+		}
+		@include mixins.respond-to(medium) {
+			padding-left: map.get($spacings, 'smallest');
 		}
 	}
 }
@@ -115,19 +170,24 @@
   	background-color: rgba($primary-color, 0);
   	color: $primary-color;
   	box-shadow: 0 10px 15px rgba($primary-color, 1);
+    transform: translateX(+4px);
 	}
 	&:focus-visible {
 		outline: 2px solid $primary-color;
+	}
+	&:active {
+  	transform: translateX(-2px);
 	}
 	@media (hover: none) {
 	  &:hover {
 	    text-decoration: none;
 	    background-color: inherit;
 	    color: inherit;
+    	transform: translateX(+0px);
 	  }
 	}
 	@include mixins.respond-to(medium) {
-		width: 95vw;
+		width: 100%;
 		padding-left: 0;
 		padding-right: 0;
 	}

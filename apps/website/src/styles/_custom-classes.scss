@@ -16,8 +16,8 @@
 	width: 100%;
 	text-align: left;
 	background-color: inherit;
+	color: inherit;
 	margin-top: map.get($spacings, "small");
-	margin-bottom: map.get($spacings, "small");
 	padding-left: map.get($spacings, "small");
 	padding-right: map.get($spacings, "small");
   @include mixins.rounded;
@@ -29,7 +29,10 @@
 }
 
 .c-padd-list {
-	padding-left: 4rem;
+	padding-left: map.get($spacings, "largest");
+	@include mixins.respond-to(medium) {
+		padding-left: map.get($spacings, "large");
+	}
 }
 
 .external-svg {

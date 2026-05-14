@@ -12,7 +12,6 @@ export class NavbarComponent extends Component<HTMLHeadingElement> {
     'tools'
   ] as const;
   private readonly fixedLinks = [
-    'home',
     'tutorial',
     'get-started',
     'changelog'
