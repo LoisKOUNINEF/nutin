@@ -17,14 +17,17 @@
 	padding-top: map.get($spacings, 'small');
 	padding-left: map.get($spacings, 'largest');
 	padding-right: map.get($spacings, 'large');
-	border-bottom: .3rem solid $primary-color;
+	border-bottom: .3rem solid $secondary-color;
 	border-style: groovy;
 	@include mixins.rounded;
 	button {
+		padding-top: .3rem;
 		transition: ease-in-out 0.2s;
 		&:hover {
 			background-color: rgba($secondary-color, .7);
 			color: $background-color;
+			padding-top: 0;
+			padding-bottom: .3rem;
 		}
 		&:focus-visible {
 			outline: 2px solid $primary-color;
@@ -52,20 +55,25 @@
 		}
 		&:hover {
 			transform: translateY(-2px);
+			scale: 1.05;
 		}
 		@media (hover: none) {
 	    &:hover {
 				transform: translateY(0);
+				scale: 1;
 	    }
 		}
 	}
 	svg {
+		transition: ease-in-out .2s;
 		&:hover {
 			transform: translateY(-2px);
+			scale: 1.05;
 		}
 		@media (hover: none) {
 	    &:hover {
 				transform: translateY(0);
+				scale: 1;
 	    }
 		}
 	}
@@ -106,14 +114,14 @@
 	@include mixins.flex-wrap;
 	svg {
 		@include mixins.display-svg;
-		margin-top: map.get($spacings, 'small');
+		margin-top: map.get($spacings, 'medium');
 		margin-left: map.get($spacings, 'small');
 		padding-right: map.get($spacings, 'small');
 	}
 	@include mixins.respond-to(medium) {
 		width: 100%;
 		@include mixins.flex-between;
-		// svg is displayed in .navbar__header on wider screens
+		// svg is displayed in .navbar__header on smaller screens
 		svg {
 			display: none;
 		}

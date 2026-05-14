@@ -215,23 +215,30 @@
 }
   
 .home__cta-row-btn-primary {
-	background-color: $background-color;
+	background-color: $primary-color;
+	color: $background-color !important;
 	border: 1px solid $secondary-color; 
 	padding: 9px 20px; 
 	border-radius: map.get($border-radius, large);
 	font-size: map.get($font-sizes, small); 
-	font-weight: bold; 
 	cursor: pointer; 
-	&::after { content: '\00a0⬈'; }
+	&::after { content: '\00a0↗'; }
+	// bold arrow icon
+	// font-weight: bold; 
+	// &::after { content: '\00a0⬈'; }
+
 	&:hover {
-		background-color: rgba($secondary-color, .1);
+		transform: translateY(-2px);
 	}
 	&:focus-visible {
 		outline: 2px solid $primary-color;
 	}
+	&:active {
+		transform: translateY(-1px);
+	}
 	@media (hover: none) {
 	  &:hover {
-			background-color: $background-color;
+		transform: translateY(0);
 	  }
 	}
 }
@@ -245,14 +252,17 @@
 	cursor: pointer; 
 	&::after { content: '\00a0↗'; }
 	&:hover {
-		background-color: rgba($secondary-color, .1);
+		transform: translateY(-2px);
 	}
 	&:focus-visible {
 		outline: 2px solid $primary-color;
 	}
+	&:active {
+		transform: translateY(-1px);
+	}
 	@media (hover: none) {
 	  &:hover {
-			background-color: $background-color;
+		transform: translateY(0);
 	  }
 	}
 }

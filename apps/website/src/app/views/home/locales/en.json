@@ -4,7 +4,7 @@
     "description": "nutin website (documentation, tutorial)."
   },
   "title": "nutin",
-  "catchphrase": "A framework you can actually understand.",
+  "catchphrase": "A mini-framework you can actually understand.",
   "subcatchphrase": "Explicit. No magic. Opiniated where it matters.",
   "briefing": "Built as a learning journey into how modern frameworks work — not to replace them, but to demystify them. Minimal, transparent, and yours to modify.",
   "pitch": "nutin started as a learning journey to understand the core concepts powering modern frontend development — not to replace Vue or Angular, but to understand them better.",
