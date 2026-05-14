@@ -12,7 +12,7 @@ export class HomeView extends View {
     return [{
       selector: 'tutorial-link',
       factory: (el) => new ButtonComponent(el, {
-        callback: () => this.goToTutorial(),
+        callback: () => this.navigateTo('tutorial'),
         i18nKey: 'home.tutorial-link',
         className: 'home__tutorial-link'
       })
@@ -24,11 +24,27 @@ export class HomeView extends View {
         content: 'npx @nutin/cli',
         type: 'none'
       })
+    },
+    {
+      selector: 'cta-row-get-started-btn',
+      factory: (el) => new ButtonComponent(el , {
+        i18nKey: 'navbar.get-started',
+        callback: () => this.navigateTo('get-started'),
+        className: 'home__cta-row-btn-primary'
+      })
+    },
+    {
+      selector: 'cta-row-tutorial-btn',
+      factory: (el) => new ButtonComponent(el , {
+        i18nKey: 'navbar.tutorial',
+        callback: () => this.navigateTo('tutorial'),
+        className: 'home__cta-row-btn-secondary'
+      })
     }]
   }
 
-  goToTutorial() {
-    AppEventBus.emit('navigate', '/tutorial');
+  navigateTo(name: string) {
+    AppEventBus.emit('navigate', `/${name}`);
     window.scrollTo({ top: 0 });
   }
 }

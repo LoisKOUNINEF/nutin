@@ -118,7 +118,6 @@
 			display: none;
 		}
 		& > div {
-    	flex-basis: 35%;
     	@include mixins.flex-column;
   	}
 		& > div:nth-child(even) {
@@ -157,10 +156,8 @@
 	  }
 	}
 	@include mixins.respond-to(medium) {
-		width: 35%;
+		width: 40%;
 		text-align: left;
-		top: 69%;
-		right: 0%;
 		& button {
 			text-align: left !important;
 		}

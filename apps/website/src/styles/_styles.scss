@@ -40,7 +40,7 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 		flex: 1;
   	padding: 3rem map.get($spacings, largest);
   	@include mixins.respond-to(medium) {
-  		padding: map.get($spacings, largest)*4 0;
+  		padding: map.get($spacings, largest)*3 0;
   	}
 	}
 

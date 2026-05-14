@@ -13,7 +13,6 @@ export class NavbarComponent extends Component<HTMLHeadingElement> {
   ] as const;
   private readonly fixedLinks = [
     'tutorial',
-    'get-started',
     'changelog'
   ] as const;
   private readonly btnClass = 'c-round-btn' as const;

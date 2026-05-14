@@ -19,7 +19,7 @@
 
 	@include mixins.respond-to(medium) {
 		// Negative margin-top to compensate for padding on main (_styles.scss)
-		margin-top: -(map.get($spacings, 'medium'));
+		margin-top: - (map.get($spacings, 'largest'));
 		backdrop-filter: blur(8px);
 		-webkit-backdrop-filter: blur(8px);
 		background-color: $background-color;

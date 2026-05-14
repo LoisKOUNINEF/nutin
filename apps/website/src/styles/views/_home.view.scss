@@ -56,7 +56,7 @@
 }
 
 .home__version-live {
-	color: green;
+	color: #3B6D11;
 }
 
 .home__header {
@@ -81,7 +81,7 @@
  	}
 }
 
-.home__technos {
+.home__subcatchphrase {
 	max-width: 60ch;
 	font-size: map.get($font-sizes, 'largest');
 	color: $primary-color;
@@ -89,6 +89,17 @@
    	width: 100%;
 		font-size: map.get($font-sizes, 'large');
 	}
+}
+
+.home__briefing {
+	max-width: 60ch;
+	font-size: 1.3rem;
+	padding-top: map.get($spacings, medium);
+	@include mixins.respond-to(medium) {
+   	width: 100%;
+		font-size: 1.2rem;
+	}
+	
 }
 
 .home__main-content {
@@ -190,5 +201,58 @@
 		width: 100%;
 		padding-left: 0;
 		padding-right: 0;
+	}
+}
+
+
+.home__cta-row { 
+	transition: ease-in-out 2s;
+	display: flex; 
+	gap: 10px; 
+	align-items: flex-end; 
+	flex-wrap: wrap;
+  padding-top: map.get($spacings, 'large');
+}
+  
+.home__cta-row-btn-primary {
+	background-color: $background-color;
+	border: 1px solid $secondary-color; 
+	padding: 9px 20px; 
+	border-radius: map.get($border-radius, large);
+	font-size: map.get($font-sizes, small); 
+	font-weight: bold; 
+	cursor: pointer; 
+	&::after { content: '\00a0⬈'; }
+	&:hover {
+		background-color: rgba($secondary-color, .1);
+	}
+	&:focus-visible {
+		outline: 2px solid $primary-color;
+	}
+	@media (hover: none) {
+	  &:hover {
+			background-color: $background-color;
+	  }
+	}
+}
+
+.home__cta-row-btn-secondary { 
+	background-color: $background-color;
+	padding: 9px 20px; 
+	border: 1px solid $secondary-color; 
+	border-radius: map.get($border-radius, large);
+	font-size: map.get($font-sizes, small);
+	cursor: pointer; 
+	&::after { content: '\00a0↗'; }
+	&:hover {
+		background-color: rgba($secondary-color, .1);
+	}
+	&:focus-visible {
+		outline: 2px solid $primary-color;
+	}
+	@media (hover: none) {
+	  &:hover {
+			background-color: $background-color;
+	  }
 	}
 }
