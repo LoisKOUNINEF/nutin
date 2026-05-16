@@ -1,0 +1,16 @@
+{ 
+	"title": "The pillars",
+	"sub": "Four abstract classes. A router, an event bus, a lifecycle. No decorators, no DI, no automated change detection. Everything lives in your src/core/ folder, not buried in node_modules.",
+	"component-title": "Component model",
+	"component-desc": "BaseComponent, Component, View — a clear hierarchy with explicit lifecycle hooks.",
+	"singleton-title": "Singleton services",
+	"singleton-desc": "One instance, shared across the whole app.",
+	"event-title": "Event bus",
+	"event-desc": "Event-triggered rendering. State flows through explicit channels you define.",
+	"routing-title": "Client-side routing",
+	"routing-desc": "Hash or history routing, route guards — no magic involved.",
+	"i18n-title": "i18n",
+	"i18n-desc": "Optional internationalisation with pipe support.",
+	"testing-title": "Testing toolkit",
+	"testing-desc": "Jest-inspired, works across frontend and backend."
+}

@@ -1,0 +1,6 @@
+{ "id": 10,
+    "en": {
+        "name": "(Coming soon) 2.0.0",
+        "content": "Version 2.0.0 will see nutin go fullstack, with the same design philosophy.\nThis will serve two main purposes:\n\t• Enable a basic SSR & hydration to improve readability by LLMs\n\t• Offer a lightweight backend layer\nBackend layer will use Fastify and synchronous SQLite. An app can be fullstack, frontend- or backend-only.\n\nVersion 2 will also introduce following features and changes:\n\t• FormGroup, FormControl, Validators.\n\t• Small component library (~20), focused on accessibility. Will live in src/libs/components, with existing components (anchor, button).\n\t• Tooltip and dropdown.\n\t• SCSS utility classes will be removed in version 2, since they are more confusing than useful.\n\t• Mixins will now live in src/libs/scss/, clearly separating app's code from nutin's code.\n\t• CLI will be simplified:\n\t\t• Main flag: --type fullstack|frontend|backend\n\t\t• --options: Options will be passed as a comma-separated string.\n\t• QoL improvements in components, while staying true to the no-magic motto."
+    }
+}

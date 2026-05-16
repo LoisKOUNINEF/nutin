@@ -2,7 +2,7 @@
 	"id": 1,
 	"sectionId": 4,
 	"content": "# Build docker image\ndocker build -t my-tag -f tools/deployment/Dockerfile .\n\n# Run docker container\ndocker run -p 9090:9090 -n my-name my-tag:latest\n\n# You can also use package.json scripts\nnpm run docker:build\nnpm run docker:run",
-	"type": "none",
+	"type": "bash",
 	"en": {
 		"title": "Commands",
 		"after": "-t --tag : add a tag to the image; -f --file : path to Dockerfile; dot at the end indicates build context\n-p --publish : LISTEN_PORT:EXPOSED_PORT; -n --name : gives container a name\n-d --detach : run in background;"

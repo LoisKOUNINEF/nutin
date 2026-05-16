@@ -2,7 +2,7 @@
 	"id": 1,
 	"sectionId": 1,
 	"content": "npx @nutin/cli nutin-todo --preset standard\n\n# or install package globally\nnpm install -g @nutin/cli\nnutin-new nutin-todo --preset standard",
-	"type": "none",
+	"type": "bash",
 	"en": {
 		"before": "First, let's create a new nutin app :",
 		"after": "Run command with --help for a list of available options."

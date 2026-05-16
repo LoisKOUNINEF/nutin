@@ -1,0 +1,12 @@
+{ 
+	"title": "Philosophie de conception",
+	"sub": "Les limitations sont des fonctionnalités. Elles maintiennent l'attention sur l'essentiel.",
+	"transparent-title": "Transparent par conception",
+	"transparent-desc": "Aucune couche cachée, aucune boîte noire. Chaque abstraction est lisible et modifiable. Le code vous appartient — pas une dépendance.",
+	"explicit-title": "Explicite plutôt qu'automatique",
+	"explicit-desc": "Aucun décorateur, aucun conteneur d’injection de dépendances, aucune détection automatique des changements. Tout est câblé à la main, en pleine visibilité.",
+	"deps-title": "Dépendances minimales",
+	"deps-desc": "Zéro dépendance runtime.",
+	"scale-title": "A échelle humaine",
+	"scale-desc": "Conçu pour les petits projets où les frameworks complets paraissent trop lourds. Les contraintes sont intentionnelles, pas accidentelles."
+}
