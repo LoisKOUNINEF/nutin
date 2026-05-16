@@ -61,9 +61,11 @@
 
 .home__header {
 	padding-left: map.get($spacings, largest);
+	padding-bottom: map.get($spacings, largest);
 	@include mixins.flex-column;
 	@include mixins.respond-to(medium) {
 		padding-left: map.get($spacings, medium);
+		padding-bottom: map.get($spacings, medium);
 		width: 100%;
 	}
 }
@@ -120,28 +122,35 @@
 }
 
 .home__snippet-container {
-	max-width: 45ch;
-	background-color: rgba($primary-color, .2);
-	font-family: $secondary-font;
-	color: $primary-color;
-	font-weight: bold;
-	font-size: map.get($font-sizes, 'large');
+	max-width: 100ch;
+	background-color: rgba($secondary-color, .2);
 	padding-top: map.get($spacings, 'large');
 	padding-bottom: map.get($spacings, 'medium');
 	margin-top: map.get($spacings, 'large');
 	margin-bottom: map.get($spacings, 'largest');
 	border-radius: 1rem;
   box-shadow: 0 10px 15px rgba($primary-color, .7);
+  h2 {
+  	color: $primary-color;
+		font-size: 1.2rem; 
+		font-weight: 600; 
+		font-family: $secondary-font;
+  }
   p {
+  	max-width: 80ch;
+  }
+  h2, p {
 		padding-left: map.get($spacings, 'large');
 		@include mixins.respond-to(medium) {
-		padding-left: 0;
+			padding-left: 0;
 		}
 	}
 	@include mixins.respond-to(medium) {
 		max-width: 100%;
 		@include mixins.flex-center;
 		@include mixins.flex-column;
+		margin-left: map.get($spacings, small);
+		margin-right: map.get($spacings, small);
 	}
 }
 
@@ -149,14 +158,14 @@
 	font-size: map.get($font-sizes, 'large');
 	padding-top: map.get($spacings, 'large');
 	width: 100%;
+	.snippet__code {
+		width: 90ch;
+	}
 	pre {
-		background: linear-gradient(to top, rgba($background-color, 1), rgba($secondary-color, .4));
+		background: linear-gradient(to top, rgba($background-color, 1), rgba($primary-color, .4));
 		border-radius: 1rem;
 		font-size: map.get($font-sizes, 'medium');
-		font-style: normal;
-		width: 95%;
 		padding-top: map.get($spacings, 'large');
-		padding-bottom: map.get($spacings, 'large');
 		padding-left: map.get($spacings, 'large');
 		background-color: inherit;
 		code {
@@ -165,6 +174,15 @@
 		@include mixins.respond-to(medium) {
 			padding-left: map.get($spacings, 'smallest');
 		}
+	}
+}
+
+.home__tutorial-link-container {
+  color: $background-color;
+  padding: map.get($spacings, 'largest') 0;
+	@include mixins.respond-to(medium) {
+		margin: 0 map.get($spacings, small);
+  	padding: map.get($spacings, 'medium') 0;
 	}
 }
 
@@ -203,7 +221,6 @@
 		padding-right: 0;
 	}
 }
-
 
 .home__cta-row { 
 	transition: ease-in-out 2s;

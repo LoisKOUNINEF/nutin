@@ -2,7 +2,7 @@
 	"id": 2,
 	"sectionId": 2,
 	"content": "npm run test\n\n# rebuild before running tests\nnpm run test:rebuild\n\n# watch test files changes\nnpm run test:watch\n\n# filter\nnpm run test foo bar # will only run test files which name contain foo or bar",
-	"type": "none",
+	"type": "bash",
 	"en": {
 		"title": "Run tests",
 		"before": "Test runner supports filter.",

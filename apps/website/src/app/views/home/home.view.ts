@@ -1,5 +1,5 @@
 import { AppEventBus, ComponentConfig, View } from '../../../core/index.js';
-import { ButtonComponent, SnippetComponent } from '../../components/index.js';
+import { ButtonComponent, HomeExtrasComponent, HomePhilosophyComponent, HomePillarsComponent, SnippetComponent } from '../../components/index.js';
 
 const template = `__TEMPLATE_PLACEHOLDER__`;
 
@@ -8,7 +8,7 @@ export class HomeView extends View {
     super({template});
   }
 
-  childConfigs(): ComponentConfig[] {
+  public childConfigs(): ComponentConfig[] {
     return [{
       selector: 'tutorial-link',
       factory: (el) => new ButtonComponent(el, {
@@ -22,7 +22,7 @@ export class HomeView extends View {
         id: 0,
         sectionId: 0,
         content: 'npx @nutin/cli',
-        type: 'none'
+        type: 'bash'
       })
     },
     {
@@ -40,10 +40,24 @@ export class HomeView extends View {
         callback: () => this.navigateTo('tutorial'),
         className: 'home__cta-row-btn-secondary'
       })
-    }]
+    },
+    ...this.getSectionsConfig(),]
   }
 
-  navigateTo(name: string) {
+  private getSectionsConfig(): ComponentConfig[] {
+    return [{
+      selector: 'home-pillars',
+      factory: (el) => new HomePillarsComponent(el)
+    },{
+      selector: 'home-philosophy',
+      factory: (el) => new HomePhilosophyComponent(el)
+    },{
+      selector: 'home-extras',
+      factory: (el) => new HomeExtrasComponent(el)
+    }];
+  }
+
+  private navigateTo(name: string) {
     AppEventBus.emit('navigate', `/${name}`);
     window.scrollTo({ top: 0 });
   }

@@ -1,0 +1,16 @@
+{ 
+	"title": "Les piliers",
+	"sub": "Quatre classes abstraites. Un routeur, un event bus, un lifecycle. Aucun décorateur, aucune injection de dépendances, aucune détection automatique des changements. Tout vit dans votre dossier src/core/, pas enfoui dans node_modules.",
+	"component-title": "Modèle de composants",
+	"component-desc": "BaseComponent, Component, View — une hiérarchie claire avec des hooks de cycle de vie explicites.",
+	"singleton-title": "Services singleton",
+	"singleton-desc": "Une seule instance, partagée dans toute l'application.",
+	"event-title": "Event bus",
+	"event-desc": "Rendu déclenché par événements. L'état circule via des canaux explicites que vous définissez.",
+	"routing-title": "Routage côté client",
+	"routing-desc": "Routage hash ou history, guards de routes — sans aucune magie.",
+	"i18n-title": "i18n",
+	"i18n-desc": "Internationalisation optionnelle avec support des pipes.",
+	"testing-title": "Outils de test",
+	"testing-desc": "Inspiré de Jest, fonctionne côté frontend comme backend."
+}

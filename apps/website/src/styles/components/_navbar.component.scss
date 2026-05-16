@@ -37,6 +37,8 @@
 	      text-decoration: none;
 	      background-color: inherit;
 	      color: inherit;
+				padding-bottom: 0;
+				padding-top: .3rem;
 	    }
 		}
 	}
@@ -50,8 +52,8 @@
 		@include mixins.respond-to(medium) {
 			width: 60px;
 			height: 60px;
-			margin-left: -0.8rem;
-			margin-bottom: -1.5rem;
+			margin-left: -(map.get($spacings, small));
+			margin-bottom: -(map.get($spacings, large));
 		}
 		&:hover {
 			transform: translateY(-2px);
@@ -104,6 +106,13 @@
 	}
 }
 
+.navbar__github-icon {
+	@include mixins.respond-to(medium) {
+		padding-top: map.get($spacings, small);
+		padding-right: map.get($spacings, small);
+	}
+}
+
 .navbar__home-btn {
 	@include mixins.respond-to(medium) {
 		padding-top: map.get($spacings, 'small');
@@ -128,15 +137,8 @@
 		& > div {
     	@include mixins.flex-column;
   	}
-		& > div:nth-child(even) {
-			padding-right: map.get($spacings, 'small');
-			align-items: flex-end;
-			text-align: right;
-  	}
 		& > div:nth-child(odd) {
 			padding-left: map.get($spacings, 'smallest');
-			align-items: flex-start;
-			text-align: left;
   	}
 	}
 }
@@ -162,6 +164,11 @@
 	  &:hover::after {
 	    content: '>';
 	  }
+		@media (hover: none) {
+	    &:hover::after {
+		    content: '';
+		  }
+		}
 	}
 	@include mixins.respond-to(medium) {
 		width: 40%;

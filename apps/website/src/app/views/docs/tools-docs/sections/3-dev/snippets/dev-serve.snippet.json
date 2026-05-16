@@ -2,7 +2,7 @@
 	"id": 2,
 	"sectionId": 3,
 	"content": "# live reload / rebuild.\nnpm run dev",
-	"type": "none",
+	"type": "bash",
 	"en": {
 		"title": "Watch mode"
 	},
