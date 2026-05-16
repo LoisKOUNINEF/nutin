@@ -2,7 +2,7 @@
 	"id": 2,
 	"sectionId": 1,
 	"content": "cd nutin-todo && npm run serve",
-	"type": "none",
+	"type": "bash",
 	"en": {
 		"before": "Check that it runs :",
 		"after": "npm run dev : live rebuild / reload on changes.\nThe app is reachable on port 9090."

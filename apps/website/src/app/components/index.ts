@@ -6,3 +6,5 @@ export * from './section/section.component.js';
 export * from './snippet/snippet.component.js';
 export * from './sidebar/sidebar.component.js';
 export * from './table-of-content/table-of-content.component.js';
+
+export * from './home-section/index.js';

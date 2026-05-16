@@ -3,6 +3,7 @@
 @use "mixins";
 
 .snippet__code {
+	border-radius: map.get($border-radius, medium);
 	overflow-x: auto;
 	width: 75vw;
 	@include mixins.respond-to(small) {

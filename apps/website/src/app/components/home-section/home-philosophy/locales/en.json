@@ -1,0 +1,12 @@
+{ 
+	"title": "Design philosophy",
+	"sub": "The limitations are features. They keep the focus on what's essential.",
+	"transparent-title": "Transparent by design",
+	"transparent-desc": "No hidden layers, no black boxes. Every abstraction is readable and modifiable. You own the code — not a dependency.",
+	"explicit-title": "Explicit over automatic",
+	"explicit-desc": "No decorators, no DI container, no automated change detection. Everything is wired by hand, in plain sight.",
+	"deps-title": "Minimal dependencies",
+	"deps-desc": "Zero runtime dependencies.",
+	"scale-title": "Personal scale",
+	"scale-desc": "Designed for small projects where full frameworks feel heavy. The constraints are intentional, not accidental."
+}

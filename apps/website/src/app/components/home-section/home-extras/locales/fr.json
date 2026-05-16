@@ -1,0 +1,16 @@
+{ 
+	"title": "Ce qui est inclus",
+	"sub": "Optionnel, composable, toujours transparent.",
+	"deployment-title": "Outils de déploiement",
+	"deployment-desc": "Dockerfile et configuration Nginx",
+	"formsystem-title": "",
+	"formsystem-desc": "",
+	"encryption-title": "",
+	"encryption-desc": "",
+	"component-title": "",
+	"component-desc": "",
+	"guards-title": "Guards & pipes",
+	"guards-desc": "Guards de routes et transformation de données.",
+	"ssr-title": "",
+	"ssr-desc": ""
+}

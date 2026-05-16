@@ -1,0 +1,16 @@
+{ 
+	"title": "What comes with it",
+	"sub": "Optional, composable, always transparent.",
+	"deployment-title": "Deployment helpers",
+	"deployment-desc": "Dockerfile and Nginx config.",
+	"formsystem-title": "Form system",
+	"formsystem-desc": "FormGroup, FormControl, built-in validators.",
+	"encryption-title": "Encryption",
+	"encryption-desc": "AES-256-GCM field-level, zero extra dependencies.",
+	"component-title": "Component library",
+	"component-desc": "Accessible, stateless UI primitives — yours to modify.",
+	"guards-title": "Guards & pipes",
+	"guards-desc": "Route guards and data transformation.",
+	"ssr-title": "SSR initial state",
+	"ssr-desc": "Server-rendered shell with hydration on first load."
+}

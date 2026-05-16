@@ -2,17 +2,27 @@
 @use "variables" as *;
 @use "mixins";
 
+.tutorial__presentation {
+  font-size: 1.1rem;
+  max-width: 100ch;
+}
+
 .tutorial__important {
+  margin: auto;
+  width: 60ch;
 	font-size: 1.2rem;
-	padding-top: map.get($spacings, 'medium');
-	padding-bottom: map.get($spacings, 'medium');
+	padding: map.get($spacings, 'medium');
 	text-align: center;
 	font-family: $secondary-font;
-	color: $secondary-color;
+  background-color: $secondary-color;
+	color: $background-color;
 	font-style: italic;
 	font-weight: bold;
-  @include mixins.border($primary-color);
   @include mixins.rounded;
+  border-radius: map.get($border-radius, large);
+  @include mixins.respond-to(medium) {
+    width: 100%;
+  }
 }
 
 .tutorial__container {
@@ -30,5 +40,15 @@
         color: inherit;
       }
     }
+  }
+}
+
+.tutorial__toc {
+  padding-left: map.get($spacings, small);
+  font-family: $secondary-font;
+  font-size: map.get($font-sizes, large);
+  color: $primary-color;
+  @include mixins.respond-to(medium) {
+    padding-left: map.get($spacings, small);
   }
 }

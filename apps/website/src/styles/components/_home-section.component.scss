@@ -1,0 +1,97 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+
+.home-section { 
+	padding: 2.5rem 0;
+	h2 { 
+		font-size: 1.2rem; 
+		font-weight: 500; 
+		margin-bottom: 0.5rem; 
+	}
+  .home-section__sub { 
+  	line-height: 1.7; 
+  	margin-bottom: map.get($spacings, large); 
+  	max-width: 60ch;
+  }
+  @include mixins.respond-to(medium) {
+    padding: map.get($spacings, largest) map.get($spacings, small);
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  max-width: 100ch;
+  @include mixins.respond-to(medium) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.grid + .grid { margin-top: 12px; }
+
+.philosophy-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  max-width: 100ch;
+  @include mixins.respond-to(medium) {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+.card {
+  border: 0.5px solid rgba(0,0,0,0.12);
+  border-radius: 12px;
+  padding: 1.1rem 1.25rem 1.4rem;
+  @include mixins.respond-to(medium) {
+    padding: 1.1rem map.get($spacings, small) map.get($spacings, medium);
+  }
+}
+
+.pillar-card {
+  background: rgba($secondary-color, .2);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  svg {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    stroke: #1a1a1a;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+  }
+}
+
+.card svg {
+  display: block;
+  margin-bottom: 1rem;
+  width: 24px;
+  height: 24px;
+  stroke: #1a1a1a;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+.card-title {
+  font-weight: 600;
+  font-size: 15px;
+  color: #1a1a1a;
+}
+
+.card-desc {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.card-empty { background: transparent; border: none; }

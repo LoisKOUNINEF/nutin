@@ -14,15 +14,15 @@
 .footer__body {
   text-decoration: underline;
   @include mixins.flex-between;
+  align-items: flex-start;
 
   @include mixins.respond-to(medium) {
     display: block;
-    text-align: center;
   }
 
   section {
   	@include mixins.respond-to(medium) {
-    	padding-bottom: map.get($spacings, 'medium');
+    	padding-bottom: map.get($spacings, 'small');
   	}
   }
   a {
@@ -39,5 +39,16 @@
         color: inherit;
       }
     }
+  }
+}
+
+.footer__nutin {
+  text-align: center;
+  font-style: italic;
+  font-family: $secondary-font;
+  font-size: map.get($font-sizes, small);
+  @include mixins.respond-to(medium) {
+    text-align: right;
+    padding-top: map.get($spacings, 'large');
   }
 }
