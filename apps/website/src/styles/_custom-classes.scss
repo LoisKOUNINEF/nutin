@@ -47,3 +47,32 @@
     mask-repeat: no-repeat;
   }
 }
+
+.arrow-top-right-svg {
+	&::after {
+    content: "";
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    background-color: currentColor;
+    mask-image: url(/assets/images/arrow-top-right.svg);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+  	transform: translateY(2px);
+		transition: ease-in-out .2s;
+  }
+  &:hover {
+  	&::after {
+  		transform: translateY(0);
+  		scale: 1.2;
+  	}
+  }
+  @media(hover:none) {
+	  &:hover {
+	  	&::after {
+	  		transform: translateY(2px);
+	  		scale: 1;
+	  	}
+	  }
+	}
+}

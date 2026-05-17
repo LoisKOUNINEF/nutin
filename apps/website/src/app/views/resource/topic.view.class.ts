@@ -25,8 +25,7 @@ export abstract class TopicView extends ResourceView {
     return {
       selector: this.sectionComponentSelector,
       factory: (el) => new SectionComponent(el,
-        { section: topic },  
-        'resource__section'
+        { section: topic },
       )
     };
   }

@@ -24,6 +24,40 @@ export class DomHelper {
     element.innerHTML = SecurityHelper.sanitizeTemplate(template, trustLevel);
     return element;
   }
+  
+  public static cleanupOptionalContent(): void {
+    const isEmpty = (el: HTMLElement): boolean => {
+      if (el instanceof HTMLImageElement) {
+        return !el.src || el.src.trim() === "";
+      }
+
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+        return !el.value?.trim();
+      }
+
+      if (el instanceof HTMLMediaElement || el instanceof HTMLSourceElement) {
+        return !el.getAttribute("src");
+      }
+
+      const content = el.textContent?.trim();
+      return !content || content === "undefined";
+    };
+
+    const isValueUndefined = (el: HTMLElement): boolean => {
+      const value = el.getAttribute("data-optional");
+      if (!value) return false;
+      return (
+        value.trim() === '' ||
+        value === "undefined" ||
+        value === "null"
+      );
+    }
+
+    document.querySelectorAll<HTMLElement>("[data-optional]").forEach(el => {
+      if (isValueUndefined(el) || isEmpty(el)) el.remove();
+      el.removeAttribute("data-optional");
+    });
+  }
 
   private static appendOrReplace(config: DomElementConfig) {
     if (config.target instanceof HTMLElement) {

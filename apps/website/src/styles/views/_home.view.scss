@@ -135,11 +135,6 @@
 		font-size: 1.2rem; 
 		font-weight: 600; 
 		font-family: $secondary-font;
-  }
-  p {
-  	max-width: 80ch;
-  }
-  h2, p {
 		padding-left: map.get($spacings, 'large');
 		@include mixins.respond-to(medium) {
 			padding-left: 0;
@@ -223,7 +218,7 @@
 }
 
 .home__cta-row { 
-	transition: ease-in-out 2s;
+	transition: ease-in-out .2s;
 	display: flex; 
 	gap: 10px; 
 	align-items: flex-end; 
@@ -232,6 +227,7 @@
 }
   
 .home__cta-row-btn-primary {
+	transition: ease-in-out .2s;
 	background-color: $primary-color;
 	color: $background-color !important;
 	border: 1px solid $secondary-color; 
@@ -239,10 +235,6 @@
 	border-radius: map.get($border-radius, large);
 	font-size: map.get($font-sizes, small); 
 	cursor: pointer; 
-	&::after { content: '\00a0↗'; }
-	// bold arrow icon
-	// font-weight: bold; 
-	// &::after { content: '\00a0⬈'; }
 
 	&:hover {
 		transform: translateY(-2px);
@@ -267,7 +259,6 @@
 	border-radius: map.get($border-radius, large);
 	font-size: map.get($font-sizes, small);
 	cursor: pointer; 
-	&::after { content: '\00a0↗'; }
 	&:hover {
 		transform: translateY(-2px);
 	}
@@ -279,7 +270,7 @@
 	}
 	@media (hover: none) {
 	  &:hover {
-		transform: translateY(0);
+			transform: translateY(0);
 	  }
 	}
 }

@@ -5,38 +5,33 @@ import { SectionComponent, TableOfContentComponent } from '../../components/inde
 export abstract class SinglePageCatalogView extends ResourceView {
   protected tocHref: string | undefined;
 
-  private renderSinglePage(): ComponentConfig[] {
-    return [ 
-      ...this.renderTableOfContent(), 
-      ...this.renderCatalog()
-    ]
-  }
-
-  private renderTableOfContent(): ComponentConfig[] {
-    return [
-      {
-        selector: this.sectionsIndexSelector,
-        factory: (el) => new TableOfContentComponent(el, this.sections)
-      }
-    ]
+  private renderTableOfContent(): ComponentConfig {
+    return {
+      selector: this.sectionsIndexSelector,
+      factory: (el) => new TableOfContentComponent(el, this.sections)
+    }
   }
 
   private renderCatalog(): ComponentConfig[] {
-    const sectionsWithAnchor = this.sections.map((section) => {
+    const sectionsWithAnchor = this.sections.map((section, index) => {
       return {
         section: section, 
         catalogTocHref: this.tocHref,
+        index: index,
       }
     });
     return this.catalogConfig({
       array: sectionsWithAnchor,
-      elementName: 'section',
+      elementName: `${this.viewName}-${this.sectionComponentSelector}-section`,
       selector: this.sectionComponentSelector,
-      component: SectionComponent
+      component: SectionComponent,
     });
   }
 
   public childConfigs(): ComponentConfig[] {
-    return this.renderSinglePage();
+    return [ 
+      this.renderTableOfContent(), 
+      ...this.renderCatalog()
+    ]
   }
 }

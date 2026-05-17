@@ -56,24 +56,14 @@ export abstract class Component<T extends HTMLElement = HTMLElement, K = any> ex
     normalizeKeys = [],
     defaults = {},
   }: ComponentOptions) {
-    let normalizedConfig = ConfigHelper.normalize(config, defaults);
-    normalizedConfig = ConfigHelper.normalizeStrings(normalizedConfig, normalizeKeys);
-
-    const template = templateFn(normalizedConfig);
-
+    const template = ConfigHelper.createNormalizedTemplate({
+      config, defaults, normalizeKeys, templateFn,
+    });
     super({template, mountTarget, tagName});
 
-    this.config = normalizeKeys && config
-      ? ConfigHelper.normalizeStrings(config, normalizeKeys)
-      : config ?? ({} as T);
-
+    this.config = ConfigHelper.setConfigValue(config, normalizeKeys);
     this.props = props;
-
-    this.buttonManager = new ButtonManager(
-      this, 
-      this.props.buttons, 
-      { containerClassName: 'component-buttons' }
-    );
+    this.buttonManager = this.createButtonManager();
   }
 
   public getValues(): Record<string, string> {
@@ -88,15 +78,21 @@ export abstract class Component<T extends HTMLElement = HTMLElement, K = any> ex
     return super.render();
   }
 
+  private createButtonManager(): ButtonManager {
+    return new ButtonManager(
+      this, 
+      this.props.buttons, 
+      { containerClassName: 'component-buttons' }
+    );
+  }
+
   private applyProps(): void {
     if (this.props.className) {
       this.element.classList.add(this.props.className);
     }
-
     if (this.props.style) {
       this.element.style = this.props.style;
     }
-
     this.applyDataBindings();
   }
 
