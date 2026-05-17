@@ -6,9 +6,8 @@
   "title": "nutin",
   "catchphrase": "A transparent mini-framework.",
   "subcatchphrase": "Explicit. No magic. Opiniated where it matters.",
-  "briefing": "Built as a learning journey into how modern frameworks work — not to replace them, but to demystify them. Minimal, transparent, and yours to modify.",
-  "pitch": "nutin started as a learning journey to understand the core concepts powering modern frontend development; not to replace Vue or Angular, but to understand them better.",
+  "briefing-1": "Built as a learning journey into how modern frameworks work.",
+  "briefing-2": "Minimal, readable, and yours to modify.",
   "snippet": "Quick Start\n",
-  "snippet-pitch": " ",
   "tutorial-link": "Build your first nutin app"
 } 

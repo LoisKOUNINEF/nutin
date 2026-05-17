@@ -2,19 +2,21 @@
 
 // colours (RGB)
 $background-color: rgb(247 249 246);
+$surface-color: rgb(237 242 236); // #EDF2EC
 $text-color: rgb(22 28 24);
+$text-muted: rgb(80 104 88); // #506858
 $primary-color: rgb(71, 85, 105);
 $secondary-color: rgb(148, 163, 184);
+$accent-color: rgb(15 122 72); // #0F7A48
 
-// $background-color: rgb(255,251,240);
-// $text-color: rgb(44,36,30);
-// $primary-color: rgb(230,126,34);
-// $secondary-color: rgb(168,67,29);
-
-// $background-color: rgb(253,246,232);
-// $text-color: rgb(31,27,23);
-// $primary-color: rgb(194,59,34);
-// $secondary-color: rgb(222,138,74);
+// ! Dark Theme !
+//$background-color: rgb(17 23 20);
+//$surface-color: rgb(26 36 32); // #1A2420
+//$text-color: rgb(232 236 234);
+//$text-muted: rgb(176 196 186); // #b0c4ba
+//$primary-color: rgb(139 181 162); // #8bb5a2
+//$secondary-color: rgb(109 149 127); // #6d957f
+//$accent-color: rgb(25, 150, 90);
 
 // snackbar colours
 $snack-success: rgb(76 175 80);

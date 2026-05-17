@@ -9,19 +9,22 @@
 
 .tutorial__important {
   margin: auto;
-  width: 60ch;
-	font-size: 1.2rem;
-	padding: map.get($spacings, 'medium');
+  min-width: 95%;
+	font-size: 1.05rem;
+	padding: map.get($spacings, 'medium') map.get($spacings, 'smallest');
 	text-align: center;
-	font-family: $secondary-font;
-  background-color: $secondary-color;
-	color: $background-color;
-	font-style: italic;
-	font-weight: bold;
+  font-weight: 600;
+  letter-spacing: .01rem;
+  background-color: $surface-color;
+	color: $accent-color;
   @include mixins.rounded;
+  border-left: 3px solid $accent-color;
+  border-right: 3px solid $accent-color;
+  border-top: 1px solid $accent-color;
+  border-bottom: 1px solid $accent-color;
   border-radius: map.get($border-radius, large);
   @include mixins.respond-to(medium) {
-    width: 100%;
+    min-width: 100%;
   }
 }
 
