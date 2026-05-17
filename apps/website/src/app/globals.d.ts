@@ -1,12 +1,14 @@
 declare type CoreEventMap = {
-  'navigate': string;
-  'reload': string;
-  'view-mount': string;
-  'view-render': string;
-  'view-unmount': string;
-  'track-pageview': { page: string };
-
-  // Add other events and their payload types here
+    'navigate': string;
+    'reload': string;
+    'view-mount': string;
+    'view-render': string;
+    'view-unmount': string;
+    'track-pageview': { page: string };
+    'popover-opened': string;
+    'popover-close': string;
+    'language-changed': string;
+    // Add other events and their payload types here
 };
 
 declare type StoreEventMap = {[ K in `store:${string}` ]: any; };

@@ -5,7 +5,7 @@ const template = `__TEMPLATE_PLACEHOLDER__`;
 
 export class ChangelogView extends SinglePageCatalogView {
   protected sections: ISection[] = changelogSections;
-  protected sectionComponentSelector: string = 'section-catalog';
+  protected sectionComponentSelector: string = 'changelog-sections';
   protected sectionsIndexSelector: string = '';
 
   constructor() {

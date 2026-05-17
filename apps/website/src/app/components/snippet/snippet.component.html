@@ -2,11 +2,11 @@
 	<h3 
 		class="u-padd-x-largest u-padd-y-small u-bold u-font-secondary"
 		style="font-size:1.25rem;"
-		data-optional
-	>${_snippet.title ? '•' : ''} ${_snippet.title}</h3>
+		data-optional="${_snippet.title}"
+	>• ${_snippet.title}</h3>
 	<p
 		class="u-padd-x-medium u-padd-y-medium u-pre-wrap"
-		data-optional
+		data-optional="${_snippet.before}"
 	>${_snippet.before}</p>
 	<div class="u-flex-center u-flex-column">
 		<pre 
@@ -18,7 +18,7 @@
 		</pre>
 		<p 
 			class="u-text-center u-font-small u-italic u-padd-x-small u-padd-y-small u-pre-wrap"
-			data-optional
+			data-optional="${_snippet.after}"
 		>${_snippet.after}</p><br/>
 	</div>
 </div>

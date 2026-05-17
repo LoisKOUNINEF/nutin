@@ -1,5 +1,5 @@
 import { DEFAULT_LANGUAGE, LANGUAGES, Language, Translations } from './languages.js';
-import { Service } from '../../index.js';
+import { AppEventBus, Service } from '../../index.js';
 
 export class I18n extends Service<I18n> {
   private readonly _DEFAULT_LANGUAGE: Language = DEFAULT_LANGUAGE;
@@ -7,11 +7,12 @@ export class I18n extends Service<I18n> {
   private _currentLanguage: Language = this._DEFAULT_LANGUAGE;
   private _translations: Translations = {};
   private _defaultTranslations: Translations = {};
+  private readonly _localStorageKey = 'nutin-fav-lang';
 
   constructor() {
     super();
     this.registerCleanup(this.resetTranslations);
-    this._currentLanguage = this.getBrowserLanguage();
+    this._currentLanguage = this.getPreferredLanguage();
   }
 
   public get currentLanguage(): Language {
@@ -24,6 +25,17 @@ export class I18n extends Service<I18n> {
 
   public get languages(): Language[] {
     return this._LANGUAGES;
+  }
+
+  public get localStorageKey(): string {
+    return this._localStorageKey;
+  }
+
+  public async setCurrentLanguage(lang: Language): Promise<void> {
+    this._currentLanguage = lang;
+    this.savePreferences();
+    await this.loadTranslations(lang);
+    AppEventBus.emit('language-changed');
   }
 
   public async loadTranslations(lang: Language): Promise<void> {
@@ -39,10 +51,11 @@ export class I18n extends Service<I18n> {
         await this.loadDefaultTranslations();
       }
       
-      document.documentElement.lang = lang;    
+      document.documentElement.lang = lang;   
+      this.savePreferences();
     } catch (error) {
       console.error('Translation load error:', error);
-    } 
+    }
   }
 
   public translate(key: string, textContent?: string | null): string {
@@ -60,8 +73,8 @@ export class I18n extends Service<I18n> {
   }
 
   public async initTranslations(): Promise<void> {
-    const browserLang = this.getBrowserLanguage();
-    const lang = this._LANGUAGES.includes(browserLang) ? browserLang : this._DEFAULT_LANGUAGE;
+    const preferredLang = this.getPreferredLanguage();
+    const lang = this._LANGUAGES.includes(preferredLang) ? preferredLang : this._DEFAULT_LANGUAGE;
 
     // Always load default translations first
     if (lang !== this._DEFAULT_LANGUAGE) {
@@ -69,6 +82,18 @@ export class I18n extends Service<I18n> {
     }
 
     await this.loadTranslations(lang);
+  }
+
+  public getTranslationObject<T = any>(key: string): T | null {
+    const keys = key.split('.');
+    
+    let value = this.getNestedValue(this._translations, keys);
+
+    if (!value && this._currentLanguage !== this._DEFAULT_LANGUAGE) {
+      value = this.getNestedValue(this._defaultTranslations, keys);
+    }
+    
+    return value || null;
   }
 
   public resetTranslations(): void {
@@ -82,8 +107,8 @@ export class I18n extends Service<I18n> {
     this.dispose();
   }
 
-  private getBrowserLanguage() {
-    return navigator.language.split('-')[0] as Language;
+  private getPreferredLanguage() {
+    return this.getPreferences() || navigator.language.split('-')[0] as Language;
   };
 
   private async loadDefaultTranslations(): Promise<void> {
@@ -105,6 +130,14 @@ export class I18n extends Service<I18n> {
       if (!value) break;
     }
     return value;
+  }
+
+  private savePreferences(): void {
+    localStorage.setItem(this._localStorageKey, this._currentLanguage);
+  }
+
+  private getPreferences(): string | null {
+    return localStorage.getItem(this._localStorageKey);
   }
 }
 

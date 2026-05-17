@@ -30,7 +30,7 @@ export class HomeView extends View {
       factory: (el) => new ButtonComponent(el , {
         i18nKey: 'navbar.get-started',
         callback: () => this.navigateTo('get-started'),
-        className: 'home__cta-row-btn-primary'
+        className: 'home__cta-row-btn-primary arrow-top-right-svg'
       })
     },
     {
@@ -38,7 +38,7 @@ export class HomeView extends View {
       factory: (el) => new ButtonComponent(el , {
         i18nKey: 'navbar.tutorial',
         callback: () => this.navigateTo('tutorial'),
-        className: 'home__cta-row-btn-secondary'
+        className: 'home__cta-row-btn-secondary arrow-top-right-svg'
       })
     },
     ...this.getSectionsConfig(),]
