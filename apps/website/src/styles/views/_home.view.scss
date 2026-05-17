@@ -155,6 +155,9 @@
 	width: 100%;
 	.snippet__code {
 		width: 90ch;
+		@include mixins.respond-to(medium) {
+			width: auto;
+		}
 	}
 	pre {
 		background: linear-gradient(to top, rgba($background-color, 1), rgba($primary-color, .4));
