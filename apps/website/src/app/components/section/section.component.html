@@ -1,25 +1,25 @@
 <div 
 	class="u-padd-y-medium u-shadow-large"
-	id="section${_section.id}"
+	id="section${_config.section.id}"
 >
 	<h2
 		data-pipe="capitalizeAll"
 		class="u-font-large u-padd-x-largest u-padd-y-medium"
-	>${_section.name}</h2>
+	>${_config.section.name}</h2>
 	<p 
 		class="u-padd-x-medium u-padd-y-small u-pre-wrap"
 		style="max-width:120ch;" 
 		data-optional
-	>${_section.content}</p>
+	>${_config.section.content}</p>
 	<div data-optional>
-		<div data-catalog="snippet-container-${_section.id}"></div>
+		<div data-catalog="snippet-container-${_config.section.id}"></div>
 	</div>
 	<aside 
 		class="u-font-small u-padd-x-medium u-padd-y-small u-pre-wrap"
 		style="max-width:120ch;"
 		data-optional
-	>${_section.notes}</aside>
+	>${_config.section.notes}</aside>
 	<div class="u-text-right u-font-smallest u-italic u-padd-y-small u-padd-x-small">
-		<div data-component="anchor"></div>
+		<div data-component="anchor-${_config.section.id}"></div>
 	</div>
 <div>

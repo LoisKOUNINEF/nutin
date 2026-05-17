@@ -5,7 +5,8 @@ import { I18nService, View } from "../../../index.js";
  */
 export class NavigationManager {
   public static normalizePath(path: string): string {
-    const url = new URL(path, window.location.origin);
+    const collapsed = path.replace(/\/\/+/g, '/');
+    const url = new URL(collapsed, window.location.origin);
     return (url.pathname || '/').replace(/\/+$/, '') || '/';
   }
 

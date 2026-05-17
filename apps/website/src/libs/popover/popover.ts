@@ -1,4 +1,6 @@
-import { View, ButtonManager, BaseButton, ViewRenderManager } from '../../core/index.js';
+import { View, ButtonManager, BaseButton, ComponentConfig, AppPipeRegistry, CatalogConfig, AppEventBus } from '../../core/index.js';
+import { FocusTrapHelper, IFocusTrapOptions } from './helpers/focus-trap.helper.js';
+import { IPopoverDomElements, PopoverDomHelper } from './helpers/popover-dom.helper.js';
 
 export interface PopoverButton extends BaseButton {
   // if needed for Popover-specific properties
@@ -6,29 +8,56 @@ export interface PopoverButton extends BaseButton {
 
 export interface PopoverOptions {
   template: string;
+  components?: ComponentConfig[];
+  catalogs?: CatalogConfig[];
   viewName?: string;
   onClose?: () => void;
   buttons?: PopoverButton[];
+  focusTrapOptions?: IFocusTrapOptions;
 }
 
 export class PopoverView extends View {
-  private onClose?: () => void;
-  private overlay: HTMLElement | null = null;
-  private buttonManager: ButtonManager;
+  private _onClose?: () => void;
+  private _overlay: HTMLElement | null = null;
+  private _buttonManager: ButtonManager;
+  private _prevTitle: string | undefined;
+  private _catalogs: CatalogConfig[];
+  private _focusTrap: FocusTrapHelper | null = null;
+  private _focusTrapOptions: IFocusTrapOptions;
+  private _components: ComponentConfig[];
 
   constructor({
     template,
     buttons = [],
     onClose,
-    viewName = 'popover',
+    viewName,
+    components = [],
+    catalogs = [],
+    focusTrapOptions = {}
   }: PopoverOptions) {
-    super({template, tagName: 'div', mountTarget: 'body', viewName});
-    this.onClose = onClose;
-    this.buttonManager = new ButtonManager(
-      this, 
-      this.wrapButtonCallbacks(buttons), 
-      { containerClassName: 'popover-buttons' }
-    );
+    super({ template, tagName: 'div', mountTarget: 'body' });
+    this._onClose = onClose;
+    this._components = components;
+    this._catalogs = catalogs;
+    this._buttonManager = this.createButtonManager(buttons);
+    this.setOptionalViewName(viewName);
+    this._focusTrapOptions = focusTrapOptions;
+    AppEventBus.subscribe('popover-close', () => this.destroy());
+  }
+
+  public childConfigs(): ComponentConfig[] {
+    return [
+      ...this._components,
+      ...this.catalogConfigs()
+    ];
+  }
+
+  public catalogConfigs(): ComponentConfig[] {
+    const configs: ComponentConfig[] = []
+    this._catalogs.map((catalog) => {
+      configs.push(...this.catalogConfig(catalog));
+    })
+    return configs;
   }
 
   public override shouldUpdateMetaContent(): boolean {
@@ -36,89 +65,63 @@ export class PopoverView extends View {
   }
 
   public override render(): HTMLElement {
-    document.body.classList.add('no-scroll');
-    this.overlay = this.createOverlay();
+    document.documentElement.classList.add('no-scroll');
 
-    const wrapper = this.createWrapper();
-    const content = this.createContent();
+    const { wrapper, overlay } = this.createPopoverDomElements();
 
-    this.appendCloseButton(content);
-    this.appendFooterButtons(content);
+    this._focusTrap = this.createFocusTrap(wrapper, overlay);
+    this._focusTrap.activate();
 
-    wrapper.appendChild(content);
-    this.overlay.appendChild(wrapper);
-    document.body.appendChild(this.overlay);
+    AppEventBus.emit('popover-opened');
+    this._overlay = overlay;
+    return overlay;
+  }
+
+  public override destroy(): void {
+    this._focusTrap?.deactivate();
+    if (this._prevTitle) document.title = this._prevTitle;
+
+    this._overlay = PopoverDomHelper.removeDomElements(this._overlay, () => {
+      document.documentElement.classList.remove('no-scroll');
+      super.destroy();
+      if (typeof this._onClose === 'function') {
+        this._onClose();
+      }
+    });
+  }
+
+  private setOptionalViewName(viewName: string | undefined): void {
+    if (viewName) {
+      this._prevTitle = document.title;
+      document.title = AppPipeRegistry.apply('capitalize', viewName);
+    }
+  }
+
+  private createButtonManager(buttons: PopoverButton[]): ButtonManager {
+    return new ButtonManager(
+      this, 
+      buttons, 
+      { containerClassName: 'popover-buttons' }
+    );
+  }
+
+  private createPopoverDomElements(): IPopoverDomElements {
+    const content = super.render();
+    const { overlay, wrapper } = PopoverDomHelper.createDomElements(content, this._buttonManager);
 
     this.autoBindEvents();
     this.parseDataAttributes();
     this.animateIn(wrapper);
 
-    this.bindOverlayClose();
-
-    return this.overlay;
+    return { overlay, wrapper };
   }
 
-  public override destroy(): void {
-    if (this.overlay) {
-      const wrapper = this.overlay.querySelector('.popover-wrapper');
-      this.overlay.classList.remove('show');
-      wrapper?.classList.remove('show');
-
-      setTimeout(() => {
-        wrapper?.remove()
-        this.overlay?.remove();
-        this.overlay = null;
-      }, 250); // match transition duration
-    }
-
-    document.body.classList.remove('no-scroll');
-    super.destroy();
-
-    if (typeof this.onClose === 'function') {
-      this.onClose();
-    }
-  }
-
-// Wraps button callbacks to include destroy() call
-  private wrapButtonCallbacks(buttons: PopoverButton[]): PopoverButton[] {
-    return buttons.map(btn => ({
-      ...btn,
-      callback: () => {
-        if (btn.callback) {
-          btn.callback();
-        }
-        this.destroy();
-      }
-    }));
-  }
-
-  private createOverlay(): HTMLElement {
-    const overlay = document.createElement('div');
-    overlay.className = 'popover-overlay';
-    return overlay;
-  }
-
-  private createWrapper(): HTMLElement {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'popover-wrapper';
-    return wrapper;
-  }
-
-  private createContent(): HTMLElement {
-    const content = super.render();
-    content.classList.add('popover-content');
-    ViewRenderManager.cleanupOptionalContent();
-    return content;
-  }
-
-  private appendCloseButton(content: HTMLElement): void {
-    const closeButton = document.createElement('button');
-    closeButton.className = 'popover-close-button';
-    closeButton.innerHTML = '&times;';
-    closeButton.setAttribute('aria-label', 'Close');
-    // bind method onCloseClick
-    closeButton.setAttribute('data-event', 'click:onCloseClick');
-    content.prepend(closeButton);
+  private createFocusTrap(wrapper: HTMLElement, overlay: HTMLElement): FocusTrapHelper {
+    return new FocusTrapHelper({
+      container: wrapper,
+      overlay: overlay,
+      options: this._focusTrapOptions
+    });
   }
 
   // Handles the close button (via data-event bound in appendCloseButton)
@@ -126,19 +129,9 @@ export class PopoverView extends View {
     this.destroy();
   }
 
-  private appendFooterButtons(content: HTMLElement): void {
-    this.buttonManager.appendTo(content);
-  }
-
-  private bindOverlayClose(): void {
-    this.overlay?.addEventListener('click', (e: MouseEvent) => {
-      if (e.target === this.overlay) this.destroy();
-    });
-  }
-
   private animateIn(wrapper: HTMLElement): void {
     requestAnimationFrame(() => {
-      this.overlay?.classList.add('show');
+      this._overlay?.classList.add('show');
       wrapper.classList.add('show');
     });
   }

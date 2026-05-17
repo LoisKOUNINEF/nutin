@@ -5,7 +5,7 @@ const template = `__TEMPLATE_PLACEHOLDER__`;
 
 export class GetStartedView extends SinglePageCatalogView {
   protected sections: ISection[] = GetStartedSection;
-  protected sectionComponentSelector: string = 'section-catalog';
+  protected sectionComponentSelector: string = 'get-started-sections';
   protected sectionsIndexSelector: string = '';
   constructor() {
     super({template});

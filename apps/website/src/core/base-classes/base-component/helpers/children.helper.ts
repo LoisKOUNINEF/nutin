@@ -1,22 +1,50 @@
 import { BaseComponent, ComponentConfig } from '../base-component.js';
 
+declare type Binding = {
+  config: ComponentConfig;
+  elements: HTMLElement[];
+}
+
 export class ChildrenHelper {
   public static addChildren(
-    component: BaseComponent, 
-    element: HTMLElement, 
+    component: BaseComponent,
+    element: HTMLElement,
     children: BaseComponent[]
   ): void {
-    const configs: ComponentConfig[] = component.childConfigs();
-    configs.forEach(config => {
-      element.querySelectorAll(`[data-component="${config.selector}"]`).forEach(el => {
-        if (el instanceof HTMLElement) {
-          const childComponent = config.factory(el);
-          childComponent.render();
-          this.registerChild(childComponent, children);
-        }
+    const configs = component.childConfigs();
+
+    const bindings: Array<Binding> = configs.map(config => ({
+      config,
+      elements: Array.from(
+        element.querySelectorAll(`[data-component="${config.selector}"]`)
+      ).filter((el): el is HTMLElement => el instanceof HTMLElement)
+    }));
+
+    bindings.forEach(({ config, elements }) => {
+      elements.forEach(el => {
+        const childComponent = config.factory(el);
+        this.registerChild(childComponent, children);
+        childComponent.render();
       });
     });
   }
+
+  // public static addChildren(
+  //   component: BaseComponent, 
+  //   element: HTMLElement, 
+  //   children: BaseComponent[]
+  // ): void {
+  //   const configs: ComponentConfig[] = component.childConfigs();
+  //   configs.forEach(config => {
+  //     element.querySelectorAll(`[data-component="${config.selector}"]`).forEach(el => {
+  //       if (el instanceof HTMLElement) {
+  //         const childComponent = config.factory(el);
+  //         childComponent.render();
+  //         this.registerChild(childComponent, children);
+  //       }
+  //     });
+  //   });
+  // }
 
   public static destroyChildren(children: BaseComponent[]): void {
     children.forEach(child => child.destroy());

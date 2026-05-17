@@ -22,41 +22,8 @@ export class ViewRenderManager {
 
     view.render();
 
-
-    this.cleanupOptionalContent();
-
     this.emitEvent('view-mount', view.viewName);
     return view;
-  }
-
-  public static cleanupOptionalContent(): void {
-    const isEmpty = (el: HTMLElement): boolean => {
-      const attrName = el.dataset.optional?.trim();
-
-      if (attrName && attrName !== "") {
-        const attrValue = el.getAttribute(attrName);
-        return !attrValue || attrValue.trim() === "" || attrValue === "undefined";
-      }
-
-      if (el instanceof HTMLImageElement) {
-        return !el.src || el.src.trim() === "";
-      }
-
-      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
-        return !el.value?.trim();
-      }
-
-      if (el instanceof HTMLMediaElement || el instanceof HTMLSourceElement) {
-        return !el.getAttribute("src");
-      }
-
-      const content = el.textContent?.trim();
-      return !content || content === "undefined";
-    };
-
-    document.querySelectorAll<HTMLElement>("[data-optional]").forEach(el => {
-      if (isEmpty(el)) el.remove();
-    });
   }
 
   private static emitEvent(event: EventKey, viewName: string): void {
