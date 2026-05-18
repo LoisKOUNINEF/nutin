@@ -76,3 +76,45 @@
 	  }
 	}
 }
+
+.not-found__container {
+	h1 {
+		padding-bottom: map.get($spacings, large);
+	}
+	img {
+		box-shadow: -10px -10px inset $surface-color;
+	}
+}
+
+.not-found__home-btn-container {
+	padding-top: map.get($spacings, large);
+	width: 100%;
+	@include mixins.flex-center;
+	@include mixins.flex-column;
+	@include mixins.respond-to(medium) {
+		gap: map.get($spacings, smallest);
+	}
+	img {
+		box-shadow: none;
+	}
+	button {
+		&::before, &::after {
+			content: '<\00a0';
+			visibility: hidden;
+		}
+		transition: ease-in-out .2s;
+		&:hover {
+			color: $primary-color;
+			text-decoration: underline;
+			&::before {
+			visibility: visible;
+			}
+		}
+		@media(hover:none) {
+			&:hover {
+				color: inherit;
+				text-decoration: none;
+			}
+		}
+	}
+}

@@ -8,12 +8,11 @@
 	padding: map.get($spacings, 'medium');
 	width: 100%;
   border-top: 5px solid $surface-color;
-  //background-color: $surface-color;
+  color: $text-muted;
   @include mixins.rounded;
 }
 
 .footer__body {
-  text-decoration: underline;
   @include mixins.flex-between;
   align-items: flex-start;
 
@@ -27,18 +26,8 @@
   	}
   }
   a {
-    &:hover {
-      color: rgba($primary-color, .8);
-    }
     &:focus-visible {
       outline: 2px solid $primary-color;
-    }
-    @media (hover: none) {
-      &:hover {
-        text-decoration: none;
-        background-color: inherit;
-        color: inherit;
-      }
     }
   }
 }
@@ -48,8 +37,23 @@
   font-style: italic;
   font-family: $secondary-font;
   font-size: map.get($font-sizes, small);
+  color: $text-color;
   @include mixins.respond-to(medium) {
     text-align: right;
     padding-top: map.get($spacings, 'large');
+  }
+}
+
+.footer__nutin-brand {
+  transition: ease-in-out .7s;
+  font-weight: bold;
+  color: $accent-color;
+  &:hover {
+    color: $secondary-color;
+  }
+  @media (hover: none) {
+    &:hover {
+      color: $accent-color;
+    }
   }
 }

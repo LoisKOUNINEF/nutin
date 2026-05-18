@@ -55,3 +55,9 @@
     padding-left: map.get($spacings, small);
   }
 }
+
+.tutorial__demo-link {
+  padding: 0 map.get($spacings, small);
+  color: $accent-color;
+  font-style: italic;
+}
