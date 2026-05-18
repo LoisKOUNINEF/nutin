@@ -2,23 +2,17 @@
 @use "variables" as *;
 @use "mixins";
 
-.sidebar__nav {
-	@include mixins.flex-column;
+.sidebar__container {
 	position: sticky;
 	left: 0;
 	top: 3rem;
-	overflow-y: auto;
-	padding-top: map.get($spacings, 'largest');
-	margin-right: map.get($spacings, 'medium');
-	// Negative margin-left to compensate for padding on main (_styles.scss)
+	width: 22vw;
 	margin-left: -(map.get($spacings, 'largest'));
 	padding-bottom: map.get($spacings, 'largest');
-	width: 20vw;
-	@include mixins.rounded;
 
 	@include mixins.respond-to(medium) {
 		// Negative margin-top to compensate for padding on main (_styles.scss)
-		margin-top: - (map.get($spacings, 'largest'));
+		margin-top: -1rem;
 		backdrop-filter: blur(8px);
 		-webkit-backdrop-filter: blur(8px);
 		background-color: $background-color;
@@ -30,17 +24,29 @@
 	}
 }
 
+.sidebar__nav {
+	@include mixins.flex-column;
+	margin-right: map.get($spacings, 'medium');
+	// Negative margin-left to compensate for padding on main (_styles.scss)
+	@include mixins.respond-to(medium) {
+		margin-right: 0;
+	}
+}
+
 .sidebar__head {
-	background-color: $surface-color;
+  border-radius: 0 !important;
+	color: $background-color!important;
+	background-color: $secondary-color;
 	padding-left: map.get($spacings, 'large');
-	padding-bottom: map.get($spacings, 'small');
+	padding-top: map.get($spacings, 'medium');
 	margin-bottom: map.get($spacings, 'medium');
 	font-size: map.get($font-sizes, 'large');
-	font-weight: bold;
+	font-weight: 600!important;
 	width: 100%;
-	@include mixins.rounded;
+	letter-spacing: .05rem;
+	border-radius: 0px;
 	@include mixins.respond-to(medium) {
-		padding: 0;
+		padding: map.get($spacings, 'small') 0;
 		text-align: center;
 	}
 }
@@ -48,6 +54,7 @@
 .sidebar__btn {
 	transition: all ease-in-out .2s;
 	padding-left: map.get($spacings, 'large');
+	padding-right: map.get($spacings, 'large');
 	&:hover {
 		background-color: rgba($text-color, .2);
 		font-weight: bold;
@@ -61,11 +68,14 @@
 	    color: inherit;
 	  }
 	}
+	@include mixins.respond-to(medium) {
+		margin-bottom: map.get($spacings, 'smallest');
+	}
 }
 
 .sidebar__current-btn {
 	font-weight: bold;
-	box-shadow: 1.2rem .3rem .3rem rgba($text-color, .5);
+	box-shadow: 0.15rem 0.2rem 0.2rem rgba($text-color, 0.5);
 	pointer-events: none;
 }
 
@@ -74,6 +84,7 @@
 	order: 1;
 	color: $accent-color;
 	padding-left: map.get($spacings, 'medium');
+	padding-top: map.get($spacings, 'large');
   a {
     &:hover {
 			background-color: inherit;
