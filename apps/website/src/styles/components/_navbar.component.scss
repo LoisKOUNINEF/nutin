@@ -13,18 +13,18 @@
 	left: 0;
 	width: 100%;
 	height: 3rem;
-	background: $background-color;
+	background-color: $surface-color;
 	padding-top: map.get($spacings, 'small');
 	padding-left: map.get($spacings, 'largest');
 	padding-right: map.get($spacings, 'large');
-	border-bottom: .3rem solid $secondary-color;
+	border-bottom: 5px solid $secondary-color;
 	border-style: groovy;
 	@include mixins.rounded;
 	button {
 		padding-top: .3rem;
 		transition: ease-in-out 0.2s;
 		&:hover {
-			background-color: rgba($secondary-color, .7);
+			background-color: $secondary-color;
 			color: $background-color;
 			padding-top: 0;
 			padding-bottom: .3rem;
@@ -66,16 +66,27 @@
 	    }
 		}
 	}
+
 	svg {
 		transition: ease-in-out .2s;
+		path {
+			transition: ease-in-out .2s;
+			fill: $text-color;
+		}
 		&:hover {
 			transform: translateY(-2px);
 			scale: 1.05;
+			path {
+				fill: $secondary-color;
+			}
 		}
 		@media (hover: none) {
 	    &:hover {
 				transform: translateY(0);
 				scale: 1;
+				path {
+					fill: $text-color;
+				}
 	    }
 		}
 	}
@@ -148,8 +159,7 @@
 	top: 100%;
 	min-width: 11%;
 	border-radius: map.get($border-radius, 'medium');
-	@include mixins.bg-gradient(bottom, rgba($secondary-color, .5), $background-color);
-	background-color: $background-color;
+	background-color: $surface-color;
 	padding-left: map.get($spacings, 'smallest');
 	opacity: 0;
 	visibility: hidden;

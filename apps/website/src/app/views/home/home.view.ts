@@ -22,8 +22,9 @@ export class HomeView extends View {
         id: 0,
         sectionId: 0,
         content: 'npx @nutin/cli',
-        type: 'bash'
-      })
+        type: 'bash',
+      },
+      { className: 'snippet__code' })
     },
     {
       selector: 'cta-row-get-started-btn',
@@ -31,14 +32,6 @@ export class HomeView extends View {
         i18nKey: 'navbar.get-started',
         callback: () => this.navigateTo('get-started'),
         className: 'home__cta-row-btn-primary arrow-top-right-svg'
-      })
-    },
-    {
-      selector: 'cta-row-tutorial-btn',
-      factory: (el) => new ButtonComponent(el , {
-        i18nKey: 'navbar.tutorial',
-        callback: () => this.navigateTo('tutorial'),
-        className: 'home__cta-row-btn-secondary arrow-top-right-svg'
       })
     },
     ...this.getSectionsConfig(),]

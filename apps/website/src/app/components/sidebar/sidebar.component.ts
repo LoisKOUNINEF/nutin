@@ -20,7 +20,7 @@ export class SidebarComponent extends Component {
   private _routeParams: Record<string, string>;
   private readonly btnClass = 'c-block-btn c-round-btn sidebar__btn';
 
-  constructor(mountTarget: HTMLElement, config: ISidebarConfig ) {
+  constructor(mountTarget: HTMLElement, config: ISidebarConfig) {
     super({templateFn, mountTarget, config});
     this._sections = config.sections;
     this._viewName = config.viewName;

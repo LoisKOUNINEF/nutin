@@ -1,7 +1,8 @@
 {
 	"catchphrase": "Un mini-framework transparent.",
   "subcatchphrase": "Explicite. Sans magie. Des choix assumés là où ils comptent.",
-  "briefing": "Construit comme un parcours d’apprentissage pour comprendre le fonctionnement des frameworks modernes; non pas pour les remplacer, mais pour les démystifier. Minimaliste, transparent, et entièrement modifiable.",
+  "briefing-1": "Construit comme un parcours d’apprentissage pour comprendre le fonctionnement des frameworks modernes.",
+  "briefing-2": "Minimaliste, lisible, et entièrement modifiable.",
   "snippet": "Quick Start\n",
   "tutorial-link": "Créez votre première app nutin"
 }

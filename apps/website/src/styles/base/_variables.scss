@@ -1,20 +1,26 @@
 @use "fonts";
 
 // colours (RGB)
-$background-color: rgb(247 249 246);
-$text-color: rgb(22 28 24);
-$primary-color: rgb(71, 85, 105);
-$secondary-color: rgb(148, 163, 184);
+$background-color: rgb(247 249 246); // #F7F9F6
+$surface-color: rgb(237 242 236); // #EDF2EC
+$text-color: rgb(22 28 24); // #161C18
+$text-muted: rgb(80 104 88); // #506858
+$primary-color: rgb(71, 85, 105); // #475569
+$secondary-color: rgb(148, 163, 184); // #94A3B8
+$accent-color: rgb(90 122 96); // #5A7A60
+$disabled-bg: rgb(220 228 218); // #DCE4DA
+$disabled-text: rgb(140 160 140); // #8CA08C
 
-// $background-color: rgb(255,251,240);
-// $text-color: rgb(44,36,30);
-// $primary-color: rgb(230,126,34);
-// $secondary-color: rgb(168,67,29);
-
-// $background-color: rgb(253,246,232);
-// $text-color: rgb(31,27,23);
-// $primary-color: rgb(194,59,34);
-// $secondary-color: rgb(222,138,74);
+// ! Dark Theme !
+// $background-color: rgb(17 23 20); // #111714
+// $surface-color: rgb(26 36 32); // #1A2420
+// $text-color: rgb(232 236 234); // #E8ECEA
+// $text-muted: rgb(176 196 186); // #B0C4BA
+// $primary-color: rgb(139 181 162); // #8BB5A2
+// $secondary-color: rgb(109 149 127); // #6D957F
+// $accent-color: rgb(74 122 96); // #4A7A60
+// $disabled-bg: rgb(38 48 44); // #26302C
+// $disabled-text: rgb(100 120 110); // #64786E
 
 // snackbar colours
 $snack-success: rgb(76 175 80);
@@ -67,9 +73,9 @@ $box-sizes: (
 
 // shadows
 $shadows: (
-	small: 0 1px 2px rgba($primary-color, 0.05),
-	medium: 0 4px 6px rgba($primary-color, 0.1),
-	large: 0 10px 15px rgba($primary-color, 0.15),
+	small: 0 1px 2px rgba($text-color, 0.05),
+	medium: 0 4px 6px rgba($text-color, 0.1),
+	large: 0 10px 15px rgba($text-color, 0.15),
 );
 
 // breakpoints
