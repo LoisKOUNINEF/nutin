@@ -4,7 +4,7 @@
     "description": "nutin website (documentation, tutorial)."
   },
   "title": "nutin",
-  "catchphrase": "A transparent mini-framework.",
+  "catchphrase": "Minimalist, transparent TypeScript framework.",
   "subcatchphrase": "Explicit. No magic. Opiniated where it matters.",
   "briefing-1": "Built as a learning journey into how modern frameworks work.",
   "briefing-2": "Minimal, readable, and yours to modify.",

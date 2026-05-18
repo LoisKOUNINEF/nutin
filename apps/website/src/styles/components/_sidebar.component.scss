@@ -9,18 +9,10 @@
 	width: 22vw;
 	margin-left: -(map.get($spacings, 'largest'));
 	padding-bottom: map.get($spacings, 'largest');
-}
-
-.sidebar__nav {
-	overflow-y: auto;
-	@include mixins.flex-column;
-	margin-right: map.get($spacings, 'medium');
-	// Negative margin-left to compensate for padding on main (_styles.scss)
-	@include mixins.rounded;
 
 	@include mixins.respond-to(medium) {
 		// Negative margin-top to compensate for padding on main (_styles.scss)
-		margin-top: -3rem;
+		margin-top: -1rem;
 		backdrop-filter: blur(8px);
 		-webkit-backdrop-filter: blur(8px);
 		background-color: $background-color;
@@ -32,15 +24,27 @@
 	}
 }
 
+.sidebar__nav {
+	@include mixins.flex-column;
+	margin-right: map.get($spacings, 'medium');
+	// Negative margin-left to compensate for padding on main (_styles.scss)
+	@include mixins.respond-to(medium) {
+		margin-right: 0;
+	}
+}
+
 .sidebar__head {
+  border-radius: 0 !important;
+	color: $background-color!important;
 	background-color: $secondary-color;
 	padding-left: map.get($spacings, 'large');
-	padding-bottom: map.get($spacings, 'small');
+	padding-top: map.get($spacings, 'medium');
 	margin-bottom: map.get($spacings, 'medium');
 	font-size: map.get($font-sizes, 'large');
-	font-weight: bold;
+	font-weight: 600!important;
 	width: 100%;
-	@include mixins.rounded;
+	letter-spacing: .05rem;
+	border-radius: 0px;
 	@include mixins.respond-to(medium) {
 		padding: map.get($spacings, 'small') 0;
 		text-align: center;
@@ -48,7 +52,6 @@
 }
 
 .sidebar__btn {
-	width: 98%;
 	transition: all ease-in-out .2s;
 	padding-left: map.get($spacings, 'large');
 	padding-right: map.get($spacings, 'large');

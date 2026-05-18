@@ -19,7 +19,6 @@
 	padding-right: map.get($spacings, 'large');
 	border-bottom: 5px solid $secondary-color;
 	border-style: groovy;
-	@include mixins.rounded;
 	button {
 		padding-top: .3rem;
 		transition: ease-in-out 0.2s;
