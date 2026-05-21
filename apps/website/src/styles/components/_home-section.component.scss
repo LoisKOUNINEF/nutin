@@ -42,7 +42,7 @@
 }
 
 .card {
-  border: 0.5px solid rgba($text-color,0.12);
+  border: 0.5px solid var(--border);
   border-radius: 12px;
   padding: 1.1rem 1.25rem 1.4rem;
   @include mixins.respond-to(medium) {
@@ -51,7 +51,7 @@
 }
 
 .pillar-card {
-  background: $surface-color;
+  background: var(--surface);
 }
 
 .card-header {
@@ -63,7 +63,7 @@
     flex-shrink: 0;
     width: 20px;
     height: 20px;
-    stroke: $primary-color;
+    stroke: var(--primary);
     stroke-width: 1.5;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -76,7 +76,7 @@
   margin-bottom: 1rem;
   width: 24px;
   height: 24px;
-  stroke: $primary-color;
+  stroke: var(--primary);
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -85,12 +85,12 @@
 .card-title {
   font-weight: 600;
   font-size: 16px;
-  color: $primary-color;
+  color: var(--primary);
 }
 
 .card-desc {
   font-size: 15px;
-  color: $text-color;
+  color: var(--text);
   line-height: 1.6;
 }
 

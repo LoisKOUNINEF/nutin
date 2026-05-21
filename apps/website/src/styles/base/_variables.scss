@@ -11,14 +11,56 @@ $accent-color: rgb(90 122 96); // #5A7A60
 $disabled-bg: rgb(220 228 218); // #DCE4DA
 $disabled-text: rgb(140 160 140); // #8CA08C
 
+$light-theme: (
+	background: rgb(247 249 246),      // #F7F9F6
+	surface: rgb(237 242 236),         // #EDF2EC
+	text: rgb(22 28 24),               // #161C18
+	text-muted: rgb(80 104 88),              // #506858
+	primary: rgb(71 85 105),           // #475569
+	primary-hover: rgb(56 68 87),            // #384457
+	secondary: rgb(148 163 184),       // #94A3B8
+	secondary-hover: rgb(124 140 163),       // #7C8CA3
+	accent: rgb(90 122 96),            // #5A7A60
+	success: rgb(74 140 98),                 // #4A8C62
+	error: rgb(190 78 78),                   // #BE4E4E
+	warning: rgb(214 162 62),                // #D6A23E
+	info: rgb(74 120 190),                   // #4A78BE
+	border: rgb(205 216 206),                // #CDD8CE
+	border-strong: rgb(150 168 154),         // #96A89A
+	overlay: rgb(10 18 14 / 52%),            // #0A120E85
+	disabled-bg: rgb(220 228 218),           // #DCE4DA
+	disabled-text: rgb(140 160 140),         // #8CA08C
+);
+
+$dark-theme: (
+	background: rgb(17 23 20),         // #111714
+	surface: rgb(26 36 32),            // #1A2420
+	text: rgb(232 236 234),            // #E8ECEA
+	text-muted: rgb(176 196 186),            // #B0C4BA
+	primary: rgb(139 181 162),         // #8BB5A2
+	primary-hover: rgb(160 198 181),         // #A0C6B5
+	secondary: rgb(109 149 127),       // #6D957F
+	secondary-hover: rgb(128 170 146),       // #80AA92
+	accent: rgb(74 122 96),            // #4A7A60
+	success: rgb(92 170 118),                // #5CAA76
+	error: rgb(224 102 102),                 // #E06666
+	warning: rgb(235 186 82),                // #EBBA52
+	info: rgb(102 153 224),                  // #6699E0
+	border: rgb(52 66 60),                   // #34423C
+	border-strong: rgb(88 108 98),           // #586C62
+	overlay: rgb(0 0 0 / 68%),               // #000000AD
+	disabled-bg: rgb(38 48 44),              // #26302C
+	disabled-text: rgb(100 120 110),         // #64786E
+);
+
 // ! Dark Theme !
-// $background-color: rgb(17 23 20); // #111714
-// $surface-color: rgb(26 36 32); // #1A2420
-// $text-color: rgb(232 236 234); // #E8ECEA
+// $background: rgb(17 23 20); // #111714
+// $surface: rgb(26 36 32); // #1A2420
+// $text: rgb(232 236 234); // #E8ECEA
 // $text-muted: rgb(176 196 186); // #B0C4BA
-// $primary-color: rgb(139 181 162); // #8BB5A2
-// $secondary-color: rgb(109 149 127); // #6D957F
-// $accent-color: rgb(74 122 96); // #4A7A60
+// $primary: rgb(139 181 162); // #8BB5A2
+// $secondary: rgb(109 149 127); // #6D957F
+// $accent: rgb(74 122 96); // #4A7A60
 // $disabled-bg: rgb(38 48 44); // #26302C
 // $disabled-text: rgb(100 120 110); // #64786E
 
@@ -73,9 +115,9 @@ $box-sizes: (
 
 // shadows
 $shadows: (
-	small: 0 1px 2px rgba($text-color, 0.05),
-	medium: 0 4px 6px rgba($text-color, 0.1),
-	large: 0 10px 15px rgba($text-color, 0.15),
+	small: 0 1px 2px color-mix(in srgb, var(--text), transparent 95%),
+	medium: 0 4px 6px color-mix(in srgb, var(--text), transparent 90%),
+	large: 0 10px 15px color-mix(in srgb, var(--text), transparent 85%),
 );
 
 // breakpoints
