@@ -173,6 +173,10 @@
   background-color: var(--secondary);
 }
 
+.u-bg-surface {
+  background-color: var(--surface);
+}
+
 .u-bg-gradient-to-right {
   @include mixins.bg-gradient(right, rgba($primary-color, .7), rgba($secondary-color, .7));
 }

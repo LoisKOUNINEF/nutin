@@ -1,4 +1,4 @@
-import { Service } from '../../../core/index.js';
+import { Service } from '../../../../core/index.js';
 
 export class ThemeToggler extends Service<ThemeToggler> {  
   private _isLightTheme: boolean;
@@ -34,7 +34,7 @@ export class ThemeToggler extends Service<ThemeToggler> {
     else return false;
   }
   
-  private savePreferences(): void {
+  private savePreferences() {
     let pref;
     if (this._isLightTheme) pref = this._lightTheme;
     else pref = this._darkTheme;
