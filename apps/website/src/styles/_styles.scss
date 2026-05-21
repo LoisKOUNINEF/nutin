@@ -21,9 +21,17 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 // Global styles
 :root {
 	font-size: clamp(16px, 18px, 20px);
+	@each $name, $value in $light-theme {
+    --#{$name}: #{$value};
+  }
+  .dark-theme {
+	  @each $name, $value in $dark-theme {
+	    --#{$name}: #{$value};
+	  }
+	}
 	body {
-		background-color: $background-color;
-	  color: $text-color;
+		background-color: var(--background);
+	  color: var(--text);
 		min-height: 100vh;
 		width: 100%;
 		cursor: default;
@@ -74,5 +82,12 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
     a:hover {
       text-decoration: none;
   	}
+	}
+
+	.theme-transition {
+		transition: background-color ease-in-out .2s, background ease-in-out .2s, border ease-in-out .2s, color ease-in-out .2s, scale ease-in-out .2s, transform ease-in-out .2s;
+		-moz-transition: background-color ease-in-out .2s, background ease-in-out .2s, border ease-in-out .2s, color ease-in-out .2s, scale ease-in-out .2s, transform ease-in-out .2s;
+		-webkit-transition: background-color ease-in-out .2s, background ease-in-out .2s, border ease-in-out .2s, color ease-in-out .2s, scale ease-in-out .2s, transform ease-in-out .2s;
+		-o-transition: background-color ease-in-out .2s, background ease-in-out .2s, border ease-in-out .2s, color ease-in-out .2s, scale ease-in-out .2s, transform ease-in-out .2s;
 	}
 }

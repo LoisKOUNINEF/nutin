@@ -45,7 +45,7 @@
 }
 
 .popover-overlay {
-  background: linear-gradient(to right, rgba($primary-color, .7), rgba($secondary-color, .7));
+  background: var(--overlay);
   position: fixed;
   inset: 0;
   backdrop-filter: blur(5px);
@@ -62,7 +62,7 @@
 
 .popover-wrapper {
   position: relative;
-  background-color: $background-color;
+  background-color: var(--background);
   border-radius: 10px transparent;
   max-width: 600px;
   width: 90%;

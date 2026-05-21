@@ -3,7 +3,7 @@
 @use "mixins";
 
 .navbar {
-	z-index: 2;
+	z-index: 11;
 	font-weight: bold;
 	font-size: 1.05rem;
 	@include mixins.flex-between;
@@ -13,23 +13,23 @@
 	left: 0;
 	width: 100%;
 	height: 3rem;
-	background-color: $background-color;
+	background-color: var(--background);
 	padding-top: map.get($spacings, 'small');
 	padding-left: map.get($spacings, 'largest');
 	padding-right: map.get($spacings, 'large');
-	border-bottom: 5px solid $secondary-color;
+	border-bottom: 5px solid var(--secondary);
 	border-style: groovy;
 	button {
 		padding-top: .3rem;
 		transition: ease-in-out 0.2s;
 		&:hover {
-			background-color: $secondary-color;
-			color: $background-color;
+			background-color: var(--secondary);
+			color: var(--background);
 			padding-top: 0;
 			padding-bottom: .3rem;
 		}
 		&:focus-visible {
-			outline: 2px solid $primary-color;
+			outline: 2px solid var(--primary);
 		}
 		@media (hover: none) {
 	    &:hover {
@@ -70,13 +70,13 @@
 		transition: ease-in-out .2s;
 		path {
 			transition: ease-in-out .2s;
-			fill: $text-color;
+			fill: var(--text);
 		}
 		&:hover {
 			transform: translateY(-2px);
 			scale: 1.05;
 			path {
-				fill: $secondary-color;
+				fill: var(--secondary);
 			}
 		}
 		@media (hover: none) {
@@ -84,7 +84,7 @@
 				transform: translateY(0);
 				scale: 1;
 				path {
-					fill: $text-color;
+					fill: var(--text);
 				}
 	    }
 		}
@@ -95,7 +95,7 @@
 		padding: 0;
 		padding-bottom: map.get($spacings, 'smallest');
 		height: auto;
-		border-bottom: .4rem solid $primary-color;
+		border-bottom: .4rem solid var(--primary);
 	}
 }
 
@@ -158,7 +158,7 @@
 	top: 100%;
 	min-width: 11%;
 	border-radius: map.get($border-radius, 'medium');
-	background-color: $surface-color;
+	background-color: var(--surface);
 	padding-left: map.get($spacings, 'smallest');
 	opacity: 0;
 	visibility: hidden;

@@ -7,8 +7,8 @@
 	bottom: 0;
 	padding: map.get($spacings, 'medium');
 	width: 100%;
-  border-top: 5px solid $surface-color;
-  color: $text-muted;
+  border-top: 5px solid var(--surface);
+  color: var(--text-muted);
   @include mixins.rounded;
 }
 
@@ -27,7 +27,7 @@
   }
   a {
     &:focus-visible {
-      outline: 2px solid $primary-color;
+      outline: 2px solid var(--primary);
     }
   }
 }
@@ -37,7 +37,7 @@
   font-style: italic;
   font-family: $secondary-font;
   font-size: map.get($font-sizes, small);
-  color: $text-color;
+  color: var(--text);
   @include mixins.respond-to(medium) {
     text-align: right;
     padding-top: map.get($spacings, 'large');
@@ -47,13 +47,13 @@
 .footer__nutin-brand {
   transition: ease-in-out .7s;
   font-weight: bold;
-  color: $accent-color;
+  color: var(--accent);
   &:hover {
     color: $secondary-color;
   }
   @media (hover: none) {
     &:hover {
-      color: $accent-color;
+      color: var(--accent);
     }
   }
 }
