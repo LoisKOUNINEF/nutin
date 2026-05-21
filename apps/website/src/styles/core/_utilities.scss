@@ -68,19 +68,19 @@
 
 // color
 .u-color-base {
-  color: $text-color;
+  color: var(--text);
 }
 
 .u-color-prim {
-  color: $primary-color;
+  color: var(--primary);
 }
 
 .u-color-sec {
-  color: $secondary-color;
+  color: var(--secondary);
 }
 
 .u-color-bg {
-  color: $background-color;
+  color: var(--background);
 }
 
 // font weight / style
@@ -158,7 +158,7 @@
 
 // backgrounds
 .u-bg-base {
-  background-color: $background-color;
+  background-color: var(--background);
 }
 
 .u-bg-inherit {
@@ -166,11 +166,11 @@
 }
 
 .u-bg-primary {
-  background-color: $primary-color;
+  background-color: var(--primary);
 }
 
 .u-bg-secondary {
-  background-color: $secondary-color;
+  background-color: var(--secondary);
 }
 
 .u-bg-gradient-to-right {

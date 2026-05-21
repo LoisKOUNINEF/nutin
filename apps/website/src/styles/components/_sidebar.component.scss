@@ -15,7 +15,7 @@
 		margin-top: -1rem;
 		backdrop-filter: blur(8px);
 		-webkit-backdrop-filter: blur(8px);
-		background-color: $background-color;
+		background-color: var(--background);
 		padding-bottom: map.get($spacings, 'medium');
 		width: 100%;
 		height: auto;
@@ -35,8 +35,8 @@
 
 .sidebar__head {
   border-radius: 0 !important;
-	color: $background-color!important;
-	background-color: $secondary-color;
+	color: var(--background)!important;
+	background-color: var(--secondary);
 	padding-left: map.get($spacings, 'large');
 	padding-top: map.get($spacings, 'medium');
 	margin-bottom: map.get($spacings, 'medium');
@@ -56,11 +56,11 @@
 	padding-left: map.get($spacings, 'large');
 	padding-right: map.get($spacings, 'large');
 	&:hover {
-		background-color: rgba($text-color, .2);
+		background-color: color-mix(in srgb, var(--text), transparent 80%);
 		font-weight: bold;
 	}
 	&:focus-visible {
-		outline: 2px solid $primary-color;
+		outline: 2px solid var(--primary);
 	}
 	@media (hover: none) {
 	  &:hover {
@@ -75,14 +75,14 @@
 
 .sidebar__current-btn {
 	font-weight: bold;
-	box-shadow: 0.15rem 0.2rem 0.2rem rgba($text-color, 0.5);
+	box-shadow: -1px 0.2rem 0.2rem color-mix(in srgb, var(--text), transparent 50%);
 	pointer-events: none;
 }
 
 .sidebar__anchor {
 	transition: all ease-in-out .2s;
 	order: 1;
-	color: $accent-color;
+	color: var(--accent);
 	padding-left: map.get($spacings, 'medium');
 	padding-top: map.get($spacings, 'large');
   a {
@@ -91,7 +91,7 @@
 			font-weight: normal;
     }
     &:focus-visible {
-      outline: 2px solid $primary-color;
+      outline: 2px solid var(--primary);
     }
     @media (hover: none) {
       &:hover {

@@ -15,13 +15,13 @@
 	text-align: center;
   font-weight: 600;
   letter-spacing: .01rem;
-  background-color: $surface-color;
-	color: $accent-color;
+  background-color: var(--surface);
+	color: var(--accent);
   @include mixins.rounded;
-  border-left: 3px solid $accent-color;
-  border-right: 3px solid $accent-color;
-  border-top: 1px solid $accent-color;
-  border-bottom: 1px solid $accent-color;
+  border-left: 3px solid var(--accent);
+  border-right: 3px solid var(--accent);
+  border-top: 1px solid var(--accent);
+  border-bottom: 1px solid var(--accent);
   border-radius: map.get($border-radius, large);
   @include mixins.respond-to(medium) {
     min-width: 100%;
@@ -31,10 +31,10 @@
 .tutorial__container {
   a {
     &:hover {
-      color: rgba($primary-color, .8);
+      color: color-mix(in srgb, var(--primary), transparent 20%);
     }
     &:focus-visible {
-      outline: 2px solid $primary-color;
+      outline: 2px solid var(--primary);
     }
     @media (hover: none) {
       &:hover {
@@ -48,9 +48,9 @@
 
 .tutorial__toc {
   padding-left: map.get($spacings, small);
-  font-family: $secondary-font;
+  font-family: var(--secondary);
   font-size: map.get($font-sizes, large);
-  color: $primary-color;
+  color: var(--primary);
   @include mixins.respond-to(medium) {
     padding-left: map.get($spacings, small);
   }
@@ -58,6 +58,6 @@
 
 .tutorial__demo-link {
   padding: 0 map.get($spacings, small);
-  color: $accent-color;
+  color: var(--accent);
   font-style: italic;
 }

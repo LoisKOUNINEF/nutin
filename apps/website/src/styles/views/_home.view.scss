@@ -7,7 +7,7 @@
 	margin-left: clamp(1rem, 5vw, 10rem);
   margin-right: clamp(1rem, 5vw, 10rem);
   h1 {
-		font-size: map.get($font-sizes, largest)*1.5;
+		font-size: 1.5rem;
 		padding-top: map.get($spacings, 'medium');
 	}
 	@include mixins.respond-to(medium) {
@@ -26,7 +26,7 @@
 }
 
 .home__title-wrapper {
-	padding-left: map.get($spacings, largest);
+	// padding-left: map.get($spacings, largest);
 	padding-bottom: map.get($spacings, large);
 	@include mixins.respond-to(medium) {
 		padding-left: map.get($spacings, small);
@@ -37,7 +37,7 @@
 .home__title {
 	letter-spacing: .3rem;
   font-family: $secondary-font;
-	color: $primary-color;
+	color: var(--primary);
 	font-size: map.get($font-sizes, 'large');
 	font-weight: bold;
 	padding-top: map.get($spacings, 'small');
@@ -45,7 +45,7 @@
 }
 
 .home__version {
-	margin-left: map.get($spacings, small);
+	// margin-left: map.get($spacings, small);
 	padding-bottom: 0.05rem;
 	padding-left: map.get($spacings, smallest);
 	padding-right: map.get($spacings, small);
@@ -54,7 +54,7 @@
 	font-size: map.get($font-sizes, smallest);
 	border-radius: map.get($border-radius, pill);
 	background: rgba($secondary-color, .3);
-	color: $text-muted;
+	color: var(--text-muted);
 }
 
 .home__version-live {
@@ -74,7 +74,7 @@
 
 .home__catchphrase {
 	max-width: 60ch;
-	color: $primary-color;
+	color: var(--primary);
 	font-size: map.get($font-sizes, 'largest');
 	font-weight: bold;
 	padding-bottom: map.get($spacings, small);
@@ -88,7 +88,7 @@
 .home__subcatchphrase {
 	max-width: 60ch;
 	font-size: map.get($font-sizes, 'largest');
-	color: $primary-color;
+	color: var(--primary);
 	@include mixins.respond-to(medium) {
    	width: 100%;
 		font-size: map.get($font-sizes, 'large');
@@ -125,13 +125,13 @@
 
 .home__snippet-container {
 	max-width: 100ch;
-	background-color: $surface-color;
+	background-color: var(--surface);
 	padding-top: map.get($spacings, 'large');
 	padding-bottom: map.get($spacings, 'medium');
 	margin-top: map.get($spacings, 'large');
 	margin-bottom: map.get($spacings, 'largest');
 	border-radius: 1rem;
-  box-shadow: 0 5px 7px rgba($primary-color, .7);
+  box-shadow: 0 5px 7px color-mix(in srgb, var(--primary), transparent 30%);
   h2 {
 		font-size: 1.2rem; 
 		font-weight: 600; 
@@ -162,14 +162,14 @@
 		}
 	}
 	pre {
-		background: linear-gradient(to top, rgba($secondary-color, .1), rgba($secondary-color, .2));
+		background: linear-gradient(to top, var(--background), var(--background));
 		border-radius: 1rem;
 		font-size: map.get($font-sizes, 'medium');
 		padding-top: map.get($spacings, 'large');
 		padding-left: map.get($spacings, 'large');
 		background-color: inherit;
 		code {
-			color: $primary-color;
+			color: var(--primary);
 		}
 		@include mixins.respond-to(medium) {
 			padding-left: map.get($spacings, 'small');
@@ -178,7 +178,7 @@
 }
 
 .home__tutorial-link-container {
-  color: $background-color;
+  color: var(--background);
   padding: map.get($spacings, 'largest') 0;
 	@include mixins.respond-to(medium) {
 		margin: 0 map.get($spacings, small);
@@ -188,21 +188,21 @@
 
 .home__tutorial-link {
   @include mixins.rounded;
-  box-shadow: 0 5px 7px rgba($primary-color, .5);
+  box-shadow: 0 5px 7px color-mix(in srgb, var(--primary), transparent 50%);
   font-family: $secondary-font;
   font-size: map.get($font-sizes, 'large');
   font-weight: bold;
-  background-color: $primary-color;
+  background-color: var(--primary);
   padding: map.get($spacings, 'medium');
 	transition: ease-in-out 0.3s;
 	&:hover {
-  	background-color: $background-color;
-  	color: $primary-color;
-  	box-shadow: 0 5px 7px rgba($primary-color, 1);
+  	background-color: var(--background);
+  	color: var(--primary);
+  	box-shadow: 0 5px 7px var(--primary);
     transform: translateX(+4px);
 	}
 	&:focus-visible {
-		outline: 2px solid $primary-color;
+		outline: 2px solid var(--primary);
 	}
 	&:active {
   	transform: translateX(-2px);
@@ -233,9 +233,9 @@
   
 .home__cta-row-btn-primary {
 	transition: ease-in-out .2s;
-	background-color: $primary-color;
-	color: $background-color !important;
-	border: 1px solid $primary-color; 
+	background-color: var(--primary);
+	color: var(--background) !important;
+	border: 1px solid var(--primary); 
 	padding: 9px 20px; 
 	border-radius: map.get($border-radius, large);
 	font-size: map.get($font-sizes, small); 
@@ -243,10 +243,10 @@
 
 	&:hover {
 		transform: translateY(-2px);
-		background-color: color.scale($primary-color, $lightness: -10%);
+		background-color: color-mix(in oklch, var(--primary) 100%, black 10%);
 	}
 	&:focus-visible {
-		outline: 2px solid $primary-color;
+		outline: 2px solid var(--primary);
 	}
 	&:active {
 		transform: translateY(-1px);
@@ -259,9 +259,9 @@
 }
 
 .home__cta-row-btn-secondary { 
-	background-color: $background-color;
+	background-color: var(--background);
 	padding: 9px 20px; 
-	border: 1px solid $secondary-color; 
+	border: 1px solid var(--secondary); 
 	border-radius: map.get($border-radius, large);
 	font-size: map.get($font-sizes, small);
 	cursor: pointer; 
@@ -269,7 +269,7 @@
 		transform: translateY(-2px);
 	}
 	&:focus-visible {
-		outline: 2px solid $primary-color;
+		outline: 2px solid var(--primary);
 	}
 	&:active {
 		transform: translateY(-1px);
