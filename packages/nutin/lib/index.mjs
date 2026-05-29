@@ -15,19 +15,33 @@ export async function createApp() {
     .option('-pm, --package-manager <manager>', 'Specify package manager (npm, yarn, pnpm, bun)')
     .option('--preset <preset>', 
       `${chalk.yellow('Project preset configuration:')}
-      ${chalk.cyan('• minimal')}${chalk.boldGray('   - external templates')}
-      ${chalk.cyan('• standard')}${chalk.boldGray('  - minimal + i18n & built-in SCSS utilities')}
-      ${chalk.cyan('• full')}${chalk.boldGray('      - standard + deployment helpers & built-in testing toolkit')}
-      ${chalk.cyan('• cicd')}${chalk.boldGray('      - minimal + deployment helpers')}`
+      ${chalk.cyan('• minimal')}${chalk.boldGray('        - external templates')}
+      ${chalk.cyan('• standard')}${chalk.boldGray('       - minimal + i18n & small UI library')}
+      ${chalk.cyan('• full')}${chalk.boldGray('           - standard + deployment helpers & built-in testing toolkit')}`
     )
-    .option('--i18n', 'Use i18n & json-based content')
-    .option('--deploy-helper', 'Use Docker & deployment helpers')
-    .option('--testin-nutin', 'Use built-in testing toolkit')
-    .option('--transition', 'Use animated view transitions\nNote: may interfere with CSS `position: fixed`, `z-index`…')
+    .option('--options <options>',
+      `${chalk.yellow('Comma-separated list of additional options:')}
+      ${chalk.cyan('• i18n')}${chalk.boldGray('           - i18n & json-based content')}
+      ${chalk.cyan('• libs')}${chalk.boldGray('           - small UI library')}
+      ${chalk.cyan('• deploy-helper')}${chalk.boldGray('  - Docker & deployment helpers')}
+      ${chalk.cyan('• testing')}${chalk.boldGray('        - built-in testing toolkit')}
+      ${chalk.cyan('• transition')}${chalk.boldGray('     - animated view transitions - NOTE: may break position:absolute and similar properties')}`,
+      (val) => val.split(',').map((s) => s.trim()).filter(Boolean)
+    )
     .action(async (projectName, cliOptions) => {
+      // Normalize options array into the shape the rest of the app expects
+      const options = cliOptions.options ?? [];
+      const normalizedOptions = {
+        ...cliOptions,
+        i18n:          options.includes('i18n') || undefined,
+        deployHelper:  options.includes('deploy-helper') || undefined,
+        stylinNutin:   options.includes('libs') || undefined,
+        testinNutin:   options.includes('testing') || undefined,
+        transition:    options.includes('transition') || undefined,
+      };
       print.blue('🚀 Welcome to nutin !');
       try {
-        const preferences = await promptUser(projectName, cliOptions);
+        const preferences = await promptUser(projectName, normalizedOptions);
         await createProject(preferences);
         displaySuccessMessage(preferences);
       } catch (error) {

@@ -1,12 +1,16 @@
 import { AppRouter, Service{{#if i18n}}, I18nService{{/if}} } from '../core/index.js';
+{{#if stylinNutin}}
 import { registerPipes } from '../libs/index.js';
+{{/if}}
 import { appRoutes } from './routes.js';
 
 class App {
   // private header: NavbarComponent;
 
   constructor() {
+    {{#if stylinNutin}}
     registerPipes();
+    {{/if}}
     AppRouter(appRoutes);
 
     // Init global components

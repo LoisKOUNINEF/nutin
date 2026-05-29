@@ -2,6 +2,11 @@ import inquirer from 'inquirer';
 import { defaults } from './context-builder.mjs';
 
 export async function promptUser(initialName, cliOptions = {}) {
+  const PRESET_CHOICES = [
+    { name: 'minimal   — external templates', value: 'minimal' },
+    { name: 'standard  — minimal + i18n & UI library', value: 'standard' },
+    { name: 'full      — standard + deployment & testing', value: 'full' },
+  ];
 
   let projectName = initialName;
   if (!projectName) {
@@ -31,10 +36,25 @@ export async function promptUser(initialName, cliOptions = {}) {
     packageManager = pmPreference.packageManager;
   }
 
+
+  let preset = cliOptions.preset;
+  if (!preset) {
+    const presetChoice = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'preset',
+        message: 'Preset:',
+        choices: PRESET_CHOICES,
+        default: 'minimal',
+      },
+    ]);
+    preset = presetChoice.preset;
+  }
+
   return {
     projectName,
     packageManager,
-    preset: cliOptions.preset,
+    preset,
     i18n: cliOptions.i18n,
     deployHelper: cliOptions.deployHelper,
     testinNutin: cliOptions.testinNutin,
