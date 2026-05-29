@@ -1,15 +1,15 @@
 import { ButtonManager } from "src/core/index.js";
 
-export interface IPopoverDomElements {
+export interface IOverlayDomElements {
 	wrapper: HTMLElement;
 	overlay: HTMLElement;
 }
 
-export class PopoverDomHelper {
+export class OverlayDomHelper {
 	public static createDomElements(
 		content: HTMLElement, 
 		buttonManager: ButtonManager
-	): IPopoverDomElements {
+	): IOverlayDomElements {
     const overlay = this.createOverlay();
     const wrapper = this.createWrapper();
     content = this.createContent(content);

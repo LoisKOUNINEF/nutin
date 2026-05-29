@@ -1,8 +1,6 @@
 @use "variables" as *;
-{{#if stylinNutin}}
-@use "sass:map";
 @use "mixins";
-{{/if}}
+@use "fonts";
 
 // css reset
 html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video, button, input, textarea {
@@ -23,32 +21,9 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 // Global styles
 :root {
 	body {
-		background-color: $background-color;
-	  color: $text-color;
 		min-height: 100vh;
 		cursor: default;
-	  {{#if stylinNutin}}
-	  line-height: 1.6;
-		font-family: $primary-font;
-	  font-size: map.get($font-sizes, medium);
-		{{else}}
-		font-family: Arial, Helvetica, sans-serif;
+	  line-height: 1;
 		font-size: 1rem;
-	  {{/if}}
 	}
-
-{{#if stylinNutin}}
-	h1 {
-		font-size: map.get($font-sizes, largest);
-		font-family: $secondary-font;
-	}
-
-	a, button {
-		cursor: pointer;
-	}
-
-	a {
-		text-decoration: none;
-	}
-{{/if}}
 }

@@ -1,6 +1,5 @@
-import { View, ButtonManager, BaseButton, ComponentConfig, AppPipeRegistry, CatalogConfig, AppEventBus } from '../../core/index.js';
-import { FocusTrapHelper, IFocusTrapOptions } from './helpers/focus-trap.helper.js';
-import { IPopoverDomElements, PopoverDomHelper } from './helpers/popover-dom.helper.js';
+import { View, ButtonManager, BaseButton, ComponentConfig, AppPipeRegistry, CatalogConfig, AppEventBus } from '../../../core/index.js';
+import { FocusTrapHelper, IFocusTrapOptions, IOverlayDomElements, OverlayDomHelper } from '../helpers/index.js';
 
 export interface PopoverButton extends BaseButton {
   // if needed for Popover-specific properties
@@ -67,7 +66,7 @@ export class PopoverView extends View {
   public override render(): HTMLElement {
     document.documentElement.classList.add('no-scroll');
 
-    const { wrapper, overlay } = this.createPopoverDomElements();
+    const { wrapper, overlay } = this.createOverlayDomElements();
 
     this._focusTrap = this.createFocusTrap(wrapper, overlay);
     this._focusTrap.activate();
@@ -81,7 +80,7 @@ export class PopoverView extends View {
     this._focusTrap?.deactivate();
     if (this._prevTitle) document.title = this._prevTitle;
 
-    this._overlay = PopoverDomHelper.removeDomElements(this._overlay, () => {
+    this._overlay = OverlayDomHelper.removeDomElements(this._overlay, () => {
       document.documentElement.classList.remove('no-scroll');
       super.destroy();
       if (typeof this._onClose === 'function') {
@@ -105,9 +104,9 @@ export class PopoverView extends View {
     );
   }
 
-  private createPopoverDomElements(): IPopoverDomElements {
+  private createOverlayDomElements(): IOverlayDomElements {
     const content = super.render();
-    const { overlay, wrapper } = PopoverDomHelper.createDomElements(content, this._buttonManager);
+    const { overlay, wrapper } = OverlayDomHelper.createDomElements(content, this._buttonManager);
 
     this.autoBindEvents();
     this.parseDataAttributes();

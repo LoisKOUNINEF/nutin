@@ -27,6 +27,7 @@ onExit
 ```
 
 - StylinNutin
+    - Can now use SCSS or Tailwind (v3) (default: SCSS)
     - removed utility classes: they created confusion and had questionable usefulness. mixins now live in `libs/scss/_mixins-nutin.scss`.
     - globally scoped stylesheets, co-located with feature files for organizational convenience. **Use unique class names.** *Note: nutin's naming convention encourages prefixes.*
     - Added stateless, accessibility-focused components library.

@@ -1,4 +1,4 @@
-import { RouteGuard } from "../../core/index.js";
+import { RouteGuard } from "../core/index.js";
 
 export const Guards = {
   custom: (checkFn: () => boolean | string | Promise<boolean | string>, redirectTo?: string): RouteGuard => {

@@ -1,5 +1,53 @@
 @use "sass:map";
 @use "variables" as *;
+@use "sass:color";
+
+
+// Configuration 
+
+$breakpoints: (
+  xs: 475px,    // Small phones (iPhone SE, Galaxy Fold)
+  sm: 640px,    // Tailwind's standard (larger phones)
+  md: 768px,    // Bootstrap's tablet (iPad portrait)
+  lg: 1024px,   // Tailwind's standard (iPad landscape, small laptops)
+  xl: 1280px,   // Tailwind's standard (desktops)
+  2xl: 1536px,  // Tailwind's 2xl (large desktops)
+) !default;
+
+$z-layers: (
+  negative: -1,    // Behind base content
+  base: 0,
+  dropdown: 100,
+  sticky: 200,
+  overlay: 300,
+  modal: 400,
+  toast: 500,
+  max: 9999,       // Emergency override
+) !default;
+
+
+// Breakpoints 
+
+@mixin respond-to($breakpoint) {
+  $value: map.get($breakpoints, $breakpoint);
+
+  @if $value {
+    @media (max-width: $value) {
+      @content;
+    }
+  }
+}
+
+
+// Z-index
+
+// usage: @include z(modal);
+@mixin z($layer) {
+  z-index: map.get($z-layers, $layer);
+}
+
+
+// Flexbox
 
 @mixin flex-center {
   display: flex;
@@ -34,6 +82,15 @@
   flex-wrap: wrap;
 }
 
+@mixin flex-gap($gap: 1rem, $wrap: wrap) {
+  display: flex;
+  flex-wrap: $wrap;
+  gap: $gap;
+}
+
+
+// Grid
+
 @mixin grid($columns: 1, $gap: 1rem) {
   display: grid;
   grid-template-columns: repeat($columns, 1fr);
@@ -47,24 +104,6 @@
     @media (min-width: $breakpoint) {
       grid-template-columns: repeat($columns, 1fr);
     }
-  }
-}
-
-@mixin grid-row($span: null, $start: null) {
-  @if $span {
-    grid-row-end: span $span;
-  }
-  @if $start {
-    grid-row-start: $start;
-  }
-}
-
-@mixin grid-column($span: null, $start: null) {
-  @if $span {
-    grid-column-end: span $span;
-  }
-  @if $start {
-    grid-column-start: $start;
   }
 }
 
@@ -101,12 +140,7 @@
   gap: $gap;
 }
 
-@mixin advanced-fr-grid(
-  $columns: "1fr",
-  $rows: null,
-  $gap: 1rem,
-  $dense: false
-) {
+@mixin advanced-fr-grid($columns: "1fr", $rows: null, $gap: 1rem, $dense: false) {
   display: grid;
   grid-template-columns: unquote($columns);
   
@@ -121,6 +155,24 @@
   }
 }
 
+@mixin grid-row($span: null, $start: null) {
+  @if $span {
+    grid-row-end: span $span;
+  }
+  @if $start {
+    grid-row-start: $start;
+  }
+}
+
+@mixin grid-column($span: null, $start: null) {
+  @if $span {
+    grid-column-end: span $span;
+  }
+  @if $start {
+    grid-column-start: $start;
+  }
+}
+
 @mixin grid-area($area) {
   grid-area: $area;
 }
@@ -129,9 +181,48 @@
   grid-template-areas: $areas;
 }
 
+
+// Positioning 
+
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@mixin fixed-full {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+@mixin sticky($top: 0, $z: 10) {
+  position: sticky;
+  top: $top;
+  z-index: $z;
+}
+
+@mixin pos($pos, $t: auto, $r: auto, $b: auto, $l: auto) {
+  position: $pos;
+  top: $t;
+  right: $r;
+  bottom: $b;
+  left: $l;
+}
+
+
+// Sizing & Spacing 
+
 @mixin box($w, $h) {
   width: $w;
   height: $h;
+}
+
+@mixin aspect-ratio($w: 16, $h: 9) {
+  aspect-ratio: #{$w} / #{$h};
 }
 
 @mixin margin-y($val) {
@@ -154,15 +245,22 @@
   padding-right: $val;
 }
 
-@mixin text-ellipsis {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+
+// Typography
 
 @mixin font($size, $weight: normal) {
   font-size: $size;
   font-weight: $weight;
+}
+
+@mixin fluid-type($min-size, $max-size, $min-vw: 320px, $max-vw: 1200px) {
+  font-size: clamp(#{$min-size}, calc(#{$min-size} + (#{$max-size} - #{$min-size}) * ((100vw - #{$min-vw}) / (#{$max-vw} - #{$min-vw}))), #{$max-size});
+}
+
+@mixin text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @mixin line-clamp($lines) {
@@ -172,28 +270,13 @@
   overflow: hidden;
 }
 
-@mixin absolute-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+// Semantic alias for line-clamp
+@mixin truncate-lines($lines: 2) {
+  @include line-clamp($lines);
 }
 
-@mixin fixed-full {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-}
 
-@mixin pos($pos, $t: auto, $r: auto, $b: auto, $l: auto) {
-  position: $pos;
-  top: $t;
-  right: $r;
-  bottom: $b;
-  left: $l;
-}
+// Backgrounds 
 
 @mixin bg-cover {
   background-size: cover;
@@ -205,8 +288,34 @@
   background: linear-gradient(to $dir, $from, $to);
 }
 
+@mixin image-cover {
+  -webkit-background-size: 100vw 100vh;
+  -moz-background-size: 100vw 100vh;
+  -o-background-size: 100vw 100vh;
+  background-size: 100vw 100vh;
+  background-attachment: fixed;
+}
+
+
+// Borders & Shadows
+
+@mixin border($color, $width: 1px, $style: solid) {
+  border: $width $style $color;
+}
+
+@mixin rounded($radius: 4px) {
+  border-radius: $radius;
+}
+
 @mixin box-shadow($shadow...) {
   box-shadow: $shadow;
+}
+
+
+// Interactivity 
+
+@mixin cursor-pointer {
+  cursor: pointer;
 }
 
 @mixin transition($props...) {
@@ -218,48 +327,12 @@
   &:hover {
     transform: scale($scale);
   }
-}
-
-@mixin border($color, $width: 1px, $style: solid) {
-  border: $width $style $color;
-}
-
-@mixin rounded($radius: 4px) {
-  border-radius: $radius;
-}
-
-@mixin hide {
-  display: none !important;
-}
-
-@mixin sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(1px, 1px, 1px, 1px);
-  white-space: nowrap;
-}
-
-@mixin clearfix {
-  &::after {
-    content: '';
-    display: table;
-    clear: both;
+  @media(hover:none) {
+    &:hover {
+      transform: scale(1);
+    }
   }
 }
-
-@mixin cursor-pointer {
-  cursor: pointer;
-}
-
-@mixin image-cover {
-  -webkit-background-size: 100vw 100vh;
-  -moz-background-size: 100vw 100vh;
-  -o-background-size: 100vw 100vh;
-  background-size: 100vw 100vh;
-  background-attachment: fixed;
-};
 
 @mixin button-disabled {
   button:disabled {
@@ -272,15 +345,50 @@
   }
 }
 
-@mixin respond-to($breakpoint) {
-  $value: map.get($breakpoints, $breakpoint);
-
-  @if $value {
-    @media (max-width: $value) {
-      @content;
-    }
+@mixin focus-ring($color: currentColor, $offset: 2px) {
+  &:focus-visible {
+    outline: 2px solid $color;
+    outline-offset: $offset;
   }
 }
+
+
+// Accessibility 
+
+@mixin sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+  text-decoration: none;
+  outline: none;
+}
+
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}
+
+
+// Utilities
+
+@mixin hide {
+  display: none !important;
+}
+
+@mixin clearfix {
+  &::after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}
+
+
+// Animations
 
 @mixin fade-in($duration: 0.5s, $delay: 0s) {
   @keyframes fade-in {
@@ -326,12 +434,11 @@
 
 @mixin bounce-in($duration: 0.8s, $delay: 0s) {
   @keyframes bounce-in {
-    0% { transform: scale(0.9); opacity: 0; }
-    60% { transform: scale(1.05); opacity: 1; }
-    80% { transform: scale(0.95); }
+    0%   { transform: scale(0.9); opacity: 0; }
+    60%  { transform: scale(1.05); opacity: 1; }
+    80%  { transform: scale(0.95); }
     100% { transform: scale(1); }
   }
-
   & {
     animation: bounce-in $duration ease-out $delay forwards;
   }
@@ -341,7 +448,6 @@
   @keyframes spin {
     to { transform: rotate(360deg); }
   }
-
   & {
     animation: spin $duration linear $delay infinite;
     animation-direction: $direction;
@@ -351,9 +457,8 @@
 @mixin pulse($duration: 1.5s, $delay: 0s) {
   @keyframes pulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    50%       { opacity: 0.5; }
   }
-
   & {
     animation: pulse $duration ease-in-out $delay infinite;
   }
@@ -361,11 +466,10 @@
 
 @mixin shake($duration: 0.5s, $delay: 0s) {
   @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20%, 60% { transform: translateX(-10px); }
-    40%, 80% { transform: translateX(10px); }
+    0%, 100%  { transform: translateX(0); }
+    20%, 60%  { transform: translateX(-10px); }
+    40%, 80%  { transform: translateX(10px); }
   }
-
   & {
     animation: shake $duration ease-in-out $delay;
   }
