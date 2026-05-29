@@ -1,25 +1,27 @@
 import config from '#root/testin-nutin.config.js';
 
-export function printSummary(passed, failed, time) {
+export function printSummary(passed, failed, todo, time) {
   const totalTime = time.toFixed(2);
-  const total = passed + failed;
+  const total = passed + failed + todo;
   print.boldBlue(`\nTest Summary`);
   print.boldInfo(`✓ ${passed} passed`);
   print.boldError(`✗ ${failed} failed`);
+  if (todo > 0) print.boldSection(`✎ ${todo} todo`);
   print.info(`📖 ${total} total`);
   print.info(`⌚️ Time: ${totalTime}ms \n`);
 }
 
 export function printResults(results) {
   const sortedResults = results.sort((a, b) => {
-    if (a.status === 'passed' && b.status === 'failed') return -1;
-    if (a.status === 'failed' && b.status === 'passed') return 1;
-    return 0;
+    const order = { passed: 0, failed: 1, todo: 2 };
+    return (order[a.status] ?? 0) - (order[b.status] ?? 0);
   });
 
   sortedResults.forEach(result => {
     if (result.status === 'passed') {
-      if (config.verbose ) console.log(`${chalk.green('✓')} ${chalk.cyan(`${result.suiteName}`)} - ${chalk.green(`${result.name}`)}`);
+      if (config.verbose) console.log(`${chalk.green('✓')} ${chalk.cyan(`${result.suiteName}`)} - ${chalk.green(`${result.name}`)}`);
+    } else if (result.status === 'todo') {
+      console.log(`${chalk.yellow('✎')} ${chalk.cyan(`${result.suiteName}`)} - ${chalk.yellow(`${result.name}`)} ${chalk.yellow('(todo)')}`);
     } else {
       print.error(`✗ ${result.suiteName} - ${result.name}`);
       print.grayError(result.error);

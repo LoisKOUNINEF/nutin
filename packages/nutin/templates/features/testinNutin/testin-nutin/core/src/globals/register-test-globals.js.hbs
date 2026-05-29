@@ -32,6 +32,19 @@ export function registerTestGlobals() {
     });
   };
 
+  global.it.todo = (name) => {
+    addTest({
+      suiteName: currentSuite,
+      testName: name,
+      testFn: null,
+      todo: true,
+      beforeEach: null,
+      beforeAll: null,
+      afterEach: null,
+      afterAll: null
+    });
+  };
+
   global.beforeAll = (fn) => {
     currentSuiteHooks.beforeAll = fn;
   };

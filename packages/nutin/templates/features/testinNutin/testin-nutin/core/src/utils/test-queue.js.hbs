@@ -4,6 +4,7 @@ import { printStart, printSummary, printResults } from './print.js';
 const testQueue = new Queue();
 let passed = 0;
 let failed = 0;
+let todo = 0;
 let elapsedTime;
 
 export function addTest(test) {
@@ -22,6 +23,16 @@ export async function runQueuedTests() {
   for (let i = 0; i < testAmount; i++) {
     try {
       test = testQueue.deque();
+
+      if (test.todo) {
+        todo++;
+        results.push({
+          suiteName: test.suiteName,
+          status: 'todo',
+          name: test.testName
+        });
+        continue;
+      }
 
       if (test.suiteName !== previousSuite) {
         teardownJsdom();
@@ -60,5 +71,5 @@ export async function runQueuedTests() {
   const endTime = performance.now();
   elapsedTime = (endTime - startTime);
   printResults(results);
-  printSummary(passed, failed, elapsedTime);
+  printSummary(passed, failed, todo, elapsedTime);
 }
