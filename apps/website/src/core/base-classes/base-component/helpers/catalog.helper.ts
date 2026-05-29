@@ -36,14 +36,14 @@ type CatalogItemConfig<T = any> =
   ```
 */
 export class CatalogHelper {
-  public static generateCatalog(config: CatalogConfig, scope: Element): ComponentConfig[] {
+  public static generateCatalog(config: CatalogConfig, scope: Element = document.documentElement): ComponentConfig[] {
     if (!config.array || config.array.length < 1) return [];
 
     const componentConfigs: ComponentConfig[] = [];
     const containers = scope.querySelectorAll(`[data-catalog="${config.selector}"]`);
 
     containers.forEach((container) => {
-      if (!container || !(container instanceof HTMLElement) || (container.firstElementChild)) return;
+      if (!container || !(container instanceof HTMLElement)) return;
       componentConfigs.push(...this.getComponentConfigArray(config, container))
     })
 
@@ -51,6 +51,7 @@ export class CatalogHelper {
   }
 
   private static getComponentConfigArray(config: CatalogConfig, container: HTMLElement): ComponentConfig[] {
+    container.innerHTML = '';
     const componentConfigs: ComponentConfig[] = [];
     for (let i = 0; i < config.array.length; i++) {
       this.createElements(i, config, container);
@@ -72,7 +73,7 @@ export class CatalogHelper {
     const configWithIndex = this.getConfigWithIndex(config, index)
 
     const { props, defaults, normalizeKeys } = config;
-    const options = { ...props, ...defaults, ...normalizeKeys };
+    const options = { props, defaults, normalizeKeys };
 
     componentConfigs.push(
       { 

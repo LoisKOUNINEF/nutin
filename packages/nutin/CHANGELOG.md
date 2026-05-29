@@ -4,15 +4,17 @@
 
 - Cleaner separation
     - `app` folder now exclusively contains application code, as it should. `components/common` folder now lives in `src/libs/components`/
-    - `styles` folder is now exclusively dedicated to global application styles. Libraries styles now live alongside their components, as do built-in mixins and functions.
+    - `styles` folder is now exclusively dedicated to global application styles. Libraries styles now live alongside their components in `libs/*`, and built-in mixins and functions in `libs/scss`.
 
 - BaseComponent / Component / View
-*If you wonder why those didn't come earlier, the answer's 42.*
+*If you wonder why those weren't there from the beginning, the answer's 42.*
     - Cleaner separation of concerns.
         - BaseComponent responsibilities: Render lifecycle, Hydration, DOM lifecycle, Invalidation, Event subscriptions (DOM and bus), Teardown, Render guard, Composition orchestration
         - Component responsibilities: Props (className, style, data-bindings, dynamic buttons), Config + defaults + normalization, Template generation via `templateFn`
         - View responsibilities: Route params, Navigation hooks (onEnter/onExit), Metadata policies, View identity (viewName)
     - Proper lifecycle & lifecycle hooks
+    - EventBus methods with automatic unsubscribe: `listen(event, callback`, `listenToRenderEvents(events[])`. AppEventBus can still be used directly if needed (`once`...) but must be unsubscribed manually via `onBeforeDestroy` hook.
+
 ```ts
 onBeforeRender
 onAfterRender
@@ -25,7 +27,7 @@ onExit
 ```
 
 - StylinNutin
-    - removed utility classes: used to create confusion and had questionable usefulness
+    - removed utility classes: they created confusion and had questionable usefulness. mixins now live in `libs/scss/_mixins-nutin.scss`.
     - globally scoped stylesheets, co-located with feature files for organizational convenience. **Use unique class names.** *Note: nutin's naming convention encourages prefixes.*
     - Added stateless, accessibility-focused components library.
     - Added forms, formGroup & formControl (Validators)
@@ -36,6 +38,9 @@ onExit
 - TestinNutin
     - Added `it.todo` global
 
+- CLI
+    - Rework app creation flow (again)
+        - 
 
 ## V1.3.1
 
