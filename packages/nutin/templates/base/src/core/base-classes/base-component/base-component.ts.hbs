@@ -56,7 +56,7 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
     this._isRendering = true;
 
     try {
-      this.beforeRender();
+      this.onBeforeRender();
       this.element.innerHTML = SecurityHelper.sanitizeTemplate(
         this.generateTemplate(),
         this.trustLevel
@@ -64,7 +64,7 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
       this.hydrate();
       this.compose();
       this.autoBindEvents()
-      this.afterRender();
+      this.onAfterRender();
       return this.element;
     } finally {
       this._isRendering = false;
@@ -72,7 +72,7 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
   }
 
   public destroy(): void {
-    this.beforeDestroy();
+    this.onBeforeDestroy();
     EventHelper.destroyEvents(this.eventListeners);
     this._busSubscriptions.forEach(([event, callback]) => {
       AppEventBus.off(event, callback);
@@ -80,14 +80,14 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
     this._busSubscriptions = [];
     ChildrenHelper.destroyChildren(this._children);
     this.element.remove();
-    this.afterDestroy();
+    this.onAfterDestroy();
   }
 
   // Lifecycle hooks — override in subclasses as needed
-  protected beforeRender(): void {}
-  protected afterRender(): void {}
-  protected beforeDestroy(): void {}
-  protected afterDestroy(): void {}
+  protected onBeforeRender(): void {}
+  protected onAfterRender(): void {}
+  protected onBeforeDestroy(): void {}
+  protected onAfterDestroy(): void {}
 
   protected generateTemplate(): string {
     return '';
