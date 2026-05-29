@@ -15,25 +15,39 @@ export const defaults = {
 };
 
 export class ContextBuilder {
-	buildContext(preferences) { 
+  buildContext(preferences) {
     const version = packageVersion;
     const ciCommand = getCiCommand(preferences.packageManager);
 
-    const preset = PRESET_MAP[preferences.preset] ?? PRESET_MAP['default'];
+    const preset = PRESET_MAP[preferences.preset] ?? PRESET_MAP.default;
+
+    const stylinNutin =
+      preferences.stylinNutin ?? preset.stylinNutin;
+
+    const i18n =
+      preferences.i18n ?? preset.i18n;
+
+    const deployHelper =
+      preferences.deployHelper ?? preset.deployHelper;
+
+    const testinNutin =
+      preferences.testinNutin ?? preset.testinNutin;
 
     return {
       projectName: preferences.projectName,
       packageManager: preferences.packageManager,
-      
-      template: preset.template,
-      stylinNutin: preferences.stylinNutin ?? preset.stylinNutin,
-      i18n: preferences.i18n ?? preset.i18n,
-      deployHelper: preferences.deployHelper ?? preset.deployHelper,
-      testinNutin: preferences.testinNutin ?? preset.testinNutin,
-      transition: preferences.transition,
 
-      ciCommand: ciCommand,
-      version: version
+      template: preset.template,
+
+      stylinNutin,
+      i18n,
+      deployHelper,
+      testinNutin,
+
+      hasDataAttributes: i18n || stylinNutin,
+
+      ciCommand,
+      version
     };
   }
 }

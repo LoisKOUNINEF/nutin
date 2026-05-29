@@ -1,33 +1,11 @@
 import { View, AppEventBus } from '../../../index.js';
 
 /**
- * handles all view rendering{{#if transition}} and transition animation logic{{/if}}.
+ * handles all view rendering}.
  */
 export class ViewRenderManager {
-  {{#if transition}}
-  public static renderAnimatedView(view: View): void {
-    const container = document.getElementById('app');
-    const el = view.render();
-    el.classList.add('app-view-transition');
-    container?.appendChild(el);
-    
-    requestAnimationFrame(() => {
-      el.classList.add('enter-active');
-    });
-  }
-
-  {{/if}}
   public static async transitionOutCurrentView(currentView: View | null): Promise<null> {
     if (!currentView) return null;
-    {{#if transition}}
-    const container = document.getElementById('app');
-    const el = container?.firstElementChild as HTMLElement;
-
-    if (el) {
-      el.classList.add('exit-active');
-      await this.delay(300); // match transition duration in _libs.scss
-    }
-    {{/if}}
     currentView.destroy();
     currentView.onExit();
     this.emitEvent('view-unmount', currentView.viewName);
@@ -43,12 +21,7 @@ export class ViewRenderManager {
     // Set route parameters before rendering
     view.setRouteParams(params);
 
-
-    {{#if transition}}
-    this.renderAnimatedView(view);
-    {{else}}
     view.render();
-    {{/if}}
     view.onEnter();
 
     this.emitEvent('view-mount', view.viewName);
@@ -58,10 +31,4 @@ export class ViewRenderManager {
   private static emitEvent(event: EventKey, viewName: string): void {
     AppEventBus.emit(event, viewName);
   }
-  {{#if transition}}
-
-  private static delay(ms: number): Promise<void> {
-    return new Promise(res => setTimeout(res, ms));
-  }
-  {{/if}}
 }

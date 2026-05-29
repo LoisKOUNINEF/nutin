@@ -104,17 +104,18 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
     this.addChildren();
   }
 
-{{#unless (and i18n stylinNutin)}}
-  protected parseDataAttributes(): void {
-    {{#if i18n}}
-    I18nHelper.parseI18nAttributes(this.element);
-    {{/if}}
-    {{#if stylinNutin}}
-    PipeHelper.parsePipeAttributes(this.element);
-    {{/if}}
-  }
+{{#if hasDataAttributes}}
+protected parseDataAttributes(): void {
+  {{#if i18n}}
+  I18nHelper.parseI18nAttributes(this.element);
+  {{/if}}
 
-{{/unless}}
+  {{#if stylinNutin}}
+  PipeHelper.parsePipeAttributes(this.element);
+  {{/if}}
+}
+
+{{/if}}
   protected autoBindEvents(): void {
     EventHelper.destroyEvents(this.eventListeners);
     this.eventListeners.length = 0;

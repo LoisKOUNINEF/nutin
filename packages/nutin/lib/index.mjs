@@ -24,8 +24,7 @@ export async function createApp() {
       ${chalk.cyan('• i18n')}${chalk.boldGray('           - i18n & json-based content')}
       ${chalk.cyan('• libs')}${chalk.boldGray('           - small UI library')}
       ${chalk.cyan('• deploy-helper')}${chalk.boldGray('  - Docker & deployment helpers')}
-      ${chalk.cyan('• testing')}${chalk.boldGray('        - built-in testing toolkit')}
-      ${chalk.cyan('• transition')}${chalk.boldGray('     - animated view transitions - NOTE: may break position:absolute and similar properties')}`,
+      ${chalk.cyan('• testing')}${chalk.boldGray('        - built-in testing toolkit')}`,
       (val) => val.split(',').map((s) => s.trim()).filter(Boolean)
     )
     .action(async (projectName, cliOptions) => {
@@ -33,11 +32,11 @@ export async function createApp() {
       const options = cliOptions.options ?? [];
       const normalizedOptions = {
         ...cliOptions,
+        hasOptions:   (options.length ?? 0) > 0,
         i18n:          options.includes('i18n') || undefined,
         deployHelper:  options.includes('deploy-helper') || undefined,
         stylinNutin:   options.includes('libs') || undefined,
         testinNutin:   options.includes('testing') || undefined,
-        transition:    options.includes('transition') || undefined,
       };
       print.blue('🚀 Welcome to nutin !');
       try {

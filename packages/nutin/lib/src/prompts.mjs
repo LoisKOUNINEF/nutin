@@ -36,9 +36,8 @@ export async function promptUser(initialName, cliOptions = {}) {
     packageManager = pmPreference.packageManager;
   }
 
-
   let preset = cliOptions.preset;
-  if (!preset) {
+  if (!preset && !cliOptions.hasOptions) {
     const presetChoice = await inquirer.prompt([
       {
         type: 'list',
@@ -56,6 +55,7 @@ export async function promptUser(initialName, cliOptions = {}) {
     packageManager,
     preset,
     i18n: cliOptions.i18n,
+    stylinNutin: cliOptions.stylinNutin,
     deployHelper: cliOptions.deployHelper,
     testinNutin: cliOptions.testinNutin,
     transition:   cliOptions.transition,
