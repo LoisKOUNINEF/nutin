@@ -2,6 +2,9 @@
 
 ## V1.4.0
 
+- Removed `Store`
+    - They created confusion and had questionable usefulness. Besides, services already handle it better.
+
 - Cleaner separation
     - `app` folder now exclusively contains application code, as it should. `components/common` folder now lives in `src/libs/components`/
     - `styles` folder is now exclusively dedicated to global application styles. Libraries styles now live alongside their components in `libs/*`, and built-in mixins and functions in `libs/scss`.

@@ -1,4 +1,4 @@
-declare type CoreEventMap = {
+declare type EventMap = {
     'navigate': string;
     'reload': string;
     'view-mount': string;
@@ -11,10 +11,6 @@ declare type CoreEventMap = {
     // Add other events and their payload types here
 };
 
-declare type StoreEventMap = {[ K in `store:${string}` ]: any; };
-
-// Merged event map
-declare type EventMap = CoreEventMap & StoreEventMap;
 declare type EventKey = keyof EventMap;
 
 // Prism

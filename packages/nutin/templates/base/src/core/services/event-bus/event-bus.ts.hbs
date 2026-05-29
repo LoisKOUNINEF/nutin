@@ -58,7 +58,10 @@ export class EventBus extends Service<EventBus> {
     if (!handlers) return;
 
     if (callback) {
-      this.handlers[event] = handlers.filter(h => h !== callback);
+      (this.handlers as Record<
+        EventKey,
+        Array<(data: EventMap[K]) => void>
+      >)[event] = handlers.filter(h => h !== callback);
     } else {
       delete this.handlers[event];
     }
@@ -76,8 +79,10 @@ export class EventBus extends Service<EventBus> {
     if (!this.handlers[event]) {
       this.handlers[event] = [];
     }
-    this.handlers[event]!.push(callback);
-    this._subscriptions.push({ event, callback, once });
+    (
+      this.handlers as Record<EventKey, Array<(data: EventMap[K]) => void>>
+    )[event].push(callback);
+    this._subscriptions.push({ event, callback, once } as Subscription);
   }
 
   private cleanupEventListeners = (): void => {

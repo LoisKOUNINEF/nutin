@@ -74,6 +74,7 @@ class Router extends Service<Router> {
     
     NavigationManager.updateMetaContent(this._currentView);
     NavigationManager.updateHistory(normalizedPath, currentPath, pushState);
+    window.scrollTo({ top:0 });
   }
 
   public getCurrentParams(): Record<string, string> {
