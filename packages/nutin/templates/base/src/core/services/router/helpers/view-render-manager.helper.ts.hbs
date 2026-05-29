@@ -29,6 +29,7 @@ export class ViewRenderManager {
     }
     {{/if}}
     currentView.destroy();
+    currentView.onExit();
     this.emitEvent('view-unmount', currentView.viewName);
     return null;
   }
@@ -42,13 +43,14 @@ export class ViewRenderManager {
     // Set route parameters before rendering
     view.setRouteParams(params);
 
+
     {{#if transition}}
     this.renderAnimatedView(view);
-
     {{else}}
     view.render();
-
     {{/if}}
+    view.onEnter();
+
     this.emitEvent('view-mount', view.viewName);
     return view;
   }
