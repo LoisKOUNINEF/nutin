@@ -6,14 +6,16 @@
     - `app` folder now exclusively contains application code, as it should. `components/common` folder now lives in `src/libs/components`/
     - `styles` folder is now exclusively dedicated to global application styles. Libraries styles now live alongside their components in `libs/*`, and built-in mixins and functions in `libs/scss`.
 
-- BaseComponent / Component / View
+- Base classes
 *If you wonder why those weren't there from the beginning, the answer's 42.*
-    - Cleaner separation of concerns.
+    - BaseComponent / Component / View.
         - BaseComponent responsibilities: Render lifecycle, Hydration, DOM lifecycle, Invalidation, Event subscriptions (DOM and bus), Teardown, Render guard, Composition orchestration
         - Component responsibilities: Props (className, style, data-bindings, dynamic buttons), Config + defaults + normalization, Template generation via `templateFn`
         - View responsibilities: Route params, Navigation hooks (onEnter/onExit), Metadata policies, View identity (viewName)
-    - Proper lifecycle & lifecycle hooks
-    - EventBus methods with automatic unsubscribe: `listen(event, callback`, `listenToRenderEvents(events[])`. AppEventBus can still be used directly if needed (`once`...) but must be unsubscribed manually via `onBeforeDestroy` hook.
+        - Proper lifecycle & lifecycle hooks
+        - EventBus methods with automatic unsubscribe: `listen(event, callback`, `listenToRenderEvents(events[])`. AppEventBus can still be used directly if needed (`once`...) but must be unsubscribed manually via `onBeforeDestroy` hook.
+    - Service
+        - Now exposes a single getInstance() method that accepts arguments, only on first call.
 
 ```ts
 onBeforeRender

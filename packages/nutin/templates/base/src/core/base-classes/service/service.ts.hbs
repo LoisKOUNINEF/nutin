@@ -1,15 +1,15 @@
 /**
- * Abstract  class for implementing the Singleton pattern.
+ * Abstract class for implementing the Singleton pattern.
  * Supports constructor parameters for initialization.
  */
 export abstract class Service<T extends Service<T>> {
   private static _instances = new Map<Function, any>();
   private static _instantiating = new Set<Function>();
   private _cleanupCallbacks: (() => void)[] = [];
-  
+
   constructor(...args: any[]) {
     const constructor = this.constructor as new (...args: any[]) => T;
-    
+
     if (!Service._instantiating.has(constructor)) {
       throw new Error(
         `${constructor.name} is a Service. Use ${constructor.name}.getInstance() instead.`
@@ -19,31 +19,39 @@ export abstract class Service<T extends Service<T>> {
     window.addEventListener('beforeunload', this.dispose);
   }
 
-  public static createInstance<T extends Service<T>>(
-    constructor: new (...args: any[]) => T,
+  /**
+   * Returns the singleton instance, creating it with the provided args if it
+   * doesn't exist yet. Throws if args are passed to an already-initialized instance,
+   * preventing silent re-initialization mismatches.
+   */
+  public static getInstance<T extends Service<T>>(
+    this: new (...args: any[]) => T,
     ...args: any[]
   ): T {
-    if (!Service._instances.has(constructor)) {
-      Service._instantiating.add(constructor);
-      Service._instances.set(constructor, new constructor(...args));
-      Service._instantiating.delete(constructor);
-    }
-    return Service._instances.get(constructor);
-  }
+    const alreadyExists = Service._instances.has(this);
 
-  public static getInstance<T extends Service<T>>(this: new () => T): T {
-    if (!Service._instances.has(this)) {
+    if (alreadyExists && args.length > 0) {
+      throw new Error(
+        `${this.name} is already initialized. ` +
+        `getInstance() was called with arguments on an existing instance, ` +
+        `which would silently ignore them. ` +
+        `Call getInstance() without arguments to retrieve the existing instance.`
+      );
+    }
+
+    if (!alreadyExists) {
       Service._instantiating.add(this);
-      Service._instances.set(this, new this());
+      Service._instances.set(this, new this(...args));
       Service._instantiating.delete(this);
     }
+
     return Service._instances.get(this);
   }
 
   public static hasInstance<T extends Service<T>>(
     constructor: new (...args: any[]) => T
   ): boolean {
-    return Service._instances.has(constructor);  
+    return Service._instances.has(constructor);
   }
 
   public static async destroy<T extends Service<T>>(
@@ -65,7 +73,7 @@ export abstract class Service<T extends Service<T>> {
   public static async destroyAll(): Promise<void> {
     const destroyPromises = Array.from(Service._instances.values())
       .map(instance => instance.onDestroy());
-    
+
     await Promise.all(destroyPromises);
     Service._instances.clear();
     Service._instantiating.clear();
@@ -76,10 +84,10 @@ export abstract class Service<T extends Service<T>> {
   }
 
   /**
-   * For async and custom cleanup operations
+   * For async and custom cleanup operations.
    */
-  protected onDestroy<T extends Service<T>>(this: () => T): void {
-    console.log(`No onDestroy operations.`)
+  protected onDestroy(): void {
+    console.log(`No onDestroy operations.`);
   }
 
   private autoBindMethods(): void {

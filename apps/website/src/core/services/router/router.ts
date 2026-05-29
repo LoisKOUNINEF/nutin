@@ -1,4 +1,4 @@
-import { View, AppEventBus } from '../../index.js';
+import { View, AppEventBus, Service } from '../../index.js';
 import { Routes, RouteConfig, RouteGuardsManager, GuardResult } from './helpers/route-guard-manager.helper.js';
 import { ViewRenderManager } from './helpers/view-render-manager.helper.js';
 import { NavigationManager } from './helpers/navigation-manager.helper.js';
@@ -16,13 +16,27 @@ export interface RouteMatch {
   params: Record<string, string>;
 }
 
-class Router {
+class Router extends Service<Router> {
   private _currentView: View | null = null;
   private _currentParams: Record<string, string> = {};
+  private onPopState = () => this.handlePopState();
+  private onNavigate = (path: string) => this.navigate(path);
+  private onReload = () => this.reload();
+  private _busSubscriptions: Array<[EventKey, (data: any) => void]> = [];
 
   constructor(private routes: Routes) {
+    super();
     this.initializeEventListeners();
     this.navigate(NavigationManager.getCurrentPath());
+    this.registerCleanup(this.removeEventListeners)
+  }
+
+  public removeEventListeners(): void {
+    this._busSubscriptions.forEach(([event, callback]) => {
+      AppEventBus.off(event, callback);
+    });
+    this._busSubscriptions = [];
+    window.removeEventListener('popstate', this.onPopState);
   }
 
   public async reload(): Promise<void> {
@@ -71,9 +85,11 @@ class Router {
   }
 
   private initializeEventListeners(): void {
-    window.addEventListener('popstate', () => this.handlePopState());
-    AppEventBus.subscribe('navigate', (path: string) => this.navigate(path));
-    AppEventBus.subscribe('reload', () => this.reload());
+    window.addEventListener('popstate', this.onPopState);
+    AppEventBus.subscribe('navigate', this.onNavigate);
+    this._busSubscriptions.push(['navigate', this.onNavigate]);
+    AppEventBus.subscribe('reload', this.onReload);
+    this._busSubscriptions.push(['reload', this.onReload]);
   }
 
   private handlePopState(): void {
@@ -141,4 +157,4 @@ class Router {
   }
 }
 
-export const AppRouter = (routes: Routes) => new Router(routes);
+export const AppRouter = (routes: Routes) => Router.getInstance(routes);

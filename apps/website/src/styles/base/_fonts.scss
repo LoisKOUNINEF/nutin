@@ -62,26 +62,6 @@
 
 @font-face {
   font-family: 'Source Sans Pro';
-  src: url('/assets/fonts/source-sans-pro/woff/source-sans-pro-500-normal.woff2') format('woff2'),
-       url('/assets/fonts/source-sans-pro/woff/source-sans-pro-500-normal.woff') format('woff'),
-       url('/assets/fonts/source-sans-pro/ttf/source-sans-pro-500-normal.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Source Sans Pro';
-  src: url('/assets/fonts/source-sans-pro/woff/source-sans-pro-500-italic.woff2') format('woff2'),
-       url('/assets/fonts/source-sans-pro/woff/source-sans-pro-500-italic.woff') format('woff'),
-       url('/assets/fonts/source-sans-pro/ttf/source-sans-pro-500-italic.ttf') format('truetype');
-  font-weight: 500;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Source Sans Pro';
   src: url('/assets/fonts/source-sans-pro/woff/source-sans-pro-600-normal.woff2') format('woff2'),
        url('/assets/fonts/source-sans-pro/woff/source-sans-pro-600-normal.woff') format('woff'),
        url('/assets/fonts/source-sans-pro/ttf/source-sans-pro-600-normal.ttf') format('truetype');
