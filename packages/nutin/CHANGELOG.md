@@ -38,6 +38,9 @@ onExit
 - TestinNutin
     - Added `it.todo` global
 
+- i18n
+    - Now uses URL: aligns with common practices & allows SEO to render static HTML files for each language.
+
 - CLI
     - Rework app creation flow (again)
         - 

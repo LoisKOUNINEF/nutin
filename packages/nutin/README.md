@@ -59,3 +59,8 @@ npx @nutin/cli
 
 - Docs on [website](https://www.nutin.org).
 - Docs on [repository](https://github.com/LoisKOUNINEF/nutin/tree/main/docs).
+
+## Resources
+
+- [Test page performance](https://pagespeed.web.dev)
+- [Test security headers (nginx)](https://securityheaders.com/)
