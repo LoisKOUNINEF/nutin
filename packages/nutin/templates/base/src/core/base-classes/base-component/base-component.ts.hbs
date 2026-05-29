@@ -61,8 +61,8 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
         this.generateTemplate(),
         this.trustLevel
       );
-      this.hydrate();
       this.compose();
+      this.hydrate();
       this.autoBindEvents()
       this.onAfterRender();
       return this.element;
@@ -95,11 +95,11 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
 
   protected hydrate(): void {
     this.parseDataAttributes();
+    DomHelper.cleanupOptionalContent();
   }
 
   protected compose(): void {
     this.addChildren();
-    DomHelper.cleanupOptionalContent();
   }
 
   protected parseDataAttributes(): void {

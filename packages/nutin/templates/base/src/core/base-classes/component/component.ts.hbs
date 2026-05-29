@@ -87,7 +87,7 @@ export abstract class Component<T extends HTMLElement = HTMLElement, K = any> ex
     });
   }
 
-  protected override beforeRender(): void {
+  protected override onBeforeRender(): void {
     this.applyProps();
   }
 
