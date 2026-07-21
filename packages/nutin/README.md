@@ -4,8 +4,8 @@
 Includes essential features out of the box.                          
 *Pure TypeScript, SASS, and DOM-driven components — zero runtime dependencies.*
 
-- Required : Node >=18 
-- **JSDOM requirement** (testin-nutin companion) : `{ node: '^20.19.0 || ^22.12.0 || >=24.0.0' }`
+- Required : Node >=22 
+- **JSDOM requirement** (testin-nutin companion) : `{ node: '^22.12.0 || >=24.0.0' }`
 
 ## Install
 

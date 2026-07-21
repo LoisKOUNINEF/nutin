@@ -1,6 +1,76 @@
 # Changelog
 
+<<<<<<< Updated upstream
 ## V1.3.1
+=======
+## 2.0.0
+
+- EventBus
+    - Nutin internal events are no longer defined in `globals.d.ts` - new interface `AppEvent` only for app-level events. Payload types are now objects (clearer).
+    - Now exposes domain facades for navigation, lifecycle, and overlays events. Subscribing functions (`on*`) return a closure function to abstract unsubscription.
+    - EventBus remains directly usable in app-level events / domain facades. Naming convention: `domain:event-name`.
+
+```ts
+// emit
+Navigation.navigateTo('path');
+
+// closure
+const unsub = Navigation.onNavigate(this.doStuff);
+
+// onDestroy
+unsub()
+```
+
+- Removed `Store`
+    - It created confusion and had questionable usefulness. Besides, services already handles what Store was supposed to.
+
+- Cleaner separation
+    - `app` folder now exclusively contains application code, as it should. `components/common` folder now lives in `src/libs/components`/
+    - `styles` folder is now exclusively dedicated to global application styles. Libraries styles now live alongside their components in `libs/*`, and built-in mixins and functions in `libs/scss`.
+
+- Base classes
+    - Cleaner responsibilities:
+        - BaseComponent responsibilities: Render lifecycle, Hydration, DOM lifecycle, Invalidation, Event subscriptions (DOM and bus), Teardown, Render guard, Composition orchestration
+        - Component responsibilities: Props (className, style, data-bindings, dynamic buttons), Config + defaults + normalization, Template generation via `templateFn`
+        - View responsibilities: Route params, Navigation hooks (onEnter/onExit), Metadata policies, View identity (viewName)
+    - EventBus methods with automatic unsubscribe: `listen(event, callback`, `listenToRenderEvents(events[])`. AppEventBus can still be used directly if needed (`once`...) but must be unsubscribed manually via `onBeforeDestroy` hook.
+    - Proper lifecycle hooks
+```ts
+onBeforeRender()
+onAfterRender()
+onBeforeDestroy()
+onAfterDestroy()
+
+// existing View hooks - called by router
+onEnter()
+onExit()
+```
+- Service
+    - Now exposes a single `getInstance()` method that accepts arguments, only on first call.
+
+
+- StylinNutin
+    - Can now use Tailwind (v4) as an optional utility layer alongside SASS.
+    - Added stateless, accessibility-focused components library.
+    - Added forms, formGroup & formControl (Validators)
+    - globally scoped stylesheets, co-located with feature files for organizational convenience. **Use unique class names.** *Note: Nutin's naming convention encourages prefixes `home__header`*
+    - removed utility classes: they created confusion and had questionable usefulness. mixins now live in `libs/scss/_mixins-nutin.scss`.
+
+- Deployment Helper
+    - SEO: `config/seo-routes.json` is used by production builder to generate static HTML files to be served to bots, as well as robots.txt and sitemap.xml.
+
+- TestinNutin
+    - Added `it.todo` global
+
+- i18n
+    - Now uses URL: aligns with common practices & allows SEO to render static HTML files for each language.
+
+- CLI
+    - App creation flow reworked (again, but for the best)
+        Cleaner presets & `--options` flag accepting comma-separated options string.
+
+## 1.3.1
+>>>>>>> Stashed changes
 
 - Minor features:
     - New BaseComponent protected method.
@@ -34,7 +104,7 @@
             CI/CD: Minimal + deployment helpers
         - Remaining flags: `--i18n`, `--deploy-helper`, `--testin-nutin`, `--transition`
 
-## V1.3.0
+## 1.3.0
 
 Version 1.3.0 marks a stability milestone with various improvements and refinements, making this the recommended version for new projects.
 
@@ -69,11 +139,11 @@ Version 1.3.0 marks a stability milestone with various improvements and refineme
 - TestinNutin
     - Now applies `setupJsdom()` beforeAll (was beforeEach) and `teardownJsdom()` afterAll (was afterEach) in `test-queue.js` (improved efficiency / speed)
 
-## V1.2.3
+## 1.2.3
 
 - `nginx.conf` : fixed multi-line CSP map warning (single line map)
 
-## V1.2.2
+## 1.2.2
 
 - Fixed Nginx security headers in child location blocks.
 
@@ -81,7 +151,7 @@ Version 1.3.0 marks a stability milestone with various improvements and refineme
 
 - Removed ghost files
 
-## V1.2.1
+## 1.2.1
 
 - Builder
 
@@ -109,7 +179,7 @@ Version 1.3.0 marks a stability milestone with various improvements and refineme
 
 - Added explicit chokidar devDependency (sass & live-server transitive).
 
-## V1.2.0
+## 1.2.0
 
 - Fixed `npm run dev` command. Added middleware to reload nested routes.
 
@@ -140,7 +210,7 @@ Version 1.3.0 marks a stability milestone with various improvements and refineme
 - stylin-nutin (generator)
     - When generating a component, prompts (boolean) to generate a `_component-name.scss` file in `styles/components` (forwarded by `styles/components/_index.scss`).
 
-## V1.1.0
+## 1.1.0
 
 - Added index access in CatalogConfig. Use with `config.index`.
 ```typescript
@@ -159,10 +229,10 @@ type CatalogItemConfig<T = any> =
 
 **Notes:** *Primitive data arrays (string, number, etc) needs to be accessed with `config.value`.*
 
-## V1.0.2
+## 1.0.2
 
 - Partially fixed `npm run dev` script when using internal templates. *Page still needs to be reload manually from time to time.*
 
-## V1.0.1
+## 1.0.1
 
 - Fixed typo issue when using i18n feature
