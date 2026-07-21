@@ -1,8 +1,5 @@
 # Changelog
 
-<<<<<<< Updated upstream
-## V1.3.1
-=======
 ## 2.0.0
 
 - EventBus
@@ -69,8 +66,7 @@ onExit()
     - App creation flow reworked (again, but for the best)
         Cleaner presets & `--options` flag accepting comma-separated options string.
 
-## 1.3.1
->>>>>>> Stashed changes
+## 2.0.0
 
 - Minor features:
     - New BaseComponent protected method.
