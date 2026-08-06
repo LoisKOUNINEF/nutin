@@ -1,11 +1,6 @@
 # [nutin](https://www.nutin.org)
 
-**Build SPAs by understanding SPAs. A minimal frontend toolkit crafted for learning and lean applications.**                    
-Includes essential features out of the box.                          
-*Pure TypeScript, SASS, and DOM-driven components — zero runtime dependencies.*
-
-- Required : Node >=22 
-- **JSDOM requirement** (testin-nutin companion) : `{ node: '^22.12.0 || >=24.0.0' }`
+**nutin aims to bridge the gap between vanilla web development and large frameworks.**
 
 ## Install
 
