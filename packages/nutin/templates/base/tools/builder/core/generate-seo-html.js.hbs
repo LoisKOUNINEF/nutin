@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { exit } from 'process';
 import { PATHS } from './paths.js';
-import { print, isVerbose } from '../../utils/index.js';
+import { print, builderConfig } from '../../utils/index.js';
 
 function escape(str) {
   return str
@@ -146,7 +146,7 @@ function processRoute(template, baseUrl, lang, route) {
       fs.mkdirSync(outputDir, { recursive: true });
       fs.writeFileSync(outputPath, html, 'utf-8');
 
-      if (isVerbose) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
+      if (builderConfig.isExhaustive) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
     }
   } else {
     const { title, description } = route;
@@ -180,7 +180,7 @@ function processRoute(template, baseUrl, lang, route) {
     fs.mkdirSync(outputDir, { recursive: true });
     fs.writeFileSync(outputPath, html, 'utf-8');
 
-    if (isVerbose) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
+    if (builderConfig.isExhaustive) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
   }
 }
 
@@ -204,7 +204,7 @@ function generateSeoHtml() {
 
 try {
   generateSeoHtml();
-  if (isVerbose) print.boldInfo('✅ SEO HTML generation complete.');
+  if (builderConfig.isVerbose) print.boldInfo('✅ SEO HTML generation complete.');
 } catch (err) {
   print.boldError(`[generate-seo-html] Unexpected error: ${err.message}`);
   exit(1);

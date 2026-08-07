@@ -1,17 +1,18 @@
 export default {
   inlineTemplates: false,
+  i18n: true,
+  tailwind: false,
   generator: {
-    generateLocales: false,
-    generateStylesheet: false,
+    generateLocales: false, // generates locales/*.json for components / views
+    generateStylesheet: false, // generates .scss for components / views
   },
   builder: {
-    // generateSEO: true,
+    generateSEO: true,
     sass: {
       paths: [ 
         'base', 
       ], // in styles/
     },
-    // tailwind: false,
     esbuild: {
         bundle: true,
         minify: true,
@@ -33,15 +34,13 @@ export default {
       // BROTLI OPTIONAL
       // brotli: false,
     },
-    verbose: false,
-    // logLevel: 0, // 0 = logs start / finish; 1 = logs steps; 2 = logs all.
+    logLevel: 0, // 0 = logs start / finish; 1 = logs steps; 2 = logs all.
   },
   {{#if testinNutin}}
   testinNutin: {
       origins: [
-      'src/app', // actual app code
-      // 'src/core', // toolkit core logic
-      // 'testin-nutin/core/tests', // test globals
+      'src/app',
+      // 'src/core', // Nutin core logic - uncomment to test your own modifications
     ],
     jsdomOptions: {
       runScripts: false,     // or true ("dangerously") if needed

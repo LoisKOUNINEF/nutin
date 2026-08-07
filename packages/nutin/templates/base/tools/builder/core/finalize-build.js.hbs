@@ -1,12 +1,12 @@
-import { print, isProd, isVerbose } from "../../utils/index.js";
+import { print, builderConfig } from "../../utils/index.js";
 import fs from 'fs';
 import path from 'path';
 import { PATHS } from "./paths.js";
 
 function finalizeBuild() {
-  if (isProd) removeFoldersAfterBundle();
+  if (builderConfig.isProd) removeFoldersAfterBundle();
   replaceDir(PATHS.temp, PATHS.build);
-  if (isVerbose) print.boldInfo('✅ Build finalized.');
+  if (builderConfig.isVerbose) print.boldInfo('✅ Build finalized.');
 }
 
 function removeFoldersAfterBundle() {

@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { exit } from 'process';
 import { PATHS } from './paths.js';
-import { print, isVerbose } from '../../utils/index.js';
+import { builderConfig. } from '../../utils/index.js';
 
 function generateRobotsTxt() {
   const seoConfigPath = path.join(PATHS.temp, 'config', 'seo.json');
@@ -50,12 +50,12 @@ function generateRobotsTxt() {
   const outputPath = path.join(PATHS.tempSource, 'robots.txt');
   fs.writeFileSync(outputPath, lines.join('\n') + '\n', 'utf-8');
 
-  if (isVerbose) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
+  if (builderConfig.isExhaustive) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
 }
 
 try {
   generateRobotsTxt();
-  if (isVerbose) print.boldInfo('✅ robots.txt generation complete.');
+  if (builderConfig.isVerbose) print.boldInfo('✅ robots.txt generation complete.');
 } catch (err) {
   print.boldError(`[generate-robots-txt] Unexpected error: ${err.message}`);
   exit(1);

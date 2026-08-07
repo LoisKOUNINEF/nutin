@@ -38,6 +38,32 @@ function getInstallCommand(packageManager) {
   }
 }
 
+export function getDeployHelperScripts({ projectName, packageManager }) {
+  return {
+    "docker:build": `docker build -t ${projectName} -f tools/deployment/Dockerfile .`,
+    "docker:run": `docker run -p 9090:9090 ${projectName}:latest`,
+    "patch": `${packageManager} version patch -m 'CI/CD: Bump version to %s'`,
+    "minor": `${packageManager} version minor -m 'CI/CD: Bump version to %s'`,
+    "major": `${packageManager} version major -m 'CI/CD: Bump version to %s'`
+  };
+}
+
+export function getTestinNutinScripts({ packageManager }) {
+  return {
+    "test": "node testin-nutin/runner.js",
+    "test:rebuild": `${packageManager} run build && ${packageManager} run test`,
+    "test:watch": `${packageManager} run build && node testin-nutin/watch-tests.js`
+  };
+}
+
+export function getTestinNutinExtras() {
+  return {
+    devDependencies: { "jsdom": "^26.1.0" },
+    imports: { "#root/*.js": "./*.js" },
+    engines: { "node": ">=20.19.0" }
+  };
+}
+
 function getScripts(context) {
   const { testinNutin, packageManager, projectName, deployHelper } = context;
 
@@ -50,24 +76,10 @@ function getScripts(context) {
     "generate": "node tools/generator/generator.js"
   };
 
-  const deployHelperScripts = {
-    "docker:build": `docker build -t ${projectName} -f tools/deployment/Dockerfile .`,
-    "docker:run": `docker run -p 9090:9090 ${projectName}:latest`,
-    "patch": `${packageManager} version patch -m 'CI/CD: Bump version to %s'`,
-    "minor": `${packageManager} version minor -m 'CI/CD: Bump version to %s'`,
-    "major": `${packageManager} version major -m 'CI/CD: Bump version to %s'`
-  }
-
-  const testinNutinScripts = {
-    "test": "node testin-nutin/runner.js",
-    "test:rebuild": `${packageManager} run build && ${packageManager} run test`,
-    "test:watch": `${packageManager} run build && node testin-nutin/watch-tests.js`
-  }
-
   let scripts = { ...baseScripts };
 
-  if (testinNutin) scripts = { ...scripts, ...testinNutinScripts };
-  if (deployHelper) scripts = { ...scripts, ...deployHelperScripts };
+  if (testinNutin) scripts = { ...scripts, ...getTestinNutinScripts({ packageManager }) };
+  if (deployHelper) scripts = { ...scripts, ...getDeployHelperScripts({ projectName, packageManager }) };
 
   return scripts;
 }
@@ -100,11 +112,9 @@ export async function generatePackageJson(projectPath, context) {
     }),
     scripts,
     devDependencies,
-    ...(testinNutin && {
-      "engines": {
-        "node": ">=20.19.0"
-      }
-    })
+    "engines": {
+      "node": ">=22"
+    }
   };
   
   await fs.writeJSON(path.join(projectPath, 'package.json'), packageJson, { spaces: 2 });

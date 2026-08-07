@@ -1,96 +1,89 @@
-import { Service } from "../../index.js";
+import { BaseComponent, BaseComponentOptions } from '../../index.js';
 
-export type IEventBus = InstanceType<typeof EventBus>;
-
-export type Subscription<K extends EventKey = EventKey> = {
-  event: K;
-  callback: (data: EventMap[K]) => void;
-  once?: boolean;
-};
-
-class EventBus extends Service<EventBus> {
-  private _subscriptions: Subscription[] = [];
-
-  constructor() {
-    super();
-    this.registerCleanup(this.cleanupEventListeners);
-  }
-
-  private handlers: {
-    [K in EventKey]?: Array<(data: EventMap[K]) => void>;
-  } = {};
-
-  public subscribe<K extends EventKey>(
-    event: K,
-    callback: (data: EventMap[K]) => void
-  ): void {
-    this.addHandler(event, callback, false);
-  }
-
-  public once<K extends EventKey>(
-    event: K,
-    callback: (data: EventMap[K]) => void
-  ): void {
-    this.addHandler(event, callback, true);
-  }
-
-  public emit<K extends EventKey>(event: K, data?: EventMap[K]): void {
-    const callbacks = this.handlers[event];
-    if (!callbacks) return;
-
-    callbacks.slice().forEach(callback => {
-      callback(data!);
-
-      const subIndex = this._subscriptions.findIndex(
-        sub => sub.event === event && sub.callback === callback && sub.once
-      );
-      if (subIndex > -1) {
-        this.off(event, callback);
-      }
-    });
-  }
-
-  public off<K extends EventKey>(
-    event: K,
-    callback?: (data: EventMap[K]) => void
-  ): void {
-    const handlers = this.handlers[event];
-    if (!handlers) return;
-
-    if (callback) {
-      (this.handlers as Record<
-        EventKey,
-        Array<(data: EventMap[K]) => void>
-      >)[event] = handlers.filter(h => h !== callback);
-    } else {
-      delete this.handlers[event];
-    }
-
-    this._subscriptions = this._subscriptions.filter(
-      sub => sub.event !== event || (callback && sub.callback !== callback)
-    );
-  }
-
-  private addHandler<K extends EventKey>(
-    event: K,
-    callback: (data: EventMap[K]) => void,
-    once: boolean
-  ): void {
-    if (!this.handlers[event]) {
-      this.handlers[event] = [];
-    }
-    (
-      this.handlers as Record<EventKey, Array<(data: EventMap[K]) => void>>
-    )[event].push(callback);
-    this._subscriptions.push({ event, callback, once } as Subscription);
-  }
-
-  private cleanupEventListeners = (): void => {
-    this._subscriptions.forEach(({ event, callback }) => {
-      this.off(event, callback);
-    });
-    this._subscriptions = [];
-  };
+export interface ViewOptions extends BaseComponentOptions {
+  viewName?: string;
 }
 
-export const AppEventBus = EventBus.getInstance();
+export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComponent<T> {
+  public viewName: string;
+  protected routeParams: Record<string, string> = {};
+  private _template: string;
+
+  constructor({
+    template,
+    tagName = 'section',
+    mountTarget = '#app',
+    viewName,
+    trustLevel,
+  }: ViewOptions) {
+    super({ mountTarget, tagName, trustLevel });
+    this._template = template ?? '';
+    this.viewName = viewName || this.getKebabCaseViewName();
+  }
+
+  protected override generateTemplate(): string {
+    return this._template;
+  }
+
+  public setRouteParams(params: Record<string, string>): void {
+    this.routeParams = { ...params };
+  }
+
+  public getRouteParams(): Record<string, string> {
+    return { ...this.routeParams };
+  }
+
+  public getRouteParam(key: string): string | undefined {
+    return this.routeParams[key];
+  }
+
+  public hasRouteParam(key: string): boolean {
+    return key in this.routeParams && this.routeParams[key] !== undefined;
+  }
+
+/**
+ * Hide navbar
+ * Container div must have id="navbar"
+ */
+  protected hideNavbar(): void {
+    const navbar = document.getElementById('navbar') as HTMLElement;
+    if (navbar) navbar.style = 'display: none';
+  }
+
+/**
+ * Hide footer
+ * Container div must have id="footer"
+ */
+  protected hideFooter(): void {
+    const footer = document.getElementById('footer') as HTMLElement;
+    if (footer) footer.style = 'display: none';
+  }
+
+/**
+ * Reveal navbar
+ * Container div must have id="navbar"
+ */
+  protected revealNavbar(): void {
+    const navbar = document.getElementById('navbar') as HTMLElement;
+    if (navbar) navbar.style = 'display: block';
+  }
+
+/**
+ * Reveal footer
+ * Container div must have id="footer"
+ */
+  protected revealFooter(): void {
+    const footer = document.getElementById('footer') as HTMLElement;
+    if (footer) footer.style = 'display: block';
+  }
+
+  private getKebabCaseViewName(): string {
+    const className = this.constructor.name;
+    const baseName = className.replace(/View$/, '');
+    return baseName.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+  }
+
+  // Navigation hooks — called by router only, never by render lifecycle
+  public onEnter(): void {}
+  public onExit(): void {}
+}

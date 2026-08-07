@@ -3,7 +3,8 @@
 import path from "path";
 import { allFormats, getLastWord, print, promptBoolean } from "../utils/index.js";
 import { generateFile, appendToIndex, generateJson } from "./handle-file.js";
-import { serviceTemplate, componentTemplate, viewTemplate{{#if !config.inlinetemplate}}, htmlTemplate{{/if}} } from "./templates/index.js";
+import { serviceTemplate, componentTemplate, viewTemplate, htmlTemplate } from "./templates/index.js";
+import nutinConfig from "../../nutin.config.js";
 
 // Constants and Setup
 const [, , rawType, rawFullPath] = process.argv;
@@ -32,17 +33,15 @@ const creators = {
   component: async (name, targetPath) => {
     const suffix = 'component';
     print.section(`Generating component: ${name.capitalized}`);
-    const doGenerateStylesheet = await promptBoolean('Generate component\'s stylesheet ?');
 
     try {
-      if (doGenerateStylesheet) generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
+      if (nutinConfig.generator.generateStylesheet) generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
       generateFile({ name, targetPath, templateFn: componentTemplate, suffix: suffix });
-      {{#if 1config.inlineTemplate}}
-      generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: suffix, extension: 'html' });
-      {{/if}}
-      {{#if config.generateLocales}}
-      generateJson({ targetPath, name });
-      {{/if}}
+      if (!nutinConfig.inlineTemplates) generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: suffix, extension: 'html' });
+      if (nutinConfig.generator.generateLocale) {
+        if (!nutinConfig.i18n) print.warn('⚠️ Enable i18n in nutin.config.js to generate locales.');
+        else generateJson({ targetPath, name });
+      }
       appendToIndex({ name, targetPath, suffix: suffix });
     } catch (err) {
       handleError("Failed to generate component", err);
@@ -51,17 +50,15 @@ const creators = {
   view: async (name, targetPath) => {
     const suffix = 'view';
     print.section(`Generating view: ${name.capitalized}`);
-    const doGenerateStylesheet = await promptBoolean('Generate view\'s stylesheet ?');
 
     try {
-      if (doGenerateStylesheet) generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
+      if (nutinConfig.generator.generateStylesheet) generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
       generateFile({ name, targetPath, templateFn: viewTemplate, suffix: suffix });
-      {{#if 1config.inlineTemplate}}
-      generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: suffix, extension: 'html' });
-      {{/if}}
-      {{#if config.generateLocales}}
-      generateJson({ targetPath, name });
-      {{/if}}
+      if (!nutinConfig.inlineTemplates) generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: suffix, extension: 'html' });
+      if (nutinConfig.generator.generateLocale) {
+        if (!nutinConfig.i18n) print.warn('⚠️ Enable i18n in nutin.config.js to generate locales.');
+        else generateJson({ targetPath, name });
+      }
       appendToIndex({name, targetPath, suffix: suffix });
     } catch (err) {
       handleError("Failed to generate view", err);
@@ -74,7 +71,7 @@ const create = creators[type.kebab];
 
 if (create) {
   await create(name, targetPath);
-  print.boldSuccess(`\n${type.capitalized} ${name.capitalized} has been generated.\n`)
+  print.boldSuccess(`\n${type.capitalized} ${name.capitalized} generated in ${targetPath}.\n`)
 } else {
   showUsageAndExit(`Unsupported type: '${type.kebab}'`);
 }

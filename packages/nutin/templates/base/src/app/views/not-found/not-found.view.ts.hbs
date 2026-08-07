@@ -1,28 +1,13 @@
-import { AppEventBus, ComponentConfig, View } from '../../../core/index.js';
-import { ButtonComponent } from '../../components/index.js';
+import { Navigation, ComponentConfig, View } from '../../../core/index.js';
 
-const template = `{{#if externalTemplates}}__TEMPLATE_PLACEHOLDER__{{else}}<div style="display:flex;justify-content:center;align-items:center;flex-direction:column">
-  <h1 style="font-size:2rem;font-weight:bold;">Page Not Found</h1>
-  <img src="/assets/images/logo-small-trans.avif" width=250 height=250 alt="nutin's small logo with a growing plant.">
-  <div data-component="home"></div>
-</div>{{/if}}`;
+const template = `__TEMPLATE_PLACEHOLDER__`;
 
 export class NotFoundView extends View {
   constructor() {
     super({template});
   }
 
-  childConfigs(): ComponentConfig[] {
-    const btnStyles = 'background-color:inherit;font-size:large;font-style:italic;padding-top:1rem;padding-bottom:1rem;'
-    return [
-      { 
-        selector: 'home',
-        factory: (el) => new ButtonComponent(el, { textContent: 'Back to home', callback: () => this.handleHome(), style: btnStyles })
-      },
-    ]
-  }
-
-  handleHome() {
-    AppEventBus.emit('navigate', '/');
+  private handleHome() {
+    Navigation.navigateTo('/');
   }
 }

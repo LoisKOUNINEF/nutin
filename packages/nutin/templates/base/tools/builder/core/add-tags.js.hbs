@@ -1,8 +1,8 @@
-import { print, isProd } from '../../utils/index.js';
+import { print, builderConfig } from '../../utils/index.js';
 import { writeFile } from 'fs/promises';
 
 export async function addTags(htmlContent, filePath) {
-  const scriptSrc = isProd ? "bundle.js" : "app/main.js";
+  const scriptSrc = builderConfig.isProd ? "bundle.js" : "app/main.js";
   
   const tags = [
     { type: 'stylesheet', href: 'main.css', position: 'head' },

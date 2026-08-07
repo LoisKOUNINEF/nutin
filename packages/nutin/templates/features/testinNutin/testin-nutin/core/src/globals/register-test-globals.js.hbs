@@ -1,5 +1,5 @@
 import { print, addTest } from '../../index.js';
-import config from '#root/testin-nutin.config.js';
+import config from '#root/nutin.config.js';
 import { setupJsdom, teardownJsdom, resetDom, flushPromises } from './jsdom-setup.js';
 import './assertion-lib.js';
 import './spyon.js';
@@ -16,7 +16,7 @@ export function registerTestGlobals() {
       afterEach: null,
       afterAll: null
     };
-    if (config.verbose) print.boldSuccess('📂 ' + name);
+    if (config.testinNutin.verbose) print.boldSuccess('📂 ' + name);
     fn();
   };
 

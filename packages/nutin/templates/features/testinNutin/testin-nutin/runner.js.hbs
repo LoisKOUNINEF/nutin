@@ -1,10 +1,10 @@
 import { registerTestGlobals, getTestFiles, runQueuedTests, print } from './core/index.js';
 import path from 'path';
-import config from '#root/testin-nutin.config.js';
+import config from '#root/nutin.config.js';
 
 registerTestGlobals();
 
-let testFiles = config.origins.flatMap(
+let testFiles = config.testinNutin.origins.flatMap(
   origin => getTestFiles(`../${origin}`)
 );
 
@@ -20,7 +20,7 @@ async function loadTestFile(file) {
 }
 
 async function runTests() {
-  if (config.verbose) print.head('Test suites :');
+  if (config.testinNutin.verbose) print.head('Test suites :');
   for (const file of testFiles) {
     try {
       await loadTestFile(file);

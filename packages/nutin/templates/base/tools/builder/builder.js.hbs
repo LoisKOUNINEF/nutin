@@ -1,39 +1,35 @@
 #!/usr/bin/env node
 
 import path from 'path';
-import { print, isProd, runScript } from '../utils/index.js';
+import { print, builderConfig, runScript } from '../utils/index.js';
 
 const scriptsDir = path.join(process.cwd(), 'tools', 'builder', 'core');
 
-if (!isProd) print.section('⚠️ For production, use \'npm run build:prod\' ⚠️');
+if (!builderConfig.isProd) print.section('⚠️ For production, use \'npm run build:prod\' ⚠️');
 print.boldHead(`\nStarting build...`);
 
-runScript(path.join(scriptsDir, 'copy-static.js'), 'Copying files...');
+runScript(path.join(scriptsDir, 'copy-static.js'), 'Copying files...', builderConfig.isVerbose);
 
-if(!isProd) runScript(path.join(scriptsDir, 'tsc.js'), 'Running TypeScript compiler...');
+if(!builderConfig.isProd) runScript(path.join(scriptsDir, 'tsc.js'), 'Running TypeScript compiler...', builderConfig.isVerbose);
 
-{{#if config.inlinedtemplate}}
-runScript(path.join(scriptsDir, 'merge-templates.js'), 'Merging HTML templates in temp files...');
-{{else}}
-runScript(path.join(scriptsDir, 'minify-html.js'), 'Minifying inline templates...');
-{{/if}}
-{{#if i18n}}
-runScript(path.join(scriptsDir, 'build-i18n.js'), 'Combining locales for production...');
-{{/if}}
-runScript(path.join(scriptsDir, 'sass.js'), 'Compiling styles from main.scss...');
-runScript(path.join(scriptsDir, 'validate-html.js'), 'Adding and validating tags in index.html...');
+if (!builderConfig.inlineTemplates) runScript(path.join(scriptsDir, 'merge-templates.js'), 'Merging HTML templates in temp files...', builderConfig.isVerbose);
+else runScript(path.join(scriptsDir, 'minify-html.js'), 'Minifying inline templates...', builderConfig.isVerbose);
+if (builderConfig.i18n) runScript(path.join(scriptsDir, 'build-i18n.js'), 'Combining locales for production...', builderConfig.isVerbose);
+runScript(path.join(scriptsDir, 'sass.js'), 'Compiling styles from main.scss...', builderConfig.isVerbose);
+// if (builderConfig.tailwind) ...
+runScript(path.join(scriptsDir, 'validate-html.js'), 'Adding and validating tags in index.html...', builderConfig.isVerbose);
 
-if (isProd) {
-	runScript(path.join(scriptsDir, 'esbuild.js'), 'Running esbuild...');
-	runScript(path.join(scriptsDir, 'hash-files.js'), 'Hashing files...');
-{{#if config.generateSEO}}
-	runScript(path.join(scriptsDir, 'generate-seo-html.js'), 'Generating SEO HTML pages...');
-	runScript(path.join(scriptsDir, 'generate-robots-txt.js'), 'Generating robots.txt...');
-	runScript(path.join(scriptsDir, 'generate-sitemap-xml.js'), 'Generating sitemap.xml...');
-{{/if}}
-	runScript(path.join(scriptsDir, 'compress-files.js'), 'Compressing files...');
+if (builderConfig.isProd) {
+	runScript(path.join(scriptsDir, 'esbuild.js'), 'Running esbuild...', builderConfig.isVerbose);
+	runScript(path.join(scriptsDir, 'hash-files.js'), 'Hashing files...', builderConfig.isVerbose);
+if (builderConfig.generateSeo) {
+	runScript(path.join(scriptsDir, 'generate-seo-html.js'), 'Generating SEO HTML pages...', builderConfig.isVerbose);
+	runScript(path.join(scriptsDir, 'generate-robots-txt.js'), 'Generating robots.txt...', builderConfig.isVerbose);
+	runScript(path.join(scriptsDir, 'generate-sitemap-xml.js'), 'Generating sitemap.xml...', builderConfig.isVerbose);
+}
+	runScript(path.join(scriptsDir, 'compress-files.js'), 'Compressing files...', builderConfig.isVerbose);
 }
 
-runScript(path.join(scriptsDir, 'finalize-build.js'), 'Finalizing build...')
+runScript(path.join(scriptsDir, 'finalize-build.js'), 'Finalizing build...', builderConfig.isVerbose)
 
 print.boldSuccess(`\nBuild successful!\n`);

@@ -1,6 +1,6 @@
 import { readFile } from 'fs/promises';
 import { exit } from 'process';
-import { print, isVerbose } from '../../utils/index.js';
+import { print, builderConfig } from '../../utils/index.js';
 import { PATHS } from './paths.js';
 import path from 'path';
 import { addTags } from './add-tags.js';
@@ -28,7 +28,7 @@ async function validateHtml() {
     errorExit('No stylesheet found in HTML');
   }
 
-  if (isVerbose) print.boldInfo('✅ HTML validation passed');
+  if (builderConfig.isVerbose) print.boldInfo('✅ HTML validation passed');
 }
 
 function errorExit(message) {

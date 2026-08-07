@@ -1,1 +1,10 @@
 export * from './pipes/pipes.js';
+{{#if accessibilityComponents}}
+export * from './accessibility-components/index.js';
+{{/if}}
+{{#if forms}}
+export * from './forms/index.js';
+{{/if}}
+{{#if overlays}}
+export * from './overlays/index.js';
+{{/if}}

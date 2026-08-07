@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url';
 import * as fsExtra from 'fs-extra';
 import { TemplateCompiler } from './template-compiler.mjs';
 import { print } from './print.mjs';
+import { FEATURES } from './feature-registry.mjs';
 
 const fs = fsExtra.default;
 const __filename = fileURLToPath(import.meta.url);
@@ -33,24 +34,24 @@ export class FileGenerator {
     return path.join(__dirname, '..', '..', 'templates', 'base');
   }
 
-  async processTemplateDirectory(templateDir, outputDir, context) {
+  async processTemplateDirectory(templateDir, outputDir, context, options = {}) {
     if (!(await fs.pathExists(templateDir))) {
       throw new Error(`Template directory not found: ${templateDir}`);
     }
 
     const entries = await fs.readdir(templateDir, { withFileTypes: true });
-    
+
     for (const entry of entries) {
       if (entry.name === '.DS_Store') continue;
-      
+
       const templatePath = path.join(templateDir, entry.name);
-      
+
       if (entry.isDirectory()) {
         const outputPath = path.join(outputDir, entry.name);
         await fs.ensureDir(outputPath);
-        await this.processTemplateDirectory(templatePath, outputPath, context);
+        await this.processTemplateDirectory(templatePath, outputPath, context, options);
       } else {
-        await this.processTemplateFile(templatePath, outputDir, entry.name, context);
+        await this.processTemplateFile(templatePath, outputDir, entry.name, context, options);
       }
     }
   }
@@ -62,36 +63,38 @@ export class FileGenerator {
       return;
     }
 
-    const features = [ 'template', 'i18n', 'stylinNutin', 'testinNutin', 'deployHelper' ];
+    const features = FEATURES.map((feature) => feature.key);
     
     for (const feature of features) {
       if (context[feature]) {
         const featureTemplateDir = path.join(featuresDir, feature);
         
         if (await fs.pathExists(featureTemplateDir)) {
-          print.info(`  🔧 Adding ${feature} feature...`);
+          print.info(`Adding ${feature} feature...`);
           await this.processTemplateDirectory(featureTemplateDir, projectPath, context);
         }
       }
     }
   }
 
-  async processTemplateFile(templatePath, outputDir, fileName, context) {
+  async processTemplateFile(templatePath, outputDir, fileName, context, options = {}) {
     if (fileName.includes("test.js") && !(context.testinNutin)) {
       return;
     }
 
     const fileExt = path.extname(fileName).toLowerCase();
-    
+    const outputFileName = fileName.endsWith('.hbs') ? fileName.replace('.hbs', '') : fileName;
+    const outputPath = path.join(outputDir, outputFileName);
+
+    if (options.skipExisting && await fs.pathExists(outputPath)) {
+      print.section(`⚠️  Skipped (already exists): ${path.relative(outputDir, outputPath)}`);
+      return;
+    }
+
     if (BINARY_EXTENSIONS.has(fileExt)) {
-      const outputPath = path.join(outputDir, fileName);
       await fs.copy(templatePath, outputPath);
       // print.info(`📄 Copied: ${fileName}`);
     } else if (fileName.endsWith('.hbs')) {
-
-      const outputFileName = fileName.replace('.hbs', '');
-      const outputPath = path.join(outputDir, outputFileName);
-      
       try {
         const compiledContent = await this.compiler.compileFile(templatePath, context);
         await fs.writeFile(outputPath, compiledContent);
@@ -101,7 +104,6 @@ export class FileGenerator {
         throw error;
       }
     } else {
-      const outputPath = path.join(outputDir, fileName);
       await fs.copy(templatePath, outputPath);
       // print.info(`📄 Copied: ${fileName}`);
     }

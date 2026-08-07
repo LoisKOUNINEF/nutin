@@ -6,7 +6,7 @@
   position: fixed;
   inset: 0;
   backdrop-filter: blur(5px);
-  background-color: var(--overlay);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -39,14 +39,14 @@
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0 1rem;
-  color: var(--text);
+  color: #111827;
 
   &:focus:not(:focus-visible) {
     outline: none;
   }
 
   &:focus-visible {
-    outline: 2px solid var(--secondary);
+    outline: 2px solid #6b7280;
   }
 }
 

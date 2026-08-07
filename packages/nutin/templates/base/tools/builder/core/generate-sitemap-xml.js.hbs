@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { exit } from 'process';
 import { PATHS } from './paths.js';
-import { print, isVerbose } from '../../utils/index.js';
+import { print, builderConfig } from '../../utils/index.js';
 
 function collectUrls(baseUrl, routes) {
   const urls = [];
@@ -39,12 +39,12 @@ function generateSitemapXml() {
   const outputPath = path.join(PATHS.tempSource, 'sitemap.xml');
   fs.writeFileSync(outputPath, xml, 'utf-8');
 
-  if (isVerbose) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
+  if (builderConfig.isExhaustive) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
 }
 
 try {
   generateSitemapXml();
-  if (isVerbose) print.boldInfo('✅ sitemap.xml generation complete.');
+  if (builderConfig.isVerbose) print.boldInfo('✅ sitemap.xml generation complete.');
 } catch (err) {
   print.boldError(`[generate-sitemap-xml] Unexpected error: ${err.message}`);
   exit(1);
