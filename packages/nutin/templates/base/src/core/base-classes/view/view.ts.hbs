@@ -1,77 +1,96 @@
-import { BaseComponent, BaseComponentOptions } from '../../index.js';
+import { Service } from "../../index.js";
 
-export interface ViewOptions extends BaseComponentOptions {
-  viewName?: string;
+export type IEventBus = InstanceType<typeof EventBus>;
+
+export type Subscription<K extends EventKey = EventKey> = {
+  event: K;
+  callback: (data: EventMap[K]) => void;
+  once?: boolean;
+};
+
+class EventBus extends Service<EventBus> {
+  private _subscriptions: Subscription[] = [];
+
+  constructor() {
+    super();
+    this.registerCleanup(this.cleanupEventListeners);
+  }
+
+  private handlers: {
+    [K in EventKey]?: Array<(data: EventMap[K]) => void>;
+  } = {};
+
+  public subscribe<K extends EventKey>(
+    event: K,
+    callback: (data: EventMap[K]) => void
+  ): void {
+    this.addHandler(event, callback, false);
+  }
+
+  public once<K extends EventKey>(
+    event: K,
+    callback: (data: EventMap[K]) => void
+  ): void {
+    this.addHandler(event, callback, true);
+  }
+
+  public emit<K extends EventKey>(event: K, data?: EventMap[K]): void {
+    const callbacks = this.handlers[event];
+    if (!callbacks) return;
+
+    callbacks.slice().forEach(callback => {
+      callback(data!);
+
+      const subIndex = this._subscriptions.findIndex(
+        sub => sub.event === event && sub.callback === callback && sub.once
+      );
+      if (subIndex > -1) {
+        this.off(event, callback);
+      }
+    });
+  }
+
+  public off<K extends EventKey>(
+    event: K,
+    callback?: (data: EventMap[K]) => void
+  ): void {
+    const handlers = this.handlers[event];
+    if (!handlers) return;
+
+    if (callback) {
+      (this.handlers as Record<
+        EventKey,
+        Array<(data: EventMap[K]) => void>
+      >)[event] = handlers.filter(h => h !== callback);
+    } else {
+      delete this.handlers[event];
+    }
+
+    this._subscriptions = this._subscriptions.filter(
+      sub => sub.event !== event || (callback && sub.callback !== callback)
+    );
+  }
+
+  private addHandler<K extends EventKey>(
+    event: K,
+    callback: (data: EventMap[K]) => void,
+    once: boolean
+  ): void {
+    if (!this.handlers[event]) {
+      this.handlers[event] = [];
+    }
+    (
+      this.handlers as Record<EventKey, Array<(data: EventMap[K]) => void>>
+    )[event].push(callback);
+    this._subscriptions.push({ event, callback, once } as Subscription);
+  }
+
+  private cleanupEventListeners = (): void => {
+    this._subscriptions.forEach(({ event, callback }) => {
+      this.off(event, callback);
+    });
+    this._subscriptions = [];
+  };
 }
 
-export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComponent<T> {
-  public viewName: string;
-  protected routeParams: Record<string, string> = {};
-
-  constructor({
-      template,
-      tagName = 'section',
-      mountTarget = '#app',
-      viewName
-    }: ViewOptions) {
-    super({template, mountTarget, tagName});
-    this.viewName = viewName || this.getKebabCaseViewName();
-  }
-
-   /**
-   * Set route parameters for this view instance
-   * Called by the router when the view is instantiated
-   */
-  public setRouteParams(params: Record<string, string>): void {
-    this.routeParams = { ...params };
-  }
-
-  /**
-   * Get all route parameters
-   */
-  public getRouteParams(): Record<string, string> {
-    return { ...this.routeParams };
-  }
-
-  /**
-   * Get a specific route parameter
-   */
-  public getRouteParam(key: string): string | undefined {
-    return this.routeParams[key];
-  }
-
-  /**
-   * Check if a route parameter exists and has a value
-   */
-  public hasRouteParam(key: string): boolean {
-    return key in this.routeParams && this.routeParams[key] !== undefined;
-  }
-
-  public shouldUpdateMetaContent(): boolean {
-    return true;
-  }
-  
-  public onEnter(): void {
-    console.log(`${this.viewName} mounted with params:`, this.routeParams);
-  }
-
-  public onExit(): void {
-    console.log(`${this.viewName} unmounted`);
-  }
-
-  public override render(): HTMLElement {
-    this.onEnter();
-    return super.render();
-  }
-
-  public override destroy(): void {
-    super.destroy();
-    this.onExit();
-  }
-
-  private getKebabCaseViewName(): string {
-    const className = this.constructor.name;
-    const baseName = className.replace(/View$/, '');
-    return baseName.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
-  }
-}
+export const AppEventBus = EventBus.getInstance();

@@ -69,7 +69,7 @@ export class DomHelper {
         config.target.replaceWith(config.element);
       }
     } else {
-      console.warn('Mount target not found:', config.mountTarget);
+      return;
     }
   }
 }

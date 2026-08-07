@@ -1,0 +1,55 @@
+export default {
+  inlineTemplates: false,
+  generator: {
+    generateLocales: false,
+    generateStylesheet: false,
+  },
+  builder: {
+    // generateSEO: true,
+    sass: {
+      paths: [ 
+        'base', 
+      ], // in styles/
+    },
+    // tailwind: false,
+    esbuild: {
+        bundle: true,
+        minify: true,
+        sourcemap: true,
+        drop: ['console', 'debugger'],
+        platform: 'browser',
+        format: 'esm',
+        target: ['es2015'],
+        legalComments: 'none',
+        loader: {
+          '.json': 'json',
+        },
+        define: {
+          'process.env.NODE_ENV': '"production"',
+        },
+    },
+    compression: {
+      gzip: true,
+      // BROTLI OPTIONAL
+      // brotli: false,
+    },
+    verbose: false,
+    // logLevel: 0, // 0 = logs start / finish; 1 = logs steps; 2 = logs all.
+  },
+  {{#if testinNutin}}
+  testinNutin: {
+      origins: [
+      'src/app', // actual app code
+      // 'src/core', // toolkit core logic
+      // 'testin-nutin/core/tests', // test globals
+    ],
+    jsdomOptions: {
+      runScripts: false,     // or true ("dangerously") if needed
+      resources: false,      // or true ("usable") if needed
+      freezeGlobals: false,
+      pretendToBeVisual: true,
+    },
+    verbose: false,
+  },
+  {{/if}}
+}

@@ -1,0 +1,30 @@
+@use "sass:map";
+@use "../core/overlay-variables" as *;
+
+$dropdown-config: (
+  'border-radius': 0.5rem,
+  'min-width': 160px,
+  'content-padding': 0.25rem 0,
+  'shadow-offset-y': 2px,
+  'shadow-blur': 10px,
+  'shadow-fade': 85%,
+  'color-background': var(--background),
+  'color-text': var(--text),
+) !default;
+
+.dropdown-wrapper {
+  z-index: map.get($overlay-z-index, dropdown);
+  background: map.get($dropdown-config, 'color-background');
+  color: map.get($dropdown-config, 'color-text');
+  border-radius: map.get($dropdown-config, 'border-radius');
+  box-shadow:
+    0
+    map.get($dropdown-config, 'shadow-offset-y')
+    map.get($dropdown-config, 'shadow-blur')
+    color-mix(in srgb, map.get($dropdown-config, 'color-text'), transparent map.get($dropdown-config, 'shadow-fade'));
+  min-width: map.get($dropdown-config, 'min-width');
+}
+
+.dropdown-content {
+  padding: map.get($dropdown-config, 'content-padding');
+}

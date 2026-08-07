@@ -8,13 +8,11 @@
 
 - `{{packageManager}} run build` (dev) or `{{packageManager}} run build:prod` (production)
 
-	Accepts `--bundle` (= build:prod) and `--log` (verbose output) flags
-
 ## Generate Component, View, Service
 
 - `{{packageManager}} run generate ELEMENT ELEMENT_NAME`
 
-	Supports nested paths.
+	Supports nested paths. Updates element's barrel file (index.ts)
 
 {{#if testinNutin}}
 ## Test

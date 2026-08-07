@@ -1,6 +1,6 @@
 import { Service } from "../../../core/index.js";
 
-export class Example extends Service<Example> {
+export class ExampleService extends Service<Example> {
   constructor() {
     super();
     this.registerCallback();
@@ -15,4 +15,4 @@ export class Example extends Service<Example> {
   }
 }
 
-export const exampleService = Example.getInstance();
+export const exampleService = ExampleService.getInstance();

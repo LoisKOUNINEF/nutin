@@ -1,0 +1,77 @@
+@use "sass:map";
+
+$progress-config: (
+  'gap': 0.25rem,
+  'label-font-size': 0.875rem,
+  'bar-border-radius': 9999px,
+  'bar-transition-duration': 0.3s,
+  'label-font-weight': 500,
+  'bar-height': 0.5rem,
+  'indeterminate-duration': 1.5s,
+  'color-text-muted': var(--text-muted),
+  'color-surface': var(--surface),
+  'color-primary': var(--primary),
+) !default;
+
+.app-progress {
+  display: flex;
+  flex-direction: column;
+  gap: map.get($progress-config, 'gap');
+  width: 100%;
+  cursor: default;
+}
+
+.progress__label {
+  font-size: map.get($progress-config, 'label-font-size');
+  font-weight: map.get($progress-config, 'label-font-weight');
+  color: map.get($progress-config, 'color-text-muted');
+
+  &:empty { display: none; }
+}
+
+.progress__bar {
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  width: 100%;
+  height: map.get($progress-config, 'bar-height');
+  border: none;
+  border-radius: map.get($progress-config, 'bar-border-radius');
+  background-color: map.get($progress-config, 'color-surface');
+  overflow: hidden;
+
+  // WebKit / Blink
+  &::-webkit-progress-bar {
+    background-color: map.get($progress-config, 'color-surface');
+    border-radius: inherit;
+  }
+
+  &::-webkit-progress-value {
+    background-color: map.get($progress-config, 'color-primary');
+    border-radius: inherit;
+    transition: width map.get($progress-config, 'bar-transition-duration') ease;
+  }
+
+  // Firefox
+  &::-moz-progress-bar {
+    background-color: map.get($progress-config, 'color-primary');
+    border-radius: inherit;
+  }
+
+  // Indeterminate shimmer (no value attribute)
+  &:not([value]) {
+    background: linear-gradient(
+      90deg,
+      map.get($progress-config, 'color-surface') 25%,
+      map.get($progress-config, 'color-primary') 50%,
+      map.get($progress-config, 'color-surface') 75%
+    );
+    background-size: 200% 100%;
+    animation: progress-indeterminate map.get($progress-config, 'indeterminate-duration') linear infinite;
+  }
+}
+
+@keyframes progress-indeterminate {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

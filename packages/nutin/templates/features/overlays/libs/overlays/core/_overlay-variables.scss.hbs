@@ -1,0 +1,55 @@
+// Shared default palette for overlay "status" colors (success/error/info).
+// Each consumer (Snackbar, NotificationBanner, EmergencyDialog, ...) aliases
+// this into its own `!default` variable (e.g. `$snackbar-colors: $semantic-colors !default;`)
+// so overriding this map changes the default for all of them at once, while
+// overriding a specific component's own alias changes only that component.
+$semantic-colors: (
+  success: rgb(76 175 80),
+  error: rgb(244 67 54),
+  info: rgb(33 150 243),
+  warning: rgb(244 67 54),
+  text: white,
+) !default;
+
+
+$overlay-z-index: (
+  // Base layout
+  base: 0,
+
+  // Sticky UI
+  sticky-header: 100,
+  sticky-footer: 110,
+  floating-button: 120,
+
+  // Navigation / temporary panels
+  sidebar: 200,
+  mobile-nav: 210,
+
+  // Anchored overlays
+  dropdown: 300,
+  popover: 310,
+  tooltip: 320,
+  context-menu: 330,
+
+  // Passive overlays
+  snackbar: 400,
+  toast: 410,
+  notification-banner: 420,
+
+  // Modal overlays
+  modal-backdrop: 500,
+  modal: 510,
+
+  drawer-backdrop: 520,
+  drawer: 530,
+
+  fullscreen-overlay: 540,
+
+  // Critical interactions
+  blocking-loader: 600,
+  emergency-dialog: 610,
+
+  // Runtime/dev
+  debug-panel: 700,
+  inspector: 710
+);

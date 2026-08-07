@@ -28,7 +28,7 @@ async function validateHtml() {
     errorExit('No stylesheet found in HTML');
   }
 
-  if (isVerbose) print.boldInfo('HTML validation passed\n');
+  if (isVerbose) print.boldInfo('✅ HTML validation passed');
 }
 
 function errorExit(message) {

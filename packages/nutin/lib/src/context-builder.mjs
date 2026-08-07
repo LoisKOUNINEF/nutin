@@ -2,11 +2,11 @@ import { getCiCommand } from './package-manager.mjs';
 import { packageVersion } from './version.mjs';
 
 const PRESET_MAP = {
-  default: { template: false, stylinNutin: false, i18n: false, deployHelper: false, testinNutin: false },
-  minimal: { template: true, stylinNutin: false, i18n: false, deployHelper: false, testinNutin: false },
-  standard: { template: true, stylinNutin: true,  i18n: true,  deployHelper: false, testinNutin: false },
-  full:     { template: true, stylinNutin: true,  i18n: true,  deployHelper: true,  testinNutin: true  },
-  cicd:     { template: true, stylinNutin: false, i18n: false, deployHelper: true,  testinNutin: false },
+  default: { libs: false, deployHelper: false, testinNutin: false },
+  minimal: { libs: false, deployHelper: false, testinNutin: false },
+  standard: { libs: true, deployHelper: false, testinNutin: false },
+  full:     { libs: true, deployHelper: true,  testinNutin: true  },
+  cicd:     { libs: false, deployHelper: true,  testinNutin: false },
 };
 
 export const defaults = {
@@ -25,13 +25,11 @@ export class ContextBuilder {
     return {
       projectName: preferences.projectName,
       packageManager: preferences.packageManager,
-      
-      template: preset.template,
-      stylinNutin: preset.stylinNutin,
-      i18n: preferences.i18n ?? preset.i18n,
+
+      externalTemplates: !preferences.externalTemplates ?? true,
+      libs: preset.libs,
       deployHelper: preferences.deployHelper ?? preset.deployHelper,
       testinNutin: preferences.testinNutin ?? preset.testinNutin,
-      transition: preferences.transition,
 
       ciCommand: ciCommand,
       version: version

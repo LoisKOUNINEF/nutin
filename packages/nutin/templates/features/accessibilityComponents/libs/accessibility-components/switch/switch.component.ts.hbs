@@ -1,0 +1,67 @@
+import { Component, ComponentProps } from '../../../core/index.js';
+import { FormControlHelper } from '../utils/index.js';
+
+export interface ISwitchConfig {
+  // Form identity
+  id?: string;
+  name?: string;
+  value?: string;
+  // State
+  checked?: boolean;
+  disabled?: boolean;
+  required?: boolean;
+  // Label — span is removed via data-optional if neither is provided
+  labelKey?: string;
+  labelText?: string;
+  // Escape hatch: aria-label on the <input> when there is no visible label
+  ariaLabel?: string;
+  // Callback
+  onChange?: (checked: boolean) => void;
+}
+
+const normalizeKeys: (keyof ISwitchConfig)[] = ['id', 'name', 'value', 'labelKey', 'labelText'];
+
+export class SwitchComponent extends Component<HTMLLabelElement, ISwitchConfig> {
+  constructor(mountTarget: HTMLElement, config: ISwitchConfig, props?: ComponentProps) {
+    super({ mountTarget, config, tagName: 'label', normalizeKeys, props });
+  }
+
+  protected override onBeforeRender(): void {
+    super.onBeforeRender();
+    this.element.classList.add('app-switch');
+  }
+
+  protected override generateTemplate(): string {
+    const { id, name, value, labelKey, labelText, ariaLabel, checked, disabled, required } = this.config;
+
+    const inputAttrs = [
+      'type="checkbox"',
+      'role="switch"',
+      'class="switch__input"',
+      id        ? `id="${id}"`                : '',
+      name      ? `name="${name}"`            : '',
+      value     ? `value="${value}"`          : '',
+      ariaLabel ? `aria-label="${ariaLabel}"` : '',
+      checked   ? 'checked'                   : '',
+      disabled  ? 'disabled'                  : '',
+      required  ? 'required'                  : '',
+    ].filter(Boolean).join(' ');
+
+    return `<input ${inputAttrs}>${FormControlHelper.renderLabel(labelKey, labelText, 'switch__label')}`;
+  }
+
+  protected override onAfterRender(): void {
+    const input = this.element.querySelector<HTMLInputElement>('.switch__input');
+    if (!input) return;
+    FormControlHelper.bindCheckedChange(input, this.config.onChange, this.eventListeners);
+  }
+
+  public getValue(): boolean {
+    return this.element.querySelector<HTMLInputElement>('.switch__input')?.checked ?? false;
+  }
+
+  public setValue(checked: boolean): void {
+    const input = this.element.querySelector<HTMLInputElement>('.switch__input');
+    if (input) input.checked = checked;
+  }
+}

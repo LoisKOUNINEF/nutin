@@ -1,0 +1,30 @@
+@use "sass:map";
+@use "../core/overlay-variables" as *;
+
+$context-menu-config: (
+  'border-radius': 0.5rem,
+  'min-width': 160px,
+  'content-padding': 0.25rem 0,
+  'shadow-offset-y': 2px,
+  'shadow-blur': 10px,
+  'shadow-fade': 85%,
+  'color-background': var(--background),
+  'color-text': var(--text),
+) !default;
+
+.context-menu-wrapper {
+  z-index: map.get($overlay-z-index, context-menu);
+  background: map.get($context-menu-config, 'color-background');
+  color: map.get($context-menu-config, 'color-text');
+  border-radius: map.get($context-menu-config, 'border-radius');
+  box-shadow:
+    0
+    map.get($context-menu-config, 'shadow-offset-y')
+    map.get($context-menu-config, 'shadow-blur')
+    color-mix(in srgb, map.get($context-menu-config, 'color-text'), transparent map.get($context-menu-config, 'shadow-fade'));
+  min-width: map.get($context-menu-config, 'min-width');
+}
+
+.context-menu-content {
+  padding: map.get($context-menu-config, 'content-padding');
+}

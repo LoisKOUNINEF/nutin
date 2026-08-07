@@ -35,10 +35,9 @@ export async function promptUser(initialName, cliOptions = {}) {
     projectName,
     packageManager,
     preset: cliOptions.preset,
-    i18n: cliOptions.i18n,
     deployHelper: cliOptions.deployHelper,
     testinNutin: cliOptions.testinNutin,
-    transition:   cliOptions.transition,
+    externalTemplates: cliOptions.inlineTemplates
   };
 }
 

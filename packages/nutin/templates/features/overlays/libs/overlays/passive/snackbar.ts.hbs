@@ -1,0 +1,89 @@
+import { SecurityHelper } from "../../../core/base-classes/base-component/helpers/security.helper.js";
+import { PassiveOverlayRuntime, PassiveOverlayItem } from '../core/passive-overlay-runtime.js';
+
+export type NotifyOptions = {
+  type?: 'info' | 'success' | 'error';
+  position?: 'top' | 'bottom';
+  duration?: number;
+  actionText?: string;
+  onAction?: () => void;
+  maxStack?: number;
+};
+
+type SnackbarItem = PassiveOverlayItem & {
+  type?: 'info' | 'success' | 'error' | 'warning';
+};
+
+class Snackbar extends PassiveOverlayRuntime<SnackbarItem> {
+  private _bottomContainer: HTMLElement;
+  private _topContainer: HTMLElement;
+
+  constructor() {
+    super();
+    this.element.classList.add('snackbar-region');
+
+    this._bottomContainer = document.createElement('div');
+    this._bottomContainer.className = 'snackbar-region__bottom';
+
+    this._topContainer = document.createElement('div');
+    this._topContainer.className = 'snackbar-region__top';
+
+    this.element.appendChild(this._bottomContainer);
+    this.element.appendChild(this._topContainer);
+  }
+
+  public notify(message: string, options: NotifyOptions = {}): void {
+    this.enqueue({
+      message,
+      type: options.type,
+      position: options.position,
+      duration: options.duration,
+      actionText: options.actionText,
+      onAction: options.onAction,
+    });
+  }
+
+  protected _showItem(item: SnackbarItem): void {
+    const type = item.type ?? 'info';
+    const position = item.position ?? 'bottom';
+    const duration = item.duration ?? 3000;
+    const container = position === 'bottom' ? this._bottomContainer : this._topContainer;
+
+    const message = SecurityHelper.sanitizeTemplate(item.message);
+    const actionText = item.actionText
+      ? SecurityHelper.sanitizeTemplate(item.actionText)
+      : undefined;
+
+    const el = document.createElement('div');
+    el.className = `app-snackbar app-snackbar--${type}`;
+    el.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    el.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+    el.setAttribute('aria-atomic', 'true');
+    el.innerHTML = `
+      <span>${message}</span>
+      ${actionText ? `<button type="button">${actionText}</button>` : ''}
+    `;
+
+    container.appendChild(el);
+
+    if (actionText && item.onAction) {
+      const btn = el.querySelector<HTMLButtonElement>('button');
+      btn?.addEventListener('click', () => {
+        item.onAction?.();
+        el.remove();
+        this._onItemDismissed();
+      });
+    }
+
+    this._autoDismiss(el, duration, () => this._onItemDismissed());
+  }
+}
+
+const snackbar = new Snackbar();
+
+export function notify(message: string, options: NotifyOptions = {}): void {
+  if (options.maxStack) {
+    snackbar.setMaxStack(options.maxStack);
+  }
+  snackbar.notify(message, options);
+}

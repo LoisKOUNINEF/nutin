@@ -1,0 +1,25 @@
+@use "sass:map";
+@use "../core/overlay-variables" as *;
+
+$tooltip-config: (
+  'border-radius': 0.35rem,
+  'font-size': 0.85rem,
+  'max-width': 240px,
+  'content-padding': 0.35rem 0.6rem,
+  'color-text': var(--text),
+  'color-background': var(--background),
+) !default;
+
+.tooltip-wrapper {
+  z-index: map.get($overlay-z-index, tooltip);
+  background: map.get($tooltip-config, 'color-text');
+  color: map.get($tooltip-config, 'color-background');
+  border-radius: map.get($tooltip-config, 'border-radius');
+  font-size: map.get($tooltip-config, 'font-size');
+  max-width: map.get($tooltip-config, 'max-width');
+  pointer-events: none;
+}
+
+.tooltip-content {
+  padding: map.get($tooltip-config, 'content-padding');
+}

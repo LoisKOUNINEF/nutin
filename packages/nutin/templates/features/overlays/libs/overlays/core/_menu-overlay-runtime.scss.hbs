@@ -1,0 +1,32 @@
+@use "sass:map";
+
+$menu-item-config: (
+  'padding': 0.5rem 1rem,
+  'disabled-opacity': 0.5,
+  'color-text': var(--text),
+  'color-secondary-hover': var(--secondary-hover),
+  'color-background': var(--background),
+) !default;
+
+.menu-item {
+  padding: map.get($menu-item-config, 'padding');
+  cursor: pointer;
+  color: map.get($menu-item-config, 'color-text');
+  outline: none;
+
+  &:hover,
+  &:focus-visible {
+    background-color: map.get($menu-item-config, 'color-secondary-hover');
+    color: map.get($menu-item-config, 'color-background');
+  }
+
+  &.menu-item--disabled {
+    cursor: not-allowed;
+    opacity: map.get($menu-item-config, 'disabled-opacity');
+
+    &:hover {
+      background-color: transparent;
+      color: map.get($menu-item-config, 'color-text');
+    }
+  }
+}

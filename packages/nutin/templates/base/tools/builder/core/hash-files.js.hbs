@@ -26,11 +26,13 @@ function addHashToFiles(distDir) {
     fileMap[oldRel] = newRel;
 
     if (isVerbose) {
-      print.info(`Renamed: ${oldRel} → ${newRel}`);
+      print.gray(`Renamed: ${oldRel} → ${newRel}`);
     }
   });
 
   updateHtmlReferences(path.join(distDir, 'index.html'), fileMap);
+
+  if (isVerbose) print.boldInfo(`✅ Hashing complete.`);
 }
 
 function hashFile(filePath) {
@@ -46,7 +48,7 @@ function updateHtmlReferences(htmlPath, fileMap) {
   });
   
   fs.writeFileSync(htmlPath, html);
-  if (isVerbose) print.info('Updated index.html references');
+  if (isVerbose) print.boldGray('Updated index.html references');
 }
 
 addHashToFiles(PATHS.tempSource);

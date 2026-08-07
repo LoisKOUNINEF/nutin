@@ -1,0 +1,48 @@
+@use "sass:map";
+
+$avatar-config: (
+  'font-family': (Arial, sans-serif),
+  'border-radius-circle': 9999px,
+  'border-radius-square': 4px,
+  'default-size': 2.5rem,
+  'font-size-ratio': 0.38,
+  'font-weight': 600,
+  'initials-letter-spacing': 0.05em,
+  'color-surface': var(--surface),
+  'color-text-muted': var(--text-muted),
+) !default;
+
+.app-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  width:  var(--avatar-size, #{map.get($avatar-config, 'default-size')});
+  height: var(--avatar-size, #{map.get($avatar-config, 'default-size')});
+  background-color: map.get($avatar-config, 'color-surface');
+  color: map.get($avatar-config, 'color-text-muted');
+  font-family: map.get($avatar-config, 'font-family');
+  font-size: calc(var(--avatar-size, #{map.get($avatar-config, 'default-size')}) * #{map.get($avatar-config, 'font-size-ratio')});
+  font-weight: map.get($avatar-config, 'font-weight');
+  user-select: none;
+
+  &.avatar--circle { border-radius: map.get($avatar-config, 'border-radius-circle'); }
+  &.avatar--square { border-radius: map.get($avatar-config, 'border-radius-square'); }
+}
+
+.avatar__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatar__fallback,
+.avatar__initials {
+  font-size: inherit;
+  font-weight: inherit;
+  text-transform: uppercase;
+  letter-spacing: map.get($avatar-config, 'initials-letter-spacing');
+  line-height: 1;
+}

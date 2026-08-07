@@ -5,13 +5,13 @@ import { print, runCommand } from '../utils/index.js';
 async function startDev() {
   try {
     console.clear();
-    print.boldHead('🚀 Starting Dev Environment...');
+    print.blue('🚀 Starting Dev Environment...\n');
 
-    await runCommand('{{packageManager}}', ['run', 'build']);
+    await runCommand('npm', ['run', 'build', '--silent']);
 
     const { serve, watcher } = await Promise.all([
-      runCommand('{{packageManager}}', ['run', 'serve:only']),
-      runCommand('node', ['tools/dev/watcher.js'])
+      runCommand('npm', ['run', 'serve:only', '--silent']),
+      runCommand('node', ['tools/dev/watcher.js', '--silent'])
     ]);
 
     serve.on('close', (code) => {

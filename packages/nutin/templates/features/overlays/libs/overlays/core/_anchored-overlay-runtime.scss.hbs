@@ -1,0 +1,23 @@
+@use "sass:map";
+
+// anchored overlay runtime config — shared base for Popover/Tooltip/Dropdown/ContextMenu
+$anchored-overlay-config: (
+  'transition-duration': 0.15s,
+  'initial-scale': 0.97,
+) !default;
+
+.anchored-overlay-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transform: scale(map.get($anchored-overlay-config, 'initial-scale'));
+  transition:
+    opacity map.get($anchored-overlay-config, 'transition-duration') ease,
+    transform map.get($anchored-overlay-config, 'transition-duration') ease;
+
+  &.show {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

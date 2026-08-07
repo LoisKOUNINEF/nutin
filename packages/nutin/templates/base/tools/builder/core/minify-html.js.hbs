@@ -1,12 +1,10 @@
 import { minify } from 'html-minifier-terser';
-{{#unless template}}
 import fs from 'fs';
 import { exit } from 'process';
 import { getFilesRecursive, print, isProd, isVerbose } from '../../utils/index.js';
 import { PATHS } from './paths.js';
-{{/unless}}
 
-{{#if template}}export {{/if}}async function minifyHTML(html) {
+export async function minifyHTML(html) {
   return minify(html, {
     collapseWhitespace: true,
     removeComments: true,
@@ -20,7 +18,6 @@ import { PATHS } from './paths.js';
   });
 }
 
-{{#unless template}}
 const TEMPLATE_REGEX =
   /const\s+(template|templateFn)\s*=?\s*(?:\(.*?\)\s*=>\s*)?`([\s\S]*?)`/gm;
 
@@ -56,5 +53,3 @@ minifyInlineHTML().catch((err) => {
   print.boldError(`Unexpected error: ${err.message}`);
   exit(1);
 });
-
-{{/unless}}

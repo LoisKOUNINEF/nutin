@@ -1,0 +1,36 @@
+@use "sass:map";
+
+$picture-config: (
+  'caption-margin-top': 0.25rem,
+  'caption-font-size': 0.875rem,
+  'caption-line-height': 1.4,
+  'color-text-muted': var(--text-muted),
+) !default;
+
+// PictureComponent renders a <figure> — no fixed app-* class is set by the component.
+// These styles apply to any figure produced by PictureComponent or consumed via props.className.
+
+figure {
+  display: block;
+  margin: 0;
+
+  picture {
+    display: block;
+    line-height: 0; // collapse inline gap below img
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  figcaption {
+    margin-top: map.get($picture-config, 'caption-margin-top');
+    font-size: map.get($picture-config, 'caption-font-size');
+    color: map.get($picture-config, 'color-text-muted');
+    line-height: map.get($picture-config, 'caption-line-height');
+
+    &:empty { display: none; }
+  }
+}

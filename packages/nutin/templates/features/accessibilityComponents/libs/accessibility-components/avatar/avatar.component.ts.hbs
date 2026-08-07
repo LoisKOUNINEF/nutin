@@ -1,0 +1,60 @@
+import { Component, ComponentProps } from '../../../core/index.js';
+
+export interface IAvatarConfig {
+  alt: string;
+  src?: string;
+  initials?: string;
+  size?: string;
+  shape?: 'circle' | 'square';
+}
+
+const normalizeKeys: (keyof IAvatarConfig)[] = ['src', 'initials', 'size', 'shape'];
+
+export class AvatarComponent extends Component<HTMLDivElement, IAvatarConfig> {
+  constructor(mountTarget: HTMLElement, config: IAvatarConfig, props?: ComponentProps) {
+    super({ mountTarget, config, tagName: 'div', normalizeKeys, props });
+  }
+
+  protected override onBeforeRender(): void {
+    super.onBeforeRender();
+    this.element.classList.add('app-avatar');
+    this.element.classList.add(`avatar--${this.config.shape || 'circle'}`);
+    if (this.config.size) {
+      this.element.style.setProperty('--avatar-size', this.config.size);
+    }
+    if (!this.config.src) {
+      this.element.setAttribute('role', 'img');
+      this.element.setAttribute('aria-label', this.config.alt);
+    }
+  }
+
+  protected override generateTemplate(): string {
+    const { src, alt, initials } = this.config;
+
+    if (src) {
+      const fallback = initials
+        ? `<span class="avatar__fallback" aria-hidden="true">${initials}</span>`
+        : '';
+      return `<img class="avatar__img" src="${src}" alt="${alt}" loading="lazy" decoding="async">${fallback}`;
+    }
+
+    return `<span class="avatar__initials" aria-hidden="true">${initials}</span>`;
+  }
+
+  protected override onAfterRender(): void {
+    if (!this.config.src || !this.config.initials) return;
+
+    const img = this.element.querySelector<HTMLImageElement>('.avatar__img');
+    const fallback = this.element.querySelector<HTMLElement>('.avatar__fallback');
+    if (!img || !fallback) return;
+
+    const handler: EventListener = () => {
+      img.style.display = 'none';
+      this.element.setAttribute('role', 'img');
+      this.element.setAttribute('aria-label', this.config.alt);
+      fallback.removeAttribute('aria-hidden');
+    };
+    img.addEventListener('error', handler);
+    this.eventListeners.push([img, 'error', handler]);
+  }
+}

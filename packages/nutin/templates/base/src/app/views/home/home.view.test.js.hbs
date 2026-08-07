@@ -10,17 +10,9 @@ describe('HomeView', () => {
 	it('should be defined', () => {
 		expect(view).toBeDefined();
 	});
-	{{#if i18n}}
-	it('should have title with i18n key', () => {
+	it('should have h1 tag', () => {
 		const h1 = view.element.querySelector('h1');
 		expect(h1).toBeDefined();
-		expect(h1.textContent).toBe('home.title');		
+		expect(h1.textContent).toBe('{{projectName}}');
 	});
-	{{else}}
-	it('should have title', () => {
-		const h1 = view.element.querySelector('h1');
-		expect(h1).toBeDefined();
-		expect(h1.textContent).toBe('{{projectName}}');		
-	});
-	{{/if}}
 })

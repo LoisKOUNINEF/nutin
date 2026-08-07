@@ -1,0 +1,83 @@
+@use "sass:map";
+@use "../core/overlay-variables" as *;
+
+$snackbar-colors: $semantic-colors !default;
+
+// snackbar overlay config
+$snackbar-config: (
+  'padding': 0.75rem 1.5rem,
+  'border-radius': 0.5rem,
+  'gap': 1rem,
+  'stack-gap': 0.5rem,
+  'offset': 1rem,
+  'container-width': 350px,
+  'animation-duration': 0.3s,
+  'shadow-offset-y': 2px,
+  'shadow-blur': 6px,
+  'shadow-color': rgba(0, 0, 0, 0.3),
+) !default;
+
+// Positioned containers — one per gravity direction
+// Items stack in column inside; no JS offset calculation needed.
+.snackbar-region__bottom,
+.snackbar-region__top {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: map.get($snackbar-config, 'stack-gap');
+  width: map.get($snackbar-config, 'container-width');
+  max-width: 90vw;
+  pointer-events: none;
+
+  .app-snackbar {
+    pointer-events: auto;
+  }
+}
+
+.snackbar-region__bottom {
+  bottom: map.get($snackbar-config, 'offset');
+  flex-direction: column-reverse; // new items appear at bottom, push existing ones up
+}
+
+.snackbar-region__top {
+  top: map.get($snackbar-config, 'offset');
+}
+
+.app-snackbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: map.get($snackbar-colors, 'info');
+  color: map.get($snackbar-colors, 'text');
+  padding: map.get($snackbar-config, 'padding');
+  border-radius: map.get($snackbar-config, 'border-radius');
+  box-shadow:
+    0
+    map.get($snackbar-config, 'shadow-offset-y')
+    map.get($snackbar-config, 'shadow-blur')
+    map.get($snackbar-config, 'shadow-color');
+  gap: map.get($snackbar-config, 'gap');
+  width: 100%;
+  animation: snackbar-fade-in map.get($snackbar-config, 'animation-duration') ease;
+}
+
+.app-snackbar--success { background: map.get($snackbar-colors, 'success'); }
+.app-snackbar--error   { background: map.get($snackbar-colors, 'error'); }
+.app-snackbar--info    { background: map.get($snackbar-colors, 'info'); }
+.app-snackbar--warning { background: map.get($snackbar-colors, 'warning'); }
+
+.app-snackbar button {
+  background: transparent;
+  border: none;
+  color: map.get($snackbar-colors, 'text');
+  font-weight: bold;
+  cursor: pointer;
+}
+
+@keyframes snackbar-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

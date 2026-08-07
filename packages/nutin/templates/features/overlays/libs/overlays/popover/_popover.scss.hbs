@@ -1,0 +1,30 @@
+@use "sass:map";
+@use "../core/overlay-variables" as *;
+
+$popover-config: (
+  'border-radius': 0.5rem,
+  'max-width': 320px,
+  'content-padding': 1rem,
+  'shadow-offset-y': 2px,
+  'shadow-blur': 10px,
+  'shadow-fade': 85%,
+  'color-background': var(--background),
+  'color-text': var(--text),
+) !default;
+
+.popover-wrapper {
+  z-index: map.get($overlay-z-index, popover);
+  background: map.get($popover-config, 'color-background');
+  color: map.get($popover-config, 'color-text');
+  border-radius: map.get($popover-config, 'border-radius');
+  box-shadow:
+    0
+    map.get($popover-config, 'shadow-offset-y')
+    map.get($popover-config, 'shadow-blur')
+    color-mix(in srgb, map.get($popover-config, 'color-text'), transparent map.get($popover-config, 'shadow-fade'));
+  max-width: map.get($popover-config, 'max-width');
+}
+
+.popover-content {
+  padding: map.get($popover-config, 'content-padding');
+}

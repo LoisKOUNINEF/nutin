@@ -5,13 +5,13 @@ export const serviceTemplate = (name, targetPath) => {
 
   return `import { Service } from '${relToCore}';
 
-export class ${name.pascal} extends Service<${name.pascal}> {  
+export class ${name.pascal}Service extends Service<${name.pascal}Service> {  
   constructor() {
     super();
   }
 
 }
 
-export const ${name.pascal}Service = ${name.pascal}.getInstance();
+export const ${name.camel}Service = ${name.pascal}Service.getInstance();
 `;
 }

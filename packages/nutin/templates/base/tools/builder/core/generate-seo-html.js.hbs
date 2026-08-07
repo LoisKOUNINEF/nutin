@@ -1,0 +1,211 @@
+import fs from 'fs';
+import path from 'path';
+import { exit } from 'process';
+import { PATHS } from './paths.js';
+import { print, isVerbose } from '../../utils/index.js';
+
+function escape(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function upsertInHead(html, pattern, replacement, fullTag) {
+  if (pattern.test(html)) {
+    return html.replace(pattern, replacement);
+  }
+  return html.replace('</head>', `\n    ${fullTag}\n  </head>`);
+}
+
+function buildBodyContent(content) {
+  return content
+    .flatMap(block => Object.entries(block).map(([tag, text]) => `    <${tag}>${text}</${tag}>`))
+    .join('\n');
+}
+
+function applySubstitutions(template, lang, title, description, pageUrl, ogImage) {
+  let html = template;
+
+  // lang attribute on <html>
+  if (/(<html[^>]*\slang=)["'][^"']*["']/.test(html)) {
+    html = html.replace(/(<html[^>]*\slang=)["'][^"']*["']/, `$1"${lang}"`);
+  } else {
+    html = html.replace(/<html/, `<html lang="${lang}"`);
+  }
+
+  // <title>
+  html = upsertInHead(html,
+    /(<title>)[^<]*(<\/title>)/,
+    `$1${escape(title)}$2`,
+    `<title>${escape(title)}</title>`
+  );
+
+  // <meta name="description"> — replace all occurrences, or insert one
+  const descPattern = /(<meta\s+name=["']description["']\s+content=)["'][^"']*["']/;
+  if (descPattern.test(html)) {
+    html = html.replace(/(<meta\s+name=["']description["']\s+content=)["'][^"']*["']/g, `$1"${escape(description)}"`);
+  } else {
+    html = html.replace('</head>', `\n    <meta name="description" content="${escape(description)}" />\n  </head>`);
+  }
+
+  // <link rel="canonical">
+  html = upsertInHead(html,
+    /(<link\s+rel=["']canonical["']\s+href=)["'][^"']*["']/,
+    `$1"${pageUrl}/"`,
+    `<link rel="canonical" href="${pageUrl}/" />`
+  );
+
+  // og:url
+  html = upsertInHead(html,
+    /(<meta\s+property=["']og:url["']\s+content=)["'][^"']*["']/,
+    `$1"${pageUrl}/"`,
+    `<meta property="og:url" content="${pageUrl}/" />`
+  );
+
+  // og:title
+  html = upsertInHead(html,
+    /(<meta\s+property=["']og:title["']\s+content=)["'][^"']*["']/,
+    `$1"${escape(title)}"`,
+    `<meta property="og:title" content="${escape(title)}" />`
+  );
+
+  // og:description
+  html = upsertInHead(html,
+    /(<meta\s+property=["']og:description["']\s+content=)["'][^"']*["']/,
+    `$1"${escape(description)}"`,
+    `<meta property="og:description" content="${escape(description)}" />`
+  );
+
+  // twitter:title
+  html = upsertInHead(html,
+    /(<meta\s+name=["']twitter:title["']\s+content=)["'][^"']*["']/,
+    `$1"${escape(title)}"`,
+    `<meta name="twitter:title" content="${escape(title)}" />`
+  );
+
+  // twitter:description
+  html = upsertInHead(html,
+    /(<meta\s+name=["']twitter:description["']\s+content=)["'][^"']*["']/,
+    `$1"${escape(description)}"`,
+    `<meta name="twitter:description" content="${escape(description)}" />`
+  );
+
+  // og:image + twitter:image — only when explicitly provided in route config
+  if (ogImage) {
+    html = upsertInHead(html,
+      /(<meta\s+property=["']og:image["']\s+content=)["'][^"']*["']/,
+      `$1"${escape(ogImage)}"`,
+      `<meta property="og:image" content="${escape(ogImage)}" />`
+    );
+    html = upsertInHead(html,
+      /(<meta\s+name=["']twitter:image["']\s+content=)["'][^"']*["']/,
+      `$1"${escape(ogImage)}"`,
+      `<meta name="twitter:image" content="${escape(ogImage)}" />`
+    );
+  }
+
+  return html;
+}
+
+function processRoute(template, baseUrl, lang, route) {
+  const isI18n = !Array.isArray(route.content) && typeof route.content === 'object' && route.content !== null;
+
+  if (isI18n) {
+    for (const [lang, content] of Object.entries(route.content)) {
+      const title = typeof route.title === 'object' ? route.title[lang] : route.title;
+      const description = typeof route.description === 'object' ? route.description[lang] : route.description;
+      const ogImage = typeof route.ogImage === 'object' && route.ogImage !== null ? route.ogImage[lang] : route.ogImage;
+
+      if (!title || !description) {
+        print.boldError(`[generate-seo-html] Missing title or description for route "${route.path}" / lang "${lang}" in seo.json`);
+        exit(1);
+      }
+
+      const routeSuffix = route.path === '/' ? '' : route.path;
+      const pageUrl = `${baseUrl}/${lang}${routeSuffix}`;
+
+      let html = applySubstitutions(template, lang, title, description, pageUrl, ogImage);
+
+      html = html.replace(
+        /<main\s+id=["']app["'][^>]*>[\s\S]*?<\/main>/,
+        `<main id="app">\n${buildBodyContent(content)}\n  </main>`
+      );
+
+      if (html === template) {
+        print.boldError(`[generate-seo-html] Failed to apply any changes for ${lang}${route.path}`);
+        exit(1);
+      }
+
+      const segments = routeSuffix ? routeSuffix.split('/').filter(Boolean) : [];
+      const outputDir = path.join(PATHS.tempSource, lang, ...segments);
+      const outputPath = path.join(outputDir, 'index.html');
+
+      fs.mkdirSync(outputDir, { recursive: true });
+      fs.writeFileSync(outputPath, html, 'utf-8');
+
+      if (isVerbose) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
+    }
+  } else {
+    const { title, description } = route;
+
+    if (!title || !description) {
+      print.boldError(`[generate-seo-html] Missing title or description for route "${route.path}" in seo.json`);
+      exit(1);
+    }
+
+    const routeSuffix = route.path === '/' ? '' : route.path;
+    const pageUrl = `${baseUrl}${routeSuffix}`;
+
+    let html = applySubstitutions(template, lang, title, description, pageUrl, route.ogImage);
+
+    if (route.content) {
+      html = html.replace(
+        /<main\s+id=["']app["'][^>]*>[\s\S]*?<\/main>/,
+        `<main id="app">\n${buildBodyContent(route.content)}\n  </main>`
+      );
+    }
+
+    if (html === template) {
+      print.boldError(`[generate-seo-html] Failed to apply any changes for ${route.path} — index.html may be missing a </head> tag`);
+      exit(1);
+    }
+
+    const segments = routeSuffix ? routeSuffix.split('/').filter(Boolean) : [];
+    const outputDir = path.join(PATHS.tempSource, ...segments);
+    const outputPath = path.join(outputDir, 'index.html');
+
+    fs.mkdirSync(outputDir, { recursive: true });
+    fs.writeFileSync(outputPath, html, 'utf-8');
+
+    if (isVerbose) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
+  }
+}
+
+function generateSeoHtml() {
+  const templatePath = path.join(PATHS.tempSource, 'index.html');
+  const template = fs.readFileSync(templatePath, 'utf-8');
+
+  if (!template.includes('</head>')) {
+    print.boldError('[generate-seo-html] index.html is missing a </head> tag — cannot inject SEO tags');
+    exit(1);
+  }
+
+  const seoConfigPath = path.join(PATHS.temp, 'config', 'seo.json');
+  const seoConfig = JSON.parse(fs.readFileSync(seoConfigPath, 'utf-8'));
+  const baseUrl = seoConfig.baseUrl.replace(/\/$/, '');
+
+  for (const route of seoConfig.routes) {
+    processRoute(template, baseUrl, route.lang, route);
+  }
+}
+
+try {
+  generateSeoHtml();
+  if (isVerbose) print.boldInfo('✅ SEO HTML generation complete.');
+} catch (err) {
+  print.boldError(`[generate-seo-html] Unexpected error: ${err.message}`);
+  exit(1);
+}

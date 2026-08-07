@@ -2,7 +2,7 @@ import { spawn } from 'child_process';
 
 export function runCommand(command, args = []) {
   return new Promise((resolve, reject) => {
-    const child = spawn(command, args, { stdio: 'inherit', shell: true });
+    const child = spawn([command, ...args].join(' '), { stdio: 'inherit', shell: true });
 
     child.on('close', (code) => {
       if (code === 0) resolve();

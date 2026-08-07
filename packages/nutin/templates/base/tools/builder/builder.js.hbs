@@ -5,14 +5,14 @@ import { print, isProd, runScript } from '../utils/index.js';
 
 const scriptsDir = path.join(process.cwd(), 'tools', 'builder', 'core');
 
-if (!isProd) print.boldInfo('For production, use build:prod.\n');
-print.boldHead(`Starting build...\n`);
+if (!isProd) print.section('⚠️ For production, use \'npm run build:prod\' ⚠️');
+print.boldHead(`\nStarting build...`);
 
 runScript(path.join(scriptsDir, 'copy-static.js'), 'Copying files...');
 
 if(!isProd) runScript(path.join(scriptsDir, 'tsc.js'), 'Running TypeScript compiler...');
 
-{{#if template}}
+{{#if config.inlinedtemplate}}
 runScript(path.join(scriptsDir, 'merge-templates.js'), 'Merging HTML templates in temp files...');
 {{else}}
 runScript(path.join(scriptsDir, 'minify-html.js'), 'Minifying inline templates...');
@@ -26,13 +26,14 @@ runScript(path.join(scriptsDir, 'validate-html.js'), 'Adding and validating tags
 if (isProd) {
 	runScript(path.join(scriptsDir, 'esbuild.js'), 'Running esbuild...');
 	runScript(path.join(scriptsDir, 'hash-files.js'), 'Hashing files...');
-{{#if deployHelper}}
-	runScript(path.join(scriptsDir, 'compress-files.js'), 'Compressing files...');
+{{#if config.generateSEO}}
+	runScript(path.join(scriptsDir, 'generate-seo-html.js'), 'Generating SEO HTML pages...');
+	runScript(path.join(scriptsDir, 'generate-robots-txt.js'), 'Generating robots.txt...');
+	runScript(path.join(scriptsDir, 'generate-sitemap-xml.js'), 'Generating sitemap.xml...');
 {{/if}}
+	runScript(path.join(scriptsDir, 'compress-files.js'), 'Compressing files...');
 }
 
 runScript(path.join(scriptsDir, 'finalize-build.js'), 'Finalizing build...')
 
 print.boldSuccess(`\nBuild successful!\n`);
-
-if (!isProd) print.boldInfo('For production, use build:prod.');

@@ -6,8 +6,4 @@ describe('App container', () => {
   it('should have title', () => {
     expect(document.title).toEqual('{{projectName}}');
   });
-  it('should have meta description', () => {
-    const desc = document.querySelector('meta[name="description"]').content;
-    expect(desc).toEqual('{{projectName}}');
-  });
 });

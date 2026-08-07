@@ -1,0 +1,17 @@
+@use "sass:map";
+@use "../core/overlay-variables" as *;
+
+$emergency-dialog-colors: $semantic-colors !default;
+
+$emergency-dialog-config: (
+  'accent-width': 4px,
+  'color-error': map.get($emergency-dialog-colors, error),
+) !default;
+
+.emergency-dialog-overlay {
+  z-index: map.get($overlay-z-index, emergency-dialog);
+}
+
+.emergency-dialog-wrapper {
+  border-top: map.get($emergency-dialog-config, 'accent-width') solid map.get($emergency-dialog-config, 'color-error');
+}

@@ -1,0 +1,29 @@
+@use "sass:map";
+@use "../core/overlay-variables" as *;
+
+$blocking-loader-config: (
+  'gap': 1rem,
+  'message-font-size': 1rem,
+  'message-font-weight': 600,
+  'color-overlay': var(--overlay),
+  'color-text': var(--text),
+) !default;
+
+.blocking-loader-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: map.get($overlay-z-index, blocking-loader);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: map.get($blocking-loader-config, 'gap');
+  background-color: map.get($blocking-loader-config, 'color-overlay');
+  backdrop-filter: blur(5px);
+  color: map.get($blocking-loader-config, 'color-text');
+}
+
+.blocking-loader-overlay__message {
+  font-size: map.get($blocking-loader-config, 'message-font-size');
+  font-weight: map.get($blocking-loader-config, 'message-font-weight');
+}
