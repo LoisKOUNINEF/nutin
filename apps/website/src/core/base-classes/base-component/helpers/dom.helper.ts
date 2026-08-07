@@ -59,7 +59,7 @@ export class DomHelper {
     });
   }
 
-  private static appendOrReplace(config: DomElementConfig) {
+  private static appendOrReplace(config: DomElementConfig): void {
     if (config.target instanceof HTMLElement) {
       if (typeof config.mountTarget === 'string') {
         // Append mode
@@ -69,7 +69,7 @@ export class DomHelper {
         config.target.replaceWith(config.element);
       }
     } else {
-      console.warn('Mount target not found:', config.mountTarget);
+      return;
     }
   }
 }

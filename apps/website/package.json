@@ -18,7 +18,7 @@
     "generate": "node tools/generator/generator.js",
     "test": "node testin-nutin/runner.js",
     "test:rebuild": "npm run build && npm run test",
-    "test:watch": "npm run build && node test/watch-tests.js",
+    "test:watch": "npm run build && node testin-nutin/watch-tests.js",
     "code-to-json": "node src/app/helpers/format-code/code-to-json.cjs"
   }
 }
