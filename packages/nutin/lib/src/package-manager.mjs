@@ -91,6 +91,7 @@ export async function generatePackageJson(projectPath, context) {
     "chokidar": "^4.0.3",
     "esbuild": "^0.25.12",
     "html-minifier-terser": "^7.2.0",
+    "linkedom": "^0.18.12",
     "live-server": "^1.2.2",
     "sass": "^1.89.0",
     "typescript": "^5.8.3",

@@ -1,0 +1,74 @@
+import { parseHTML } from 'linkedom';
+import path from 'path';
+import { PATHS } from '../paths.js';
+import { installGlobals } from './ssr-polyfills.js';
+
+let renderIndex = 0;
+
+/**
+ * Renders one (route, lang) pair by instantiating the real View via appRoutes and calling
+ * .render(), returning the resulting real markup. Fresh linkedom window + cache-busted
+ * dynamic import per call, so no singleton state (I18nService, etc.) leaks between renders.
+ */
+export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFetch, lang, pageUrl }) {
+  // linkedom's second parseHTML() arg is a raw "globals" bag merged onto the returned window —
+  // there's no dedicated url option; confirmed empirically that `{ url: pageUrl }` leaves
+  // `window.location` undefined. Passing a real URL instance as `location` gives `.pathname`/
+  // `.href` for free, which is what I18n's getLocaleFromUrl() actually reads.
+  const { window } = parseHTML('<!doctype html><html><body></body></html>', { location: new URL(pageUrl) });
+  const { trackedFetches } = installGlobals(window, {
+    lang,
+    mockFetch: mockFetch ?? {},
+    localesDir: path.join(PATHS.tempSource, 'locales'),
+  });
+
+  let Service;
+  let constructorName = appRoutesKey;
+
+  try {
+    const bundle = await import(`${bundleUrl}?ssr=${renderIndex++}`);
+    ({ Service } = bundle);
+    const { appRoutes, I18nService, RouteGuardsManager } = bundle;
+
+    const routeConfig = appRoutes[appRoutesKey];
+    if (!routeConfig) {
+      throw new Error(
+        `No appRoutes entry found for "${appRoutesKey}" — check that config/seo.json's route "path" ` +
+        `matches a real key in src/app/routes.ts.`
+      );
+    }
+
+    await I18nService.setCurrentLanguage(lang);
+
+    const viewConstructor = RouteGuardsManager.getViewConstructor(routeConfig);
+    const view = viewConstructor();
+    constructorName = view.constructor.name;
+
+    if (mockParams) view.setRouteParams(mockParams);
+
+    const element = view.render();
+
+    await Promise.all(trackedFetches);
+    await Promise.resolve();
+
+    return element.outerHTML;
+  } catch (err) {
+    throw new Error(
+      `[ssr] Failed to render route "${appRoutesKey}" (lang "${lang}", view "${constructorName}"): ${err.message}${hintForError(err)}`,
+      { cause: err }
+    );
+  } finally {
+    if (Service) await Service.destroyAll();
+  }
+}
+
+function hintForError(err) {
+  if (err instanceof ReferenceError && /is not defined$/.test(err.message)) {
+    return (
+      `\n  Hint: this usually means the component tree touches an unguarded browser global ` +
+      `(e.g. "window", "navigator", "matchMedia") that isn't polyfilled for SSR — see ` +
+      `tools/builder/core/ssr/ssr-polyfills.js.`
+    );
+  }
+  return '';
+}

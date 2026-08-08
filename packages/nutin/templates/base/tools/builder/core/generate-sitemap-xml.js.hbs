@@ -4,15 +4,14 @@ import { exit } from 'process';
 import { PATHS } from './paths.js';
 import { print, builderConfig } from '../../utils/index.js';
 
-function collectUrls(baseUrl, routes) {
+function collectUrls(baseUrl, routes, languages) {
   const urls = [];
 
   for (const route of routes) {
     const routeSuffix = route.path === '/' ? '' : route.path;
-    const isI18n = builderConfig.i18n && !Array.isArray(route.content) && typeof route.content === 'object' && route.content !== null;
 
-    if (isI18n) {
-      for (const lang of Object.keys(route.content)) {
+    if (builderConfig.i18n) {
+      for (const lang of languages) {
         urls.push(`${baseUrl}/${lang}${routeSuffix}/`);
       }
     } else {
@@ -33,7 +32,10 @@ function generateSitemapXml() {
   const seoConfig = JSON.parse(fs.readFileSync(seoConfigPath, 'utf-8'));
   const baseUrl = seoConfig.baseUrl.replace(/\/$/, '');
 
-  const urls = collectUrls(baseUrl, seoConfig.routes);
+  const languagesConfigPath = path.join(PATHS.temp, 'config', 'languages.json');
+  const { languages } = JSON.parse(fs.readFileSync(languagesConfigPath, 'utf-8'));
+
+  const urls = collectUrls(baseUrl, seoConfig.routes, languages);
   const xml = buildSitemapXml(urls);
 
   const outputPath = path.join(PATHS.tempSource, 'sitemap.xml');

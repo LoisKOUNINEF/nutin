@@ -3,6 +3,8 @@ import path from 'path';
 import { exit } from 'process';
 import { PATHS } from './paths.js';
 import { print, builderConfig } from '../../utils/index.js';
+import { buildSsrBundle, cleanupSsrBundle } from './ssr/ssr-bundle.js';
+import { renderRoute } from './ssr/ssr-render.js';
 
 function escape(str) {
   return str
@@ -18,12 +20,6 @@ function upsertInHead(html, pattern, replacement, fullTag) {
     return html.replace(pattern, replacement);
   }
   return html.replace('</head>', `\n    ${fullTag}\n  </head>`);
-}
-
-function buildBodyContent(content) {
-  return content
-    .flatMap(block => Object.entries(block).map(([tag, text]) => `    <${tag}>${text}</${tag}>`))
-    .join('\n');
 }
 
 function applySubstitutions(template, lang, title, description, pageUrl, ogImage) {
@@ -110,6 +106,9 @@ function applySubstitutions(template, lang, title, description, pageUrl, ogImage
   return html;
 }
 
+// Collapses a per-lang-object-or-flat value down to one language, falling back to the
+// first available value if the exact key is missing. Used when i18n is off, where a route
+// may still be authored as a per-lang object (e.g. the default seo.json.hbs) or a flat value.
 function resolveLocaleValue(value, defaultLanguage) {
   if (value && typeof value === 'object' && !Array.isArray(value)) {
     return value[defaultLanguage] ?? Object.values(value)[0];
@@ -117,84 +116,118 @@ function resolveLocaleValue(value, defaultLanguage) {
   return value;
 }
 
-function processRoute(template, baseUrl, defaultLanguage, route) {
-  const isI18n = builderConfig.i18n && !Array.isArray(route.content) && typeof route.content === 'object' && route.content !== null;
+// Used when i18n is on: a per-lang object must have an exact entry for `lang` (no silent
+// fallback to another language), while a flat value is applied uniformly to every language.
+function valueForLang(value, lang) {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value[lang] : value;
+}
 
-  if (isI18n) {
-    for (const [lang, content] of Object.entries(route.content)) {
-      const title = typeof route.title === 'object' ? route.title[lang] : route.title;
-      const description = typeof route.description === 'object' ? route.description[lang] : route.description;
-      const ogImage = typeof route.ogImage === 'object' && route.ogImage !== null ? route.ogImage[lang] : route.ogImage;
+function segmentsOf(routeSuffix) {
+  return routeSuffix ? routeSuffix.split('/').filter(Boolean) : [];
+}
+
+function validateMockParams(route) {
+  const requiredParams = [...route.path.matchAll(/:([^/]+)/g)]
+    .map(([, name]) => name)
+    .filter((name) => !name.endsWith('?')); // optional segments don't require a mock value
+
+  if (requiredParams.length === 0) return;
+
+  const provided = route.mockParams ?? {};
+  const missing = requiredParams.filter((name) => !(name in provided));
+
+  if (missing.length > 0) {
+    print.boldError(
+      `[generate-seo-html] Route "${route.path}" has dynamic segment(s) but is missing "mockParams" ` +
+      `for: ${missing.join(', ')}. Add a "mockParams" object to this route in config/seo.json.`
+    );
+    exit(1);
+  }
+}
+
+async function writeRouteHtml({ template, lang, title, description, pageUrl, ogImage, body, outputSegments, routePath }) {
+  let html = applySubstitutions(template, lang, title, description, pageUrl, ogImage);
+
+  if (html === template) {
+    print.boldError(`[generate-seo-html] Failed to apply any changes for ${routePath} (lang "${lang}") — index.html may be missing a </head> tag`);
+    exit(1);
+  }
+
+  html = html.replace(
+    /<main\s+id=["']app["'][^>]*>[\s\S]*?<\/main>/,
+    `<main id="app">\n${body}\n  </main>`
+  );
+
+  const outputDir = path.join(PATHS.tempSource, ...outputSegments);
+  const outputPath = path.join(outputDir, 'index.html');
+
+  fs.mkdirSync(outputDir, { recursive: true });
+  fs.writeFileSync(outputPath, html, 'utf-8');
+
+  if (builderConfig.isExhaustive) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
+}
+
+async function processRoute(template, baseUrl, defaultLanguage, languages, route, bundleUrl) {
+  validateMockParams(route);
+
+  const routeSuffix = route.path === '/' ? '' : route.path;
+
+  if (builderConfig.i18n) {
+    for (const lang of languages) {
+      const title = valueForLang(route.title, lang);
+      const description = valueForLang(route.description, lang);
+      const ogImage = valueForLang(route.ogImage, lang);
 
       if (!title || !description) {
         print.boldError(`[generate-seo-html] Missing title or description for route "${route.path}" / lang "${lang}" in seo.json`);
         exit(1);
       }
 
-      const routeSuffix = route.path === '/' ? '' : route.path;
       const pageUrl = `${baseUrl}/${lang}${routeSuffix}`;
+      const body = await renderRoute({
+        bundleUrl,
+        appRoutesKey: route.path,
+        mockParams: route.mockParams,
+        mockFetch: route.mockFetch,
+        lang,
+        pageUrl,
+      });
 
-      let html = applySubstitutions(template, lang, title, description, pageUrl, ogImage);
-
-      html = html.replace(
-        /<main\s+id=["']app["'][^>]*>[\s\S]*?<\/main>/,
-        `<main id="app">\n${buildBodyContent(content)}\n  </main>`
-      );
-
-      if (html === template) {
-        print.boldError(`[generate-seo-html] Failed to apply any changes for ${lang}${route.path}`);
-        exit(1);
-      }
-
-      const segments = routeSuffix ? routeSuffix.split('/').filter(Boolean) : [];
-      const outputDir = path.join(PATHS.tempSource, lang, ...segments);
-      const outputPath = path.join(outputDir, 'index.html');
-
-      fs.mkdirSync(outputDir, { recursive: true });
-      fs.writeFileSync(outputPath, html, 'utf-8');
-
-      if (builderConfig.isExhaustive) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
+      await writeRouteHtml({
+        template, lang, title, description, pageUrl, ogImage, body,
+        outputSegments: [lang, ...segmentsOf(routeSuffix)],
+        routePath: route.path,
+      });
     }
   } else {
     const title = resolveLocaleValue(route.title, defaultLanguage);
     const description = resolveLocaleValue(route.description, defaultLanguage);
     const ogImage = resolveLocaleValue(route.ogImage, defaultLanguage);
-    const content = resolveLocaleValue(route.content, defaultLanguage);
 
     if (!title || !description) {
       print.boldError(`[generate-seo-html] Missing title or description for route "${route.path}" in seo.json`);
       exit(1);
     }
 
-    const routeSuffix = route.path === '/' ? '' : route.path;
     const pageUrl = `${baseUrl}${routeSuffix}`;
+    const body = await renderRoute({
+      bundleUrl,
+      appRoutesKey: route.path,
+      mockParams: route.mockParams,
+      mockFetch: route.mockFetch,
+      lang: defaultLanguage,
+      pageUrl,
+    });
 
-    let html = applySubstitutions(template, defaultLanguage, title, description, pageUrl, ogImage);
-
-    if (content) {
-      html = html.replace(
-        /<main\s+id=["']app["'][^>]*>[\s\S]*?<\/main>/,
-        `<main id="app">\n${buildBodyContent(content)}\n  </main>`
-      );
-    }
-
-    if (html === template) {
-      print.boldError(`[generate-seo-html] Failed to apply any changes for ${route.path} — index.html may be missing a </head> tag`);
-      exit(1);
-    }
-
-    const segments = routeSuffix ? routeSuffix.split('/').filter(Boolean) : [];
-    const outputDir = path.join(PATHS.tempSource, ...segments);
-    const outputPath = path.join(outputDir, 'index.html');
-
-    fs.mkdirSync(outputDir, { recursive: true });
-    fs.writeFileSync(outputPath, html, 'utf-8');
-
-    if (builderConfig.isExhaustive) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
+    await writeRouteHtml({
+      template, lang: defaultLanguage, title, description, pageUrl, ogImage, body,
+      outputSegments: segmentsOf(routeSuffix),
+      routePath: route.path,
+    });
   }
 }
 
-function generateSeoHtml() {
+async function generateSeoHtml() {
   const templatePath = path.join(PATHS.tempSource, 'index.html');
   const template = fs.readFileSync(templatePath, 'utf-8');
 
@@ -208,17 +241,25 @@ function generateSeoHtml() {
   const baseUrl = seoConfig.baseUrl.replace(/\/$/, '');
 
   const languagesConfigPath = path.join(PATHS.temp, 'config', 'languages.json');
-  const { defaultLanguage } = JSON.parse(fs.readFileSync(languagesConfigPath, 'utf-8'));
+  const { languages, defaultLanguage } = JSON.parse(fs.readFileSync(languagesConfigPath, 'utf-8'));
 
-  for (const route of seoConfig.routes) {
-    processRoute(template, baseUrl, defaultLanguage, route);
+  const bundleUrl = await buildSsrBundle();
+
+  try {
+    for (const route of seoConfig.routes) {
+      await processRoute(template, baseUrl, defaultLanguage, languages, route, bundleUrl);
+    }
+  } finally {
+    cleanupSsrBundle();
   }
 }
 
-try {
-  generateSeoHtml();
-  if (builderConfig.isVerbose) print.boldInfo('✅ SEO HTML generation complete.');
-} catch (err) {
-  print.boldError(`[generate-seo-html] Unexpected error: ${err.message}`);
-  exit(1);
-}
+generateSeoHtml()
+  .then(() => {
+    if (builderConfig.isVerbose) print.boldInfo('✅ SEO HTML generation complete.');
+  })
+  .catch((err) => {
+    print.boldError(`[generate-seo-html] ${err.message}`);
+    if (builderConfig.isVerbose && err.stack) print.gray(err.stack);
+    exit(1);
+  });
