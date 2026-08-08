@@ -22,7 +22,7 @@ runScript(path.join(scriptsDir, 'validate-html.js'), 'Adding and validating tags
 if (builderConfig.isProd) {
 	runScript(path.join(scriptsDir, 'esbuild.js'), 'Running esbuild...', builderConfig.isVerbose);
 	runScript(path.join(scriptsDir, 'hash-files.js'), 'Hashing files...', builderConfig.isVerbose);
-if (builderConfig.generateSeo) {
+if (builderConfig.generateSEO) {
 	runScript(path.join(scriptsDir, 'generate-seo-html.js'), 'Generating SEO HTML pages...', builderConfig.isVerbose);
 	runScript(path.join(scriptsDir, 'generate-robots-txt.js'), 'Generating robots.txt...', builderConfig.isVerbose);
 	runScript(path.join(scriptsDir, 'generate-sitemap-xml.js'), 'Generating sitemap.xml...', builderConfig.isVerbose);

@@ -110,8 +110,15 @@ function applySubstitutions(template, lang, title, description, pageUrl, ogImage
   return html;
 }
 
-function processRoute(template, baseUrl, lang, route) {
-  const isI18n = !Array.isArray(route.content) && typeof route.content === 'object' && route.content !== null;
+function resolveLocaleValue(value, defaultLanguage) {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return value[defaultLanguage] ?? Object.values(value)[0];
+  }
+  return value;
+}
+
+function processRoute(template, baseUrl, defaultLanguage, route) {
+  const isI18n = builderConfig.i18n && !Array.isArray(route.content) && typeof route.content === 'object' && route.content !== null;
 
   if (isI18n) {
     for (const [lang, content] of Object.entries(route.content)) {
@@ -149,7 +156,10 @@ function processRoute(template, baseUrl, lang, route) {
       if (builderConfig.isExhaustive) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
     }
   } else {
-    const { title, description } = route;
+    const title = resolveLocaleValue(route.title, defaultLanguage);
+    const description = resolveLocaleValue(route.description, defaultLanguage);
+    const ogImage = resolveLocaleValue(route.ogImage, defaultLanguage);
+    const content = resolveLocaleValue(route.content, defaultLanguage);
 
     if (!title || !description) {
       print.boldError(`[generate-seo-html] Missing title or description for route "${route.path}" in seo.json`);
@@ -159,12 +169,12 @@ function processRoute(template, baseUrl, lang, route) {
     const routeSuffix = route.path === '/' ? '' : route.path;
     const pageUrl = `${baseUrl}${routeSuffix}`;
 
-    let html = applySubstitutions(template, lang, title, description, pageUrl, route.ogImage);
+    let html = applySubstitutions(template, defaultLanguage, title, description, pageUrl, ogImage);
 
-    if (route.content) {
+    if (content) {
       html = html.replace(
         /<main\s+id=["']app["'][^>]*>[\s\S]*?<\/main>/,
-        `<main id="app">\n${buildBodyContent(route.content)}\n  </main>`
+        `<main id="app">\n${buildBodyContent(content)}\n  </main>`
       );
     }
 
@@ -197,8 +207,11 @@ function generateSeoHtml() {
   const seoConfig = JSON.parse(fs.readFileSync(seoConfigPath, 'utf-8'));
   const baseUrl = seoConfig.baseUrl.replace(/\/$/, '');
 
+  const languagesConfigPath = path.join(PATHS.temp, 'config', 'languages.json');
+  const { defaultLanguage } = JSON.parse(fs.readFileSync(languagesConfigPath, 'utf-8'));
+
   for (const route of seoConfig.routes) {
-    processRoute(template, baseUrl, route.lang, route);
+    processRoute(template, baseUrl, defaultLanguage, route);
   }
 }
 

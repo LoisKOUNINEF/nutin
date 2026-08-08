@@ -202,7 +202,7 @@ export async function addFeatureToProject(featureKey) {
     await ensureTestinNutinConfigBlock(path.join(projectPath, nutinConfigFileName));
   }
 
-  if (feature.key === 'forms') {
+  if (feature.key === 'forms' || feature.key === 'overlays') {
     await addFeatureToProject('accessibilityComponents');
   }
 

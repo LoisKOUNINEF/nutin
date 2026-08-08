@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { exit } from 'process';
 import { PATHS } from './paths.js';
-import { builderConfig. } from '../../utils/index.js';
+import { builderConfig, print } from '../../utils/index.js';
 
 function generateRobotsTxt() {
   const seoConfigPath = path.join(PATHS.temp, 'config', 'seo.json');

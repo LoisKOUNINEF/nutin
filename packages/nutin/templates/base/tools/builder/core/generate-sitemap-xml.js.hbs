@@ -9,7 +9,7 @@ function collectUrls(baseUrl, routes) {
 
   for (const route of routes) {
     const routeSuffix = route.path === '/' ? '' : route.path;
-    const isI18n = !Array.isArray(route.content) && typeof route.content === 'object' && route.content !== null;
+    const isI18n = builderConfig.i18n && !Array.isArray(route.content) && typeof route.content === 'object' && route.content !== null;
 
     if (isI18n) {
       for (const lang of Object.keys(route.content)) {

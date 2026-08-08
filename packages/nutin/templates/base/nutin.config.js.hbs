@@ -1,11 +1,16 @@
 export default {
+  // Nutin features
   inlineTemplates: false,
   i18n: true,
   tailwind: false,
+
+  // Components / Views scaffolding
   generator: {
-    generateLocales: false, // generates locales/*.json for components / views
-    generateStylesheet: false, // generates .scss for components / views
+    generateLocales: false, // generates locales/*.json alongside components / views
+    generateStylesheet: false, // generates .scss alongside components / views
   },
+
+  // Build pipeline
   builder: {
     generateSEO: true,
     sass: {
@@ -16,18 +21,9 @@ export default {
     esbuild: {
         bundle: true,
         minify: true,
-        sourcemap: true,
-        drop: ['console', 'debugger'],
-        platform: 'browser',
-        format: 'esm',
+        sourcemap: false,
         target: ['es2015'],
-        legalComments: 'none',
-        loader: {
-          '.json': 'json',
-        },
-        define: {
-          'process.env.NODE_ENV': '"production"',
-        },
+        drop: ['console', 'debugger'],
     },
     compression: {
       gzip: true,
@@ -37,6 +33,8 @@ export default {
     logLevel: 0, // 0 = logs start / finish; 1 = logs steps; 2 = logs all.
   },
   {{#if testinNutin}}
+
+  // Testing toolkit
   testinNutin: {
       origins: [
       'src/app',

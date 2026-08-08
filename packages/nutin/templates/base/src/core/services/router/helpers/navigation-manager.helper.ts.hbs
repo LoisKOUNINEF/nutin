@@ -1,11 +1,14 @@
 import { I18nService, View } from "../../../index.js";
 import { Language } from "../../i18n/languages.js";
+import { CONFIG } from "../../../config.js";
 
 /**
  * Navigation - handles path normalization and history management
  */
 export class NavigationManager {
   public static extractLocale(path: string): { locale: Language | null; strippedPath: string } {
+    if (!CONFIG.i18n) return { locale: null, strippedPath: path };
+
     const segments = path.split('/').filter(Boolean);
     const first = segments[0] as Language;
     if (first && I18nService.languages.includes(first)) {
@@ -16,6 +19,8 @@ export class NavigationManager {
   }
 
   public static addLocalePrefix(strippedPath: string): string {
+    if (!CONFIG.i18n) return strippedPath;
+
     const lang = I18nService.currentLanguage;
     return strippedPath === '/' ? `/${lang}` : `/${lang}${strippedPath}`;
   }

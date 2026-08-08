@@ -1,5 +1,6 @@
 import { DEFAULT_LANGUAGE, LANGUAGES, Language, Translations } from './languages.js';
 import { AppEventBus, Service } from '../../index.js';
+import { CONFIG } from '../../config.js';
 
 export class I18n extends Service<I18n> {
   private readonly _DEFAULT_LANGUAGE: Language = DEFAULT_LANGUAGE;
@@ -122,6 +123,8 @@ export class I18n extends Service<I18n> {
   }
 
   private getLocaleFromUrl(): Language | null {
+    if (!CONFIG.i18n) return null;
+
     const first = window.location.pathname.split('/').filter(Boolean)[0] as Language;
     return first && this._LANGUAGES.includes(first) ? first : null;
   }
