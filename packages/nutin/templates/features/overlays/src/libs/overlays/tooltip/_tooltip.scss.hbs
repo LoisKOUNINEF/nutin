@@ -1,14 +1,20 @@
 @use "sass:map";
 @use "../core/overlay-variables" as *;
+@use "../../../styles/nutin-config" as config;
 
-$tooltip-config: (
+$tooltip-defaults: (
   'border-radius': 0.35rem,
   'font-size': 0.85rem,
   'max-width': 240px,
   'content-padding': 0.35rem 0.6rem,
   'color-text': #111827,
   'color-background': #ffffff,
-) !default;
+);
+
+$tooltip-config: map.deep-merge(
+  $tooltip-defaults,
+  map.get(config.$config, 'components', 'tooltip') or ()
+);
 
 .tooltip-wrapper {
   z-index: map.get($overlay-z-index, tooltip);

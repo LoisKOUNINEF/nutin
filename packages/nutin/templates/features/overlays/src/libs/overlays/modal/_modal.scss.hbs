@@ -1,8 +1,9 @@
 @use "sass:map";
 @use "../core/overlay-variables" as *;
+@use "../../../styles/nutin-config" as config;
 
 // modal overlay config
-$modal-config: (
+$modal-defaults: (
   'z-index': map.get($overlay-z-index, modal),
   'transition-duration': 0.3s,
   'border-radius': 1rem,
@@ -22,7 +23,12 @@ $modal-config: (
   'color-text': #111827,
   'color-secondary': #6b7280,
   'color-secondary-hover': #4b5563,
-) !default;
+);
+
+$modal-config: map.deep-merge(
+  $modal-defaults,
+  map.get(config.$config, 'components', 'modal') or ()
+);
 
 .modal-overlay {
   z-index: map.get($modal-config, 'z-index');

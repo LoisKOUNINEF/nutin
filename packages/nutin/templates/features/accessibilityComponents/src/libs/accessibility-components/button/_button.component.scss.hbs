@@ -1,8 +1,14 @@
 @use "sass:map";
+@use "../../../styles/nutin-config" as config;
 
-$button-config: (
+$button-defaults: (
   'color-outline': #2563eb,
-) !default;
+);
+
+$button-config: map.deep-merge(
+  $button-defaults,
+  map.get(config.$config, 'components', 'button') or ()
+);
 
 .component-buttons {
   button {

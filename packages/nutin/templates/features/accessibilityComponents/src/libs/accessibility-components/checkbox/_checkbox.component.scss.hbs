@@ -1,6 +1,7 @@
 @use "sass:map";
+@use "../../../styles/nutin-config" as config;
 
-$checkbox-config: (
+$checkbox-defaults: (
   'gap': 0.5rem,
   'border-radius': 2px,
   'transition-duration': 0.2s,
@@ -18,7 +19,12 @@ $checkbox-config: (
   'color-disabled-bg': #e5e7eb,
   'color-border': #d1d5db,
   'color-text': #111827,
-) !default;
+);
+
+$checkbox-config: map.deep-merge(
+  $checkbox-defaults,
+  map.get(config.$config, 'components', 'checkbox') or ()
+);
 
 .app-checkbox {
   display: inline-flex;

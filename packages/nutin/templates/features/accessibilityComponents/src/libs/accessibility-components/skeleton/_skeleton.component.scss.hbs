@@ -1,6 +1,7 @@
 @use "sass:map";
+@use "../../../styles/nutin-config" as config;
 
-$skeleton-config: (
+$skeleton-defaults: (
   'border-radius': 4px,
   'text-border-radius': 2px,
   'line-border-radius': 2px,
@@ -12,7 +13,12 @@ $skeleton-config: (
   'circle-default-size': 2.5rem,
   'default-height': 1em,
   'color-surface': #f3f4f6,
-) !default;
+);
+
+$skeleton-config: map.deep-merge(
+  $skeleton-defaults,
+  map.get(config.$config, 'components', 'skeleton') or ()
+);
 
 @keyframes skeleton-pulse {
   0%, 100% { opacity: 1; }

@@ -1,6 +1,7 @@
 @use "sass:map";
+@use "../../../styles/nutin-config" as config;
 
-$select-config: (
+$select-defaults: (
   'gap': 0.25rem,
   'label-font-size': 0.875rem,
   'control-padding-y': 0.5rem,
@@ -22,7 +23,12 @@ $select-config: (
   'color-primary': #2563eb,
   'color-disabled-bg': #e5e7eb,
   'color-disabled-text': #9ca3af,
-) !default;
+);
+
+$select-config: map.deep-merge(
+  $select-defaults,
+  map.get(config.$config, 'components', 'select') or ()
+);
 
 .app-select {
   display: flex;

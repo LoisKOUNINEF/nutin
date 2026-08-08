@@ -81,6 +81,9 @@ export class FileGenerator {
     if (fileName.includes("test.js") && !(context.testinNutin)) {
       return;
     }
+    if (fileName.includes("_nutin-config.scss") && !(context.accessibilityComponents || context.forms || context.overlays)) {
+      return;
+    }
 
     const fileExt = path.extname(fileName).toLowerCase();
     const outputFileName = fileName.endsWith('.hbs') ? fileName.replace('.hbs', '') : fileName;

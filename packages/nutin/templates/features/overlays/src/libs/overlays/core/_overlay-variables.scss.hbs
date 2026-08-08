@@ -1,15 +1,23 @@
+@use "sass:map";
+@use "../../../styles/nutin-config" as config;
+
 // Shared default palette for overlay "status" colors (success/error/info).
 // Each consumer (Snackbar, NotificationBanner, EmergencyDialog, ...) aliases
 // this into its own `!default` variable (e.g. `$snackbar-colors: $semantic-colors !default;`)
 // so overriding this map changes the default for all of them at once, while
 // overriding a specific component's own alias changes only that component.
-$semantic-colors: (
+$semantic-colors-defaults: (
   success: rgb(76 175 80),
   error: rgb(244 67 54),
   info: rgb(33 150 243),
   warning: rgb(244 67 54),
   text: white,
-) !default;
+);
+
+$semantic-colors: map.deep-merge(
+  $semantic-colors-defaults,
+  map.get(config.$config, 'components', 'overlay-variables', 'semantic-colors') or ()
+);
 
 
 $overlay-z-index: (

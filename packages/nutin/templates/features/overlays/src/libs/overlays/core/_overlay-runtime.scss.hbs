@@ -1,9 +1,15 @@
 @use "sass:map";
 @use "overlay-variables" as *;
+@use "../../../styles/nutin-config" as config;
 
-$overlay-runtime-config: (
+$overlay-runtime-defaults: (
   'z-index': map.get($overlay-z-index, snackbar),
-) !default;
+);
+
+$overlay-runtime-config: map.deep-merge(
+  $overlay-runtime-defaults,
+  map.get(config.$config, 'components', 'overlay-runtime') or ()
+);
 
 html.no-scroll {
   overflow: hidden;

@@ -1,6 +1,7 @@
 @use "sass:map";
+@use "../../../styles/nutin-config" as config;
 
-$switch-config: (
+$switch-defaults: (
   'gap': 0.5rem,
   'border-radius': 9999px,
   'transition-duration': 0.2s,
@@ -21,9 +22,14 @@ $switch-config: (
   'color-disabled-bg': #e5e7eb,
   'color-disabled-text': #9ca3af,
   'color-text': #111827,
-) !default;
+);
 
-$switch-thumb-offset: (map.get($switch-config, 'track-height') - map.get($switch-config, 'thumb-size')) * 0.5 !default;
+$switch-config: map.deep-merge(
+  $switch-defaults,
+  map.get(config.$config, 'components', 'switch') or ()
+);
+
+$switch-thumb-offset: (map.get($switch-config, 'track-height') - map.get($switch-config, 'thumb-size')) * 0.5;
 
 .app-switch {
   display: inline-flex;

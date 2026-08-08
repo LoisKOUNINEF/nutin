@@ -1,12 +1,18 @@
 @use "sass:map";
 @use "../core/overlay-variables" as *;
+@use "../../../styles/nutin-config" as config;
 
 $emergency-dialog-colors: $semantic-colors !default;
 
-$emergency-dialog-config: (
+$emergency-dialog-defaults: (
   'accent-width': 4px,
   'color-error': map.get($emergency-dialog-colors, error),
-) !default;
+);
+
+$emergency-dialog-config: map.deep-merge(
+  $emergency-dialog-defaults,
+  map.get(config.$config, 'components', 'emergency-dialog') or ()
+);
 
 .emergency-dialog-overlay {
   z-index: map.get($overlay-z-index, emergency-dialog);

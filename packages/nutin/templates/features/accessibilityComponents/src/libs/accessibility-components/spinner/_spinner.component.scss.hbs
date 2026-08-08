@@ -1,6 +1,7 @@
 @use "sass:map";
+@use "../../../styles/nutin-config" as config;
 
-$spinner-config: (
+$spinner-defaults: (
   'size': 2rem,
   'thickness': 3px,
   'duration': 1s,
@@ -12,7 +13,12 @@ $spinner-config: (
   'thickness-xl': 5px,
   'color-primary': #2563eb,
   'border-radius': 50%,
-) !default;
+);
+
+$spinner-config: map.deep-merge(
+  $spinner-defaults,
+  map.get(config.$config, 'components', 'spinner') or ()
+);
 
 @mixin spin($duration: 1s, $delay: 0s, $direction: normal) {
   @keyframes spin {

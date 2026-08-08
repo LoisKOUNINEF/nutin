@@ -1,13 +1,19 @@
 @use "sass:map";
 @use "../core/overlay-variables" as *;
+@use "../../../styles/nutin-config" as config;
 
-$blocking-loader-config: (
+$blocking-loader-defaults: (
   'gap': 1rem,
   'message-font-size': 1rem,
   'message-font-weight': 600,
   'color-overlay': rgba(0, 0, 0, 0.5),
   'color-text': #111827,
-) !default;
+);
+
+$blocking-loader-config: map.deep-merge(
+  $blocking-loader-defaults,
+  map.get(config.$config, 'components', 'blocking-loader') or ()
+);
 
 .blocking-loader-overlay {
   position: fixed;

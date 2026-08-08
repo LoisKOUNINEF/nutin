@@ -73,65 +73,62 @@ ready-made classes — everything else in the mixin list is `@include`-only.
 ## Customizing component/overlay SCSS
 
 accessibility-components, forms, and overlays all follow the same styling
-convention: every visual unit's tunables live in a single `!default` Sass
-map (`$<name>-config`, plus a couple of standalone `!default` scalars like
-`$switch-thumb-offset` and shared palettes like `$semantic-colors`),
-consumed internally via `map.get($<name>-config, 'key')`. Nothing is passed
-in from a template's `config`/`props` at the TS level — these are
-build-time SCSS defaults, not runtime props.
+convention: every visual unit's tunables live in a Sass map (`$<name>-config`,
+plus a couple of standalone scalars like `$switch-thumb-offset`, derived from
+their component's map), consumed internally via `map.get($<name>-config,
+'key')`. Nothing is passed in from a template's `config`/`props` at the TS
+level — these are build-time SCSS defaults, not runtime props.
 
-**Override pattern.** These partials are Dart Sass modules (`@use`/
-`@forward`, not legacy `@import`), and a `!default` variable can only be
-configured the *first* time its module is loaded anywhere in the compiled
-graph — every barrel in between (`accessibility-components/_index.scss.hbs`,
-`overlays/_index.scss.hbs`, `forms/_index.scss.hbs`, `src/libs/_index.scss.hbs`)
-forwards plainly, with no `with (...)` passthrough. So to override a map,
-add a **configured `@use`** for that specific partial in
-`src/styles/main.scss.hbs`, positioned *before* the `@use "../libs";` line
-that pulls in the barrel:
+**Override pattern: one root config map.** There is exactly one public Sass
+configuration entry point, `src/styles/_nutin-config.scss` (`$config: ()
+!default;`). Every `$<name>-config` map is built by deep-merging its own
+literal defaults with `map.get(config.$config, 'components', '<name>')` — the
+config key is always the variable name minus the `$` prefix and trailing
+`-config` (e.g. `$modal-config` → `'modal'`, `$anchored-overlay-config` →
+`'anchored-overlay'`, `$form-control-config` → `'form-control'`). To override,
+configure that one file *before* `@use "../libs";` — you only need to know
+this single path, not which partial owns which map or where it lives:
 
 ```scss
 // src/styles/main.scss.hbs, before `@use "../libs";`
-@use "../libs/accessibility-components/checkbox/checkbox.component" with (
-  $checkbox-config: (
-    'gap': 0.5rem,
-    'border-radius': 2px,
-    'transition-duration': 0.2s,
-    'label-font-size': 1rem,
-    'disabled-opacity': 0.6,
-    'input-size': 1.125rem,
-    'input-border-width': 2px,
-    'checkmark-background-size': 75%,
-    'focus-outline-width': 2px,
-    'focus-outline-offset': 2px,
-    'label-line-height': 1.4,
-    'color-border-strong': #9ca3af,
-    'color-background': #ffffff,
-    'color-primary': #ff6600, // ← only this one actually changed
-    'color-disabled-bg': #e5e7eb,
-    'color-border': #d1d5db,
-    'color-text': #111827,
-  )
+@use "nutin-config" with (
+  $config: (
+    'components': (
+      'checkbox': (
+        'color-primary': #ff6600, // ← only this one key is overridden
+      ),
+    ),
+  ),
 );
 
 @use "../libs";
 ```
 
-Once loaded (and configured) this way, the barrel's later
-`@forward "checkbox/checkbox.component";` just reuses the same, already-configured
-module — Sass modules are evaluated once and cached per compilation.
+Because `map.deep-merge` merges recursively, you only list the keys you want
+to change — everything else falls back to the component's own default. This
+also composes across components/overlays in one place: extend the
+`'components'` map with as many entries as you like (`'modal': (...)`,
+`'form-control': (...)`, etc.) in that same single `@use ... with (...)`
+block. Once configured (Sass modules are evaluated once and cached per
+compilation), every later unconfigured `@use "../../../styles/nutin-config" as
+config;` inside a partial — and every barrel forward in between
+(`accessibility-components/_index.scss.hbs`, `overlays/_index.scss.hbs`,
+`forms/_index.scss.hbs`, `src/libs/_index.scss.hbs`) — sees the same merged
+`$config`.
 
-**Gotcha: `with (...)` replaces the whole map, it doesn't merge.** Sass has
-no concept of partially overriding a map variable — passing
-`$checkbox-config: (...)` replaces every key. To change one value, copy the
-component's full default map from its source `.scss.hbs` file (tables
-below) and edit only what you need, as in the example above.
+`src/styles/_nutin-config.scss` itself is only generated when at least one of
+accessibility-components, forms, or overlays is enabled (`scssUtils` alone
+doesn't pull it in, since nothing in scss-utils reads it) — a project with
+none of those three libs has no config file and nothing to `@use`.
 
-For the shared overlay palette, overriding `$semantic-colors`
-(`core/_overlay-variables.scss.hbs`) changes the default for every overlay
+For the shared overlay palette, overriding `'overlay-variables':
+('semantic-colors': (...))` (backing `$semantic-colors` in
+`core/_overlay-variables.scss.hbs`) changes the default for every overlay
 that aliases it (`$snackbar-colors`, `$notification-banner-colors`,
-`$emergency-dialog-colors`) at once; overriding one of those aliases
-directly changes only that overlay.
+`$emergency-dialog-colors`) at once; those per-component alias variables are
+still plain `!default` scalars, so overriding one of them directly (the old
+way, via a configured `@use` on that specific partial) still changes only
+that overlay.
 
 **Every color default below is a literal hex/rgba value.**
 
@@ -150,11 +147,12 @@ directly changes only that overlay.
 | `$spinner-config` | `size`, `thickness`, `duration`, `size-sm`, `thickness-sm`, `size-lg`, `thickness-lg`, `size-xl`, `thickness-xl`, `color-primary`, `border-radius` |
 | `$switch-config` | `gap`, `border-radius`, `transition-duration`, `label-font-size`, `track-width`, `track-height`, `thumb-size`, `disabled-opacity`, `thumb-shadow-offset-y`, `thumb-shadow-blur`, `thumb-shadow-color`, `focus-outline-width`, `focus-outline-offset`, `label-line-height`, `color-border-strong`, `color-background`, `color-primary`, `color-disabled-bg`, `color-disabled-text`, `color-text` |
 
-`switch` also has a derived standalone `!default` scalar,
+`switch` also has a derived standalone scalar,
 `$switch-thumb-offset: (track-height − thumb-size) × 0.5`, computed *from*
-`$switch-config` at load time — override `$switch-config`'s
-`track-height`/`thumb-size` rather than trying to set the offset directly,
-since it's recomputed from those two values. `anchor`, `empty`, `focusable`,
+the merged `$switch-config` — override `$switch-config`'s (i.e. the
+`'switch'` config entry's) `track-height`/`thumb-size` rather than trying to
+set the offset directly, since it's recomputed from those two values.
+`anchor`, `empty`, `focusable`,
 and `visually-hidden` have no SCSS partial (unstyled/semantic) or, for
 `visually-hidden`, plain hardcoded CSS with no config map.
 
@@ -173,8 +171,8 @@ template (see note below).
 
 | Map | File | Keys |
 |---|---|---|
-| `$semantic-colors` | `core/_overlay-variables.scss.hbs` | `success`, `error`, `info`, `warning`, `text` — shared palette; see aliasing note above |
-| `$overlay-z-index` | `core/_overlay-variables.scss.hbs` | one key per layer (`base`, `sticky-header`, `sticky-footer`, `floating-button`, `sidebar`, `mobile-nav`, `dropdown`, `popover`, `tooltip`, `context-menu`, `snackbar`, `toast`, `notification-banner`, `modal-backdrop`, `modal`, `drawer-backdrop`, `drawer`, `fullscreen-overlay`, `blocking-loader`, `emergency-dialog`, `debug-panel`, `inspector`) — plain map, not `!default` |
+| `$semantic-colors` (config key `'overlay-variables'` → `'semantic-colors'`) | `core/_overlay-variables.scss.hbs` | `success`, `error`, `info`, `warning`, `text` — shared palette; see aliasing note above |
+| `$overlay-z-index` | `core/_overlay-variables.scss.hbs` | one key per layer (`base`, `sticky-header`, `sticky-footer`, `floating-button`, `sidebar`, `mobile-nav`, `dropdown`, `popover`, `tooltip`, `context-menu`, `snackbar`, `toast`, `notification-banner`, `modal-backdrop`, `modal`, `drawer-backdrop`, `drawer`, `fullscreen-overlay`, `blocking-loader`, `emergency-dialog`, `debug-panel`, `inspector`) — plain map, not `!default`, and deliberately **not** wired into the central config (see below) |
 | `$overlay-runtime-config` | `core/_overlay-runtime.scss.hbs` | `z-index` (styles `.passive-overlay-region`) |
 | `$anchored-overlay-config` | `core/_anchored-overlay-runtime.scss.hbs` | `transition-duration`, `initial-scale` |
 | `$menu-item-config` | `core/_menu-overlay-runtime.scss.hbs` | `padding`, `disabled-opacity`, `color-text`, `color-secondary-hover`, `color-background` |
@@ -192,13 +190,13 @@ template (see note below).
 **`$overlay-z-index` can't be overridden with this pattern at all** — unlike
 every other map above, it's declared without `!default`
 (`core/_overlay-variables.scss.hbs`), and Sass only allows `with (...)`
-configuration on variables marked `!default`; attempting to configure it
-throws `"$overlay-z-index was not declared with !default"`. To change the
-layering, the only option today is editing
+configuration on variables marked `!default`. This was a deliberate
+exclusion when the rest of the table was wired into the central config, not
+an oversight — to change the layering, the only option today is editing
 `core/_overlay-variables.scss.hbs` directly (or, once generated, the
-project's own copy of that file). Worth fixing upstream by adding
-`!default` if it's meant to be user-configurable like the rest of this
-table.
+project's own copy of that file). Worth fixing upstream by adding it to the
+central config too, like `semantic-colors`, if it's meant to be
+user-configurable like the rest of this table.
 
 ## accessibility-components
 

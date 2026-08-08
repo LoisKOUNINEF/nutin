@@ -1,6 +1,7 @@
 @use "sass:map";
+@use "../../../styles/nutin-config" as config;
 
-$avatar-config: (
+$avatar-defaults: (
   'font-family': (Arial, sans-serif),
   'border-radius-circle': 9999px,
   'border-radius-square': 4px,
@@ -10,7 +11,12 @@ $avatar-config: (
   'initials-letter-spacing': 0.05em,
   'color-surface': #f3f4f6,
   'color-text-muted': #6b7280,
-) !default;
+);
+
+$avatar-config: map.deep-merge(
+  $avatar-defaults,
+  map.get(config.$config, 'components', 'avatar') or ()
+);
 
 .app-avatar {
   display: inline-flex;

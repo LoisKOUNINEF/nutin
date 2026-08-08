@@ -1,10 +1,11 @@
 @use "sass:map";
 @use "../core/overlay-variables" as *;
+@use "../../../styles/nutin-config" as config;
 
 $snackbar-colors: $semantic-colors !default;
 
 // snackbar overlay config
-$snackbar-config: (
+$snackbar-defaults: (
   'padding': 0.75rem 1.5rem,
   'border-radius': 0.5rem,
   'gap': 1rem,
@@ -15,7 +16,12 @@ $snackbar-config: (
   'shadow-offset-y': 2px,
   'shadow-blur': 6px,
   'shadow-color': rgba(0, 0, 0, 0.3),
-) !default;
+);
+
+$snackbar-config: map.deep-merge(
+  $snackbar-defaults,
+  map.get(config.$config, 'components', 'snackbar') or ()
+);
 
 // Positioned containers — one per gravity direction
 // Items stack in column inside; no JS offset calculation needed.

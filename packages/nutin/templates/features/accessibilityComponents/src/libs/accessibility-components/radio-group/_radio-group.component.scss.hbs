@@ -1,6 +1,7 @@
 @use "sass:map";
+@use "../../../styles/nutin-config" as config;
 
-$radio-group-config: (
+$radio-group-defaults: (
   'legend-font-size': 0.875rem,
   'legend-margin-bottom': 0.5rem,
   'options-gap': 0.5rem,
@@ -22,7 +23,12 @@ $radio-group-config: (
   'color-disabled-bg': #e5e7eb,
   'color-border': #d1d5db,
   'color-text': #111827,
-) !default;
+);
+
+$radio-group-config: map.deep-merge(
+  $radio-group-defaults,
+  map.get(config.$config, 'components', 'radio-group') or ()
+);
 
 .app-radio-group {
   border: none;

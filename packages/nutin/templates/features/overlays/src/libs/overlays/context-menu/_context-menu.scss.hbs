@@ -1,7 +1,8 @@
 @use "sass:map";
 @use "../core/overlay-variables" as *;
+@use "../../../styles/nutin-config" as config;
 
-$context-menu-config: (
+$context-menu-defaults: (
   'border-radius': 0.5rem,
   'min-width': 160px,
   'content-padding': 0.25rem 0,
@@ -10,7 +11,12 @@ $context-menu-config: (
   'shadow-fade': 85%,
   'color-background': #ffffff,
   'color-text': #111827,
-) !default;
+);
+
+$context-menu-config: map.deep-merge(
+  $context-menu-defaults,
+  map.get(config.$config, 'components', 'context-menu') or ()
+);
 
 .context-menu-wrapper {
   z-index: map.get($overlay-z-index, context-menu);

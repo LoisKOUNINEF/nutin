@@ -79,6 +79,18 @@ async function ensureLibsUseInMainScss(mainScssPath) {
   return true;
 }
 
+async function ensureScssConfigFile(projectPath, context) {
+  const templateDir = path.join(__dirname, '..', '..', 'templates', 'base', 'src', 'styles');
+  const outputDir = path.join(projectPath, 'src', 'styles');
+  await fileGenerator.processTemplateFile(
+    path.join(templateDir, '_nutin-config.scss.hbs'),
+    outputDir,
+    '_nutin-config.scss.hbs',
+    context,
+    { skipExisting: true },
+  );
+}
+
 async function updateLibBarrels(projectPath, feature) {
   if (feature.tsExport) {
     await appendLineIfMissing(path.join(projectPath, 'src', 'libs', 'index.ts'), feature.tsExport);
@@ -197,6 +209,10 @@ export async function addFeatureToProject(featureKey) {
   await fileGenerator.processTemplateDirectory(featureTemplateDir, projectPath, context, { skipExisting: true });
   await updateLibBarrels(projectPath, feature);
   await updatePackageJson(projectPath, feature, context);
+
+  if (feature.key === 'accessibilityComponents' || feature.key === 'forms' || feature.key === 'overlays') {
+    await ensureScssConfigFile(projectPath, context);
+  }
 
   if (feature.key === 'testinNutin') {
     await ensureTestinNutinConfigBlock(path.join(projectPath, nutinConfigFileName));

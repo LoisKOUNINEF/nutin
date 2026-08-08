@@ -1,10 +1,16 @@
 @use "sass:map";
+@use "../../../styles/nutin-config" as config;
 
 // anchored overlay runtime config — shared base for Popover/Tooltip/Dropdown/ContextMenu
-$anchored-overlay-config: (
+$anchored-overlay-defaults: (
   'transition-duration': 0.15s,
   'initial-scale': 0.97,
-) !default;
+);
+
+$anchored-overlay-config: map.deep-merge(
+  $anchored-overlay-defaults,
+  map.get(config.$config, 'components', 'anchored-overlay') or ()
+);
 
 .anchored-overlay-wrapper {
   position: fixed;

@@ -1,12 +1,18 @@
 @use "sass:map";
+@use "../../../styles/nutin-config" as config;
 
-$menu-item-config: (
+$menu-item-defaults: (
   'padding': 0.5rem 1rem,
   'disabled-opacity': 0.5,
   'color-text': #111827,
   'color-secondary-hover': #4b5563,
   'color-background': #ffffff,
-) !default;
+);
+
+$menu-item-config: map.deep-merge(
+  $menu-item-defaults,
+  map.get(config.$config, 'components', 'menu-item') or ()
+);
 
 .menu-item {
   padding: map.get($menu-item-config, 'padding');

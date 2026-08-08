@@ -1,7 +1,8 @@
 @use "sass:map";
 @use "../core/overlay-variables" as *;
+@use "../../../styles/nutin-config" as config;
 
-$popover-config: (
+$popover-defaults: (
   'border-radius': 0.5rem,
   'max-width': 320px,
   'content-padding': 1rem,
@@ -10,7 +11,12 @@ $popover-config: (
   'shadow-fade': 85%,
   'color-background': #ffffff,
   'color-text': #111827,
-) !default;
+);
+
+$popover-config: map.deep-merge(
+  $popover-defaults,
+  map.get(config.$config, 'components', 'popover') or ()
+);
 
 .popover-wrapper {
   z-index: map.get($overlay-z-index, popover);

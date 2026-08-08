@@ -1,7 +1,8 @@
 @use "sass:map";
 @use "../core/overlay-variables" as *;
+@use "../../../styles/nutin-config" as config;
 
-$dropdown-config: (
+$dropdown-defaults: (
   'border-radius': 0.5rem,
   'min-width': 160px,
   'content-padding': 0.25rem 0,
@@ -10,7 +11,12 @@ $dropdown-config: (
   'shadow-fade': 85%,
   'color-background': #ffffff,
   'color-text': #111827,
-) !default;
+);
+
+$dropdown-config: map.deep-merge(
+  $dropdown-defaults,
+  map.get(config.$config, 'components', 'dropdown') or ()
+);
 
 .dropdown-wrapper {
   z-index: map.get($overlay-z-index, dropdown);

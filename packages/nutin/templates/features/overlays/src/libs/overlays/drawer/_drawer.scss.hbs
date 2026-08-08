@@ -1,7 +1,8 @@
 @use "sass:map";
 @use "../core/overlay-variables" as *;
+@use "../../../styles/nutin-config" as config;
 
-$drawer-config: (
+$drawer-defaults: (
   'transition-duration': 0.3s,
   'width': min(400px, 90vw),
   'height': min(480px, 90vh),
@@ -12,7 +13,12 @@ $drawer-config: (
   'color-overlay': rgba(0, 0, 0, 0.5),
   'color-background': #ffffff,
   'color-text': #111827,
-) !default;
+);
+
+$drawer-config: map.deep-merge(
+  $drawer-defaults,
+  map.get(config.$config, 'components', 'drawer') or ()
+);
 
 .drawer-backdrop {
   z-index: map.get($overlay-z-index, drawer-backdrop);

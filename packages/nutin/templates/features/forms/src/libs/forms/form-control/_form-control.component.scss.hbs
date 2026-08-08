@@ -1,6 +1,7 @@
 @use "sass:map";
+@use "../../../styles/nutin-config" as config;
 
-$form-control-config: (
+$form-control-defaults: (
   'gap': 0.25rem,
   'disabled-opacity': 0.6,
   'label-font-size': 0.875rem,
@@ -27,7 +28,12 @@ $form-control-config: (
   'color-primary': #2563eb,
   'color-disabled-bg': #e5e7eb,
   'color-disabled-text': #9ca3af,
-) !default;
+);
+
+$form-control-config: map.deep-merge(
+  $form-control-defaults,
+  map.get(config.$config, 'components', 'form-control') or ()
+);
 
 .app-form-control {
   display: flex;

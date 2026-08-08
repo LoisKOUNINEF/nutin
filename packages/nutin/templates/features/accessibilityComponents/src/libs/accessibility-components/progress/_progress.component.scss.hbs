@@ -1,6 +1,7 @@
 @use "sass:map";
+@use "../../../styles/nutin-config" as config;
 
-$progress-config: (
+$progress-defaults: (
   'gap': 0.25rem,
   'label-font-size': 0.875rem,
   'bar-border-radius': 9999px,
@@ -11,7 +12,12 @@ $progress-config: (
   'color-text-muted': #6b7280,
   'color-surface': #f3f4f6,
   'color-primary': #2563eb,
-) !default;
+);
+
+$progress-config: map.deep-merge(
+  $progress-defaults,
+  map.get(config.$config, 'components', 'progress') or ()
+);
 
 .app-progress {
   display: flex;
