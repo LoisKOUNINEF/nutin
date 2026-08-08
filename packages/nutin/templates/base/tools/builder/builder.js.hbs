@@ -16,7 +16,7 @@ if (!builderConfig.inlineTemplates) runScript(path.join(scriptsDir, 'merge-templ
 else runScript(path.join(scriptsDir, 'minify-html.js'), 'Minifying inline templates...', builderConfig.isVerbose);
 if (builderConfig.i18n) runScript(path.join(scriptsDir, 'build-i18n.js'), 'Combining locales for production...', builderConfig.isVerbose);
 runScript(path.join(scriptsDir, 'sass.js'), 'Compiling styles from main.scss...', builderConfig.isVerbose);
-// if (builderConfig.tailwind) ...
+if (builderConfig.tailwind) runScript(path.join(scriptsDir, 'tailwind.js'), 'Compiling Tailwind CSS...', builderConfig.isVerbose);
 runScript(path.join(scriptsDir, 'validate-html.js'), 'Adding and validating tags in index.html...', builderConfig.isVerbose);
 
 if (builderConfig.isProd) {
