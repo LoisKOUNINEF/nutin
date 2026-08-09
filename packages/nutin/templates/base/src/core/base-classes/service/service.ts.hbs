@@ -86,9 +86,7 @@ export abstract class Service<T extends Service<T>> {
   /**
    * For async and custom cleanup operations.
    */
-  protected onDestroy(): void {
-    console.log(`No onDestroy operations.`);
-  }
+  protected onDestroy(): void {}
 
   private autoBindMethods(): void {
     let proto = Object.getPrototypeOf(this);

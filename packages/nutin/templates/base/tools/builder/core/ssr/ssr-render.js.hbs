@@ -10,11 +10,9 @@ let renderIndex = 0;
  * .render(), returning the resulting real markup. Fresh linkedom window + cache-busted
  * dynamic import per call, so no singleton state (I18nService, etc.) leaks between renders.
  */
-export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFetch, lang, pageUrl }) {
-  // linkedom's second parseHTML() arg is a raw "globals" bag merged onto the returned window —
-  // there's no dedicated url option; confirmed empirically that `{ url: pageUrl }` leaves
-  // `window.location` undefined. Passing a real URL instance as `location` gives `.pathname`/
-  // `.href` for free, which is what I18n's getLocaleFromUrl() actually reads.
+export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFetch, lang, pageUrl, i18nEnabled }) {
+  // Passing a real URL instance as `location` gives `.pathname`/`.href`
+  // which is what I18n's getLocaleFromUrl() actually reads.
   const { window } = parseHTML('<!doctype html><html><body></body></html>', { location: new URL(pageUrl) });
   const { trackedFetches } = installGlobals(window, {
     lang,
@@ -38,7 +36,7 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
       );
     }
 
-    await I18nService.setCurrentLanguage(lang);
+    if (i18nEnabled) await I18nService.setCurrentLanguage(lang);
 
     const viewConstructor = RouteGuardsManager.getViewConstructor(routeConfig);
     const view = viewConstructor();

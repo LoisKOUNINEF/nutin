@@ -114,7 +114,6 @@ async function mergeJson() {
   if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
 
   const localeFilesMap = findLocaleFiles();
-  // const locales = 
   for (const [locale, files] of Object.entries(localeFilesMap)) {
     const combined = combineJsonFiles(files);
     fs.writeFileSync(

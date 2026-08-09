@@ -5,16 +5,12 @@ import path from 'path';
  * Installs the minimum browser globals the framework's own base classes touch
  * unconditionally (Service's `beforeunload` listener, I18n's `navigator`/`window.location`
  * reads), plus a couple of cheap defensive stubs (matchMedia) for common patterns
- * downstream projects add (e.g. dark-mode toggles) that this template doesn't ship itself.
+ * downstream projects add (e.g. dark-mode toggles).
  *
  * Returns `trackedFetches`, the in-flight promises served by the fetch shim during this
  * render — ssr-render.js awaits these before capturing markup, to let any resulting
  * fetch-driven re-render (via `listenToRenderEvents`) complete first.
  */
-// Node defines several browser-ish globals (navigator, crypto, fetch, ...) as configurable
-// getter-only accessor properties — plain assignment (`globalThis.x = ...`) throws on those,
-// since it goes through [[Set]]. Object.defineProperty uses [[DefineOwnProperty]] instead,
-// which succeeds as long as the existing property is configurable (Node's are).
 function setGlobal(target, key, value) {
   try {
     Object.defineProperty(target, key, { value, writable: true, configurable: true, enumerable: true });
@@ -23,16 +19,6 @@ function setGlobal(target, key, value) {
   }
 }
 
-// linkedom's `window` (and its return value from parseHTML more broadly) resolves DOM
-// identifiers like `document`/`HTMLElement`/`HTMLInputElement` via a `get` trap that ISN'T
-// reflected by `Object.getOwnPropertyNames`/`in`/`Object.keys` — confirmed empirically:
-// `'document' in window` is false, `Object.getOwnPropertyNames(window)` never lists it, yet
-// `window.document` resolves fine. So the plain enumeration loop below only ever picks up
-// generic JS/Node globals (Object, Array, Promise, crypto, fetch, ...) — DOM constructors
-// need to be copied by explicit name instead. List matches what the framework's own helpers
-// (dom.helper.ts, security.helper.ts, i18n.helper.ts, pipe.helper.ts, data-binding.helper.ts,
-// catalog.helper.ts, children.helper.ts) actually do `instanceof` checks against or otherwise
-// touch, plus a few common adjacent DOM globals a downstream project's own components might need.
 const KNOWN_DOM_GLOBALS = [
   'document', 'customElements',
   'Node', 'Element', 'HTMLElement', 'HTMLDocument',
@@ -76,8 +62,8 @@ export function installGlobals(window, { lang, mockFetch = {}, localesDir } = {}
   setGlobal(globalThis, 'navigator', navigatorStub);
   setGlobal(window, 'navigator', navigatorStub);
 
-  // linkedom doesn't implement localStorage/sessionStorage at all (confirmed empirically —
-  // not just unguarded, genuinely absent) — I18n's savePreferences()/getPreferences() need it.
+  // linkedom doesn't implement localStorage/sessionStorage at all
+  // I18n's savePreferences()/getPreferences() need it.
   const localStorageStub = createMemoryStorage();
   setGlobal(globalThis, 'localStorage', localStorageStub);
   setGlobal(window, 'localStorage', localStorageStub);
@@ -123,7 +109,8 @@ async function resolveFetch(url, { mockFetch, localesDir }) {
       const body = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
       return jsonResponse(body);
     }
-    return { ok: false, status: 404, json: async () => ({}), text: async () => '' };
+    // No translations authored for this locale yet — a normal early-project state, not an error.
+    return jsonResponse({});
   }
 
   throw new Error(

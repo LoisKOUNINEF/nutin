@@ -1,4 +1,5 @@
-import { AppRouter, Service{{#if i18n}}, I18nService{{/if}} } from '../core/index.js';
+import nutinConfig from '../../nutin.config.js';
+import { AppRouter, Service, I18nService } from '../core/index.js';
 import { registerPipes } from '../libs/index.js';
 import { appRoutes } from './routes.js';
 
@@ -28,10 +29,10 @@ class App {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  {{#if i18n}}
-  await I18nService.initTranslations();
-  await I18nService.loadTranslations(I18nService.currentLanguage);
-  {{/if}}
+  if (nutinConfig.i18n) {
+    await I18nService.initTranslations();
+    await I18nService.loadTranslations(I18nService.currentLanguage);
+  }
   const app = new App();
 });
 
