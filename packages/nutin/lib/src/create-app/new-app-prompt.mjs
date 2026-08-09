@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import { defaults } from './context-builder.mjs';
 
-export async function promptUser(initialName, cliOptions = {}) {
+export async function newAppPrompt(initialName, cliOptions = {}) {
 
   let projectName = initialName;
   if (!projectName) {

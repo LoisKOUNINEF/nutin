@@ -1,12 +1,12 @@
 import path from 'path';
 import * as fsExtra from 'fs-extra';
-import { print } from './print.mjs';
+import { print } from '../utils/print.mjs';
 import { initializeGit } from './git-manager.mjs';
-import { installDependencies } from './package-manager.mjs';
-import { FileGenerator } from './file-generator.mjs';
-import { JsonGenerator } from './json-generator.mjs';
+import { installDependencies } from '../common/package-json-manager.mjs';
+import { FileGenerator } from '../common/file-generator.mjs';
+import { JsonGenerator } from '../common/json-generator.mjs';
 import { ContextBuilder } from './context-builder.mjs';
-import { writeProjectMeta } from './project-meta.mjs';
+import { writeProjectMeta } from '../common/project-meta.mjs';
 
 const fs = fsExtra.default;
 

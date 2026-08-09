@@ -2,12 +2,12 @@ import path from 'path';
 import * as fsExtra from 'fs-extra';
 import inquirer from 'inquirer';
 import * as Diff from 'diff';
-import { print } from './print.mjs';
-import { FileGenerator } from './file-generator.mjs';
-import { FEATURES } from './feature-registry.mjs';
-import { getCiCommand, detectPackageManager } from './package-manager.mjs';
-import { packageVersion } from './version.mjs';
-import { readProjectMeta, writeProjectMeta, updateProjectMeta } from './project-meta.mjs';
+import { print } from '../utils/print.mjs';
+import { FileGenerator } from '../common/file-generator.mjs';
+import { FEATURES } from '../common/feature-registry.mjs';
+import { getCiCommand, detectPackageManager } from '../common/package-json-manager.mjs';
+import { PACKAGE_VERSION as packageVersion } from '../common/package-data.mjs';
+import { readProjectMeta, writeProjectMeta, updateProjectMeta } from '../common/project-meta.mjs';
 import { fetchOldTemplates } from './version-fetcher.mjs';
 
 const fs = fsExtra.default;

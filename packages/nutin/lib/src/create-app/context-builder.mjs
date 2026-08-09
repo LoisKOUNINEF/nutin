@@ -1,5 +1,5 @@
-import { getCiCommand } from './package-manager.mjs';
-import { packageVersion } from './version.mjs';
+import { getCiCommand } from '../common/package-json-manager.mjs';
+import { PACKAGE_VERSION } from '../common/package-data.mjs';
 
 const LIBS_ON = { accessibilityComponents: true, forms: true, overlays: true, scssUtils: true };
 const LIBS_OFF = { accessibilityComponents: false, forms: false, overlays: false, scssUtils: false };
@@ -18,7 +18,7 @@ export const defaults = {
 
 export class ContextBuilder {
 	buildContext(preferences) { 
-    const version = packageVersion;
+    const version = PACKAGE_VERSION;
     const ciCommand = getCiCommand(preferences.packageManager);
 
     const preset = PRESET_MAP[preferences.preset] ?? PRESET_MAP['default'];

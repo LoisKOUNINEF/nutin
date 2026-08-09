@@ -1,12 +1,12 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import * as fsExtra from 'fs-extra';
-import { print } from './print.mjs';
-import { FileGenerator } from './file-generator.mjs';
-import { FEATURES } from './feature-registry.mjs';
-import { getCiCommand, getDeployHelperScripts, getTestinNutinScripts, getTestinNutinExtras, detectPackageManager } from './package-manager.mjs';
-import { packageVersion } from './version.mjs';
-import { updateProjectMeta } from './project-meta.mjs';
+import { print } from '../utils/print.mjs';
+import { FileGenerator } from '../common/file-generator.mjs';
+import { FEATURES } from '../common/feature-registry.mjs';
+import { getCiCommand, getDeployHelperScripts, getTestinNutinScripts, getTestinNutinExtras, detectPackageManager } from '../common/package-json-helper.mjs';
+import { PACKAGE_VERSION } from '../common/package-data.mjs';
+import { updateProjectMeta } from '../common/project-meta.mjs';
 
 const fs = fsExtra.default;
 const __filename = fileURLToPath(import.meta.url);
@@ -32,7 +32,7 @@ async function buildContext(projectPath, feature) {
     projectName: packageJson.name,
     packageManager,
     ciCommand: getCiCommand(packageManager),
-    version: packageVersion,
+    version: PACKAGE_VERSION,
     [feature.key]: true,
   };
 }
@@ -217,7 +217,7 @@ export async function addFeatureToProject(featureKey) {
   }
 
   await updateProjectMeta(projectPath, {
-    version: packageVersion,
+    version: PACKAGE_VERSION,
     packageManager: context.packageManager,
     features: { [feature.key]: true },
   });

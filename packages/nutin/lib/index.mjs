@@ -1,16 +1,16 @@
 import { program } from 'commander';
-import { print, chalk } from './src/print.mjs';
-import { promptUser } from './src/prompts.mjs';
-import { createProject } from './src/project-generator.mjs';
-import { displaySuccessMessage } from './src/utils.mjs';
-import { packageVersion } from './src/version.mjs';
-import { FEATURES, findFeatureByCli } from './src/feature-registry.mjs';
-import { addFeatureToProject } from './src/feature-adder.mjs';
-import { updateProject } from './src/project-updater.mjs';
+import { print, chalk } from './src/utils/print.mjs';
+import { newAppPrompt } from './src/create-app/new-app-prompt.mjs';
+import { createProject } from './src/create-app/project-generator.mjs';
+import { displaySuccessMessage } from './src/create-app/success-message.mjs';
+import { PACKAGE_VERSION } from './src/common/package-data.mjs';
+import { FEATURES, findFeatureByCli } from './src/common/feature-registry.mjs';
+import { addFeatureToProject } from './src/add-feature/feature-adder.mjs';
+import { updateProject } from './src/update-app/project-updater.mjs';
 
 export async function createApp() {
   program
-    .version(packageVersion)
+    .version(PACKAGE_VERSION)
     .configureOutput({
       helpWidth: 100 
     })
@@ -27,7 +27,7 @@ export async function createApp() {
     .action(async (projectName, cliOptions) => {
       print.blue('🚀 Welcome to nutin !');
       try {
-        const preferences = await promptUser(projectName, cliOptions);
+        const preferences = await newAppPrompt(projectName, cliOptions);
         await createProject(preferences);
         displaySuccessMessage(preferences);
       } catch (error) {
@@ -43,7 +43,7 @@ export async function addFeature() {
   const featureChoices = [...FEATURES.map((feature) => feature.cli), 'all'];
 
   program
-    .version(packageVersion)
+    .version(PACKAGE_VERSION)
     .configureOutput({
       helpWidth: 100
     })
@@ -76,7 +76,7 @@ export async function addFeature() {
 
 export async function updateApp() {
   program
-    .version(packageVersion)
+    .version(PACKAGE_VERSION)
     .configureOutput({
       helpWidth: 100
     })

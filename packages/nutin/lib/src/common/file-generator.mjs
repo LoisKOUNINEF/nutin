@@ -2,7 +2,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import * as fsExtra from 'fs-extra';
 import { TemplateCompiler } from './template-compiler.mjs';
-import { print } from './print.mjs';
+import { print } from '../utils/print.mjs';
 import { FEATURES } from './feature-registry.mjs';
 
 const fs = fsExtra.default;
@@ -75,10 +75,7 @@ export class FileGenerator {
     }
   }
 
-  // Decides whether a template file applies given the context, and renders its
-  // output content in memory. Shared by disk-writing generation (create/add-feature)
-  // and in-memory diffing (nutin-update) so the two never drift on file-selection rules.
-  async renderTemplateFile(templatePath, fileName, context) {
+  async isRenderTemplateFile(templatePath, fileName, context) {
     if (fileName.includes("test.js") && !(context.testinNutin)) {
       return null;
     }
@@ -105,7 +102,7 @@ export class FileGenerator {
   async processTemplateFile(templatePath, outputDir, fileName, context, options = {}) {
     let rendered;
     try {
-      rendered = await this.renderTemplateFile(templatePath, fileName, context);
+      rendered = await this.isRenderTemplateFile(templatePath, fileName, context);
     } catch (error) {
       print.boldError(`❌ Failed to process template: ${fileName}`);
       throw error;
@@ -118,17 +115,13 @@ export class FileGenerator {
     const outputPath = path.join(outputDir, rendered.outputFileName);
 
     if (options.skipExisting && await fs.pathExists(outputPath)) {
-      print.section(`⚠️  Skipped (already exists): ${path.relative(outputDir, outputPath)}`);
+      print.boldGray(`Skipped (already exists): ${path.relative(outputDir, outputPath)}`);
       return;
     }
 
     await fs.writeFile(outputPath, rendered.content);
   }
 
-  // In-memory equivalent of generateProjectFromTemplates: walks base + every
-  // enabled feature dir under templatesRoot, returning relative output path ->
-  // rendered content, without touching disk. Used by nutin-update to diff two
-  // versions' output without writing either of them to the real project.
   async collectTemplateTree(templatesRoot, context) {
     const result = new Map();
 
@@ -161,7 +154,7 @@ export class FileGenerator {
       if (entry.isDirectory()) {
         await this.collectTemplateDirectory(entryPath, baseDir, context, result);
       } else {
-        const rendered = await this.renderTemplateFile(entryPath, entry.name, context);
+        const rendered = await this.isRenderTemplateFile(entryPath, entry.name, context);
         if (!rendered) continue;
 
         const relativeDir = path.relative(baseDir, dir);
