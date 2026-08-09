@@ -38,7 +38,7 @@ const creators = {
       if (nutinConfig.generator.generateStylesheet) generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
       generateFile({ name, targetPath, templateFn: componentTemplate, suffix: suffix });
       if (!nutinConfig.inlineTemplates) generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: suffix, extension: 'html' });
-      if (nutinConfig.generator.generateLocale) {
+      if (nutinConfig.generator.generateLocales) {
         if (!nutinConfig.i18n) print.warn('⚠️ Enable i18n in nutin.config.js to generate locales.');
         else generateJson({ targetPath, name });
       }
@@ -55,7 +55,7 @@ const creators = {
       if (nutinConfig.generator.generateStylesheet) generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
       generateFile({ name, targetPath, templateFn: viewTemplate, suffix: suffix });
       if (!nutinConfig.inlineTemplates) generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: suffix, extension: 'html' });
-      if (nutinConfig.generator.generateLocale) {
+      if (nutinConfig.generator.generateLocales) {
         if (!nutinConfig.i18n) print.warn('⚠️ Enable i18n in nutin.config.js to generate locales.');
         else generateJson({ targetPath, name });
       }
