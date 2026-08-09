@@ -6,6 +6,7 @@ import { installDependencies } from './package-manager.mjs';
 import { FileGenerator } from './file-generator.mjs';
 import { JsonGenerator } from './json-generator.mjs';
 import { ContextBuilder } from './context-builder.mjs';
+import { writeProjectMeta } from './project-meta.mjs';
 
 const fs = fsExtra.default;
 
@@ -41,7 +42,8 @@ export class ProjectGenerator {
 
   async runPostSetupTasks(projectPath, context) {
     await this.jsonGenerator.generateJsonFiles(projectPath, context);
-    await initializeGit(projectPath);    
+    await writeProjectMeta(projectPath, context);
+    await initializeGit(projectPath);
     await installDependencies(projectPath, context.packageManager);
   }
 }

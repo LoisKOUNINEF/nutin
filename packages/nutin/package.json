@@ -7,7 +7,8 @@
   "bin": {
     "create-nutin-app": "./bin/create-app.mjs",
     "nutin-new": "./bin/create-app.mjs",
-    "nutin-add": "./bin/add-feature.mjs"
+    "nutin-add": "./bin/add-feature.mjs",
+    "nutin-update": "./bin/update-app.mjs"
   },
   "scripts": {
     "patch": "npm version patch -m 'CI/CD: Bump version to %s'",
@@ -29,9 +30,11 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^9.0.0",
+    "diff": "^9.0.0",
     "fs-extra": "^11.0.0",
     "handlebars": "^4.7.8",
-    "inquirer": "^9.0.0"
+    "inquirer": "^9.0.0",
+    "tar": "^7.5.22"
   },
   "engines": {
     "node": ">=22"

@@ -5,6 +5,13 @@ import * as path from 'path';
 
 const fs = fsExtra.default;
 
+export async function detectPackageManager(projectPath) {
+  if (await fs.pathExists(path.join(projectPath, 'pnpm-lock.yaml'))) return 'pnpm';
+  if (await fs.pathExists(path.join(projectPath, 'yarn.lock'))) return 'yarn';
+  if (await fs.pathExists(path.join(projectPath, 'bun.lockb'))) return 'bun';
+  return 'npm';
+}
+
 export async function installDependencies(projectPath, packageManager) {
   print.section(`📦 Installing dependencies with ${packageManager}...`);
   

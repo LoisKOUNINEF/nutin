@@ -4,21 +4,15 @@ import * as fsExtra from 'fs-extra';
 import { print } from './print.mjs';
 import { FileGenerator } from './file-generator.mjs';
 import { FEATURES } from './feature-registry.mjs';
-import { getCiCommand, getDeployHelperScripts, getTestinNutinScripts, getTestinNutinExtras } from './package-manager.mjs';
+import { getCiCommand, getDeployHelperScripts, getTestinNutinScripts, getTestinNutinExtras, detectPackageManager } from './package-manager.mjs';
 import { packageVersion } from './version.mjs';
+import { updateProjectMeta } from './project-meta.mjs';
 
 const fs = fsExtra.default;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const fileGenerator = new FileGenerator();
 const nutinConfigFileName = 'nutin.config.js';
-
-async function detectPackageManager(projectPath) {
-  if (await fs.pathExists(path.join(projectPath, 'pnpm-lock.yaml'))) return 'pnpm';
-  if (await fs.pathExists(path.join(projectPath, 'yarn.lock'))) return 'yarn';
-  if (await fs.pathExists(path.join(projectPath, 'bun.lockb'))) return 'bun';
-  return 'npm';
-}
 
 async function validateProject(projectPath, feature) {
   const packageJsonPath = path.join(projectPath, 'package.json');
@@ -221,6 +215,12 @@ export async function addFeatureToProject(featureKey) {
   if (feature.key === 'forms' || feature.key === 'overlays') {
     await addFeatureToProject('accessibilityComponents');
   }
+
+  await updateProjectMeta(projectPath, {
+    version: packageVersion,
+    packageManager: context.packageManager,
+    features: { [feature.key]: true },
+  });
 
   print.boldSuccess(`✅ ${feature.key} added.`);
 }

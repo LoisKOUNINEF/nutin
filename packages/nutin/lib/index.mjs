@@ -6,6 +6,7 @@ import { displaySuccessMessage } from './src/utils.mjs';
 import { packageVersion } from './src/version.mjs';
 import { FEATURES, findFeatureByCli } from './src/feature-registry.mjs';
 import { addFeatureToProject } from './src/feature-adder.mjs';
+import { updateProject } from './src/project-updater.mjs';
 
 export async function createApp() {
   program
@@ -66,6 +67,28 @@ export async function addFeature() {
         }
       } catch (error) {
         print.boldError(`❌ Error adding feature: ${error.stack}`);
+        process.exit(1);
+      }
+    });
+
+  program.parse();
+}
+
+export async function updateApp() {
+  program
+    .version(packageVersion)
+    .configureOutput({
+      helpWidth: 100
+    })
+    .option('-y, --yes', 'Skip the confirmation prompt and apply safe updates immediately')
+    .option('--from <path>', 'Use a local templates/ directory as the old baseline instead of fetching from npm')
+    .action(async (cliOptions) => {
+      print.blue('🚀 nutin — update');
+
+      try {
+        await updateProject(process.cwd(), cliOptions);
+      } catch (error) {
+        print.boldError(`❌ Error updating project: ${error.stack}`);
         process.exit(1);
       }
     });

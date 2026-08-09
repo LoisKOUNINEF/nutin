@@ -21,17 +21,17 @@ export class FileGenerator {
     this.compiler = new TemplateCompiler();
   }
 
-  async generateProjectFromTemplates(projectPath, context) {
-    const templateDir = this.getTemplateDirectory();
-    
+  async generateProjectFromTemplates(projectPath, context, templatesRoot = this.getTemplatesRoot()) {
+    const templateDir = path.join(templatesRoot, 'base');
+
     print.section('📝 Processing templates...');
     await this.processTemplateDirectory(templateDir, projectPath, context);
-    
-    await this.processFeatureTemplates(projectPath, context);
+
+    await this.processFeatureTemplates(projectPath, context, templatesRoot);
   }
 
-  getTemplateDirectory() {
-    return path.join(__dirname, '..', '..', 'templates', 'base');
+  getTemplatesRoot() {
+    return path.join(__dirname, '..', '..', 'templates');
   }
 
   async processTemplateDirectory(templateDir, outputDir, context, options = {}) {
@@ -56,59 +56,118 @@ export class FileGenerator {
     }
   }
 
-  async processFeatureTemplates(projectPath, context) {
-    const featuresDir = path.join(__dirname, '..', '..', 'templates', 'features');
-    
+  async processFeatureTemplates(projectPath, context, templatesRoot = this.getTemplatesRoot()) {
+    const featuresDir = path.join(templatesRoot, 'features');
+
     if (!(await fs.pathExists(featuresDir))) {
       return;
     }
 
-    const features = FEATURES.map((feature) => feature.key);
-    
-    for (const feature of features) {
-      if (context[feature]) {
-        const featureTemplateDir = path.join(featuresDir, feature);
-        
+    for (const feature of FEATURES) {
+      if (context[feature.key]) {
+        const featureTemplateDir = path.join(featuresDir, feature.key);
+
         if (await fs.pathExists(featureTemplateDir)) {
-          print.info(`Adding ${feature} feature...`);
+          print.info(`Adding ${feature.key} feature...`);
           await this.processTemplateDirectory(featureTemplateDir, projectPath, context);
         }
       }
     }
   }
 
-  async processTemplateFile(templatePath, outputDir, fileName, context, options = {}) {
+  // Decides whether a template file applies given the context, and renders its
+  // output content in memory. Shared by disk-writing generation (create/add-feature)
+  // and in-memory diffing (nutin-update) so the two never drift on file-selection rules.
+  async renderTemplateFile(templatePath, fileName, context) {
     if (fileName.includes("test.js") && !(context.testinNutin)) {
-      return;
+      return null;
     }
     if (fileName.includes("_nutin-config.scss") && !(context.accessibilityComponents || context.forms || context.overlays)) {
-      return;
+      return null;
     }
 
     const fileExt = path.extname(fileName).toLowerCase();
     const outputFileName = fileName.endsWith('.hbs') ? fileName.replace('.hbs', '') : fileName;
-    const outputPath = path.join(outputDir, outputFileName);
+    const isBinary = BINARY_EXTENSIONS.has(fileExt);
+
+    let content;
+    if (isBinary) {
+      content = await fs.readFile(templatePath);
+    } else if (fileName.endsWith('.hbs')) {
+      content = await this.compiler.compileFile(templatePath, context);
+    } else {
+      content = await fs.readFile(templatePath, 'utf8');
+    }
+
+    return { outputFileName, isBinary, content };
+  }
+
+  async processTemplateFile(templatePath, outputDir, fileName, context, options = {}) {
+    let rendered;
+    try {
+      rendered = await this.renderTemplateFile(templatePath, fileName, context);
+    } catch (error) {
+      print.boldError(`❌ Failed to process template: ${fileName}`);
+      throw error;
+    }
+
+    if (!rendered) {
+      return;
+    }
+
+    const outputPath = path.join(outputDir, rendered.outputFileName);
 
     if (options.skipExisting && await fs.pathExists(outputPath)) {
       print.section(`⚠️  Skipped (already exists): ${path.relative(outputDir, outputPath)}`);
       return;
     }
 
-    if (BINARY_EXTENSIONS.has(fileExt)) {
-      await fs.copy(templatePath, outputPath);
-      // print.info(`📄 Copied: ${fileName}`);
-    } else if (fileName.endsWith('.hbs')) {
-      try {
-        const compiledContent = await this.compiler.compileFile(templatePath, context);
-        await fs.writeFile(outputPath, compiledContent);
-        // print.info(`📝 Generated: ${outputFileName}`);
-      } catch (error) {
-        print.boldError(`❌ Failed to process template: ${fileName}`);
-        throw error;
+    await fs.writeFile(outputPath, rendered.content);
+  }
+
+  // In-memory equivalent of generateProjectFromTemplates: walks base + every
+  // enabled feature dir under templatesRoot, returning relative output path ->
+  // rendered content, without touching disk. Used by nutin-update to diff two
+  // versions' output without writing either of them to the real project.
+  async collectTemplateTree(templatesRoot, context) {
+    const result = new Map();
+
+    const baseDir = path.join(templatesRoot, 'base');
+    if (await fs.pathExists(baseDir)) {
+      await this.collectTemplateDirectory(baseDir, baseDir, context, result);
+    }
+
+    const featuresDir = path.join(templatesRoot, 'features');
+    for (const feature of FEATURES) {
+      if (!context[feature.key]) continue;
+
+      const featureDir = path.join(featuresDir, feature.key);
+      if (await fs.pathExists(featureDir)) {
+        await this.collectTemplateDirectory(featureDir, featureDir, context, result);
       }
-    } else {
-      await fs.copy(templatePath, outputPath);
-      // print.info(`📄 Copied: ${fileName}`);
+    }
+
+    return result;
+  }
+
+  async collectTemplateDirectory(dir, baseDir, context, result) {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      if (entry.name === '.DS_Store') continue;
+
+      const entryPath = path.join(dir, entry.name);
+
+      if (entry.isDirectory()) {
+        await this.collectTemplateDirectory(entryPath, baseDir, context, result);
+      } else {
+        const rendered = await this.renderTemplateFile(entryPath, entry.name, context);
+        if (!rendered) continue;
+
+        const relativeDir = path.relative(baseDir, dir);
+        const relativeOutputPath = path.join(relativeDir, rendered.outputFileName);
+        result.set(relativeOutputPath, { content: rendered.content, isBinary: rendered.isBinary });
+      }
     }
   }
 }
