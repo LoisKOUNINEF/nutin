@@ -6,9 +6,9 @@ const fs = fsExtra.default;
 
 export class JsonManager {
   async generateJsonFiles(projectPath, context) {
-    this.generatePackageJson(projectPath, context);
-    this.generateTsconfigJson(projectPath, context);
-    this.generateConfigFiles(projectPath, context);
+    await this.generatePackageJson(projectPath, context);
+    await this.generateTsconfigJson(projectPath, context);
+    await this.generateConfigFiles(projectPath, context);
   }
 
   async generatePackageJson(projectPath, context) {

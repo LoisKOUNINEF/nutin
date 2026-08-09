@@ -15,6 +15,11 @@ export async function newAppPrompt(initialName, cliOptions = {}) {
       },
     ]);
     projectName = nameInput.projectName;
+  } else {
+    const validationResult = validateProjectName(projectName);
+    if (validationResult !== true) {
+      throw new Error(validationResult);
+    }
   }
 
   let packageManager = cliOptions.packageManager;

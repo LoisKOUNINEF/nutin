@@ -16,7 +16,7 @@ export async function installDependencies(projectPath, packageManager) {
   print.section(`📦 Installing dependencies with ${packageManager}...`);
   
   const installCommand = getInstallCommand(packageManager);
-  await promiseExec(installCommand, { cwd: projectPath });
+  await promiseExec(installCommand, { cwd: projectPath, maxBuffer: 1024 * 1024 * 10 });
 }
 
 export function getCiCommand(packageManager) {

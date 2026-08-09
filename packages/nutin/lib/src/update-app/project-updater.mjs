@@ -2,7 +2,7 @@ import path from 'path';
 import * as fsExtra from 'fs-extra';
 import inquirer from 'inquirer';
 import { print } from '../utils/print.mjs';
-import { PACKAGE_VERSION as packageVersion } from '../common/package-data.mjs';
+import { PACKAGE_VERSION as packageVersion, META_FILE_NAME } from '../common/package-data.mjs';
 import { readProjectMeta, updateProjectMeta } from '../common/project-meta.mjs';
 import { fetchOldTemplates } from './fetch-old-templates.mjs';
 import { parseVersion, compareVersions } from './version-compare.mjs';
@@ -44,7 +44,22 @@ export class ProjectUpdater {
   }
 
   async resolveMeta(projectPath) {
-    return (await readProjectMeta(projectPath)) ?? (await bootstrapProjectMeta(projectPath));
+    const meta = (await readProjectMeta(projectPath)) ?? (await bootstrapProjectMeta(projectPath));
+    this.assertValidVersion(meta.version);
+    return meta;
+  }
+
+  // meta.version ends up interpolated into a shell command in fetchOldTemplates
+  // (npm pack), so it must be strictly numeric before anything downstream uses it —
+  // .nutin-meta.json is a plain project file that could be hand-edited or come from
+  // an untrusted clone.
+  assertValidVersion(version) {
+    if (!/^\d+\.\d+\.\d+$/.test(version)) {
+      throw new Error(
+        `${META_FILE_NAME} has an invalid version "${version}" — expected e.g. "1.3.1". ` +
+        `Fix or delete ${META_FILE_NAME} and try again.`,
+      );
+    }
   }
 
   isUpToDate(meta) {

@@ -22,6 +22,7 @@ export async function fetchOldTemplates(version, { from } = {}) {
   try {
     const { stdout } = await promiseExec(
       `npm pack ${PACKAGE_NAME}@${version} --pack-destination "${tmpDir}" --json`,
+      { maxBuffer: 1024 * 1024 * 10 },
     );
     const parsed = JSON.parse(stdout);
     const packResult = Array.isArray(parsed) ? parsed[0] : Object.values(parsed)[0];
@@ -38,7 +39,14 @@ export async function fetchOldTemplates(version, { from } = {}) {
     throw new Error(`npm pack did not report a tarball for ${PACKAGE_NAME}@${version}.`);
   }
 
-  await tar.x({ file: path.join(tmpDir, tarballName), cwd: tmpDir });
+  try {
+    await tar.x({ file: path.join(tmpDir, tarballName), cwd: tmpDir });
+  } catch (error) {
+    await fs.remove(tmpDir);
+    throw new Error(`Couldn't extract ${tarballName} for ${PACKAGE_NAME}@${version} — (${error.message})`);
+  }
+
+  await fs.remove(path.join(tmpDir, tarballName));
 
   const templatesRoot = path.join(tmpDir, 'package', 'templates');
   if (!(await fs.pathExists(templatesRoot))) {

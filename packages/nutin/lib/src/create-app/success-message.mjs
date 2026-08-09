@@ -1,9 +1,5 @@
-import { exec } from 'child_process';
-import { promisify } from 'util';
 import { print } from '../utils/print.mjs';
-import { PACKAGE_NAME, PACKAGE_HOMEPAGE } from '../common/package-data.mjs';
-
-export const promiseExec = promisify(exec);
+import { PACKAGE_HOMEPAGE } from '../common/package-data.mjs';
 
 export function displaySuccessMessage(answers) {
   const { projectName, packageManager, deployHelper } = answers;
