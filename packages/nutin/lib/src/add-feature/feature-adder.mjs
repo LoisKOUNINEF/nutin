@@ -62,10 +62,32 @@ export class FeatureAdder {
     }
     if (feature.key === 'testinNutin') {
       await ensureTestinNutinConfigBlock(path.join(projectPath, nutinConfigFileName));
+      await this.backfillTestFiles(projectPath, context);
     }
 
     await updateLibBarrels(projectPath, feature);
     await updatePackageJson(projectPath, feature, context);
+  }
+
+  // templates/base and any already-installed feature dir can contain *.test.js.hbs
+  // files gated by context.testinNutin — they were skipped when originally generated
+  // (testinNutin was off then). Reprocess those trees now so the project ends up with
+  // the same *.test.js files it would have if testin-nutin had been on from the start.
+  // skipExisting means nothing the project already has gets touched.
+  async backfillTestFiles(projectPath, context) {
+    const templatesRoot = path.join(__dirname, '..', '..', '..', 'templates');
+
+    const dirsToRescan = [path.join(templatesRoot, 'base')];
+    for (const other of FEATURES) {
+      if (other.key === 'testinNutin' || !context[other.key]) continue;
+      dirsToRescan.push(path.join(templatesRoot, 'features', other.key));
+    }
+
+    for (const dir of dirsToRescan) {
+      if (await fs.pathExists(dir)) {
+        await this.fileGenerator.processTemplateDirectory(dir, projectPath, context, { skipExisting: true });
+      }
+    }
   }
 
   async runPostAddTasks(projectPath, feature, context) {
