@@ -4,6 +4,7 @@ Thank you for your interest in contributing! This document provides guidelines a
 
 ## Table of Contents
 
+- [Philosophy and Principles](#philosophy-and-principles)
 - [Getting Started](#getting-started)
 - [Development Setup](#development-setup)
 - [Contributing Guidelines](#contributing-guidelines)
@@ -12,6 +13,114 @@ Thank you for your interest in contributing! This document provides guidelines a
 - [Getting Help](#getting-help)
 - [Recognition](#recognition)
 - [License](#license)
+# Architecture & Design Principles
+
+## Philosophy and Principles
+
+```java
+nutin aims to bridge the gap between vanilla web development and large frameworks.
+```
+
+The goal is to provide a structured layer:
+
+* explicit, easy to understand and to start with;
+* favoring code ownership and openness;
+* (pretty) well-documented
+
+The internal architecture should remain highly modular, while the public APIs and CLI should remain intentionally small.
+
+### Expose concepts, not implementation
+
+The CLI and generated project should expose concepts that users naturally understand.
+
+A user should think in terms of **capabilities**, not source folders; the CLI represents the user's mental model, not the filesystem.
+
+Example:
+```bash
+# Internal structure:
+libs/
+    components/
+    forms/
+    overlays/
+    pipes/
+
+# Public CLI:
+nutin add libs
+```
+
+### Internal modularity
+
+Internal code should be split aggressively.
+
+Reasons:
+
+* Single Responsibility Principle
+* Easier maintenance
+* Maximum flexibility with minimal user complexity.
+
+EXAMPLE:
+
+```node
+// Exposed:
+installLibs()
+
+// may internally perform:
+installComponents();
+installForms();
+installOverlays();
+installPipes();
+```
+
+### Configuration philosophy
+
+The project has one configuration entry point (single source of truth) that contains framework-wide configuration.
+
+```
+nutin.config.js
+
+Nutin features - i18n, inlineTemplates, tailwind booleans
+
+# sections
+builder
+generator
+testing
+...
+```
+
+### Simplicity beats configurability
+
+Adding options is easy.
+
+Removing them later can only be done manually.
+
+### Framework defaults
+
+Defaults exist to eliminate unnecessary decisions.
+
+Users can always pick options or deviate later.
+
+### Design heuristics
+
+When introducing a new feature, ask:
+
+1. Is this architecture or productivity?
+2. Does the user naturally think in terms of this concept?
+3. Does exposing this option improve the user experience?
+4. Is this expensive to add later?
+5. Will most projects eventually use it?
+6. Does this simplify or complicate documentation?
+7. Does this simplify or complicate generators?
+8. Does this improve or worsen the first impression?
+9. Can the implementation remain modular while the public API stays simple?
+10. Am I exposing a capability, or leaking an implementation detail?
+
+If unsure, choose the simpler public API.
+
+Internal architecture should preserve future flexibility.
+
+The framework should evolve internally without forcing users to learn new concepts unless those concepts provide clear, tangible value.
+
+### 42
 
 ## Getting Started
 
