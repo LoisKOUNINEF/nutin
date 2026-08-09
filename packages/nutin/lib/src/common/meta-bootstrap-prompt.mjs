@@ -1,11 +1,11 @@
 import inquirer from 'inquirer';
 import { print } from '../utils/print.mjs';
-import { FEATURES } from '../common/feature-registry.mjs';
-import { detectPackageManager } from '../common/package-json-helper.mjs';
-import { writeProjectMeta } from '../common/project-meta.mjs';
+import { FEATURES } from './feature-registry.mjs';
+import { detectPackageManager } from './package-json-helper.mjs';
+import { writeProjectMeta } from './project-meta.mjs';
 
 export async function bootstrapProjectMeta(projectPath) {
-  print.section('⚠️  No .nutin-meta.json found — this project predates nutin-update.');
+  print.section('⚠️  No .nutin-meta.json found for this project.');
   print.section('Answer a couple of questions so a baseline can be reconstructed:\n');
 
   const { version } = await inquirer.prompt([

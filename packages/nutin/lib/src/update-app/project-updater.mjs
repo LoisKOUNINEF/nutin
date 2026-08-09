@@ -6,7 +6,7 @@ import { PACKAGE_VERSION as packageVersion } from '../common/package-data.mjs';
 import { readProjectMeta, updateProjectMeta } from '../common/project-meta.mjs';
 import { fetchOldTemplates } from './fetch-old-templates.mjs';
 import { parseVersion, compareVersions } from './version-compare.mjs';
-import { bootstrapProjectMeta } from './meta-bootstrap-prompt.mjs';
+import { bootstrapProjectMeta } from '../common/meta-bootstrap-prompt.mjs';
 import { printUpdateSummary } from './update-summary-printer.mjs';
 import { writeConflictReport } from './conflict-report-writer.mjs';
 import { UpdateContextBuilder } from './update-context-builder.mjs';
