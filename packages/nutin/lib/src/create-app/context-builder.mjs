@@ -1,4 +1,4 @@
-import { getCiCommand } from '../common/package-json-manager.mjs';
+import { getCiCommand } from '../common/package-json-helper.mjs';
 import { PACKAGE_VERSION } from '../common/package-data.mjs';
 
 const LIBS_ON = { accessibilityComponents: true, forms: true, overlays: true, scssUtils: true };

@@ -65,12 +65,12 @@ async function copyConfig() {
   const destPath = path.join(temp, 'config');
   try {
     await copyJsonFiles(srcPath, destPath);
+    await copyFile(path.resolve('nutin.config.js'), path.join(temp, 'nutin.config.js'));
+
     // for tests to run
     if (!builderConfig.isProd) await copyJsonFiles(srcPath, path.join(PATHS.temp, 'config'));
-    // src/core/config.ts imports nutin.config.js two levels up: from dist-build/src/core (prod,
-    // resolved on disk by esbuild) that's dist-build/; from dist/src/core (dev, resolved as a URL
-    // by the browser against live-server's 'dist/src' root) that's dist/src/ — same `temp` split as above.
-    await copyFile(path.resolve('nutin.config.js'), path.join(temp, 'nutin.config.js'));
+    if (!builderConfig.isProd) await copyFile(path.resolve('nutin.config.js'), path.join(PATHS.temp, 'nutin.config.js'));
+    
     if (builderConfig.isVerbose) print.info('Config files copied');
   } catch {
     print.boldError('Issue when copying config files.');

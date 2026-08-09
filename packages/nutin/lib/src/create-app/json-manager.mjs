@@ -1,6 +1,6 @@
 import path from 'path';
 import * as fsExtra from 'fs-extra';
-import { getAllScripts } from '../common/package-json-manager.mjs';
+import { getAllScripts } from '../common/package-json-helper.mjs';
 
 const fs = fsExtra.default;
 

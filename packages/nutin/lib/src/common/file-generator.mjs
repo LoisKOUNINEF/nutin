@@ -31,7 +31,7 @@ export class FileGenerator {
   }
 
   getTemplatesRoot() {
-    return path.join(__dirname, '..', '..', 'templates');
+    return path.join(__dirname, '..', '..', '..', 'templates');
   }
 
   async processTemplateDirectory(templateDir, outputDir, context, options = {}) {

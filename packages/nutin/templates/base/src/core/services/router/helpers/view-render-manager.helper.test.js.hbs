@@ -26,6 +26,8 @@ describe('ViewRenderManager', () => {
         return el;
       },
       destroy: () => {},
+      onEnter: () => {},
+      onExit: () => {},
     };
   };
 
@@ -59,6 +61,6 @@ describe('ViewRenderManager', () => {
 
     await ViewRenderManager.transitionOutCurrentView(view);
 
-    expect(JSON.stringify(emitted)).toContain(JSON.stringify({ event: 'view-unmount', data: 'SettingsView' }));
+    expect(JSON.stringify(emitted)).toContain(JSON.stringify({ event: 'view-unmount', data: { viewName: 'SettingsView' } }));
   });
 });

@@ -8,7 +8,7 @@ export type Subscription<K extends EventKey = EventKey> = {
   once?: boolean;
 };
 
-class EventBus extends Service<EventBus> {
+export class EventBus extends Service<EventBus> {
   private _subscriptions: Subscription[] = [];
 
   constructor() {

@@ -2,9 +2,9 @@ import path from 'path';
 import * as fsExtra from 'fs-extra';
 import { print } from '../utils/print.mjs';
 import { initializeGit } from './git-manager.mjs';
-import { installDependencies } from '../common/package-json-manager.mjs';
+import { installDependencies } from '../common/package-json-helper.mjs';
 import { FileGenerator } from '../common/file-generator.mjs';
-import { JsonGenerator } from '../common/json-generator.mjs';
+import { JsonManager } from './json-manager.mjs';
 import { ContextBuilder } from './context-builder.mjs';
 import { writeProjectMeta } from '../common/project-meta.mjs';
 
@@ -13,7 +13,7 @@ const fs = fsExtra.default;
 export class ProjectGenerator {
   constructor() {
     this.fileGenerator = new FileGenerator();
-    this.jsonGenerator = new JsonGenerator();
+    this.jsonManager = new JsonManager();
     this.builder = new ContextBuilder();
   }
 
@@ -41,7 +41,7 @@ export class ProjectGenerator {
   }
 
   async runPostSetupTasks(projectPath, context) {
-    await this.jsonGenerator.generateJsonFiles(projectPath, context);
+    await this.jsonManager.generateJsonFiles(projectPath, context);
     await writeProjectMeta(projectPath, context);
     await initializeGit(projectPath);
     await installDependencies(projectPath, context.packageManager);

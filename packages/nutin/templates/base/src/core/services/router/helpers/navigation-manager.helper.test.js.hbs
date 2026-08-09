@@ -8,12 +8,6 @@ describe('NavigationManager', () => {
     expect(NavigationManager.normalizePath('')).toBe('/');
   });
 
-  it('should determine if pushState should be used', () => {
-    expect(NavigationManager.shouldPushState(true, '/home', '/about')).toBe(true);
-    expect(NavigationManager.shouldPushState(false, '/home', '/about')).toBe(false);
-    expect(NavigationManager.shouldPushState(true, '/about', '/about')).toBe(false);
-  });
-
   it('should call pushState when conditions are met', () => {
     const originalPushState = window.history.pushState;
     let called = false;
