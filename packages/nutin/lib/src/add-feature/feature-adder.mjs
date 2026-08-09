@@ -69,11 +69,6 @@ export class FeatureAdder {
     await updatePackageJson(projectPath, feature, context);
   }
 
-  // templates/base and any already-installed feature dir can contain *.test.js.hbs
-  // files gated by context.testinNutin — they were skipped when originally generated
-  // (testinNutin was off then). Reprocess those trees now so the project ends up with
-  // the same *.test.js files it would have if testin-nutin had been on from the start.
-  // skipExisting means nothing the project already has gets touched.
   async backfillTestFiles(projectPath, context) {
     const templatesRoot = path.join(__dirname, '..', '..', '..', 'templates');
 

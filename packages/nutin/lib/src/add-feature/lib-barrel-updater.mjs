@@ -6,7 +6,7 @@ const fs = fsExtra.default;
 
 async function appendLineIfMissing(filePath, line) {
   if (!(await fs.pathExists(filePath))) {
-    print.section(`⚠️  Skipped (not found): ${path.basename(filePath)}`);
+    print.warn(`⚠️  Skipped (not found): ${path.basename(filePath)}`);
     return false;
   }
 

@@ -115,7 +115,7 @@ export class FileGenerator {
     const outputPath = path.join(outputDir, rendered.outputFileName);
 
     if (options.skipExisting && await fs.pathExists(outputPath)) {
-      print.boldGray(`Skipped (already exists): ${path.relative(outputDir, outputPath)}`);
+      print.gray(`Skipped (already exists): ${path.relative(outputDir, outputPath)}`);
       return;
     }
 

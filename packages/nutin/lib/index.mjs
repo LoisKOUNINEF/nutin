@@ -40,7 +40,7 @@ export async function createApp() {
 }
 
 export async function addFeature() {
-  const featureChoices = [...FEATURES.map((feature) => feature.cli), 'all'];
+  const featureChoices = [...FEATURES.map((feature) => feature.cli), 'libs', 'all'];
 
   program
     .version(PACKAGE_VERSION)
@@ -57,7 +57,13 @@ export async function addFeature() {
       }
 
       try {
-        if (featureArg === 'all') {
+        if (featureArg === 'libs') {
+          for (const feature of FEATURES) {
+            if (feature.key === 'testinNutin' || feature.key === 'deployHelper') {
+              continue;
+            } else await addFeatureToProject(feature.key);
+          }
+        } else if (featureArg === 'all') {
           for (const feature of FEATURES) {
             await addFeatureToProject(feature.key);
           }

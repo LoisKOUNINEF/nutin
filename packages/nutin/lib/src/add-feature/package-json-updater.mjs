@@ -52,7 +52,7 @@ export async function updatePackageJson(projectPath, feature, context) {
 
   const skipped = [...scriptsResult.skipped, ...devDepsResult.skipped, ...importsResult.skipped, ...enginesResult.skipped];
   if (skipped.length > 0) {
-    print.section(`⚠️  Kept existing package.json values for: ${skipped.join(', ')}`);
+    print.info(`Kept existing package.json values for: ${skipped.join(', ')}`);
   }
   print.info('Updated package.json');
 

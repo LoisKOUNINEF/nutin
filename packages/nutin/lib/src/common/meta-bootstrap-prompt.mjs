@@ -5,7 +5,7 @@ import { detectPackageManager } from './package-json-helper.mjs';
 import { writeProjectMeta } from './project-meta.mjs';
 
 export async function bootstrapProjectMeta(projectPath) {
-  print.section('⚠️  No .nutin-meta.json found for this project.');
+  print.warn('⚠️  No .nutin-meta.json found for this project.');
   print.section('Answer a couple of questions so a baseline can be reconstructed:\n');
 
   const { version } = await inquirer.prompt([

@@ -107,7 +107,7 @@ export class ProjectUpdater {
         },
       ]);
       if (!proceed) {
-        print.section('Aborted — no files were changed.');
+        print.boldInfo('Aborted — no files were changed.');
         return;
       }
     }

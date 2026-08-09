@@ -43,7 +43,7 @@ export class TemplateDiffer {
 
       if (!oldEntry) {
         // Brand new file introduced in the new version — nothing to conflict with,
-        // unless something else already occupies that path (no baseline to judge it by).
+        // unless something else already occupies that path
         if (!existsOnDisk) {
           toAdd.push({ relPath, newEntry });
           continue;
@@ -75,8 +75,7 @@ export class TemplateDiffer {
       if (contentEquals(actualContent, oldEntry.content)) {
         toUpdate.push({ relPath, newEntry });
       } else if (!contentEquals(actualContent, newEntry.content)) {
-        // Differs from both baselines — a real conflict. (If it already matches
-        // the new version verbatim, there's nothing to do or report.)
+        // Differs from both baselines — a real conflict.
         conflicts.push({ relPath, actualContent, newEntry });
       }
     }

@@ -25,7 +25,7 @@ async function getTestinNutinConfigBlock() {
 
 export async function ensureTestinNutinConfigBlock(nutinConfigPath) {
   if (!(await fs.pathExists(nutinConfigPath))) {
-    print.section(`⚠️  Skipped (not found): ${path.basename(nutinConfigPath)}`);
+    print.warn(`⚠️  Skipped (not found): ${path.basename(nutinConfigPath)}`);
     return false;
   }
 
