@@ -133,16 +133,23 @@ class MyParent {
 
 ## Remove empty HTML tags
 
-- `data-optional` 
+- `data-optional`
+
+Removes the element if either of two checks is true. The `data-optional` attribute itself is always stripped from the element afterwards, whether or not it was removed.
+
+1. **The `data-optional` attribute's own value** is empty, `"undefined"`, or `"null"` — meant for direct interpolation, so the same variable is checked and displayed:
 
 ```html
 <!-- Will remove div if myOptionalData is undefined -->
-<div data-optional>${ myOptionalData }</div>
+<div data-optional="${myOptionalData}">${myOptionalData}</div>
 ```
 
-- `data-optional="attrName"` (`src`, `href`, ...)
+2. **A structural fallback**, used when `data-optional`'s value doesn't match the above (e.g. a bare `data-optional` with no value) — keyed on tag: `<img>` checks `.src`, `<input>`/`<textarea>` check `.value`, `<audio>`/`<video>`/`<source>` check the `src` attribute, anything else checks trimmed `textContent`:
 
 ```html
-<!-- Will remove div if src is undefined -->
-<div data-optional="src" src="">Will be removed</div>
-```              
+<!-- Will remove img if its src ends up empty -->
+<img data-optional src="${imageUrl}">
+
+<!-- Will remove span if neither key nor text resolves to anything -->
+<span data-optional="${key || text}">${text}</span>
+```

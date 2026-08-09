@@ -2,18 +2,33 @@
 
 ## Quick map
 
-* `libs/snackbar/snackbar.ts` → `notify(message, options)` — simple queued snackbars/toasts
-* `libs/popover/popover.ts` → `PopoverView` — small View for popovers
-* `libs/guards/guards.ts` → `Guards` — route guard helpers
-* `libs/pipes/pipes.ts` → `registerPipes()` — registers a set of common pipes into `AppPipeRegistry`
-* `libs/index.ts` → barrel file for easy import
+Base `libs/` ships one thing unconditionally: **pipes**. Everything else in this doc is only present when its feature flag is enabled at `nutin-new`/`nutin-add <feature>` time — `libs/index.ts` conditionally re-exports each feature's barrel:
+
 ```ts
-import { notify, PopoverView, Guards, registerPipes } from '../libs/index.ts';
+// libs/index.ts.hbs (simplified)
+export * from './pipes/pipes.js';
+// only if `overlays` feature is on:
+export * from './overlays/index.js';
+// only if `accessibilityComponents` feature is on:
+export * from './accessibility-components/index.js';
+// only if `forms` feature is on:
+export * from './forms/index.js';
+```
+
+* `libs/pipes/pipes.ts` → `registerPipes()` — always present, registers a set of common pipes into `AppPipeRegistry`
+* `libs/overlays/passive/snackbar.ts` → `notify(message, options)` — **requires the `overlays` feature**
+* `libs/overlays/popover/popover.ts` → `PopoverOverlay` — **requires the `overlays` feature**
+* `src/app/guards.ts` → `Guards` — app-level (not part of `libs/`), always present
+* `libs/index.ts` → barrel file re-exporting whatever's enabled
+```ts
+import { registerPipes } from '../libs/index.js';
+// only available if `overlays` is enabled:
+import { notify, PopoverOverlay } from '../libs/index.js';
 ```
 
 ## 1. Snackbar (notify)
 
-**File:** `libs/snackbar/snackbar.ts`
+**File:** `libs/overlays/passive/snackbar.ts` (only present with the `overlays` feature)
 
 API
 
@@ -21,9 +36,10 @@ API
 type NotifyOptions = {
   type?: 'info' | 'success' | 'error';
   position?: 'top' | 'bottom';
-  duration?: number; // ms
+  duration?: number; // ms, default 3000
   actionText?: string; // button content
   onAction?: () => void; // callback
+  maxStack?: number; // caps how many snackbars can be stacked at once
 }
 
 export function notify(message: string, options?: NotifyOptions): void
@@ -31,14 +47,15 @@ export function notify(message: string, options?: NotifyOptions): void
 
 Behavior
 
-* Simple queue: subsequent `notify()` calls enqueue messages; only one shows at a time.
-* Each snackbar is appended to `document.body` and removed after `duration` (defaults to 3000 ms).
-* If `actionText` and `onAction` are provided, an action button is rendered and wired.
+* `notify` is backed by a `PassiveOverlayRuntime`-based queue with separate top/bottom containers (both rendered at once; each snackbar appends to whichever container matches its `position`).
+* Each snackbar is auto-dismissed after `duration` (defaults to 3000 ms), or immediately when its action button is clicked.
+* If `actionText` and `onAction` are provided, an action button is rendered and wired; clicking it calls `onAction` then dismisses.
+* Accessibility: each snackbar sets `role="alert"`/`aria-live="assertive"` for `type: 'error'`, otherwise `role="status"`/`aria-live="polite"`, plus `aria-atomic="true"`.
 
 Usage
 
 ```ts
-import { notify } from 'libs/snackbar/snackbar.js';
+import { notify } from 'libs/index.js';
 
 notify('Saved successfully', { type: 'success', position: 'top', duration: 4000 });
 
@@ -52,83 +69,91 @@ notify('Failed to save', {
 
 Notes
 
-* CSS classes used: `app-snackbar`, `app-snackbar--{type}`, `app-snackbar--{position}` — style these in your app (`src/styles/core/_libs.scss`).
+* CSS classes used: `app-snackbar`, `app-snackbar--{type}` (`info`/`success`/`error`). There is no position modifier class — position is expressed by which container (`.snackbar-region__bottom` / `.snackbar-region__top`) the snackbar is appended to.
+* Styles are co-located at `libs/overlays/passive/_snackbar.scss`, forwarded via `libs/overlays/_index.scss` → `libs/_index.scss`.
 
-# 2. PopoverView
+# 2. PopoverOverlay
 
-**File:** `libs/popover/popover.ts`
+**File:** `libs/overlays/popover/popover.ts` (only present with the `overlays` feature)
 
 API summary
 
 ```ts
-export interface PopoverButton extends BaseButton { /* label, callback, classes, ... */ }
-export interface PopoverOptions {
-  template: string; // inner HTML for popover content
-  viewName?: string; // default: 'popover'
+export interface PopoverOptions extends AnchoredOverlayRuntimeOptions {
+  anchor: HTMLElement;         // required — element the popover is positioned against
+  template: string;            // inner HTML for popover content
+  components?: ComponentConfig[];
+  catalogs?: CatalogConfig[];
+  interactive?: boolean;       // default false — sets role="dialog" + defaults trapFocus on
   onClose?: () => void;
-  buttons?: PopoverButton[]; // footer/action buttons
 }
 
-export class PopoverView extends View {
-  constructor({ template, buttons = [], onClose, viewName = 'popover' }: PopoverOptions)
-  render(): HTMLElement
-  destroy(): void
+// inherited from AnchoredOverlayRuntimeOptions
+export interface AnchoredOverlayRuntimeOptions {
+  placement?: 'top' | 'bottom' | 'left' | 'right' | `${'top'|'bottom'|'left'|'right'}-${'start'|'end'}`; // default 'bottom'
+  offset?: number;        // default 8
+  trapFocus?: boolean;    // default false (or `interactive` if set)
+  focusTrapOptions?: IFocusTrapOptions;
+  animationDuration?: number;
+}
+
+export class PopoverOverlay extends AnchoredOverlayRuntime {
+  constructor(options: PopoverOptions)
+  open(): HTMLElement
+  close(): void
 }
 ```
 
 Behavior & notes
 
-* `PopoverView` extends the core `View` class and is intended to be used as a simple modal-like popover.
-* It creates an overlay appended to `document.body` and inserts a `.popover-wrapper` element containing your `template` plus optionally rendered action buttons.
-* Clicking outside the wrapper (on the overlay) will close the popover.
-* Each button's callback is wrapped so the popover automatically `destroy()`s after the callback runs.
-* `onClose` is called when the popover is destroyed.
+* `PopoverOverlay` extends `AnchoredOverlayRuntime`, which handles anchor-relative positioning (with auto-flip), outside-click dismissal, `Escape` key handling, optional focus trapping, and reposition-on-resize/scroll.
+* `template` plus any `components`/`catalogs` are rendered inside a `.popover-wrapper` element; `role` is `"dialog"` when `interactive: true`, `"region"` otherwise.
+* Call `.open()` to render/position/show it, `.close()` to dismiss (also triggered by outside click / `Escape`).
+* `onClose` is called right before the popover is destroyed.
+* There is no `buttons`/footer-actions option — compose action buttons via `template`/`components` and wire them with `data-event` in the usual way.
 
 Usage
 
 ```ts
-import { PopoverView } from 'libs/popover/popover.js';
+import { PopoverOverlay } from 'libs/index.js';
 
-const pop = new PopoverView({
+const pop = new PopoverOverlay({
+  anchor: triggerButtonEl,
   template: `
     <div class="popover-body">
       <h3>Confirm</h3>
       <p>Are you sure?</p>
+      <button data-event="click:onCancel">Cancel</button>
+      <button data-event="click:onDelete">Delete</button>
     </div>
   `,
-  buttons: [
-    { text: 'Cancel', classes: ['btn'], callback: () => console.log('cancel') },
-    { text: 'Delete', classes: ['btn','btn-danger'], callback: () => doDelete() }
-  ],
+  interactive: true,
   onClose: () => console.log('closed')
 });
 
-pop.render();
+pop.open();
 ```
 
 Styling hooks
 
-* The overlay element and `.popover-wrapper` should be styled in your app CSS (`src/styles/core/_libs.scss`). If `view transition` feature was enabled on app setup, the implementation adds/removes a `show` class to animate entrance/exit — match transition duration if needed.
+* Styles are co-located at `libs/overlays/popover/_popover.scss`, forwarded via `libs/overlays/_index.scss` → `libs/_index.scss`.
 
 # 3. Guards
 
-**File:** `libs/guards/guards.ts`
+**File:** `src/app/guards.ts` (app-level file, not part of `libs/`)
 
 Exports
 
 ```ts
 export const Guards = {
-  custom: (checkFn: () => boolean | string | Promise<boolean | string>, redirectTo?: string) => RouteGuard,
-  // example
   requireAuth: (redirectTo: string = '/login') => RouteGuard
 }
 ```
 
 Behavior & usage
 
-* Each guard returns a `RouteGuard` usable by the router (the toolkit's router expects guards that return `true` to allow navigation, or a string/redirect path to block and redirect).
-* `Guards.custom` — build custom guard from a predicate function; predicate can be sync or async and may return `true` or `redirectPath`.
-* `Guards.requireAuth` — simple example guard that checks `localStorage.getItem('user_token')` and redirects to `/login` by default if missing.
+* `requireAuth` is a minimal example guard: checks `localStorage.getItem('user_token')` and redirects to `/login` by default if missing.
+* Extend this file with your own guards as needed — write a plain function matching the `RouteGuard` signature and add it to (or alongside) the `Guards` object.
 
 Example
 
@@ -144,7 +169,7 @@ type RouteConfig = (() => View) | {
 
 '/protected': {
   view: () => new ProtectedView(),
-  guards: [requireAuth]
+  guards: [Guards.requireAuth()]
 }
 ```
 
@@ -164,20 +189,20 @@ registerPipes(); // registers a set of utility pipes into AppPipeRegistry
 
 What it registers (summary)
 
-* `currency` — formats numbers using `Intl.NumberFormat` (args: currency, locale)
-* `date` — formats dates (implementation uses Intl.DateTimeFormat or a simple formatter)
-* `number` — numeric formatting
+* `currency` — `(value, currency = 'USD', locale = 'en-US')`, formats via `Intl.NumberFormat`
+* `date` — `(value, locale = navigator.language, format = 'long' | 'short' | 'time', time = false)`, formats via `Intl.DateTimeFormat`. Note: the first argument is the **locale**, not the format — e.g. `date:en-US,short` for short format, not `date:'short'`.
+* `number` — `(value, decimals = 0)`, numeric formatting via `.toFixed()`
 * `uppercase`, `lowercase` — string transforms
 * `capitalize`, `capitalizeAll` — capitalize first letter / all words
-* `truncate` — shortens strings to a max length
-* `default` — fallback value
+* `truncate` — `(value, length = 50, suffix = '...')`
+* `default` — `(value, defaultValue = '')` fallback value
 * `json` — JSON.pretty print
 
 Usage (in templates)
 
 ```html
-<span data-pipe="currency:'EUR'">1234.5</span>
-<span data-pipe="date:'short'">2024-09-01T12:00:00Z</span>
+<span data-pipe="currency:EUR">1234.5</span>
+<span data-pipe="date:en-US,short">2024-09-01T12:00:00Z</span>
 <span data-pipe="uppercase">hello</span>
 ```
 
@@ -196,17 +221,18 @@ Notes
 ### Show a confirmation popover and notify on action
 
 ```ts
-import { PopoverView } from 'libs';
-import { notify } from 'libs';
+import { PopoverOverlay, notify } from 'libs/index.js';
 
-const pop = new PopoverView({
-  template: '<p>Confirm ?</p>',
-  buttons: [
-    { text: 'Cancel' },
-    { text: 'OK', callback: () => notify('Confirmed', { type: 'success' }) }
-  ]
+const pop = new PopoverOverlay({
+  anchor: triggerButtonEl,
+  template: `
+    <p>Confirm?</p>
+    <button data-event="click:onCancel">Cancel</button>
+    <button data-event="click:onOk">OK</button>
+  `,
 });
-pop.render();
+pop.open();
+// wire onOk to call notify('Confirmed', { type: 'success' }) then pop.close()
 ```
 
 ### Enable pipes at startup
@@ -219,8 +245,9 @@ registerPipes();
 
 # 7. Where to look in code
 
-* `src/libs/snackbar/snackbar.ts` — `notify` implementation & queue
-* `src/libs/popover/popover.ts` — `PopoverView` implementation (overlay, wrapper, button wiring)
-* `src/libs/guards/guards.ts` — simple guard helpers - extend as needed, or register customs.
 * `src/libs/pipes/pipes.ts` — registration of app pipes - extend as needed, or register customs.
+* `src/libs/overlays/passive/snackbar.ts` — `notify` implementation & queue *(overlays feature)*
+* `src/libs/overlays/popover/popover.ts` — `PopoverOverlay` implementation (anchoring, focus trap, dismissal) *(overlays feature)*
+* `src/libs/overlays/core/` — shared `OverlayRuntime`/`AnchoredOverlayRuntime`/`PassiveOverlayRuntime` base classes *(overlays feature)*
+* `src/app/guards.ts` — guard helpers - extend as needed
 * `src/libs/index.ts` — barrel file

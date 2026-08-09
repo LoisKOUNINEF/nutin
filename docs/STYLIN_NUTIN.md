@@ -1,134 +1,37 @@
 # stylin-nutin Docs
 
+`STYLIN_NUTIN.md` now refers to the **`scssUtils`** feature — this content only ships when `scssUtils` is enabled, and lives under `src/libs/scss-utils/` rather than `src/styles/base/` (see [Where to look in code](#where-to-look-in-code)).
+
 - [Classes](#classes)
 - [Mixins](#mixins)
 
 ## Classes
 
-Utility classes use variables defined in `styles/base/_variables.scss`, as well as mixins defined in `styles/base/_mixins.scss`.
+Utility classes use variables defined in `styles/base/_variables.scss`, as well as mixins defined in `libs/scss-utils/_mixins-nutin.scss`. The class set is intentionally small — most styling is expected to go through the mixins below directly in your component/view `.scss` files.
 
 ```scss
 // Utility classes prefix : 'u-'
 
-// $name = smallest || small || medium || large || largest
-// font size
-@each $name, $size in $font-sizes {
-	.u-font-#{$name}
-}
+.u-hide
 
-// padding
-@each $name, $space in $spacings {
-	.u-padd-x-#{$name}
-}
-@each $name, $space in $spacings {
-	.u-padd-y-#{$name}
-}
+.u-hide-on-medium
 
-//margin
-@each $name, $space in $spacings {
-	.u-marg-x-#{$name}
-}
+.u-hide-on-small
 
-@each $name, $space in $spacings {
-	.u-marg-y-#{$name}
-}
-
-//border-radius
-// $name = small || medium || large || pill
-@each $name, $radius in $border-radius {
-	.u-rounded-#{$name}
-}
-
-// box-shadow
-// $name = small | medium || large
-@each $name, $shadow in $shadows {
-	.u-shadow-#{$name}
-}
-
-// transition
-// $name = fast || normal || slow
-@each $name, $transition in $transitions {
-	.u-transition-#{$name}
-}
-
-.u-color-base
-
-.u-color-prim
-
-.u-color-sec
-
-.u-color-bg
-
-.u-italic
-
-.u-bold
-
-.u-font-secondary
-
-.u-font-primary 
-
-.u-text-center
-
-.u-text-right
-
-.u-text-left
-
-.u-flex-center
-
-.u-flex-column
-
-.u-flex-row
-
-.u-flex-between
-
-.u-flex-around
-
-.u-flex-wrap
-
-.u-ellipsis
-
-.u-clamp-2
-
-.u-absolute-center
-
-.u-fixed-full
-
-.u-bg-base
-
-.u-bg-inherit
-
-.u-bg-primary
-
-.u-bg-secondary
-
-.u-bg-gradient-to-right
-
-.u-bg-cover
-
-.u-img-cover
-
-.u-transition
-
-.u-hover-scale
-
-.u-border
-
-.u-border-none
-
-.u-rounded
+.u-pre-wrap
 
 .u-btn-disabled
-
-.u-hide
 
 .u-sr-only
 
 .u-clearfix
 
 .u-pointer
-
-.u-pre-wrap
 ```
+
+* `.u-hide` / `.u-hide-on-medium` / `.u-hide-on-small` — `display: none !important`, the latter two scoped inside `respond-to(medium|small)` media queries.
+* `.u-pre-wrap` — `white-space: pre-wrap; overflow-wrap: break-word;`
+* `.u-btn-disabled`, `.u-sr-only`, `.u-clearfix`, `.u-pointer` — thin wrappers around the matching mixins below.
 
 ## Mixins
 
@@ -373,6 +276,8 @@ Mixins use variables defined in `styles/base/_variables.scss`.
 	overflow: hidden;
 	clip: rect(1px, 1px, 1px, 1px);
 	white-space: nowrap;
+	text-decoration: none;
+	outline: none;
 }
 
 @mixin clearfix {
@@ -416,13 +321,18 @@ Mixins use variables defined in `styles/base/_variables.scss`.
 	}
 }
 
+// Animation mixins wrap their `animation:` declaration in `& { }` internally
+// (shown below as written in source) so the keyframes @-rule and the rule
+// applying it can share one mixin without leaking into unrelated selectors.
+
 @mixin fade-in($duration: 0.5s, $delay: 0s) {
 	@keyframes fade-in {
 		from { opacity: 0; }
 		to { opacity: 1; }
 	}
-
-	animation: fade-in $duration ease-in $delay forwards;
+	& {
+		animation: fade-in $duration ease-in $delay forwards;
+	}
 }
 
 @mixin slide-in-left($distance: 100%, $duration: 0.6s, $delay: 0s) {
@@ -436,8 +346,9 @@ Mixins use variables defined in `styles/base/_variables.scss`.
 			opacity: 1;
 		}
 	}
-
-	animation: slide-in-left $duration ease-out $delay forwards;
+	& {
+		animation: slide-in-left $duration ease-out $delay forwards;
+	}
 }
 
 @mixin scale-up($from: 0.8, $to: 1, $duration: 0.4s, $delay: 0s) {
@@ -451,8 +362,9 @@ Mixins use variables defined in `styles/base/_variables.scss`.
 			opacity: 1;
 		}
 	}
-
-	animation: scale-up $duration ease $delay forwards;
+	& {
+		animation: scale-up $duration ease $delay forwards;
+	}
 }
 
 @mixin bounce-in($duration: 0.8s, $delay: 0s) {
@@ -462,17 +374,19 @@ Mixins use variables defined in `styles/base/_variables.scss`.
 		80% { transform: scale(0.95); }
 		100% { transform: scale(1); }
 	}
-
-	animation: bounce-in $duration ease-out $delay forwards;
+	& {
+		animation: bounce-in $duration ease-out $delay forwards;
+	}
 }
 
 @mixin spin($duration: 1s, $delay: 0s, $direction: normal) {
 	@keyframes spin {
 		to { transform: rotate(360deg); }
 	}
-
-	animation: spin $duration linear $delay infinite;
-	animation-direction: $direction;
+	& {
+		animation: spin $duration linear $delay infinite;
+		animation-direction: $direction;
+	}
 }
 
 @mixin pulse($duration: 1.5s, $delay: 0s) {
@@ -480,8 +394,9 @@ Mixins use variables defined in `styles/base/_variables.scss`.
 		0%, 100% { opacity: 1; }
 		50% { opacity: 0.5; }
 	}
-
-	animation: pulse $duration ease-in-out $delay infinite;
+	& {
+		animation: pulse $duration ease-in-out $delay infinite;
+	}
 }
 
 @mixin shake($duration: 0.5s, $delay: 0s) {
@@ -490,15 +405,19 @@ Mixins use variables defined in `styles/base/_variables.scss`.
 		20%, 60% { transform: translateX(-10px); }
 		40%, 80% { transform: translateX(10px); }
 	}
-
-	animation: shake $duration ease-in-out $delay;
+	& {
+		animation: shake $duration ease-in-out $delay;
+	}
 }
 ```
 
 ## Where to look in code
 
-* `src/styles/base/` - variables, mixins, functions, fonts registration.
-* `src/styles/core/` - utility classes (using mixins and variables defined in `src/styles/base/`) and libraries classes.
+* `src/styles/base/` - variables, fonts registration (no more mixins here — see below).
+* `src/libs/scss-utils/_mixins-nutin.scss` - all mixins listed above *(scssUtils feature)*.
+* `src/libs/scss-utils/_utilities.scss` - the 8 utility classes listed above *(scssUtils feature)*.
+* `src/libs/scss-utils/_index.scss` - forwards the two files above; itself forwarded by `src/libs/_index.scss` (only `@forward`ed when `scssUtils` is enabled).
 * `src/styles/_styles.scss` - css reset and global styles.
-* `src/styles/main.scss` - imports (`use`) styles from `src/styles/core/`, `src/styles/_styles.scss`, `src/styles/_custom-classes`, `src/styles/components/`, `src/styles/views/`. 
-* `src/styles/components` `src/styles/views` - exported by barrel files `_index.scss`
+* `src/styles/_nutin-config.scss` - `$config` Sass map for overriding libs variables (deep-merge), `!default` empty by default.
+* `src/styles/main.scss` - conditionally `@use "../libs"` (only if `scssUtils`, `overlays`, `accessibilityComponents`, or `forms` is enabled) plus always `@use "styles"` (the reset). It no longer imports any `components/`/`views/` partials.
+* Component/view `.scss` files are **co-located** next to their `.ts` file (e.g. `src/app/components/my-widget/my-widget.component.scss`) — there's no more `src/styles/components`/`src/styles/views` barrel. The builder (`tools/builder/core/sass.js`) recursively discovers and compiles every `.scss` file under `src/app/components` and `src/app/views` directly, appending each result to the compiled `main.css`.

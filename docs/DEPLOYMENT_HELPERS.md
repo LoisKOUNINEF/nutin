@@ -63,7 +63,7 @@ Prevents an attacker from changing your document base and redirecting relative U
 
 All unspecified resource types (e.g., media, frames) are only allowed from the same origin.
 
-- `script-src 'self`
+- `script-src 'self'`
 
 Only load JS from your own domain. Prevents loading third-party or injected scripts.                      
 **Whitelist third-party scripts:** `script-src 'self' https://cdn.jsdelivr.net;`
@@ -270,8 +270,9 @@ Provides a lightweight HTTP health endpoint for monitoring or container orchestr
 ``` 
 location /health {
     access_log off;
+    add_header Content-Type text/plain always;
+    add_header Cache-Control "no-store" always;
     return 200 "healthy\n";
-    add_header Content-Type text/plain;
 }
 ```
 
@@ -286,6 +287,33 @@ Instantly returns a simple 200 OK response.
 - `add_header Content-Type text/plain`
 
 Ensures plain text content type.
+
+- `add_header Cache-Control "no-store"`
+
+Ensures the health check response itself is never cached.
+
+### 404 handling
+
+SPAs rarely hit a true 404 (the `try_files ... /index.html` fallback on the main route usually wins), but the config still defines a dedicated error page with the same security headers as other routes:
+
+```
+error_page 404 /404.html;
+
+location = /404.html {
+    internal;
+    try_files /404.html =404;
+    expires -1;
+    add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+
+    # Security headers
+    add_header X-Frame-Options $frame_options always;
+    add_header X-Content-Type-Options $content_type_options always;
+    add_header X-XSS-Protection $xss_protection always;
+    add_header Referrer-Policy $referrer_policy always;
+    add_header Permissions-Policy $permissions_policy always;
+    add_header Content-Security-Policy $csp_policy always;
+}
+```
 
 ### Hide Nginx version
 
@@ -327,7 +355,7 @@ gzip_types
 
 **Default deployment helpers do NOT support Brotli compression.**                     
 If you want to use it :
-    - uncomment brotli-related sections (`BROTLI OPTIONAL`) in `builder.config.js` and `tools/builder/core/compress-files.js`
+    - uncomment brotli-related sections (`BROTLI OPTIONAL`) in `nutin.config.js` (the `compression.brotli` key) and `tools/builder/core/compress-files.js`
     - enable brotli in nginx.conf
     - You'll also need to use an existing Brotli-enabled nginx image or build your own from source.
 
