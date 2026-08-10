@@ -34,11 +34,11 @@ export class FeatureAdder {
 
     const meta = await readProjectMeta(projectPath);
     if (meta?.features?.[feature.key]) {
-      print.warn(`\n${feature.key} is already enabled in this project — skipping.`);
+      print.warn(`${feature.key} is already enabled in this project — skipping.`);
       return;
     }
 
-    print.boldHead(`\nAdding ${feature.key} to ${projectPath}...\n`);
+    print.boldHead(`\nAdding ${feature.key} to ${projectPath}...`);
 
     const context = await this.builder.buildContext(projectPath, feature);
 
@@ -68,11 +68,11 @@ export class FeatureAdder {
 
     if (needsnutinMixins) {
       await ensureScssConfigFile(this.fileGenerator, projectPath, context);
-      print.info(`\nnutinMixins required by ${feature.key}, installing now...`);
+      print.info(`nutinMixins required by ${feature.key}, installing now...`);
       await this.addFeatureToProject('nutinMixins');
     }
     if (needsAccessibilityComponents) {
-      print.info(`\naccessibilityComponents required by ${feature.key}, installing now...`);
+      print.info(`accessibilityComponents required by ${feature.key}, installing now...`);
       await this.addFeatureToProject('accessibilityComponents');
     }
     if (feature.key === 'testinNutin') {
