@@ -3,8 +3,9 @@ import { gzipSync
 // BROTLI OPTIONAL
 //, brotliCompressSync, constants 
 } from 'zlib';
-import { print, getFilesRecursive, builderConfig } from '../../utils/index.js';
+import { print, getFilesRecursive } from '../../utils/index.js';
 import { PATHS } from './paths.js';
+import { builderConfig } from '../builder.config.js';
 
 const compress = {
   gzip: builderConfig.compression.gzip,

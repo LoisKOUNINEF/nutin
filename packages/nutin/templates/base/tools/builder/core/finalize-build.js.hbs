@@ -1,7 +1,8 @@
-import { print, builderConfig } from "../../utils/index.js";
 import fs from 'fs';
 import path from 'path';
 import { PATHS } from "./paths.js";
+import { builderConfig } from '../builder.config.js';
+import { print } from "../../utils/index.js";
 
 function finalizeBuild() {
   if (builderConfig.isProd) removeFoldersAfterBundle();

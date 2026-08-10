@@ -1,8 +1,9 @@
 import esbuild from 'esbuild';
 import path from 'path';
 import { exit } from 'process';
-import { print, builderConfig } from '../../utils/index.js';
+import { print } from '../../utils/index.js';
 import { PATHS } from './paths.js';
+import { builderConfig } from '../builder.config.js';
 
 const ENTRY_FILE = path.join(PATHS.tempApp, 'main.ts');
 const OUT_FILE = path.join(PATHS.tempSource, 'bundle.js');

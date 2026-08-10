@@ -1,5 +1,6 @@
-import { runCommand, print, builderConfig } from "../../utils/index.js";
 import { exit } from 'process';
+import { runCommand, print } from "../../utils/index.js";
+import { builderConfig } from '../builder.config.js';
 
 async function compileTS() {
   await runCommand('tsc', ['--project', 'tsconfig.json']);

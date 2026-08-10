@@ -1,9 +1,10 @@
 import { readFile } from 'fs/promises';
 import { exit } from 'process';
-import { print, builderConfig } from '../../utils/index.js';
-import { PATHS } from './paths.js';
 import path from 'path';
+import { print } from '../../utils/index.js';
+import { PATHS } from './paths.js';
 import { addTags } from './add-tags.js';
+import { builderConfig } from '../builder.config.js';
 
 async function validateHtml() {
   const filePath = path.join(PATHS.tempSource, 'index.html');

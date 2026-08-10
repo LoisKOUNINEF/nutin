@@ -1,8 +1,9 @@
 import { minify } from 'html-minifier-terser';
 import fs from 'fs';
 import { exit } from 'process';
-import { getFilesRecursive, print, builderConfig } from '../../utils/index.js';
+import { getFilesRecursive, print } from '../../utils/index.js';
 import { PATHS } from './paths.js';
+import { builderConfig } from '../builder.config.js';
 
 export async function minifyHTML(html) {
   return minify(html, {

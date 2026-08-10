@@ -1,5 +1,6 @@
-import { print, builderConfig } from '../../utils/index.js';
 import { writeFile } from 'fs/promises';
+import { print } from '../../utils/index.js';
+import { builderConfig } from '../builder.config.js';
 
 export async function addTags(htmlContent, filePath) {
   const scriptSrc = builderConfig.isProd ? "bundle.js" : "app/main.js";

@@ -2,9 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import { exit } from 'process';
 import { PATHS } from './paths.js';
-import { print, builderConfig } from '../../utils/index.js';
+import { print } from '../../utils/index.js';
 import { buildSsrBundle, cleanupSsrBundle } from './ssr/ssr-bundle.js';
 import { renderRoute } from './ssr/ssr-render.js';
+import { builderConfig } from '../builder.config.js';
 
 function escape(str) {
   return str

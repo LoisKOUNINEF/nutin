@@ -1,8 +1,9 @@
 import * as sass from 'sass';
 import * as fs from 'fs';
 import path from 'path';
-import { getFilesRecursive, builderConfig, print } from '../../utils/index.js';
+import { getFilesRecursive, print } from '../../utils/index.js';
 import { PATHS } from './paths.js';
+import { builderConfig } from '../builder.config.js';
 
 const stylesOutput = path.join(PATHS.tempSource, 'main.css');
 

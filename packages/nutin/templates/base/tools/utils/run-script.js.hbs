@@ -1,7 +1,7 @@
 import { resolve } from 'path';
 import { spawnSync } from 'child_process';
 import process from 'process';
-import { print, builderConfig } from './index.js';
+import { print } from './index.js';
 
 export function runScript(path, message, addNewline = false) {
   const hasNewline = addNewline ? '\n' : '';

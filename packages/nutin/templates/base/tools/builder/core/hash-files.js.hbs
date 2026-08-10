@@ -2,7 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { PATHS } from './paths.js';
-import { print, builderConfig, getFilesRecursive } from '../../utils/index.js';
+import { print, getFilesRecursive } from '../../utils/index.js';
+import { builderConfig } from '../builder.config.js';
 
 function addHashToFiles(distDir) {
   const files = getFilesRecursive(distDir, ['.js', '.css']);
