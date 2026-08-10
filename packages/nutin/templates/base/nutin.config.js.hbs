@@ -36,10 +36,7 @@ export default {
 
   // Testing toolkit
   testinNutin: {
-      origins: [
-      'src/app',
-      // 'src/core', // Nutin core logic - uncomment to test your own modifications
-    ],
+    includeInternals: false, // true to run src/core and src/libs tests
     jsdomOptions: {
       runScripts: false,     // or true ("dangerously") if needed
       resources: false,      // or true ("usable") if needed

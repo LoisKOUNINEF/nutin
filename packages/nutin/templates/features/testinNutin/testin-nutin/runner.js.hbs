@@ -2,9 +2,12 @@ import { registerTestGlobals, getTestFiles, runQueuedTests, print } from './core
 import path from 'path';
 import config from '#root/nutin.config.js';
 
+const origins = ['src/app'];
+if (config.testinNutin.includeInternals) origins.push('src/core', 'src/libs');
+
 registerTestGlobals();
 
-let testFiles = config.testinNutin.origins.flatMap(
+let testFiles = origins.flatMap(
   origin => getTestFiles(`../${origin}`)
 );
 
