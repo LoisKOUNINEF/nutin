@@ -1,8 +1,8 @@
 import { getCiCommand } from '../common/package-json-helper.mjs';
 import { PACKAGE_VERSION } from '../common/package-data.mjs';
 
-const LIBS_ON = { accessibilityComponents: true, forms: true, overlays: true, scssUtils: true };
-const LIBS_OFF = { accessibilityComponents: false, forms: false, overlays: false, scssUtils: false };
+const LIBS_ON = { accessibilityComponents: true, forms: true, overlays: true, nutinMixins: true };
+const LIBS_OFF = { accessibilityComponents: false, forms: false, overlays: false, nutinMixins: false };
 
 const PRESET_MAP = {
   default:  { ...LIBS_OFF, deployHelper: false, testinNutin: false }, 
@@ -30,7 +30,7 @@ export class ContextBuilder {
       accessibilityComponents: preferences.libs ?? preset.accessibilityComponents,
       forms: preferences.libs ?? preset.forms,
       overlays: preferences.libs ?? preset.overlays,
-      scssUtils: preferences.libs ?? preset.scssUtils,
+      nutinMixins: preferences.libs ?? preset.nutinMixins,
       deployHelper: preferences.deployHelper ?? preset.deployHelper,
       testinNutin: preferences.testinNutin ?? preset.testinNutin,
 

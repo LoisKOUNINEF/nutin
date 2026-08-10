@@ -1,5 +1,6 @@
 @use "sass:map";
 @use "../../../styles/nutin-config" as config;
+@use "nutin-mixins";
 
 $spinner-defaults: (
   'size': 2rem,
@@ -20,17 +21,6 @@ $spinner-config: map.deep-merge(
   map.get(config.$config, 'components', 'spinner') or ()
 );
 
-@mixin spin($duration: 1s, $delay: 0s, $direction: normal) {
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  & {
-    animation: spin $duration linear $delay infinite;
-    animation-direction: $direction;
-  }
-}
-
 .app-spinner {
   display: inline-flex;
   justify-content: center;
@@ -43,7 +33,7 @@ $spinner-config: map.deep-merge(
 
 .spinner__ring {
   border-radius: map.get($spinner-config, 'border-radius');
-  @include spin(map.get($spinner-config, 'duration'));
+  @include nutin-mixins.spin(map.get($spinner-config, 'duration'));
   width: var(--spinner-size, #{map.get($spinner-config, 'size')});
   height: var(--spinner-size, #{map.get($spinner-config, 'size')});
   animation-duration: var(--spinner-duration, #{map.get($spinner-config, 'duration')});

@@ -1,0 +1,16 @@
+@mixin disabled {
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@mixin hover-scale($scale: 1.05) {
+  transition: transform 0.2s;
+  &:hover {
+    transform: scale($scale);
+  }
+}
+
+@mixin transition($props...) {
+  transition: $props;
+}

@@ -1,0 +1,44 @@
+@use "sass:map";
+@use "../../styles/nutin-config" as config;
+
+$breakpoints-defaults: (
+  small: 576px,
+  medium: 815px,
+  large: 1450px,
+  largest: 1600px,
+) !default;
+
+$breakpoints-config: map.deep-merge(
+  $breakpoints-defaults,
+  map.get(config.$config, 'breakpoints') or ()
+);
+
+@mixin respond-to($breakpoint) {
+  $value: map.get($breakpoints-config, $breakpoint);
+
+  @if $value {
+    @media (max-width: $value) {
+      @content;
+    }
+  }
+}
+
+@mixin responsive-grid($default: 1, $breakpoints-config: (), $gap: 1rem) {
+  @include grid($default, $gap);
+
+  @each $breakpoint, $columns in $breakpoints-config {
+    @media (min-width: $breakpoint) {
+      grid-template-columns: repeat($columns, 1fr);
+    }
+  }
+}
+
+@mixin responsive-fr-grid($default: "1fr", $breakpoints-config: (), $gap: 1rem) {
+  @include fr-grid($default, $gap);
+
+  @each $breakpoint, $columns in $breakpoints-config {
+    @media (min-width: $breakpoint) {
+      grid-template-columns: unquote($columns);
+    }
+  }
+}

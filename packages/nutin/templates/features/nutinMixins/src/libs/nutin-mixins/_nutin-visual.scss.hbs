@@ -1,0 +1,29 @@
+@mixin bg-cover {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+@mixin bg-gradient($dir, $from, $to) {
+  background: linear-gradient(to $dir, $from, $to);
+}
+
+@mixin border($color, $width: 1px, $style: solid) {
+  border: $width $style $color;
+}
+
+@mixin box-shadow($shadow...) {
+  box-shadow: $shadow;
+}
+
+@mixin image-cover {
+  -webkit-background-size: 100vw 100vh;
+  -moz-background-size: 100vw 100vh;
+  -o-background-size: 100vw 100vh;
+  background-size: 100vw 100vh;
+  background-attachment: fixed;
+};
+
+@mixin rounded($radius: 4px) {
+  border-radius: $radius;
+}

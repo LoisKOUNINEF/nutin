@@ -1,0 +1,147 @@
+@use "sass:map";
+@use "../../styles/nutin-config" as config;
+
+// ------------------------------------------------
+// Animation keyframes
+// ------------------------------------------------
+
+$animations-defaults: (
+  'scale-up': (
+    'from': 0.8,
+    'to': 1,
+  ),
+  'slide-in-left': (
+    'distance': 100%,
+  ),
+) !default;
+
+$animations-config: map.deep-merge(
+  $animations-defaults,
+  map.get(config.$config, 'animations') or ()
+);
+
+@keyframes nutin-bounce-in {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+
+  80% {
+    transform: scale(0.95);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes nutin-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes nutin-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes nutin-scale-up {
+  from {
+    transform: scale(map.get($animations-config, 'scale-up', 'from'));
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(map.get($animations-config, 'scale-up', 'to'));
+    opacity: 1;
+  }
+}
+
+@keyframes nutin-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20%,
+  60% {
+    transform: translateX(-10px);
+  }
+
+  40%,
+  80% {
+    transform: translateX(10px);
+  }
+}
+
+@keyframes nutin-slide-in-left {
+  from {
+    transform: translateX(-#{map.get($animations-config, 'slide-in-left', 'distance')});
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes nutin-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+// ------------------------------------------------
+// Animation mixins
+// ------------------------------------------------
+
+@mixin bounce-in($duration: 0.8s, $delay: 0s) {
+  animation: nutin-bounce-in $duration ease-out $delay forwards;
+}
+
+@mixin fade-in($duration: 0.5s, $delay: 0s) {
+  animation: nutin-fade-in $duration ease-in $delay forwards;
+}
+
+@mixin pulse($duration: 1.5s, $delay: 0s) {
+  animation: nutin-pulse $duration ease-in-out $delay infinite;
+}
+
+@mixin scale-up($duration: 0.4s, $delay: 0s) {
+  animation: nutin-scale-up $duration ease $delay forwards;
+}
+
+@mixin shake($duration: 0.5s, $delay: 0s) {
+  animation: nutin-shake $duration ease-in-out $delay;
+}
+
+@mixin slide-in-left($duration: 0.6s, $delay: 0s) {
+  animation: nutin-slide-in-left $duration ease-out $delay forwards;
+}
+
+@mixin spin(
+  $duration: 1s,
+  $delay: 0s,
+  $direction: normal
+) {
+  animation: nutin-spin $duration linear $delay infinite;
+  animation-direction: $direction;
+}

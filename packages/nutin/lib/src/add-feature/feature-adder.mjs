@@ -5,7 +5,7 @@ import { print } from '../utils/print.mjs';
 import { FileGenerator } from '../common/file-generator.mjs';
 import { FEATURES } from '../common/feature-registry.mjs';
 import { PACKAGE_VERSION } from '../common/package-data.mjs';
-import { updateProjectMeta } from '../common/project-meta.mjs';
+import { readProjectMeta, updateProjectMeta } from '../common/project-meta.mjs';
 import { FeatureContextBuilder } from './feature-context-builder.mjs';
 import { updateLibBarrels } from './lib-barrel-updater.mjs';
 import { ensureScssConfigFile } from './scss-config-generator.mjs';
@@ -32,6 +32,12 @@ export class FeatureAdder {
     const projectPath = process.cwd();
     await this.validateProject(projectPath, feature);
 
+    const meta = await readProjectMeta(projectPath);
+    if (meta?.features?.[feature.key]) {
+      print.warn(`\n${feature.key} is already enabled in this project — skipping.`);
+      return;
+    }
+
     print.boldHead(`\nAdding ${feature.key} to ${projectPath}...\n`);
 
     const context = await this.builder.buildContext(projectPath, feature);
@@ -57,8 +63,17 @@ export class FeatureAdder {
 
     await this.fileGenerator.processTemplateDirectory(featureTemplateDir, projectPath, context, { skipExisting: true });
 
-    if (feature.key === 'accessibilityComponents' || feature.key === 'forms' || feature.key === 'overlays') {
+    const needsAccessibilityComponents = feature.key === 'forms' || feature.key === 'overlays';
+    const needsnutinMixins = feature.key === 'accessibilityComponents' || needsAccessibilityComponents;
+
+    if (needsnutinMixins) {
       await ensureScssConfigFile(this.fileGenerator, projectPath, context);
+      print.info(`\nnutinMixins required by ${feature.key}, installing now...`);
+      await this.addFeatureToProject('nutinMixins');
+    }
+    if (needsAccessibilityComponents) {
+      print.info(`\naccessibilityComponents required by ${feature.key}, installing now...`);
+      await this.addFeatureToProject('accessibilityComponents');
     }
     if (feature.key === 'testinNutin') {
       await ensureTestinNutinConfigBlock(path.join(projectPath, nutinConfigFileName));
@@ -86,11 +101,6 @@ export class FeatureAdder {
   }
 
   async runPostAddTasks(projectPath, feature, context) {
-    if (feature.key === 'forms' || feature.key === 'overlays') {
-      print.warn(`\naccessibilityComponents required by ${feature.key}, installing now...`)
-      await this.addFeatureToProject('accessibilityComponents');
-    }
-
     await updateProjectMeta(projectPath, {
       version: PACKAGE_VERSION,
       packageManager: context.packageManager,

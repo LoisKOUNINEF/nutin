@@ -19,9 +19,9 @@ export const FEATURES = [
     scssForward: '@forward "overlays";',
   },
   {
-    key: 'scssUtils',
-    cli: 'scss-utils',
-    scssForward: '@forward "scss-utils";',
+    key: 'nutinMixins',
+    cli: 'nutin-mixins',
+    scssForward: '@forward "scss-mixins";',
   },
   {
     key: 'deployHelper',
