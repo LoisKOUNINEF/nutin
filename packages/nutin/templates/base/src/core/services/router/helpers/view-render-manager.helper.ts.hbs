@@ -17,15 +17,25 @@ export class ViewRenderManager {
     params: Record<string, string> = {}
   ): View {
     const view = viewConstructor();
+    ViewRenderManager.clearStaleMountContent(view);
 
     // Set route parameters before rendering
     view.setRouteParams(params);
-
 
     view.render();
     view.onEnter();
 
     Lifecycle.viewMount(view.viewName);
     return view;
+  }
+
+  private static clearStaleMountContent(view: View): void {
+    const viewElement = view.getElement();
+    const container = viewElement.parentElement;
+    if (!container) return;
+
+    Array.from(container.childNodes).forEach((node) => {
+      if (node !== viewElement) node.remove();
+    });
   }
 }

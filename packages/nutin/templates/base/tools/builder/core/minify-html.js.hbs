@@ -47,7 +47,7 @@ async function minifyInlineHTML() {
       if (builderConfig.isExhaustive) print.gray(`Minified inline HTML in: ${file}`);
     }
   }
-  if (builderConfig.isVerbose) print.boldInfo('✅ Templates minified.\n');
+  if (builderConfig.isVerbose && builderConfig.inlineTemplates) print.boldInfo('✅ Templates minified.\n');
 }
 
 minifyInlineHTML().catch((err) => {

@@ -46,6 +46,10 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
     DomHelper.mountElement(this.element, mountTarget);
   }
 
+  public getElement(): T {
+    return this.element;
+  }
+
   public childConfigs(): ComponentConfig[] {
     return [];
   }

@@ -25,7 +25,7 @@ export async function createApp() {
     .option('--deploy-helper', 'Dockerfile & nginx.conf')
     .option('--testin-nutin', 'Lightweight testing toolkit')
     .action(async (projectName, cliOptions) => {
-      print.blue('🚀 Welcome to nutin !');
+      print.boldSuccess('\n🚀 Welcome to your new nutin app!\n');
       try {
         const preferences = await newAppPrompt(projectName, cliOptions);
         await createProject(preferences);

@@ -10,7 +10,7 @@ async function copyStatic() {
   const extensions = [...BINARY_EXTENSIONS, '.html'];
   if (builderConfig.isProd) extensions.push('.ts');
 
-  if (builderConfig.isVerbose) print.blue(`File types that will be copied: ${extensions.join(', ')}`);
+  if (builderConfig.isVerbose) print.boldGray(`File types that will be copied: ${extensions.join(', ')}`);
 
   await ensureDir(PATHS.tempSource);
 

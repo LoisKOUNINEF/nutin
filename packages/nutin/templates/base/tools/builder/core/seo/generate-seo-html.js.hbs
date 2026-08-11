@@ -1,11 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import { exit } from 'process';
-import { PATHS } from './paths.js';
-import { print } from '../../utils/index.js';
+import { PATHS } from '../paths.js';
+import { print } from '../../../utils/index.js';
 import { buildSsrBundle, cleanupSsrBundle } from './ssr/ssr-bundle.js';
-import { renderRoute } from './ssr/ssr-render.js';
-import { builderConfig } from '../builder.config.js';
+import { renderRoute, getAppRoutePaths } from './ssr/ssr-render.js';
+import { builderConfig } from '../../builder.config.js';
+
+const WELL_KNOWN_NON_SEO_ROUTES = ['/404', '/403', '/500'];
 
 function escape(str) {
   return str
@@ -164,8 +166,21 @@ async function writeRouteHtml({ template, lang, title, description, pageUrl, ogI
 
   fs.mkdirSync(outputDir, { recursive: true });
   fs.writeFileSync(outputPath, html, 'utf-8');
+}
 
-  if (builderConfig.isExhaustive) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
+async function warnForRoutesMissingSeoConfig(bundleUrl, seoRoutes, defaultLanguage) {
+  const appRoutePaths = await getAppRoutePaths(bundleUrl, defaultLanguage);
+  const seoRoutePaths = new Set(seoRoutes.map((route) => route.path));
+
+  for (const path of appRoutePaths) {
+    if (seoRoutePaths.has(path)) continue;
+
+    if (WELL_KNOWN_NON_SEO_ROUTES.includes(path)) {
+      print.boldGray(`[generate-seo-html] Route "${path}" has no matching entry in config/seo.json — probably intentional.`);
+    } else {
+      print.error(`[generate-seo-html] Route "${path}" has no matching entry in config/seo.json; consider adding it so this route gets SEO/SSR HTML, sitemap, and meta tags.`);
+    }
+  }
 }
 
 async function processRoute(template, baseUrl, defaultLanguage, languages, route, bundleUrl) {
@@ -230,7 +245,7 @@ async function processRoute(template, baseUrl, defaultLanguage, languages, route
   }
 }
 
-async function generateSeoHtml() {
+export async function generateSeoHtml() {
   const templatePath = path.join(PATHS.tempSource, 'index.html');
   const template = fs.readFileSync(templatePath, 'utf-8');
 
@@ -249,6 +264,8 @@ async function generateSeoHtml() {
   const bundleUrl = await buildSsrBundle();
 
   try {
+    await warnForRoutesMissingSeoConfig(bundleUrl, seoConfig.routes, defaultLanguage);
+
     for (const route of seoConfig.routes) {
       await processRoute(template, baseUrl, defaultLanguage, languages, route, bundleUrl);
     }
@@ -256,13 +273,3 @@ async function generateSeoHtml() {
     cleanupSsrBundle();
   }
 }
-
-generateSeoHtml()
-  .then(() => {
-    if (builderConfig.isVerbose) print.boldInfo('✅ SEO HTML generation complete.');
-  })
-  .catch((err) => {
-    print.boldError(`[generate-seo-html] ${err.message}`);
-    if (builderConfig.isVerbose && err.stack) print.gray(err.stack);
-    exit(1);
-  });

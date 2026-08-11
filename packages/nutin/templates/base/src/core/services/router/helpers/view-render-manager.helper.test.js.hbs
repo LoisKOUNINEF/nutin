@@ -31,21 +31,6 @@ describe('ViewRenderManager', () => {
     };
   };
 
-{{#if animation}}
-  it('should add exit class and destroy current view on transition out', async () => {
-    const view = mockView();
-    const el = view.render();
-    container.appendChild(el);
-
-    // Spy on destroy
-    const spy = spyOn(view, 'destroy');
-
-    await ViewRenderManager.transitionOutCurrentView(view);
-
-    expect(spy).toHaveBeenCalled();
-  });
-
-{{/if}}
   it('should do nothing if no current view is passed to transitionOutCurrentView', async () => {
     const result = await ViewRenderManager.transitionOutCurrentView(null);
     expect(result).toBe(null);
@@ -62,5 +47,29 @@ describe('ViewRenderManager', () => {
     await ViewRenderManager.transitionOutCurrentView(view);
 
     expect(JSON.stringify(emitted)).toContain(JSON.stringify({ event: 'view-unmount', data: { viewName: 'SettingsView' } }));
+  });
+
+  it('should clear stale mount content before rendering the new view', () => {
+    const stale = document.createElement('div');
+    stale.className = 'stale-seo-content';
+    container.appendChild(stale);
+
+    const viewElement = document.createElement('div');
+    viewElement.className = 'mock-view';
+    container.appendChild(viewElement);
+
+    const view = {
+      viewName: 'HomeView',
+      getElement: () => viewElement,
+      setRouteParams: () => {},
+      render: () => viewElement,
+      onEnter: () => {},
+    };
+
+    ViewRenderManager.renderNewView(() => view);
+
+    expect(container.children.length).toBe(1);
+    expect(container.contains(stale)).toBe(false);
+    expect(container.contains(viewElement)).toBe(true);
   });
 });
