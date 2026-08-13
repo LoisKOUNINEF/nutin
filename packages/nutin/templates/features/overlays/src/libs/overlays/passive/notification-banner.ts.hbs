@@ -107,8 +107,21 @@ class NotificationBanner extends PassiveOverlayRuntime<NotificationBannerItem> {
   }
 }
 
-const notificationBanner = new NotificationBanner();
+let notificationBanner: NotificationBanner | null = null;
+
+function getNotificationBanner(): NotificationBanner {
+  if (!notificationBanner) notificationBanner = new NotificationBanner();
+  return notificationBanner;
+}
 
 export function showNotificationBanner(message: string, options: NotificationBannerOptions = {}): void {
-  notificationBanner.show(message, options);
+  getNotificationBanner().show(message, options);
+}
+
+// Test-only: forces the next show() call to construct a fresh
+// NotificationBanner (and re-subscribe to Lifecycle.onViewUnmount), so it
+// mounts into whichever document is live at that point rather than whichever
+// document was live the first time this module was ever imported.
+export function _resetNotificationBannerForTesting(): void {
+  notificationBanner = null;
 }

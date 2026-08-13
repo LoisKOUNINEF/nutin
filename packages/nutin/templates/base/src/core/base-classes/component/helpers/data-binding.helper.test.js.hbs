@@ -1,0 +1,63 @@
+import { DataBindingHelper } from '#root/dist/src/core/base-classes/component/helpers/data-binding.helper.js';
+
+describe('DataBindingHelper', () => {
+  let container;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    container.remove();
+    container = null;
+  });
+
+  it('applyDataBindings sets textContent for a plain bound element', () => {
+    container.innerHTML = '<span data-bind="name"></span>';
+    DataBindingHelper.applyDataBindings(container, { name: 'Ada' });
+    expect(container.querySelector('span').textContent).toBe('Ada');
+  });
+
+  it('applyDataBindings sets .value for a bound input element', () => {
+    container.innerHTML = '<input data-bind="name">';
+    DataBindingHelper.applyDataBindings(container, { name: 'Ada' });
+    expect(container.querySelector('input').value).toBe('Ada');
+  });
+
+  it('applyDataBindings sets .value for a bound textarea element', () => {
+    container.innerHTML = '<textarea data-bind="bio"></textarea>';
+    DataBindingHelper.applyDataBindings(container, { bio: 'hello' });
+    expect(container.querySelector('textarea').value).toBe('hello');
+  });
+
+  it('applyDataBindings coerces non-string values to strings', () => {
+    container.innerHTML = '<span data-bind="count"></span>';
+    DataBindingHelper.applyDataBindings(container, { count: 42 });
+    expect(container.querySelector('span').textContent).toBe('42');
+  });
+
+  it('applyDataBindings skips a bound element when props[key] is undefined', () => {
+    container.innerHTML = '<span data-bind="missing">original</span>';
+    DataBindingHelper.applyDataBindings(container, {});
+    expect(container.querySelector('span').textContent).toBe('original');
+  });
+
+  it('getDataBindingValues reads .value from bound input/textarea elements', () => {
+    container.innerHTML = '<input data-bind="name" value="Ada"><textarea data-bind="bio">hi</textarea>';
+    const values = DataBindingHelper.getDataBindingValues(container);
+    expect(values).toEqual({ name: 'Ada', bio: 'hi' });
+  });
+
+  it('getDataBindingValues reads textContent from bound plain elements', () => {
+    container.innerHTML = '<span data-bind="name">Ada</span>';
+    const values = DataBindingHelper.getDataBindingValues(container);
+    expect(values).toEqual({ name: 'Ada' });
+  });
+
+  it('getDataBindingValues defaults missing textContent to an empty string', () => {
+    container.innerHTML = '<span data-bind="name"></span>';
+    const values = DataBindingHelper.getDataBindingValues(container);
+    expect(values).toEqual({ name: '' });
+  });
+});

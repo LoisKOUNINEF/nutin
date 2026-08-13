@@ -1,0 +1,112 @@
+import { PictureComponent } from '#root/dist/src/libs/accessibility-components/picture/picture.component.js';
+
+describe('PictureComponent', () => {
+  let placeholder;
+  let component;
+
+  const sources = [{ src: 'photo.avif', type: 'image/avif' }, { src: 'photo.webp', type: 'image/webp' }];
+
+  beforeEach(() => {
+    placeholder = document.createElement('div');
+    document.body.appendChild(placeholder);
+  });
+
+  afterEach(() => {
+    component?.destroy();
+    component = null;
+    placeholder = null;
+  });
+
+  it('renders one <source> per config.sources entry with srcset/type', () => {
+    component = new PictureComponent(placeholder, { sources, fallback: 'photo.jpg', alt: 'A photo' });
+    component.render();
+    const els = component.getElement().querySelectorAll('source');
+    expect(els.length).toBe(2);
+    expect(els[0].getAttribute('srcset')).toBe('photo.avif');
+    expect(els[0].getAttribute('type')).toBe('image/avif');
+  });
+
+  it('uses an explicit srcset over the source src when given', () => {
+    component = new PictureComponent(placeholder, {
+      sources: [{ src: 'photo.avif', type: 'image/avif', srcset: 'photo-2x.avif 2x' }],
+      fallback: 'photo.jpg', alt: 'A photo',
+    });
+    component.render();
+    expect(component.getElement().querySelector('source').getAttribute('srcset')).toBe('photo-2x.avif 2x');
+  });
+
+  it('applies media/sizes to a <source> only when given', () => {
+    component = new PictureComponent(placeholder, {
+      sources: [{ src: 'photo.avif', type: 'image/avif', media: '(min-width: 800px)', sizes: '50vw' }],
+      fallback: 'photo.jpg', alt: 'A photo',
+    });
+    component.render();
+    const source = component.getElement().querySelector('source');
+    expect(source.getAttribute('media')).toBe('(min-width: 800px)');
+    expect(source.getAttribute('sizes')).toBe('50vw');
+  });
+
+  it('renders the fallback <img> with src/alt and default loading/decoding', () => {
+    component = new PictureComponent(placeholder, { sources, fallback: 'photo.jpg', alt: 'A photo' });
+    component.render();
+    const img = component.getElement().querySelector('img');
+    expect(img.getAttribute('src')).toBe('photo.jpg');
+    expect(img.getAttribute('alt')).toBe('A photo');
+    expect(img.getAttribute('loading')).toBe('lazy');
+    expect(img.getAttribute('decoding')).toBe('async');
+  });
+
+  it('applies explicit width/height/loading/decoding on the fallback <img>', () => {
+    component = new PictureComponent(placeholder, {
+      sources, fallback: 'photo.jpg', alt: 'A photo', width: 400, height: 300, loading: 'eager', decoding: 'sync',
+    });
+    component.render();
+    const img = component.getElement().querySelector('img');
+    expect(img.getAttribute('width')).toBe('400');
+    expect(img.getAttribute('height')).toBe('300');
+    expect(img.getAttribute('loading')).toBe('eager');
+    expect(img.getAttribute('decoding')).toBe('sync');
+  });
+
+  it('renders a caption when provided, with the capitalize pipe wired up', () => {
+    component = new PictureComponent(placeholder, { sources, fallback: 'photo.jpg', alt: 'A photo', caption: 'a caption' });
+    component.render();
+    const figcaption = component.getElement().querySelector('figcaption');
+    expect(figcaption).toBeDefined();
+    expect(figcaption.getAttribute('data-pipe')).toBe('capitalize');
+  });
+
+  it('strips the figcaption entirely when neither caption nor captionI18nKey is given', () => {
+    component = new PictureComponent(placeholder, { sources, fallback: 'photo.jpg', alt: 'A photo' });
+    component.render();
+    expect(component.getElement().querySelector('figcaption')).toBe(null);
+  });
+
+  it('marks the figure aria-hidden when the image is decorative (empty alt, no caption)', () => {
+    component = new PictureComponent(placeholder, { sources, fallback: 'photo.jpg', alt: '' });
+    component.render();
+    expect(component.getElement().getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('does not mark the figure aria-hidden when alt text is present', () => {
+    component = new PictureComponent(placeholder, { sources, fallback: 'photo.jpg', alt: 'A photo' });
+    component.render();
+    expect(component.getElement().hasAttribute('aria-hidden')).toBe(false);
+  });
+
+  it('does not mark the figure aria-hidden when alt is empty but a caption is present (not purely decorative)', () => {
+    component = new PictureComponent(placeholder, { sources, fallback: 'photo.jpg', alt: '', caption: 'Still described' });
+    component.render();
+    expect(component.getElement().hasAttribute('aria-hidden')).toBe(false);
+  });
+
+  it('removes aria-hidden on a re-render once the image becomes non-decorative', () => {
+    component = new PictureComponent(placeholder, { sources, fallback: 'photo.jpg', alt: '' });
+    component.render();
+    expect(component.getElement().getAttribute('aria-hidden')).toBe('true');
+
+    component.config.alt = 'Now described';
+    component.render();
+    expect(component.getElement().hasAttribute('aria-hidden')).toBe(false);
+  });
+});

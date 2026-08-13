@@ -51,6 +51,7 @@ export class CheckboxComponent extends Component<HTMLLabelElement, ICheckboxConf
   }
 
   protected override onAfterRender(): void {
+    super.onAfterRender();
     const input = this.element.querySelector<HTMLInputElement>('.checkbox__input');
     if (!input) return;
 

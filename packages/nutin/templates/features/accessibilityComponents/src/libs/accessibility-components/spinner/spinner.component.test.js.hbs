@@ -1,0 +1,53 @@
+import { SpinnerComponent } from '#root/dist/src/libs/accessibility-components/spinner/spinner.component.js';
+
+describe('SpinnerComponent', () => {
+  let placeholder;
+  let component;
+
+  beforeEach(() => {
+    placeholder = document.createElement('div');
+    document.body.appendChild(placeholder);
+  });
+
+  afterEach(() => {
+    component?.destroy();
+    component = null;
+    placeholder = null;
+  });
+
+  it('renders role=status, the app-spinner class, and a spinner__ring span', () => {
+    component = new SpinnerComponent(placeholder);
+    component.render();
+    expect(component.getElement().getAttribute('role')).toBe('status');
+    expect(component.getElement().classList.contains('app-spinner')).toBe(true);
+    expect(component.getElement().querySelector('.spinner__ring')).toBeDefined();
+  });
+
+  it('defaults aria-label to "Loading"', () => {
+    component = new SpinnerComponent(placeholder);
+    component.render();
+    expect(component.getElement().getAttribute('aria-label')).toBe('Loading');
+  });
+
+  it('uses a custom label when given', () => {
+    component = new SpinnerComponent(placeholder, { label: 'Saving changes' });
+    component.render();
+    expect(component.getElement().getAttribute('aria-label')).toBe('Saving changes');
+  });
+
+  it('sets each CSS custom property only when its config value is given', () => {
+    component = new SpinnerComponent(placeholder, { size: '2rem', color: 'red', duration: '1s', thickness: '3px' });
+    component.render();
+    const style = component.getElement().style;
+    expect(style.getPropertyValue('--spinner-size')).toBe('2rem');
+    expect(style.getPropertyValue('--spinner-color')).toBe('red');
+    expect(style.getPropertyValue('--spinner-duration')).toBe('1s');
+    expect(style.getPropertyValue('--spinner-thickness')).toBe('3px');
+  });
+
+  it('sets no CSS custom properties when none are given', () => {
+    component = new SpinnerComponent(placeholder);
+    component.render();
+    expect(component.getElement().style.getPropertyValue('--spinner-size')).toBe('');
+  });
+});

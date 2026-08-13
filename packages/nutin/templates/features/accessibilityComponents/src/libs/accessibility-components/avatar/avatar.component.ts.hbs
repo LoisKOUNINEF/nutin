@@ -42,6 +42,7 @@ export class AvatarComponent extends Component<HTMLDivElement, IAvatarConfig> {
   }
 
   protected override onAfterRender(): void {
+    super.onAfterRender();
     if (!this.config.src || !this.config.initials) return;
 
     const img = this.element.querySelector<HTMLImageElement>('.avatar__img');

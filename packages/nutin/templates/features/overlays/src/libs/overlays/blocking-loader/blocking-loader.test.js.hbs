@@ -1,0 +1,63 @@
+import { BlockingLoaderOverlay } from '#root/dist/src/libs/overlays/blocking-loader/blocking-loader.js';
+import { Overlays } from '#root/dist/src/core/index.js';
+
+describe('BlockingLoaderOverlay', () => {
+  let overlay;
+
+  afterEach(() => {
+    overlay?.close?.();
+    overlay = null;
+    document.querySelectorAll('.blocking-loader-overlay').forEach(el => el.remove());
+    document.documentElement.classList.remove('no-scroll');
+  });
+
+  it('sets role="alert", aria-busy="true", aria-live="assertive" at construction time', () => {
+    overlay = new BlockingLoaderOverlay();
+
+    expect(overlay.getElement().getAttribute('role')).toBe('alert');
+    expect(overlay.getElement().getAttribute('aria-busy')).toBe('true');
+    expect(overlay.getElement().getAttribute('aria-live')).toBe('assertive');
+  });
+
+  it('renders a spinner child, using the given message as its aria-label', () => {
+    overlay = new BlockingLoaderOverlay({ message: 'Fetching data' });
+    overlay.open();
+
+    const spinner = overlay.getElement().querySelector('.app-spinner');
+    expect(spinner).toBeDefined();
+    expect(spinner.getAttribute('aria-label')).toBe('Fetching data');
+    expect(overlay.getElement().textContent).toContain('Fetching data');
+  });
+
+  it('falls back to "Loading" for the spinner label when no message is given', () => {
+    overlay = new BlockingLoaderOverlay();
+    overlay.open();
+
+    const spinner = overlay.getElement().querySelector('.app-spinner');
+    expect(spinner.getAttribute('aria-label')).toBe('Loading');
+  });
+
+  it('emits Overlays.overlayOpened("blocking-loader") on render and overlayClosed on destroy', () => {
+    const openedSpy = spyOn(Overlays, 'overlayOpened');
+    const closedSpy = spyOn(Overlays, 'overlayClosed');
+
+    overlay = new BlockingLoaderOverlay();
+    overlay.open();
+    expect(openedSpy.lastCall).toEqual(['blocking-loader']);
+
+    overlay.close();
+    expect(closedSpy.lastCall).toEqual(['blocking-loader']);
+
+    openedSpy.restore();
+    closedSpy.restore();
+  });
+
+  it('locks scroll while open and unlocks on close', () => {
+    overlay = new BlockingLoaderOverlay();
+    overlay.open();
+    expect(document.documentElement.classList.contains('no-scroll')).toBe(true);
+
+    overlay.close();
+    expect(document.documentElement.classList.contains('no-scroll')).toBe(false);
+  });
+});

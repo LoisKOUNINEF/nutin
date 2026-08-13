@@ -1,0 +1,121 @@
+import { AnchorManager } from '#root/dist/src/libs/accessibility-components/utils/anchor-manager/anchor-manager.utils.js';
+
+describe('AnchorManager', () => {
+  let container;
+  let target;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+
+    target = document.createElement('div');
+    target.id = 'section-1';
+    target.textContent = 'Section one';
+    document.body.appendChild(target);
+
+    useFakeTimers();
+  });
+
+  afterEach(() => {
+    runAllTimers();
+    useRealTimers();
+    container.remove();
+    target.remove();
+    document.querySelectorAll('.u-sr-only').forEach(el => el.remove());
+  });
+
+  it('appends an anchor with the configured href into the target', () => {
+    new AnchorManager({ href: 'https://example.com' }, container);
+    const anchor = container.querySelector('a');
+    expect(anchor).toBeDefined();
+    expect(anchor.getAttribute('href')).toBe('https://example.com');
+  });
+
+  it('applies target and a safe rel when target is configured', () => {
+    new AnchorManager({ href: 'https://example.com', target: '_blank' }, container);
+    const anchor = container.querySelector('a');
+    expect(anchor.getAttribute('target')).toBe('_blank');
+    expect(anchor.getAttribute('rel')).toBe('noopener noreferrer');
+  });
+
+  it('does not set target/rel when target is not configured', () => {
+    new AnchorManager({ href: 'https://example.com' }, container);
+    const anchor = container.querySelector('a');
+    expect(anchor.hasAttribute('target')).toBe(false);
+    expect(anchor.hasAttribute('rel')).toBe(false);
+  });
+
+  it('applies the generic attribute config (textContent, className, aria-label) via AttributesHelper', () => {
+    new AnchorManager({ href: 'https://example.com', textContent: 'Visit', className: 'link' }, container);
+    const anchor = container.querySelector('a');
+    expect(anchor.textContent).toBe('Visit');
+    expect(anchor.className).toBe('link');
+  });
+
+  it('appends a "(opens in new tab)" aria-label suffix only when target is set', () => {
+    new AnchorManager({ href: 'https://example.com', textContent: 'Visit', target: '_blank' }, container);
+    const anchor = container.querySelector('a');
+    expect(anchor.getAttribute('aria-label')).toBe('Visit (opens in new tab)');
+  });
+
+  it('does not add a new-tab aria-label suffix when target is absent', () => {
+    new AnchorManager({ href: 'https://example.com', ariaLabel: 'Go' }, container);
+    const anchor = container.querySelector('a');
+    expect(anchor.getAttribute('aria-label')).toBe('Go');
+  });
+
+  it('does not intercept clicks on an external (non-#) href', () => {
+    new AnchorManager({ href: 'https://example.com' }, container);
+    const anchor = container.querySelector('a');
+    // Suppress jsdom's own (unimplemented) real navigation follow-through for
+    // this un-intercepted real-URL click — irrelevant to what this test checks.
+    anchor.addEventListener('click', (e) => e.preventDefault());
+
+    click(anchor);
+
+    expect(document.querySelector('.u-sr-only[role="status"]')).toBe(null);
+  });
+
+  it('does not bind a keydown handler on an external (non-#) href', () => {
+    new AnchorManager({ href: 'https://example.com' }, container);
+    const anchor = container.querySelector('a');
+
+    anchor.dispatchEvent(new window.KeyboardEvent('keydown', { key: ' ' }));
+
+    expect(document.querySelector('.u-sr-only[role="status"]')).toBe(null);
+  });
+
+  it('intercepts a click on an internal (#id) href: prevents default and synchronously injects an aria-live announcement region', () => {
+    new AnchorManager({ href: '#section-1' }, container);
+    const anchor = container.querySelector('a');
+
+    let defaultPrevented = false;
+    anchor.addEventListener('click', (e) => { defaultPrevented = e.defaultPrevented; });
+    click(anchor);
+
+    expect(defaultPrevented).toBe(true);
+
+    const announcement = document.querySelector('.u-sr-only[role="status"]');
+    expect(announcement).toBeDefined();
+    expect(announcement.getAttribute('aria-live')).toBe('polite');
+    expect(announcement.getAttribute('aria-atomic')).toBe('true');
+  });
+
+  it('activates an internal href the same way on a Space keydown', () => {
+    new AnchorManager({ href: '#section-1' }, container);
+    const anchor = container.querySelector('a');
+
+    anchor.dispatchEvent(new window.KeyboardEvent('keydown', { key: ' ' }));
+
+    expect(document.querySelector('.u-sr-only[role="status"]')).toBeDefined();
+  });
+
+  it('ignores non-Space keydowns on an internal href', () => {
+    new AnchorManager({ href: '#section-1' }, container);
+    const anchor = container.querySelector('a');
+
+    anchor.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
+
+    expect(document.querySelector('.u-sr-only[role="status"]')).toBe(null);
+  });
+});

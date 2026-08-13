@@ -1,0 +1,14 @@
+// Shared mechanics for testing OverlayRuntime subclasses under fake timers.
+// Callers are responsible for useFakeTimers()/useRealTimers() around each test.
+
+export function flushShow() {
+  advanceTimersByTime(16);
+}
+
+export function flushOutsideClickBind() {
+  advanceTimersByTime(0);
+}
+
+export function completeTransitionGatedDestroy(el) {
+  el.dispatchEvent(new window.Event('transitionend'));
+}

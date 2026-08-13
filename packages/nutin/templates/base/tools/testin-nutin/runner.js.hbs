@@ -1,0 +1,46 @@
+import path from 'path';
+import { registerTestGlobals, getTestFiles, runQueuedTests, print } from './core/index.js';
+import config from '#root/nutin.config.js';
+
+const origins = [];
+const frameworkOrigins = [
+  path.join('src', 'core'), 
+  path.join('src', 'libs'),
+  path.join('tools', 'testin-nutin'),
+];
+
+if (config.testinNutin.includeFramework) origins.push(...frameworkOrigins);
+if (config.testinNutin.includeApp) origins.push(path.join('src', 'app'));
+
+registerTestGlobals();
+
+let testFiles = origins.flatMap(
+  origin => getTestFiles(path.join('..', origin))
+);
+
+const args = process.argv.slice(2);
+if (args.length) {
+  testFiles = testFiles.filter(file => args.some(f => file.includes(f)));
+}
+
+async function loadTestFile(file) {
+  setupJsdom();
+  await import(file);
+  teardownJsdom();
+}
+
+async function runTests() {
+  if (config.testinNutin.verbose) print.head('Test suites :');
+  for (const file of testFiles) {
+    try {
+      await loadTestFile(file);
+    } catch (error) {
+      print.boldError(`✗ ${file} failed to load:`);
+      print.grayError(error.stack);
+    }
+  }
+
+  await runQueuedTests();
+}
+
+runTests();

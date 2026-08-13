@@ -1,0 +1,89 @@
+import { showNotificationBanner, _resetNotificationBannerForTesting } from '#root/dist/src/libs/overlays/passive/notification-banner.js';
+import { Lifecycle } from '#root/dist/src/core/index.js';
+
+describe('NotificationBanner (via showNotificationBanner())', () => {
+  beforeEach(() => {
+    document.querySelectorAll('.notification-banner-region').forEach(el => el.remove());
+    _resetNotificationBannerForTesting();
+  });
+
+  afterEach(() => {
+    // Force-dismiss via the real production path rather than reaching into
+    // private state. Never AppEventBus.cleanupEventListeners() here — it
+    // would permanently strip this module's one-time onViewUnmount subscription.
+    Lifecycle.viewUnmount('cleanup');
+  });
+
+  it('defaults type to "info" and position to "top" (differs from Snackbar\'s "bottom" default)', () => {
+    showNotificationBanner('hello');
+    const region = document.querySelector('.notification-banner-region');
+    const el = region.querySelector('.app-notification-banner');
+
+    expect(el.classList.contains('app-notification-banner--info')).toBe(true);
+    expect(region.querySelector('.notification-banner-region__top').contains(el)).toBe(true);
+  });
+
+  it('never auto-dismisses: it persists indefinitely until manually dismissed', () => {
+    useFakeTimers();
+    showNotificationBanner('hello');
+    const el = document.querySelector('.app-notification-banner');
+
+    expect(getTimerCount()).toBe(0);
+    advanceTimersByTime(1000 * 60 * 60);
+    expect(document.body.contains(el)).toBe(true);
+
+    useRealTimers();
+  });
+
+  it('close button dismisses: removes the element, calls onClose, and promotes a queued item', () => {
+    let closed = false;
+    showNotificationBanner('first', { onClose: () => { closed = true; } });
+    showNotificationBanner('second');
+    const region = document.querySelector('.notification-banner-region');
+    const firstEl = region.querySelector('.app-notification-banner');
+
+    click(firstEl.querySelector('.app-notification-banner__close'));
+
+    expect(closed).toBe(true);
+    expect(document.body.contains(firstEl)).toBe(false);
+    expect(region.textContent).toContain('second');
+    expect(region.querySelectorAll('.app-notification-banner').length).toBe(1);
+  });
+
+  it('action button click calls onAction AND also dismisses (unlike Snackbar, whose action click has no onClose coupling)', () => {
+    let actioned = false;
+    let closed = false;
+    showNotificationBanner('hello', {
+      actionText: 'Undo',
+      onAction: () => { actioned = true; },
+      onClose: () => { closed = true; },
+    });
+    const el = document.querySelector('.app-notification-banner');
+
+    click(el.querySelector('.app-notification-banner__action'));
+
+    expect(actioned).toBe(true);
+    expect(closed).toBe(true);
+    expect(document.body.contains(el)).toBe(false);
+  });
+
+  it('Lifecycle.viewUnmount() force-dismisses active items (calling onClose) but drops queued-but-unshown items silently, without onClose', () => {
+    let activeClosed = false;
+    let queuedClosed = false;
+    showNotificationBanner('active', { onClose: () => { activeClosed = true; } });
+    showNotificationBanner('queued', { onClose: () => { queuedClosed = true; } });
+
+    Lifecycle.viewUnmount('navigated-away');
+
+    expect(activeClosed).toBe(true);
+    expect(queuedClosed).toBe(false);
+    expect(document.querySelectorAll('.app-notification-banner').length).toBe(0);
+  });
+
+  it('sanitizes message and actionText', () => {
+    showNotificationBanner('<script>alert(1)</script>Hi', { actionText: '<script>alert(2)</script>Go' });
+    const el = document.querySelector('.app-notification-banner');
+
+    expect(el.innerHTML).not.toContain('<script>');
+  });
+});

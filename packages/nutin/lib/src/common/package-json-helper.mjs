@@ -45,7 +45,7 @@ export function getInstallCommand(packageManager) {
   }
 }
 
-export function getDeployHelperScripts({ projectName, packageManager }) {
+export function getDockerScripts({ projectName, packageManager }) {
   return {
     "docker:build": `docker build -t ${projectName} -f tools/deployment/Dockerfile .`,
     "docker:run": `docker run -p 9090:9090 ${projectName}:latest`,
@@ -55,38 +55,24 @@ export function getDeployHelperScripts({ projectName, packageManager }) {
   };
 }
 
-export function getTestinNutinScripts({ packageManager }) {
-  return {
-    "test": "node testin-nutin/runner.js",
-    "test:rebuild": `${packageManager} run build && ${packageManager} run test`,
-    "test:watch": `${packageManager} run build && node testin-nutin/watch-tests.js`
-  };
-}
-
-export function getTestinNutinExtras() {
-  return {
-    devDependencies: { "jsdom": "^26.1.0" },
-    imports: { "#root/*.js": "./*.js" },
-    engines: { "node": ">=20.19.0" }
-  };
-}
-
 export function getAllScripts(context) {
-  const { testinNutin, packageManager, projectName, deployHelper } = context;
+  const { packageManager, projectName, docker } = context;
 
   const baseScripts = {
     "build": "node tools/builder/builder.js",
     "build:prod": "NODE_ENV=production node tools/builder/builder.js",
-    "serve:only": "node tools/dev/serve.js",
     "serve": `${packageManager} run build && ${packageManager} run serve:only`,
+    "serve:only": "node tools/dev/serve.js",
     "dev": "node tools/dev/dev-serve.js",
-    "generate": "node tools/generator/generator.js"
+    "generate": "node tools/generator/generator.js",
+    "testin-nutin": `${packageManager} run build && node tools/testin-nutin/runner.js`,
+    "testin-nutin:watch": `${packageManager} run build && node tools/testin-nutin/watch-tests.js`,
+    "testin-nutin:only": `node tools/testin-nutin/runner.js`
   };
 
   let scripts = { ...baseScripts };
 
-  if (testinNutin) scripts = { ...scripts, ...getTestinNutinScripts({ packageManager }) };
-  if (deployHelper) scripts = { ...scripts, ...getDeployHelperScripts({ projectName, packageManager }) };
+  if (docker) scripts = { ...scripts, ...getDockerScripts({ projectName, packageManager }) };
 
   return scripts;
 }

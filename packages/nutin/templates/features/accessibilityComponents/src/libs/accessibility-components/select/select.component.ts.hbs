@@ -59,6 +59,7 @@ export class SelectComponent extends Component<HTMLLabelElement, ISelectConfig> 
   }
 
   protected override onAfterRender(): void {
+    super.onAfterRender();
     const select = this.element.querySelector<HTMLSelectElement>('.select__control');
     if (!select) return;
     FormControlHelper.bindValueChange(select, this.config.onChange, this.eventListeners);

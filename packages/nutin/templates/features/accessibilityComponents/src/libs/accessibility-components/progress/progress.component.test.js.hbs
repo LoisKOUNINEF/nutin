@@ -1,0 +1,64 @@
+import { ProgressComponent } from '#root/dist/src/libs/accessibility-components/progress/progress.component.js';
+
+describe('ProgressComponent', () => {
+  let placeholder;
+  let component;
+
+  beforeEach(() => {
+    placeholder = document.createElement('div');
+    document.body.appendChild(placeholder);
+  });
+
+  afterEach(() => {
+    component?.destroy();
+    component = null;
+    placeholder = null;
+  });
+
+  it('renders a <progress> with the app-progress class and progress__bar class', () => {
+    component = new ProgressComponent(placeholder);
+    component.render();
+    expect(component.getElement().classList.contains('app-progress')).toBe(true);
+    expect(component.getElement().querySelector('progress.progress__bar')).toBeDefined();
+  });
+
+  it('defaults max to 100 and omits value when not given', () => {
+    component = new ProgressComponent(placeholder);
+    component.render();
+    const progress = component.getElement().querySelector('progress');
+    expect(progress.getAttribute('max')).toBe('100');
+    expect(progress.hasAttribute('value')).toBe(false);
+  });
+
+  it('applies an explicit value and max', () => {
+    component = new ProgressComponent(placeholder, { value: 40, max: 80 });
+    component.render();
+    const progress = component.getElement().querySelector('progress');
+    expect(progress.getAttribute('value')).toBe('40');
+    expect(progress.getAttribute('max')).toBe('80');
+  });
+
+  it('renders value=0 (not omitted, since it is only skipped when strictly undefined)', () => {
+    component = new ProgressComponent(placeholder, { value: 0 });
+    component.render();
+    expect(component.getElement().querySelector('progress').getAttribute('value')).toBe('0');
+  });
+
+  it('applies aria-label only when given', () => {
+    component = new ProgressComponent(placeholder, { ariaLabel: 'Upload progress' });
+    component.render();
+    expect(component.getElement().querySelector('progress').getAttribute('aria-label')).toBe('Upload progress');
+  });
+
+  it('renders a label when given, strips it when absent', () => {
+    component = new ProgressComponent(placeholder, { labelText: 'Uploading' });
+    component.render();
+    expect(component.getElement().querySelector('.progress__label')).toBeDefined();
+  });
+
+  it('strips the label when neither labelText nor labelKey is given', () => {
+    component = new ProgressComponent(placeholder);
+    component.render();
+    expect(component.getElement().querySelector('.progress__label')).toBe(null);
+  });
+});

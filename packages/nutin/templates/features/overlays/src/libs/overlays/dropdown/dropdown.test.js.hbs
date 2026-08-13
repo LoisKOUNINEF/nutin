@@ -1,0 +1,48 @@
+import { DropdownOverlay } from '#root/dist/src/libs/overlays/dropdown/dropdown.js';
+
+describe('DropdownOverlay', () => {
+  let anchor;
+  let overlay;
+
+  const items = [{ label: 'One' }, { label: 'Two' }];
+
+  beforeEach(() => {
+    anchor = document.createElement('button');
+    document.body.appendChild(anchor);
+    useFakeTimers();
+  });
+
+  afterEach(() => {
+    document.querySelectorAll('.anchored-overlay-wrapper').forEach(el => {
+      el.dispatchEvent(new window.Event('transitionend'));
+      el.remove();
+    });
+    anchor.remove();
+    anchor = null;
+    overlay = null;
+    useRealTimers();
+  });
+
+  it('wires the given anchor: an outside click closes, a click on the anchor itself does not', () => {
+    overlay = new DropdownOverlay({ anchor, items });
+    overlay.open();
+    advanceTimersByTime(0); // flush the deferred outside-click bind
+    const closeSpy = spyOn(overlay, 'close');
+
+    anchor.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+    expect(closeSpy.callCount).toBe(0);
+
+    document.body.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+    expect(closeSpy.callCount).toBe(1);
+
+    closeSpy.restore();
+  });
+
+  it('renders with the dropdown-wrapper/dropdown-content classes', () => {
+    overlay = new DropdownOverlay({ anchor, items });
+    const wrapper = overlay.open();
+
+    expect(wrapper.classList.contains('dropdown-wrapper')).toBe(true);
+    expect(overlay.getElement().classList.contains('dropdown-content')).toBe(true);
+  });
+});

@@ -52,8 +52,8 @@ export abstract class PassiveOverlayRuntime<
 
   protected abstract _showItem(item: TItem): void;
 
-  protected _autoDismiss(element: HTMLElement, duration: number, onDone: () => void): void {
-    setTimeout(() => {
+  protected _autoDismiss(element: HTMLElement, duration: number, onDone: () => void): ReturnType<typeof setTimeout> {
+    return setTimeout(() => {
       element.remove();
       onDone();
     }, duration);

@@ -67,6 +67,7 @@ export class FormControlComponent extends Component<HTMLDivElement, IFormControl
   }
 
   protected override onAfterRender(): void {
+    super.onAfterRender();
     this._inputEl = this.element.querySelector<HTMLInputElement | HTMLTextAreaElement>('.form-control__input');
     this._errorEl = this.element.querySelector<HTMLParagraphElement>('.form-control__error');
     if (!this._inputEl) return;

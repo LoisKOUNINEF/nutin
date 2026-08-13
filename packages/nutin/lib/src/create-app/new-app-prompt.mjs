@@ -41,8 +41,7 @@ export async function newAppPrompt(initialName, cliOptions = {}) {
     packageManager,
     preset: cliOptions.preset,
     libs: cliOptions.libs,
-    deployHelper: cliOptions.deployHelper,
-    testinNutin: cliOptions.testinNutin,
+    docker: cliOptions.docker,
   };
 }
 

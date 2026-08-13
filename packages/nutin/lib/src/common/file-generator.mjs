@@ -76,9 +76,6 @@ export class FileGenerator {
   }
 
   async isRenderTemplateFile(templatePath, fileName, context) {
-    if (/\.test\.js(\.hbs)?$/.test(fileName) && !(context.testinNutin)) {
-      return null;
-    }
     if (/^_nutin-config\.scss(\.hbs)?$/.test(fileName) && !(context.accessibilityComponents || context.forms || context.overlays)) {
       return null;
     }

@@ -9,13 +9,11 @@ import { readProjectMeta, updateProjectMeta } from '../common/project-meta.mjs';
 import { FeatureContextBuilder } from './feature-context-builder.mjs';
 import { updateLibBarrels } from './lib-barrel-updater.mjs';
 import { ensureScssConfigFile } from './scss-config-generator.mjs';
-import { ensureTestinNutinConfigBlock } from './testin-nutin-config-updater.mjs';
 import { updatePackageJson } from './package-json-updater.mjs';
 
 const fs = fsExtra.default;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const nutinConfigFileName = 'nutin.config.js';
 
 export class FeatureAdder {
   constructor() {
@@ -64,9 +62,9 @@ export class FeatureAdder {
     await this.fileGenerator.processTemplateDirectory(featureTemplateDir, projectPath, context, { skipExisting: true });
 
     const needsAccessibilityComponents = feature.key === 'forms' || feature.key === 'overlays';
-    const needsnutinMixins = feature.key === 'accessibilityComponents' || needsAccessibilityComponents;
+    const needsNutinMixins = feature.key === 'accessibilityComponents' || needsAccessibilityComponents;
 
-    if (needsnutinMixins) {
+    if (needsNutinMixins) {
       await ensureScssConfigFile(this.fileGenerator, projectPath, context);
       print.info(`nutinMixins required by ${feature.key}, installing now...`);
       await this.addFeatureToProject('nutinMixins');
@@ -75,29 +73,9 @@ export class FeatureAdder {
       print.info(`accessibilityComponents required by ${feature.key}, installing now...`);
       await this.addFeatureToProject('accessibilityComponents');
     }
-    if (feature.key === 'testinNutin') {
-      await ensureTestinNutinConfigBlock(path.join(projectPath, nutinConfigFileName));
-      await this.backfillTestFiles(projectPath, context);
-    }
 
     await updateLibBarrels(projectPath, feature);
     await updatePackageJson(projectPath, feature, context);
-  }
-
-  async backfillTestFiles(projectPath, context) {
-    const templatesRoot = path.join(__dirname, '..', '..', '..', 'templates');
-
-    const dirsToRescan = [path.join(templatesRoot, 'base')];
-    for (const other of FEATURES) {
-      if (other.key === 'testinNutin' || !context[other.key]) continue;
-      dirsToRescan.push(path.join(templatesRoot, 'features', other.key));
-    }
-
-    for (const dir of dirsToRescan) {
-      if (await fs.pathExists(dir)) {
-        await this.fileGenerator.processTemplateDirectory(dir, projectPath, context, { skipExisting: true });
-      }
-    }
   }
 
   async runPostAddTasks(projectPath, feature, context) {

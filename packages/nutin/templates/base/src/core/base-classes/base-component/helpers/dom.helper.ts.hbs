@@ -45,6 +45,12 @@ export class DomHelper {
 
     const isValueUndefined = (el: HTMLElement): boolean => {
       const value = el.getAttribute("data-optional");
+      /*
+      A bare/empty data-optional (getAttribute returns "") is a plain marker and
+      defers entirely to isEmpty(el) below rather than forcing removal itself.
+      Only a present-but-blank value (whitespace) or the literal string produced
+      by interpolating an undefined/null expression counts as "value undefined".
+      */
       if (!value) return false;
       return (
         value.trim() === '' ||

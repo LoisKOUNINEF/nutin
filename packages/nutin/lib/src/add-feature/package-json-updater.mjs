@@ -1,7 +1,7 @@
 import path from 'path';
 import * as fsExtra from 'fs-extra';
 import { print } from '../utils/print.mjs';
-import { getDeployHelperScripts, getTestinNutinScripts, getTestinNutinExtras, installDependencies } from '../common/package-json-helper.mjs';
+import { getDockerScripts, installDependencies } from '../common/package-json-helper.mjs';
 
 const fs = fsExtra.default;
 
@@ -29,11 +29,8 @@ export async function updatePackageJson(projectPath, feature, context) {
   let scripts = {};
   let extras = {};
 
-  if (feature.key === 'deployHelper') {
-    scripts = getDeployHelperScripts(context);
-  } else if (feature.key === 'testinNutin') {
-    scripts = getTestinNutinScripts(context);
-    extras = getTestinNutinExtras();
+  if (feature.key === 'docker') {
+    scripts = getDockerScripts(context);
   } else {
     return;
   }

@@ -70,4 +70,25 @@ describe('RouteGuardsManager', () => {
     expect(typeof result.viewConstructor).toBe('function');
     expect(result.redirectTo).toBeUndefined();
   });
+
+  it('passes the actual route params through processRouteGuards to each guard', async () => {
+    const receivedParams = [];
+    const guard = (params) => { receivedParams.push(params); return true; };
+    const config = { view: mockViewConstructor, guards: [guard] };
+
+    await RouteGuardsManager.processRouteGuards(config, '/users/42', { id: '42' });
+
+    expect(receivedParams.length).toBe(1);
+    expect(receivedParams[0]).toEqual({ id: '42' });
+  });
+
+  it('defaults params to an empty object when none are passed to processRouteGuards', async () => {
+    const receivedParams = [];
+    const guard = (params) => { receivedParams.push(params); return true; };
+    const config = { view: mockViewConstructor, guards: [guard] };
+
+    await RouteGuardsManager.processRouteGuards(config, '/dashboard');
+
+    expect(receivedParams[0]).toEqual({});
+  });
 });

@@ -1,0 +1,84 @@
+import { PopoverOverlay } from '#root/dist/src/libs/overlays/popover/popover.js';
+import { completeTransitionGatedDestroy } from '#root/src/libs/overlays/core/helpers/overlay-lifecycle.helper.js';
+
+describe('PopoverOverlay', () => {
+  let anchor;
+  let overlay;
+
+  beforeEach(() => {
+    anchor = document.createElement('button');
+    document.body.appendChild(anchor);
+    useFakeTimers();
+  });
+
+  afterEach(() => {
+    document.querySelectorAll('.anchored-overlay-wrapper').forEach(el => {
+      el.dispatchEvent(new window.Event('transitionend'));
+      el.remove();
+    });
+    document.getElementById('app').inert = false;
+    anchor.remove();
+    anchor = null;
+    overlay = null;
+    useRealTimers();
+  });
+
+  it('interactive defaults to false, so trapFocus also defaults to false (Escape closes directly)', () => {
+    overlay = new PopoverOverlay({ anchor, template: '<p>x</p>' });
+    overlay.open();
+    const closeSpy = spyOn(overlay, 'close');
+
+    document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape' }));
+
+    expect(closeSpy.callCount).toBe(1);
+    closeSpy.restore();
+  });
+
+  it('interactive:true with no explicit trapFocus derives trapFocus:true', () => {
+    overlay = new PopoverOverlay({ anchor, template: '<button>inner</button>', interactive: true });
+    overlay.open();
+
+    expect(document.getElementById('app').inert).toBe(true);
+  });
+
+  it('explicit trapFocus:false overrides interactive:true', () => {
+    overlay = new PopoverOverlay({ anchor, template: '<button>inner</button>', interactive: true, trapFocus: false });
+    overlay.open();
+
+    expect(document.getElementById('app').inert).toBe(false);
+  });
+
+  it('role is "dialog" when interactive, "region" otherwise', () => {
+    overlay = new PopoverOverlay({ anchor, template: '<p>x</p>', interactive: true });
+    let wrapper = overlay.open();
+    expect(wrapper.getAttribute('role')).toBe('dialog');
+    overlay.close();
+    completeTransitionGatedDestroy(wrapper);
+
+    overlay = new PopoverOverlay({ anchor, template: '<p>x</p>' });
+    wrapper = overlay.open();
+    expect(wrapper.getAttribute('role')).toBe('region');
+  });
+
+  it('onClose fires only after the transitionend-gated destroy completes, not synchronously on close()', () => {
+    let closed = false;
+    overlay = new PopoverOverlay({ anchor, template: '<p>x</p>', onClose: () => { closed = true; } });
+    const wrapper = overlay.open();
+
+    overlay.close();
+    expect(closed).toBe(false);
+
+    completeTransitionGatedDestroy(wrapper);
+    expect(closed).toBe(true);
+  });
+
+  it('childConfigs() combines components and flattened catalogs', () => {
+    overlay = new PopoverOverlay({
+      anchor,
+      template: '<div data-component="child"></div>',
+      components: [{ selector: 'child', factory: () => ({ render() {}, destroy() {} }) }],
+    });
+
+    expect(overlay.childConfigs().length).toBe(1);
+  });
+});

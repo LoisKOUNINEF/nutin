@@ -1,4 +1,5 @@
-import { I18nService } from '#root/dist/src/core/services/index.js';
+import { I18nService, AppEventBus } from '#root/dist/src/core/services/index.js';
+import { CONFIG } from '#root/dist/src/core/config.js';
 
 class FetchMock {
   constructor() {
@@ -56,6 +57,7 @@ describe('i18n module', async () => {
   });
   afterEach(() => {
     fetchMock.restore();
+    localStorage.removeItem(I18nService.localStorageKey)
   });
 
   beforeAll(() =>{
@@ -121,5 +123,109 @@ describe('i18n module', async () => {
 
   it('should return key when translation is missing', () => {
     expect(I18nService.translate('non.existent.key')).toBe('non.existent.key');
+  });
+
+  it('setCurrentLanguage updates the language, persists it and loads its translations', async () => {
+    await I18nService.setCurrentLanguage('fr');
+
+    expect(I18nService.currentLanguage).toBe('fr');
+    expect(I18nService.translate('home.title')).toBe('Mon App');
+    expect(localStorage.getItem(I18nService.localStorageKey)).toBe('fr');
+  });
+
+  it('setCurrentLanguage emits a language-changed event with the new language', async () => {
+    const received = [];
+    const callback = (data) => received.push(data);
+    I18nService.onLanguageChange(callback);
+
+    await I18nService.setCurrentLanguage('fr');
+
+    expect(received).toEqual([{ lang: 'fr' }]);
+    AppEventBus.off('language-changed', callback);
+  });
+
+  it('getTranslationObject returns the nested value for the current language', async () => {
+    Object.defineProperty(navigator, 'language', { writable: true, configurable: true, value: 'en-US' });
+    await I18nService.initTranslations();
+    expect(I18nService.getTranslationObject('home')).toEqual({ title: 'My App', subtitle: 'English subtitle' });
+  });
+
+  it('getTranslationObject falls back to the default language when missing in the current language', async () => {
+    Object.defineProperty(navigator, 'language', { writable: true, configurable: true, value: 'fr-FR' });
+    await I18nService.initTranslations();
+    expect(I18nService.getTranslationObject('home.subtitle')).toBe('English subtitle');
+  });
+
+  it('getTranslationObject returns null when the key is not found anywhere', async () => {
+    Object.defineProperty(navigator, 'language', { writable: true, configurable: true, value: 'en-US' });
+    await I18nService.initTranslations();
+    expect(I18nService.getTranslationObject('does.not.exist')).toBe(null);
+  });
+
+  it('honors a locale prefix in the URL path when CONFIG.i18n is enabled', async () => {
+    CONFIG.i18n = true;
+    window.history.pushState({}, '', '/fr/some/page');
+    try {
+      await I18nService.initTranslations();
+      expect(I18nService.currentLanguage).toBe('fr');
+    } finally {
+      CONFIG.i18n = false;
+      window.history.pushState({}, '', '/');
+    }
+  });
+
+  it('ignores a locale prefix in the URL path when CONFIG.i18n is disabled (default)', async () => {
+    Object.defineProperty(navigator, 'language', { writable: true, configurable: true, value: 'en-US' });
+    window.history.pushState({}, '', '/fr/some/page');
+    try {
+      await I18nService.initTranslations();
+      expect(I18nService.currentLanguage).toBe('en');
+    } finally {
+      window.history.pushState({}, '', '/');
+    }
+  });
+
+  it('honors a previously saved language preference from localStorage', async () => {
+    localStorage.setItem(I18nService.localStorageKey, 'fr');
+    await I18nService.initTranslations();
+    expect(I18nService.currentLanguage).toBe('fr');
+  });
+
+  it('loadTranslations logs and leaves the language unchanged when the fetch rejects', async () => {
+    Object.defineProperty(navigator, 'language', { writable: true, configurable: true, value: 'en-US' });
+    const errSpy = spyOn(console, 'error');
+    errSpy.andCallFake(() => {});
+    global.fetch = () => Promise.reject(new Error('network down'));
+
+    await I18nService.initTranslations();
+
+    expect(errSpy.callCount).toBe(1);
+    expect(I18nService.currentLanguage).toBe('en');
+
+    errSpy.restore();
+  });
+
+  it('loadTranslations logs and leaves state unchanged when the response is not ok', async () => {
+    Object.defineProperty(navigator, 'language', { writable: true, configurable: true, value: 'en-US' });
+    const errSpy = spyOn(console, 'error');
+    errSpy.andCallFake(() => {});
+    fetchMock.mockError('/locales/en.json', 500);
+
+    await I18nService.initTranslations();
+
+    expect(errSpy.callCount).toBe(1);
+    expect(I18nService.currentLanguage).toBe('en');
+
+    errSpy.restore();
+  });
+
+  it('onDestroy resets translations and disposes the instance', async () => {
+    await I18nService.initTranslations();
+    expect(I18nService.translate('home.title')).toBe('My App');
+
+    I18nService.onDestroy();
+
+    expect(I18nService.translate('home.title')).toBe('home.title');
+    expect(localStorage.getItem(I18nService.localStorageKey)).toBe(null);
   });
 });

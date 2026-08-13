@@ -1,0 +1,39 @@
+import { LinkHelper } from '#root/dist/src/libs/accessibility-components/utils/helpers/link.helper.js';
+
+describe('LinkHelper', () => {
+  it('applyExternalTarget sets target and a safe rel attribute', () => {
+    const el = document.createElement('a');
+    LinkHelper.applyExternalTarget(el, '_blank');
+    expect(el.getAttribute('target')).toBe('_blank');
+    expect(el.getAttribute('rel')).toBe('noopener noreferrer');
+  });
+
+  it('appendNewTabSuffix appends the suffix to a non-empty base', () => {
+    expect(LinkHelper.appendNewTabSuffix('Visit site')).toBe('Visit site (opens in new tab)');
+  });
+
+  it('appendNewTabSuffix trims the leading space for an empty base', () => {
+    expect(LinkHelper.appendNewTabSuffix('')).toBe('(opens in new tab)');
+  });
+
+  it('makeInternalAnchorSpaceHandler activates on Space and prevents default', () => {
+    let activated = false;
+    let prevented = false;
+    const handler = LinkHelper.makeInternalAnchorSpaceHandler('#section', () => { activated = true; });
+
+    const event = { key: ' ', preventDefault: () => { prevented = true; } };
+    handler(event);
+
+    expect(activated).toBe(true);
+    expect(prevented).toBe(true);
+  });
+
+  it('makeInternalAnchorSpaceHandler ignores non-Space keys', () => {
+    let activated = false;
+    const handler = LinkHelper.makeInternalAnchorSpaceHandler('#section', () => { activated = true; });
+
+    handler({ key: 'Enter', preventDefault: () => {} });
+
+    expect(activated).toBe(false);
+  });
+});

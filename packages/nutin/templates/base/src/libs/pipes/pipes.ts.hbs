@@ -21,9 +21,12 @@ export const registerPipes = (): void => {
     time = false,
   ) => {
     const date = new Date(value);
+    // '' is not a valid Intl.DateTimeFormatOptions value for hour/minute, so
+    // omit those keys entirely rather than setting them when time is false.
+    const timeOptions: Intl.DateTimeFormatOptions = time ? { hour: '2-digit', minute: '2-digit' } : {};
     const formats = {
-      short: { year: 'numeric', month: 'short', day: 'numeric', hour: time ? '2-digit' : '', minute: time ? '2-digit' : '' } as Intl.DateTimeFormatOptions,
-      long: { year: 'numeric', month: 'long', day: 'numeric', hour: time ? '2-digit' : '', minute: time ? '2-digit' : '' } as Intl.DateTimeFormatOptions,
+      short: { year: 'numeric', month: 'short', day: 'numeric', ...timeOptions } as Intl.DateTimeFormatOptions,
+      long: { year: 'numeric', month: 'long', day: 'numeric', ...timeOptions } as Intl.DateTimeFormatOptions,
       time: { hour: '2-digit', minute: '2-digit' } as Intl.DateTimeFormatOptions
     };
 
@@ -51,10 +54,10 @@ export const registerPipes = (): void => {
   });
   AppPipeRegistry.register('capitalizeAll', (value) => {
     const str = String(value);
-    return str.replace(/(^|[ .,"'])\s*([a-z])/g, (match, separator, char, offset) => {
+    return str.replace(/(^|[ .,"'])(\s*)([a-z])/g, (match, separator, whitespace, char, offset) => {
     // Don't capitalize if preceded by a single quote (apostrophe)
       if (separator === "'" && offset > 0) return match;
-      return separator + char.toUpperCase();
+      return separator + whitespace + char.toUpperCase();
     });
   });
   AppPipeRegistry.register('truncate', (value, length = 50, suffix = '...') => {

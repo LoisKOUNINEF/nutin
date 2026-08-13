@@ -66,24 +66,37 @@ class Snackbar extends PassiveOverlayRuntime<SnackbarItem> {
 
     container.appendChild(el);
 
+    const autoDismissTimer = this._autoDismiss(el, duration, () => this._onItemDismissed());
+
     if (actionText && item.onAction) {
       const btn = el.querySelector<HTMLButtonElement>('button');
       btn?.addEventListener('click', () => {
         item.onAction?.();
+        clearTimeout(autoDismissTimer);
         el.remove();
         this._onItemDismissed();
       });
     }
-
-    this._autoDismiss(el, duration, () => this._onItemDismissed());
   }
 }
 
-const snackbar = new Snackbar();
+let snackbar: Snackbar | null = null;
+
+function getSnackbar(): Snackbar {
+  if (!snackbar) snackbar = new Snackbar();
+  return snackbar;
+}
 
 export function notify(message: string, options: NotifyOptions = {}): void {
   if (options.maxStack) {
-    snackbar.setMaxStack(options.maxStack);
+    getSnackbar().setMaxStack(options.maxStack);
   }
-  snackbar.notify(message, options);
+  getSnackbar().notify(message, options);
+}
+
+// Test-only: forces the next notify() call to construct a fresh Snackbar, so
+// it mounts into whichever document is live at that point rather than
+// whichever document was live the first time this module was ever imported.
+export function _resetSnackbarForTesting(): void {
+  snackbar = null;
 }

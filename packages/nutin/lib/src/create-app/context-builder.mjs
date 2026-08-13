@@ -5,9 +5,8 @@ const LIBS_ON = { accessibilityComponents: true, forms: true, overlays: true, nu
 const LIBS_OFF = { accessibilityComponents: false, forms: false, overlays: false, nutinMixins: false };
 
 const PRESET_MAP = {
-  default:  { ...LIBS_OFF, deployHelper: false, testinNutin: false }, 
-  standard: { ...LIBS_ON,  deployHelper: false, testinNutin: false },
-  full:     { ...LIBS_ON,  deployHelper: true,  testinNutin: true  },
+  default:  { ...LIBS_OFF, docker: false }, 
+  full:     { ...LIBS_ON,  docker: true },
 };
 
 export const defaults = {
@@ -31,8 +30,7 @@ export class ContextBuilder {
       forms: preferences.libs ?? preset.forms,
       overlays: preferences.libs ?? preset.overlays,
       nutinMixins: preferences.libs ?? preset.nutinMixins,
-      deployHelper: preferences.deployHelper ?? preset.deployHelper,
-      testinNutin: preferences.testinNutin ?? preset.testinNutin,
+      docker: preferences.docker ?? preset.docker,
 
       ciCommand: ciCommand,
       version: version

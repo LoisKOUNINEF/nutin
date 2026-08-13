@@ -59,6 +59,7 @@ export class RadioGroupComponent extends Component<HTMLFieldSetElement, IRadioGr
   }
 
   protected override onAfterRender(): void {
+    super.onAfterRender();
     if (typeof this.config.onChange !== 'function') return;
     const onChange = this.config.onChange;
     const handler: EventListener = (e) => {

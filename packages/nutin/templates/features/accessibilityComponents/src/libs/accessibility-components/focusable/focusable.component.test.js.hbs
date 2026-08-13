@@ -1,0 +1,70 @@
+import { FocusableComponent } from '#root/dist/src/libs/accessibility-components/focusable/focusable.component.js';
+
+describe('FocusableComponent', () => {
+  let placeholder;
+  let component;
+
+  beforeEach(() => {
+    placeholder = document.createElement('div');
+    document.body.appendChild(placeholder);
+  });
+
+  afterEach(() => {
+    component?.destroy();
+    component = null;
+    placeholder = null;
+  });
+
+  it('renders a <div> in action mode (callback, no href)', () => {
+    component = new FocusableComponent(placeholder, { callback: () => {} });
+    component.render();
+    expect(component.getElement().tagName).toBe('DIV');
+    expect(component.getElement().getAttribute('role')).toBe('button');
+  });
+
+  it('renders an <a> in link mode (href present)', () => {
+    component = new FocusableComponent(placeholder, { href: '#section' });
+    component.render();
+    expect(component.getElement().tagName).toBe('A');
+    expect(component.getElement().getAttribute('href')).toBe('#section');
+  });
+
+  it('applies props.className by splitting on spaces, without passing className through to the base Component', () => {
+    component = new FocusableComponent(placeholder, { callback: () => {} }, { className: 'a b c' });
+    component.render();
+    expect(component.getElement().classList.contains('a')).toBe(true);
+    expect(component.getElement().classList.contains('b')).toBe(true);
+    expect(component.getElement().classList.contains('c')).toBe(true);
+  });
+
+  it('invokes the callback on click in action mode', () => {
+    let called = 0;
+    component = new FocusableComponent(placeholder, { callback: () => { called++; } });
+    component.render();
+    click(component.getElement());
+    expect(called).toBe(1);
+  });
+
+  it('invokes the callback on Enter/Space keydown in action mode', () => {
+    let called = 0;
+    component = new FocusableComponent(placeholder, { callback: () => { called++; } });
+    component.render();
+    component.getElement().dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
+    expect(called).toBe(1);
+  });
+
+  it('uses a custom templateFn when config.templateFn is given', () => {
+    component = new FocusableComponent(placeholder, {
+      href: '#x',
+      templateFn: () => '<strong>Custom</strong>',
+    });
+    component.render();
+    expect(component.getElement().innerHTML).toBe('<strong>Custom</strong>');
+  });
+
+  it('defaults to an empty <span> template when no custom templateFn is given', () => {
+    component = new FocusableComponent(placeholder, { href: '#x' });
+    component.render();
+    expect(component.getElement().innerHTML).toBe('<span></span>');
+  });
+});

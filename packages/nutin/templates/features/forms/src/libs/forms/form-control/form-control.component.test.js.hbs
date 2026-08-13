@@ -1,0 +1,181 @@
+import { FormControlComponent } from '#root/dist/src/libs/forms/form-control/form-control.component.js';
+import { Validators } from '#root/dist/src/libs/forms/validators/validators.js';
+
+describe('FormControlComponent', () => {
+  let placeholder;
+  let component;
+
+  beforeEach(() => {
+    placeholder = document.createElement('div');
+    document.body.appendChild(placeholder);
+  });
+
+  afterEach(() => {
+    component?.destroy();
+    component = null;
+    placeholder = null;
+  });
+
+  it('renders an <input type="text"> by default, linked to its label via a shared id', () => {
+    component = new FormControlComponent(placeholder, { name: 'email' });
+    component.render();
+    const input = component.getElement().querySelector('input.form-control__input');
+    const label = component.getElement().querySelector('label.form-control__label');
+    expect(input.type).toBe('text');
+    expect(input.name).toBe('email');
+    expect(label.getAttribute('for')).toBe(input.id);
+  });
+
+  it('renders a <textarea> with rows when type is "textarea"', () => {
+    component = new FormControlComponent(placeholder, { name: 'bio', type: 'textarea', rows: 6 });
+    component.render();
+    const textarea = component.getElement().querySelector('textarea.form-control__input');
+    expect(textarea).toBeDefined();
+    expect(textarea.rows).toBe(6);
+  });
+
+  it('renders the required mark and aria-required only when required is set', () => {
+    component = new FormControlComponent(placeholder, { name: 'email', required: true });
+    component.render();
+    expect(component.getElement().querySelector('.form-control__required')).toBeDefined();
+    expect(component.getElement().querySelector('input').getAttribute('aria-required')).toBe('true');
+  });
+
+  it('omits the required mark and sets aria-required=false when not required', () => {
+    component = new FormControlComponent(placeholder, { name: 'email' });
+    component.render();
+    expect(component.getElement().querySelector('.form-control__required')).toBe(null);
+    expect(component.getElement().querySelector('input').getAttribute('aria-required')).toBe('false');
+  });
+
+  it('adds form-control--disabled when disabled', () => {
+    component = new FormControlComponent(placeholder, { name: 'email', disabled: true });
+    component.render();
+    expect(component.getElement().classList.contains('form-control--disabled')).toBe(true);
+    expect(component.getElement().querySelector('input').disabled).toBe(true);
+  });
+
+  it('does not validate on input before the field has been touched (blurred)', () => {
+    component = new FormControlComponent(placeholder, { name: 'email', validators: [Validators.required] });
+    component.render();
+    const input = component.getElement().querySelector('input');
+
+    input.value = '';
+    input.dispatchEvent(new window.Event('input'));
+
+    expect(component.valid).toBe(true);
+    expect(component.getElement().classList.contains('form-control--error')).toBe(false);
+  });
+
+  it('validates and applies error state on blur', () => {
+    component = new FormControlComponent(placeholder, { name: 'email', validators: [Validators.required] });
+    component.render();
+    const input = component.getElement().querySelector('input');
+
+    input.value = '';
+    input.dispatchEvent(new window.Event('blur'));
+
+    expect(component.valid).toBe(false);
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(component.getElement().classList.contains('form-control--error')).toBe(true);
+  });
+
+  it('re-validates on every input once the field has been touched', () => {
+    component = new FormControlComponent(placeholder, { name: 'email', validators: [Validators.required] });
+    component.render();
+    const input = component.getElement().querySelector('input');
+
+    input.value = '';
+    input.dispatchEvent(new window.Event('blur'));
+    expect(component.valid).toBe(false);
+
+    input.value = 'hello';
+    input.dispatchEvent(new window.Event('input'));
+    expect(component.valid).toBe(true);
+    expect(component.getElement().classList.contains('form-control--error')).toBe(false);
+  });
+
+  it('always calls onInput regardless of touched state', () => {
+    const received = [];
+    component = new FormControlComponent(placeholder, { name: 'email', onInput: (v) => received.push(v) });
+    component.render();
+    const input = component.getElement().querySelector('input');
+
+    input.value = 'a';
+    input.dispatchEvent(new window.Event('input'));
+
+    expect(received).toEqual(['a']);
+  });
+
+  it('resolves the error message from errorMessages when the key matches, else falls back to the raw key', () => {
+    component = new FormControlComponent(placeholder, {
+      name: 'email',
+      validators: [Validators.required],
+      errorMessages: { 'validators.required': 'This field is required' },
+    });
+    component.render();
+    const input = component.getElement().querySelector('input');
+    input.dispatchEvent(new window.Event('blur'));
+
+    expect(component.getElement().querySelector('.form-control__error').textContent).toBe('This field is required');
+  });
+
+  it('falls back to the raw validator key when no matching errorMessages entry exists', () => {
+    component = new FormControlComponent(placeholder, { name: 'email', validators: [Validators.required] });
+    component.render();
+    const input = component.getElement().querySelector('input');
+    input.dispatchEvent(new window.Event('blur'));
+
+    expect(component.getElement().querySelector('.form-control__error').textContent).toBe('validators.required');
+  });
+
+  it('getValue reads the current input value', () => {
+    component = new FormControlComponent(placeholder, { name: 'email' });
+    component.render();
+    component.getElement().querySelector('input').value = 'hi';
+    expect(component.getValue()).toBe('hi');
+  });
+
+  it('validate() runs validation immediately and returns the result', () => {
+    component = new FormControlComponent(placeholder, { name: 'email', validators: [Validators.required] });
+    component.render();
+    expect(component.validate()).toBe(false);
+    expect(component.getElement().classList.contains('form-control--error')).toBe(true);
+  });
+
+  it('markAsTouched() runs validation immediately, same as a blur', () => {
+    component = new FormControlComponent(placeholder, { name: 'email', validators: [Validators.required] });
+    component.render();
+    component.markAsTouched();
+    expect(component.valid).toBe(false);
+  });
+
+  it('reset() clears the value, errors, and error state', () => {
+    component = new FormControlComponent(placeholder, { name: 'email', validators: [Validators.required] });
+    component.render();
+    const input = component.getElement().querySelector('input');
+    input.value = '';
+    input.dispatchEvent(new window.Event('blur'));
+    expect(component.valid).toBe(false);
+
+    component.reset();
+
+    expect(input.value).toBe('');
+    expect(component.valid).toBe(true);
+    expect(input.getAttribute('aria-invalid')).toBe('false');
+    expect(component.getElement().classList.contains('form-control--error')).toBe(false);
+    expect(component.getElement().querySelector('.form-control__error').textContent).toBe('');
+  });
+
+  it('stops handling blur/input events after destroy()', () => {
+    component = new FormControlComponent(placeholder, { name: 'email', validators: [Validators.required] });
+    component.render();
+    const input = component.getElement().querySelector('input');
+
+    component.destroy();
+    input.dispatchEvent(new window.Event('blur'));
+
+    expect(component.valid).toBe(true);
+    component = null;
+  });
+});

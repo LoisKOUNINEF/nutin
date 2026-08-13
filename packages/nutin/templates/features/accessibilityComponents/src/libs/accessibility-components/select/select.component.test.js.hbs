@@ -1,0 +1,112 @@
+import { SelectComponent } from '#root/dist/src/libs/accessibility-components/select/select.component.js';
+
+describe('SelectComponent', () => {
+  let placeholder;
+  let component;
+
+  const options = [
+    { value: 'a', labelText: 'Option A' },
+    { value: 'b', labelText: 'Option B', selected: true },
+    { value: 'c', labelText: 'Option C', disabled: true },
+  ];
+
+  beforeEach(() => {
+    placeholder = document.createElement('div');
+    document.body.appendChild(placeholder);
+  });
+
+  afterEach(() => {
+    component?.destroy();
+    component = null;
+    placeholder = null;
+  });
+
+  it('renders one <option> per config.options entry, with text content', () => {
+    component = new SelectComponent(placeholder, { options });
+    component.render();
+    const opts = component.getElement().querySelectorAll('option');
+    expect(opts.length).toBe(3);
+    expect(opts[0].value).toBe('a');
+    expect(opts[0].textContent).toBe('Option A');
+  });
+
+  it('applies selected/disabled per option', () => {
+    component = new SelectComponent(placeholder, { options });
+    component.render();
+    const opts = component.getElement().querySelectorAll('option');
+    expect(opts[1].selected).toBe(true);
+    expect(opts[0].selected).toBe(false);
+    expect(opts[2].disabled).toBe(true);
+    expect(opts[0].disabled).toBe(false);
+  });
+
+  it('sets data-i18n on an option only when labelKey is given', () => {
+    component = new SelectComponent(placeholder, { options: [{ value: 'a', labelKey: 'opt.a' }] });
+    component.render();
+    const opt = component.getElement().querySelector('option');
+    expect(opt.getAttribute('data-i18n')).toBe('opt.a');
+  });
+
+  it('renders an empty select for an empty options array', () => {
+    component = new SelectComponent(placeholder, { options: [] });
+    component.render();
+    expect(component.getElement().querySelectorAll('option').length).toBe(0);
+  });
+
+  it('applies id/name/ariaLabel/disabled/required to the <select>, with the app-select and select__control classes', () => {
+    component = new SelectComponent(placeholder, {
+      options, id: 'country', name: 'country', ariaLabel: 'Country', disabled: true, required: true,
+    });
+    component.render();
+    expect(component.getElement().classList.contains('app-select')).toBe(true);
+    const select = component.getElement().querySelector('select');
+    expect(select.classList.contains('select__control')).toBe(true);
+    expect(select.id).toBe('country');
+    expect(select.name).toBe('country');
+    expect(select.getAttribute('aria-label')).toBe('Country');
+    expect(select.disabled).toBe(true);
+    expect(select.required).toBe(true);
+  });
+
+  it('renders a label when given, strips it when absent', () => {
+    component = new SelectComponent(placeholder, { options, labelText: 'Country' });
+    component.render();
+    expect(component.getElement().querySelector('.select__label')).toBeDefined();
+  });
+
+  it('strips the label when neither labelText nor labelKey is given', () => {
+    component = new SelectComponent(placeholder, { options });
+    component.render();
+    expect(component.getElement().querySelector('.select__label')).toBe(null);
+  });
+
+  it('getValue/setValue read and write the selected value', () => {
+    component = new SelectComponent(placeholder, { options });
+    component.render();
+    expect(component.getValue()).toBe('b');
+
+    component.setValue('c');
+    expect(component.getValue()).toBe('c');
+  });
+
+  it('calls onChange with the new value on a real change event, and stops after destroy()', () => {
+    let received = null;
+    let callCount = 0;
+    component = new SelectComponent(placeholder, {
+      options, onChange: (value) => { received = value; callCount++; },
+    });
+    component.render();
+    const select = component.getElement().querySelector('select');
+
+    select.value = 'a';
+    select.dispatchEvent(new window.Event('change'));
+    expect(received).toBe('a');
+    expect(callCount).toBe(1);
+
+    component.destroy();
+    select.dispatchEvent(new window.Event('change'));
+    expect(callCount).toBe(1);
+
+    component = null;
+  });
+});

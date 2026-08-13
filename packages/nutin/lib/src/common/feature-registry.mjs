@@ -21,15 +21,11 @@ export const FEATURES = [
   {
     key: 'nutinMixins',
     cli: 'nutin-mixins',
-    scssForward: '@forward "scss-mixins";',
+    scssForward: '@forward "nutin-mixins";',
   },
   {
-    key: 'deployHelper',
-    cli: 'deploy-helper',
-  },
-  {
-    key: 'testinNutin',
-    cli: 'testin-nutin',
+    key: 'docker',
+    cli: 'docker',
   },
 ];
 

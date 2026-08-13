@@ -1,0 +1,113 @@
+import { EmergencyDialogOverlay } from '#root/dist/src/libs/overlays/emergency-dialog/emergency-dialog.js';
+import { Overlays } from '#root/dist/src/core/index.js';
+import { completeTransitionGatedDestroy } from '#root/src/libs/overlays/core/helpers/overlay-lifecycle.helper.js';
+
+describe('EmergencyDialogOverlay', () => {
+  let overlay;
+
+  beforeEach(() => {
+    useFakeTimers();
+  });
+
+  afterEach(() => {
+    document.querySelectorAll('.emergency-dialog-overlay').forEach(backdrop => {
+      const wrapper = backdrop.querySelector('.emergency-dialog-wrapper');
+      if (wrapper) wrapper.dispatchEvent(new window.Event('transitionend'));
+      backdrop.remove();
+    });
+    document.documentElement.classList.remove('no-scroll');
+    document.getElementById('app').inert = false;
+    overlay = null;
+    useRealTimers();
+  });
+
+  it('forces dismissible:false even if the caller explicitly passes true: no close button, backdrop click does nothing', () => {
+    overlay = new EmergencyDialogOverlay({ template: '<p>x</p>', dismissible: true });
+    const backdrop = overlay.open();
+    const closeSpy = spyOn(overlay, 'close');
+
+    expect(backdrop.querySelector('.modal-close-button')).toBe(null);
+
+    click(backdrop);
+    expect(closeSpy.callCount).toBe(0);
+    closeSpy.restore();
+  });
+
+  it('forces focusTrapOptions.escapeDeactivates:false even if the caller explicitly passes true: Escape does nothing', () => {
+    overlay = new EmergencyDialogOverlay({
+      template: '<button>focusable</button>',
+      focusTrapOptions: { escapeDeactivates: true },
+    });
+    const backdrop = overlay.open();
+    const wrapper = backdrop.querySelector('.emergency-dialog-wrapper');
+    const closeSpy = spyOn(overlay, 'close');
+
+    const escEvent = new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+    wrapper.dispatchEvent(escEvent);
+
+    expect(escEvent.defaultPrevented).toBe(false);
+    expect(closeSpy.callCount).toBe(0);
+    closeSpy.restore();
+  });
+
+  it('still passes through other focusTrapOptions (e.g. returnFocusOnDeactivate:false)', () => {
+    const outside = document.createElement('button');
+    document.body.appendChild(outside);
+    outside.focus();
+
+    overlay = new EmergencyDialogOverlay({
+      template: '<button>focusable</button>',
+      focusTrapOptions: { returnFocusOnDeactivate: false },
+    });
+    const backdrop = overlay.open();
+    const wrapper = backdrop.querySelector('.emergency-dialog-wrapper');
+
+    overlay.close();
+    completeTransitionGatedDestroy(wrapper);
+
+    expect(document.activeElement).not.toBe(outside);
+    outside.remove();
+  });
+
+  it('emits Overlays.overlayOpened/"emergency-dialog" on render, overlayClosed + onClose on destroy (transitionend-gated)', () => {
+    const openedSpy = spyOn(Overlays, 'overlayOpened');
+    const closedSpy = spyOn(Overlays, 'overlayClosed');
+    let closedCb = false;
+
+    overlay = new EmergencyDialogOverlay({ template: '<p>x</p>', onClose: () => { closedCb = true; } });
+    const backdrop = overlay.open();
+    const wrapper = backdrop.querySelector('.emergency-dialog-wrapper');
+
+    expect(openedSpy.lastCall).toEqual(['emergency-dialog']);
+
+    overlay.close();
+    expect(closedSpy.callCount).toBe(0);
+    expect(closedCb).toBe(false);
+
+    completeTransitionGatedDestroy(wrapper);
+    expect(closedSpy.lastCall).toEqual(['emergency-dialog']);
+    expect(closedCb).toBe(true);
+
+    openedSpy.restore();
+    closedSpy.restore();
+  });
+
+  it('renders with the emergency-dialog-overlay/emergency-dialog-wrapper classes', () => {
+    overlay = new EmergencyDialogOverlay({ template: '<p>x</p>' });
+    const backdrop = overlay.open();
+
+    expect(backdrop.classList.contains('emergency-dialog-overlay')).toBe(true);
+    expect(backdrop.querySelector('.emergency-dialog-wrapper')).toBeDefined();
+  });
+
+  it('is only closable programmatically, since it has no built-in dismiss path', () => {
+    overlay = new EmergencyDialogOverlay({ template: '<p>x</p>' });
+    const backdrop = overlay.open();
+    const wrapper = backdrop.querySelector('.emergency-dialog-wrapper');
+
+    overlay.close();
+    completeTransitionGatedDestroy(wrapper);
+
+    expect(document.body.contains(backdrop)).toBe(false);
+  });
+});

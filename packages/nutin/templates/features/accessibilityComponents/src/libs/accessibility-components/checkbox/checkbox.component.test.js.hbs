@@ -1,0 +1,117 @@
+import { CheckboxComponent } from '#root/dist/src/libs/accessibility-components/checkbox/checkbox.component.js';
+
+describe('CheckboxComponent', () => {
+  let placeholder;
+  let component;
+
+  beforeEach(() => {
+    placeholder = document.createElement('div');
+    document.body.appendChild(placeholder);
+  });
+
+  afterEach(() => {
+    component?.destroy();
+    component = null;
+    placeholder = null;
+  });
+
+  it('replaces the placeholder mount target with its own element', () => {
+    component = new CheckboxComponent(placeholder, {});
+    component.render();
+    expect(document.body.contains(placeholder)).toBe(false);
+    expect(document.body.contains(component.getElement())).toBe(true);
+  });
+
+  it('renders a checkbox input with the app-checkbox class', () => {
+    component = new CheckboxComponent(placeholder, {});
+    component.render();
+    expect(component.getElement().classList.contains('app-checkbox')).toBe(true);
+    expect(component.getElement().querySelector('input.checkbox__input[type="checkbox"]')).toBeDefined();
+  });
+
+  it('applies id/name/value/ariaLabel/checked/disabled/required attributes when provided', () => {
+    component = new CheckboxComponent(placeholder, {
+      id: 'agree', name: 'terms', value: 'yes', ariaLabel: 'Agree to terms',
+      checked: true, disabled: true, required: true,
+    });
+    component.render();
+    const input = component.getElement().querySelector('input');
+    expect(input.id).toBe('agree');
+    expect(input.name).toBe('terms');
+    expect(input.value).toBe('yes');
+    expect(input.getAttribute('aria-label')).toBe('Agree to terms');
+    expect(input.checked).toBe(true);
+    expect(input.disabled).toBe(true);
+    expect(input.required).toBe(true);
+  });
+
+  it('omits optional attributes when not provided', () => {
+    component = new CheckboxComponent(placeholder, {});
+    component.render();
+    const input = component.getElement().querySelector('input');
+    expect(input.hasAttribute('id')).toBe(false);
+    expect(input.hasAttribute('name')).toBe(false);
+    expect(input.checked).toBe(false);
+    expect(input.disabled).toBe(false);
+    expect(input.required).toBe(false);
+  });
+
+  it('renders a label when labelText/labelKey is given', () => {
+    component = new CheckboxComponent(placeholder, { labelText: 'I agree' });
+    component.render();
+    expect(component.getElement().querySelector('.checkbox__label')).toBeDefined();
+    expect(component.getElement().textContent).toContain('I agree');
+  });
+
+  it('strips the label when neither labelText nor labelKey is given', () => {
+    component = new CheckboxComponent(placeholder, {});
+    component.render();
+    expect(component.getElement().querySelector('.checkbox__label')).toBe(null);
+  });
+
+  it('setIndeterminate/config.indeterminate sets the DOM property (not reflected as an attribute)', () => {
+    component = new CheckboxComponent(placeholder, { indeterminate: true });
+    component.render();
+    expect(component.getElement().querySelector('input').indeterminate).toBe(true);
+
+    component.setIndeterminate(false);
+    expect(component.getElement().querySelector('input').indeterminate).toBe(false);
+  });
+
+  it('getValue/setValue read and write the checked state', () => {
+    component = new CheckboxComponent(placeholder, {});
+    component.render();
+    expect(component.getValue()).toBe(false);
+
+    component.setValue(true);
+    expect(component.getValue()).toBe(true);
+  });
+
+  it('calls onChange with the new checked state on a real change event', () => {
+    let received = null;
+    component = new CheckboxComponent(placeholder, { onChange: (checked) => { received = checked; } });
+    component.render();
+
+    const input = component.getElement().querySelector('input');
+    input.checked = true;
+    input.dispatchEvent(new window.Event('change'));
+
+    expect(received).toBe(true);
+  });
+
+  it('stops calling onChange after destroy()', () => {
+    let callCount = 0;
+    component = new CheckboxComponent(placeholder, { onChange: () => { callCount++; } });
+    component.render();
+    const input = component.getElement().querySelector('input');
+
+    input.dispatchEvent(new window.Event('change'));
+    expect(callCount).toBe(1);
+
+    component.destroy();
+    input.dispatchEvent(new window.Event('change'));
+    expect(callCount).toBe(1);
+
+    component = null;
+  });
+});

@@ -28,6 +28,7 @@ export class FocusableComponent extends Component<HTMLElement, IFocusableConfig>
   }
 
   protected override onAfterRender(): void {
+    super.onAfterRender();
     FocusableHelper.applyEventListeners(this.element, this.config, this.eventListeners);
   }
 }

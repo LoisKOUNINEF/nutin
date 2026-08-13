@@ -18,13 +18,11 @@ export class JsonManager {
       "chokidar": "^4.0.3",
       "esbuild": "^0.25.12",
       "html-minifier-terser": "^7.2.0",
+      "jsdom": "^26.1.0",
       "linkedom": "^0.18.12",
       "live-server": "^1.2.2",
       "sass": "^1.89.0",
-      "typescript": "^5.8.3",
-      ...(testinNutin && {
-        "jsdom": "^26.1.0",
-      })
+      "typescript": "^5.8.3"
     };
 
     const scripts = getAllScripts(context);
@@ -33,11 +31,9 @@ export class JsonManager {
       "name": projectName,
       "version": "0.1.0",
       "type": "module",
-      ...(testinNutin && {
-        "imports": {
-          "#root/*.js": "./*.js"
-        }
-      }),
+      "imports": {
+        "#root/*.js": "./*.js"
+      },
       scripts,
       devDependencies,
       "engines": {

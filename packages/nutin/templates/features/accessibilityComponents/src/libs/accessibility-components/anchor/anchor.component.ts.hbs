@@ -34,5 +34,8 @@ export class AnchorComponent extends Component<HTMLAnchorElement, IAnchorConfig>
   protected override onAfterRender(): void {
     this.element.innerHTML = '';  // clear before AnchorManager appends
     new AnchorManager(this._config, this.element);
+    // super() must run last here: it applies props-based data-bindings, which
+    // would otherwise be wiped by the innerHTML clear/AnchorManager append above.
+    super.onAfterRender();
   }
 }

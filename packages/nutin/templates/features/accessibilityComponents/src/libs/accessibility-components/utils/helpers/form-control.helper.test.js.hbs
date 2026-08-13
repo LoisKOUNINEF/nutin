@@ -1,0 +1,70 @@
+import { FormControlHelper } from '#root/dist/src/libs/accessibility-components/utils/helpers/form-control.helper.js';
+
+describe('FormControlHelper', () => {
+  it('renderLabel includes the given text and i18n key', () => {
+    const html = FormControlHelper.renderLabel('greeting.key', 'Hello', 'my-label');
+    expect(html).toContain('class="my-label"');
+    expect(html).toContain('data-i18n="greeting.key"');
+    expect(html).toContain('>Hello<');
+  });
+
+  it('renderLabel marks itself data-optional using whichever of key/text is present', () => {
+    const withKeyOnly = FormControlHelper.renderLabel('greeting.key', undefined, 'my-label');
+    expect(withKeyOnly).toContain('data-optional="greeting.key"');
+
+    const withTextOnly = FormControlHelper.renderLabel(undefined, 'Hello', 'my-label');
+    expect(withTextOnly).toContain('data-optional="Hello"');
+  });
+
+  it('renderLabel is empty-optional when neither key nor text is provided', () => {
+    const html = FormControlHelper.renderLabel(undefined, undefined, 'my-label');
+    expect(html).toContain('data-optional=""');
+    expect(html).toContain('data-i18n=""');
+  });
+
+  it('bindCheckedChange attaches a change listener that reports input.checked', () => {
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    let received = null;
+    const eventListeners = [];
+
+    FormControlHelper.bindCheckedChange(input, (checked) => { received = checked; }, eventListeners);
+
+    input.checked = true;
+    input.dispatchEvent(new window.Event('change'));
+
+    expect(received).toBe(true);
+    expect(eventListeners.length).toBe(1);
+    expect(eventListeners[0][0]).toBe(input);
+    expect(eventListeners[0][1]).toBe('change');
+  });
+
+  it('bindCheckedChange does nothing when onChange is not a function', () => {
+    const input = document.createElement('input');
+    const eventListeners = [];
+    FormControlHelper.bindCheckedChange(input, undefined, eventListeners);
+    expect(eventListeners.length).toBe(0);
+  });
+
+  it('bindValueChange attaches a change listener that reports input.value', () => {
+    const select = document.createElement('select');
+    select.innerHTML = '<option value="a">A</option><option value="b">B</option>';
+    let received = null;
+    const eventListeners = [];
+
+    FormControlHelper.bindValueChange(select, (value) => { received = value; }, eventListeners);
+
+    select.value = 'b';
+    select.dispatchEvent(new window.Event('change'));
+
+    expect(received).toBe('b');
+    expect(eventListeners.length).toBe(1);
+  });
+
+  it('bindValueChange does nothing when onChange is not a function', () => {
+    const select = document.createElement('select');
+    const eventListeners = [];
+    FormControlHelper.bindValueChange(select, null, eventListeners);
+    expect(eventListeners.length).toBe(0);
+  });
+});

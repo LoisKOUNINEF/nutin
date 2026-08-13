@@ -16,14 +16,13 @@ export async function createApp() {
     })
     .argument('[projectName]', 'Name of the project')
     .option('-pm, --package-manager <manager>', 'Specify package manager (npm, yarn, pnpm, bun)')
+    .option('--libs', 'Built-in libraries (forms, overlays, accessibility-focused components...)')
+    .option('--docker', 'Dockerfile & nginx.conf')
     .option('--preset <preset>', 
-      `${chalk.yellow('Project preset configuration:')}
-      ${chalk.cyan('• standard')}${chalk.boldGray('  - built-in libraries')}
-      ${chalk.cyan('• full')}${chalk.boldGray('      - standard + testing toolkit & deployment helpers')}`
+      `Project preset configuration:
+      • default${chalk.gray('   - only nutin. Used if no --preset arg provided.')}
+      • full${chalk.gray('      - built-in libs & Docker')}`
     )
-    .option('--libs', 'Built-in libraries')
-    .option('--deploy-helper', 'Dockerfile & nginx.conf')
-    .option('--testin-nutin', 'Lightweight testing toolkit')
     .action(async (projectName, cliOptions) => {
       print.boldSuccess('\n🚀 Welcome to your new nutin app!\n');
       try {
@@ -59,7 +58,7 @@ export async function addFeature() {
       try {
         if (featureArg === 'libs') {
           for (const feature of FEATURES) {
-            if (feature.key === 'testinNutin' || feature.key === 'deployHelper') {
+            if (feature.key === 'docker') {
               continue;
             } else await addFeatureToProject(feature.key);
           }
@@ -101,4 +100,3 @@ export async function updateApp() {
 
   program.parse();
 }
-

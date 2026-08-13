@@ -6,8 +6,9 @@ export default {
 
   // Components / Views scaffolding
   generator: {
-    generateLocales: false, // generates locales/*.json alongside components / views
     generateStylesheet: false, // generates .scss alongside components / views
+    generateLocales: false, // generates locales/*.json alongside components / views - With i18n enabled.
+    generateTest: false, // generates .test.js alongside components / views / services - With testinNutin.includeApp = true
   },
 
   // Build pipeline
@@ -30,20 +31,20 @@ export default {
       // BROTLI OPTIONAL
       // brotli: false,
     },
-    logLevel: 0, // 0 = logs start / finish; 1 = logs steps; 2 = logs all.
+    logLevel: 0, // 0 = default; 1 = logs step name; 2 = logs all.
   },
-  {{#if testinNutin}}
 
   // Testing toolkit
+  // `npm run testin-nutin`
   testinNutin: {
-    includeInternals: false, // true to run src/core and src/libs tests
+    includeFramework: true,
+    includeApp: false,
+    verbose: false,
     jsdomOptions: {
       runScripts: false,     // or true ("dangerously") if needed
       resources: false,      // or true ("usable") if needed
       freezeGlobals: false,
       pretendToBeVisual: true,
     },
-    verbose: false,
   },
-  {{/if}}
 }

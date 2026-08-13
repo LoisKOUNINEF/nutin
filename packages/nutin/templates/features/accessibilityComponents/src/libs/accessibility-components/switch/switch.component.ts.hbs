@@ -51,6 +51,7 @@ export class SwitchComponent extends Component<HTMLLabelElement, ISwitchConfig> 
   }
 
   protected override onAfterRender(): void {
+    super.onAfterRender();
     const input = this.element.querySelector<HTMLInputElement>('.switch__input');
     if (!input) return;
     FormControlHelper.bindCheckedChange(input, this.config.onChange, this.eventListeners);

@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import { print, LANGUAGES } from '../utils/index.js';
 import { jsonTemplate } from './templates/index.js';
-import { scssTemplate } from './templates/index.js';
 
 export function generateFile({
   name,
@@ -12,7 +11,7 @@ export function generateFile({
   extension = 'ts',
 }) {
   fs.mkdirSync(targetPath, { recursive: true });
-  const template = templateFn(name, targetPath);
+  const template = templateFn(name, targetPath, suffix);
   const filePath = `${targetPath}/${name.kebab}.${suffix}.${extension}`;
 
   if (fs.existsSync(filePath)) {

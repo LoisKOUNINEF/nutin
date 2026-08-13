@@ -1,0 +1,37 @@
+import { print, chalk } from '../../../utils/index.js';
+import config from '#root/nutin.config.js';
+
+export { chalk, print } from '../../../utils/index.js';
+
+export function printSummary(todo, passed, failed, time) {
+  const totalTime = time.toFixed(2);
+  const total = passed + failed;
+
+  if (todo > 0) print.boldWarn(`\n⚠️ To do: ${todo}\n`);
+
+  print.boldBlue(`Test Summary`);
+  print.boldInfo(`✓ ${passed} passed`);
+  print.boldError(`✗ ${failed} failed`);
+  print.info(`📖 ${total} total`);
+  print.info(`⌚️ Time: ${totalTime}ms \n`);
+}
+
+export function printResults(results) {
+  const statusOrder = { todo: 0, passed: 1, failed: 2 };
+  const sortedResults = results.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+
+  sortedResults.forEach(result => {
+    if (result.status === 'todo') {
+      print.section(`TODO: ${result.name} in ${result.file}`);
+    } else if (result.status === 'passed') {
+      if (config.testinNutin.verbose ) console.log(`${chalk.green('✓')} ${chalk.cyan(`${result.suiteName}`)} - ${chalk.green(`${result.name}`)}`);
+    } else {
+      print.error(`✗ ${result.suiteName} - ${result.name}`);
+      print.grayError(result.error);
+    }
+  });
+}
+
+export function printStart() {
+  print.boldHead('\nRunning tests...\n');  
+}

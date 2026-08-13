@@ -1,0 +1,193 @@
+import { DropdownOverlay } from '#root/dist/src/libs/overlays/dropdown/dropdown.js';
+import { completeTransitionGatedDestroy } from '#root/src/libs/overlays/core/helpers/overlay-lifecycle.helper.js';
+
+describe('MenuOverlayRuntime (via DropdownOverlay)', () => {
+  let anchor;
+  let overlay;
+
+  const items = [
+    { label: 'One', value: 'one' },
+    { label: 'Two', value: 'two' },
+    { label: 'Three', value: 'three' },
+  ];
+
+  beforeEach(() => {
+    anchor = document.createElement('button');
+    document.body.appendChild(anchor);
+    useFakeTimers();
+  });
+
+  afterEach(() => {
+    document.querySelectorAll('.anchored-overlay-wrapper').forEach(el => {
+      el.dispatchEvent(new window.Event('transitionend'));
+      el.remove();
+    });
+    anchor.remove();
+    anchor = null;
+    overlay = null;
+    useRealTimers();
+  });
+
+  it('forces trapFocus:false even if the caller explicitly passes true', () => {
+    overlay = new DropdownOverlay({ anchor, items, trapFocus: true });
+    overlay.open();
+    const closeSpy = spyOn(overlay, 'close');
+
+    document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape' }));
+
+    expect(closeSpy.callCount).toBe(1);
+    closeSpy.restore();
+  });
+
+  it('renders enabled items with a click data-event and no disabled markers', () => {
+    overlay = new DropdownOverlay({ anchor, items });
+    const wrapper = overlay.open();
+    const el = wrapper.querySelector('.menu-item[data-index="0"]');
+
+    expect(el.getAttribute('data-event')).toBe('click:onItemClick:0');
+    expect(el.classList.contains('menu-item--disabled')).toBe(false);
+    expect(el.hasAttribute('aria-disabled')).toBe(false);
+  });
+
+  it('renders disabled items with no data-event and disabled markers', () => {
+    overlay = new DropdownOverlay({ anchor, items: [{ label: 'Off', disabled: true }] });
+    const wrapper = overlay.open();
+    const el = wrapper.querySelector('.menu-item[data-index="0"]');
+
+    expect(el.hasAttribute('data-event')).toBe(false);
+    expect(el.classList.contains('menu-item--disabled')).toBe(true);
+    expect(el.getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('sanitizes item labels (strips <script> tags via SecurityHelper.sanitizeTemplate)', () => {
+    overlay = new DropdownOverlay({ anchor, items: [{ label: '<script>alert(1)</script>Evil' }] });
+    const wrapper = overlay.open();
+
+    expect(wrapper.innerHTML).not.toContain('<script>');
+    expect(wrapper.textContent).toContain('Evil');
+  });
+
+  it('sets roving tabindex by DOM order and focuses the first enabled item', () => {
+    overlay = new DropdownOverlay({ anchor, items: [{ label: 'Off', disabled: true }, { label: 'On' }] });
+    const wrapper = overlay.open();
+    const els = [...wrapper.querySelectorAll('.menu-item')];
+
+    expect(els[0].getAttribute('tabindex')).toBe('0');
+    expect(els[1].getAttribute('tabindex')).toBe('-1');
+    expect(document.activeElement).toBe(els[1]);
+  });
+
+  it('ArrowDown/ArrowUp navigate with wrap-around, skipping disabled items', () => {
+    overlay = new DropdownOverlay({ anchor, items: [
+      { label: 'A' }, { label: 'B', disabled: true }, { label: 'C' },
+    ] });
+    const wrapper = overlay.open();
+    const els = [...wrapper.querySelectorAll('.menu-item')];
+
+    wrapper.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(document.activeElement).toBe(els[2]);
+
+    wrapper.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(document.activeElement).toBe(els[0]);
+
+    wrapper.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    expect(document.activeElement).toBe(els[2]);
+  });
+
+  it('Home/End jump to the first/last enabled item', () => {
+    overlay = new DropdownOverlay({ anchor, items: [
+      { label: 'A' }, { label: 'B' }, { label: 'C', disabled: true },
+    ] });
+    const wrapper = overlay.open();
+    const els = [...wrapper.querySelectorAll('.menu-item')];
+
+    wrapper.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    expect(document.activeElement).toBe(els[1]);
+
+    wrapper.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+    expect(document.activeElement).toBe(els[0]);
+  });
+
+  it('Enter/Space triggers onSelect(item, index) and closes the menu', () => {
+    let selected = null;
+    overlay = new DropdownOverlay({ anchor, items, onSelect: (item, index) => { selected = { item, index }; } });
+    const wrapper = overlay.open();
+    const closeSpy = spyOn(overlay, 'close');
+
+    wrapper.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+    expect(selected).toEqual({ item: items[0], index: 0 });
+    expect(closeSpy.callCount).toBe(1);
+    closeSpy.restore();
+  });
+
+  it('Enter/Space is a no-op when no item is focused', () => {
+    let called = false;
+    overlay = new DropdownOverlay({ anchor, items, onSelect: () => { called = true; } });
+    const wrapper = overlay.open();
+    document.activeElement.blur();
+
+    wrapper.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+    expect(called).toBe(false);
+  });
+
+  it('clicking a disabled item does nothing (no click handler is bound)', () => {
+    let called = false;
+    overlay = new DropdownOverlay({ anchor, items: [{ label: 'Off', disabled: true }], onSelect: () => { called = true; } });
+    const wrapper = overlay.open();
+
+    click(wrapper.querySelector('.menu-item'));
+
+    expect(called).toBe(false);
+  });
+
+  it('focusout with relatedTarget inside the wrapper does not close', () => {
+    overlay = new DropdownOverlay({ anchor, items });
+    const wrapper = overlay.open();
+    const closeSpy = spyOn(overlay, 'close');
+    const inner = wrapper.querySelector('.menu-item');
+
+    wrapper.dispatchEvent(new window.FocusEvent('focusout', { relatedTarget: inner, bubbles: true }));
+
+    expect(closeSpy.callCount).toBe(0);
+    closeSpy.restore();
+  });
+
+  it('focusout with relatedTarget null (bare dispatch) does not close', () => {
+    overlay = new DropdownOverlay({ anchor, items });
+    const wrapper = overlay.open();
+    const closeSpy = spyOn(overlay, 'close');
+
+    wrapper.dispatchEvent(new window.Event('focusout'));
+
+    expect(closeSpy.callCount).toBe(0);
+    closeSpy.restore();
+  });
+
+  it('focusout with relatedTarget outside the wrapper closes', () => {
+    overlay = new DropdownOverlay({ anchor, items });
+    const wrapper = overlay.open();
+    const closeSpy = spyOn(overlay, 'close');
+
+    wrapper.dispatchEvent(new window.FocusEvent('focusout', { relatedTarget: document.body, bubbles: true }));
+
+    expect(closeSpy.callCount).toBe(1);
+    closeSpy.restore();
+  });
+
+  it('unbinds menu keydown/focusout listeners as part of destroy()', () => {
+    overlay = new DropdownOverlay({ anchor, items });
+    const wrapper = overlay.open();
+    const closeSpy = spyOn(overlay, 'close');
+
+    overlay.close();
+    completeTransitionGatedDestroy(wrapper);
+    const countAfterDestroy = closeSpy.callCount;
+
+    wrapper.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+    expect(closeSpy.callCount).toBe(countAfterDestroy);
+    closeSpy.restore();
+  });
+});
