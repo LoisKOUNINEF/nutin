@@ -168,8 +168,8 @@ async function writeRouteHtml({ template, lang, title, description, pageUrl, ogI
   fs.writeFileSync(outputPath, html, 'utf-8');
 }
 
-async function warnForRoutesMissingSeoConfig(bundleUrl, seoRoutes, defaultLanguage) {
-  const appRoutePaths = await getAppRoutePaths(bundleUrl, defaultLanguage);
+async function warnForRoutesMissingSeoConfig(bundleUrl, seoRoutes, defaultLanguage, baseUrl) {
+  const appRoutePaths = await getAppRoutePaths(bundleUrl, defaultLanguage, baseUrl);
   const seoRoutePaths = new Set(seoRoutes.map((route) => route.path));
 
   for (const path of appRoutePaths) {
@@ -264,7 +264,7 @@ export async function generateSeoHtml() {
   const bundleUrl = await buildSsrBundle();
 
   try {
-    await warnForRoutesMissingSeoConfig(bundleUrl, seoConfig.routes, defaultLanguage);
+    await warnForRoutesMissingSeoConfig(bundleUrl, seoConfig.routes, defaultLanguage, baseUrl);
 
     for (const route of seoConfig.routes) {
       await processRoute(template, baseUrl, defaultLanguage, languages, route, bundleUrl);

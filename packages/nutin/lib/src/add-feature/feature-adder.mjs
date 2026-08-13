@@ -63,9 +63,12 @@ export class FeatureAdder {
 
     const needsAccessibilityComponents = feature.key === 'forms' || feature.key === 'overlays';
     const needsNutinMixins = feature.key === 'accessibilityComponents' || needsAccessibilityComponents;
+    const needsScssConfig = needsNutinMixins || feature.key === 'nutinMixins';
 
-    if (needsNutinMixins) {
+    if (needsScssConfig) {
       await ensureScssConfigFile(this.fileGenerator, projectPath, context);
+    }
+    if (needsNutinMixins) {
       print.info(`nutinMixins required by ${feature.key}, installing now...`);
       await this.addFeatureToProject('nutinMixins');
     }

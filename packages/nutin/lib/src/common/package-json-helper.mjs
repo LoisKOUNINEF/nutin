@@ -8,15 +8,40 @@ const fs = fsExtra.default;
 export async function detectPackageManager(projectPath) {
   if (await fs.pathExists(path.join(projectPath, 'pnpm-lock.yaml'))) return 'pnpm';
   if (await fs.pathExists(path.join(projectPath, 'yarn.lock'))) return 'yarn';
+  // bun 1.x switched its default lockfile from the binary bun.lockb to a text-based bun.lock —
+  // check both since either can be present depending on the bun version that created the project.
+  if (await fs.pathExists(path.join(projectPath, 'bun.lock'))) return 'bun';
   if (await fs.pathExists(path.join(projectPath, 'bun.lockb'))) return 'bun';
   return 'npm';
 }
 
 export async function installDependencies(projectPath, packageManager) {
   print.section(`📦 Installing dependencies with ${packageManager}...`);
-  
+
   const installCommand = getInstallCommand(packageManager);
-  await promiseExec(installCommand, { cwd: projectPath, maxBuffer: 1024 * 1024 * 10 });
+  try {
+    await promiseExec(installCommand, { cwd: projectPath, maxBuffer: 1024 * 1024 * 10 });
+  } catch (err) {
+    const output = `${err.stdout ?? ''}\n${err.stderr ?? ''}`;
+
+    // pnpm >=10 refuses to run devDependency postinstall/build scripts (e.g. esbuild's,
+    // chokidar's optional native watcher backends) by default and exits non-zero even though
+    // every package installed successfully. Recover by approving them here (writes pnpm-workspace.yaml,
+    // which also stops every later `pnpm run <script>` from re-triggering the same check).
+    if (packageManager === 'pnpm' && /ERR_PNPM_IGNORED_BUILDS/.test(output)) {
+      print.warn('⚠️ pnpm flagged some build scripts as needing approval — approving automatically...');
+      try {
+        await promiseExec('pnpm approve-builds --all', { cwd: projectPath, maxBuffer: 1024 * 1024 * 10 });
+        return;
+      } catch (approveErr) {
+        print.error(`pnpm approve-builds --all also failed: ${approveErr.message}`);
+      }
+    }
+
+    if (err.stdout) print.gray(err.stdout);
+    if (err.stderr) print.error(err.stderr);
+    throw new Error(`${installCommand} failed (see output above for the real cause).`);
+  }
 }
 
 export function getCiCommand(packageManager) {

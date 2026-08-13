@@ -76,7 +76,7 @@ export class FileGenerator {
   }
 
   async isRenderTemplateFile(templatePath, fileName, context) {
-    if (/^_nutin-config\.scss(\.hbs)?$/.test(fileName) && !(context.accessibilityComponents || context.forms || context.overlays)) {
+    if (/^_nutin-config\.scss(\.hbs)?$/.test(fileName) && !(context.accessibilityComponents || context.forms || context.overlays || context.nutinMixins)) {
       return null;
     }
 

@@ -78,7 +78,12 @@ async function generateTest({ targetPath, name, suffix }) {
   let isGenerate = true;
   if (!nutinConfig.testinNutin.includeApp) {
     print.warn('⚠️ Enable includeApp in nutin.config.js testinNutin object to use test files.');
-    isGenerate = await promptBoolean('Do you want to generate the test file anyway ?');
+    if (!process.stdin.isTTY) {
+      print.warn('Non-interactive shell detected — skipping test file generation.');
+      isGenerate = false;
+    } else {
+      isGenerate = await promptBoolean('Do you want to generate the test file anyway ?');
+    }
   }
   if (isGenerate) generateFile({ targetPath, name, templateFn: testTemplate, extension: 'test.js', suffix: suffix });
 }
@@ -87,7 +92,12 @@ async function generateLocales({ targetPath, name }) {
   let isGenerate = true;
   if (!nutinConfig.i18n) {
     print.warn('⚠️ Enable i18n in nutin.config.js to use json-based content.');
-    isGenerate = await promptBoolean('Do you want to generate the locales file(s) anyway ?');
+    if (!process.stdin.isTTY) {
+      print.warn('Non-interactive shell detected — skipping locales file generation.');
+      isGenerate = false;
+    } else {
+      isGenerate = await promptBoolean('Do you want to generate the locales file(s) anyway ?');
+    }
   }
   if (isGenerate) generateJson({ targetPath, name });
 }
