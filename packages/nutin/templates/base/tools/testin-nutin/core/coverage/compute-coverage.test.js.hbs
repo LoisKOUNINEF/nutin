@@ -10,9 +10,10 @@ describe('computeFileCoverage', () => {
       ],
     };
 
-    const { linesPct, functionsPct } = computeFileCoverage(scriptResult, sourceText);
+    const { linesPct, functionsPct, branchesPct } = computeFileCoverage(scriptResult, sourceText);
     expect(linesPct).toEqual(100);
     expect(functionsPct).toEqual(100);
+    expect(branchesPct).toEqual(100); // no nested ranges anywhere -> defaults to 100
   });
 
   it('reports 0% for a function that never ran', () => {
@@ -47,9 +48,12 @@ describe('computeFileCoverage', () => {
       ],
     };
 
-    const { linesPct } = computeFileCoverage(scriptResult, sourceText);
+    const { linesPct, totalBranches, coveredBranches, branchesPct } = computeFileCoverage(scriptResult, sourceText);
     // every line covered except the never-taken "return 1;" branch
     expect(linesPct).toEqual(5 / 6 * 100);
+    expect(totalBranches).toEqual(1);
+    expect(coveredBranches).toEqual(0);
+    expect(branchesPct).toEqual(0);
   });
 
   it('derives a name from the source when V8 reports an empty functionName', () => {

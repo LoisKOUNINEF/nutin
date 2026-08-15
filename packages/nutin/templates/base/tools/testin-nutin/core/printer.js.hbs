@@ -46,6 +46,7 @@ export function printCoverageReport(report) {
       .map(r => ({
         File: toTsPath(r.file),
         'Lines %': r.linesPct.toFixed(1),
+        'Branches %': r.branchesPct.toFixed(1),
         'Functions %': r.functionsPct.toFixed(1),
       }))
   );
@@ -53,14 +54,17 @@ export function printCoverageReport(report) {
   const totals = report.reduce((acc, r) => ({
     coveredLines: acc.coveredLines + r.coveredLines,
     totalLines: acc.totalLines + r.totalLines,
+    coveredBranches: acc.coveredBranches + r.coveredBranches,
+    totalBranches: acc.totalBranches + r.totalBranches,
     coveredFunctions: acc.coveredFunctions + r.coveredFunctions,
     totalFunctions: acc.totalFunctions + r.totalFunctions,
-  }), { coveredLines: 0, totalLines: 0, coveredFunctions: 0, totalFunctions: 0 });
+  }), { coveredLines: 0, totalLines: 0, coveredBranches: 0, totalBranches: 0, coveredFunctions: 0, totalFunctions: 0 });
 
   const globalLinesPct = totals.totalLines ? (totals.coveredLines / totals.totalLines) * 100 : 100;
   const globalFunctionsPct = totals.totalFunctions ? (totals.coveredFunctions / totals.totalFunctions) * 100 : 100;
+  const globalBranchesPct = totals.totalBranches ? (totals.coveredBranches / totals.totalBranches) * 100 : 100;
 
-  print.boldInfo(`Global: ${globalLinesPct.toFixed(1)}% lines, ${globalFunctionsPct.toFixed(1)}% functions\n`);
+  print.boldInfo(`Global: ${globalLinesPct.toFixed(1)}% lines, ${globalFunctionsPct.toFixed(1)}% functions, ${globalBranchesPct.toFixed(1)}% branches\n`);
 }
 
 function toTsPath(input) {

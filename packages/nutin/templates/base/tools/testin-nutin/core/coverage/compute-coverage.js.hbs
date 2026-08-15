@@ -79,9 +79,22 @@ export function computeFileCoverage({ functions }, sourceText) {
       line: offsetToLine(fn.ranges[0].startOffset, lineStarts),
     }));
 
+  // Branch coverage: every range beyond a function's own top-level range (index 0)
+  // is a nested conditional block V8 already tracked while collecting detailed
+  // coverage - if/else arms, ternary branches, switch cases, logical short-circuits,
+  // loop bodies. No AST parsing needed, just reusing data already being collected.
+  const allBranchRanges = functions.flatMap(fn => fn.ranges.slice(1));
+  const coveredBranches = allBranchRanges.filter(r => r.count > 0).length;
+  const uncoveredBranches = allBranchRanges
+    .filter(r => r.count === 0)
+    .map(r => offsetToLine(r.startOffset, lineStarts))
+    .sort((a, b) => a - b);
+
   return {
     totalLines, coveredLines, uncoveredLines,
     linesPct: totalLines ? (coveredLines / totalLines) * 100 : 100,
+    totalBranches: allBranchRanges.length, coveredBranches, uncoveredBranches,
+    branchesPct: allBranchRanges.length ? (coveredBranches / allBranchRanges.length) * 100 : 100,
     totalFunctions: realFunctions.length, coveredFunctions, uncoveredFunctions,
     functionsPct: realFunctions.length ? (coveredFunctions / realFunctions.length) * 100 : 100,
   };
