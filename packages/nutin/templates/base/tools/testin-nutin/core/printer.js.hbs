@@ -63,7 +63,7 @@ export function printCoverageReport(report) {
   print.boldInfo(`Global: ${globalLinesPct.toFixed(1)}% lines, ${globalFunctionsPct.toFixed(1)}% functions\n`);
 }
 
-export function toTsPath(input) {
+function toTsPath(input) {
   return input
     .split('/')
     .slice(1)

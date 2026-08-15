@@ -38,5 +38,5 @@ function buildMarkdown(uncovered) {
       return `## ${r.file}\n\n${lines}${fns}`;
     });
 
-  return `# Uncovered Code\n\n${sections.join('\n')}`;
+  return `# Uncovered Code\nIMPORTANT NOTE: Line numbers refer to **compiled** .js code (\`dist/src/\`).\n\n${sections.join('\n')}`;
 }

@@ -9,10 +9,17 @@ const origins = [];
 const frameworkOrigins = [
   path.join('src', 'core'),
   path.join('src', 'libs'),
+];
+const toolsOrigins = [
+  path.join('tools', 'builder'),
+  path.join('tools', 'dev'),
+  path.join('tools', 'generator'),
   path.join('tools', 'testin-nutin'),
+  path.join('tools', 'utils'),
 ];
 
 if (config.testinNutin.includeFramework) origins.push(...frameworkOrigins);
+if (config.testinNutin.includeFramework) origins.push(...toolsOrigins);
 if (config.testinNutin.includeApp) origins.push(path.join('src', 'app'));
 
 // Coverage is measured against the compiled build output (dist/src), since that's what
