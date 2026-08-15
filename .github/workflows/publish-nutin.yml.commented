@@ -1,4 +1,4 @@
-# Workflow disabled because of publishing issue.
+# Workflow disabled because of publishing issue - runs twice and breaks the package (`version already exists`).
 # Couldn't identify the cause so far; will publish manually for the time being.
 
 #name: Publish nutin Package To NPM

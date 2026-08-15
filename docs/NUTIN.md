@@ -29,7 +29,9 @@ BaseComponent<T>               — render/hydrate/destroy engine, data-* parsing
 
 - **`View`** — one per route. Built from a template string and mounted at
   `#app` by default. Adds route params (`getRouteParams`/`getRouteParam`) and
-  router-only hooks `onEnter()`/`onExit()`.
+  router-only hooks `onEnter()`/`onExit()`. Also exposes `hideNavbar()` /
+  `revealNavbar()` and `hideFooter()` / `revealFooter()`, which toggle
+  `display` on elements with `id="navbar"` / `id="footer"` in the page shell.
 - **`Component`** — reusable, non-routed UI.
   Built from a `config` object via `templateFn`, supports `data-bind` two-way
   field binding and `getValues()` to read bound fields back out.
@@ -38,7 +40,12 @@ BaseComponent<T>               — render/hydrate/destroy engine, data-* parsing
   instance, so handlers can be passed around without losing `this`.
   `registerCleanup(fn)` queues teardown run by `dispose()` (wired to
   `window.beforeunload`); `Service.destroyAll()` tears down every live
-  singleton (called from `main.ts` on `beforeunload`).
+  singleton (called from `main.ts` on `beforeunload`). Also exposes
+  `Service.hasInstance(ctor)` and `Service.destroy(ctor)` (both static;
+  `destroy`, like `destroyAll`, is async and awaits the instance's
+  `onDestroy()`), plus `testingReset()` / `testingResetAll()` — synchronous,
+  test-only helpers that drop the singleton(s) from the instance registry
+  without running cleanup/`onDestroy`.
 
 **Note on templates**: 
 - components holds a `` const templateFn = (config?) => `__TEMPLATE_PLACEHOLDER__` `` string and views holds a
@@ -101,6 +108,38 @@ Example:
 <button data-event="click:handleHome">Go back</button>
 ```
 
+`data-pipe` accepts comma-separated args after a `:` and chains with `|`
+(left-to-right); `data-pipe-source` overrides what value feeds the pipe:
+
+```html
+<div data-pipe="capitalizeAll"></div>
+<div data-pipe="date:fr-FR,long,time"></div>
+<div data-pipe="date|capitalizeAll"></div>
+<div data-pipe="date:en-US,long,time|capitalizeAll"></div>
+<div data-pipe="capitalizeAll" data-pipe-source="raw text to capitalize"></div>
+```
+
+### `data-optional` in detail
+
+Two checks run on every `[data-optional]` element on each render; either one
+removes it, and the attribute itself is always stripped from the element
+afterward regardless:
+
+1. The attribute's own **value** (meant for direct interpolation, e.g.
+   `data-optional="${x}"`) is empty, `"undefined"`, or `"null"`.
+2. A structural fallback, keyed by tag: `<img>` checks `.src`; `<input>`/
+   `<textarea>` check `.value`; `<audio>`/`<video>`/`<source>` check the
+   `src` attribute; anything else checks trimmed `textContent` — which is
+   also treated as empty if it's literally the string `"undefined"`.
+
+```html
+<!-- Will remove div if myOptionalData is undefined -->
+<div data-optional="${myOptionalData}">${myOptionalData}</div>
+
+<!-- Will remove img if its src ends up empty -->
+<img data-optional src="${imageUrl}">
+```
+
 ## Children / composition
 
 A parent declares children by overriding `childConfigs()`:
@@ -132,6 +171,12 @@ childConfigs() {
   return [...this.catalogConfig({ array: this.items, elementName: 'item', selector: 'items', component: (el, item) => new ItemComponent({ mountTarget: el }) })];
 }
 ```
+
+Every generated catalog item config carries an `index`. For object array items,
+the item is spread directly and `index` is merged in; primitive array items
+(string, number, ...) can't be spread, so they're wrapped as
+`{ value: item, index }` instead — use `config.value` to read the raw
+primitive back out.
 
 Top-level, non-routed components (e.g. a navbar/footer) are typically
 mounted directly against `document.body` in `main.ts`, outside the router's
@@ -167,9 +212,36 @@ AppEventBus.off(event, callback?)   // omit callback to remove all handlers for 
 ```
 
 Event names/payloads are typed via a global `EventMap` (declared in
-`core/internals.d.ts`), built from `FrameworkEventMap` (navigation,
-lifecycle, overlays, i18n events) plus an empty `AppEventMap` that app code
-extends via declaration merging to add its own typed events.
+`core/internals.d.ts`), built from `FrameworkEventMap` plus an empty
+`AppEventMap` that app code extends via declaration merging to add its own
+typed events:
+
+```ts
+interface NavigationEventMap {
+  'navigate': { path: string };
+  'reload': {};
+}
+interface LifecycleEventMap {
+  'before-render': {};
+  'after-render': {};
+  'before-destroy': {};
+  'after-destroy': {};
+  'view-mount': { viewName: string };
+  'view-unmount': { viewName: string };
+}
+interface OverlaysEventMap {
+  'modal-opened': {};
+  'modal-closed': {};
+  'overlay-opened': { type: string };
+  'overlay-closed': { type: string };
+}
+interface I18nEventMap {
+  'language-changed': { lang: string };
+}
+interface FrameworkEventMap extends NavigationEventMap, LifecycleEventMap, OverlaysEventMap, I18nEventMap {}
+interface AppEventMap {} // your app's own events go here (globals.d.ts)
+interface EventMap extends FrameworkEventMap, AppEventMap {}
+```
 
 Prefer `this.listen(event, callback)` (available on every `BaseComponent`)
 over calling `AppEventBus.subscribe` directly — it auto-registers the
@@ -192,6 +264,54 @@ Three facades wrap the generic bus with ergonomic named methods (each
   `modalClosed()`/`onModalClosed`, `overlayOpened(type)`/`onOverlayOpened`,
   `overlayClosed(type)`/`onOverlayClosed`.
 
+### Custom tokens
+
+`TokenHelper` isn't re-exported from `core/index` (it's an internal
+implementation detail) — import it via its real relative path:
+
+```ts
+import { TokenHelper } from '../../../core/base-classes/base-component/helpers/token.helper.js';
+```
+
+- `TokenHelper.registerCustomToken('@timestamp', () => Date.now())` — for a
+  fixed token with no variable part.
+- `TokenHelper.registerPrefixedToken('@style:', (prop, el) => el.style[prop] ?? '')`
+  — for a repeatable pattern with a dynamic suffix (`@style:color`, ...).
+  Prefixed tokens resolve fine when called directly
+  (`TokenHelper.resolve('@style:color', el, event)`), but not as a
+  `data-event` argument — `data-event`'s value is split naively on `:`, so a
+  prefixed token used there has its suffix swallowed.
+
+## Security
+
+`SecurityHelper.sanitizeTemplate(template, trustLevel)` runs on every
+`render()`, before the template is assigned to `innerHTML`. `trustLevel`
+(`'strict' | 'normal' | 'trusted'`, default `'normal'`) can be set per
+component via its `super()`:
+
+- `trusted` — no sanitization at all.
+- `normal` — strips `<script>` tags and inline `on*="..."` handler
+  attributes.
+- `strict` — everything `normal` does, plus strips `<iframe>`, `<object>`,
+  `<embed>` tags, `href="javascript:..."`, and `src="data:..."`.
+
+`SecurityHelper.escapeHtml()` is available for manually escaping arbitrary
+strings before inserting them into `innerHTML` or an attribute. Most exact
+`data-event` tokens (`@id`, `@class`, `@textContent`, ...) are escaped via
+plain `escapeHtml`; `@value` specifically routes through a variant that's
+aware of `input`/`textarea`/`contenteditable` elements, escaping their
+current value/`innerText`.
+
+XSS test cases worth trying against `strict`/`normal` sanitization:
+
+```
+"><script>alert('XSS')</script>
+"><img src=x onerror=alert('XSS')>
+"><svg onload=alert('XSS')>
+${alert('XSS')}                      (template literal escape, if using backticks)
+" onmouseover="alert('XSS')"
+```
+
 ## Router
 
 `AppRouter(routes)` (called once in `main.ts`) installs a singleton `Router`
@@ -203,9 +323,25 @@ type RouteGuard = (params) => boolean | string | Promise<boolean | string>;
 ```
 
 - Guards run before a route resolves: return `true` to allow, `false` to
-  block, or a path string to redirect elsewhere.
+  block, or a path string to redirect elsewhere. Guards you write are
+  scaffolded starter code in `src/app/guards.ts` (e.g. an example
+  `Guards.requireAuth(redirectTo?)` checking `localStorage`) — not a
+  framework `core` export, edit it freely.
 - Path patterns support params (`:id`) and optional params (`:id?`);
   resolved params are available on the view via `getRouteParam(key)`.
+
+```ts
+// src/app/routes.ts
+export const appRoutes: Routes = {
+  '/': () => new HomeView(),
+  '/404': () => new NotFoundView(),
+  '/protected': { view: () => new ProtectedView(), guards: [Guards.requireAuth()] },
+};
+
+// main.ts
+AppRouter(appRoutes);
+```
+
 - Navigation flow: `Navigation.navigateTo(path)` → bus `'navigate'` event →
   `Router` matches the route, runs guards, then destroys the current view
   (`view.destroy()` + `onExit()` + `Lifecycle.viewUnmount()`) and renders the
@@ -217,19 +353,44 @@ type RouteGuard = (params) => boolean | string | Promise<boolean | string>;
 
 ## Other core services
 
-- **`I18nService`** — language list/default come from `config/languages.json`.
+- **`I18nService`** — language list/default come from `config/languages.json`
+  (`{ "languages": [...], "defaultLanguage": "..." }`). Full method/getter
+  surface: `loadTranslations(lang)`, `translate(key, textContent?)`,
+  `setCurrentLanguage(lang)`, `onLanguageChange(cb)`, `getTranslationObject(key)`,
+  `initTranslations()`, `resetTranslations()`, and getters `currentLanguage`,
+  `defaultLanguage`, `languages`, `localStorageKey` (`'nutin-fav-lang'`).
   `setCurrentLanguage(lang)` persists to `localStorage` and emits
   `'language-changed'`; `translate(key, textContent?)` does a dot-path lookup
   with fallback: current language → default language → element's existing
   text → the raw key itself. Resolution order for the active language on
   load: URL locale segment → `localStorage` → `navigator.language` →
   default. Backs the `data-i18n` attribute.
-- **`HttpClient`** (`AppHttpClient`) — `get/post/put/patch/delete<T>(endpoint, data?, config?)`,
-  plus `addRequestInterceptor`/`addResponseInterceptor`. Non-OK responses
-  throw an `HttpError`.
+- **`HttpClient`** (`AppHttpClient`) — constructed with
+  `(baseUrl = '', defaultHeaders = {})` (both private, no public getters):
+
+  ```ts
+  get<T = unknown>(endpoint: string, config?: IRequestConfig): Promise<T>;
+  post<T = unknown>(endpoint: string, data?: unknown, config?: IRequestConfig): Promise<T>;
+  put<T = unknown>(endpoint: string, data?: unknown, config?: IRequestConfig): Promise<T>;
+  patch<T = unknown>(endpoint: string, data?: unknown, config?: IRequestConfig): Promise<T>;
+  delete<T = unknown>(endpoint: string, config?: IRequestConfig): Promise<T>;
+  addRequestInterceptor(fn: (url: string, options: RequestInit) => void): void;
+  addResponseInterceptor(fn: (response: Response) => void): void;
+
+  interface IRequestConfig {
+    queryParams?: Record<string, string>;
+    timeout?: number;
+    headers?: Record<string, string>;
+  }
+  ```
+
+  Non-OK responses throw an `HttpError`.
 - **`PipeRegistry`** (`AppPipeRegistry`) — `register(name, fn)` /
   `apply(name, value, args)`. Backs the `data-pipe` attribute; app-defined
-  pipes are registered once at startup in `main.ts`.
+  pipes are registered once at startup in `main.ts`. Applying an unregistered
+  pipe name logs a `console.warn` and passes the value through unchanged;
+  conversely, `register()` silently no-ops (no warning) if that name is
+  already taken.
 
 ## Public API surface
 
@@ -239,13 +400,46 @@ Everything is imported from `core/index.ts` — never deep-import
 ```ts
 import {
   View, Component, Service,
+  SecurityHelper, TrustLevel,
   AppEventBus, Lifecycle, Navigation, Overlays,
   AppRouter, Routes, RouteGuard,
   I18nService, AppHttpClient, AppPipeRegistry,
 } from '../../core/index.js';
 ```
 
+A handful of internal helpers (`TokenHelper`, `PipeHelper`, `I18nHelper`,
+`ChildrenHelper`, `EventHelper`, `DomHelper`, and the `CatalogHelper` class
+itself — as opposed to its `CatalogConfig`/`CatalogItemConfig` types, which
+are exported) aren't re-exported from `core/index`. They're importable only
+via their real relative path under
+`core/base-classes/base-component/helpers/`, as shown in
+[Custom tokens](#custom-tokens) above.
+
 ## Minimal worked example
+
+A component with a click handler:
+
+```ts
+// add-task.component.ts
+import { Component, ComponentConfig } from '../../../core/index.js';
+import { TasksService } from '../../services/index.js';
+
+const templateFn = () => `
+<div>
+  <button data-event="click:addTask">New Task</button>
+</div>
+`;
+
+export class AddTaskComponent extends Component {
+  constructor(mountTarget: HTMLElement) {
+    super({ templateFn, mountTarget });
+  }
+
+  private addTask() {
+    TasksService.addTask();
+  }
+}
+```
 
 A view with a click handler that navigates home:
 
@@ -257,13 +451,13 @@ const template = `__TEMPLATE_PLACEHOLDER__`; // inlined from not-found.view.html
 
 export class NotFoundView extends View {
   constructor() { super({ template }); }
-  private handleHome() { Navigation.navigateTo('/'); }
+  private _handleHome() { Navigation.navigateTo('/'); }
 }
 ```
 
 ```html
 <!-- not-found.view.html -->
-<button data-event="click:handleHome">Go back</button>
+<button data-event="click:_handleHome">Go back</button>
 ```
 
 A minimal singleton service:

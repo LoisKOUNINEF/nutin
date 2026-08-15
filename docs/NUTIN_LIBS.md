@@ -5,7 +5,7 @@
 | Lib | Toggle | Depends on |
 |---|---|---|
 | **pipes** | always on (base template, not a feature flag) | — |
-| **scss-utils** | `scssUtils` feature flag | — |
+| **nutinMixins** | `nutinMixins` feature flag (CLI `nutin-mixins`) | — |
 | **accessibility-components** | `accessibilityComponents` feature flag | — |
 | **forms** | `forms` feature flag | accessibility-components (`FormControlHelper`) |
 | **overlays** | `overlays` feature flag | — |
@@ -27,48 +27,47 @@ written into the element's `value`/`textContent`.
 |---|---|---|
 | `currency` | `(value: number, currency = 'USD', locale = 'en-US')` | `Intl.NumberFormat` currency formatting |
 | `date` | `(value, locale = navigator.language, format = 'long', time = false)` | `format`: `'short' \| 'long' \| 'time'`; invalid date logs a warning and returns the raw value |
-| `number` | `(value, decimals = 0)` | `Number(value).toFixed(decimals)` |
+| `number` | `(value, decimals = 0)` | `Number(value).toFixed(parseInt(decimals))` |
 | `uppercase` / `lowercase` | `(value)` | case conversion |
 | `capitalize` | `(value)` | uppercase first char, lowercase rest |
 | `capitalizeAll` | `(value)` | capitalizes each word (boundary: start, space, `.`, `,`, `"`, `'`), skips right after an apostrophe |
-| `truncate` | `(value, length = 50, suffix = '...')` | slices + appends suffix past `length` |
+| `truncate` | `(value, length = 50, suffix = '...')` | slices + appends suffix past `parseInt(length)` |
 | `default` | `(value, defaultValue = '')` | `value \|\| defaultValue` |
 | `json` | `(value)` | `JSON.stringify(value, null, 2)`, falls back to `String(value)` |
 
 Custom pipes are added the same way: `AppPipeRegistry.register(name, fn)`.
-Duplicate names are skipped (with a console warning), not overwritten.
+Duplicate names are skipped, not overwritten.
 
-## scss-utils
+## nutinMixins
 
-`src/libs/scss-utils/_index.scss.hbs` forwards `utilities`, which in turn
-`@use`s `mixins-nutin` — so the mixin library is consumption-only (meant to
-be `@include`d in component SCSS) except for the handful promoted to real
-`.u-*` utility classes.
+`src/libs/_index.scss.hbs` (base) does `@forward "nutin-mixins";` when the
+`nutinMixins` feature is on. The library itself lives at
+`src/libs/nutin-mixins/` (feature template, not base) and its
+`_index.scss.hbs` forwards 10 category partials directly (`nutin-accessibility`,
+`nutin-animation`, `nutin-grid`, `nutin-interaction`, `nutin-layout`,
+`nutin-position`, `nutin-responsive`, `nutin-spacing`, `nutin-typography`,
+`nutin-visual`) — there's no separate `utilities` module or `.u-*` classes;
+everything here is consumption-only, meant to be `@include`d in component
+SCSS.
 
-**Mixins** (`_mixins-nutin.scss.hbs`), by category:
+**Mixins**, by category:
 
-- **Responsive**: `respond-to($breakpoint)` — `small`/`medium`/`large`/`largest` breakpoint map (overridable), `max-width` media query.
-- **Flexbox**: `flex-around`, `flex-between`, `flex-center`, `flex-column`, `flex-row`, `flex-wrap`.
+- **Responsive**: `respond-to($breakpoint)` — reads a config-merged
+  `$breakpoints-config` (via the central config, see below) for the
+  `small`/`medium`/`large`/`largest` breakpoint map, `max-width` media query.
+- **Flexbox**: `flex-center`, `flex-between`, `flex-around` (only these
+  three — no `flex-column`/`flex-row`/`flex-wrap`).
 - **Grid**: `grid`, `fr-grid`, `fr-grid-rows`, `advanced-fr-grid`, `minmax-fr-grid`, `mixed-fr-grid`, `responsive-fr-grid`, `responsive-grid`, `grid-area`, `grid-column`, `grid-row`, `grid-template-areas`.
-- **Spacing & sizing**: `box($w, $h)`, `margin-x`, `margin-y`, `padding-x`, `padding-y`.
+- **Spacing & sizing**: `margin-x`, `margin-y`, `padding-x`, `padding-y` (no `box($w, $h)`).
 - **Typography**: `font($size, $weight: normal)`, `line-clamp($lines)`, `text-ellipsis`.
 - **Position**: `absolute-center`, `fixed-full`, `pos($pos, $t, $r, $b, $l)`.
 - **Background/border/shadow**: `bg-cover`, `bg-gradient($dir, $from, $to)`, `border(...)`, `box-shadow(...)`, `image-cover`, `rounded($radius: 4px)`.
-- **Interaction & state**: `button-disabled`, `clearfix`, `cursor-pointer`, `hide`, `hover-scale($scale: 1.05)`, `transition($props...)`.
+- **Interaction & state**: `disabled` (generic — `pointer-events: none`,
+  `cursor: not-allowed`, reduced opacity; not button-specific despite the
+  name it used to go by), `hover-scale($scale: 1.05)`, `transition($props...)`
+  (no `clearfix`/`cursor-pointer`/`hide`).
 - **Accessibility**: `sr-only`.
-- **Animation**: `bounce-in`, `fade-in`, `pulse`, `scale-up`, `shake`, `slide-in-left`, `spin` (each with `@keyframes`, `$duration`/`$delay` params).
-
-```scss
-@mixin respond-to($breakpoint) {
-  $value: map.get($breakpoints, $breakpoint);
-  @if $value { @media (max-width: $value) { @content; } }
-}
-```
-
-**Utility classes** (`_utilities.scss.hbs`), all prefixed `u-`: `.u-hide`,
-`.u-hide-on-medium`, `.u-hide-on-small`, `.u-pre-wrap`, `.u-btn-disabled`,
-`.u-sr-only`, `.u-clearfix`, `.u-pointer`. Only these 7 mixins are exposed as
-ready-made classes — everything else in the mixin list is `@include`-only.
+- **Animation**: `bounce-in`, `fade-in`, `pulse`, `scale-up`, `shake`, `slide-in-left`, `spin` (each with `@keyframes`, `$duration`/`$delay` params — also config-integrated).
 
 ## Customizing component/overlay SCSS
 
@@ -79,47 +78,81 @@ their component's map), consumed internally via `map.get($<name>-config,
 'key')`. Nothing is passed in from a template's `config`/`props` at the TS
 level — these are build-time SCSS defaults, not runtime props.
 
-**Override pattern: one root config map.** There is exactly one public Sass
-configuration entry point, `src/styles/_nutin-config.scss` (`$config: ()
-!default;`). Every `$<name>-config` map is built by deep-merging its own
-literal defaults with `map.get(config.$config, 'components', '<name>')` — the
-config key is always the variable name minus the `$` prefix and trailing
-`-config` (e.g. `$modal-config` → `'modal'`, `$anchored-overlay-config` →
-`'anchored-overlay'`, `$form-control-config` → `'form-control'`). To override,
-configure that one file *before* `@use "../libs";` — you only need to know
-this single path, not which partial owns which map or where it lives:
+**Override pattern: edit the one root config file.** There is exactly one
+public Sass configuration entry point, `src/styles/_nutin-config.scss` — a
+small file generated directly into your own project, not a library module
+you import:
 
 ```scss
-// src/styles/main.scss.hbs, before `@use "../libs";`
-@use "nutin-config" with (
-  $config: (
-    'components': (
-      'checkbox': (
-        'color-primary': #ff6600, // ← only this one key is overridden
-      ),
+// src/styles/_nutin-config.scss (as generated)
+$config: () !default;
+```
+
+Because you own this file outright, the natural way to override is to
+**edit `$config` in place** — no indirection through another file needed.
+For accessibility-components/forms/overlays, every `$<name>-config` map is
+built by deep-merging its own literal defaults with `map.get($config,
+'components', '<name>')` — the config key is always the variable name minus
+the `$` prefix and trailing `-config` (e.g. `$modal-config` → `'modal'`,
+`$anchored-overlay-config` → `'anchored-overlay'`, `$form-control-config` →
+`'form-control'`). You only need to know this single path, not which
+partial owns which map or where it lives:
+
+```scss
+// src/styles/_nutin-config.scss
+$config: (
+  'components': (
+    'checkbox': (
+      'color-primary': #ff6600, // ← only this one key is overridden
     ),
   ),
 );
-
-@use "../libs";
 ```
 
 Because `map.deep-merge` merges recursively, you only list the keys you want
 to change — everything else falls back to the component's own default. This
 also composes across components/overlays in one place: extend the
 `'components'` map with as many entries as you like (`'modal': (...)`,
-`'form-control': (...)`, etc.) in that same single `@use ... with (...)`
-block. Once configured (Sass modules are evaluated once and cached per
-compilation), every later unconfigured `@use "../../../styles/nutin-config" as
-config;` inside a partial — and every barrel forward in between
-(`accessibility-components/_index.scss.hbs`, `overlays/_index.scss.hbs`,
-`forms/_index.scss.hbs`, `src/libs/_index.scss.hbs`) — sees the same merged
-`$config`.
+`'form-control': (...)`, etc.) in that same `$config` map. Since Sass modules
+are evaluated once and cached per compilation, every accessibility-components/
+forms/overlays partial's own unconfigured `@use "../../../styles/nutin-config"
+as config;` sees this same edited `$config` — including ones reached through
+the `accessibility-components/_index.scss.hbs`, `overlays/_index.scss.hbs`,
+and `forms/_index.scss.hbs` barrel forwards (the barrels themselves never
+touch `nutin-config`; only the leaf partials that need a value do).
+
+(You can alternatively configure `$config` via `@use "nutin-config" with
+(...)` from `main.scss`, before `@use "../libs";` — Sass only allows this on
+a module's very first load anywhere in the compilation, which is why the
+ordering would matter there. Editing `_nutin-config.scss` directly sidesteps
+that constraint entirely, since you're changing the module's own default
+rather than configuring it from outside.)
+
+**`nutinMixins` reads the same file, but a level shallower and outside the
+`'components'` map.** Of its 10 category partials, only `nutin-responsive`
+and `nutin-animation` read config, and they do so differently: `@use
+"../../styles/nutin-config"` — two levels up, not three, since
+`nutin-mixins/` partials sit directly under `src/libs/nutin-mixins/` rather
+than in a further per-component subdirectory — and via top-level keys
+instead of `'components'`-nested ones: `map.get($config, 'breakpoints')` and
+`map.get($config, 'animations')`. Overriding these looks like:
+
+```scss
+// src/styles/_nutin-config.scss
+$config: (
+  'breakpoints': ('small': 480px),
+  'animations': ('duration': 400ms),
+);
+```
+
+— a sibling top-level key to `'components'`, not nested inside it.
+`nutin-mixins/_index.scss.hbs` itself never `@use`s `nutin-config` (it's a
+pure `@forward` barrel); only the two partials that need it reach for it
+directly.
 
 `src/styles/_nutin-config.scss` itself is only generated when at least one of
-accessibility-components, forms, or overlays is enabled (`scssUtils` alone
-doesn't pull it in, since nothing in scss-utils reads it) — a project with
-none of those three libs has no config file and nothing to `@use`.
+accessibility-components, forms, overlays, or `nutinMixins` is enabled — a
+project with none of those four libs has no config file and nothing to edit.
 
 For the shared overlay palette, overriding `'overlay-variables':
 ('semantic-colors': (...))` (backing `$semantic-colors` in
@@ -207,7 +240,10 @@ core's standard shape: `config` (typed component data), `normalizeKeys`
 (which config keys get i18n/pipe normalization), `props` (generic
 `className`/`style`/`data-bind` keys), and the usual lifecycle hooks
 (`onBeforeRender` for classes/ARIA attrs, `generateTemplate` for markup,
-`onAfterRender` for querying rendered children and binding events).
+`onAfterRender` for querying rendered children and binding events). One more
+hook shows up here too: `ButtonComponent` overrides `compose()` (core's hook
+that normally just calls `addChildren()`) to append `ButtonManager`'s DOM
+before falling through to `super.compose()`.
 
 Two "manager" classes build DOM imperatively instead of via
 `generateTemplate()`:
@@ -217,6 +253,9 @@ Two "manager" classes build DOM imperatively instead of via
 - **`ButtonManager`** — builds a container of dynamically generated
   `<button type="button">` elements from a `BaseButton[]` array, wiring each
   via the standard `data-event="click:onButtonClick_${index}"` convention.
+  `ButtonComponent` itself only ever wraps a single `BaseButton` (see catalog
+  below) — the array/multi-button support is `ButtonManager`'s, not exposed
+  through `ButtonComponent`'s own constructor.
 
 Shared stateless helpers (`utils/helpers/`): `AttributesHelper` (applies
 `textContent`/`data-i18n`/`data-pipe`/`className`/`style`/`aria-label`),
@@ -231,7 +270,7 @@ label suffix, Space-key anchor activation).
 |---|---|---|
 | `AnchorComponent` | `<a>` via `AnchorManager`; internal `#id` anchors get scroll+focus+announce, external get new-tab handling | `href`, `target`, `tagName` |
 | `AvatarComponent` | `<img>` with initials fallback, or initials-only `<span>` (`role="img"` when no image) | `src`, `alt`, `initials`, `size`, `shape` |
-| `ButtonComponent` | one or more dynamic `<button>`s via `ButtonManager` | `callback`, `ariaExpanded`, `ariaControls` |
+| `ButtonComponent` | one dynamic `<button>` via `ButtonManager` (manager itself supports arrays) | `callback`, `ariaExpanded`, `ariaControls` |
 | `CheckboxComponent` | `<label>` + native `<input type="checkbox">`, indeterminate support | `checked`, `indeterminate`, `onChange` |
 | `EmptyComponent` | minimal placeholder `<div>`, optionally `data-optional` | `isOptional` |
 | `FocusableComponent` | `<a>` (link mode) or `<div>` (action mode) general-purpose focusable primitive | `href`, `callback`, `ariaLabel` |
@@ -254,7 +293,8 @@ plus explicit `&:focus-visible` and disabled/state variants.
 ### Accessibility conventions
 
 - **`ariaLabel` escape hatch** on nearly every interactive config, used when
-  there's no visible text label.
+  there's no visible text label — including `RadioGroupComponent`'s
+  `<fieldset>`, for when neither `legendKey` nor `legendText` is given.
 - **New-tab announcement**: external links get `target` + `rel="noopener
   noreferrer"` and `"(opens in new tab)"` appended to the label.
 - **Internal-anchor scroll + focus + announce**: clicking (or Space-ing) an
@@ -272,8 +312,10 @@ plus explicit `&:focus-visible` and disabled/state variants.
   paired with a temporary `role="status" aria-live="polite"` region
   announcing "Navigated to \<target\>", removed after 3s.
 - **Space-key activation**: native `<a>` only fires `click` on Enter, so
-  `LinkHelper` explicitly wires Space too, for both anchors and focusable
-  link-mode elements.
+  `LinkHelper` explicitly wires Space too — but not uniformly: `AnchorManager`
+  only wires it for internal (`#`-prefixed) anchors, external anchors get
+  none, while `FocusableHelper` wires Space for any link-mode `href`
+  regardless of internal/external.
 - **Action-mode keyboard semantics**: a `div`-based focusable with a
   `callback` and no `href` gets `role="button"` + `tabindex="0"`, and both
   Enter and Space invoke the callback.
@@ -329,8 +371,9 @@ class FormGroup {
 }
 ```
 
-**Validators** (`type ValidatorFn = (value: string) => string | null` —
-`null` means valid):
+**Validators** — static methods on a `Validators` class (`Validators.required`,
+`Validators.email`, ...), not bare functions (`type ValidatorFn = (value: string)
+=> string | null` — `null` means valid):
 
 | Validator | Checks |
 |---|---|

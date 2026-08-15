@@ -12,11 +12,40 @@
 
 - `{{packageManager}} run generate ELEMENT ELEMENT_NAME`
 
-	Supports nested paths. Updates element's barrel file (index.ts)
+Supports nested paths. Updates element's barrel file (`src/app/ELEMENT/index.ts`).
 
-{{#if testinNutin}}
-## Test
+## `nutin.config.js`
 
-- `{{packageManager}} run test:rebuild`, `{{packageManager}} run test`, `{{packageManager}} run test:watch`.
+## Add feature
 
-{{/if}}
+```bash
+# Features: accessibility-components, forms, overlays, nutin-mixins, docker
+nutin-add <feature> 
+
+nutin-add libs # accessibility-components, forms, overlays, nutin-mixins
+nutin-add all
+```
+
+## Update Nutin version
+
+```bash
+nutin-update # minor / patch.
+```
+
+Consumes `.nutin-meta.json`.
+- If changes were made to src/core/ or src/libs/, will prompt and report related files diffs in a markdown file, and update untouched ones.
+- If no changes were made to src/core/ or src/libs/, will update Nutin files.
+
+## Testing
+
+You are free to use the testing tool you prefer — Jest, Vitest, or another solution.                                    
+
+This project also includes TestinNutin, Nutin's lightweight testing toolkit. It is used to test Nutin itself, and its tests are included alongside the framework code (`src/core/` and `src/libs/`).                                     
+
+These tests serve two purposes:
+- Executable documentation: they show how Nutin's core and libraries are expected to behave.
+- Framework validation: they allow you to run and modify Nutin's own tests when customizing the framework.                                           
+
+**Run Nutin tests with: `npm run testin-nutin`.**
+
+*If you choose to use TestinNutin for your own app, simply enable it in `nutin.config.js -> testinNutin -> includeApp: true`.* Its syntax is intentionally lightweight and familiar to developers coming from Jest and similar tools.

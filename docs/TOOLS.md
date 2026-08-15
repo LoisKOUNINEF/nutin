@@ -46,15 +46,15 @@ npm run generate service my-service
     - `src/app/components/widgets/my-widget/my-widget.component.scss`, if `nutin.config.js`'s `generator.generateStylesheet` is `true` (co-located next to the `.ts` file — no `styles/components/` barrel anymore).
     - it also appends an `export * from './widgets/my-widget/my-widget.component.js';` line to the nearest `index.ts` barrel (`appendToIndex` — see below).
 
-* Run tests (testin-nutin toolkit, only if the `testinNutin` feature is enabled):
+* Run tests (testin-nutin toolkit, shipped in base — no feature flag needed):
 
 ```bash
-npm run test
-npm run test:rebuild
-npm run test:watch
+npm run testin-nutin        # build, then run once
+npm run testin-nutin:only   # run only, using the existing dist/ build
+npm run testin-nutin:watch  # build once, then re-run on file changes
 ```
 
-* Versioning and Docker (only if the `deployHelper` feature is enabled):
+* Versioning and Docker (only if the `docker` feature is enabled):
 
 ```bash
 npm run patch
@@ -89,7 +89,7 @@ src/
 	libs/  -- nutin's libraries
 	styles/
 	index.html
-tools/  -- builder, dev, generator (deployment lives under tools/deployment/ with the deployHelper feature)
+tools/  -- builder, dev, generator, testin-nutin (deployment lives under tools/deployment/ with the docker feature)
 nutin.config.js
 package.json
 tsconfig.json

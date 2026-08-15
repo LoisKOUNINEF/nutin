@@ -2,22 +2,18 @@
 
 Monorepo for the nutin toolkit project - `A minimal frontend toolkit crafted for learning and lean applications` -. Contains the toolkit's NPM package, the project's website and the tutorial app.
 
-- [nutin](packages/nutin/README.md)
+- [Nutin package](packages/nutin/README.md)
 - [website](apps/website/README.md)
 - [tutorial app](apps/tutorial)
 
-*Visit the [website](https://www.nutin.org) or the [NPM package page](https://www.npmjs.com/org/nutin).*                                                                      
 ## 📄 Docs
 
-- [data-\* Attributes](docs/DATA_ATTRIBUTES.md)
-- [stylin-nutin](docs/STYLIN_NUTIN.md)
-- [Libraries](docs/LIBS.md)
-- [testin-nutin](docs/TESTIN_NUTIN.md)
+- [Nutin](docs/NUTIN.md)
+- [Built-in Libraries](docs/NUTIN_LIBS.md)
+- [Testing toolkit](docs/NUTIN_TESTING.md)
 - [Tools](docs/TOOLS.md)
-- [Deployment Helpers](docs/DEPLOYMENT_HELPERS.md)
-- [Base Classes](docs/BASE_CLASSES.md)
-- [Native Services](docs/SERVICES.md)
-- [Monorepo Workflows](docs/WORKFLOWS.md)
+- [Docker](docs/DOCKER.md)
+- [Monorepo Workflows](.github/docs/WORKFLOWS.md)
 
 ## 📝 Contributing
 
@@ -26,3 +22,5 @@ Monorepo for the nutin toolkit project - `A minimal frontend toolkit crafted for
 - [Report a Bug](../../issues/new?template=bug_report.yml)
 - [Request a Feature](../../issues/new?template=feature_request.yml)
 - [Join Discussions](../../discussions)                                   
+
+*Visit the [website](https://www.nutin.org) or the [NPM package page](https://www.npmjs.com/org/nutin).*

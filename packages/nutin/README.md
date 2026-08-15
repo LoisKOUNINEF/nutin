@@ -23,29 +23,22 @@ npx @nutin/cli
 - Flags
 
 ```bash
-# argument: project-name (prompt if not provided)
+# argument: project-name (will prompt if not provided)
 
 # Help
 -h --help
 
-# Defaults settings - see below
--d --defaults
-
 # Package manager
 -pm --package-manager <manager> # npm (Default), yarn, pnpm, bun
 
-# Presets
---preset <minimal|standard|full|cicd>
-	# minimal: external templates
-	# standard: minimal + i18n & built-in SCSS classes
-	# full: standard + deployment helpers & built-in testing toolkit
-	# cicd: minimal + deployment helpers
+# Features - can also be added on an existing app with `nutin-add <feature>`
+--libs # Built-in libraries (forms, overlays, accessibility components)
+--docker # Dockerfile & nginx.conf
 
-# Features
---i18n # Use i18n & json-based content
---deploy-helper # Use Docker & deployment helpers
---testin-nutin # Use testin-nutin toolkit
---transition # Use animated view transitions. Note: May interfere with CSS `position: fixed`, `z-index`...
+# Presets
+--preset <|default|full|> 
+	# default: only Nutin. Used if no --preset arg is provided
+	# full: built-in libraries + docker
 ```
 
 ## [First app tutorial](https://www.nutin.org/tutorial)

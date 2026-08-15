@@ -66,6 +66,18 @@ describe('RadioGroupComponent', () => {
     expect(component.getElement().disabled).toBe(true);
   });
 
+  it('sets aria-label on the fieldset when config.ariaLabel is given', () => {
+    component = new RadioGroupComponent(placeholder, { name: 'plan', options, ariaLabel: 'Choose a plan' });
+    component.render();
+    expect(component.getElement().getAttribute('aria-label')).toBe('Choose a plan');
+  });
+
+  it('does not set aria-label on the fieldset when config.ariaLabel is not given', () => {
+    component = new RadioGroupComponent(placeholder, { name: 'plan', options });
+    component.render();
+    expect(component.getElement().hasAttribute('aria-label')).toBe(false);
+  });
+
   it('renders a legend when legendText/legendKey is given', () => {
     component = new RadioGroupComponent(placeholder, { name: 'plan', options, legendText: 'Choose a plan' });
     component.render();

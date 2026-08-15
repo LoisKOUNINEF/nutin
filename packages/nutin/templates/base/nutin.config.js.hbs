@@ -8,30 +8,30 @@ export default {
   generator: {
     generateStylesheet: false, // generates .scss alongside components / views
     generateLocales: false, // generates locales/*.json alongside components / views - With i18n enabled.
-    generateTest: false, // generates .test.js alongside components / views / services - With testinNutin.includeApp = true
+    generateTest: false, // generates .test.js alongside components / views / services - With testinNutin.includeApp enabled.
   },
 
   // Build pipeline
   builder: {
     generateSEO: true,
+    logLevel: 0, // 0 = default; 1 = verbose; 2 = debug.
     sass: {
       paths: [ 
         'base', 
       ], // in styles/
     },
     esbuild: {
-        bundle: true,
-        minify: true,
-        sourcemap: false,
-        target: ['es2015'],
-        drop: ['console', 'debugger'],
+      bundle: true,
+      minify: true,
+      sourcemap: false,
+      target: ['es2015'],
+      drop: ['console', 'debugger'],
     },
     compression: {
       gzip: true,
       // BROTLI OPTIONAL
       // brotli: false,
     },
-    logLevel: 0, // 0 = default; 1 = logs step name; 2 = logs all.
   },
 
   // Testing toolkit
