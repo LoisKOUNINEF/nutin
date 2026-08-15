@@ -33,5 +33,41 @@ export function printResults(results) {
 }
 
 export function printStart() {
-  print.boldHead('\nRunning tests...\n');  
+  print.boldHead('\nRunning tests...\n');
 }
+
+export function printCoverageReport(report) {
+  if (!report.length) { print.warn('No app source files were covered.'); return; }
+
+  print.boldBlue('\nCoverage Summary');
+  console.table(
+    report
+      .sort((a, b) => a.file.localeCompare(b.file))
+      .map(r => ({
+        File: toTsPath(r.file),
+        'Lines %': r.linesPct.toFixed(1),
+        'Functions %': r.functionsPct.toFixed(1),
+      }))
+  );
+
+  const totals = report.reduce((acc, r) => ({
+    coveredLines: acc.coveredLines + r.coveredLines,
+    totalLines: acc.totalLines + r.totalLines,
+    coveredFunctions: acc.coveredFunctions + r.coveredFunctions,
+    totalFunctions: acc.totalFunctions + r.totalFunctions,
+  }), { coveredLines: 0, totalLines: 0, coveredFunctions: 0, totalFunctions: 0 });
+
+  const globalLinesPct = totals.totalLines ? (totals.coveredLines / totals.totalLines) * 100 : 100;
+  const globalFunctionsPct = totals.totalFunctions ? (totals.coveredFunctions / totals.totalFunctions) * 100 : 100;
+
+  print.boldInfo(`Global: ${globalLinesPct.toFixed(1)}% lines, ${globalFunctionsPct.toFixed(1)}% functions\n`);
+}
+
+function toTsPath(input) {
+  return input
+    .split('/')
+    .slice(1)
+    .join('/')
+    .replace(/\.js$/, '.ts');
+}
+

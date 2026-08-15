@@ -1,16 +1,25 @@
 import path from 'path';
-import { registerTestGlobals, getTestFiles, runQueuedTests, print } from './core/index.js';
+import {
+  registerTestGlobals, getTestFiles, runQueuedTests, print,
+  startCoverage, stopCoverage, buildCoverageReport, printCoverageReport,
+} from './core/index.js';
 import config from '#root/nutin.config.js';
 
 const origins = [];
 const frameworkOrigins = [
-  path.join('src', 'core'), 
+  path.join('src', 'core'),
   path.join('src', 'libs'),
   path.join('tools', 'testin-nutin'),
 ];
 
 if (config.testinNutin.includeFramework) origins.push(...frameworkOrigins);
 if (config.testinNutin.includeApp) origins.push(path.join('src', 'app'));
+
+// Coverage is measured against the compiled build output (dist/src), since that's what
+// tests actually import and run; the build has no sourcemap back to the .ts sources.
+const coverageDirs = [];
+if (config.testinNutin.includeFramework) coverageDirs.push(path.join('dist', 'src', 'core'), path.join('dist', 'src', 'libs'));
+if (config.testinNutin.includeApp) coverageDirs.push(path.join('dist', 'src', 'app'));
 
 registerTestGlobals();
 
@@ -19,8 +28,10 @@ let testFiles = origins.flatMap(
 );
 
 const args = process.argv.slice(2);
-if (args.length) {
-  testFiles = testFiles.filter(file => args.some(f => file.includes(f)));
+const coverageEnabled = args.includes('--coverage') || Boolean(config.testinNutin.coverage?.enabled);
+const fileFilters = args.filter(arg => arg !== '--coverage');
+if (fileFilters.length) {
+  testFiles = testFiles.filter(file => fileFilters.some(f => file.includes(f)));
 }
 
 async function loadTestFile(file) {
@@ -31,6 +42,8 @@ async function loadTestFile(file) {
 
 async function runTests() {
   if (config.testinNutin.verbose) print.head('Test suites :');
+  if (coverageEnabled) await startCoverage();
+
   for (const file of testFiles) {
     try {
       await loadTestFile(file);
@@ -41,6 +54,14 @@ async function runTests() {
   }
 
   await runQueuedTests();
+
+  if (coverageEnabled) {
+    let scopedResults = await stopCoverage(coverageDirs);
+    if (fileFilters.length) {
+      scopedResults = scopedResults.filter(({ filePath }) => fileFilters.some(f => filePath.includes(f)));
+    }
+    printCoverageReport(buildCoverageReport(scopedResults));
+  }
 }
 
 runTests();

@@ -1,0 +1,57 @@
+import fs from 'fs';
+import path from 'path';
+
+// V8 ranges within a script are always disjoint or strictly nested, never partially
+// overlapping. The smallest range containing an offset holds the true execution count
+// for that offset - e.g. "this function ran 5x but this one branch inside it ran 0x".
+function countAt(offset, ranges) {
+  let best = null;
+  for (const range of ranges) {
+    if (offset < range.startOffset || offset >= range.endOffset) continue;
+    if (!best || (range.endOffset - range.startOffset) < (best.endOffset - best.startOffset)) {
+      best = range;
+    }
+  }
+  return best ? best.count : 0;
+}
+
+export function computeFileCoverage({ functions }, sourceText) {
+  const allRanges = functions.flatMap(fn => fn.ranges);
+
+  // Line coverage: sample the count at each line's first non-whitespace character.
+  // Not statement/branch-accurate, but simple and good enough for a lightweight report.
+  let offset = 0;
+  let totalLines = 0;
+  let coveredLines = 0;
+  for (const line of sourceText.split('\n')) {
+    const firstChar = line.search(/\S/);
+    if (firstChar !== -1) {
+      totalLines++;
+      if (countAt(offset + firstChar, allRanges) > 0) coveredLines++;
+    }
+    offset += line.length + 1;
+  }
+
+  // Function coverage: every functions[] entry except the whole-script pseudo-function,
+  // identified by its first range spanning the entire file.
+  const realFunctions = functions.filter(fn => {
+    const [topRange] = fn.ranges;
+    return !(topRange.startOffset === 0 && topRange.endOffset === sourceText.length);
+  });
+  const coveredFunctions = realFunctions.filter(fn => fn.ranges[0].count > 0).length;
+
+  return {
+    totalLines, coveredLines,
+    linesPct: totalLines ? (coveredLines / totalLines) * 100 : 100,
+    totalFunctions: realFunctions.length, coveredFunctions,
+    functionsPct: realFunctions.length ? (coveredFunctions / realFunctions.length) * 100 : 100,
+  };
+}
+
+export function buildCoverageReport(scopedResults) {
+  return scopedResults.map(entry => {
+    const sourceText = fs.readFileSync(entry.filePath, 'utf-8');
+    const coverage = computeFileCoverage(entry, sourceText);
+    return { file: path.relative(process.cwd(), entry.filePath), ...coverage };
+  });
+}
