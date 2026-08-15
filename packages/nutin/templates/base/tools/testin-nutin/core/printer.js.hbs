@@ -46,8 +46,8 @@ export function printCoverageReport(report) {
       .map(r => ({
         File: toTsPath(r.file),
         'Lines %': r.linesPct.toFixed(1),
-        'Branches %': r.branchesPct.toFixed(1),
         'Functions %': r.functionsPct.toFixed(1),
+        'Branches %': r.branchesPct.toFixed(1),
       }))
   );
 
