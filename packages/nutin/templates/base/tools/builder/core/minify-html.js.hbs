@@ -44,7 +44,7 @@ async function minifyInlineHTML() {
 
     if (hasChanges) {
       fs.writeFileSync(file, code, 'utf8');
-      if (builderConfig.isExhaustive) print.gray(`Minified inline HTML in: ${file}`);
+      if (builderConfig.isDebug) print.gray(`Minified inline HTML in: ${file}`);
     }
   }
   if (builderConfig.isVerbose && builderConfig.inlineTemplates) print.boldInfo('✅ Templates minified.\n');

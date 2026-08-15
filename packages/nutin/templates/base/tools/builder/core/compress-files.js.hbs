@@ -32,7 +32,7 @@ function compressStaticAssets() {
         windowBits: 15
       });
       writeFileSync(`${file}.gz`, gzipped);
-      if (builderConfig.isExhaustive) print.gray(`Gzip compression: ${file}`);
+      if (builderConfig.isDebug) print.gray(`Gzip compression: ${file}`);
     }
 
     // BROTLI OPTIONAL
@@ -47,7 +47,7 @@ function compressStaticAssets() {
        }
      });
      writeFileSync(`${file}.br`, brotlied);
-     if (builderConfig.isExhaustive) print.info(`Brotli compression: ${file}`);
+     if (builderConfig.isDebug) print.info(`Brotli compression: ${file}`);
     }
     */
   });

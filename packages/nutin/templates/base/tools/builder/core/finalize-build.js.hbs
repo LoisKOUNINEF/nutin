@@ -16,12 +16,12 @@ function removeFoldersAfterBundle() {
 
   foldersToRemove.forEach(folder => fs.rmSync(pathToFolder(folder), { recursive : true }));
   
-  if (builderConfig.isExhaustive) print.info('Temporary folders removed.');
+  if (builderConfig.isDebug) print.info('Temporary folders removed.');
 }
 
 function removeNutinConfig() {
   fs.rmSync(path.join(PATHS.temp, 'nutin.config.js'));
-  if (builderConfig.isExhaustive) print.info('Temporary nutin.config.js removed.');
+  if (builderConfig.isDebug) print.info('Temporary nutin.config.js removed.');
 }
 
 function replaceDir(src, dest) {

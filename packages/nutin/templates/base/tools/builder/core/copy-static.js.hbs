@@ -26,7 +26,7 @@ async function copyStatic() {
 
       try {
         await copyFile(file, dest);
-        if (builderConfig.isExhaustive) print.gray(`Copied: ${file} → ${dest}`);
+        if (builderConfig.isDebug) print.gray(`Copied: ${file} → ${dest}`);
       } catch (err) {
         print.error(`Failed to copy: ${file}. ${err.message}`);
         exit(1);
@@ -94,7 +94,7 @@ async function copyJsonFiles(sourceDir, destDir) {
     } else if (item.isFile() && path.extname(item.name) === '.json') {
       await fs.mkdir(path.dirname(destPath), { recursive: true });
       await fs.copyFile(sourcePath, destPath);
-      if (builderConfig.isExhaustive) print.gray(`Copied JSON: ${sourcePath} -> ${destPath}`);
+      if (builderConfig.isDebug) print.gray(`Copied JSON: ${sourcePath} -> ${destPath}`);
     }
   }
 }

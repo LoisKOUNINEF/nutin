@@ -26,7 +26,7 @@ function addHashToFiles(distDir) {
 
     fileMap[oldRel] = newRel;
 
-    if (builderConfig.isExhaustive) {
+    if (builderConfig.isDebug) {
       print.gray(`Renamed: ${oldRel} → ${newRel}`);
     }
   });
@@ -49,7 +49,7 @@ function updateHtmlReferences(htmlPath, fileMap) {
   });
   
   fs.writeFileSync(htmlPath, html);
-  if (builderConfig.isExhaustive) print.boldGray('Updated index.html references');
+  if (builderConfig.isDebug) print.boldGray('Updated index.html references');
 }
 
 addHashToFiles(PATHS.tempSource);

@@ -50,5 +50,5 @@ export function generateRobotsTxt() {
   const outputPath = path.join(PATHS.tempSource, 'robots.txt');
   fs.writeFileSync(outputPath, lines.join('\n') + '\n', 'utf-8');
 
-  if (builderConfig.isExhaustive) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
+  if (builderConfig.isDebug) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
 }

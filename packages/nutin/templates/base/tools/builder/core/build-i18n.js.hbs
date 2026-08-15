@@ -61,7 +61,7 @@ async function removeJsonFiles(directory) {
     if (file.includes(`${path.sep}locales${path.sep}`)) {
       try {
         await fs.promises.unlink(file);
-        if (builderConfig.isExhaustive) print.gray(`Deleted locale JSON file: ${file}`);
+        if (builderConfig.isDebug) print.gray(`Deleted locale JSON file: ${file}`);
       } catch (err) {
         print.error(`Failed to remove ${file}: ${err.message}`);
       }
@@ -103,7 +103,7 @@ async function removeEmptyDirectories(directory) {
       const updatedItems = await fs.promises.readdir(directory);
       if (updatedItems.length === 0) {
         await fs.promises.rmdir(directory, { recursive: false });
-        if (builderConfig.isExhaustive) print.gray(`Removed empty directory: ${directory}`);
+        if (builderConfig.isDebug) print.gray(`Removed empty directory: ${directory}`);
       }
     } catch (err) {
       print.grayError(`Failed to remove empty directory ${directory}: ${err.message}`);
@@ -121,7 +121,7 @@ async function mergeJson() {
       `${destDir}/${locale}.json`,
       JSON.stringify(combined, null, 2)
     );
-    if (builderConfig.isExhaustive) print.info(`Json files for locale ${locale} merged successfully`);
+    if (builderConfig.isDebug) print.info(`Json files for locale ${locale} merged successfully`);
   }
   if (builderConfig.isVerbose) print.boldInfo(`✅ Locales json files merged successfully`);
   removeJsonFiles(PATHS.tempApp);
