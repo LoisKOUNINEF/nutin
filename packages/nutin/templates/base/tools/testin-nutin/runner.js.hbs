@@ -1,7 +1,7 @@
 import path from 'path';
 import {
   registerTestGlobals, getTestFiles, runQueuedTests, print,
-  startCoverage, stopCoverage, buildCoverageReport, printCoverageReport,
+  startCoverage, stopCoverage, buildCoverageReport, printCoverageReport, maybeWriteUncoveredReport,
 } from './core/index.js';
 import config from '#root/nutin.config.js';
 
@@ -60,7 +60,9 @@ async function runTests() {
     if (fileFilters.length) {
       scopedResults = scopedResults.filter(({ filePath }) => fileFilters.some(f => filePath.includes(f)));
     }
-    printCoverageReport(buildCoverageReport(scopedResults));
+    const report = buildCoverageReport(scopedResults);
+    printCoverageReport(report);
+    await maybeWriteUncoveredReport(report);
   }
 }
 

@@ -51,4 +51,20 @@ describe('computeFileCoverage', () => {
     // every line covered except the never-taken "return 1;" branch
     expect(linesPct).toEqual(5 / 6 * 100);
   });
+
+  it('derives a name from the source when V8 reports an empty functionName', () => {
+    const sourceText = 'class Foo {\n  constructor(x) {\n    this.x = x;\n  }\n}\n';
+    const constructorStart = sourceText.indexOf('constructor');
+    const constructorEnd = sourceText.indexOf('}', constructorStart) + 1;
+
+    const scriptResult = {
+      functions: [
+        { functionName: '', ranges: [{ startOffset: 0, endOffset: sourceText.length, count: 1 }] },
+        { functionName: '', ranges: [{ startOffset: constructorStart, endOffset: constructorEnd, count: 0 }] },
+      ],
+    };
+
+    const { uncoveredFunctions } = computeFileCoverage(scriptResult, sourceText);
+    expect(uncoveredFunctions).toEqual([{ name: 'constructor', line: 2 }]);
+  });
 });

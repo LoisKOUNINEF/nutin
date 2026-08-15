@@ -15,19 +15,49 @@ function countAt(offset, ranges) {
   return best ? best.count : 0;
 }
 
+function buildLineStarts(sourceText) {
+  const starts = [0];
+  for (let i = 0; i < sourceText.length; i++) {
+    if (sourceText[i] === '\n') starts.push(i + 1);
+  }
+  return starts;
+}
+
+function offsetToLine(offset, lineStarts) {
+  let lo = 0, hi = lineStarts.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (lineStarts[mid] <= offset) lo = mid; else hi = mid - 1;
+  }
+  return lo + 1; // 1-indexed
+}
+
+// V8 sometimes reports an empty functionName (e.g. accessors, unnamed callbacks).
+// Fall back to reading the source at the function's own start offset instead of a
+// meaningless placeholder - covers `constructor(`, `get foo(`, method names, etc.
+function deriveLabel(sourceText, startOffset) {
+  const snippet = sourceText.slice(startOffset, startOffset + 60);
+  const identifier = snippet.match(/^\s*(?:get |set )?([A-Za-z_$][\w$]*)/);
+  if (identifier) return identifier[0].trim();
+  return snippet.trim().split('\n')[0].slice(0, 30) || '<anonymous>';
+}
+
 export function computeFileCoverage({ functions }, sourceText) {
   const allRanges = functions.flatMap(fn => fn.ranges);
+  const lineStarts = buildLineStarts(sourceText);
 
   // Line coverage: sample the count at each line's first non-whitespace character.
   // Not statement/branch-accurate, but simple and good enough for a lightweight report.
   let offset = 0;
   let totalLines = 0;
   let coveredLines = 0;
+  const uncoveredLines = [];
   for (const line of sourceText.split('\n')) {
     const firstChar = line.search(/\S/);
     if (firstChar !== -1) {
       totalLines++;
       if (countAt(offset + firstChar, allRanges) > 0) coveredLines++;
+      else uncoveredLines.push(offsetToLine(offset + firstChar, lineStarts));
     }
     offset += line.length + 1;
   }
@@ -39,11 +69,17 @@ export function computeFileCoverage({ functions }, sourceText) {
     return !(topRange.startOffset === 0 && topRange.endOffset === sourceText.length);
   });
   const coveredFunctions = realFunctions.filter(fn => fn.ranges[0].count > 0).length;
+  const uncoveredFunctions = realFunctions
+    .filter(fn => fn.ranges[0].count === 0)
+    .map(fn => ({
+      name: fn.functionName || deriveLabel(sourceText, fn.ranges[0].startOffset),
+      line: offsetToLine(fn.ranges[0].startOffset, lineStarts),
+    }));
 
   return {
-    totalLines, coveredLines,
+    totalLines, coveredLines, uncoveredLines,
     linesPct: totalLines ? (coveredLines / totalLines) * 100 : 100,
-    totalFunctions: realFunctions.length, coveredFunctions,
+    totalFunctions: realFunctions.length, coveredFunctions, uncoveredFunctions,
     functionsPct: realFunctions.length ? (coveredFunctions / realFunctions.length) * 100 : 100,
   };
 }

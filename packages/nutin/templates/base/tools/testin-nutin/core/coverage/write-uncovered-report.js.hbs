@@ -1,0 +1,42 @@
+import fs from 'fs';
+import path from 'path';
+import { promptBoolean } from '../../../utils/index.js';
+import { print } from '../printer.js';
+
+const REPORT_PATH = path.join('coverage', 'uncovered.md');
+
+export async function maybeWriteUncoveredReport(report) {
+  const uncovered = report.filter(r => r.uncoveredLines.length || r.uncoveredFunctions.length);
+  if (!uncovered.length) {
+    print.info('🎉 No uncovered code found.\n');
+    return;
+  }
+
+  if (!process.stdin.isTTY) {
+    print.warn(`Skipping uncovered-code report prompt (non-interactive). Run with a TTY to be asked, or check ${REPORT_PATH} manually.\n`);
+    return;
+  }
+
+  const shouldWrite = await promptBoolean('Write uncovered-code report to file?');
+  if (!shouldWrite) return;
+
+  fs.mkdirSync(path.dirname(REPORT_PATH), { recursive: true });
+  fs.writeFileSync(REPORT_PATH, buildMarkdown(uncovered));
+  print.info(`Wrote ${REPORT_PATH}\n`);
+}
+
+function buildMarkdown(uncovered) {
+  const sections = uncovered
+    .sort((a, b) => a.file.localeCompare(b.file))
+    .map(r => {
+      const lines = r.uncoveredLines.length
+        ? `Uncovered lines: ${r.uncoveredLines.join(', ')}\n`
+        : '';
+      const fns = r.uncoveredFunctions.length
+        ? `Uncovered functions:\n${r.uncoveredFunctions.map(f => `- \`${f.name}\` (line ${f.line})`).join('\n')}\n`
+        : '';
+      return `## ${r.file}\n\n${lines}${fns}`;
+    });
+
+  return `# Uncovered Code\n\n${sections.join('\n')}`;
+}
