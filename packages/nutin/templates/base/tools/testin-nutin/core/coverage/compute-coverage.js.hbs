@@ -35,10 +35,13 @@ function offsetToLine(offset, lineStarts) {
 // V8 sometimes reports an empty functionName (e.g. accessors, unnamed callbacks).
 // Fall back to reading the source at the function's own start offset instead of a
 // meaningless placeholder - covers `constructor(`, `get foo(`, method names, etc.
+// Only treat a leading identifier as a real name when it's immediately followed by
+// `(` (a param list) - otherwise it's just an arrow function's bare parameter (e.g.
+// `c => ...`), which isn't a name at all, so fall through to a source snippet instead.
 function deriveLabel(sourceText, startOffset) {
   const snippet = sourceText.slice(startOffset, startOffset + 60);
-  const identifier = snippet.match(/^\s*(?:get |set )?([A-Za-z_$][\w$]*)/);
-  if (identifier) return identifier[0].trim();
+  const named = snippet.match(/^\s*(?:get |set )?([A-Za-z_$][\w$]*)\s*\(/);
+  if (named) return named[1];
   return snippet.trim().split('\n')[0].slice(0, 30) || '<anonymous>';
 }
 
