@@ -90,6 +90,19 @@ describe('CatalogHelper', () => {
     expect(calls[0].props).toEqual({ a: 1, b: 2 });
   });
 
+  it('skips falsy or non-HTMLElement entries returned by querySelectorAll', () => {
+    scope.innerHTML = '<div data-catalog="list"></div>';
+    const realContainer = scope.querySelector('[data-catalog="list"]');
+    const fakeScope = { querySelectorAll: () => [null, realContainer] };
+
+    const configs = CatalogHelper.generateCatalog(
+      { array: [{ id: 1 }], selector: 'list', elementName: 'item', component: class {} },
+      fakeScope
+    );
+
+    expect(configs.length).toBe(1);
+  });
+
   it('wraps primitive array items as { value, index }', () => {
     scope.innerHTML = '<div data-catalog="list"></div>';
     const calls = [];

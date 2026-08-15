@@ -80,6 +80,13 @@ describe('AvatarComponent', () => {
     expect(fallback.hasAttribute('aria-hidden')).toBe(false);
   });
 
+  it('does not throw when onAfterRender runs again after the img/fallback elements are removed', () => {
+    component = new AvatarComponent(placeholder, { alt: 'Ada', src: 'ada.png', initials: 'AL' });
+    component.render();
+    component.getElement().querySelector('.avatar__img').remove();
+    expect(() => component.onAfterRender()).not.toThrow();
+  });
+
   it('does not bind an error listener when there is no src or no initials', () => {
     component = new AvatarComponent(placeholder, { alt: 'Ada', initials: 'AL' });
     expect(() => component.render()).not.toThrow();

@@ -68,6 +68,12 @@ describe('FormGroup', () => {
     expect(group.valid).toBe(true);
   });
 
+  it('does not throw when the form is valid and no onSubmit callback is provided', () => {
+    const a = makeField({ valid: true });
+    new FormGroup(form, { a });
+    expect(() => form.dispatchEvent(new window.Event('submit', { cancelable: true }))).not.toThrow();
+  });
+
   it('calls onValidationFail with invalid field names, and does not call onSubmit, when any field is invalid', () => {
     const a = makeField({ valid: false });
     const b = makeField({ valid: true });

@@ -36,6 +36,11 @@ describe('TokenHelper', () => {
     expect(TokenHelper.resolve('@name', el, makeEvent())).toBe('field');
   });
 
+  it('@name falls back to an empty string when el has no name property', () => {
+    const el = document.createElement('div');
+    expect(TokenHelper.resolve('@name', el, makeEvent())).toBe('');
+  });
+
   it('@tag resolves the escaped tag name', () => {
     const el = document.createElement('div');
     expect(TokenHelper.resolve('@tag', el, makeEvent())).toBe('DIV');
@@ -68,16 +73,28 @@ describe('TokenHelper', () => {
     expect(TokenHelper.resolve('@textContent', el, makeEvent())).toBe('&lt;i&gt;');
   });
 
+  it('@textContent falls back to an empty string when el has no textContent', () => {
+    expect(TokenHelper.resolve('@textContent', {}, makeEvent())).toBe('');
+  });
+
   it('@innerText resolves escaped innerText', () => {
     const el = document.createElement('div');
     el.innerText = '<i>';
     expect(TokenHelper.resolve('@innerText', el, makeEvent())).toBe('&lt;i&gt;');
   });
 
+  it('@innerText falls back to an empty string when el has no innerText', () => {
+    expect(TokenHelper.resolve('@innerText', {}, makeEvent())).toBe('');
+  });
+
   it('@html resolves escaped innerHTML', () => {
     const el = document.createElement('div');
     el.innerHTML = '<i>x</i>';
     expect(TokenHelper.resolve('@html', el, makeEvent())).toBe('&lt;i&gt;x&lt;/i&gt;');
+  });
+
+  it('@html falls back to an empty string when el has no innerHTML', () => {
+    expect(TokenHelper.resolve('@html', {}, makeEvent())).toBe('');
   });
 
   it('@event resolves to the raw event object', () => {
@@ -97,10 +114,22 @@ describe('TokenHelper', () => {
     expect(TokenHelper.resolve('@y', document.createElement('div'), ev)).toBe(6);
   });
 
+  it('@x and @y fall back to 0 when clientX/clientY are missing', () => {
+    const ev = makeEvent({ clientX: undefined, clientY: undefined });
+    expect(TokenHelper.resolve('@x', document.createElement('div'), ev)).toBe(0);
+    expect(TokenHelper.resolve('@y', document.createElement('div'), ev)).toBe(0);
+  });
+
   it('@key and @code resolve to escaped keyboard event properties', () => {
     const ev = makeEvent({ key: '<', code: 'KeyA' });
     expect(TokenHelper.resolve('@key', document.createElement('div'), ev)).toBe('&lt;');
     expect(TokenHelper.resolve('@code', document.createElement('div'), ev)).toBe('KeyA');
+  });
+
+  it('@key and @code fall back to an empty string when key/code are missing', () => {
+    const ev = makeEvent({ key: undefined, code: undefined });
+    expect(TokenHelper.resolve('@key', document.createElement('div'), ev)).toBe('');
+    expect(TokenHelper.resolve('@code', document.createElement('div'), ev)).toBe('');
   });
 
   it('@attr: resolves an escaped attribute value', () => {
@@ -109,10 +138,20 @@ describe('TokenHelper', () => {
     expect(TokenHelper.resolve('@attr:title', el, makeEvent())).toBe('&lt;t&gt;');
   });
 
+  it('@attr: falls back to an empty string when the attribute is missing', () => {
+    const el = document.createElement('div');
+    expect(TokenHelper.resolve('@attr:title', el, makeEvent())).toBe('');
+  });
+
   it('@dataset: resolves an escaped dataset value', () => {
     const el = document.createElement('div');
     el.dataset.foo = '<f>';
     expect(TokenHelper.resolve('@dataset:foo', el, makeEvent())).toBe('&lt;f&gt;');
+  });
+
+  it('@dataset: falls back to an empty string when the dataset key is missing', () => {
+    const el = document.createElement('div');
+    expect(TokenHelper.resolve('@dataset:foo', el, makeEvent())).toBe('');
   });
 
   it('resolves a double-quoted string literal', () => {

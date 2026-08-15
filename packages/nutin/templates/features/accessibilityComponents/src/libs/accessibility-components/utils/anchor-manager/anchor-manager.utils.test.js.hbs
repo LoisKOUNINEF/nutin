@@ -101,6 +101,17 @@ describe('AnchorManager', () => {
     expect(announcement.getAttribute('aria-atomic')).toBe('true');
   });
 
+  it('falls back to the raw id in the announcement text when the target element does not exist', () => {
+    new AnchorManager({ href: '#missing-id' }, container);
+    const anchor = container.querySelector('a');
+
+    click(anchor);
+    tick(100);
+
+    const announcement = document.querySelector('.u-sr-only[role="status"]');
+    expect(announcement.textContent).toBe('Navigated to missing-id');
+  });
+
   it('activates an internal href the same way on a Space keydown', () => {
     new AnchorManager({ href: '#section-1' }, container);
     const anchor = container.querySelector('a');

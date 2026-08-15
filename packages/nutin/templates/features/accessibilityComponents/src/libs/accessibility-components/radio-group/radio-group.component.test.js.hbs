@@ -101,6 +101,12 @@ describe('RadioGroupComponent', () => {
     expect(component.getValue()).toBe('a');
   });
 
+  it('getValue falls back to an empty string when no option is checked', () => {
+    component = new RadioGroupComponent(placeholder, { name: 'plan', options: [{ value: 'a' }, { value: 'b' }] });
+    component.render();
+    expect(component.getValue()).toBe('');
+  });
+
   it('calls onChange with the value only when a radio becomes checked via a delegated change event', () => {
     let received = null;
     let callCount = 0;

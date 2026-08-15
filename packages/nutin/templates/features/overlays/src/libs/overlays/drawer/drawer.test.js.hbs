@@ -41,6 +41,18 @@ describe('DrawerOverlay', () => {
     }
   });
 
+  it('calls the onClose callback on destroy when provided', () => {
+    let called = false;
+    overlay = new DrawerOverlay({ template: '<p>x</p>', onClose: () => { called = true; } });
+    const backdrop = overlay.open();
+    const wrapper = backdrop.querySelector('.drawer-wrapper');
+
+    overlay.close();
+    completeTransitionGatedDestroy(wrapper);
+
+    expect(called).toBe(true);
+  });
+
   it('emits Overlays.overlayOpened("drawer") on render and overlayClosed("drawer") on destroy', () => {
     const openedSpy = spyOn(Overlays, 'overlayOpened');
     const closedSpy = spyOn(Overlays, 'overlayClosed');

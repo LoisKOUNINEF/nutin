@@ -26,6 +26,14 @@ describe('FormControlComponent', () => {
     expect(label.getAttribute('for')).toBe(input.id);
   });
 
+  it('renders placeholder and autocomplete attributes when provided', () => {
+    component = new FormControlComponent(placeholder, { name: 'email', placeholder: 'you@example.com', autocomplete: 'email' });
+    component.render();
+    const input = component.getElement().querySelector('input');
+    expect(input.getAttribute('placeholder')).toBe('you@example.com');
+    expect(input.getAttribute('autocomplete')).toBe('email');
+  });
+
   it('renders a <textarea> with rows when type is "textarea"', () => {
     component = new FormControlComponent(placeholder, { name: 'bio', type: 'textarea', rows: 6 });
     component.render();
@@ -134,6 +142,19 @@ describe('FormControlComponent', () => {
     component.render();
     component.getElement().querySelector('input').value = 'hi';
     expect(component.getValue()).toBe('hi');
+  });
+
+  it('validate() and getValue() behave safely before the component has been rendered, with no validators configured', () => {
+    component = new FormControlComponent(placeholder, { name: 'email' });
+    expect(component.getValue()).toBe('');
+    expect(component.validate()).toBe(true);
+  });
+
+  it('does not throw when onAfterRender runs again after the input is removed', () => {
+    component = new FormControlComponent(placeholder, { name: 'email' });
+    component.render();
+    component.getElement().querySelector('.form-control__input').remove();
+    expect(() => component.onAfterRender()).not.toThrow();
   });
 
   it('validate() runs validation immediately and returns the result', () => {

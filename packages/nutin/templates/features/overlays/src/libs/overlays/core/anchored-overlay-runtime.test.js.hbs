@@ -246,6 +246,48 @@ describe('AnchoredOverlayRuntime (via PopoverOverlay)', () => {
     delete document.documentElement.clientHeight;
   });
 
+  it('placement: "left"/"right" position along the horizontal axis when they fit', () => {
+    anchor.getBoundingClientRect = () => ({ top: 100, left: 300, right: 400, bottom: 120, width: 100, height: 20 });
+    Object.defineProperty(document.documentElement, 'clientWidth', { value: 800, configurable: true });
+    Object.defineProperty(document.documentElement, 'clientHeight', { value: 600, configurable: true });
+
+    overlay = new PopoverOverlay({ anchor, template: '<p>x</p>', placement: 'left' });
+    const wrapper = overlay.open();
+    wrapper.getBoundingClientRect = () => ({ top: 0, left: 0, right: 50, bottom: 30, width: 50, height: 30 });
+    overlay.updatePosition();
+
+    expect(wrapper.getAttribute('data-placement')).toBe('left');
+    expect(wrapper.style.left).toBe('242px');
+
+    overlay.setAnchorPoint(500, 100);
+    const overlay2 = new PopoverOverlay({ anchor, template: '<p>x</p>', placement: 'right' });
+    const wrapper2 = overlay2.open();
+    wrapper2.getBoundingClientRect = () => ({ top: 0, left: 0, right: 50, bottom: 30, width: 50, height: 30 });
+    overlay2.updatePosition();
+
+    expect(wrapper2.getAttribute('data-placement')).toBe('right');
+
+    delete document.documentElement.clientWidth;
+    delete document.documentElement.clientHeight;
+  });
+
+  it('placement: "end" align on the vertical cross axis anchors to the far edge', () => {
+    anchor.getBoundingClientRect = () => ({ top: 100, left: 300, right: 400, bottom: 120, width: 100, height: 20 });
+    Object.defineProperty(document.documentElement, 'clientWidth', { value: 800, configurable: true });
+    Object.defineProperty(document.documentElement, 'clientHeight', { value: 600, configurable: true });
+
+    overlay = new PopoverOverlay({ anchor, template: '<p>x</p>', placement: 'left-end' });
+    const wrapper = overlay.open();
+    wrapper.getBoundingClientRect = () => ({ top: 0, left: 0, right: 50, bottom: 30, width: 50, height: 30 });
+    overlay.updatePosition();
+
+    expect(wrapper.getAttribute('data-placement')).toBe('left-end');
+    expect(wrapper.style.top).toBe(`${120 - 30}px`);
+
+    delete document.documentElement.clientWidth;
+    delete document.documentElement.clientHeight;
+  });
+
   it('placement: clamps the cross axis so the wrapper does not overflow the viewport', () => {
     anchor.getBoundingClientRect = () => ({ top: 100, left: -5, right: 5, bottom: 120, width: 10, height: 20 });
     Object.defineProperty(document.documentElement, 'clientWidth', { value: 800, configurable: true });

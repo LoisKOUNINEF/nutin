@@ -69,6 +69,18 @@ describe('SwitchComponent', () => {
     expect(component.getValue()).toBe(true);
   });
 
+  it('getValue falls back to false when the input has not been rendered yet', () => {
+    component = new SwitchComponent(placeholder, {});
+    expect(component.getValue()).toBe(false);
+  });
+
+  it('does not throw when onAfterRender runs again after the input is removed', () => {
+    component = new SwitchComponent(placeholder, {});
+    component.render();
+    component.getElement().querySelector('.switch__input').remove();
+    expect(() => component.onAfterRender()).not.toThrow();
+  });
+
   it('calls onChange with the new checked state on a real change event, and stops after destroy()', () => {
     let received = null;
     let callCount = 0;

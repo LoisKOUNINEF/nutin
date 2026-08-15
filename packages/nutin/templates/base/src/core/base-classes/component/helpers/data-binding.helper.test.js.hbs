@@ -43,6 +43,12 @@ describe('DataBindingHelper', () => {
     expect(container.querySelector('span').textContent).toBe('original');
   });
 
+  it('applyDataBindings skips a bound element when data-bind is empty', () => {
+    container.innerHTML = '<span data-bind="">original</span>';
+    DataBindingHelper.applyDataBindings(container, { '': 'ignored' });
+    expect(container.querySelector('span').textContent).toBe('original');
+  });
+
   it('getDataBindingValues reads .value from bound input/textarea elements', () => {
     container.innerHTML = '<input data-bind="name" value="Ada"><textarea data-bind="bio">hi</textarea>';
     const values = DataBindingHelper.getDataBindingValues(container);
@@ -59,5 +65,11 @@ describe('DataBindingHelper', () => {
     container.innerHTML = '<span data-bind="name"></span>';
     const values = DataBindingHelper.getDataBindingValues(container);
     expect(values).toEqual({ name: '' });
+  });
+
+  it('getDataBindingValues skips an element when data-bind is empty', () => {
+    container.innerHTML = '<span data-bind="">hi</span>';
+    const values = DataBindingHelper.getDataBindingValues(container);
+    expect(values).toEqual({});
   });
 });

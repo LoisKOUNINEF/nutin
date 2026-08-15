@@ -135,6 +135,20 @@ describe('NavigationManager', () => {
     }
   });
 
+  it('updateLocaleInUrl handles a root pathname that collapses to an empty string when stripped', () => {
+    CONFIG.i18n = false;
+    window.history.pushState({}, '', '/');
+
+    const originalPushState = window.history.pushState;
+    window.history.pushState = () => {};
+
+    try {
+      expect(() => NavigationManager.updateLocaleInUrl()).not.toThrow();
+    } finally {
+      window.history.pushState = originalPushState;
+    }
+  });
+
   it('updateLocaleInUrl does nothing when the URL already has the correct locale prefix', () => {
     CONFIG.i18n = true;
     I18nService['_LANGUAGES'] = ['en', 'fr'];

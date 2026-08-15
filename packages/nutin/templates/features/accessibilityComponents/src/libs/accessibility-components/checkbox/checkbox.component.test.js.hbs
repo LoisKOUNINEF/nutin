@@ -87,6 +87,18 @@ describe('CheckboxComponent', () => {
     expect(component.getValue()).toBe(true);
   });
 
+  it('getValue falls back to false when the input has not been rendered yet', () => {
+    component = new CheckboxComponent(placeholder, {});
+    expect(component.getValue()).toBe(false);
+  });
+
+  it('does not throw when onAfterRender runs again after the input is removed', () => {
+    component = new CheckboxComponent(placeholder, {});
+    component.render();
+    component.getElement().querySelector('.checkbox__input').remove();
+    expect(() => component.onAfterRender()).not.toThrow();
+  });
+
   it('calls onChange with the new checked state on a real change event', () => {
     let received = null;
     component = new CheckboxComponent(placeholder, { onChange: (checked) => { received = checked; } });

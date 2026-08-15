@@ -23,6 +23,17 @@ describe('NotificationBanner (via showNotificationBanner())', () => {
     expect(region.querySelector('.notification-banner-region__top').contains(el)).toBe(true);
   });
 
+  it('renders into the bottom container and uses alert/assertive attributes for type "error"', () => {
+    showNotificationBanner('uh oh', { type: 'error', position: 'bottom' });
+    const region = document.querySelector('.notification-banner-region');
+    const el = region.querySelector('.app-notification-banner');
+
+    expect(el.classList.contains('app-notification-banner--error')).toBe(true);
+    expect(region.querySelector('.notification-banner-region__bottom').contains(el)).toBe(true);
+    expect(el.getAttribute('role')).toBe('alert');
+    expect(el.getAttribute('aria-live')).toBe('assertive');
+  });
+
   it('never auto-dismisses: it persists indefinitely until manually dismissed', () => {
     useFakeTimers();
     showNotificationBanner('hello');

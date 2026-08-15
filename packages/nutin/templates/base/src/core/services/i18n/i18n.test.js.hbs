@@ -185,6 +185,45 @@ describe('i18n module', async () => {
     }
   });
 
+  it('initTranslations falls back to the default language when the resolved preferred language is unsupported', async () => {
+    const original = I18nService.getPreferredLanguage;
+    I18nService.getPreferredLanguage = () => 'zz';
+    try {
+      await I18nService.initTranslations();
+      expect(I18nService.currentLanguage).toBe('en');
+    } finally {
+      I18nService.getPreferredLanguage = original;
+    }
+  });
+
+  it('getLocaleFromUrl returns null when the URL locale segment is not supported', () => {
+    CONFIG.i18n = true;
+    window.history.pushState({}, '', '/xx/page');
+    try {
+      expect(I18nService.getLocaleFromUrl()).toBe(null);
+    } finally {
+      CONFIG.i18n = false;
+      window.history.pushState({}, '', '/');
+    }
+  });
+
+  it('loadDefaultTranslations logs and leaves default translations empty when the fetch fails', async () => {
+    Object.defineProperty(navigator, 'language', { writable: true, configurable: true, value: 'fr-FR' });
+    const errSpy = spyOn(console, 'error');
+    errSpy.andCallFake(() => {});
+    fetchMock.mockError('/locales/en.json', 500);
+
+    await I18nService.initTranslations();
+
+    // loadDefaultTranslations is attempted twice: once explicitly by initTranslations,
+    // and again from within loadTranslations('fr') since _defaultTranslations is still
+    // empty after the first failure — each attempt logs its own error.
+    expect(errSpy.callCount).toBe(2);
+    expect(I18nService.currentLanguage).toBe('fr');
+
+    errSpy.restore();
+  });
+
   it('honors a previously saved language preference from localStorage', async () => {
     localStorage.setItem(I18nService.localStorageKey, 'fr');
     await I18nService.initTranslations();

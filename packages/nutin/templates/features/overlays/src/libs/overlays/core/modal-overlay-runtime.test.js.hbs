@@ -90,6 +90,16 @@ describe('ModalOverlayRuntime (via DrawerOverlay)', () => {
     expect(wrapper.getAttribute('aria-labelledby')).toBe('modal-label');
   });
 
+  it('uses dialogLabel to build the heading id when both a heading and dialogLabel are given', () => {
+    overlay = new DrawerOverlay({ template: '<h2>Title</h2>', dialogLabel: 'my-drawer' });
+    const backdrop = overlay.open();
+    const heading = backdrop.querySelector('h2');
+    const wrapper = backdrop.querySelector('.drawer-wrapper');
+
+    expect(heading.id).toBe('my-drawer-label');
+    expect(wrapper.getAttribute('aria-labelledby')).toBe('my-drawer-label');
+  });
+
   it('sets aria-labelledby to a dangling id when dialogLabel is set but no heading exists', () => {
     overlay = new DrawerOverlay({ template: '<p>no heading here</p>', dialogLabel: 'my-drawer' });
     const backdrop = overlay.open();

@@ -40,6 +40,14 @@ describe('pipes (registerPipes)', () => {
     expect(AppPipeRegistry.apply('date', value, ['en-US', 'nonsense'])).toBe(expected);
   });
 
+  it('date includes hour/minute in short/long formats when the time flag is set', () => {
+    const value = '2024-03-15T14:30:00Z';
+    const expected = new Date(value).toLocaleString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
+    });
+    expect(AppPipeRegistry.apply('date', value, ['en-US', 'long', true])).toBe(expected);
+  });
+
   it('date warns and returns the raw stringified value for an invalid date', () => {
     const warnSpy = spyOn(console, 'warn');
     warnSpy.andCallFake(() => {});

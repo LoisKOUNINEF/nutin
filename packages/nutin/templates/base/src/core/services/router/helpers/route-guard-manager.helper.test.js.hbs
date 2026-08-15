@@ -29,6 +29,12 @@ describe('RouteGuardsManager', () => {
     expect(JSON.stringify(result)).toBe(JSON.stringify([guard]));
   });
 
+  it('should default to an empty guards array when an object route config has no guards', () => {
+    const config = { view: mockViewConstructor };
+    const result = RouteGuardsManager.getRouteGuards(config);
+    expect(result).toEqual([]);
+  });
+
   it('should pass all guards and return true from runGuards', async () => {
     const guards = [() => true, () => Promise.resolve(true)];
     const result = await RouteGuardsManager.runGuards(guards);

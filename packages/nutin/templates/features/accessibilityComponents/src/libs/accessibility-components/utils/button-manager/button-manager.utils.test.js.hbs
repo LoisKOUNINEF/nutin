@@ -52,6 +52,16 @@ describe('ButtonManager', () => {
     expect(container.className).toBe('dynamic-buttons');
   });
 
+  it('falls back to the default class name when containerClassName is set but falsy', () => {
+    const mockComponent = {};
+    const buttons = [{ i18nKey: 'test' }];
+    const manager = new ButtonManager(mockComponent, buttons, { containerClassName: '' });
+
+    const container = manager.createButtonContainer();
+
+    expect(container.className).toBe('dynamic-buttons');
+  });
+
   it('should create container with custom class name', () => {
     const mockComponent = {};
     const buttons = [{ i18nKey: 'test' }];
@@ -112,6 +122,24 @@ describe('ButtonManager', () => {
     const button = manager.createButton(btn, 0);
     
     expect(button.className).toBe('btn-primary');
+  });
+
+  it('sets aria-expanded when explicitly provided, including false', () => {
+    const mockComponent = {};
+    const manager = new ButtonManager(mockComponent);
+
+    const button = manager.createButton({ i18nKey: 'save', ariaExpanded: false }, 0);
+
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('sets aria-controls when provided', () => {
+    const mockComponent = {};
+    const manager = new ButtonManager(mockComponent);
+
+    const button = manager.createButton({ i18nKey: 'save', ariaControls: 'menu-1' }, 0);
+
+    expect(button.getAttribute('aria-controls')).toBe('menu-1');
   });
 
   it('should set data-event attribute correctly', () => {

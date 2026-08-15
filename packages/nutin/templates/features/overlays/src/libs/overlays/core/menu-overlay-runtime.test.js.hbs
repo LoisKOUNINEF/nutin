@@ -132,6 +132,34 @@ describe('MenuOverlayRuntime (via DropdownOverlay)', () => {
     expect(called).toBe(false);
   });
 
+  it('onItemClick does nothing when called directly with a disabled item or an out-of-range index', () => {
+    let called = false;
+    overlay = new DropdownOverlay({ anchor, items: [{ label: 'Off', disabled: true }], onSelect: () => { called = true; } });
+    overlay.open();
+
+    overlay.onItemClick(0);
+    overlay.onItemClick(99);
+
+    expect(called).toBe(false);
+  });
+
+  it('keydown handling is a no-op when there are no enabled items', () => {
+    overlay = new DropdownOverlay({ anchor, items: [{ label: 'Off', disabled: true }] });
+    const wrapper = overlay.open();
+
+    expect(() => {
+      wrapper.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    }).not.toThrow();
+  });
+
+  it('_focusItemAt is a no-op when the target index is out of range', () => {
+    overlay = new DropdownOverlay({ anchor, items });
+    const wrapper = overlay.open();
+    const els = [...wrapper.querySelectorAll('.menu-item')];
+
+    expect(() => overlay._focusItemAt(els, 99)).not.toThrow();
+  });
+
   it('clicking a disabled item does nothing (no click handler is bound)', () => {
     let called = false;
     overlay = new DropdownOverlay({ anchor, items: [{ label: 'Off', disabled: true }], onSelect: () => { called = true; } });

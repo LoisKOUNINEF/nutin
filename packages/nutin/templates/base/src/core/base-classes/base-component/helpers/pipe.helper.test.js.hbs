@@ -61,4 +61,22 @@ describe('PipeHelper', () => {
     PipeHelper.parsePipeAttributes(container);
     expect(container.querySelector('span').textContent).toBe('hi');
   });
+
+  it('does nothing when the data-pipe attribute is empty', () => {
+    container.innerHTML = '<span data-pipe="">hi</span>';
+    PipeHelper.parsePipeAttributes(container);
+    expect(container.querySelector('span').textContent).toBe('hi');
+  });
+
+  it('prefers data-pipe-source over .value for an input element', () => {
+    container.innerHTML = '<input data-pipe="upper" data-pipe-source="from source" value="ignored">';
+    PipeHelper.parsePipeAttributes(container);
+    expect(container.querySelector('input').value).toBe('FROM SOURCE');
+  });
+
+  it('stops processing pipes when a pipe segment resolves to an empty name', () => {
+    container.innerHTML = '<span data-pipe=":arg">hi</span>';
+    PipeHelper.parsePipeAttributes(container);
+    expect(container.querySelector('span').textContent).toBe('hi');
+  });
 });

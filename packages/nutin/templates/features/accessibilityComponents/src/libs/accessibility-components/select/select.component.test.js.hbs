@@ -89,6 +89,18 @@ describe('SelectComponent', () => {
     expect(component.getValue()).toBe('c');
   });
 
+  it('getValue falls back to an empty string when the select has not been rendered yet', () => {
+    component = new SelectComponent(placeholder, { options });
+    expect(component.getValue()).toBe('');
+  });
+
+  it('does not throw when onAfterRender runs again after the select is removed', () => {
+    component = new SelectComponent(placeholder, { options });
+    component.render();
+    component.getElement().querySelector('.select__control').remove();
+    expect(() => component.onAfterRender()).not.toThrow();
+  });
+
   it('calls onChange with the new value on a real change event, and stops after destroy()', () => {
     let received = null;
     let callCount = 0;
