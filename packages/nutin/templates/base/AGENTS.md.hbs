@@ -20,7 +20,7 @@ nutin.config.js   build/feature config — see below
 
 - Favor small, composable components.
 - One `View` = one route.
-- Import everything from `core/index.js` or `libs/index.js` — never deep-import `core/base-classes/...` or `core/services/...`.
+- Import everything from `core/index.js`, `libs/index.js`, `components/index.js`, `views/index.js`, `services/index.js` — never deep-import `core/base-classes/...` or `components/my-component/my-component.js`.
 
 ## Commands
 
@@ -45,7 +45,7 @@ BaseComponent<T>     — render/destroy engine, data-* parsing, children
 
 ## Children components
 
-- Override `childConfigs(): ComponentConfig[]` to declare children — matched against `[data-component="selector"]` elements in the rendered template.
+- Override `childConfigs(): ComponentConfig[]` to declare children — matched against `[data-component="selector"]` elements in the rendered template. ComponentConfig: `{ selector: 'my-selector', factory: (el) => new MyComponent(el, {...} )}`.
 - For repeated lists, use the inherited `catalogConfig({ array, elementName, selector, component })` inside `childConfigs()` instead of hand-writing one entry per item — targets `[data-catalog="selector"]`.
 
 ## `data-*` attributes
