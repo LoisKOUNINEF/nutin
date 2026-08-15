@@ -64,7 +64,7 @@ export function printCoverageReport(report) {
   const globalFunctionsPct = totals.totalFunctions ? (totals.coveredFunctions / totals.totalFunctions) * 100 : 100;
   const globalBranchesPct = totals.totalBranches ? (totals.coveredBranches / totals.totalBranches) * 100 : 100;
 
-  print.boldInfo(`Global: ${globalLinesPct.toFixed(1)}% lines, ${globalFunctionsPct.toFixed(1)}% functions, ${globalBranchesPct.toFixed(1)}% branches\n`);
+  print.boldInfo(`Global:  ${globalBranchesPct.toFixed(1)}% branches, ${globalFunctionsPct.toFixed(1)}% functions, ${globalLinesPct.toFixed(1)}% lines\n`);
 }
 
 function toTsPath(input) {

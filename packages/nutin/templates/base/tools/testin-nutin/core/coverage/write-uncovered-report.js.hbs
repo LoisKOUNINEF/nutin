@@ -29,16 +29,16 @@ function buildMarkdown(uncovered) {
   const sections = uncovered
     .sort((a, b) => a.file.localeCompare(b.file))
     .map(r => {
-      const lines = r.uncoveredLines.length
-        ? `Uncovered lines: ${r.uncoveredLines.join(', ')}\n`
-        : '';
       const branches = r.uncoveredBranches.length
-        ? `Uncovered branches: ${r.uncoveredBranches.join(', ')}\n`
+        ? `Uncovered branches (lines): ${r.uncoveredBranches.join(', ')}\n`
         : '';
       const fns = r.uncoveredFunctions.length
         ? `Uncovered functions:\n${r.uncoveredFunctions.map(f => `- \`${f.name}\` (line ${f.line})`).join('\n')}\n`
         : '';
-      return `## ${r.file}\n\n${lines}${branches}${fns}`;
+      const lines = r.uncoveredLines.length
+        ? `Uncovered lines: ${r.uncoveredLines.join(', ')}\n`
+        : '';
+      return `## ${r.file}\n\n${branches}${fns}${lines}`;
     });
 
   return `# Uncovered Code\n\nIMPORTANT: Line numbers refer to **compiled** .js code (\`dist/src/\`).\n\n${sections.join('\n')}`;
