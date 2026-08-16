@@ -37,7 +37,10 @@ export function printStart() {
 }
 
 export function printCoverageReport(report) {
-  if (!report.length) { print.warn('No app source files were covered.'); return; }
+  if (!report.length) {
+    print.warn('No app source files were covered.');
+    return { globalLinesPct: 100, globalFunctionsPct: 100, globalBranchesPct: 100 };
+  }
 
   print.boldBlue('\nCoverage Summary');
   console.table(
@@ -65,6 +68,8 @@ export function printCoverageReport(report) {
   const globalBranchesPct = totals.totalBranches ? (totals.coveredBranches / totals.totalBranches) * 100 : 100;
 
   print.boldInfo(`Global:  ${globalBranchesPct.toFixed(1)}% branches, ${globalFunctionsPct.toFixed(1)}% functions, ${globalLinesPct.toFixed(1)}% lines\n`);
+
+  return { globalLinesPct, globalFunctionsPct, globalBranchesPct };
 }
 
 function toTsPath(input) {

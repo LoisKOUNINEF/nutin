@@ -61,8 +61,22 @@ async function runTests() {
       scopedResults = scopedResults.filter(({ filePath }) => fileFilters.some(f => filePath.includes(f)));
     }
     const report = buildCoverageReport(scopedResults);
-    printCoverageReport(report);
+    const globals = printCoverageReport(report);
     await maybeWriteUncoveredReport(report);
+
+    const treshold = config.testinNutin.coverage?.treshold;
+    if (typeof treshold === 'number') {
+      const misses = Object.entries({
+        lines: globals.globalLinesPct,
+        functions: globals.globalFunctionsPct,
+        branches: globals.globalBranchesPct,
+      }).filter(([, pct]) => pct < treshold);
+
+      if (misses.length) {
+        print.boldError(`\n✗ Coverage below treshold (${treshold}%): ${misses.map(([k, pct]) => `${k} ${pct.toFixed(1)}%`).join(', ')}\n`);
+        process.exit(1);
+      }
+    }
   }
 }
 

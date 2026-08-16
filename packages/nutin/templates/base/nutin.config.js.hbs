@@ -42,8 +42,8 @@ export default {
     includeApp: false,
     verbose: false,
     coverage: {
-      enabled: false,
-      treshold: 95,           // exits with code 1 if global branches, functions or lines global coverage is inder treshold
+      enabled: false,         // `enabled: true` is equivalent to `npm run testin-nutin:coverage`
+      treshold: 95,           // exits with code 1 if global branches, functions or lines global coverage is under treshold
       reportUncovered: true,  // generates a .md file in coverage/ 
     },
     jsdomOptions: {
