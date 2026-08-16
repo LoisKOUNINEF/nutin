@@ -38,11 +38,13 @@ export default {
   // `npm run testin-nutin`
   testinNutin: {
     includeFramework: true,
-    includeTools: true,
+    includeTools: false,
     includeApp: false,
     verbose: false,
     coverage: {
       enabled: false,
+      treshold: 95,           // exits with code 1 if global branches, functions or lines global coverage is inder treshold
+      reportUncovered: true,  // generates a .md file in coverage/ 
     },
     jsdomOptions: {
       runScripts: false,     // or true ("dangerously") if needed

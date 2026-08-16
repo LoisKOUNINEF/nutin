@@ -26,60 +26,91 @@ export async function runQueuedTests() {
   let previousSuiteAfterAll = null;
   let test;
   
-  for (let i = 0; i < testAmount; i++) {
+  const runAfterAll = async (suiteName, afterAllFn) => {
+    if (!afterAllFn) return;
     try {
-      test = testQueue.deque();
-
-      if (test.suiteName !== previousSuite) {
-        teardownJsdom();
-        if (previousSuiteAfterAll) {
-          await previousSuiteAfterAll();
-        }
-        setupJsdom();
-        if (test.beforeAll) {
-          await test.beforeAll();
-        }
-        previousSuite = test.suiteName;
-        previousSuiteAfterAll = test.afterAll;
-      }
-
-      if (test.isTodo) {
-        todo++;
-        results.push({
-          suiteName: test.suiteName,
-          status: 'todo',
-          name: test.testName,
-          file: test.file
-        });
-        continue;
-      }
-
-      if (test.beforeEach) await test.beforeEach();
-      await test.testFn();
-      if (test.afterEach) await test.afterEach();
-
-      passed++;
-      results.push({ 
-        suiteName: test.suiteName, 
-        status: 'passed', 
-        name: test.testName 
-      });
+      await afterAllFn();
     } catch (err) {
       failed++;
-      results.push({ 
-        suiteName: test.suiteName, 
-        status: 'failed', 
-        name: test.testName, 
+      results.push({
+        suiteName,
+        status: 'failed',
+        name: 'afterAll',
         error: err.stack
+      });
+    }
+  };
+
+  for (let i = 0; i < testAmount; i++) {
+    test = testQueue.deque();
+
+    if (test.suiteName !== previousSuite) {
+      teardownJsdom();
+      await runAfterAll(previousSuite, previousSuiteAfterAll);
+      setupJsdom();
+      previousSuite = test.suiteName;
+      previousSuiteAfterAll = test.afterAll;
+      if (test.beforeAll) {
+        try {
+          await test.beforeAll();
+        } catch (err) {
+          failed++;
+          results.push({
+            suiteName: test.suiteName,
+            status: 'failed',
+            name: 'beforeAll',
+            error: err.stack
+          });
+        }
+      }
+    }
+
+    if (test.isTodo) {
+      todo++;
+      results.push({
+        suiteName: test.suiteName,
+        status: 'todo',
+        name: test.testName,
+        file: test.file
+      });
+      continue;
+    }
+
+    let testError = null;
+    try {
+      if (test.beforeEach) await test.beforeEach();
+      await test.testFn();
+    } catch (err) {
+      testError = err;
+    }
+
+    try {
+      if (test.afterEach) await test.afterEach();
+    } catch (err) {
+      if (!testError) testError = err;
+    }
+
+    if (testError) {
+      failed++;
+      results.push({
+        suiteName: test.suiteName,
+        status: 'failed',
+        name: test.testName,
+        error: testError.stack
+      });
+    } else {
+      passed++;
+      results.push({
+        suiteName: test.suiteName,
+        status: 'passed',
+        name: test.testName
       });
     }
   }
 
   if (previousSuite !== null) {
     teardownJsdom();
-    if (previousSuiteAfterAll) {
-      await previousSuiteAfterAll();
-    }
+    await runAfterAll(previousSuite, previousSuiteAfterAll);
   }
 
   const endTime = performance.now();
