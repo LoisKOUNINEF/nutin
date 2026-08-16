@@ -42,9 +42,9 @@ export default {
     includeApp: false,
     verbose: false,
     coverage: {
-      enabled: false,         // `enabled: true` is equivalent to `npm run testin-nutin:coverage`
-      treshold: 95,           // exits with code 1 if global branches, functions or lines global coverage is under treshold
-      reportUncovered: true,  // generates a .md file in coverage/ 
+      enabled: false,        // include coverage in the normal test command
+      threshold: 95,         // exits with code 1 if any global coverage metric percentage is below the threshold
+      reportUncovered: true, // generates an .md report of uncovered code in coverage/
     },
     jsdomOptions: {
       runScripts: false,     // or true ("dangerously") if needed
