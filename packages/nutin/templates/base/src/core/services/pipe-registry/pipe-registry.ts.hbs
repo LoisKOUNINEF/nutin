@@ -9,6 +9,7 @@ class PipeRegistry extends Service<PipeRegistry> {
 
   public register(name: string, fn: PipeFunction): void {
     if(this._pipes[name]) {
+      console.warn(`Pipe "${name}" already exists - skipping.`);
       return;
     }
     this._pipes[name] = fn;

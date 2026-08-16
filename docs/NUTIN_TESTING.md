@@ -8,6 +8,7 @@ This documents `testin-nutin`, nutin's built-in test toolkit, shipped by default
 "testin-nutin": "<pm> run build && node tools/testin-nutin/runner.js",
 "testin-nutin:watch": "<pm> run build && node tools/testin-nutin/watch-tests.js"
 "testin-nutin:only": "node tools/testin-nutin/runner.js",
+"testin-nutin:coverage": "<pm> run build && node tools/testin-nutin/runner.js --coverage",
 ```
 
 The test environment loads the **built development output** (not bundled nor minified) `dist/src/index.html` into jsdom (see [How a run works](#how-a-run-works)) — running `testin-nutin:only` directly only works if `dist/` is already up to date.
@@ -25,6 +26,7 @@ the runner before any test file loads — no imports needed in test files:
 
 ```js
 describe('globals beforeEach/All and afterEach/All', () => {
+  // `beforeEach/All` and `afterEach/All` must be INSIDE a `describe` block
   beforeAll(() => { beforeAllCount++; });
   beforeEach(() => { beforeEachCount++; });
   afterEach(() => { afterEachCount++; });
@@ -89,6 +91,29 @@ Replaces `obj.methodName` and returns a handle:
 With neither `.andCallFake` nor `.andReturn` set, calls **pass through** to
 the original implementation while still being recorded — spies default to
 transparent, not silent.
+
+## Silencing console output
+
+```js
+silenceConsole('warn', () => registerPipes());
+silenceConsole(['info', 'error'], () => runScript(scriptPath, message));
+```
+
+`silenceConsole(methodOrMethods, fn)` wraps a single call, spying on and
+no-op'ing one or more `console` methods (a single name or an array) for the
+duration of that call, then restoring them automatically — before returning
+the call's result. Works for both sync and async `fn`: a thenable return
+value is awaited before restoring, so the spies stay installed for the
+whole async operation.
+
+Use it for expected-but-noisy console output you don't need to assert
+on — e.g. a real `console.warn` from calling `registerPipes()` when the
+pipes are already registered (`AppPipeRegistry` is a shared singleton, so
+several suites call it defensively; see `pipes.test.js`/
+`pipe-registry.test.js`/the `overlays` feature's `modal.test.js`). If a test
+needs to assert *what* was logged (`.callCount`, `.lastCall`), use
+`spyOn(console, 'method')` directly instead — `silenceConsole` doesn't
+expose the underlying spy handle.
 
 ## Clock
 
@@ -187,9 +212,9 @@ The shared spy factory itself lives at `mocks/create-mock-method.js`.
 2. Resolves test files by recursively scanning an `origins` list for
    `*.test.js` (`getTestFiles`, plain `fs.readdirSync`, no glob lib) —
    `origins` isn't itself a config key, it's built at runtime from
-   `testinNutin.includeFramework` (adds the framework's own test dirs) and
-   `testinNutin.includeApp` (adds `src/app`). Optional CLI args filter files
-   by substring match.
+   `testinNutin.includeFramework` (adds the framework's own test dirs),
+   `testinNutin.includeTools` (adds `tools`), and `testinNutin.includeApp`
+   (adds `src/app`). Optional CLI args filter files by substring match.
 3. For each file: sets up a fresh jsdom, `import()`s the file (this just
    *registers* its `describe`/`it` calls into a queue — nothing runs yet),
    tears the jsdom down. Import errors are caught and printed, not thrown.
@@ -209,18 +234,64 @@ chokidar watcher on `src`/`test`/`unit`/`e2e` that re-runs the **entire**
 suite (`node tools/testin-nutin/runner.js` via `child_process.exec`) on any
 change — no selective re-run, and no rebuild between runs.
 
+## Coverage
+
+Run it with `npm run testin-nutin:coverage`, or set `testinNutin.coverage.enabled: true` to make
+it the default for the plain `testin-nutin` command.
+
+Coverage is real V8 precise coverage, collected via `node:inspector`'s
+`Profiler` API (`core/coverage/collect-coverage.js`) — not a static/AST
+instrumenter.
+
+**Scope**: only the **compiled** output under `dist/src/core` + `dist/src/libs`
+(when `includeFramework`) and `dist/src/app` (when `includeApp`). **`tools/`
+is never scoped into coverage, even when `includeTools: true`** — tools
+tests run, but don't count toward the report or the threshold.
+
+Three metrics are computed per file (`core/coverage/compute-coverage.js`),
+each intentionally lightweight rather than exact:
+
+- **Lines** — samples the execution count at each line's first
+  non-whitespace character; not full statement-level coverage.
+- **Functions** — every V8-reported function range except the
+  whole-script pseudo-function.
+- **Branches** — every V8 range nested inside a function's own top-level
+  range (`if`/`else` arms, ternaries, `switch` cases, `&&`/`||`
+  short-circuits, loop bodies) — reuses data V8 already collects, no AST
+  parsing involved.
+
+Output is a per-file `console.table` (paths are shown with a cosmetic
+`.ts` extension, though coverage is measured against the compiled `.js`)
+plus a global `branches/functions/lines %` summary line.
+
+If `testinNutin.coverage.reportUncovered` is true and anything is actually
+uncovered, `coverage/uncovered.md` is written listing uncovered
+lines/branches/functions per file (otherwise a run with nothing uncovered
+just prints "🎉 No uncovered code found."). **Line numbers in that report
+refer to the compiled `dist/src/` output, not the original `.ts` source.**
+
+If `testinNutin.coverage.threshold` is a number and any global metric
+(lines/functions/branches) falls below it, the process exits with code 1
+after printing which metric(s) missed and by how much — useful as a CI gate.
+
 ## Config
 
 `testinNutin` block in `nutin.config.js`:
 
 ```js
 testinNutin: {
-  includeFramework: true,
-  includeApp: false,
-  verbose: false,
+  includeFramework: true,  // test Nutin source - src/core and src/libs
+  includeTools: false,     // tools/ tests - only meaningful logic, not included in coverage
+  includeApp: false,       // enable to use testin-nutin for application tests
+  verbose: false,          // log test suites and individual `it` tests
+  coverage: {
+    enabled: false,        // include coverage in the normal test command
+    threshold: 95,         // exit with code 1 if any global coverage metric falls below the threshold
+    reportUncovered: true, // generates an .md report of uncovered lines, functions and branches in coverage/
+  },
   jsdomOptions: {
-    runScripts: false,     // or true ("dangerously") if needed
-    resources: false,      // or true ("usable") if needed
+    runScripts: false,     // or true ("dangerously") to execute scripts in the DOM
+    resources: false,      // or true ("usable") to load external resources
     freezeGlobals: false,
     pretendToBeVisual: true,
   },
@@ -232,13 +303,15 @@ testinNutin: {
 All paths below are relative to a generated app's `tools/testin-nutin/`:
 
 * `core/globals/` — `assertion-lib.js` (extend the matcher set here),
-  `clock.js`, `jsdom-setup.js`, `register-test-globals.js`, `spyon.js`.
+  `clock.js`, `jsdom-setup.js`, `register-test-globals.js`,
+  `silence-console.js`, `spyon.js`.
+* `core/coverage` - `collect-coverage.js`, `compute-coverage.js`, `write-uncovered-report.js`.
 * `core/queue/` — `queue.js` (linked-list `Queue`), `test-discovery.js`,
   `test-queue.js` (drives `runQueuedTests()` off that `Queue`).
 * `core/tests/` — the toolkit's own tests for the assertions/globals/clock
   above.
 * `core/printer.js` — re-exports the hand-rolled `chalk`/`print` console
-  helpers from the repo-wide `tools/utils/print.js`.
+  helpers from the repo-wide `tools/utils/print.js` and provides printer methods (`printSummary`...).
 * `mocks/` — see [Mocking core services](#mocking-core-services).
 * `runner.js` / `watch-tests.js` — the two entrypoints.
 

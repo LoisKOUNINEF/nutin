@@ -37,18 +37,18 @@ export default {
   // Testing toolkit
   // `npm run testin-nutin`
   testinNutin: {
-    includeFramework: true,
-    includeTools: false,
-    includeApp: false,
-    verbose: false,
+    includeFramework: true,  // test Nutin source - src/core and src/libs
+    includeTools: true,      // test tools/ (builder, testin-nutin, etc.)
+    includeApp: false,       // enable to use testin-nutin for application tests
+    verbose: false,          // log test suites and individual `it` tests
     coverage: {
       enabled: false,        // include coverage in the normal test command
-      threshold: 95,         // exits with code 1 if any global coverage metric percentage is below the threshold
-      reportUncovered: true, // generates an .md report of uncovered code in coverage/
+      threshold: 95,         // exit with code 1 if any global coverage metric falls below the threshold
+      reportUncovered: true, // generates an .md report of uncovered lines, functions and branches in coverage/
     },
     jsdomOptions: {
-      runScripts: false,     // or true ("dangerously") if needed
-      resources: false,      // or true ("usable") if needed
+      runScripts: false,     // or true ("dangerously") to execute scripts in the DOM
+      resources: false,      // or true ("usable") to load external resources
       freezeGlobals: false,
       pretendToBeVisual: true,
     },

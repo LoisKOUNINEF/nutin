@@ -3,7 +3,11 @@ import { AppPipeRegistry } from '#root/dist/src/core/index.js';
 
 describe('pipes (registerPipes)', () => {
   beforeAll(() => {
-    registerPipes();
+    // AppPipeRegistry is a process-wide singleton shared by every suite in the
+    // run - if an earlier suite (e.g. pipe-registry.test.js) already re-registered
+    // the app's pipes, this call is a legitimate no-op that logs a "already exists"
+    // warning per pipe. Silence that expected noise rather than letting it leak.
+    silenceConsole('warn', () => registerPipes());
   });
 
   it('currency formats a number as USD/en-US by default', () => {

@@ -11,7 +11,11 @@ describe('ModalOverlay', () => {
   let overlay;
 
   beforeAll(() => {
-    registerPipes();
+    // Other suites earlier in the run (e.g. pipe-registry.test.js, pipes.test.js)
+    // typically already register these pipes on the shared singleton, so this call
+    // is usually a legitimate no-op that would otherwise log an "already exists"
+    // warning per pipe. Silence that expected noise rather than letting it leak.
+    silenceConsole('warn', () => registerPipes());
   });
 
   beforeEach(() => {

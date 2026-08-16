@@ -1,5 +1,6 @@
 import { print, addTest } from '../index.js';
 import { setupJsdom, teardownJsdom, resetDom, flushPromises } from './jsdom-setup.js';
+import { silenceConsole } from './silence-console.js';
 import './assertion-lib.js';
 import './spyon.js';
 import './clock.js';
@@ -53,6 +54,7 @@ export function registerTestGlobals() {
   global.teardownJsdom = teardownJsdom;
   global.resetDom = resetDom;
   global.flushPromises = flushPromises;
+  global.silenceConsole = silenceConsole;
 
   global.$ = (selector) => document.querySelector(selector);
   global.$$ = (selector) => [...document.querySelectorAll(selector)];

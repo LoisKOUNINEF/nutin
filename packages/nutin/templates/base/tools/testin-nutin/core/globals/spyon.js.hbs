@@ -47,11 +47,13 @@ global.spyOn = (obj, methodName) => {
     andCallFake(fn) {
       spyFunction._fake = fn;
       spyFunction._hasReturn = false;
+      return handle;
     },
     andReturn(value) {
       spyFunction._returnValue = value;
       spyFunction._hasReturn = true;
       spyFunction._fake = null;
+      return handle;
     }
   };
 

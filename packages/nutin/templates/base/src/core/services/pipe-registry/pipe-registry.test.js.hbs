@@ -17,11 +17,17 @@ describe('PipeRegistry', () => {
 	});
 
 	it('register() keeps the original implementation when the name is already registered', () => {
+		const warnSpy = spyOn(console, 'warn');
+		warnSpy.andCallFake(() => {});
+
 		AppPipeRegistry.register('dup-test', () => 'first');
 
 		AppPipeRegistry.register('dup-test', () => 'second');
 
 		expect(AppPipeRegistry.apply('dup-test', 'ignored')).toBe('first');
+
+		expect(warnSpy.callCount).toBe(1);
+		warnSpy.restore();
 	});
 
 	it('apply() warns and returns the raw value when the pipe is not registered', () => {
@@ -52,7 +58,9 @@ describe('PipeRegistry', () => {
 
 		// AppPipeRegistry is a process-wide singleton shared by every test suite,
 		// so destroying it here would otherwise leak into every suite that runs
-		// afterward and relies on the app's pipes already being registered.
-		registerPipes();
+		// afterward and relies on the app's pipes already being registered. Silenced
+		// since this can legitimately re-hit an "already exists" warning per pipe if
+		// some other suite re-registers them again later in the run.
+		silenceConsole('warn', () => registerPipes());
 	});
 });
