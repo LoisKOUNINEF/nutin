@@ -1,5 +1,13 @@
 # Tools Docs
 
+## Table of Contents
+
+- [Package.json scripts](#packagejson-scripts)
+- [Project layout](#project-layout)
+- [Builder](#builder)
+- [Core script](#core-script)
+- [Generator](#generator)
+
 ## Package.json scripts
 
 * Development server :
@@ -214,9 +222,10 @@ Compress files with gzip (`.js` `.css` `.json` `.svg` `ttf` `otf` `eot`).
 * *If external templates are used* `html.template.js` — minimal HTML snippet: `<div>{Name} works !</div>` (no `data-i18n` scaffolding, regardless of whether i18n is enabled).
 * *If `generator.generateLocales` is on* : `json.template.js` — default JSON
 * `scss.template.js` — currently a no-op stub (`() => '\n'`); styles are hand-authored, not scaffolded with boilerplate.
+* *If `generator.generateTest` is on* : `test.template.js` — minimal `.test.js` file, with one `it.todo()`.
 
 **Notes**
 
-* *If external templates are used* : Generator-produced components and views intentionally include the `__TEMPLATE_PLACEHOLDER__` token. This is by design: the build step `merge-templates.js` uses this token to inject HTML templates into those files.
-* *If `generator.generateStylesheet` is on* : The generator writes a (currently blank) `.scss` file co-located next to the component/view's own `.ts` file — there's no separate `styles/components`/`styles/views` barrel to forward it through anymore.
+* Generator-produced components and views intentionally include the `__TEMPLATE_PLACEHOLDER__` token. This is by design: the build step `merge-templates.js` uses this token to inject HTML templates into those files.
+* *If `generator.generateStylesheet` is on* : The generator writes a (currently blank) `.scss` file co-located next to the component/view's own `.ts` file
 * *If `generator.generateLocales` is on* : The generator also creates locale fragments when `generateJson` is invoked — it relies on `LANGUAGES` from `config/languages.json` at your project root. If that file doesn't exist in your project, the generator will throw.

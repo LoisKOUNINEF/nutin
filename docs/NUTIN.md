@@ -1,5 +1,19 @@
 # nutin framework
 
+## Table of Contents
+
+- [Philosophy](#philosophy)
+- [Base class hierarchy](#base-class-hierarchy)
+- [Render lifecycle](#render-lifecycle)
+- [`data-*` attribute conventions](#data--attribute-conventions)
+- [Children / composition](#children--composition)
+- [Events](#events)
+- [Security](#security)
+- [Router](#router)
+- [Other core services](#other-core-services)
+- [Public API surface](#public-api-surface)
+- [Minimal worked example](#minimal-worked-example)
+
 ## Philosophy
 
 nutin's core is deliberately tiny and dependency-free (`so lightweight it's
@@ -135,6 +149,7 @@ afterward regardless:
 ```html
 <!-- Will remove div if myOptionalData is undefined -->
 <div data-optional="${myOptionalData}">${myOptionalData}</div>
+<div data-optional>${myOptionalData}</div>
 
 <!-- Will remove img if its src ends up empty -->
 <img data-optional src="${imageUrl}">
@@ -259,7 +274,7 @@ Three facades wrap the generic bus with ergonomic named methods (each
   the protected `onBeforeRender()` etc. methods directly).
 - **`Navigation`** — `navigateTo(path)`/`onNavigate`, `reload()`/`onReload`.
   The `Router` subscribes to these to drive actual navigation, so calling
-  `Navigation.navigateTo('/')` from a view is the standard way to navigate.
+  `Navigation.navigateTo('/')` from a component or a view is the standard way to navigate.
 - **`Overlays`** — `modalOpened()`/`onModalOpened`,
   `modalClosed()`/`onModalClosed`, `overlayOpened(type)`/`onOverlayOpened`,
   `overlayClosed(type)`/`onOverlayClosed`.
@@ -267,7 +282,7 @@ Three facades wrap the generic bus with ergonomic named methods (each
 ### Custom tokens
 
 `TokenHelper` isn't re-exported from `core/index` (it's an internal
-implementation detail) — import it via its real relative path:
+implementation detail) — import it via its real relative path if needed:
 
 ```ts
 import { TokenHelper } from '../../../core/base-classes/base-component/helpers/token.helper.js';
@@ -388,9 +403,7 @@ AppRouter(appRoutes);
 - **`PipeRegistry`** (`AppPipeRegistry`) — `register(name, fn)` /
   `apply(name, value, args)`. Backs the `data-pipe` attribute; app-defined
   pipes are registered once at startup in `main.ts`. Applying an unregistered
-  pipe name logs a `console.warn` and passes the value through unchanged;
-  conversely, `register()` silently no-ops (no warning) if that name is
-  already taken.
+  pipe name logs a `console.warn` and passes the value through unchanged; `register()` logs a `console.warn` if that name is already taken.
 
 ## Public API surface
 
@@ -426,7 +439,7 @@ import { TasksService } from '../../services/index.js';
 
 const templateFn = () => `
 <div>
-  <button data-event="click:addTask">New Task</button>
+  <button data-event="click:_addTask">New Task</button>
 </div>
 `;
 
@@ -435,7 +448,7 @@ export class AddTaskComponent extends Component {
     super({ templateFn, mountTarget });
   }
 
-  private addTask() {
+  private _addTask() {
     TasksService.addTask();
   }
 }

@@ -1,5 +1,19 @@
 # nutin testing toolkit (testin-nutin)
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Writing a test](#writing-a-test)
+- [Assertions](#assertions)
+- [Spies](#spies)
+- [Silencing console output](#silencing-console-output)
+- [Clock](#clock)
+- [Mocking core services](#mocking-core-services)
+- [How a run works](#how-a-run-works)
+- [Coverage](#coverage)
+- [Config](#config)
+- [Where to look in code](#where-to-look-in-code)
+
 This documents `testin-nutin`, nutin's built-in test toolkit, shipped by default - Nutin source code is tested exclusively with it. It's a small hand-built test runner + jsdom environment + assertion library + service mocks.
 
 ## Overview
@@ -267,7 +281,7 @@ the configured `testinNutin.coverage.threshold`, when set, for context
 (e.g. `Global:  88.0% branches, 95.0% functions, 92.3% lines  (threshold: 95%)`).
 
 `coverage/summary.md` is written **unconditionally** on every coverage run
-that produces a non-empty report — the test summary (pass/fail/total/time,
+that produces a non-empty report — the test summary (pass/fail/todo/total/time,
 same numbers `printSummary` already prints for every run), the per-file
 table, and the global percentages (plus the threshold, when set), all
 persisted as a standing artifact (e.g. for CI). Unlike `uncovered.md`
@@ -291,7 +305,7 @@ after printing which metric(s) missed and by how much — useful as a CI gate.
 ```js
 testinNutin: {
   includeFramework: true,  // test Nutin source - src/core and src/libs
-  includeTools: false,      // test tools/ (builder, testin-nutin, etc.)
+  includeTools: false,     // test tools/ (builder, testin-nutin, etc.)
   includeApp: false,       // enable to use testin-nutin for application tests
   verbose: false,          // log test suites and individual `it` tests
   coverage: {

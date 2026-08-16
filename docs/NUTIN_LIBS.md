@@ -1,5 +1,15 @@
 # nutin libs
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Pipes](#pipes)
+- [Customizing component/overlay SCSS](#customizing-componentoverlay-scss)
+- [accessibility-components](#accessibility-components)
+- [forms](#forms)
+- [overlays](#overlays)
+- [nutinMixins](#nutinmixins)
+
 ## Overview
 
 | Lib | Toggle | Depends on |
@@ -10,10 +20,8 @@
 | **forms** | `forms` feature flag | accessibility-components (`FormControlHelper`) |
 | **overlays** | `overlays` feature flag | — |
 
-The CLI's `--libs` option and `standard`/`full` presets turn all four optional libs on
-together; the `default` preset turns them all off.                                         
-`forms` has a real code import from accessibility-components, which is why picking `forms` will install
-`accessibilityComponents` to prevent build break.
+The CLI's `--libs` option and `full` preset turn all four optional libs on
+together; the `default` preset turns them all off.
 
 ## Pipes
 
@@ -37,37 +45,6 @@ written into the element's `value`/`textContent`.
 
 Custom pipes are added the same way: `AppPipeRegistry.register(name, fn)`.
 Duplicate names are skipped, not overwritten.
-
-## nutinMixins
-
-`src/libs/_index.scss.hbs` (base) does `@forward "nutin-mixins";` when the
-`nutinMixins` feature is on. The library itself lives at
-`src/libs/nutin-mixins/` (feature template, not base) and its
-`_index.scss.hbs` forwards 10 category partials directly (`nutin-accessibility`,
-`nutin-animation`, `nutin-grid`, `nutin-interaction`, `nutin-layout`,
-`nutin-position`, `nutin-responsive`, `nutin-spacing`, `nutin-typography`,
-`nutin-visual`) — there's no separate `utilities` module or `.u-*` classes;
-everything here is consumption-only, meant to be `@include`d in component
-SCSS.
-
-**Mixins**, by category:
-
-- **Responsive**: `respond-to($breakpoint)` — reads a config-merged
-  `$breakpoints-config` (via the central config, see below) for the
-  `small`/`medium`/`large`/`largest` breakpoint map, `max-width` media query.
-- **Flexbox**: `flex-center`, `flex-between`, `flex-around` (only these
-  three — no `flex-column`/`flex-row`/`flex-wrap`).
-- **Grid**: `grid`, `fr-grid`, `fr-grid-rows`, `advanced-fr-grid`, `minmax-fr-grid`, `mixed-fr-grid`, `responsive-fr-grid`, `responsive-grid`, `grid-area`, `grid-column`, `grid-row`, `grid-template-areas`.
-- **Spacing & sizing**: `margin-x`, `margin-y`, `padding-x`, `padding-y` (no `box($w, $h)`).
-- **Typography**: `font($size, $weight: normal)`, `line-clamp($lines)`, `text-ellipsis`.
-- **Position**: `absolute-center`, `fixed-full`, `pos($pos, $t, $r, $b, $l)`.
-- **Background/border/shadow**: `bg-cover`, `bg-gradient($dir, $from, $to)`, `border(...)`, `box-shadow(...)`, `image-cover`, `rounded($radius: 4px)`.
-- **Interaction & state**: `disabled` (generic — `pointer-events: none`,
-  `cursor: not-allowed`, reduced opacity; not button-specific despite the
-  name it used to go by), `hover-scale($scale: 1.05)`, `transition($props...)`
-  (no `clearfix`/`cursor-pointer`/`hide`).
-- **Accessibility**: `sr-only`.
-- **Animation**: `bounce-in`, `fade-in`, `pulse`, `scale-up`, `shake`, `slide-in-left`, `spin` (each with `@keyframes`, `$duration`/`$delay` params — also config-integrated).
 
 ## Customizing component/overlay SCSS
 
@@ -460,3 +437,34 @@ tooltip 320, context-menu 330) → passive (400s: snackbar 400, toast 410,
 notification-banner 420) → modal (500s: backdrop 500, modal 510, drawer
 520–530, fullscreen 540) → critical (600s: blocking-loader 600,
 emergency-dialog 610).
+
+## nutinMixins
+
+`src/libs/_index.scss.hbs` (base) does `@forward "nutin-mixins";` when the
+`nutinMixins` feature is on. The library itself lives at
+`src/libs/nutin-mixins/` (feature template, not base) and its
+`_index.scss.hbs` forwards 10 category partials directly (`nutin-accessibility`,
+`nutin-animation`, `nutin-grid`, `nutin-interaction`, `nutin-layout`,
+`nutin-position`, `nutin-responsive`, `nutin-spacing`, `nutin-typography`,
+`nutin-visual`) — there's no separate `utilities` module or `.u-*` classes;
+everything here is consumption-only, meant to be `@include`d in component
+SCSS.
+
+**Mixins**, by category:
+
+- **Responsive**: `respond-to($breakpoint)` — reads a config-merged
+  `$breakpoints-config` (via the central config, see below) for the
+  `small`/`medium`/`large`/`largest` breakpoint map, `max-width` media query.
+- **Flexbox**: `flex-center`, `flex-between`, `flex-around` (only these
+  three — no `flex-column`/`flex-row`/`flex-wrap`).
+- **Grid**: `grid`, `fr-grid`, `fr-grid-rows`, `advanced-fr-grid`, `minmax-fr-grid`, `mixed-fr-grid`, `responsive-fr-grid`, `responsive-grid`, `grid-area`, `grid-column`, `grid-row`, `grid-template-areas`.
+- **Spacing & sizing**: `margin-x`, `margin-y`, `padding-x`, `padding-y` (no `box($w, $h)`).
+- **Typography**: `font($size, $weight: normal)`, `line-clamp($lines)`, `text-ellipsis`.
+- **Position**: `absolute-center`, `fixed-full`, `pos($pos, $t, $r, $b, $l)`.
+- **Background/border/shadow**: `bg-cover`, `bg-gradient($dir, $from, $to)`, `border(...)`, `box-shadow(...)`, `image-cover`, `rounded($radius: 4px)`.
+- **Interaction & state**: `disabled` (generic — `pointer-events: none`,
+  `cursor: not-allowed`, reduced opacity; not button-specific despite the
+  name it used to go by), `hover-scale($scale: 1.05)`, `transition($props...)`
+  (no `clearfix`/`cursor-pointer`/`hide`).
+- **Accessibility**: `sr-only`.
+- **Animation**: `bounce-in`, `fade-in`, `pulse`, `scale-up`, `shake`, `slide-in-left`, `spin` (each with `@keyframes`, `$duration`/`$delay` params — also config-integrated).

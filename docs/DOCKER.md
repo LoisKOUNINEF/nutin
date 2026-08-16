@@ -1,5 +1,12 @@
 # Deployment Helpers ( Dockerfile / Nginx config )
 
+## Table of Contents
+
+- [Dockerfile](#dockerfile)
+- [Nginx Config](#nginx-config)
+- [Gzip compression](#gzip-compression)
+- [Brotli compression](#brotli-compression)
+
 - You may use the config files and Dockerfile exactly as-is for production deployments. Modify if you need custom caching rules or add external APIs to CSP.
 - Adapt ports as needed in both `Dockerfile` and `nginx.conf`.
 - **If used in a non-nutin project :**

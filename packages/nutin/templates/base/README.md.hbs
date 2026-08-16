@@ -49,3 +49,34 @@ These tests serve two purposes:
 **Run Nutin tests with: `npm run testin-nutin`.**
 
 *If you choose to use TestinNutin for your own app, simply enable it in `nutin.config.js -> testinNutin -> includeApp: true`.* Its syntax is intentionally lightweight and familiar to developers coming from Jest and similar tools.
+
+## Project structure
+
+```
+public/
+src/
+    app/
+      components/
+        my-component/
+          my-component.component.ts
+          my-component.component.html
+      services/
+        my-service/
+            my-service.service.ts
+      views/
+        home/
+          home.view.ts
+          home.view.html
+    routes.ts
+    main.ts
+    assets/
+    core/  -- nutin's code
+    libs/  -- nutin's libraries
+    styles/
+    index.html
+tools/  -- builder, dev, generator, testin-nutin (deployment lives under tools/deployment/ with the docker feature)
+.nutin-meta.json  -- Nutin version, package manager, enabled features (source of truth for what's installed)
+nutin.config.js
+package.json
+tsconfig.json
+```
