@@ -21,10 +21,10 @@ export function printResults(results) {
   const sortedResults = results.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
 
   sortedResults.forEach(result => {
-    if (result.status === 'todo') {
-      print.section(`TODO: ${result.name} in ${result.file}`);
-    } else if (result.status === 'passed') {
+    if (result.status === 'passed') {
       if (config.testinNutin.verbose ) console.log(`${chalk.green('✓')} ${chalk.cyan(`${result.suiteName}`)} - ${chalk.green(`${result.name}`)}`);
+    } else if (result.status === 'todo') {
+      print.warn(`TODO: ${result.name} in ${toTsPath(result.file)}`);
     } else {
       print.error(`✗ ${result.suiteName} - ${result.name}`);
       print.grayError(result.error);
@@ -67,12 +67,14 @@ export function printCoverageReport(report) {
   const globalFunctionsPct = totals.totalFunctions ? (totals.coveredFunctions / totals.totalFunctions) * 100 : 100;
   const globalBranchesPct = totals.totalBranches ? (totals.coveredBranches / totals.totalBranches) * 100 : 100;
 
-  print.boldInfo(`Global:  ${globalBranchesPct.toFixed(1)}% branches, ${globalFunctionsPct.toFixed(1)}% functions, ${globalLinesPct.toFixed(1)}% lines\n`);
+  const threshold = config.testinNutin.coverage?.threshold;
+  const thresholdSuffix = typeof threshold === 'number' ? `  (threshold: ${threshold}%)` : '';
+  print.boldInfo(`Global:  ${globalBranchesPct.toFixed(1)}% branches, ${globalFunctionsPct.toFixed(1)}% functions, ${globalLinesPct.toFixed(1)}% lines${thresholdSuffix}\n`);
 
   return { globalLinesPct, globalFunctionsPct, globalBranchesPct };
 }
 
-function toTsPath(input) {
+export function toTsPath(input) {
   return input
     .split('/')
     .slice(1)

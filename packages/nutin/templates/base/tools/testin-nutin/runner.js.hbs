@@ -1,7 +1,8 @@
 import path from 'path';
 import {
-  registerTestGlobals, getTestFiles, runQueuedTests, print,
+  registerTestGlobals, getTestFiles, runQueuedTests, setCurrentTestFile, print,
   startCoverage, stopCoverage, buildCoverageReport, printCoverageReport, maybeWriteUncoveredReport,
+  writeSummaryReport,
 } from './core/index.js';
 import config from '#root/nutin.config.js';
 
@@ -36,6 +37,7 @@ if (fileFilters.length) {
 
 async function loadTestFile(file) {
   setupJsdom();
+  setCurrentTestFile(file);
   await import(file);
   teardownJsdom();
 }
@@ -53,7 +55,7 @@ async function runTests() {
     }
   }
 
-  await runQueuedTests();
+  const testResults = await runQueuedTests();
 
   if (coverageEnabled) {
     let scopedResults = await stopCoverage(coverageDirs);
@@ -62,6 +64,7 @@ async function runTests() {
     }
     const report = buildCoverageReport(scopedResults);
     const globals = printCoverageReport(report);
+    writeSummaryReport(report, globals, testResults);
     await maybeWriteUncoveredReport(report);
 
     const threshold = config.testinNutin.coverage?.threshold;

@@ -117,4 +117,6 @@ export async function runQueuedTests() {
   elapsedTime = (endTime - startTime);
   printResults(results);
   printSummary(todo, passed, failed, elapsedTime);
+
+  return { todo, passed, failed, elapsedTime };
 }

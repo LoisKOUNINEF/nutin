@@ -262,7 +262,17 @@ each intentionally lightweight rather than exact:
 
 Output is a per-file `console.table` (paths are shown with a cosmetic
 `.ts` extension, though coverage is measured against the compiled `.js`)
-plus a global `branches/functions/lines %` summary line.
+plus a global `branches/functions/lines %` summary line — which also shows
+the configured `testinNutin.coverage.threshold`, when set, for context
+(e.g. `Global:  88.0% branches, 95.0% functions, 92.3% lines  (threshold: 95%)`).
+
+`coverage/summary.md` is written **unconditionally** on every coverage run
+that produces a non-empty report — the test summary (pass/fail/total/time,
+same numbers `printSummary` already prints for every run), the per-file
+table, and the global percentages (plus the threshold, when set), all
+persisted as a standing artifact (e.g. for CI). Unlike `uncovered.md`
+below, it isn't gated by `reportUncovered` and doesn't depend on whether
+anything is actually uncovered or whether the threshold passed.
 
 If `testinNutin.coverage.reportUncovered` is true and anything is actually
 uncovered, `coverage/uncovered.md` is written listing uncovered
@@ -305,7 +315,7 @@ All paths below are relative to a generated app's `tools/testin-nutin/`:
 * `core/globals/` — `assertion-lib.js` (extend the matcher set here),
   `clock.js`, `jsdom-setup.js`, `register-test-globals.js`,
   `silence-console.js`, `spyon.js`.
-* `core/coverage` - `collect-coverage.js`, `compute-coverage.js`, `write-uncovered-report.js`.
+* `core/coverage` - `collect-coverage.js`, `compute-coverage.js`, `write-summary-report.js`, `write-uncovered-report.js`.
 * `core/queue/` — `queue.js` (linked-list `Queue`), `test-discovery.js`,
   `test-queue.js` (drives `runQueuedTests()` off that `Queue`).
 * `core/tests/` — the toolkit's own tests for the assertions/globals/clock
