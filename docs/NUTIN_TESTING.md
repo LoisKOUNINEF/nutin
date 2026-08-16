@@ -1,5 +1,5 @@
 # nutin testing toolkit (testin-nutin)
-
+<pm>
 ## Table of Contents
 
 - [Overview](#overview)
@@ -220,7 +220,7 @@ The shared spy factory itself lives at `mocks/create-mock-method.js`.
 
 ## How a run works
 
-`node tools/testin-nutin/runner.js` (alias `npm run testin-nutin:only`; `npm run testin-nutin` runs a build first):
+`node tools/testin-nutin/runner.js` (alias `<pm> run testin-nutin:only`; `<pm> run testin-nutin` runs a build first):
 
 1. Installs test globals (`registerTestGlobals()`).
 2. Resolves test files by recursively scanning an `origins` list for
@@ -243,14 +243,14 @@ The shared spy factory itself lives at `mocks/create-mock-method.js`.
    passing tests are only printed if `config.verbose`. A final summary
    prints pass/fail counts and elapsed time.
 
-`npm run testin-nutin:watch` builds once, then runs `watch-tests.js`: a
+`<pm> run testin-nutin:watch` builds once, then runs `watch-tests.js`: a
 chokidar watcher on `src`/`test`/`unit`/`e2e` that re-runs the **entire**
 suite (`node tools/testin-nutin/runner.js` via `child_process.exec`) on any
 change — no selective re-run, and no rebuild between runs.
 
 ## Coverage
 
-Run it with `npm run testin-nutin:coverage`, or set `testinNutin.coverage.enabled: true` to make
+Run it with `<pm> run testin-nutin:coverage`, or set `testinNutin.coverage.enabled: true` to make
 it the default for the plain `testin-nutin` command.
 
 Coverage is real V8 precise coverage, collected via `node:inspector`'s

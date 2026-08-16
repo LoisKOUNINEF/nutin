@@ -7,10 +7,10 @@ async function startDev() {
     console.clear();
     print.blue('🚀 Starting Dev Environment...\n');
 
-    await runCommand('npm', ['run', 'build', '--silent']);
+    await runCommand('{{packageManager}}', ['run', 'build', '--silent']);
 
     const { serve, watcher } = await Promise.all([
-      runCommand('npm', ['run', 'serve:only', '--silent']),
+      runCommand('{{packageManager}}', ['run', 'serve:only', '--silent']),
       runCommand('node', ['tools/dev/watcher.js', '--silent'])
     ]);
 

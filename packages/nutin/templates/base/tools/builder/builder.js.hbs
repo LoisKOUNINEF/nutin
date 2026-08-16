@@ -6,7 +6,7 @@ import { builderConfig } from './builder.config.js';
 
 const scriptsDir = path.join(process.cwd(), 'tools', 'builder', 'core');
 
-if (!builderConfig.isProd) print.section('⚠️ For production, use \'npm run build:prod\' ⚠️');
+if (!builderConfig.isProd) print.section('⚠️ For production, use \'{{packageManager}} run build:prod\' ⚠️');
 print.boldHead(`\nStarting build...`);
 
 runScript(path.join(scriptsDir, 'copy-static.js'), 'Copying files...', builderConfig.isVerbose);

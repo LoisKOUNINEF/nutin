@@ -104,7 +104,7 @@ async function generateLocales({ targetPath, name }) {
 
 function showUsageAndExit(message) {
   print.boldError(`\n${message}`);
-  print.warn("Usage: npm run generate <type> <path>");
+  print.warn("Usage: {{packageManager}} run generate <type> <path>");
   print.warn(`Supported types: ${Object.keys(creators).join(", ")}`);
   process.exit(1);
 }

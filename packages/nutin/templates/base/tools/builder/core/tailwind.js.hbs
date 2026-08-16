@@ -15,7 +15,7 @@ const isInstalled = (depName) => fs.existsSync(path.join(process.cwd(), 'node_mo
 const getPackageManager = () => {
   if (fs.existsSync(path.join(process.cwd(), 'pnpm-lock.yaml'))) return 'pnpm';
   if (fs.existsSync(path.join(process.cwd(), 'yarn.lock'))) return 'yarn';
-  if (fs.existsSync(path.join(process.cwd(), 'bun.lockb'))) return 'bun';
+  if (fs.existsSync(path.join(process.cwd(), 'bun.lock')) || fs.existsSync(path.join(process.cwd(), 'bun.lockb'))) return 'bun';
   return 'npm';
 };
 

@@ -24,7 +24,7 @@ watcher.on('change', (filePath) => {
     print.boldInfo(`\n🔄 File changed: ${path.relative(process.cwd(), filePath)}\n`);
     print.info('\nRebuilding...');
 
-    const command = 'npm run build --silent';
+    const command = '{{packageManager}} run build --silent';
     
     exec(command, (err, stdout, stderr) => {
       if (stdout) process.stdout.write(stdout);

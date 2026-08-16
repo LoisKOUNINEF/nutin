@@ -6,6 +6,7 @@
 - [Project layout](#project-layout)
 - [Builder](#builder)
 - [Core script](#core-script)
+- [Dev script](#dev-script)
 - [Generator](#generator)
 
 ## Package.json scripts
@@ -15,12 +16,12 @@
 
 ```bash
 # build (dev environment) and serve
-npm run serve
+<pm> run serve
 
 # without build (use existing 'dist' output)
-npm run serve:only
+<pm> run serve:only
 
-npm run dev
+<pm> run dev
 ```
 
 There are no `--bundle`/`--log` CLI flags — build mode and log verbosity are controlled elsewhere:
@@ -30,7 +31,7 @@ There are no `--bundle`/`--log` CLI flags — build mode and log verbosity are c
 * Build for production:
 
 ```bash
-npm run build:prod
+<pm> run build:prod
 # runs: NODE_ENV=production node tools/builder/builder.js
 ```
 
@@ -39,15 +40,15 @@ npm run build:prod
 ```bash
 # kebab-case name
 # supports nested path
-npm run generate ELEMENT ELEMENT_NAME
+<pm> run generate ELEMENT ELEMENT_NAME
 
 ##
-npm run generate component my-component
-npm run generate view my-view
-npm run generate service my-service
+<pm> run generate component my-component
+<pm> run generate view my-view
+<pm> run generate service my-service
 ```
 
-- Runs generator: `npm run generate component widgets/my-widget` -> this creates: 
+- Runs generator: `<pm> run generate component widgets/my-widget` -> this creates: 
     - `src/app/components/widgets/my-widget/my-widget.component.ts`.
     - `src/app/components/widgets/my-widget/my-widget.component.html`, if `nutin.config.js`'s `inlineTemplates` is `false`.
     - `src/app/components/widgets/my-widget/locales/*.json`, if `nutin.config.js`'s `generator.generateLocales` is `true` (requires the `i18n` feature).
@@ -57,20 +58,20 @@ npm run generate service my-service
 * Run tests (testin-nutin toolkit, shipped in base — no feature flag needed):
 
 ```bash
-npm run testin-nutin        # build, then run once
-npm run testin-nutin:only   # run only, using the existing dist/ build
-npm run testin-nutin:watch  # build once, then re-run on file changes
+<pm> run testin-nutin        # build, then run once
+<pm> run testin-nutin:only   # run only, using the existing dist/ build
+<pm> run testin-nutin:watch  # build once, then re-run on file changes
 ```
 
 * Versioning and Docker (only if the `docker` feature is enabled):
 
 ```bash
-npm run patch
-npm run minor
-npm run major
+<pm> run patch
+<pm> run minor
+<pm> run major
 
-npm run docker:build
-npm run docker:run
+<pm> run docker:build
+<pm> run docker:run
 ```
 
 ## Project layout
@@ -199,9 +200,28 @@ Compress files with gzip (`.js` `.css` `.json` `.svg` `ttf` `otf` `eot`).
 * Removes exisiting (if any) `dist` folder.
 * Renames `dist-build` to `dist`.
 
+## Dev script
+
+See [Package.json scripts](#packagejson-scripts) above for the `dev` / `serve` / `serve:only` commands. This section covers what each file in `tools/dev/` does.
+
+### `dev-serve.js`
+
+* Purpose: orchestrates the full dev-mode flow — one full build, then the static server and file watcher together.
+* Behavior: runs `<packageManager> run build`, then runs `<packageManager> run serve:only` and `node tools/dev/watcher.js` concurrently via `Promise.all`.
+
+### `serve.js`
+
+* Purpose: serves the built `dist/src` output with `live-server` (port `9090`).
+* Behavior: custom middleware gives SPA fallback — any request whose URL doesn't look like a static asset (no `.` in the last path segment) is rewritten to `/index.html` so client-side routing works.
+
+### `watcher.js`
+
+* Purpose: watches `src/` for changes and triggers a rebuild.
+* Behavior: uses `chokidar` to watch `src` (ignoring dotfiles), debounces changes (100ms), and guards against overlapping builds while one is already running. Rebuilds by running `<packageManager> run build`.
+
 ## Generator
 
-* Usage: `npm run generate TYPE PATH/TO/NAME`).
+* Usage: `<pm> run generate TYPE PATH/TO/NAME`).
 * `type` is a string (`component` || `view` || `service`).
 * `path` is a target path where files will be created; the script normalizes / extracts the last word to derive the `name`. Files will be created in `TYPE_FOLDER/PATH/TO/NAME/NAME.ts` or in `TYPE_FOLDER/NAME/NAME.ts` if only `name` was provided.
 
