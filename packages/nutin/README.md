@@ -1,6 +1,12 @@
-# [nutin](https://www.nutin.org)
+# [Nutin](https://www.nutin.org)
 
-**nutin aims to bridge the gap between vanilla web development and large frameworks.**
+`Bridging the gap between vanilla web development and heavy frameworks.`
+
+Nutin gives you the essential tools to build small, maintainable web apps without giving up ownership of your code.
+
+**Your app owns Nutin — not the other way around.** The framework source lives alongside your application, so you can read it, modify it, and make it yours. Nutin's update system is designed to preserve those changes.
+
+Nutin is deliberately opinionated, lightweight, and dependency-free on runtime.
 
 ## Install
 
@@ -13,8 +19,7 @@ npm install -g @nutin/cli
 
 ```bash
 # create a new app
-create-nutin-app # or
-nutin-new
+nutin-new # or create-nutin-app
 
 # without global installation
 npx @nutin/cli
@@ -41,9 +46,8 @@ npx @nutin/cli
 	# full: built-in libraries + docker
 ```
 
-## [First app tutorial](https://www.nutin.org/tutorial)
+## Links
 
-## 📄 Docs
-
-- Docs on [website](https://www.nutin.org).
-- Docs on [repository](https://github.com/LoisKOUNINEF/nutin/tree/main/docs).
+- [First app tutorial](https://www.nutin.org/tutorial).
+- [Website](https://www.nutin.org).
+- [Docs on repository](https://github.com/LoisKOUNINEF/nutin/tree/main/docs).

@@ -196,7 +196,7 @@ Compress files with gzip (`.js` `.css` `.json` `.svg` `ttf` `otf` `eot`).
 
 ### `core/finalize-build.js`
 
-* If production build (esbuild) : removes unnecessary folders from `dist-build`.
+* If production build (esbuild) : removes unnecessary folders from `dist-build` and `nutin-config.js`.
 * Removes exisiting (if any) `dist` folder.
 * Renames `dist-build` to `dist`.
 
@@ -239,13 +239,13 @@ See [Package.json scripts](#packagejson-scripts) above for the `dev` / `serve` /
 * `component.template.js` — creates a TypeScript component class that imports `Component` from `core/index.js` (relative path computed by `getRelToCore`) and sets `const templateFn = () => '__TEMPLATE_PLACEHOLDER__';` (or the literal HTML if `inlineTemplates` is off).
 * `view.template.js` — similar to component but for `View`; sets `const template = '__TEMPLATE_PLACEHOLDER__';`.
 * `service.template.js` — simple singleton `Service` pattern.
-* *If external templates are used* `html.template.js` — minimal HTML snippet: `<div>{Name} works !</div>` (no `data-i18n` scaffolding, regardless of whether i18n is enabled).
-* *If `generator.generateLocales` is on* : `json.template.js` — default JSON
+* *If external templates are used* `html.template.js` — minimal HTML snippet: `<div>{Name} works !</div>`.
+* *If `generator.generateLocales` is on* : `json.template.js` — default i18n JSON
 * `scss.template.js` — currently a no-op stub (`() => '\n'`); styles are hand-authored, not scaffolded with boilerplate.
-* *If `generator.generateTest` is on* : `test.template.js` — minimal `.test.js` file, with one `it.todo()`.
+* *If `generator.generateTest` is on* : `test.template.js` — minimal `.test.js` file.
 
 **Notes**
 
 * Generator-produced components and views intentionally include the `__TEMPLATE_PLACEHOLDER__` token. This is by design: the build step `merge-templates.js` uses this token to inject HTML templates into those files.
 * *If `generator.generateStylesheet` is on* : The generator writes a (currently blank) `.scss` file co-located next to the component/view's own `.ts` file
-* *If `generator.generateLocales` is on* : The generator also creates locale fragments when `generateJson` is invoked — it relies on `LANGUAGES` from `config/languages.json` at your project root. If that file doesn't exist in your project, the generator will throw.
+* *If `generator.generateLocales` is on* : The generator also creates locale fragments when — it relies on `LANGUAGES` from `config/languages.json` at your project root.

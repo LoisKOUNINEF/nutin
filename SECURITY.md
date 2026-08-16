@@ -2,13 +2,13 @@
 
 ## Reporting Security Vulnerabilities
 
-We take the security of our project seriously. If you believe you have found a security vulnerability, please report it responsibly.
+Security matters, eve. If you believe you have found a security vulnerability, please report it responsibly.
 
 ### How to Report
 
 **Please do NOT report security vulnerabilities through public GitHub issues.**
 
-Instead, please report security vulnerabilities by emailing us at:
+Instead, please report security vulnerabilities by emailing:
 
 📧 **nutin.toolkit@gmail.com**
 
@@ -16,7 +16,7 @@ You should receive a response within a week. If for some reason you do not, plea
 
 ### What to Include
 
-Please include as much of the information listed below as you can to help us better understand and resolve the issue:
+Please include as much of the information listed below as you can to help better understand and resolve the issue:
 
 - **Type of issue** (e.g., buffer overflow, SQL injection, cross-site scripting, etc.)
 - **Full paths of source file(s)** related to the manifestation of the issue
@@ -26,29 +26,11 @@ Please include as much of the information listed below as you can to help us bet
 - **Proof-of-concept or exploit code** (if possible)
 - **Impact of the issue**, including how an attacker might exploit the issue
 
-This information will help us triage your report more quickly.
+This information will help triage your report more quickly.
 
 ## Supported Versions
 
 We only support the latest version.
-
-## Security Update Process
-
-### Our Commitment
-
-- We will respond to security reports within **a week**
-- We will provide regular updates on our progress
-- We will work with you to understand and resolve the issue
-- We will coordinate disclosure with you
-
-### Timeline
-
-1. **Initial Response**: Within a week
-2. **Investigation**: 1-7 days for initial assessment
-3. **Fix Development**: Timeline depends on complexity
-4. **Testing & Review**: 1-7 days
-5. **Release**: Coordinated with reporter
-6. **Public Disclosure**: After fix is available
 
 ## Security Best Practices
 

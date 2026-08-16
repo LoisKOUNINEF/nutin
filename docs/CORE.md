@@ -2,7 +2,6 @@
 
 ## Table of Contents
 
-- [Philosophy](#philosophy)
 - [Base class hierarchy](#base-class-hierarchy)
 - [Render lifecycle](#render-lifecycle)
 - [`data-*` attribute conventions](#data--attribute-conventions)
@@ -15,9 +14,6 @@
 - [Minimal worked example](#minimal-worked-example)
 
 ## Philosophy
-
-nutin's core is deliberately tiny and dependency-free (`so lightweight it's
-nutin`):
 
 - **No virtual DOM, no diffing.** `render()` does a full `element.innerHTML =`
   replace of a component's own subtree every time.

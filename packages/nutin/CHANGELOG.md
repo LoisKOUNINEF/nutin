@@ -2,6 +2,9 @@
 
 ## 2.0.0
 
+- Removed `Store`
+    - It created confusion and had questionable usefulness. Besides, services already handles what Store was supposed to.
+
 - EventBus
     - Nutin internal events are no longer defined in `globals.d.ts` - new interface `AppEvent` only for app-level events. Payload types are now objects (clearer).
     - Now exposes domain facades for navigation, lifecycle, and overlays events. Subscribing functions (`on*`) return a closure function to abstract unsubscription.
@@ -17,9 +20,6 @@ const unsub = Navigation.onNavigate(this.doStuff);
 // onDestroy
 unsub()
 ```
-
-- Removed `Store`
-    - It created confusion and had questionable usefulness. Besides, services already handles what Store was supposed to.
 
 - Cleaner separation
     - `app` folder now exclusively contains application code, as it should. `components/common` folder now lives in `src/libs/components`/
@@ -45,8 +45,7 @@ onExit()
 - Service
     - Now exposes a single `getInstance()` method that accepts arguments, only on first call.
 
-
-- StylinNutin
+- Libs
     - Can now use Tailwind (v4) as an optional utility layer alongside SASS.
     - Added stateless, accessibility-focused components library.
     - Added forms, formGroup & formControl (Validators)
@@ -66,7 +65,7 @@ onExit()
     - App creation flow reworked (again, but for the best)
         Cleaner presets & `--options` flag accepting comma-separated options string.
 
-## 2.0.0
+## 1.3.1
 
 - Minor features:
     - New BaseComponent protected method.

@@ -1,6 +1,6 @@
 # Contributing to nutin
 
-Thank you for your interest in contributing! This document provides guidelines and information for contributing to this monorepo, which contains the npm package, the official website and the tutorial app.
+Thank you for your interest in contributing! This document provides guidelines and information for contributing to this monorepo, which contains the npm package and the official website.
 
 ## Table of Contents
 
@@ -13,7 +13,6 @@ Thank you for your interest in contributing! This document provides guidelines a
 - [Getting Help](#getting-help)
 - [Recognition](#recognition)
 - [License](#license)
-# Architecture & Design Principles
 
 ## Philosophy and Principles
 
@@ -25,7 +24,7 @@ The goal is to provide a structured layer:
 
 * explicit, easy to understand and to start with;
 * favoring code ownership and openness;
-* (pretty) well-documented
+* with a very high test coverage and (pretty) well-documented
 
 The internal architecture should remain highly modular, while the public APIs and CLI should remain intentionally small.
 
@@ -104,15 +103,10 @@ Users can always pick options or deviate later.
 When introducing a new feature, ask:
 
 1. Is this architecture or productivity?
-2. Does the user naturally think in terms of this concept?
-3. Does exposing this option improve the user experience?
-4. Is this expensive to add later?
-5. Will most projects eventually use it?
-6. Does this simplify or complicate documentation?
-7. Does this simplify or complicate generators?
-8. Does this improve or worsen the first impression?
-9. Can the implementation remain modular while the public API stays simple?
-10. Am I exposing a capability, or leaking an implementation detail?
+2. Will most projects eventually use it?
+3. Does this improve or worsen the user experience?
+4. Can the implementation remain modular while the public API stays simple?
+5. Am I exposing a capability, or leaking an implementation detail?
 
 If unsure, choose the simpler public API.
 
@@ -120,15 +114,13 @@ Internal architecture should preserve future flexibility.
 
 The framework should evolve internally without forcing users to learn new concepts unless those concepts provide clear, tangible value.
 
-### 42
-
 ## Getting Started
 
 ### Prerequisites
 
-- **Node.js**: Version 18.x or higher
-- **npm**: Version 9.x or higher (or yarn/pnpm equivalent)
-- **Git**: Latest stable version
+- Node.js: Version 22.x or higher
+- npm: Version 9.x or higher (or yarn/pnpm/bun equivalent)
+- Git: Latest stable version
 
 ## Development Setup
 
@@ -147,7 +139,7 @@ The framework should evolve internally without forcing users to learn new concep
 
 ### Types of Contributions
 
-We welcome various types of contributions:
+Various types of contributions are welcome:
 
 - 🐛 **Bug fixes**
 - ✨ **New features**
@@ -175,8 +167,7 @@ We welcome various types of contributions:
 2. **Make your changes:**
    - Follow the existing code style and conventions
    - Update documentation as needed
-   - Add tests for new functionality
-   - Ensure all tests pass
+   - Add tests for new functionality **NOTE**: Nutin is tested with its own toolkit, syntax is very Jest-inspired.
 
 3. **Commit your changes:**
    ```bash
@@ -206,9 +197,9 @@ type(scope): description
 - `chore`: Build process or auxiliary tool changes
 
 **Scopes:**
-- `nutin`: Changes to the main toolkit
-- `testin-nutin`: Changes to the tesing toolkit
-- `stylin-nutin`: Changes to the styling library
+- `core`: Changes to the main toolkit
+- `testing`: Changes to the testing toolkit
+- `libraries`: Changes to the built-in libraries
 - `website`: Changes to the website
 - `docs`: Documentation changes
 - `ci`: CI/CD changes
@@ -261,11 +252,9 @@ For sensitive issues or direct maintainer contact:
 
 ## Recognition
 
-Contributors are recognized in several ways:
-
 - **All Contributors**: Listed in README
 - **Release notes**: Contributions mentioned in changelogs
-- **GitHub**: Contributor badges and statistics
+- **Gratitude**
 
 ## License
 
