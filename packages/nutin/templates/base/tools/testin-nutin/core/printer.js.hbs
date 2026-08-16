@@ -17,7 +17,7 @@ export function printSummary(todo, passed, failed, time) {
 }
 
 export function printResults(results) {
-  const statusOrder = { todo: 0, passed: 1, failed: 2 };
+  const statusOrder = { passed: 0, todo: 1, failed: 2 };
   const sortedResults = results.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
 
   sortedResults.forEach(result => {

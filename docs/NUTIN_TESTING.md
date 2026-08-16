@@ -291,7 +291,7 @@ after printing which metric(s) missed and by how much — useful as a CI gate.
 ```js
 testinNutin: {
   includeFramework: true,  // test Nutin source - src/core and src/libs
-  includeTools: false,     // tools/ tests - only meaningful logic, not included in coverage
+  includeTools: false,      // test tools/ (builder, testin-nutin, etc.)
   includeApp: false,       // enable to use testin-nutin for application tests
   verbose: false,          // log test suites and individual `it` tests
   coverage: {
