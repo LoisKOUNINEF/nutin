@@ -91,14 +91,6 @@ Tokens: `@value`, `@id`, `@class`, `@textContent`, `@event`, `@target`, `@attr:n
 - Naming convention: `.my-element__my-class`.
 - Component/overlay/mixin Sass tunables live in `$<name>-config` maps, overridable in one place: edit `src/styles/_nutin-config.scss`'s `$config` directly (it's generated into your project, not an imported library file). For accessibility-components/forms/overlays: nest under `'components': ('<name>': (...))`. For nutinMixins (`breakpoints`/`animations` only): top-level `'breakpoints': (...)`/`'animations': (...)`, not nested under `'components'`.
 
-## `nutin.config.js`
-
-Central build/feature config (see the generated file's inline comments for details):
-- `inlineTemplates`, `i18n`, `tailwind` — top-level feature toggles.
-- `generator.{generateStylesheet, generateLocales, generateTest}` — what the generator scaffolds alongside new elements.
-- `builder.{generateSEO, logLevel, sass.paths, esbuild, compression}` — build pipeline behavior.
-- `testinNutin.{includeFramework, includeTools, includeApp, verbose, jsdomOptions}` — test discovery/environment.
-
 ## Built-in libraries
 
 Pipes are included in every project (`registerPipes()`, always on). Check `.nutin-meta.json`'s `features` object to see which optional libraries are present in this project:
@@ -109,6 +101,24 @@ Pipes are included in every project (`registerPipes()`, always on). Check `.nuti
 - `overlays` — modal/drawer/dropdown/tooltip/snackbar runtime, layered z-index system.
 
 Every lib's styles follow the same naming/config-map convention above.
+
+## Configuration
+
+### `nutin.config.js`
+
+Central build/feature config (see the inline comments for details):
+- `inlineTemplates`, `i18n`, `tailwind` — top-level feature toggles.
+- `generator.{generateStylesheet, generateLocales, generateTest}` — what the generator scaffolds alongside new elements.
+- `builder.{generateSEO, logLevel, sass.paths, esbuild, compression}` — build pipeline behavior.
+- `testinNutin.{includeFramework, includeTools, includeApp, verbose, jsdomOptions}` — test discovery/environment.
+
+### `config/seo.json`
+
+Consumed by builder (production only) to generate static HTML per route. Unused if `nutin.config.js -> builder -> generateSEO` is disabled.
+
+### `config/languages.json`
+
+Consumed by i18nService and builder. Unused if i18n is disabled.
 
 ## Security
 

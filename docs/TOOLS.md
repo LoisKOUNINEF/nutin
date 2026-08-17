@@ -4,6 +4,7 @@
 
 - [Package.json scripts](#packagejson-scripts)
 - [Project layout](#project-layout)
+- [SEO files generation](#seo-files-generation)
 - [Builder](#builder)
 - [Core script](#core-script)
 - [Dev script](#dev-script)
@@ -104,6 +105,84 @@ package.json
 tsconfig.json
 ```
 
+## SEO files generation
+
+`config/seo.json`
+
+```json
+{
+  "baseUrl": "https://my-website.com",
+  "disallowBots": [],
+  "routes": [ /* ... */ ]
+}
+```
+
+### Route fields
+
+| Field | Required | Type | Notes |
+|---|---|---|---|
+| `path` | yes | `string` | Must match a key in `src/app/routes.ts`'s `appRoutes`; dynamic segments use `:param` (`:param?` for optional). |
+| `title` | yes | `string \| { [lang]: string }` | A flat string applies to every language uniformly; use a per-language object to localize. |
+| `description` | yes | `string \| { [lang]: string }` | Same rules as `title`. |
+| `ogImage` | no | `string \| { [lang]: string }` | Only written into `og:image`/`twitter:image` when present — omit to leave those tags out entirely. |
+| `mockParams` | required if `path` has dynamic segments | `{ [param]: string }` | One representative value per dynamic segment, used to SSR-render that route at build time; missing one is a build-time `exit(1)`. |
+| `mockFetch` | no | `{ [url]: jsonBody }` | Exact-URL-keyed map — any `fetch(url)` call made while SSR-rendering this route that matches a key resolves to `jsonBody` instead of hitting the network. For views that fetch data on mount. |
+| `disallow` | no | `true \| string[]` | `true` blocks this path for every bot in `robots.txt`; an array of bot names blocks it only for those bots. |
+
+### Examples
+
+- Default (i18n disabled)
+
+```json
+{
+  "baseUrl": "https://my-app.com",
+  "disallowBots": ["GPTBot"],
+  "routes": [
+    {
+      "path": "/",
+      "title": "My App — Home",
+      "description": "Welcome to My App.",
+      "ogImage": "/assets/images/og-cover.jpg"
+    },
+    {
+      "path": "/blog/:slug",
+      "title": "My App — Blog",
+      "description": "Read the latest posts.",
+      "mockParams": { "slug": "hello-world" },
+      "mockFetch": { "/api/posts/hello-world": { "title": "Hello World", "body": "..." } }
+    }
+  ]
+}
+```
+
+- i18n enabled
+
+`nutin.config.js`'s `i18n: true`, `config/languages.json` listing `en`+`fr`. One
+route is fully localized; the other is left flat on purpose - will trigger a warning
+
+```json
+{
+  "baseUrl": "https://my-app.com",
+  "disallowBots": [],
+  "routes": [
+    {
+      "path": "/",
+      "title": { "en": "My App — Home", "fr": "Mon App — Accueil" },
+      "description": { "en": "Welcome to My App.", "fr": "Bienvenue sur Mon App." },
+      "ogImage": "/assets/images/og-cover.jpg"
+    },
+    {
+      "path": "/blog/:slug",
+      "title": "My App — Blog",
+      "description": "Read the latest posts.",
+      "mockParams": { "slug": "hello-world" }
+    }
+  ]
+}
+```
+
+`ogImage` stays flat even on the localized route.
+
 ## Builder
 
 ### Build flow
@@ -142,21 +221,21 @@ tsconfig.json
     - rename dist-build to dist
     - *production*: remove unused folder beforehand.
 
-## Core script
+### Core script
 
-### `core/copy-static.js`
+#### `core/copy-static.js`
 
 * Purpose:
     - copy files into `dist-build/src/` while handling binary files and JSON files specially; also copies `public/favicon.ico` and the `config/`/`nutin.config.js` files into the build output.
 * Uses: `tools/builder/variables/binary-extensions.js` (set of known binary extensions) and `tools/utils/get-files-recursive.js`.
 * If you add new asset formats, update `binary-extensions.js`.
 
-### `core/validate-routes.js`
+#### `core/validate-routes.js`
 
 * Purpose: catch duplicate route keys in `src/app/routes.ts` before they cause a silently unreachable route at runtime.
 * Behavior: statically parses `appRoutes`'s object literal with the TypeScript compiler API (the file is never executed) and exits with an error listing every duplicated key.
 
-### `core/build-i18n.js`
+#### `core/build-i18n.js`
 
 * Only if i18n feature is used.
 * Purpose: merge many small locale JSON files scattered under `src/app` into unified locale files under `dist-build/src/locales/<lang>.json`.
@@ -166,7 +245,7 @@ tsconfig.json
     - It then removes the original JSON fragments under `dist-build/src/app` (calling `removeJsonFiles(cleanupDir)`).
 * If no locale JSONs are present, the step will effectively do nothing (no files created).
 
-### `core/merge-templates.js`
+#### `core/merge-templates.js`
 
 * Only if `inlineTemplates` is `false` (external templates).
 * Purpose: inject external HTML templates into JS files by replacing `__TEMPLATE_PLACEHOLDER__` tokens.
@@ -177,31 +256,39 @@ tsconfig.json
 
 * If you don't provide external `.html` files, the templateFn / template content will remain and the component/view will render it.
 
-### `core/sass.js`
+#### `core/sass.js`
 
 * Scans paths defined in `nutin.config.js`'s `sass.paths`.
 * Compiles `src/styles/main.scss` into `dist-build/src/main.css`, then recursively finds and appends every `.scss` file co-located under `src/app/components` and `src/app/views`.
 * Add new scss folder paths in `nutin.config.js` if needed.
 
-### `core/validate-html.js`
+#### `core/validate-html.js`
 
 * Purpose: inject the main script tag and main stylesheet ref, then run a few checks on HTML before finishing the build.
 * Behavior : it reads `index.html` file, add app's entrypoint script tag and stylesheet link tag, validates tags and errors out if expected nodes are missing.
 
-### `core/esbuild.js`
+#### `core/esbuild.js`
 
 Runs esbuild with config derived from `nutin.config.js`.
 
-### `core/hash-files.js`
+#### `core/hash-files.js`
 
 Hash `.js` and `.css` files.
 
-### `core/compress-files.js`
+#### `core/compress-files.js`
 
 Compress files with gzip (`.js` `.css` `.json` `.svg` `ttf` `otf` `eot`).                                     
 *Note: Uncomment Brotli compression if you intend to use it.*
 
-### `core/finalize-build.js`
+#### `core/generate-seo-html.js`
+
+* HTML generation: per-route/lang static `index.html` with real SSR content and meta tags, `robots.txt` generation, `sitemap.xml` generation.
+* Any real route in `src/app/routes` with no matching entry in `config/seo.json` gets a warning. `/404`, `/403`, `/500` get a quieter "probably intentional" note. Never fatal.
+* Missing language object are never fatal (warn only)
+* Hard failures: missing `mockParams`, empty value (e.g. `"title": ""`), unexpected
+  error. Exits the whole build with code 1.
+
+#### `core/finalize-build.js`
 
 * If production build (esbuild) : removes unnecessary folders from `dist-build` and `nutin-config.js`.
 * Removes exisiting (if any) `dist` folder.

@@ -1,7 +1,7 @@
 export default {
   // Nutin features
   inlineTemplates: false,
-  i18n: false,
+  i18n: false, // Add languages in config/languages.json after enabling i18n
   tailwind: false,
 
   // Components / Views scaffolding
@@ -13,7 +13,7 @@ export default {
 
   // Build pipeline
   builder: {
-    generateSEO: true,
+    generateSEO: true, // Consumes config/seo.json to generate per-route static HTML.
     logLevel: 0, // 0 = default; 1 = verbose; 2 = debug.
     sass: {
       paths: [ 
@@ -38,7 +38,7 @@ export default {
   // `{{packageManager}} run testin-nutin`
   testinNutin: {
     includeFramework: true,  // test Nutin source - src/core and src/libs
-    includeTools: false,      // test tools/ (builder, testin-nutin, etc.)
+    includeTools: false,     // test tools/ (builder, testin-nutin, etc.)
     includeApp: false,       // enable to use testin-nutin for application tests
     verbose: false,          // log test suites and individual `it` tests
     coverage: {
