@@ -113,6 +113,11 @@ Internal architecture should preserve future flexibility.
 
 The framework should evolve internally without forcing users to learn new concepts unless those concepts provide clear, tangible value.
 
+### Test your modifications with agents
+
+Point your agent to [agents testing matrix documentation](#docs/AGENTS_TESTING_MATRIX.md) to assist you in testing your modifications to `packages/nutin`.
+This is meant to ease the testing process, but **doesn't fully replace human, manual testing**.
+
 ## Getting Started
 
 ### Prerequisites

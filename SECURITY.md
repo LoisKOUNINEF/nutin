@@ -2,7 +2,7 @@
 
 ## Reporting Security Vulnerabilities
 
-Security matters, eve. If you believe you have found a security vulnerability, please report it responsibly.
+If you believe you have found a security vulnerability, please report it responsibly.
 
 ### How to Report
 
@@ -111,10 +111,10 @@ We would like to thank the following individuals for responsibly disclosing secu
 We support safe harbor for security researchers who:
 
 - Make a good faith effort to avoid privacy violations and disruptions
-- Only interact with systems you own or have explicit permission to test
+- Only interact with systems they own or have explicit permission to test
 - Do not access or modify user data
 - Report vulnerabilities promptly
-- Do not perform attacks that could harm our users or services
+- Do not perform attacks that could harm either users or services
 
 ### Disclaimer
 
@@ -136,7 +136,7 @@ This security policy does not grant any rights or permissions beyond those expli
 
 ---
 
-**Version**: 1.2.0  
-**Last Updated**: 11/05/2025  
+**Version**: 2.0.0  
+**Last Updated**: 17/05/2026  
 
 Thank you for helping keep our project and users safe! 🔒
