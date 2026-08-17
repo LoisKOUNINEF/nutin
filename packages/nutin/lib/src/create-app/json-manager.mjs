@@ -8,7 +8,6 @@ export class JsonManager {
   async generateJsonFiles(projectPath, context) {
     await this.generatePackageJson(projectPath, context);
     await this.generateTsconfigJson(projectPath, context);
-    await this.generateConfigFiles(projectPath, context);
   }
 
   async generatePackageJson(projectPath, context) {
@@ -42,21 +41,6 @@ export class JsonManager {
     };
     
     await fs.writeJSON(path.join(projectPath, 'package.json'), packageJson, { spaces: 2 });
-  }
-
-  async generateConfigFiles(projectPath, context) {
-    const configPath = path.join(projectPath, 'config');
-    await fs.ensureDir(configPath); 
-    await this.generateLanguageConfig(configPath);
-  }
-
-  async generateLanguageConfig(configPath) {
-    const languages = {
-      "languages": [ "en" ],
-      "defaultLanguage": "en"
-    };
-
-    await fs.writeJSON(path.join(configPath, 'languages.json'), languages, { spaces: 2 });    
   }
 
   async generateTsconfigJson(projectPath) {

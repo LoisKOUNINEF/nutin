@@ -215,7 +215,7 @@ route is fully localized; the other is left flat on purpose - will trigger a war
 11. *production only* : `compress-files.js`
     - compress files with gzip (`.js` `.css` `.json` `.svg` `ttf` `otf` `eot`)
 12. *production only, if `generateSEO` is enabled* : `generate-seo-files.js`
-    - server-render each route to static HTML, plus `robots.txt`/`sitemap.xml` — see [SEO.md](SEO.md) for full behavior.
+    - server-render each route to static HTML, plus `robots.txt`/`sitemap.xml` — see [SEO files generation](#seo-files-generation) for full behavior.
 13. `finalize-build.js`
     - remove existing dist/ folder.
     - rename dist-build to dist

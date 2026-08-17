@@ -48,8 +48,6 @@ export async function addFeature() {
     })
     .argument('<feature>', `Feature to add to the current project: ${featureChoices.join(', ')}`)
     .action(async (featureArg) => {
-      print.blue('🚀 nutin — add feature');
-
       if (!featureChoices.includes(featureArg)) {
         print.boldError(`❌ Unknown feature "${featureArg}". Choose one of: ${featureChoices.join(', ')}`);
         process.exit(1);

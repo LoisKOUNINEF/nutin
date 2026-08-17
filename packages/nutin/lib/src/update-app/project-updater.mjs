@@ -54,9 +54,9 @@ export class ProjectUpdater {
   // .nutin-meta.json is a plain project file that could be hand-edited or come from
   // an untrusted clone.
   assertValidVersion(version) {
-    if (!/^\d+\.\d+\.\d+$/.test(version)) {
+    if (typeof version !== 'string' || !/^\d+\.\d+\.\d+$/.test(version)) {
       throw new Error(
-        `${META_FILE_NAME} has an invalid version "${version}" — expected e.g. "1.3.1". ` +
+        `${META_FILE_NAME} has an invalid version "${version}" — expected a version in major.minor.patch format, e.g. "1.3.1". ` +
         `Fix or delete ${META_FILE_NAME} and try again.`,
       );
     }
@@ -71,7 +71,7 @@ export class ProjectUpdater {
     if (comparison > 0) {
       throw new Error(
         `This project records nutin v${meta.version}, but the installed CLI is v${packageVersion}. ` +
-        'Install the latest nutin before running nutin-update.',
+        'Install the latest nutin with "npm i -g @nutin/cli" before running nutin-update.',
       );
     }
     if (parseVersion(meta.version).major !== parseVersion(packageVersion).major) {

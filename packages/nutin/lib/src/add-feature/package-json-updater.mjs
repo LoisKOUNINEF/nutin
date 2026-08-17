@@ -27,7 +27,6 @@ export async function updatePackageJson(projectPath, feature, context) {
   const packageJson = await fs.readJSON(packageJsonPath);
 
   let scripts = {};
-  let extras = {};
 
   if (feature.key === 'docker') {
     scripts = getDockerScripts(context);
@@ -36,18 +35,11 @@ export async function updatePackageJson(projectPath, feature, context) {
   }
 
   const scriptsResult = mergeAdditive(packageJson.scripts ?? {}, scripts);
-  const devDepsResult = mergeAdditive(packageJson.devDependencies ?? {}, extras.devDependencies ?? {});
-  const importsResult = mergeAdditive(packageJson.imports ?? {}, extras.imports ?? {});
-  const enginesResult = mergeAdditive(packageJson.engines ?? {}, extras.engines ?? {});
-
   packageJson.scripts = scriptsResult.merged;
-  if (extras.devDependencies) packageJson.devDependencies = devDepsResult.merged;
-  if (extras.imports) packageJson.imports = importsResult.merged;
-  if (extras.engines) packageJson.engines = enginesResult.merged;
 
   await fs.writeJSON(packageJsonPath, packageJson, { spaces: 2 });
 
-  const skipped = [...scriptsResult.skipped, ...devDepsResult.skipped, ...importsResult.skipped, ...enginesResult.skipped];
+  const skipped = scriptsResult.skipped;
   if (skipped.length > 0) {
     print.info(`Kept existing package.json values for: ${skipped.join(', ')}`);
   }

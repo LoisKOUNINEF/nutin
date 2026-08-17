@@ -14,8 +14,8 @@ describe('View', () => {
   afterEach(() => {
     app.innerHTML = '';
     app = null;
-    const navbar = document.getElementById('navbar');
-    if (navbar) navbar.remove();
+    const header = document.getElementById('header');
+    if (header) header.remove();
     const footer = document.getElementById('footer');
     if (footer) footer.remove();
   });
@@ -70,17 +70,17 @@ describe('View', () => {
     expect(view.getRouteParam('id')).toBe('1');
   });
 
-  it('hideNavbar/revealNavbar toggle the #navbar element display style when present', () => {
-    const navbar = document.createElement('div');
-    navbar.id = 'navbar';
-    document.body.appendChild(navbar);
+  it('hideHeader/revealHeader toggle the #header element display style when present', () => {
+    const header = document.createElement('div');
+    header.id = 'header';
+    document.body.appendChild(header);
 
     const view = new HomeView({});
-    view.hideNavbar();
-    expect(navbar.style.display).toBe('none');
+    view.hideHeader();
+    expect(header.style.display).toBe('none');
 
-    view.revealNavbar();
-    expect(navbar.style.display).toBe('block');
+    view.revealHeader();
+    expect(header.style.display).toBe('block');
   });
 
   it('hideFooter/revealFooter toggle the #footer element display style when present', () => {
@@ -96,9 +96,9 @@ describe('View', () => {
     expect(footer.style.display).toBe('block');
   });
 
-  it('hideNavbar/hideFooter are no-ops when the elements are absent', () => {
+  it('hideHeader/hideFooter are no-ops when the elements are absent', () => {
     const view = new HomeView({});
-    expect(() => view.hideNavbar()).not.toThrow();
+    expect(() => view.hideHeader()).not.toThrow();
     expect(() => view.hideFooter()).not.toThrow();
   });
 

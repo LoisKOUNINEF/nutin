@@ -42,12 +42,12 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
   }
 
 /**
- * Hide navbar
- * Container div must have id="navbar"
+ * Hide header
+ * Container div must have id="header"
  */
-  protected hideNavbar(): void {
-    const navbar = document.getElementById('navbar') as HTMLElement;
-    if (navbar) navbar.style = 'display: none';
+  protected hideHeader(): void {
+    const header = document.getElementById('header') as HTMLElement;
+    if (header) header.style = 'display: none';
   }
 
 /**
@@ -60,12 +60,12 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
   }
 
 /**
- * Reveal navbar
- * Container div must have id="navbar"
+ * Reveal header
+ * Container div must have id="header"
  */
-  protected revealNavbar(): void {
-    const navbar = document.getElementById('navbar') as HTMLElement;
-    if (navbar) navbar.style = 'display: block';
+  protected revealHeader(): void {
+    const header = document.getElementById('header') as HTMLElement;
+    if (header) header.style = 'display: block';
   }
 
 /**

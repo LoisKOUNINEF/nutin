@@ -1,16 +1,15 @@
 // Single source of truth for the optional, additive features under templates/features
 export const FEATURES = [
   {
+    key: 'nutinMixins',
+    cli: 'nutin-mixins',
+    scssForward: '@forward "nutin-mixins";',
+  },
+  {
     key: 'accessibilityComponents',
     cli: 'accessibility-components',
     tsExport: "export * from './accessibility-components/index.js';",
     scssForward: '@forward "accessibility-components";',
-  },
-  {
-    key: 'forms',
-    cli: 'forms',
-    tsExport: "export * from './forms/index.js';",
-    scssForward: '@forward "forms";',
   },
   {
     key: 'overlays',
@@ -19,9 +18,10 @@ export const FEATURES = [
     scssForward: '@forward "overlays";',
   },
   {
-    key: 'nutinMixins',
-    cli: 'nutin-mixins',
-    scssForward: '@forward "nutin-mixins";',
+    key: 'forms',
+    cli: 'forms',
+    tsExport: "export * from './forms/index.js';",
+    scssForward: '@forward "forms";',
   },
   {
     key: 'docker',

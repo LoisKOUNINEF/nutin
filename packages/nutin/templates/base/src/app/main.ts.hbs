@@ -15,17 +15,17 @@ class App {
     // this.footer = new FooterComponent('body' as unknown as HTMLElement);
 
     // Init app
-    this.initialize();
+    // this.initialize();
   }
 
-  public async initialize() {
-    this.renderBaseLayout();
-  }
+  // public async initialize() {
+  //   this.renderBaseLayout();
+  // }
 
-  private renderBaseLayout() {
-    // document.body.prepend(this.header.render());
-    // document.body.append(this.footer.render());
-  }
+  // private renderBaseLayout() {
+  //   document.body.prepend(this.header.render());
+  //   document.body.append(this.footer.render());
+  // }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await I18nService.initTranslations();
     await I18nService.loadTranslations(I18nService.currentLanguage);
   }
-  const app = new App();
+  new App();
 });
 
 window.addEventListener('beforeunload', async () => {
