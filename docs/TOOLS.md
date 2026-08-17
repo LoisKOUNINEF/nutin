@@ -107,7 +107,7 @@ tsconfig.json
 
 ## SEO files generation
 
-`config/seo.json`
+`config/seo.json` - enabled in `nutin.config.js -> generateSEO`.
 
 ```json
 {

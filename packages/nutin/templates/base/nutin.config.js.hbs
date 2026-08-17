@@ -4,6 +4,8 @@ export default {
   i18n: false, // Add languages in config/languages.json after enabling i18n
   tailwind: false,
 
+  generateSEO: false, // Consumes config/seo.json to generate per-route static HTML, robots.txt and sitemap.xml.
+
   // Components / Views scaffolding
   generator: {
     generateStylesheet: false, // generates .scss alongside components / views
@@ -13,7 +15,6 @@ export default {
 
   // Build pipeline
   builder: {
-    generateSEO: true, // Consumes config/seo.json to generate per-route static HTML.
     logLevel: 0, // 0 = default; 1 = verbose; 2 = debug.
     sass: {
       paths: [ 

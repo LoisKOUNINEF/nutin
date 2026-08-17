@@ -107,14 +107,14 @@ Every lib's styles follow the same naming/config-map convention above.
 ### `nutin.config.js`
 
 Central build/feature config (see the inline comments for details):
-- `inlineTemplates`, `i18n`, `tailwind` — top-level feature toggles.
+- `inlineTemplates`, `i18n`, `tailwind`, `generateSEO` — top-level feature toggles.
 - `generator.{generateStylesheet, generateLocales, generateTest}` — what the generator scaffolds alongside new elements.
-- `builder.{generateSEO, logLevel, sass.paths, esbuild, compression}` — build pipeline behavior.
+- `builder.{logLevel, sass.paths, esbuild, compression}` — build pipeline behavior.
 - `testinNutin.{includeFramework, includeTools, includeApp, verbose, jsdomOptions}` — test discovery/environment.
 
 ### `config/seo.json`
 
-Consumed by builder (production only) to generate static HTML per route. Unused if `nutin.config.js -> builder -> generateSEO` is disabled.
+Consumed by builder (production only) to generate static HTML per route. Unused if `nutin.config.js -> generateSEO` is disabled.
 
 ### `config/languages.json`
 

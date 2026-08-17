@@ -2,11 +2,12 @@ import process from 'process';
 import nutinConfig from '../../nutin.config.js';
 
 export const builderConfig = {
-    ...nutinConfig.builder,
-    isProd: process.env.NODE_ENV === 'production',
-    inlineTemplates: nutinConfig.inlineTemplates,
-    i18n: nutinConfig.i18n,
-    tailwind: nutinConfig.tailwind,
-    isVerbose: nutinConfig.builder.logLevel >= 1,
-    isDebug: nutinConfig.builder.logLevel === 2,
+  ...nutinConfig.builder,
+  isProd: process.env.NODE_ENV === 'production',
+  inlineTemplates: nutinConfig.inlineTemplates,
+  i18n: nutinConfig.i18n,
+  tailwind: nutinConfig.tailwind,
+  generateSEO: nutinConfig.generateSEO,
+  isVerbose: nutinConfig.builder.logLevel >= 1,
+  isDebug: nutinConfig.builder.logLevel === 2,
 };
