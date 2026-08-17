@@ -9,12 +9,15 @@
 - [Update Nutin](#update-nutin)
 - [Testing](#testing)
 - [Project structure](#project-structure)
+- [Documentation links](#documentation-links)
 
 ## Generate Component, View, Service
 
-- `{{packageManager}} run generate ELEMENT ELEMENT_NAME`
+- `{{packageManager}} run generate <component|view|service> ELEMENT_NAME`
 
-Supports nested paths. Updates element's barrel file (`src/app/ELEMENT/index.ts`).
+Supports nested paths (i.e. `{{packageManager}} run generate component path/to/my-component`).
+
+Updates corresponding barrel file (`src/app/<components|views|services>/index.ts`).
 
 ## Add feature
 
@@ -31,9 +34,9 @@ nutin-add all
 ### `nutin.config.js`
 
 Central build/feature config (see the inline comments for details):
-- `inlineTemplates`, `i18n`, `tailwind` — top-level feature toggles.
+- `inlineTemplates`, `i18n`, `tailwind`, `generateSEOFiles` — top-level feature toggles.
 - `generator.{generateStylesheet, generateLocales, generateTest}` — what the generator scaffolds alongside new elements.
-- `builder.{generateSEO, logLevel, sass.paths, esbuild, compression}` — build pipeline behavior.
+- `builder.{logLevel, sass.paths, esbuild, compression}` — build pipeline behavior.
 - `testinNutin.{includeFramework, includeTools, includeApp, verbose, jsdomOptions}` — test discovery/environment.
 
 ### `config/seo.json`
@@ -103,6 +106,8 @@ These tests serve two purposes:
 
 *If you choose to use TestinNutin for your own app, simply enable it in `nutin.config.js -> testinNutin -> includeApp: true`.* Its syntax is intentionally lightweight and familiar to developers coming from Jest and similar tools.
 
+[TestinNutin docs ->](https://github.com/LoisKOUNINEF/nutin/tree/main/docs/TESTING.md)
+
 ## Project structure
 
 ```
@@ -133,3 +138,8 @@ nutin.config.js
 package.json
 tsconfig.json
 ```
+
+## Useful Links
+
+- [Docs on repository](https://github.com/LoisKOUNINEF/nutin/tree/main/docs)
+- [Official website](https://nutin.org)
