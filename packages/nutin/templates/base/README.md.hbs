@@ -36,11 +36,14 @@ Central build/feature config (see the inline comments for details):
 
 ### `config/seo.json`
 
-Consumed by builder (production only) to generate static HTML per route. Unused if `nutin.config.js -> builder -> generateSEO` is disabled.
+- Register your routes' description, title and ogImage here.
+- Consumed by builder (production only) to generate static HTML per route.
+- Unused if `nutin.config.js -> builder -> generateSEO` is disabled.
 
 ### `config/languages.json`
 
-Consumed by i18nService and builder. Unused if `nutin.config.js -> i18n` is disabled.
+- Register supported languages for i18n here.
+- Unused if `nutin.config.js -> i18n` is disabled.
 
 ## Update Nutin version
 

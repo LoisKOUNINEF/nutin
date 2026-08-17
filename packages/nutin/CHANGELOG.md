@@ -2,36 +2,39 @@
 
 ## 2.0.0
 
-- Removed `Store`
-    - It created confusion and had questionable usefulness. Besides, services already handles what Store was supposed to.
-
-- EventBus
-    - Nutin internal events are no longer defined in `globals.d.ts` - new interface `AppEvent` only for app-level events. Payload types are now objects (clearer).
-    - Now exposes domain facades for navigation, lifecycle, and overlays events. Subscribing functions (`on*`) return a closure function to abstract unsubscription.
-    - EventBus remains directly usable in app-level events / domain facades. Naming convention: `domain:event-name`.
-
+- Main features
+  - New central config file: `nutin.config.js` - Nutin features (i18n, inlineTemplates, tailwind), builder, generator, testing.
+  - Can now use Tailwind (v4) as an optional utility layer alongside SASS.
+  - Globally scoped stylesheets, co-located with feature files. **Use unique class names.** *Note: Nutin's naming convention encourages prefixes `home__header`*.
+  - i18n now uses URL: aligns with common practices & allows SEO to render static HTML files for each language.
+  - SEO static files generation: `config/seo-routes.json` is used by production builder to generate static HTML files to be served to bots.
+  - Added stateless, accessibility-focused components library.
+  - Added accessibility-focused overlays library.
+  - Added forms, formGroup & formControl (Validators) library.
+  - New interface `AppEvent` only for app-level events. Nutin internal events are no longer defined in `globals.d.ts`. Payload types are now objects.
+  - EventBus exposes domain facades for navigation, lifecycle, and overlays events. Subscribing functions (`on*`) return a closure function to abstract unsubscription. it remains directly usable in app-level events / domain facades. Naming convention: `domain:event-name`.
 ```ts
 // emit
 Navigation.navigateTo('path');
-
 // closure
 const unsub = Navigation.onNavigate(this.doStuff);
-
 // onDestroy
 unsub()
 ```
+  - New CLI `nutin-add <feature>` (add libraries and docker) and `nutin-update` (update Nutin to latest patch / minor).
+  - TestinNutin: Added code coverage summary (branches / functions/ lines), `it.todo`, clock mocking (`setTimeout / setInterval`).
+  - New file: `AGENTS.md` - gives LLMs the minimal context they need to start working with you in a Nutin project.
 
-- Cleaner separation
-    - `app` folder now exclusively contains application code, as it should. `components/common` folder now lives in `src/libs/components`/
-    - `styles` folder is now exclusively dedicated to global application styles. Libraries styles now live alongside their components in `libs/*`, and built-in mixins and functions in `libs/scss`.
+- Removed:
+  - `Store`: It created confusion and had questionable usefulness. Besides, services already handles what Store was supposed to.
+  - CSS utility classes: Had questionable usefulness and relevance, and tailwind support buried it.
 
-- Base classes
-    - Cleaner responsibilities:
-        - BaseComponent responsibilities: Render lifecycle, Hydration, DOM lifecycle, Invalidation, Event subscriptions (DOM and bus), Teardown, Render guard, Composition orchestration
-        - Component responsibilities: Props (className, style, data-bindings, dynamic buttons), Config + defaults + normalization, Template generation via `templateFn`
-        - View responsibilities: Route params, Navigation hooks (onEnter/onExit), Metadata policies, View identity (viewName)
-    - EventBus methods with automatic unsubscribe: `listen(event, callback`, `listenToRenderEvents(events[])`. AppEventBus can still be used directly if needed (`once`...) but must be unsubscribed manually via `onBeforeDestroy` hook.
-    - Proper lifecycle hooks
+- Cleaner responsibilities
+  - BaseComponent responsibilities: Render lifecycle, Hydration, DOM lifecycle, Invalidation, Event subscriptions (DOM and bus), Teardown, Render guard, Composition orchestration
+  - Component responsibilities: Props (className, style, data-bindings, dynamic buttons), Config + defaults + normalization, Template generation via `templateFn`
+  - View responsibilities: Route params, Navigation hooks (onEnter/onExit), Metadata policies, View identity (viewName)
+  - EventBus methods with automatic unsubscribe: `listen(event, callback`, `listenToRenderEvents(events[])`. AppEventBus can still be used directly if needed (`once`...) but must be unsubscribed manually via `onBeforeDestroy` hook.
+  - Proper lifecycle hooks
 ```ts
 onBeforeRender()
 onAfterRender()
@@ -42,28 +45,9 @@ onAfterDestroy()
 onEnter()
 onExit()
 ```
-- Service
-    - Now exposes a single `getInstance()` method that accepts arguments, only on first call.
+  - Service now exposes a single `getInstance()` method that accepts arguments, only on first call.
 
-- Libs
-    - Can now use Tailwind (v4) as an optional utility layer alongside SASS.
-    - Added stateless, accessibility-focused components library.
-    - Added forms, formGroup & formControl (Validators)
-    - globally scoped stylesheets, co-located with feature files for organizational convenience. **Use unique class names.** *Note: Nutin's naming convention encourages prefixes `home__header`*
-    - removed utility classes: they created confusion and had questionable usefulness. mixins now live in `libs/scss/_mixins-nutin.scss`.
-
-- Deployment Helper
-    - SEO: `config/seo-routes.json` is used by production builder to generate static HTML files to be served to bots, as well as robots.txt and sitemap.xml.
-
-- TestinNutin
-    - Added `it.todo` global
-
-- i18n
-    - Now uses URL: aligns with common practices & allows SEO to render static HTML files for each language.
-
-- CLI
-    - App creation flow reworked (again, but for the best)
-        Cleaner presets & `--options` flag accepting comma-separated options string.
+- Numerous bug fixes
 
 ## 1.3.1
 

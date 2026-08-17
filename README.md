@@ -1,12 +1,12 @@
-# Project Nutin Monorepo.
+# Nutin Monorepo.
 
-`Bridging the gap between vanilla web development and heavy frameworks.`
+`The structure of a framework. The freedom of vanilla.`
 
-Nutin gives you the essential tools to build small, maintainable web apps without giving up ownership of your code.
+Nutin provides the essential tools to build maintainable web applications that you own completely.
 
 **Your app owns Nutin — not the other way around.** The framework source lives alongside your application, so you can read it, modify it, and make it yours. Nutin's update system is designed to preserve those changes.
 
-Nutin is deliberately opinionated, lightweight, and dependency-free on runtime.
+Nutin is deliberately pragmatic, lightweight, and dependency-free on runtime.
 
 **[Create your first app](https://www.nutin.org/tutorial).**
 
@@ -16,7 +16,7 @@ Contains NPM [package source code](packages/nutin/README.md) (Handlebars templat
 
 ## 📄 Docs
 
-- **[Nutin](docs/CORE.md)**: Core functionalities
+- **[Core](docs/CORE.md)**: Core functionalities
 - **[Libraries](docs/LIBS.md)**: Built-in optionals (forms, overlays, accessibilty-focused components).
 - **[Testing](docs/TESTING.md)**: Built-in testing toolkit - used to test Nutin, can be used to test the app.
 - **[Docker](docs/DOCKER.md)**: Multi-stage `Dockerfile` and ready-to-use `nginx.conf`
