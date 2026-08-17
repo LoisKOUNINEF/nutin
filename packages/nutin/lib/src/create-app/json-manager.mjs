@@ -46,11 +46,8 @@ export class JsonManager {
 
   async generateConfigFiles(projectPath, context) {
     const configPath = path.join(projectPath, 'config');
-    
-    if (context.i18n) {
-      await fs.ensureDir(configPath); 
-      await this.generateLanguageConfig(configPath);
-    }
+    await fs.ensureDir(configPath); 
+    await this.generateLanguageConfig(configPath);
   }
 
   async generateLanguageConfig(configPath) {

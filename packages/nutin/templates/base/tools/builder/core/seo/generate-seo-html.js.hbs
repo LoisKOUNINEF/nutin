@@ -125,6 +125,57 @@ function valueForLang(value, lang) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value[lang] : value;
 }
 
+// Used to actually resolve HTML content when i18n is on: falls back to defaultLanguage (then
+// the first available value) when `lang` has no exact entry, mirroring resolveLocaleValue's
+// fallback. Missing translations become a warning (see collectI18nSeoIssues), not a crash.
+function valueForLangWithFallback(value, lang, defaultLanguage) {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return value[lang] ?? value[defaultLanguage] ?? Object.values(value)[0];
+  }
+  return value;
+}
+
+// Which language's value valueForLangWithFallback would actually use for `lang`, given the
+// same value[lang] ?? value[defaultLanguage] ?? Object.values(value)[0] precedence — so
+// warnings can name the real source language instead of assuming defaultLanguage.
+function sourceLangFor(value, lang, defaultLanguage) {
+  if (value[lang]) return lang;
+  if (value[defaultLanguage]) return defaultLanguage;
+  return Object.keys(value).find((key) => value[key]);
+}
+
+// Upfront pass over every route x lang x field, run before the (expensive) SSR bundle build.
+// Buckets each combination into a fallback warning (some language has content, this one
+// doesn't) or a hard error (no language has any content for this field on this route).
+function collectI18nSeoIssues(routes, languages, defaultLanguage) {
+  const fallbacks = [];
+  const missing = [];
+  const noLocalization = [];
+
+  for (const route of routes) {
+    for (const field of ['title', 'description']) {
+      const value = route[field];
+
+      if (value && typeof value !== 'object') {
+        noLocalization.push({ path: route.path, field });
+      }
+
+      for (const lang of languages) {
+        if (valueForLang(value, lang)) continue;
+
+        const sourceLang = value && typeof value === 'object' ? sourceLangFor(value, lang, defaultLanguage) : undefined;
+        if (sourceLang) {
+          fallbacks.push({ path: route.path, field, lang, sourceLang });
+        } else {
+          missing.push({ path: route.path, field, lang });
+        }
+      }
+    }
+  }
+
+  return { fallbacks, missing, noLocalization };
+}
+
 function segmentsOf(routeSuffix) {
   return routeSuffix ? routeSuffix.split('/').filter(Boolean) : [];
 }
@@ -190,14 +241,9 @@ async function processRoute(template, baseUrl, defaultLanguage, languages, route
 
   if (builderConfig.i18n) {
     for (const lang of languages) {
-      const title = valueForLang(route.title, lang);
-      const description = valueForLang(route.description, lang);
-      const ogImage = valueForLang(route.ogImage, lang);
-
-      if (!title || !description) {
-        print.boldError(`[generate-seo-html] Missing title or description for route "${route.path}" / lang "${lang}" in seo.json`);
-        exit(1);
-      }
+      const title = valueForLangWithFallback(route.title, lang, defaultLanguage);
+      const description = valueForLangWithFallback(route.description, lang, defaultLanguage);
+      const ogImage = valueForLangWithFallback(route.ogImage, lang, defaultLanguage);
 
       const pageUrl = `${baseUrl}/${lang}${routeSuffix}`;
       const body = await renderRoute({
@@ -260,6 +306,41 @@ export async function generateSeoHtml() {
 
   const languagesConfigPath = path.join(PATHS.temp, 'config', 'languages.json');
   const { languages, defaultLanguage } = JSON.parse(fs.readFileSync(languagesConfigPath, 'utf-8'));
+
+  if (builderConfig.i18n) {
+    const { fallbacks, missing, noLocalization } = collectI18nSeoIssues(seoConfig.routes, languages, defaultLanguage);
+
+    if (noLocalization.length > 0) {
+      const lines = noLocalization
+        .map(({ path, field }) => `  - route "${path}": "${field}"`)
+        .join('\n');
+      print.warn(
+        `[generate-seo-html] i18n is enabled, but these routes have no language values in seo.json:\n${lines}\n\n` +
+        `Add per-language objects (e.g. { "en": ..., "fr": ... }) under the matching route's ` +
+        `"title"/"description" in config/seo.json to localize this content, or ignore this ` +
+        `warning if sharing the same content across every language is intentional.`
+      );
+    }
+
+    if (fallbacks.length > 0) {
+      const lines = fallbacks
+        .map(({ path, field, lang, sourceLang }) => `  - route "${path}": "${field}.${lang}" not set — using "${field}.${sourceLang}"`)
+        .join('\n');
+      print.error(`[generate-seo-html] Using defaultLanguage fallback for missing i18n content:\n${lines}`);
+    }
+
+    if (missing.length > 0) {
+      const lines = missing
+        .map(({ path, field, lang }) => `  - route "${path}": missing "${field}.${lang}" (no language has a value for this field)`)
+        .join('\n');
+      print.boldError(
+        `[generate-seo-html] config/seo.json is missing required content:\n${lines}\n\n` +
+        `Add these keys under the matching route's "title"/"description" in config/seo.json. ` +
+        `Configured languages (config/languages.json): ${languages.join(', ')}.`
+      );
+      exit(1);
+    }
+  }
 
   const bundleUrl = await buildSsrBundle();
 

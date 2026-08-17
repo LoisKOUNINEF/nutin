@@ -112,30 +112,32 @@ tsconfig.json
 
 1. `copy-static.js`
     — copy files from `src/` into `dist-build/src/` (assets/static + JSONs), the favicon, and `config/`/`nutin.config.js`, respecting known binary extensions.
-2. *dev builds only* : `tsc.js`
+2. `validate-routes.js`
+    — statically parse `src/app/routes.ts`'s `appRoutes` object literal (TypeScript compiler API, no execution) and fail the build if any route key is duplicated (an earlier duplicate would be silently unreachable).
+3. *dev builds only* : `tsc.js`
     — run the TypeScript compiler.
-3. *If `inlineTemplates` is `false`* : `merge-templates.js`
+4. *If `inlineTemplates` is `false`* : `merge-templates.js`
     — minify each external HTML template then replace the matching `.js` file's `__TEMPLATE_PLACEHOLDER__` token with it.
     *If `inlineTemplates` is `true`* : `minify-html.js`
     — minify inline templates in place instead.
-4. *If i18n is used* : `build-i18n.js`
-    — find JSON locale fragments and merge them into per-locale files under `dist-build/src/locales/`.
 5. `sass.js`
     — compile `src/styles/main.scss` (plus every component/view's co-located `.scss`) and write `dist-build/src/main.css`.
 6. *If `tailwind` is configured* : `tailwind.js`
     — compile Tailwind CSS.
-7. `validate-html.js`
+7. *If i18n is used* : `build-i18n.js`
+    — find JSON locale fragments and merge them into per-locale files under `dist-build/src/locales/`.
+8. `validate-html.js`
 	- add app entrypoint script tag and stylesheet link tag in index.html
     — run lightweight checks over `dist-build/src/index.html` to ensure required tags exist.
-8. *production only* : `esbuild.js`
+9. *production only* : `esbuild.js`
     - run esbuild
-9. *production only* : `hash-files.js`
+10. *production only* : `hash-files.js`
     - hash `.js` and `.css` files
-10. *production only, if `generateSEO` is enabled* : `generate-seo-html.js`, `generate-robots-txt.js`, `generate-sitemap-xml.js`
-    - server-render each route to static HTML for SEO, plus generate `robots.txt` and `sitemap.xml` (see `tools/builder/core/ssr/` for the underlying SSR bundle/render/polyfill scripts).
 11. *production only* : `compress-files.js`
     - compress files with gzip (`.js` `.css` `.json` `.svg` `ttf` `otf` `eot`)
-12. `finalize-build.js`
+12. *production only, if `generateSEO` is enabled* : `generate-seo-files.js`
+    - server-render each route to static HTML, plus `robots.txt`/`sitemap.xml` — see [SEO.md](SEO.md) for full behavior.
+13. `finalize-build.js`
     - remove existing dist/ folder.
     - rename dist-build to dist
     - *production*: remove unused folder beforehand.
@@ -148,6 +150,11 @@ tsconfig.json
     - copy files into `dist-build/src/` while handling binary files and JSON files specially; also copies `public/favicon.ico` and the `config/`/`nutin.config.js` files into the build output.
 * Uses: `tools/builder/variables/binary-extensions.js` (set of known binary extensions) and `tools/utils/get-files-recursive.js`.
 * If you add new asset formats, update `binary-extensions.js`.
+
+### `core/validate-routes.js`
+
+* Purpose: catch duplicate route keys in `src/app/routes.ts` before they cause a silently unreachable route at runtime.
+* Behavior: statically parses `appRoutes`'s object literal with the TypeScript compiler API (the file is never executed) and exits with an error listing every duplicated key.
 
 ### `core/build-i18n.js`
 

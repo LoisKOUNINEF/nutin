@@ -7,7 +7,7 @@ import { generateSitemapXml } from './seo/generate-sitemap-xml.js';
 
 function generateSeoFiles() {
   generateSeoHtml();
-  if (builderConfig.isVerbose) print.info('robots.txt generation complete.');
+  if (builderConfig.isVerbose) print.info('SEO HTML generation complete.');
   generateRobotsTxt();
   if (builderConfig.isVerbose) print.info('robots.txt generation complete.');
   generateSitemapXml();

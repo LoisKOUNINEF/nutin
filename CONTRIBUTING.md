@@ -67,7 +67,6 @@ installLibs()
 installComponents();
 installForms();
 installOverlays();
-installPipes();
 ```
 
 ### Configuration philosophy
