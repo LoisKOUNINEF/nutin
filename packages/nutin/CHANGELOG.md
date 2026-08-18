@@ -8,7 +8,7 @@
   - Removed `Store`: It created confusion and had questionable usefulness. Besides, services already handles what Store was supposed to.
 
 - Main features
-  - New central config file: `nutin.config.js` - Nutin features (i18n, inlineTemplates, tailwind), builder, generator, testing.
+  - New main config file: `nutin.config.js` - Nutin features (i18n, inlineTemplates, tailwind, generateSEOFiles), builder, generator, testing.
   - Can now use Tailwind (v4) as an optional utility layer alongside SASS.
   - Globally scoped stylesheets, co-located with feature files. **Use unique class names.** *Note: Nutin's naming convention encourages prefixes `home__header`*.
   - Optional SEO static files generation: `config/seo.json` is used by production builder to generate static HTML files to be served to bots, via real SSR of your components (only title, description and ogImage remain hand-authored content). Also generates `robots.txt` and `sitemap.xml` from `config/seo.json` (supports per-route `disallow` / `disallowBots`).
@@ -26,8 +26,9 @@ unsub()
   - New CLI command `nutin-add docker`
     Now supports brotli compression and all 4 package manager (npm, yarn, pnpm, bun) out of the box.
   - New CLI command `nutin-update` (update Nutin to latest patch / minor). `nutin-update` diffs your project against the new templates and merges changes, reporting any conflicts it can't resolve automatically.
-  - TestinNutin: Added code coverage summary (branches / functions/ lines), `it.todo`, clock mocking (`setTimeout / setInterval`).
+  - New file: `GETTING_STARTED.md` - gives a new Nutin developer enough architectural context and concrete conventions to start working without immediately having to consult the full documentation.
   - New file: `AGENTS.md` - gives LLMs the minimal context they need to start working with you in a Nutin project.
+  - TestinNutin: Added code coverage summary (branches / functions/ lines), `it.todo`, clock mocking (`setTimeout / setInterval`).
 
 - Cleaner base classes responsibilities
   - BaseComponent responsibilities: Render lifecycle, Hydration, DOM lifecycle, Invalidation, Event subscriptions (DOM and bus), Teardown, Render guard, Composition orchestration.
