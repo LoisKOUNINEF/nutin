@@ -3,7 +3,6 @@ import * as fs from 'fs';
 import path from 'path';
 import { print, runCommand, promptBoolean } from '../../utils/index.js';
 import { PATHS } from './paths.js';
-import { builderConfig } from '../builder.config.js';
 
 const REQUIRED_DEPS = [
   { name: 'tailwindcss', version: '^4.3.0' },
@@ -62,7 +61,7 @@ const mainCss = path.join(PATHS.tempSource, 'main.css');
 const args = ['-i', input, '-o', output];
 if (builderConfig.isProd) args.push('--minify');
 
-execFileSync(twBin, args, { stdio: builderConfig.isVerbose ? 'inherit' : 'pipe' });
+execFileSync(twBin, args, { stdio: 'pipe' });
 
 // Tailwind's @layer blocks always lose to unlayered SCSS in the cascade regardless
 // of order, so prepending here is only for readable file ordering, not precedence.
@@ -70,5 +69,3 @@ const tailwindCss = fs.readFileSync(output, 'utf-8');
 const existingCss = fs.readFileSync(mainCss, 'utf-8');
 fs.writeFileSync(mainCss, tailwindCss + '\n' + existingCss);
 fs.unlinkSync(output);
-
-if (builderConfig.isVerbose) print.boldInfo('✅ Tailwind CSS processed.');

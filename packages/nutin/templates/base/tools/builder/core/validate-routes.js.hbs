@@ -4,7 +4,6 @@ import path from 'path';
 import ts from 'typescript';
 import { print } from '../../utils/index.js';
 import { PATHS } from './paths.js';
-import { builderConfig } from '../builder.config.js';
 
 const ROUTES_FILE = path.join(PATHS.sourceApp, 'routes.ts');
 
@@ -70,7 +69,6 @@ function validateRoutes() {
     );
   }
 
-  if (builderConfig.isVerbose) print.boldInfo('✅ Route validation passed');
 }
 
 function errorExit(message) {

@@ -1,26 +1,26 @@
 export default {
   // Nutin features
-  inlineTemplates: false,
-  i18n: false, // Add languages in config/languages.json after enabling i18n
-  tailwind: false,
+  tailwind: false,         // Enable Tailwind CSS v4
+  i18n: false,             // Enable i18n; configure languages in config/languages.json 
+  inlineTemplates: false,  // Embed HTML templates in .ts files instead of colocated .html files
 
-  generateSEOFiles: false, // Consumes config/seo.json to generate per-route static HTML, robots.txt and sitemap.xml.
+  generateSEOFiles: false, // Generate per-route HTML, robots.txt and sitemap.xml; configure SEO data in config/seo.json
 
   // Components / Views scaffolding
   generator: {
-    generateStylesheet: false, // generates .scss alongside components / views
-    generateLocales: false, // generates locales/*.json alongside components / views - With i18n enabled.
-    generateTest: false, // generates .test.js alongside components / views / services - With testinNutin.includeApp enabled.
+    generateStylesheet: false, // Generate a .scss file alongside each component or view
+    generateLocales: false,    // Generate locale files alongside components and views (requires i18n)
+    generateTest: false,       // Generate test files alongside components, views and services (requires testinNutin.includeApp)
   },
 
   // Build pipeline
   builder: {
-    logLevel: 0, // 0 = default; 1 = verbose; 2 = debug.
     sass: {
       paths: [ 
         'base', 
-      ], // in styles/
+      ], // Directories in styles/ to include in the Sass load path
     },
+
     esbuild: {
       bundle: true,
       minify: true,
@@ -28,28 +28,26 @@ export default {
       target: ['es2015'],
       drop: ['console', 'debugger'],
     },
-    compression: {
-      gzip: true,
-      // BROTLI OPTIONAL
-      // brotli: false,
-    },
   },
 
   // Testing toolkit
   // `{{packageManager}} run testin-nutin`
   testinNutin: {
-    includeFramework: true,  // test Nutin source - src/core and src/libs
-    includeTools: false,     // test tools/ (builder, testin-nutin, etc.)
-    includeApp: false,       // enable to use testin-nutin for application tests
-    verbose: false,          // log test suites and individual `it` tests
+    includeFramework: true,  // Test Nutin source - src/core and src/libs
+    includeTools: false,     // Test tools/ (builder, testin-nutin, etc.)
+    includeApp: false,       // Include application tests
+
+    verbose: false,          // Log test suites and individual tests
+    
     coverage: {
-      enabled: false,        // include coverage in the normal test command
-      threshold: 95,         // exit with code 1 if any global coverage metric falls below the threshold
-      reportUncovered: true, // generates an .md report of uncovered lines, functions and branches in coverage/
+      enabled: false,        // Include coverage in the normal test command
+      threshold: 95,         // Fail if any global coverage metric falls below this threshold
+      reportUncovered: true, // Generate a report of uncovered lines, functions and branches
     },
+
     jsdomOptions: {
-      runScripts: false,     // or true ("dangerously") to execute scripts in the DOM
-      resources: false,      // or true ("usable") to load external resources
+      runScripts: false,
+      resources: false,
       freezeGlobals: false,
       pretendToBeVisual: true,
     },

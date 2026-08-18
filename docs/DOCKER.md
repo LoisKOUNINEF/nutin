@@ -360,11 +360,10 @@ gzip_types
 
 ## Brotli compression
 
-**Default deployment helpers do NOT support Brotli compression.**                     
-If you want to use it :
-    - uncomment brotli-related sections (`BROTLI OPTIONAL`) in `nutin.config.js` (the `compression.brotli` key) and `tools/builder/core/compress-files.js`
-    - enable brotli in nginx.conf
-    - You'll also need to use an existing Brotli-enabled nginx image or build your own from source.
+**Default nginx.conf do NOT support Brotli compression.**                     
+You'll need to:
+    - enable brotli in nginx.conf - simple examples below
+    - Use a Brotli-enabled nginx image or build your own from source.
 
 ### Build nginx from source
 

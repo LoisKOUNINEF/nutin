@@ -1,4 +1,4 @@
-# Nutin Monorepo.
+# Nutin Monorepo
 
 `The structure of a framework. The freedom of vanilla.`
 
@@ -8,17 +8,19 @@ Nutin provides the essential tools to build maintainable web applications that y
 
 Nutin is deliberately pragmatic, lightweight, and dependency-free on runtime.
 
-**[Create your first app](https://www.nutin.org/tutorial).**
+**[Create your first app →](https://www.nutin.org/tutorial).**
 
-## Monorepo
+## Repository
 
-Contains NPM [package source code](packages/nutin/README.md) (Handlebars templates), [the website source code](apps/website/README.md) built with Nutin, and a working example of the [app built in the tutorial](apps/tutorial).
+- **[NPM package](packages/nutin/README.md)** — Nutin CLI, generator and templates
+- **[Website](apps/website/README.md)** — Nutin's website, built with Nutin
+- **[Tutorial app](apps/tutorial)** — Working example of the application built in the tutorial
 
 ## 📄 Docs
 
 - **[Core](docs/CORE.md)**: Core functionalities
-- **[Libraries](docs/LIBS.md)**: Built-in optionals (forms, overlays, accessibilty-focused components).
-- **[Testing](docs/TESTING.md)**: Built-in testing toolkit - used to test Nutin, can be used to test the app.
+- **[Libraries](docs/LIBS.md)**: Optional built-ins (forms, overlays, accessibility-focused components).
+- **[Testing](docs/TESTING.md)**: Built-in testing toolkit - used to test Nutin and available for application tests.
 - **[Docker](docs/DOCKER.md)**: Multi-stage `Dockerfile` and ready-to-use `nginx.conf`
 - **[Tools](docs/TOOLS.md)**: Generator, builder, development environment.
 

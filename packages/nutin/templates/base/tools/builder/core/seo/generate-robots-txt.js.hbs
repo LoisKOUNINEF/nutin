@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import { PATHS } from '../paths.js';
 import { print } from '../../../utils/index.js';
-import { builderConfig } from '../../builder.config.js';
 
 export function generateRobotsTxt() {
   const seoConfigPath = path.join(PATHS.temp, 'config', 'seo.json');
@@ -49,6 +48,4 @@ export function generateRobotsTxt() {
 
   const outputPath = path.join(PATHS.tempSource, 'robots.txt');
   fs.writeFileSync(outputPath, lines.join('\n') + '\n', 'utf-8');
-
-  if (builderConfig.isDebug) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
 }

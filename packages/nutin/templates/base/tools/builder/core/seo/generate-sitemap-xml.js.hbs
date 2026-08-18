@@ -41,6 +41,4 @@ export function generateSitemapXml() {
 
   const outputPath = path.join(PATHS.tempSource, 'sitemap.xml');
   fs.writeFileSync(outputPath, xml, 'utf-8');
-
-  if (builderConfig.isDebug) print.gray(`Generated: ${path.relative(process.cwd(), outputPath)}`);
 }

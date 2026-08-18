@@ -1,6 +1,6 @@
 # Contributing to nutin
 
-Thank you for your interest in contributing! This document provides guidelines and information for contributing to this monorepo, which contains the npm package and the official website.
+Thank you for your interest in contributing! This document provides guidelines and information for contributing to this monorepo, which contains the NPM package and the official website.
 
 ## Table of Contents
 
@@ -16,15 +16,11 @@ Thank you for your interest in contributing! This document provides guidelines a
 
 ## Philosophy and Principles
 
-```java
-nutin aims to bridge the gap between vanilla web development and large frameworks.
-```
+The goal is to provide a structured layer that is:
 
-The goal is to provide a structured layer:
-
-* explicit, easy to understand and to start with;
-* favoring code ownership and openness;
-* with a very high test coverage and (pretty) well-documented
+* explicit, easy to understand and to start with,
+* favoring code ownership and openness,
+* with high test coverage and thorough documentation
 
 The internal architecture should remain highly modular, while the public APIs and CLI should remain intentionally small.
 
@@ -71,18 +67,18 @@ installOverlays();
 
 ### Configuration philosophy
 
-The project has one configuration entry point (single source of truth) that contains framework-wide configuration.
+The project has one main configuration entry point, `nutin.config.js`, for framework and tooling options.
+Specialized configuration files are used where appropriate, such as `config/languages.json` and `config/seo.json`.
 
 ```
-nutin.config.js
+# nutin.config.js
 
-Nutin features - i18n, inlineTemplates, tailwind booleans
+Nutin features
 
-# sections
-builder
-generator
-testing
-...
+Sections:
+- generator
+- builder
+- testinNutin
 ```
 
 ### Simplicity beats configurability
@@ -113,17 +109,11 @@ Internal architecture should preserve future flexibility.
 
 The framework should evolve internally without forcing users to learn new concepts unless those concepts provide clear, tangible value.
 
-### Test your modifications with agents
-
-Point your agent to [agents testing matrix documentation](docs/AGENTS_TESTING_MATRIX/README.md) to assist you in testing your modifications to `packages/nutin`.
-This is meant to ease the testing process, but **doesn't fully replace human, manual testing**.
-
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js: Version 22.x or higher
-- npm: Version 9.x or higher (or yarn/pnpm/bun equivalent)
 - Git: Latest stable version
 
 ## Development Setup
@@ -138,6 +128,12 @@ This is meant to ease the testing process, but **doesn't fully replace human, ma
    ```bash
    npm install
    ```
+   
+4. Testing changes
+
+See the [agents testing matrix](docs/AGENTS_TESTING_MATRIX/README.md) for guidance on testing changes to `packages/nutin`.
+
+This can speed up testing, but **does not replace human manual testing**.
 
 ## Contributing Guidelines
 
@@ -181,7 +177,7 @@ Various types of contributions are welcome:
 
 ### Commit Message Convention
 
-We use [Conventional Commits](https://conventionalcommits.org/) format:
+Nutin prefers [Conventional Commits](https://conventionalcommits.org/) format:
 
 ```
 type(scope): description
@@ -200,14 +196,6 @@ type(scope): description
 - `test`: Adding or updating tests
 - `chore`: Build process or auxiliary tool changes
 
-**Scopes:**
-- `core`: Changes to the main toolkit
-- `testing`: Changes to the testing toolkit
-- `libraries`: Changes to the built-in libraries
-- `website`: Changes to the website
-- `docs`: Documentation changes
-- `ci`: CI/CD changes
-
 **Examples:**
 - `feat(nutin): implemented dependency injection`
 - `fix(website): resolve mobile navigation issue`
@@ -215,24 +203,16 @@ type(scope): description
 
 ## Pull Request Process
 
-### PR Template
-
-When creating a PR, please include:
-
-1. **Description** of changes
-2. **Type of change** (bug fix, new feature, etc.)
-3. **Testing** performed
-4. **Screenshots** (for UI changes)
-5. **Breaking changes** (if any)
-6. **Related issues** (if applicable)
+Please use the PR template and provide enough context to understand the change, how it was tested, and any relevant breaking changes.
 
 ## Documentation
 
 ### Package / Website Documentation
 
-- **Documentation**: Generated from JSDoc comments
-- **README**: Keep READMEs up to date
-- **Examples**: Include practical usage examples
+- API documentation: generated from JSDoc comments
+- Markdown documentation: maintained in docs/
+- Website documentation: maintained in apps/website/
+- READMEs: keep them aligned with their intended audience
 
 ### Writing Guidelines
 
@@ -247,18 +227,11 @@ When creating a PR, please include:
 
 - **GitHub Discussions**: For questions and general discussion
 - **Issues**: For bug reports and feature requests
-- **Discord**: [Coming soon(er or later)]
 
 ### Maintainer Contact
 
 For sensitive issues or direct maintainer contact:
 - Email: [nutin-toolkit@gmail.com]
-
-## Recognition
-
-- **All Contributors**: Listed in README
-- **Release notes**: Contributions mentioned in changelogs
-- **Gratitude**
 
 ## License
 

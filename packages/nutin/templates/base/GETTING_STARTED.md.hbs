@@ -3,46 +3,40 @@
 ## Table of contents
 
 - [Generate Component, View, Service](#generate-component-view-service)
-- [Add feature](#add-feature)
 - [Configuration](#configuration)
 - [Register global components](#register-global-components)
+- [Add feature](#add-feature)
 - [Update Nutin](#update-nutin)
 - [Testing](#testing)
 - [Project structure](#project-structure)
 - [Useful links](#useful-links)
 
-## Generate Component, View, Service
+## Generate components, views and services
 
 - `{{packageManager}} run generate <component|view|service> ELEMENT_NAME`
 
-Supports nested paths (i.e. `{{packageManager}} run generate component path/to/my-component`).
+Supports nested paths, for example:
 
-Updates corresponding barrel file (`src/app/<components|views|services>/index.ts`).
+`{{packageManager}} run generate component path/to/my-component`
 
-## Add feature
-
-```bash
-# Features: accessibility-components, forms, overlays, nutin-mixins, docker
-nutin-add <feature> 
-
-nutin-add libs # accessibility-components, forms, overlays, nutin-mixins
-nutin-add all
-```
+Generated elements are automatically exported from the corresponding barrel file:
+`src/app/<components|views|services>/index.ts`.
 
 ## Configuration
 
 ### `nutin.config.js`
 
-Central build/feature config (see the inline comments for details):
-- `inlineTemplates`, `i18n`, `tailwind`, `generateSEOFiles` — top-level feature toggles.
-- `generator.{generateStylesheet, generateLocales, generateTest}` — what the generator scaffolds alongside new elements.
-- `builder.{logLevel, sass.paths, esbuild, compression}` — build pipeline behavior.
-- `testinNutin.{includeFramework, includeTools, includeApp, verbose, jsdomOptions}` — test discovery/environment.
+Main build and feature configuration. See the inline comments for details.
+
+- `tailwind`, `i18n`, `inlineTemplates`, `generateSEOFiles` — top-level features.
+- `generator.*` — controls what the generator scaffolds.
+- `builder.*` — controls build behavior.
+- `testinNutin.*` — controls TestinNutin.
 
 ### `config/seo.json`
 
 - Register your routes' description, title and ogImage here.
-- Consumed by builder (production only) to generate static HTML per route.
+- Data is used to generate static HTML per route, robots.txt and sitemap.xml.
 - Unused if `nutin.config.js -> generateSEO` is disabled.
 
 ### `config/languages.json`
@@ -65,82 +59,95 @@ class App {
     registerPipes();
     AppRouter(appRoutes);
 
-    // Init global components 
     this.header = new HeaderComponent('body' as unknown as HTMLElement);
     this.footer = new FooterComponent('body' as unknown as HTMLElement);
 
-    // Init app
-    this.renderBaseLayout();
-  }
-
-  private renderBaseLayout() {
-    // prepend header
     document.body.prepend(this.header.render());
-    // append footer
     document.body.append(this.footer.render());
   }
 }
 ```
 
+## Add feature
+
+Add optional features to an existing application:
+
+```bash
+nutin-add <feature>
+```
+
+Available features:
+- accessibility-components
+- forms
+- overlays
+- nutin-mixins
+- docker
+
+Convenience bundles:
+```bash
+nutin-add libs  # accessibility-components, forms, overlays, nutin-mixins
+nutin-add all   # all available features
+```
+
 ## Update Nutin
 
 ```bash
-nutin-update # minor / patch.
+nutin-update # updates to the latest compatible minor/patch version
 ```
 
-Consumes `.nutin-meta.json`.
-- If changes were made to src/core/ or src/libs/, will prompt and report related files diffs in a markdown file, and update untouched ones.
-- If no changes were made to src/core/ or src/libs/, will update Nutin files.
+`nutin-update` uses `.nutin-meta.json` to identify Nutin-managed files and preserve application changes.
+
+Nutin updates preserve modifications made to Nutin's source files. When changes overlap, the updater reports the affected files and lets you review them.
 
 ## Testing
 
-You are free to use the testing tool you prefer for your application — Jest, Vitest, or another solution.                                    
+You can use any testing tool you prefer for application code, including Jest or Vitest.
 
-This project includes TestinNutin, Nutin's lightweight testing toolkit, and *Nutin ships its own tests* with high coverage so that people modifying the toolkit can verify that their changes haven't introduced regressions. *Nutin is tested exclusively with TestinNutin*.                                                  
+This project includes TestinNutin, Nutin's lightweight testing toolkit. Nutin itself is tested exclusively with TestinNutin, and its tests are included in the generated project so you can:
+- use them as executable documentation;
+- run and modify Nutin's tests when customizing the framework.
 
-These tests serve two purposes:
-- Executable documentation: they show how Nutin's core and libraries are expected to behave.
-- Framework validation: they allow you to run and modify Nutin's own tests when customizing the framework.                                           
+Run the tests with:
 
-**Run Nutin tests with: `{{packageManager}} run testin-nutin`.**
+`{{packageManager}} run testin-nutin`
 
-*If you choose to use TestinNutin for your own app, simply enable it in `nutin.config.js -> testinNutin -> includeApp: true`.* Its syntax is intentionally lightweight and familiar to developers coming from Jest and similar tools.
+To use TestinNutin for application tests, enable:
 
-[TestinNutin docs ->](https://github.com/LoisKOUNINEF/nutin/tree/main/docs/TESTING.md)
+```js
+// nutin.config.js
+testinNutin: {
+  includeApp: true,
+}
+```
+
+See [TestinNutin docs](https://github.com/LoisKOUNINEF/nutin/tree/main/docs/TESTING.md).
 
 ## Project structure
 
 ```
-public/
+config/
+  languages.json
+  seo.json
+
 src/
-    app/
-      components/
-        my-component/
-          my-component.component.ts
-          my-component.component.html
-      services/
-        my-service/
-            my-service.service.ts
-      views/
-        home/
-          home.view.ts
-          home.view.html
+  app/
+    components/
+    services/
+    views/
     routes.ts
     main.ts
-    assets/
-    core/  -- nutin's code
-    libs/  -- nutin's libraries
-    styles/
-    index.html
-tools/  -- builder, dev, generator, testin-nutin, docker (optional).
-.nutin-meta.json  -- source of truth for CLI commands nutin-add <feature> and nutin-update
+  assets/
+  core/   -- Nutin's core source
+  libs/   -- Nutin's libraries
+  styles/
+
+tools/    -- build, development, generator and testing tools
+
 nutin.config.js
-package.json
-tsconfig.json
 ```
 
 ## Useful Links
 
-- [Docs on repository](https://github.com/LoisKOUNINEF/nutin/tree/main/docs)
-- [Official website](https://nutin.org)
-- [First app tutorial](https://nutin.org/tutorial)
+- [Nutin website](https://www.nutin.org)
+- [First app tutorial](https://www.nutin.org/tutorial)
+- [Repository documentation](https://github.com/LoisKOUNINEF/nutin/tree/main/docs)

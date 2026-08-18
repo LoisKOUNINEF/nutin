@@ -3,10 +3,9 @@ import { spawnSync } from 'child_process';
 import process from 'process';
 import { print } from './index.js';
 
-export function runScript(path, message, addNewline = false) {
-  const hasNewline = addNewline ? '\n' : '';
-  if (!message) print.boldSection(`${hasNewline}Running ${path}...`);
-  else print.boldSection(`${hasNewline}${message}`);
+export function runScript(path, message) {
+  if (!message) print.boldSection(`Running ${path}...`);
+  else print.boldSection(`${message}`);
 
   const args = [resolve(path), '--silent'];
 

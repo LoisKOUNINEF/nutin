@@ -32,18 +32,18 @@ export class FeatureAdder {
 
     const meta = await readProjectMeta(projectPath);
     if (meta?.features?.[feature.key]) {
-      print.warn(`${feature.key} is already enabled in this project — skipping.`);
+      print.gray(`${feature.key} is already enabled in this project — skipping.`);
       return;
     }
 
-    print.boldHead(`\nAdding ${feature.key} to ${projectPath}...`);
+    print.boldInfo(`\nAdding ${feature.key} to ${projectPath}...`);
 
     const context = await this.builder.buildContext(projectPath, feature);
 
     await this.applyFeatureTemplate(projectPath, feature, context);
     await this.runPostAddTasks(projectPath, feature, context);
 
-    print.boldSuccess(`✅ ${feature.key} added.`);
+    print.boldInfo(`${feature.key} added.`);
   }
 
   async validateProject(projectPath, feature) {

@@ -25,29 +25,16 @@ nutin-new # or create-nutin-app
 npx @nutin/cli
 ```
 
-- Flags
+## Add features
 
 ```bash
-# argument: project-name (will prompt if not provided)
-
-# Help
--h --help
-
-# Package manager
--pm --package-manager <manager> # npm (Default), yarn, pnpm, bun
-
-# Features - can also be added on an existing app with `nutin-add <feature>`
---libs # Built-in libraries (forms, overlays, accessibility components)
---docker # Dockerfile & nginx.conf
-
-# Presets
---preset <|default|full|> 
-	# default: only Nutin. Used if no --preset arg is provided
-	# full: built-in libraries + docker
+# add a feature to an existing app
+nutin-add <feature>
 ```
 
-## Links
+## Update Nutin
 
-- [First app tutorial](https://www.nutin.org/tutorial).
-- [Website](https://www.nutin.org).
-- [Docs on repository](https://github.com/LoisKOUNINEF/nutin/tree/main/docs).
+```bash
+# update Nutin while preserving your changes
+nutin-update
+```
