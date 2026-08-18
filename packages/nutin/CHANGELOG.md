@@ -29,10 +29,11 @@ unsub()
   - New file: `AGENTS.md` - gives LLMs the minimal context they need to start working with you in a Nutin project.
 
 - Cleaner responsibilities
-  - BaseComponent responsibilities: Render lifecycle, Hydration, DOM lifecycle, Invalidation, Event subscriptions (DOM and bus), Teardown, Render guard, Composition orchestration
+  - BaseComponent responsibilities: Render lifecycle, Hydration, DOM lifecycle, Invalidation, Event subscriptions (DOM and bus), Teardown, Render guard, Composition orchestration.
   - Component responsibilities: Props (className, style, data-bindings, dynamic buttons), Config + defaults + normalization, Template generation via `templateFn`
   - View responsibilities: Route params, Navigation hooks (onEnter/onExit), Metadata policies, View identity (viewName)
-  - EventBus methods with automatic unsubscribe: `listen(event, callback`, `listenToRenderEvents(events[])`. AppEventBus can still be used directly if needed (`once`...) but must be unsubscribed manually via `onBeforeDestroy` hook.
+  - EventBus methods with automatic unsubscribe: `listen(event, callback`, `listenToRenderEvents(events[])`. *Note*: `listenToRenderEvents`'s force` param has been removed - no longer needed.
+  - AppEventBus can still be used directly if needed (`once`...) but must be unsubscribed manually via `onBeforeDestroy` hook.
   - Proper lifecycle hooks
 ```ts
 onBeforeRender()
