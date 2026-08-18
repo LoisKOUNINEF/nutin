@@ -51,6 +51,58 @@ Nutin uses SASS (.scss) as its default styling solution.
 
 Tailwind CSS v4 is also supported as an optional utility-first CSS layer.
 
+## A Typical Component
+
+```bash
+components/
+  product-card/
+    product-card.component.html
+    product-card.component.ts
+```
+
+```ts
+const templateFn = (product: Product) => `__TEMPLATE_PLACEHOLDER__`;
+
+export class ProductCardComponent extends Component {
+constructor(mountTarget: HTMLElement, config: Product) {
+    super({ templateFn, mountTarget, config });
+  }
+
+  public childConfigs(): ComponentConfig[] {
+    const myComponent = {
+      selector: ``,
+      factory: (el) => new ProjectHeaderComponent(
+        el,
+        { name, imageSrc, tagline, technos, tags }
+      )
+    };
+
+    const myCatalog = this.catalog
+
+    return [
+      myComponent,
+      ...myCatalog,
+    ]
+  }
+
+  private _goToDetails(productId: string) {
+    Navigation.navigateTo(`/products/${productId}`);
+  }
+}
+```
+
+```html
+<div
+  data-event="click:_goToDetails:${product.id}"
+  class="product-card"
+>
+  <h2 class="product-card__name">${product.name}</h2>
+  <span data-pipe="currency">${product.price}</span>
+  <div data-component=""></div>
+  <div data-catalog="product-tags"></div>
+</div>
+```
+
 ## Register global components
 
 If you need components to be outside of `<main>` (`<header> / <footer>`), initialize them in `main.ts`.
