@@ -25,11 +25,11 @@ nutin-new # or create-nutin-app
 npx @nutin/cli
 ```
 
-## Add features
+## Add Docker
 
 ```bash
-# add a feature to an existing app
-nutin-add <feature>
+# add docker to an existing app
+nutin-add docker
 ```
 
 ## Update Nutin

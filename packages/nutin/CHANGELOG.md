@@ -4,17 +4,14 @@
 
 - Breaking:
   - Node engine requirement raised to `>=22` (was `>=18`).
+  - Removed All libraries except `Pipes` since they didn't fit nutin's philosophy.
+  - Removed `Store`: It created confusion and had questionable usefulness. Besides, services already handles what Store was supposed to.
 
 - Main features
   - New central config file: `nutin.config.js` - Nutin features (i18n, inlineTemplates, tailwind), builder, generator, testing.
   - Can now use Tailwind (v4) as an optional utility layer alongside SASS.
   - Globally scoped stylesheets, co-located with feature files. **Use unique class names.** *Note: Nutin's naming convention encourages prefixes `home__header`*.
-  - i18n now uses URL: aligns with common practices & allows SEO to render static HTML files for each language.
-  - SEO static files generation: `config/seo-routes.json` is used by production builder to generate static HTML files to be served to bots, via real SSR of your components (not hand-authored content). Production builder now also generates `robots.txt` and `sitemap.xml` from `config/seo-routes.json` (supports per-route `disallow` / `disallowBots`).
-  - Added stateless, accessibility-focused components library.
-  - Added accessibility-focused overlays library.
-  - Added forms, formGroup & formControl (Validators) library.
-  - Above libraries styles can be customized via new file `styles/_nutin-config.scss`.
+  - Optional SEO static files generation: `config/seo.json` is used by production builder to generate static HTML files to be served to bots, via real SSR of your components (only title, description and ogImage remain hand-authored content). Also generates `robots.txt` and `sitemap.xml` from `config/seo.json` (supports per-route `disallow` / `disallowBots`).
   - New interface `AppEvent` only for app-level events. Nutin internal events are no longer defined in `globals.d.ts`. Payload types are now objects.
   - EventBus exposes domain facades for navigation, lifecycle, and overlays events. Subscribing functions (`on*`) return a closure function to abstract unsubscription. it remains directly usable in app-level events / domain facades. Naming convention: `domain:event-name`.
 ```ts
@@ -25,13 +22,11 @@ const unsub = Navigation.onNavigate(this.doStuff);
 // onDestroy
 unsub()
 ```
-  - New CLI `nutin-add <feature>` (add libraries and docker) and `nutin-update` (update Nutin to latest patch / minor). `nutin-update` diffs your project against the new templates and merges changes, reporting any conflicts it can't resolve automatically.
+  - i18n now uses URL: aligns with common practices & allows SEO to render static HTML files for each language.
+  - New CLI command `nutin-add docker`
+  - New CLI command `nutin-update` (update Nutin to latest patch / minor). `nutin-update` diffs your project against the new templates and merges changes, reporting any conflicts it can't resolve automatically.
   - TestinNutin: Added code coverage summary (branches / functions/ lines), `it.todo`, clock mocking (`setTimeout / setInterval`).
   - New file: `AGENTS.md` - gives LLMs the minimal context they need to start working with you in a Nutin project.
-
-- Removed:
-  - `Store`: It created confusion and had questionable usefulness. Besides, services already handles what Store was supposed to.
-  - CSS utility classes: Had questionable usefulness and relevance, and tailwind support buried it.
 
 - Cleaner responsibilities
   - BaseComponent responsibilities: Render lifecycle, Hydration, DOM lifecycle, Invalidation, Event subscriptions (DOM and bus), Teardown, Render guard, Composition orchestration

@@ -72,11 +72,8 @@ export function getInstallCommand(packageManager) {
 
 export function getDockerScripts({ projectName, packageManager }) {
   return {
-    "docker:build": `docker build -t ${projectName} -f tools/deployment/Dockerfile .`,
-    "docker:run": `docker run -p 9090:9090 ${projectName}:latest`,
-    "patch": `${packageManager} version patch -m 'CI/CD: Bump version to %s'`,
-    "minor": `${packageManager} version minor -m 'CI/CD: Bump version to %s'`,
-    "major": `${packageManager} version major -m 'CI/CD: Bump version to %s'`
+    "docker:build": `docker build -t ${projectName} -f tools/docker/Dockerfile .`,
+    "docker:run": `docker run -p 9090:9090 ${projectName}:latest`
   };
 }
 

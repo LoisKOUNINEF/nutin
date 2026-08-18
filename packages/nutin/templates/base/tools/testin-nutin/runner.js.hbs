@@ -6,21 +6,28 @@ import {
 } from './core/index.js';
 import config from '#root/nutin.config.js';
 
+const args = process.argv.slice(2);
+const coverageEnabled = args.includes('--coverage') || Boolean(config.testinNutin.coverage?.enabled);
+const fileFilters = args.filter(arg => arg !== '--coverage');
+
+// Tests import and run the compiled build output (dist/src/)
+// and has no sourcemap back to the .ts sources
 const origins = [];
-const frameworkOrigins = [
-  path.join('src', 'core'),
-  path.join('src', 'libs'),
-];
+if (coverageEnabled) const coverageDirs = [];
 
-if (config.testinNutin.includeFramework) origins.push(...frameworkOrigins);
+if (config.testinNutin.includeFramework) {
+  const frameworkDir = path.join('src', 'core');
+  origins.push(frameworkDir);
+  if (coverageEnabled) coverageDirs.push(path.join('dist', frameworkDir));
+}
+
+if (config.testinNutin.includeApp) {
+  const appDir = path.join('src', 'app');
+  origins.push(appDir);
+  if (coverageEnabled) coverageDirs.push(path.join('dist', appDir);
+}
+
 if (config.testinNutin.includeTools) origins.push('tools');
-if (config.testinNutin.includeApp) origins.push(path.join('src', 'app'));
-
-// Coverage is measured against the compiled build output (dist/src), since that's what
-// tests actually import and run; the build has no sourcemap back to the .ts sources.
-const coverageDirs = [];
-if (config.testinNutin.includeFramework) coverageDirs.push(path.join('dist', 'src', 'core'), path.join('dist', 'src', 'libs'));
-if (config.testinNutin.includeApp) coverageDirs.push(path.join('dist', 'src', 'app'));
 
 registerTestGlobals();
 
@@ -28,9 +35,6 @@ let testFiles = origins.flatMap(
   origin => getTestFiles(path.join('..', origin))
 );
 
-const args = process.argv.slice(2);
-const coverageEnabled = args.includes('--coverage') || Boolean(config.testinNutin.coverage?.enabled);
-const fileFilters = args.filter(arg => arg !== '--coverage');
 if (fileFilters.length) {
   testFiles = testFiles.filter(file => fileFilters.some(f => file.includes(f)));
 }
@@ -42,8 +46,34 @@ async function loadTestFile(file) {
   teardownJsdom();
 }
 
+asunc function runCoverage(testResults) {
+  let scopedResults = await stopCoverage(coverageDirs);
+  if (fileFilters.length) {
+    scopedResults = scopedResults.filter(({ filePath }) => fileFilters.some(f => filePath.includes(f)));
+  }
+  const report = buildCoverageReport(scopedResults);
+  const globals = printCoverageReport(report);
+  writeSummaryReport(report, globals, testResults);
+  await maybeWriteUncoveredReport(report);
+
+  const threshold = config.testinNutin.coverage?.threshold;
+  if (typeof threshold === 'number') {
+    const misses = Object.entries({
+      lines: globals.globalLinesPct,
+      functions: globals.globalFunctionsPct,
+      branches: globals.globalBranchesPct,
+    }).filter(([, pct]) => pct < threshold);
+
+    if (misses.length) {
+      print.boldError(`\n✗ Coverage below threshold (${threshold}%): ${misses.map(([k, pct]) => `${k} ${pct.toFixed(1)}%`).join(', ')}\n`);
+      process.exit(1);
+    }
+  }
+}
+
 async function runTests() {
   if (config.testinNutin.verbose) print.head('Test suites :');
+
   if (coverageEnabled) await startCoverage();
 
   for (const file of testFiles) {
@@ -57,30 +87,7 @@ async function runTests() {
 
   const testResults = await runQueuedTests();
 
-  if (coverageEnabled) {
-    let scopedResults = await stopCoverage(coverageDirs);
-    if (fileFilters.length) {
-      scopedResults = scopedResults.filter(({ filePath }) => fileFilters.some(f => filePath.includes(f)));
-    }
-    const report = buildCoverageReport(scopedResults);
-    const globals = printCoverageReport(report);
-    writeSummaryReport(report, globals, testResults);
-    await maybeWriteUncoveredReport(report);
-
-    const threshold = config.testinNutin.coverage?.threshold;
-    if (typeof threshold === 'number') {
-      const misses = Object.entries({
-        lines: globals.globalLinesPct,
-        functions: globals.globalFunctionsPct,
-        branches: globals.globalBranchesPct,
-      }).filter(([, pct]) => pct < threshold);
-
-      if (misses.length) {
-        print.boldError(`\n✗ Coverage below threshold (${threshold}%): ${misses.map(([k, pct]) => `${k} ${pct.toFixed(1)}%`).join(', ')}\n`);
-        process.exit(1);
-      }
-    }
-  }
+  if (coverageEnabled) await runCoverage(testResults);
 }
 
 runTests();

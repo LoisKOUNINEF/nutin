@@ -16,13 +16,6 @@ export async function createApp() {
     })
     .argument('[projectName]', 'Name of the project')
     .option('-pm, --package-manager <manager>', 'Specify package manager (npm, yarn, pnpm, bun)')
-    .option('--libs', 'Built-in libraries (forms, overlays, accessibility-focused components...)')
-    .option('--docker', 'Dockerfile & nginx.conf')
-    .option('--preset <preset>', 
-      `Project preset configuration:
-      • default${chalk.gray('   - only nutin. Used if no --preset arg provided.')}
-      • full${chalk.gray('      - built-in libs & Docker')}`
-    )
     .action(async (projectName, cliOptions) => {
       print.boldSuccess('\n🚀 Welcome to your new nutin app!\n');
       try {

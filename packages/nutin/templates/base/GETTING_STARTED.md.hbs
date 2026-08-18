@@ -4,6 +4,7 @@
 
 - [Generate Component, View, Service](#generate-component-view-service)
 - [Configuration](#configuration)
+- [Styling](#styling)
 - [Register global components](#register-global-components)
 - [Add feature](#add-feature)
 - [Update Nutin](#update-nutin)
@@ -26,7 +27,7 @@ Generated elements are automatically exported from the corresponding barrel file
 
 ### `nutin.config.js`
 
-Main build and feature configuration. See the inline comments for details.
+Main Nutin options and tools configuration. See the inline comments for details.
 
 - `tailwind`, `i18n`, `inlineTemplates`, `generateSEOFiles` — top-level features.
 - `generator.*` — controls what the generator scaffolds.
@@ -43,6 +44,12 @@ Main build and feature configuration. See the inline comments for details.
 
 - Register supported languages for i18n here.
 - Unused if `nutin.config.js -> i18n` is disabled.
+
+## Styling
+
+Nutin uses SASS (.scss) as its default styling solution.
+
+Tailwind CSS v4 is also supported as an optional utility-first CSS layer.
 
 ## Register global components
 
@@ -68,26 +75,13 @@ class App {
 }
 ```
 
-## Add feature
-
-Add optional features to an existing application:
+## Add Docker
 
 ```bash
-nutin-add <feature>
+nutin-add docker
 ```
 
-Available features:
-- accessibility-components
-- forms
-- overlays
-- nutin-mixins
-- docker
-
-Convenience bundles:
-```bash
-nutin-add libs  # accessibility-components, forms, overlays, nutin-mixins
-nutin-add all   # all available features
-```
+Adds Docker and Nginx configuration for production deployment.
 
 ## Update Nutin
 
@@ -120,7 +114,7 @@ testinNutin: {
 }
 ```
 
-See [TestinNutin docs](https://github.com/LoisKOUNINEF/nutin/tree/main/docs/TESTING.md).
+See [TestinNutin docs](https://nutin.org/docs/testin-nutin).
 
 ## Project structure
 

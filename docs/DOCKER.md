@@ -8,29 +8,58 @@
 - [Brotli compression](#brotli-compression)
 
 - You may use the config files and Dockerfile exactly as-is for production deployments. Modify if you need custom caching rules or add external APIs to CSP.
-- Adapt ports as needed in both `Dockerfile` and `nginx.conf`.
-- **If used in a non-nutin project :**
-    - Adapt paths and commands in `Dockerfile` (COPY / RUN).
+- *TO FIX - Should be handled by `nutin-add docker`*: Adapt ports as needed in both `Dockerfile` and `nginx.conf`.
+
+
+production Nginx configuration
+Brotli support
+gzip fallback
+static-file caching
+SPA routing
+security headers
+precompressed asset serving
+multi-stage Docker build
+minimal Alpine runtime
+
 
 ## Dockerfile
 
 A preconfigured, multi-stage Dockerfile that
 - Builds your application in a Node environment
-- Serves the final assets using Nginx Alpine image
+- `CUSTOM IMAGE` Serves the final assets using Nginx Alpine image
 - Includes an optional container healthcheck
 - Exposes ports for reverse proxies like Traefik
-- Is optimized for speed, small image size, and security.
-- NOTE : if using pnpm or bun as package manager, you'll need to tweak the Dockerfile.
+- Is designed for speed, small image size, and security.
+- *TO FIX - Should be handled by `nutin-add docker`*: if using pnpm or bun as package manager, you'll need to tweak the Dockerfile.
+
+## Compression
+
+Gzip (`.gz`) and Brotli (`.br`) compression are handled by Nutin's builder (`tools/builder/core/compress-files.js`).
+
+Params:
+```js
+gzip: {
+  level: 9,
+  memLevel: 9,
+  windowBits: 15
+}
+
+brotli: {
+  [constants.BROTLI_PARAM_QUALITY]: 11,
+  [constants.BROTLI_PARAM_MODE]: constants.BROTLI_MODE_GENERIC,
+  [constants.BROTLI_PARAM_SIZE_HINT]: content.length
+}
+```
 
 ## Nginx Config
 
-- **This Nginx config is for production.**
-- *Note: using non-standard ports because I personally use Traefik as a reverse proxy. Adapt to your setup.*
-- ***This Nginx config does not include `add_header Strict-Transport-Security  "max-age=63072000" always;` for the same reason (Traefik reverse proxy). HSTS should be applied at the reverse proxy layer. Do not add it here unless Nginx is exposed directly over HTTPS.***
+**This Nginx config assumes the use of a reverse proxy** (i.e. Traefik), so it:
+- uses non-standard port(s) (default: 9090).
+- does not include `add_header Strict-Transport-Security  "max-age=63072000" always;`. Add it here only if Nginx is exposed directly over HTTPS.
 
-### Enabling Gzip
+### Gzip
 
-Gzip is globally enabled. *Note: Brotli is not enabled because nginx alpine image doesn't support it.*
+Gzip is globally enabled.
 
 - `gzip on`
 
@@ -39,7 +68,7 @@ Enables gzip compression for responses
 - `gzip_static on`, 
 
 Serves `.gz` files if they are present.                     
-*Note : you can enable / disable gzip_static only for specific locations in nginx.conf if you don't want it to be enabled globally.*
+*Note: you can enable / disable gzip_static only for specific locations in nginx.conf if you don't want it to be enabled globally.*
 
 - `gzip_proxied any`
 
@@ -51,7 +80,7 @@ Prevents caching issues when some clients accept gzip and others do not.
 
 ### Headers
 
-*Note : when you use `add_header` in a child location block, it replaces ALL headers from the parent context rather than merging them.*
+*Reminder: when you use `add_header` in a child location block, it replaces ALL headers from the parent context rather than merging them.*
 - You need to repeat the security headers in each location block that uses add_header. 
 - This config uses nginx `map` directives to define headers once, then reuse them.
 
@@ -329,41 +358,8 @@ location = /404.html {
 Prevents Nginx from revealing its version number in response headers / error pages (like “502 Bad Gateway”).                           
 Reduces information leakage: attackers can’t fingerprint your exact Nginx version to target known vulnerabilities.
 
-## Gzip compression
 
-**Gzip compression is handled by the builder, and enabled globally in `nginx.conf`. Example provided for information purpose.**
 
-### Example Gzip configuration
-
-```
-gzip on;
-gzip_vary on;
-gzip_static on;
-gzip_proxied any;
-gzip_comp_level 6;
-gzip_min_length 1000;
-
-gzip_types
-    text/plain
-    text/css
-    text/xml
-    text/javascript
-    application/json
-    application/javascript
-    application/xml+rss
-    application/rss+xml
-    font/truetype
-    font/opentype
-    application/vnd.ms-fontobject
-    image/svg+xml;
-```
-
-## Brotli compression
-
-**Default nginx.conf do NOT support Brotli compression.**                     
-You'll need to:
-    - enable brotli in nginx.conf - simple examples below
-    - Use a Brotli-enabled nginx image or build your own from source.
 
 ### Build nginx from source
 

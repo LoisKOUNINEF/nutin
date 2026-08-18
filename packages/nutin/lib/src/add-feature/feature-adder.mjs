@@ -7,8 +7,6 @@ import { FEATURES } from '../common/feature-registry.mjs';
 import { PACKAGE_VERSION } from '../common/package-data.mjs';
 import { readProjectMeta, updateProjectMeta } from '../common/project-meta.mjs';
 import { FeatureContextBuilder } from './feature-context-builder.mjs';
-import { updateLibBarrels } from './lib-barrel-updater.mjs';
-import { ensureScssConfigFile } from './scss-config-generator.mjs';
 import { updatePackageJson } from './package-json-updater.mjs';
 
 const fs = fsExtra.default;
@@ -51,8 +49,8 @@ export class FeatureAdder {
     if (!(await fs.pathExists(packageJsonPath))) {
       throw new Error(`No package.json found in ${projectPath} — run this from a nutin project's root.`);
     }
-    if (feature.scssForward && !(await fs.pathExists(path.join(projectPath, 'src', 'libs')))) {
-      throw new Error(`No src/libs directory found in ${projectPath} — is this a nutin project?`);
+    if (!(await fs.pathExists(path.join(projectPath, 'src', 'tools')))) {
+      throw new Error(`No src/tools directory found in ${projectPath} — is this a nutin project?`);
     }
   }
 
@@ -61,23 +59,6 @@ export class FeatureAdder {
 
     await this.fileGenerator.processTemplateDirectory(featureTemplateDir, projectPath, context, { skipExisting: true });
 
-    const needsAccessibilityComponents = feature.key === 'forms' || feature.key === 'overlays';
-    const needsNutinMixins = feature.key === 'accessibilityComponents' || needsAccessibilityComponents;
-    const needsScssConfig = needsNutinMixins || feature.key === 'nutinMixins';
-
-    if (needsScssConfig) {
-      await ensureScssConfigFile(this.fileGenerator, projectPath, context);
-    }
-    if (needsNutinMixins) {
-      print.info(`nutinMixins required by ${feature.key}, installing now...`);
-      await this.addFeatureToProject('nutinMixins');
-    }
-    if (needsAccessibilityComponents) {
-      print.info(`accessibilityComponents required by ${feature.key}, installing now...`);
-      await this.addFeatureToProject('accessibilityComponents');
-    }
-
-    await updateLibBarrels(projectPath, feature);
     await updatePackageJson(projectPath, feature, context);
   }
 

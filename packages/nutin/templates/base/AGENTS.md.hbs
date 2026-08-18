@@ -8,7 +8,6 @@ This project was generated with Nutin {{version}}.
 src/
   app/            application code (components, views, services)
   core/           Nutin framework internals — see "Nutin" section before editing
-  libs/           Nutin built-in libraries (pipes, plus any enabled feature libs)
   styles/         project-level Sass, incl. _nutin-config.scss overrides
 config/           i18n (languages.json) and SEO configuration
 tools/            builder, dev server, generator, testin-nutin runner
@@ -91,25 +90,38 @@ Tokens: `@value`, `@id`, `@class`, `@textContent`, `@event`, `@target`, `@attr:n
 - Naming convention: `.my-element__my-class`.
 - Component/overlay/mixin Sass tunables live in `$<name>-config` maps, overridable in one place: edit `src/styles/_nutin-config.scss`'s `$config` directly (it's generated into your project, not an imported library file). For accessibility-components/forms/overlays: nest under `'components': ('<name>': (...))`. For nutinMixins (`breakpoints`/`animations` only): top-level `'breakpoints': (...)`/`'animations': (...)`, not nested under `'components'`.
 
-## Built-in libraries
+## Pipes
 
-Pipes are included in every project (`registerPipes()`, always on). Check `.nutin-meta.json`'s `features` object to see which optional libraries are present in this project:
+```
+// currency
+AppPipeRegistry.register('currency');
+    
+// date
+AppPipeRegistry.register('date');
 
-- `nutinMixins` — Sass mixins (responsive, grid, spacing, animation, ...), no utility classes.
-- `accessibility-components` — accessible primitives (`CheckboxComponent`, `SelectComponent`, `RadioGroupComponent`, ...).
-- `forms` — imperative `FormControlComponent`/`FormGroup`/validators (depends on accessibility-components).
-- `overlays` — modal/drawer/dropdown/tooltip/snackbar runtime, layered z-index system.
+// number (toFixed)
+AppPipeRegistry.register('number');
 
-Every lib's styles follow the same naming/config-map convention above.
+// string pipes
+AppPipeRegistry.register('uppercase');
+AppPipeRegistry.register('lowercase');    
+AppPipeRegistry.register('capitalize');
+AppPipeRegistry.register('capitalizeAll');
+AppPipeRegistry.register('truncate');
+    
+// utility pipes
+AppPipeRegistry.register('default');
+AppPipeRegistry.register('json');
+```
 
 ## Configuration
 
 ### `nutin.config.js`
 
-Central build/feature config (see the inline comments for details):
+Central options/tools config (see the inline comments for details):
 - `inlineTemplates`, `i18n`, `tailwind`, `generateSEO` — top-level feature toggles.
 - `generator.{generateStylesheet, generateLocales, generateTest}` — what the generator scaffolds alongside new elements.
-- `builder.{logLevel, sass.paths, esbuild, compression}` — build pipeline behavior.
+- `builder.{sass.paths, esbuild}` — build pipeline behavior.
 - `testinNutin.{includeFramework, includeTools, includeApp, verbose, jsdomOptions}` — test discovery/environment.
 
 ### `config/seo.json`
@@ -126,7 +138,7 @@ Consumed by i18nService and builder. Unused if i18n is disabled.
 
 ## Testing (testin-nutin)
 
-Nutin's own hand-built test runner + jsdom - not Jest. `describe`/`it` only (**no `test()` alias**), `beforeAll`/`beforeEach`/`afterEach`/`afterAll` (one of each per suite, no stacking). All globals — no imports needed in test files.
+Nutin's own hand-built test runner + jsdom - not Jest. `describe`/`it` only (**no `test()` alias**), `beforeAll`/`beforeEach`/`afterEach`/`afterAll` (one of each per suite, no stacking - inside `describe` statement, not top-level). All globals — no imports needed in test files.
 
 - Matchers: `toBe`, `toEqual`, `toContain`, `toBeTruthy`/`toBeFalsy`, `toBeDefined`/`toBeUndefined`, `toBeInstanceOf`, `toHaveBeenCalled`/`toHaveBeenCalledWith`, `toBeLessThan`/`toBeGreaterThan`, `toThrow` — each has a `.not` counterpart.
 - `spyOn(obj, 'method')` returns `.calls`/`.callCount`/`.lastCall`, `.andCallFake(fn)`/`.andReturn(v)`, `.restore()` — unlike mocks, calls pass through by default.
@@ -142,13 +154,13 @@ Tests are an important source of documentation. They describe expected behavior 
 Before changing existing functionality, inspect the corresponding tests.
 When adding behavior, add or update tests.
 
-When modifying Nutin core/ files  (or libs/ files, to a lesser extent):
+When modifying Nutin `core/` files:
 
-1. Explore the alternatives: is modifying Nutin core files the best approach? Always ask for validation.
+1. Explore the alternatives: is modifying Nutin core files the best approach long-term? Always ask for validation.
 2. Check the corresponding Nutin documentation and tests.
 3. Preserve existing conventions.
 4. Inspect existing implementations before creating new abstractions.
-5. Reuse existing utilities/components where appropriate.
+5. Reuse existing utilities/helpers where appropriate.
 6. Do not rewrite generated configuration unnecessarily.
 7. Keep changes focused on the requested feature.
 8. Run tests.

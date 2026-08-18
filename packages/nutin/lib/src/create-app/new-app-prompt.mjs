@@ -39,9 +39,6 @@ export async function newAppPrompt(initialName, cliOptions = {}) {
   return {
     projectName,
     packageManager,
-    preset: cliOptions.preset,
-    libs: cliOptions.libs,
-    docker: cliOptions.docker,
   };
 }
 
