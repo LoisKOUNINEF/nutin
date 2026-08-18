@@ -13,7 +13,7 @@ const fileFilters = args.filter(arg => arg !== '--coverage');
 // Tests import and run the compiled build output (dist/src/)
 // and has no sourcemap back to the .ts sources
 const origins = [];
-if (coverageEnabled) const coverageDirs = [];
+const coverageDirs = [];
 
 if (config.testinNutin.includeFramework) {
   const frameworkDir = path.join('src', 'core');
@@ -24,7 +24,7 @@ if (config.testinNutin.includeFramework) {
 if (config.testinNutin.includeApp) {
   const appDir = path.join('src', 'app');
   origins.push(appDir);
-  if (coverageEnabled) coverageDirs.push(path.join('dist', appDir);
+  if (coverageEnabled) coverageDirs.push(path.join('dist', appDir));
 }
 
 if (config.testinNutin.includeTools) origins.push('tools');
@@ -46,7 +46,7 @@ async function loadTestFile(file) {
   teardownJsdom();
 }
 
-asunc function runCoverage(testResults) {
+async function runCoverage(testResults) {
   let scopedResults = await stopCoverage(coverageDirs);
   if (fileFilters.length) {
     scopedResults = scopedResults.filter(({ filePath }) => fileFilters.some(f => filePath.includes(f)));
