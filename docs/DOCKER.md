@@ -30,7 +30,7 @@ A preconfigured, multi-stage Dockerfile that
 - Includes an optional container healthcheck
 - Exposes ports for reverse proxies like Traefik
 - Is designed for speed, small image size, and security.
-- *TO FIX - Should be handled by `nutin-add docker`*: if using pnpm or bun as package manager, you'll need to tweak the Dockerfile.
+- Works out of the box with npm, yarn, pnpm, and bun — no manual tweaks needed. `nutin-add docker` detects your package manager and renders the matching install/lockfile lines. `corepack enable` is run for you (needed for pnpm/yarn); pnpm's install step also auto-approves dependency build scripts (`pnpm approve-builds --all`) since pnpm ≥10 blocks them by default in a fresh, non-interactive install and native deps like `esbuild` need their postinstall step to run.
 
 ## Compression
 
@@ -361,27 +361,29 @@ Reduces information leakage: attackers can’t fingerprint your exact Nginx vers
 
 
 
-### Build nginx from source
+### Brotli compression
+
+Brotli is enabled by default — no manual setup required. The final stage of the generated `Dockerfile` builds nginx from `alpine` directly (rather than the stock `nginx:alpine` image, which has no brotli module):
 
 ```
 FROM alpine
 RUN apk add --no-cache nginx nginx-mod-http-brotli
 ```
 
-### Enable brotli in `nginx.conf`
+`nginx.conf` enables it globally, mirroring the gzip config:
 
 ```
 brotli on;
 brotli_static on;
 ```
 
-### Example Brotli configuration
+`brotli_static` serves the `.br` files already produced by the builder; `brotli` compresses on the fly for anything not precompressed.
+
+### Additional Brotli tuning (optional)
+
+The two directives above are all that's shipped by default. For finer control over compression level, buffers, or MIME types, you can add these to `nginx.conf`:
 
 ```
-# Enable Brotli compression
-brotli on;
-brotli_static on;
-
 # Compression level (0-11)
 # Recommended values:
 # - 4-6 for dynamic content (balance between speed and compression)

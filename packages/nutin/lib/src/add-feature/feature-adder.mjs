@@ -49,8 +49,8 @@ export class FeatureAdder {
     if (!(await fs.pathExists(packageJsonPath))) {
       throw new Error(`No package.json found in ${projectPath} — run this from a nutin project's root.`);
     }
-    if (!(await fs.pathExists(path.join(projectPath, 'src', 'tools')))) {
-      throw new Error(`No src/tools directory found in ${projectPath} — is this a nutin project?`);
+    if (!(await fs.pathExists(path.join(projectPath, 'tools')))) {
+      throw new Error(`No tools directory found in ${projectPath} — is this a nutin project?`);
     }
   }
 

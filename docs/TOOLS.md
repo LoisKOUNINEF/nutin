@@ -99,7 +99,7 @@ src/
 	libs/  -- nutin's libraries
 	styles/
 	index.html
-tools/  -- builder, dev, generator, testin-nutin (deployment lives under tools/deployment/ with the docker feature)
+tools/  -- builder, dev, generator, testin-nutin (docker - optional)
 nutin.config.js
 package.json
 tsconfig.json
@@ -277,8 +277,7 @@ Hash `.js` and `.css` files.
 
 #### `core/compress-files.js`
 
-Compress files with gzip (`.js` `.css` `.json` `.svg` `ttf` `otf` `eot`).                                     
-*Note: Uncomment Brotli compression if you intend to use it.*
+Compress files with gzip and Brotli (`.js` `.css` `.json` `.svg` `ttf` `otf` `eot`), writing `.gz` and `.br` siblings. Served by the `docker` feature's nginx config out of the box.
 
 #### `core/generate-seo-html.js`
 

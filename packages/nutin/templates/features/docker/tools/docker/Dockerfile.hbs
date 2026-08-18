@@ -1,28 +1,50 @@
-ARG NODE_VERSION=22.3.0
-ARG NGINX_VERSION=1.27-alpine
+ARG NODE_VERSION=22.23.2
+ARG ALPINE_VERSION=3.20
 ARG PORT=9090
 
-FROM node:${NODE_VERSION} AS builder
+FROM node:${NODE_VERSION}-alpine AS builder
 WORKDIR /usr/src/app
+RUN corepack enable
+{{#if (eq packageManager "npm")}}
+COPY package.json package-lock.json* .
+{{/if}}
+{{#if (eq packageManager "pnpm")}}
+COPY package.json pnpm-lock.yaml .
+{{/if}}
+{{#if (eq packageManager "yarn")}}
+COPY package.json yarn.lock .
+{{/if}}
+{{#if (eq packageManager "bun")}}
+COPY package.json bun.lock* bun.lockb* .
+RUN npm install -g bun
+{{/if}}
+{{#if (eq packageManager "pnpm")}}
+RUN {{ciCommand}} || pnpm approve-builds --all
+{{else}}
+RUN {{ciCommand}}
+{{/if}}
 COPY ./src ./src
-COPY ./package* .
-COPY ./builder.config.js .
+COPY ./public ./public
+COPY ./nutin.config.js .
 COPY ./config ./config
 COPY ./tools/builder ./tools/builder
-COPY ./tools/deployment ./tools/deployment
+COPY ./tools/docker ./tools/docker
 COPY ./tools/utils ./tools/utils
-RUN {{ciCommand}} && \
-    {{packageManager}} run build:prod
+RUN {{packageManager}} run build:prod
 
-FROM nginx:${NGINX_VERSION}
+FROM alpine:${ALPINE_VERSION}
+ARG PORT
+ENV PORT=${PORT}
 
-RUN rm /etc/nginx/conf.d/default.conf
-COPY --from=builder /usr/src/app/tools/deployment/nginx.conf /etc/nginx/conf.d/default.conf
+RUN apk add --no-cache nginx nginx-mod-http-brotli
+
+RUN rm -f /etc/nginx/http.d/default.conf
+COPY --from=builder /usr/src/app/tools/docker/nginx.conf /etc/nginx/http.d/default.conf
 COPY --from=builder /usr/src/app/dist/src /usr/share/nginx/html
 
 EXPOSE ${PORT}
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:${PORT}/health || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:${PORT}/health || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]

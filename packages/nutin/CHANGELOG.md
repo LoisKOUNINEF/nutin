@@ -24,11 +24,12 @@ unsub()
 ```
   - i18n now uses URL: aligns with common practices & allows SEO to render static HTML files for each language.
   - New CLI command `nutin-add docker`
+    Now supports brotli compression and all 4 package manager (npm, yarn, pnpm, bun) out of the box.
   - New CLI command `nutin-update` (update Nutin to latest patch / minor). `nutin-update` diffs your project against the new templates and merges changes, reporting any conflicts it can't resolve automatically.
   - TestinNutin: Added code coverage summary (branches / functions/ lines), `it.todo`, clock mocking (`setTimeout / setInterval`).
   - New file: `AGENTS.md` - gives LLMs the minimal context they need to start working with you in a Nutin project.
 
-- Cleaner responsibilities
+- Cleaner base classes responsibilities
   - BaseComponent responsibilities: Render lifecycle, Hydration, DOM lifecycle, Invalidation, Event subscriptions (DOM and bus), Teardown, Render guard, Composition orchestration.
   - Component responsibilities: Props (className, style, data-bindings, dynamic buttons), Config + defaults + normalization, Template generation via `templateFn`
   - View responsibilities: Route params, Navigation hooks (onEnter/onExit), Metadata policies, View identity (viewName)

@@ -30,8 +30,10 @@ map $uri $csp_policy {
 # ---------------------------
 gzip on;
 gzip_static on;
-gzip_vary on;
 gzip_proxied any;
+
+brotli on;
+brotli_static on;
 
 server {
     # ---------------------------
