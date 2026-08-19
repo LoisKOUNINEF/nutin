@@ -5,6 +5,8 @@
   "preferGlobal": true,
   "main": "lib/index.mjs",
   "bin": {
+    "cli": "./bin/cli.mjs",
+    "nutin": "./bin/cli.mjs",
     "create-nutin-app": "./bin/create-app.mjs",
     "nutin-new": "./bin/create-app.mjs",
     "nutin-add": "./bin/add-feature.mjs",

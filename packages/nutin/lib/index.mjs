@@ -1,4 +1,4 @@
-import { program } from 'commander';
+import { Command } from 'commander';
 import { print, chalk } from './src/utils/print.mjs';
 import { newAppPrompt } from './src/create-app/new-app-prompt.mjs';
 import { createProject } from './src/create-app/project-generator.mjs';
@@ -8,11 +8,11 @@ import { FEATURES, findFeatureByCli } from './src/common/feature-registry.mjs';
 import { addFeatureToProject } from './src/add-feature/feature-adder.mjs';
 import { updateProject } from './src/update-app/project-updater.mjs';
 
-export async function createApp() {
-  program
+export function createAppCommand(command) {
+  return command
     .version(PACKAGE_VERSION)
     .configureOutput({
-      helpWidth: 100 
+      helpWidth: 100
     })
     .argument('[projectName]', 'Name of the project')
     .option('-pm, --package-manager <manager>', 'Specify package manager (npm, yarn, pnpm, bun)')
@@ -27,14 +27,12 @@ export async function createApp() {
         process.exit(1);
       }
     });
-
-  program.parse();
 }
 
-export async function addFeature() {
+export function addFeatureCommand(command) {
   const featureChoices = [...FEATURES.map((feature) => feature.cli), 'libs', 'all'];
 
-  program
+  return command
     .version(PACKAGE_VERSION)
     .configureOutput({
       helpWidth: 100
@@ -66,12 +64,10 @@ export async function addFeature() {
         process.exit(1);
       }
     });
-
-  program.parse();
 }
 
-export async function updateApp() {
-  program
+export function updateAppCommand(command) {
+  return command
     .version(PACKAGE_VERSION)
     .configureOutput({
       helpWidth: 100
@@ -88,6 +84,15 @@ export async function updateApp() {
         process.exit(1);
       }
     });
+}
 
-  program.parse();
+export function buildCli() {
+  const program = new Command();
+  program.name('nutin').version(PACKAGE_VERSION);
+
+  createAppCommand(program.command('new', { isDefault: true }).description('Create a new nutin app'));
+  addFeatureCommand(program.command('add').description('Add a feature to the current project'));
+  updateAppCommand(program.command('update').description('Update nutin while preserving your changes'));
+
+  return program;
 }

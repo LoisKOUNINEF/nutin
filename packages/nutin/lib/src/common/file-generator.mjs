@@ -76,10 +76,6 @@ export class FileGenerator {
   }
 
   async isRenderTemplateFile(templatePath, fileName, context) {
-    if (/^_nutin-config\.scss(\.hbs)?$/.test(fileName) && !(context.accessibilityComponents || context.forms || context.overlays || context.nutinMixins)) {
-      return null;
-    }
-
     const fileExt = path.extname(fileName).toLowerCase();
     const outputFileName = fileName.endsWith('.hbs') ? fileName.replace('.hbs', '') : fileName;
     const isBinary = BINARY_EXTENSIONS.has(fileExt);

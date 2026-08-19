@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 
-import { createApp } from '../lib/index.mjs';
+import { Command } from 'commander';
+import { createAppCommand } from '../lib/index.mjs';
 
-createApp().catch((error) => {
-  console.error('Error:', error.message);
-  process.exit(1);
-});
+createAppCommand(new Command()).parseAsync(process.argv);

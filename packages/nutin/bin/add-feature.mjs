@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 
-import { addFeature } from '../lib/index.mjs';
+import { Command } from 'commander';
+import { addFeatureCommand } from '../lib/index.mjs';
 
-addFeature().catch((error) => {
-  console.error('Error:', error.message);
-  process.exit(1);
-});
+addFeatureCommand(new Command()).parseAsync(process.argv);

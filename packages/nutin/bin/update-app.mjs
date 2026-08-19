@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 
-import { updateApp } from '../lib/index.mjs';
+import { Command } from 'commander';
+import { updateAppCommand } from '../lib/index.mjs';
 
-updateApp().catch((error) => {
-  console.error('Error:', error.message);
-  process.exit(1);
-});
+updateAppCommand(new Command()).parseAsync(process.argv);
