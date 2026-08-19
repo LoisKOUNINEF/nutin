@@ -64,7 +64,7 @@ export class JsonManager {
         "resolveJsonModule": true,
         "typeRoots": ["src/types", "node_modules/@types"]
       },
-      "include": ["src/app", "src/core", "src/libs"],
+      "include": ["src/app", "src/core"],
       "exclude": ["node_modules"]
     };
     

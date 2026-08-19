@@ -124,7 +124,7 @@ Use it for expected-but-noisy console output you don't need to assert
 on — e.g. a real `console.warn` from calling `registerPipes()` when the
 pipes are already registered (`AppPipeRegistry` is a shared singleton, so
 several suites call it defensively; see `pipes.test.js`/
-`pipe-registry.test.js`/the `overlays` feature's `modal.test.js`). If a test
+`pipe-registry.test.js`). If a test
 needs to assert *what* was logged (`.callCount`, `.lastCall`), use
 `spyOn(console, 'method')` directly instead — `silenceConsole` doesn't
 expose the underlying spy handle.
@@ -181,9 +181,7 @@ Under fake timers, `Date.now()` and no-arg `new Date()` return the virtual
 clock; `new Date(explicit args)` still constructs a real, unaffected date.
 
 See `testin-nutin/core/tests/clock.test.js` for the full behavior this
-covers, and the `overlays` feature's `snackbar.test.js`/`dropdown.test.js`
-for real usage (auto-dismiss timing, flushing a deferred bind via
-`advanceTimersByTime(0)`).
+covers.
 
 ## Mocking core services
 
@@ -257,7 +255,7 @@ Coverage is real V8 precise coverage, collected via `node:inspector`'s
 `Profiler` API (`core/coverage/collect-coverage.js`) — not a static/AST
 instrumenter.
 
-**Scope**: only the **compiled** output under `dist/src/core` + `dist/src/libs`
+**Scope**: only the **compiled** output under `dist/src/core`
 (when `includeFramework`) and `dist/src/app` (when `includeApp`). **`tools/`
 is never scoped into coverage, even when `includeTools: true`** — tools
 tests run, but don't count toward the report or the threshold.
@@ -304,7 +302,7 @@ after printing which metric(s) missed and by how much — useful as a CI gate.
 
 ```js
 testinNutin: {
-  includeFramework: true,  // test Nutin source - src/core and src/libs
+  includeFramework: true,  // test Nutin source - src/core
   includeTools: false,     // test tools/ (builder, testin-nutin, etc.)
   includeApp: false,       // enable to use testin-nutin for application tests
   verbose: false,          // log test suites and individual `it` tests

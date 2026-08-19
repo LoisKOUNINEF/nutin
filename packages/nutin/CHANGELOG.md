@@ -12,8 +12,8 @@
   - Can now use Tailwind (v4) as an optional utility layer alongside SASS.
   - Globally scoped stylesheets, co-located with feature files. **Use unique class names.** *Note: Nutin's naming convention encourages prefixes `home__header`*.
   - Optional SEO static files generation: `config/seo.json` is used by production builder to generate static HTML files to be served to bots, via real SSR of your components (only title, description and ogImage remain hand-authored content). Also generates `robots.txt` and `sitemap.xml` from `config/seo.json` (supports per-route `disallow` / `disallowBots`).
-  - New interface `AppEvent` only for app-level events. Nutin internal events are no longer defined in `globals.d.ts`. Payload types are now objects.
-  - EventBus exposes domain facades for navigation, lifecycle, and overlays events. Subscribing functions (`on*`) return a closure function to abstract unsubscription. it remains directly usable in app-level events / domain facades. Naming convention: `domain:event-name`.
+  - New interface `AppEventMap` only for app-level events. Nutin internal events are no longer defined in `globals.d.ts`. Payload types are now objects.
+  - EventBus exposes domain facades for navigation and lifecycle events. Subscribing functions (`on*`) return a closure function to abstract unsubscription. it remains directly usable in app-level events / domain facades.
 ```ts
 // emit
 Navigation.navigateTo('path');
@@ -31,9 +31,9 @@ unsub()
   - TestinNutin: Added code coverage summary (branches / functions/ lines), `it.todo`, clock mocking (`setTimeout / setInterval`).
 
 - Cleaner base classes responsibilities
-  - BaseComponent responsibilities: Render lifecycle, Hydration, DOM lifecycle, Invalidation, Event subscriptions (DOM and bus), Teardown, Render guard, Composition orchestration.
-  - Component responsibilities: Props (className, style, data-bindings, dynamic buttons), Config + defaults + normalization, Template generation via `templateFn`
-  - View responsibilities: Route params, Navigation hooks (onEnter/onExit), Metadata policies, View identity (viewName)
+  - BaseComponent responsibilities: Render lifecycle, Hydration, DOM lifecycle, Event subscriptions (DOM and bus), Teardown, Render guard, Composition orchestration.
+  - Component responsibilities: Props (className, style, data-bindings), Config + defaults + normalization, Template generation via `templateFn`
+  - View responsibilities: Route params, Navigation hooks (onEnter/onExit), View identity (viewName)
   - EventBus methods with automatic unsubscribe: `listen(event, callback`, `listenToRenderEvents(events[])`. *Note*: `listenToRenderEvents`'s force` param has been removed - no longer needed.
   - AppEventBus can still be used directly if needed (`once`...) but must be unsubscribed manually via `onBeforeDestroy` hook.
   - Proper lifecycle hooks

@@ -12,8 +12,7 @@ const stylesPath = path.join(PATHS.source, 'styles');
 const scssOrigins = builderConfig.sass.paths;
 const scssPath = (origin) => path.join(stylesPath, origin);
 const stylesInput = scssOrigins.map(origin => scssPath(origin));
-const libsInput = path.join(PATHS.source, 'libs');
-const pathsToLoad = [ ...stylesInput, libsInput ];
+const pathsToLoad = [ ...stylesInput ];
 
 await sass.compileAsync(path.join(stylesPath, 'main.scss'), {
   loadPaths: [ ...pathsToLoad ],

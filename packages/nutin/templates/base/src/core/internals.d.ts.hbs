@@ -12,20 +12,13 @@ declare interface LifecycleEventMap {
   'view-unmount': { viewName: string };
 }
 
-declare interface OverlaysEventMap {
-  'modal-opened': {};
-  'modal-closed': {};
-  'overlay-opened': { type: string };
-  'overlay-closed': { type: string };
-}
-
 declare interface I18nEventMap {
   'language-changed': {
     lang: string;
   };
 }
 
-declare interface FrameworkEventMap extends NavigationEventMap, LifecycleEventMap, OverlaysEventMap, I18nEventMap {}
+declare interface FrameworkEventMap extends NavigationEventMap, LifecycleEventMap, I18nEventMap {}
 
 declare interface AppEventMap {}
 

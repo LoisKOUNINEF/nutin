@@ -2,7 +2,7 @@
 
 `The structure of a framework. The freedom of vanilla.`
 
-Nutin provides the essential tools to build maintainable web applications that you own completely.
+Nutin provides the structure and tooling you'd expect from a framework, while keeping the underlying web platform visible and giving you code ownership.
 
 **Your app owns Nutin — not the other way around.** The framework source lives alongside your application, so you can read it, modify it, and make it yours. Nutin's update system is designed to preserve those changes.
 

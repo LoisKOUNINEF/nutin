@@ -9,5 +9,3 @@ export const FEATURES = [
 export function findFeatureByCli(cliName) {
   return FEATURES.find((feature) => feature.cli === cliName);
 }
-
-export const LIB_FEATURE_KEYS = FEATURES.filter((feature) => feature.key);

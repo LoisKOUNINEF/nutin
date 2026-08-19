@@ -2,7 +2,7 @@
 
 `The structure of a framework. The freedom of vanilla.`
 
-Nutin provides the essential tools to build maintainable web applications that you own completely.
+Nutin provides the structure and tooling you'd expect from a framework, while keeping the underlying web platform visible and giving you code ownership.
 
 **Your app owns Nutin — not the other way around.** The framework source lives alongside your application, so you can read it, modify it, and make it yours. Nutin's update system is designed to preserve those changes.
 
@@ -19,7 +19,6 @@ Nutin is deliberately pragmatic, lightweight, and dependency-free on runtime.
 ## 📄 Docs
 
 - **[Core](docs/CORE.md)**: Core functionalities
-- **[Libraries](docs/LIBS.md)**: Optional built-ins (forms, overlays, accessibility-focused components).
 - **[Testing](docs/TESTING.md)**: Built-in testing toolkit - used to test Nutin and available for application tests.
 - **[Docker](docs/DOCKER.md)**: Multi-stage `Dockerfile` and ready-to-use `nginx.conf`
 - **[Tools](docs/TOOLS.md)**: Generator, builder, development environment.

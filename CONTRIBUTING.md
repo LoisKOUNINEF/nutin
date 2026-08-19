@@ -4,6 +4,8 @@ Nutin is maintained as a small, focused toolkit. Contributions should preserve i
 
 ## Philosophy and Principles
 
+Nutin gives vanilla web development some of the architectural benefits developers appreciate in frameworks, without turning those conventions into rules.
+
 Nutin's public surface should remain small while providing:
 
 * explicit concepts that are easy to understand and get started with;

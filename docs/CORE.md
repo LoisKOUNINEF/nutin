@@ -240,16 +240,10 @@ interface LifecycleEventMap {
   'view-mount': { viewName: string };
   'view-unmount': { viewName: string };
 }
-interface OverlaysEventMap {
-  'modal-opened': {};
-  'modal-closed': {};
-  'overlay-opened': { type: string };
-  'overlay-closed': { type: string };
-}
 interface I18nEventMap {
   'language-changed': { lang: string };
 }
-interface FrameworkEventMap extends NavigationEventMap, LifecycleEventMap, OverlaysEventMap, I18nEventMap {}
+interface FrameworkEventMap extends NavigationEventMap, LifecycleEventMap, I18nEventMap {}
 interface AppEventMap {} // your app's own events go here (globals.d.ts)
 interface EventMap extends FrameworkEventMap, AppEventMap {}
 ```
@@ -260,7 +254,7 @@ subscription for cleanup on `destroy()`. `this.listenToRenderEvents([...])`
 is a shortcut that re-runs `this.render()` whenever any of the given events
 fire.
 
-Three facades wrap the generic bus with ergonomic named methods (each
+Two facades wrap the generic bus with ergonomic named methods (each
 `onXxx` returns an unsubscribe function):
 
 - **`Lifecycle`** — `viewMount(viewName)`/`onViewMount`,
@@ -271,9 +265,6 @@ Three facades wrap the generic bus with ergonomic named methods (each
 - **`Navigation`** — `navigateTo(path)`/`onNavigate`, `reload()`/`onReload`.
   The `Router` subscribes to these to drive actual navigation, so calling
   `Navigation.navigateTo('/')` from a component or a view is the standard way to navigate.
-- **`Overlays`** — `modalOpened()`/`onModalOpened`,
-  `modalClosed()`/`onModalClosed`, `overlayOpened(type)`/`onOverlayOpened`,
-  `overlayClosed(type)`/`onOverlayClosed`.
 
 ### Custom tokens
 
@@ -410,7 +401,7 @@ Everything is imported from `core/index.ts` — never deep-import
 import {
   View, Component, Service,
   SecurityHelper, TrustLevel,
-  AppEventBus, Lifecycle, Navigation, Overlays,
+  AppEventBus, Lifecycle, Navigation,
   AppRouter, Routes, RouteGuard,
   I18nService, AppHttpClient, AppPipeRegistry,
 } from '../../core/index.js';

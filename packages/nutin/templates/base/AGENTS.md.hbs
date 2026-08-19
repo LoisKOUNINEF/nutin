@@ -8,7 +8,7 @@ This project was generated with Nutin {{version}}.
 src/
   app/            application code (components, views, services)
   core/           Nutin framework internals — see "Nutin" section before editing
-  styles/         project-level Sass, incl. _nutin-config.scss overrides
+  styles/         project-level Sass
 config/           i18n (languages.json) and SEO configuration
 tools/            builder, dev server, generator, testin-nutin runner, docker (optional)
 nutin.config.js   build/feature config — see below
@@ -19,7 +19,7 @@ nutin.config.js   build/feature config — see below
 
 - Favor small, composable components.
 - One `View` = one route.
-- Import everything from barrel files (`core/index.js`, `libs/index.js`, `components/index.js`, `views/index.js`, `services/index.js`) — do not deep-import.
+- Import everything from barrel files (`core/index.js`, `components/index.js`, `views/index.js`, `services/index.js`) — do not deep-import.
 
 ## Commands
 
@@ -78,7 +78,6 @@ Tokens: `@value`, `@id`, `@class`, `@textContent`, `@event`, `@target`, `@attr:n
 - `AppEventBus` — `subscribe`/`once`/`emit`/`off`. Inside a component, prefer `this.listen(event, cb)` (auto-unsubscribes on `destroy()`) or `this.listenToRenderEvents([event1, event2, ...])` (re-runs `this.render()` whenever any of the given events fire) over calling the bus directly. Typed facades — each `on*` subscriber returns a closure you call directly to unsubscribe (`const off = Navigation.onNavigate(cb); ...; off();`), no need to keep the original callback reference around for `off()`:
   - `Navigation` — `navigateTo(path)`/`onNavigate`, `reload()`/`onReload`.
   - `Lifecycle` — `viewMount(viewName)`/`onViewMount`, `viewUnmount(viewName)`/`onViewUnmount`, plus generic `beforeRender`/`afterRender`/`beforeDestroy`/`afterDestroy`.
-  - `Overlays` — `modalOpened()`/`onModalOpened`, `modalClosed()`/`onModalClosed`, `overlayOpened(type)`/`onOverlayOpened`, `overlayClosed(type)`/`onOverlayClosed`.
 - `AppRouter(routes)` — call once in `main.ts`; routes support `:param`/`:param?` and per-route guards.
 - `AppHttpClient` — `get/post/put/patch/delete<T>(endpoint, data?, config?)`; non-OK responses throw `HttpError`.
 - `I18nService` — `translate(key, fallback?)`, `setCurrentLanguage(lang)`; language list comes from `config/languages.json`.
@@ -88,7 +87,6 @@ Tokens: `@value`, `@id`, `@class`, `@textContent`, `@event`, `@target`, `@attr:n
 
 - Sass is the primary styling system; Tailwind is optional (`nutin.config.js`'s `tailwind` flag).
 - Naming convention: `.my-element__my-class`.
-- Component/overlay/mixin Sass tunables live in `$<name>-config` maps, overridable in one place: edit `src/styles/_nutin-config.scss`'s `$config` directly (it's generated into your project, not an imported library file). For accessibility-components/forms/overlays: nest under `'components': ('<name>': (...))`. For nutinMixins (`breakpoints`/`animations` only): top-level `'breakpoints': (...)`/`'animations': (...)`, not nested under `'components'`.
 
 ## Pipes
 

@@ -30,7 +30,7 @@ export function createAppCommand(command) {
 }
 
 export function addFeatureCommand(command) {
-  const featureChoices = [...FEATURES.map((feature) => feature.cli), 'libs', 'all'];
+  const featureChoices = [...FEATURES.map((feature) => feature.cli), 'all'];
 
   return command
     .version(PACKAGE_VERSION)
@@ -45,13 +45,7 @@ export function addFeatureCommand(command) {
       }
 
       try {
-        if (featureArg === 'libs') {
-          for (const feature of FEATURES) {
-            if (feature.key === 'docker') {
-              continue;
-            } else await addFeatureToProject(feature.key);
-          }
-        } else if (featureArg === 'all') {
+        if (featureArg === 'all') {
           for (const feature of FEATURES) {
             await addFeatureToProject(feature.key);
           }
