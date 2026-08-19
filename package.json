@@ -16,9 +16,9 @@
     "ws:dev": "npm run dev -w",
     "ws:generate": "npm run generate -w",
     "ws:watch": "npm run watch -w",
-    "ws:test": "npm run test -w",
-    "ws:test:rebuild": "npm run test:rebuild -w",
-    "ws:test:watch": "npm run test:watch -w",
+    "ws:testin-nutin": "npm run testin-nutin -w",
+    "ws:testin-nutin:watch": "npm run testin-nutin:watch -w",
+    "ws:testin-nutin:coverage": "npm run testin-nutin:coverage -w",
     "nutin:publish": "npm run publish -w @nutin/cli"
   },
   "devDependencies": {

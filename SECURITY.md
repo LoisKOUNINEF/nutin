@@ -1,142 +1,27 @@
 # Security Policy
 
-## Reporting Security Vulnerabilities
+## Reporting a Vulnerability
 
-If you believe you have found a security vulnerability, please report it responsibly.
+If you believe you have found a security vulnerability in Nutin, please report it privately rather than through a public GitHub issue.
 
-### How to Report
+Email: nutin.toolkit@gmail.com
 
-**Please do NOT report security vulnerabilities through public GitHub issues.**
+Please include enough information to reproduce and assess the issue, such as:
+- affected version
+- affected file or feature
+- steps to reproduce
+- expected and actual behavior
+- potential impact
 
-Instead, please report security vulnerabilities by emailing:
-
-📧 **nutin.toolkit@gmail.com**
-
-You should receive a response within a week. If for some reason you do not, please follow up via email to ensure we received your original message.
-
-### What to Include
-
-Please include as much of the information listed below as you can to help better understand and resolve the issue:
-
-- **Type of issue** (e.g., buffer overflow, SQL injection, cross-site scripting, etc.)
-- **Full paths of source file(s)** related to the manifestation of the issue
-- **Location of the affected source code** (tag/branch/commit or direct URL)
-- **Special configuration** required to reproduce the issue
-- **Step-by-step instructions** to reproduce the issue
-- **Proof-of-concept or exploit code** (if possible)
-- **Impact of the issue**, including how an attacker might exploit the issue
-
-This information will help triage your report more quickly.
+We will acknowledge reports as soon as reasonably possible.
 
 ## Supported Versions
 
-We only support the latest version.
+Only the latest version of Nutin is supported.
 
-## Security Best Practices
+| Version | Supported |
+| ------- | --------- |
+| Latest  | Yes       |
+| Older versions | No |
 
-### For Users
-
-#### Package Usage
-
-- **Keep dependencies updated**: Regularly update to the latest version
-- **Use npm audit**: Run `npm audit` regularly to check for vulnerabilities
-- **Pin versions**: Use exact versions in production environments
-- **Review dependencies**: Understand what packages you're including
-- **XSS Test Cases :**
-
-Basic script injection :                                
-`"><script>alert('XSS')</script>`                            
-
-Image onerror :                               
-`"><img src=x onerror=alert('XSS')>`                               
-
-SVG injection :                               
-`"><svg onload=alert('XSS')>`                               
-
-Template literal escape (if using backticks) :                               
-`${alert('XSS')}`                               
-
-Event handler attributes:                               
-`" onmouseover="alert('XSS')"`
-
-
-#### Environment Security
-
-- **Secure API keys**: Never commit API keys or secrets to version control
-- **Use environment variables**: Store sensitive configuration in environment variables
-- **Validate inputs**: Always validate and sanitize user inputs
-- **Use HTTPS**: Ensure all communications use HTTPS in production
-
-### For Contributors
-
-#### Development
-
-- **Dependency management**: Be cautious when adding new dependencies. nutin doesn't natively use any runtime dependencies.
-- **Input validation**: Always validate and sanitize inputs
-- **Error handling**: Don't expose sensitive information in error messages
-
-## Vulnerability Disclosure Policy
-
-### Public Disclosure
-
-After a security issue has been resolved:
-
-1. **Security advisory** published on GitHub
-2. **Release notes** include security fix information
-3. **CVE assignment** requested if applicable
-4. **Community notification** through appropriate channels
-
-## Security Contact Information
-
-### Primary Contact
-- **Email**: nutin-toolkit@gmail.com
-
-### Response Languages
-We can respond to security reports in:
-- English
-- French
-
-## Security Hall of Fame
-
-We would like to thank the following individuals for responsibly disclosing security vulnerabilities:
-
-<!-- This section will be updated as we receive and address security reports -->
-
-*No security vulnerabilities have been reported yet.*
-
-## Legal
-
-### Safe Harbor
-
-We support safe harbor for security researchers who:
-
-- Make a good faith effort to avoid privacy violations and disruptions
-- Only interact with systems they own or have explicit permission to test
-- Do not access or modify user data
-- Report vulnerabilities promptly
-- Do not perform attacks that could harm either users or services
-
-### Disclaimer
-
-This security policy does not grant any rights or permissions beyond those explicitly stated. All testing and research should comply with applicable laws and regulations.
-
-## Additional Resources
-
-### Security Learning Resources
-
-- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
-- [Node.js Security Best Practices](https://nodejs.org/en/docs/guides/security/)
-- [npm Security Best Practices](https://docs.npmjs.com/security)
-
-### Security Tools
-
-- [npm audit](https://docs.npmjs.com/cli/v8/commands/npm-audit)
-- [Snyk](https://snyk.io/)
-- [OWASP ZAP](https://owasp.org/www-project-zap/)
-
----
-
-**Version**: 2.0.0  
-**Last Updated**: 17/05/2026  
-
-Thank you for helping keep our project and users safe! 🔒
+Thank you for helping keep Nutin secure.

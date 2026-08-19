@@ -7,7 +7,7 @@ export class NotFoundView extends View {
     super({template});
   }
 
-  private handleHome() {
+  private _handleHome(): void {
     Navigation.navigateTo('/');
   }
 }

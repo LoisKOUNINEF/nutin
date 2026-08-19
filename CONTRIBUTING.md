@@ -1,47 +1,20 @@
 # Contributing to nutin
 
-Thank you for your interest in contributing! This document provides guidelines and information for contributing to this monorepo, which contains the NPM package and the official website.
-
-## Table of Contents
-
-- [Philosophy and Principles](#philosophy-and-principles)
-- [Getting Started](#getting-started)
-- [Development Setup](#development-setup)
-- [Contributing Guidelines](#contributing-guidelines)
-- [Pull Request Process](#pull-request-process)
-- [Documentation](#documentation)
-- [Getting Help](#getting-help)
-- [Recognition](#recognition)
-- [License](#license)
+Nutin is maintained as a small, focused toolkit. Contributions should preserve its simplicity, keep the public API intentionally small, and avoid introducing unnecessary abstractions or configuration.
 
 ## Philosophy and Principles
 
-The goal is to provide a structured layer that is:
+Nutin's public surface should remain small while providing:
 
-* explicit, easy to understand and to start with,
-* favoring code ownership and openness,
-* with high test coverage and thorough documentation
-
-The internal architecture should remain highly modular, while the public APIs and CLI should remain intentionally small.
+* explicit concepts that are easy to understand and get started with;
+* strong code ownership and openness;
+* high test coverage and thorough documentation.
 
 ### Expose concepts, not implementation
 
-The CLI and generated project should expose concepts that users naturally understand.
+The features should expose concepts that users naturally understand.
 
-A user should think in terms of **capabilities**, not source folders; the CLI represents the user's mental model, not the filesystem.
-
-Example:
-```bash
-# Internal structure:
-libs/
-    components/
-    forms/
-    overlays/
-    pipes/
-
-# Public CLI:
-nutin add libs
-```
+A user should think in terms of **capabilities**, not implementation details.
 
 ### Internal modularity
 
@@ -53,39 +26,11 @@ Reasons:
 * Easier maintenance
 * Maximum flexibility with minimal user complexity.
 
-EXAMPLE:
-
-```node
-// Exposed:
-installLibs()
-
-// may internally perform:
-installComponents();
-installForms();
-installOverlays();
-```
-
 ### Configuration philosophy
 
-The project has one main configuration entry point, `nutin.config.js`, for framework and tooling options.
+A Nutin-generated project has one main configuration entry point, `nutin.config.js`, for framework and tooling options.
+
 Specialized configuration files are used where appropriate, such as `config/languages.json` and `config/seo.json`.
-
-```
-# nutin.config.js
-
-Nutin features
-
-Sections:
-- generator
-- builder
-- testinNutin
-```
-
-### Simplicity beats configurability
-
-Adding options is easy.
-
-Removing them later can only be done manually.
 
 ### Framework defaults
 
@@ -118,124 +63,94 @@ The framework should evolve internally without forcing users to learn new concep
 
 ## Development Setup
 
-1. **Fork and clone the repository:**
-   ```bash
-   git clone https://github.com/lois-kouninef/nutin.git
-   cd nutin
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-   
-4. Testing changes
-
-See the [agents testing matrix](docs/AGENTS_TESTING_MATRIX/README.md) for guidance on testing changes to `packages/nutin`.
-
-This can speed up testing, but **does not replace human manual testing**.
-
-## Contributing Guidelines
-
-### Types of Contributions
-
-Various types of contributions are welcome:
-
-- 🐛 **Bug fixes**
-- ✨ **New features**
-- 📝 **Documentation improvements**
-- 🎨 **UI/UX enhancements**
-- 🔧 **Build and tooling improvements**
-- 🧪 **Test coverage improvements**
-- 🌍 **Translations**
-
-### Before You Start
-
-1. **Check existing issues** to see if your contribution is already being discussed
-2. **Open an issue** for significant changes to discuss your approach
-3. **Search existing PRs** to avoid duplicate work
-
-### Development Workflow
-
-1. **Create a feature branch:**
-   ```bash
-   git checkout -b feature/your-feature-name
-   # or
-   git checkout -b fix/issue-description
-   ```
-
-2. **Make your changes:**
-   - Follow the existing code style and conventions
-   - Update documentation as needed
-   - Add tests for new functionality **NOTE**: Nutin is tested with its own toolkit, syntax is very Jest-inspired.
-
-3. **Commit your changes:**
-   ```bash
-   git add .
-   git commit -m "type(scope): description"
-   ```
-
-### Commit Message Convention
-
-Nutin prefers [Conventional Commits](https://conventionalcommits.org/) format:
-
-```
-type(scope): description
-
-[optional body]
-
-[optional footer(s)]
+1. **Clone and install
+```bash
+git clone https://github.com/lois-kouninef/nutin.git
+cd nutin
+npm install
 ```
 
-**Types:**
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting, etc.)
-- `refactor`: Code refactoring
-- `test`: Adding or updating tests
-- `chore`: Build process or auxiliary tool changes
+2. **Test the package locally**
 
-**Examples:**
-- `feat(nutin): implemented dependency injection`
-- `fix(website): resolve mobile navigation issue`
-- `docs: added docs for X`
+When working on the Nutin package, you can test the local version against a separate project.
 
-## Pull Request Process
+Create a scratch project and link the local package:
+```bash
+mkdir nutin-scratch
+cd nutin-scratch
+npm link ../path/to/nutin/packages/nutin
+```
+Nutin CLI commands will now use the locally linked package.
 
-Please use the PR template and provide enough context to understand the change, how it was tested, and any relevant breaking changes.
+When finished, unlink it:
+```bash
+npm unlink ../path/to/nutin/packages/nutin
+```
+
+## Making Changes
+
+Contributions are welcome across the toolkit, CLI, build tooling, tests, documentation, and website.
+
+Before making a substantial change, consider opening an issue or discussion to explain the problem and proposed approach. This is especially useful for changes that affect the public API, generated project structure, or framework architecture.
+
+## Code
+
+* Follow the existing code structure and conventions.
+* Keep responsibilities separated.
+* Prefer simple solutions over additional abstraction.
+* Avoid exposing internal implementation details through the public API.
+* Keep generated projects and CLI behavior consistent with the documented Nutin experience.
+
+## Tests
+
+New functionality and bug fixes should include appropriate tests.
+
+Nutin is tested with testin-nutin, its own lightweight testing toolkit with a Jest-inspired syntax.
+
+When changing existing behavior, update the relevant tests rather than relying solely on manual verification.
 
 ## Documentation
 
-### Package / Website Documentation
+Documentation should favor practical examples and clear explanations over exhaustive reference material.
 
-- API documentation: generated from JSDoc comments
-- Markdown documentation: maintained in docs/
-- Website documentation: maintained in apps/website/
-- READMEs: keep them aligned with their intended audience
+Update documentation when a change affects:
 
-### Writing Guidelines
+* public APIs or CLI commands
+* generated project structure
+* configuration
+* user-facing behavior
+* installation or development workflows
 
-- Use clear, concise language
-- Include code examples where helpful
-- Keep documentation up to date with code changes
-- Use proper markdown formatting.
+Keep documentation concise and aligned with the actual behavior of the project.
 
-## Getting Help
+### Commits
 
-### Community
+Nutin prefers [Conventional Commits](https://conventionalcommits.org/) format:
 
-- **GitHub Discussions**: For questions and general discussion
-- **Issues**: For bug reports and feature requests
+Use the following format:
+```
+type(scope): description
+```
 
-### Maintainer Contact
+Examples:
 
-For sensitive issues or direct maintainer contact:
-- Email: [nutin-toolkit@gmail.com]
+* `feat(nutin): implemented dependency injection`
+* `fix(website): resolve mobile navigation issue`
+* `docs: added docs for X`
+
+## Pull Requests
+
+Pull requests should clearly explain:
+
+* what was changed
+* why the change was made
+* how it was tested
+* any breaking changes or changes to generated projects
+
+For changes affecting the public API, CLI, configuration, or generated project structure, explain the user-facing impact explicitly.
 
 ## License
 
 By contributing to this project, you agree that your contributions will be licensed under the same license as the project.
-
 
 Thank you for contributing! 🎉

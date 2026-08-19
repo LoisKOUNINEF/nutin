@@ -5,6 +5,7 @@ import { print } from '../utils/print.mjs';
 import { FileGenerator } from '../common/file-generator.mjs';
 import { FEATURES } from '../common/feature-registry.mjs';
 import { PACKAGE_VERSION } from '../common/package-data.mjs';
+import { installDependencies } from '../common/package-json-helper.mjs';
 import { readProjectMeta, updateProjectMeta } from '../common/project-meta.mjs';
 import { FeatureContextBuilder } from './feature-context-builder.mjs';
 import { updatePackageJson } from './package-json-updater.mjs';
@@ -49,8 +50,8 @@ export class FeatureAdder {
     if (!(await fs.pathExists(packageJsonPath))) {
       throw new Error(`No package.json found in ${projectPath} — run this from a nutin project's root.`);
     }
-    if (!(await fs.pathExists(path.join(projectPath, 'tools')))) {
-      throw new Error(`No tools directory found in ${projectPath} — is this a nutin project?`);
+    if (!(await fs.pathExists(path.join(projectPath, 'nutin.config.js')))) {
+      throw new Error(`No nutin.config.js file found in ${projectPath} — is this a nutin project?`);
     }
   }
 
@@ -68,6 +69,8 @@ export class FeatureAdder {
       packageManager: context.packageManager,
       features: { [feature.key]: true },
     });
+    if (feature.key === 'docker') return;
+    await installDependencies(projectPath, context.packageManager);
   }
 }
 

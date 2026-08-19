@@ -1,7 +1,7 @@
 import path from 'path';
 import * as fsExtra from 'fs-extra';
 import { print } from '../utils/print.mjs';
-import { getDockerScripts, installDependencies } from '../common/package-json-helper.mjs';
+import { getDockerScripts } from '../common/package-json-helper.mjs';
 
 const fs = fsExtra.default;
 
@@ -25,10 +25,11 @@ function mergeAdditive(target, additions) {
 export async function updatePackageJson(projectPath, feature, context) {
   const packageJsonPath = path.join(projectPath, 'package.json');
   const packageJson = await fs.readJSON(packageJsonPath);
+  const isDocker = feature.key === 'docker';
 
   let scripts = {};
 
-  if (feature.key === 'docker') {
+  if (isDocker) {
     scripts = getDockerScripts(context);
   } else {
     return;
@@ -44,6 +45,4 @@ export async function updatePackageJson(projectPath, feature, context) {
     print.info(`Kept existing package.json values for: ${skipped.join(', ')}`);
   }
   print.info('Updated package.json');
-
-  await installDependencies(projectPath, context.packageManager);
 }

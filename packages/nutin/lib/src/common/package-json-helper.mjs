@@ -85,11 +85,11 @@ export function getAllScripts(context) {
     "build:prod": "NODE_ENV=production node tools/builder/builder.js",
     "serve": `${packageManager} run build && ${packageManager} run serve:only`,
     "serve:only": "node tools/dev/serve.js",
+    "serve:prod": `${packageManager} run build:prod && ${packageManager} run serve:only`,
     "dev": "node tools/dev/dev-serve.js",
     "generate": "node tools/generator/generator.js",
     "testin-nutin": `${packageManager} run build && node tools/testin-nutin/runner.js`,
     "testin-nutin:watch": `${packageManager} run build && node tools/testin-nutin/watch-tests.js`,
-    "testin-nutin:only": `node tools/testin-nutin/runner.js`,
     "testin-nutin:coverage": `${packageManager} run build && node tools/testin-nutin/runner.js --coverage`
   };
 
