@@ -25,8 +25,9 @@ if (builderConfig.tailwind) runScript(path.join(scriptsDir, 'tailwind.js'), 'Com
 
 runScript(path.join(scriptsDir, 'validate-html.js'), 'Processing index.html...');
 
+if (builderConfig.i18n) runScript(path.join(scriptsDir, 'build-i18n.js'), 'Building locales...');
+
 if (builderConfig.isProd) {
-	if (builderConfig.i18n) runScript(path.join(scriptsDir, 'build-i18n.js'), 'Combining locales...');
 	runScript(path.join(scriptsDir, 'esbuild.js'), 'Running esbuild...');
 	runScript(path.join(scriptsDir, 'hash-files.js'), 'Hashing files...');
 	runScript(path.join(scriptsDir, 'compress-files.js'), 'Compressing files...');

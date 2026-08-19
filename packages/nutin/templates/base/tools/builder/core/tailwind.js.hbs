@@ -39,19 +39,23 @@ if (missingDeps.length) {
   print.gray('Required packages:');
   missingDeps.forEach(dep => print.gray(`  - ${dep.name}@${dep.version}`));
 
-  if (!process.stdin.isTTY) {
-    print.boldError(`Non-interactive shell detected. Run manually: ${installCommand}`);
-    process.exit(1);
+  let shouldInstall = true;
+  if (process.stdin.isTTY) {
+    shouldInstall = await promptBoolean('Install them now?');
+  } else {
+    print.gray(`Non-interactive shell detected. Installing automatically: ${installCommand}`);
   }
 
-  const shouldInstall = await promptBoolean('Install them now?');
   if (!shouldInstall) {
     print.boldError(`Aborting. Run manually: ${installCommand}`);
     process.exit(1);
   }
 
   const [command, ...args] = installCommand.split(' ');
-  await runCommand(command, args);
+  // npm silently skips installing new devDependencies when NODE_ENV=production
+  // (as it is during `build:prod`), so this subprocess must not inherit it.
+  const { NODE_ENV: _NODE_ENV, ...installEnv } = process.env;
+  await runCommand(command, args, { env: installEnv });
 }
 
 const twBin = path.join(process.cwd(), 'node_modules', '.bin', 'tailwindcss');

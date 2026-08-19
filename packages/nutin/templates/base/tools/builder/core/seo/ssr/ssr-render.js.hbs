@@ -40,7 +40,7 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
   try {
     const bundle = await import(`${bundleUrl}?ssr=${renderIndex++}`);
     ({ Service } = bundle);
-    const { appRoutes, I18nService, RouteGuardsManager } = bundle;
+    const { appRoutes, I18nService, RouteGuardsManager, registerPipes } = bundle;
 
     const routeConfig = appRoutes[appRoutesKey];
     if (!routeConfig) {
@@ -49,6 +49,8 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
         `matches a real key in src/app/routes.ts.`
       );
     }
+
+    registerPipes();
 
     if (i18nEnabled) await I18nService.setCurrentLanguage(lang);
 

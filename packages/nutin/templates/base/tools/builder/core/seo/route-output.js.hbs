@@ -7,8 +7,6 @@ import { applySubstitutions } from './html-substitutions.js';
 import { getAppRoutePaths } from './ssr/ssr-render.js';
 import { builderConfig } from '../../builder.config.js';
 
-const builderConfig.WELL_KNOWN_NON_SEO_ROUTES = ['/404', '/403', '/500'];
-
 export function segmentsOf(routeSuffix) {
   return routeSuffix ? routeSuffix.split('/').filter(Boolean) : [];
 }
