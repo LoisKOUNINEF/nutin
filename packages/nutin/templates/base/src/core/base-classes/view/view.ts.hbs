@@ -47,7 +47,7 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
  */
   protected hideHeader(): void {
     const header = document.getElementById('header') as HTMLElement;
-    if (header) header.style = 'display: none';
+    if (header) header.style.cssText = 'display: none';
   }
 
 /**
@@ -56,7 +56,7 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
  */
   protected hideFooter(): void {
     const footer = document.getElementById('footer') as HTMLElement;
-    if (footer) footer.style = 'display: none';
+    if (footer) footer.style.cssText = 'display: none';
   }
 
 /**
@@ -65,7 +65,7 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
  */
   protected revealHeader(): void {
     const header = document.getElementById('header') as HTMLElement;
-    if (header) header.style = 'display: block';
+    if (header) header.style.cssText = 'display: block';
   }
 
 /**
@@ -74,7 +74,7 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
  */
   protected revealFooter(): void {
     const footer = document.getElementById('footer') as HTMLElement;
-    if (footer) footer.style = 'display: block';
+    if (footer) footer.style.cssText = 'display: block';
   }
 
   private getKebabCaseViewName(): string {
