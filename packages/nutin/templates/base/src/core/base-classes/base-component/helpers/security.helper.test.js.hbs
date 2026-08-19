@@ -65,6 +65,43 @@ describe('SecurityHelper', () => {
     expect(result.includes('onmouseover')).toBe(false);
   });
 
+  it('sanitizeTemplate "normal" level strips unquoted event handler attributes', () => {
+    const result = SecurityHelper.sanitizeTemplate('<img src=x onerror=alert(1)>', 'normal');
+    expect(result.includes('onerror')).toBe(false);
+  });
+
+  it('sanitizeTemplate "normal" level is not fooled by nested-tag script reassembly', () => {
+    const result = SecurityHelper.sanitizeTemplate(
+      '<scr<script></script>ipt>alert(document.domain)</scr<script></script>ipt>',
+      'normal'
+    );
+    // A naive substring check is misleading here: the sanitized output can still
+    // contain the literal text "<script>" as part of an inert malformed tag name
+    // (e.g. "SCR<SCRIPT"), which HTML parsers never re-interpret as a real <script>
+    // element. Re-parse the result and assert no live <script> element exists.
+    const reparsed = document.createElement('template');
+    reparsed.innerHTML = result;
+    expect(reparsed.content.querySelector('script')).toBe(null);
+  });
+
+  it('sanitizeTemplate "normal" level is not fooled by nested-tag event handler reassembly', () => {
+    const result = SecurityHelper.sanitizeTemplate(
+      '<img src=x onerr<script>x</script>or=alert(1)>',
+      'normal'
+    );
+    expect(result.includes('onerror')).toBe(false);
+  });
+
+  it('sanitizeTemplate "strict" level strips whitespace-obfuscated javascript: URLs', () => {
+    const result = SecurityHelper.sanitizeTemplate('<a href="java\tscript:alert(1)">x</a>', 'strict');
+    expect(result.includes('javascript:')).toBe(false);
+  });
+
+  it('sanitizeTemplate "strict" level strips javascript: from action/formaction/poster/background too', () => {
+    const result = SecurityHelper.sanitizeTemplate('<form action="javascript:alert(1)">x</form>', 'strict');
+    expect(result.includes('javascript:')).toBe(false);
+  });
+
   it('sanitizeInputElement escapes the value of an input element', () => {
     const input = document.createElement('input');
     input.value = '<script>alert(1)</script>';
