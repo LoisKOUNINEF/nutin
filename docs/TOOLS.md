@@ -193,8 +193,9 @@ route is fully localized; the other is left flat on purpose - will trigger a war
     — copy files from `src/` into `dist-build/src/` (assets/static + JSONs), the favicon, and `config/`/`nutin.config.js`, respecting known binary extensions.
 2. `validate-routes.js`
     — statically parse `src/app/routes.ts`'s `appRoutes` object literal (TypeScript compiler API, no execution) and fail the build if any route key is duplicated (an earlier duplicate would be silently unreachable).
-3. *dev builds only* : `tsc.js`
+3. `tsc.js`
     — run the TypeScript compiler.
+    - eventhough it could be skipped for production build (using `esbuild`), it runs for Type checking.
 4. *If `inlineTemplates` is `false`* : `merge-templates.js`
     — minify each external HTML template then replace the matching `.js` file's `__TEMPLATE_PLACEHOLDER__` token with it.
     *If `inlineTemplates` is `true`* : `minify-html.js`
