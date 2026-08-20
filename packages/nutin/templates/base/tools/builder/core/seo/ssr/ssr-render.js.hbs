@@ -2,6 +2,7 @@ import { parseHTML } from 'linkedom';
 import path from 'path';
 import { PATHS } from '../../app/paths.js';
 import { installGlobals } from './ssr-polyfills.js';
+import { print } from '../../../../utils/index.js';
 
 let renderIndex = 0;
 
@@ -72,7 +73,13 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
       { cause: err }
     );
   } finally {
-    if (Service) await Service.destroyAll();
+    if (Service) {
+      try {
+        await Service.destroyAll();
+      } catch (cleanupErr) {
+        print.grayError(`[ssr] destroyAll cleanup failed: ${cleanupErr.message}`);
+      }
+    }
   }
 }
 

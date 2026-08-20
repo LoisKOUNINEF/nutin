@@ -14,7 +14,7 @@ function removeFoldersAfterBundle() {
   const foldersToRemove = [ 'core', 'app', path.join('..', 'config') ];
   const pathToFolder = (folder) => path.join(PATHS.tempSource, folder);
 
-  foldersToRemove.forEach(folder => fs.rmSync(pathToFolder(folder), { recursive : true }));
+  foldersToRemove.forEach(folder => fs.rmSync(pathToFolder(folder), { recursive: true, force: true }));
 }
 
 function removeNutinConfig() {

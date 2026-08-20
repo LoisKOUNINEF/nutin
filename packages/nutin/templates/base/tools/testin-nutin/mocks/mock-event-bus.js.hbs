@@ -24,10 +24,10 @@ export class MockEventBus {
     this.off.calls = [];
     this.off.mockReset = () => { this.off.calls = []; };
 
-    this.on = (event, callback) => {
+    this.on = createMockMethod((event, callback) => {
       if (!this.handlers[event]) this.handlers[event] = [];
       this.handlers[event].push(callback);
-    };
+    });
 
     this.onDestroy = createMockMethod();
     this.reset = this.reset.bind(this);
@@ -37,6 +37,7 @@ export class MockEventBus {
     this.subscribe.mockReset();
     this.emit.mockReset();
     this.off.mockReset();
+    this.on.mockReset();
     this.onDestroy.mockReset();
     this.handlers = {};
   }

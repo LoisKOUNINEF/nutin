@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import path from "path";
-import { allFormats, getLastWord, print, promptBoolean } from "../utils/index.js";
+import { allFormats, getLastWord, print, promptBoolean, errorExit } from "../utils/index.js";
 import { generateFile, appendToIndex, generateJson } from "./handle-file.js";
 import { serviceTemplate, componentTemplate, viewTemplate, htmlTemplate, scssTemplate, testTemplate } from "./templates/index.js";
 import nutinConfig from "../../nutin.config.js";
@@ -11,6 +11,7 @@ const [, , rawType, rawFullPath] = process.argv;
 
 if (!rawType || !rawFullPath) {
   showUsageAndExit("Missing arguments.");
+  process.exit(1);
 }
 
 const type = allFormats(rawType);
@@ -71,6 +72,7 @@ if (create) {
   print.boldSuccess(`\n${type.capitalized} ${name.capitalized} generated in ${targetPath}.\n`)
 } else {
   showUsageAndExit(`Unsupported type: '${type.kebab}'`);
+  process.exit(1);
 }
 
 // Helper Functions
@@ -110,7 +112,5 @@ function showUsageAndExit(message) {
 }
 
 function handleError(context, error) {
-  print.boldError(`\n${context}`);
-  print.boldError(error instanceof Error ? error.message : error);
-  process.exit(1);
+  errorExit(error, context);
 }

@@ -1,7 +1,7 @@
 import { execFileSync } from 'child_process';
 import * as fs from 'fs';
 import path from 'path';
-import { print, runCommand, promptBoolean } from '../../../utils/index.js';
+import { print, runCommand, promptBoolean, errorExit } from '../../../utils/index.js';
 import { PATHS } from '../app/paths.js';
 import { builderConfig } from '../../builder.config.js';
 
@@ -55,7 +55,11 @@ if (missingDeps.length) {
   // npm silently skips installing new devDependencies when NODE_ENV=production
   // (as it is during `build:prod`), so this subprocess must not inherit it.
   const { NODE_ENV: _NODE_ENV, ...installEnv } = process.env;
-  await runCommand(command, args, { env: installEnv });
+  try {
+    await runCommand(command, args, { env: installEnv });
+  } catch (err) {
+    errorExit(err, 'tailwind-install');
+  }
 }
 
 const twBin = path.join(process.cwd(), 'node_modules', '.bin', 'tailwindcss');
@@ -66,7 +70,11 @@ const mainCss = path.join(PATHS.tempSource, 'main.css');
 const args = ['-i', input, '-o', output];
 if (builderConfig.isProd) args.push('--minify');
 
-execFileSync(twBin, args, { stdio: 'pipe' });
+try {
+  execFileSync(twBin, args, { stdio: 'inherit' });
+} catch (err) {
+  errorExit(err, 'tailwind');
+}
 
 // Tailwind's @layer blocks always lose to unlayered SCSS in the cascade regardless
 // of order, so prepending here is only for readable file ordering, not precedence.

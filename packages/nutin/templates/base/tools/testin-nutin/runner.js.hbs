@@ -2,7 +2,7 @@ import path from 'path';
 import {
   registerTestGlobals, getTestFiles, runQueuedTests, setCurrentTestFile, print,
   startCoverage, stopCoverage, buildCoverageReport, printCoverageReport, maybeWriteUncoveredReport,
-  writeSummaryReport,
+  writeSummaryReport, setupJsdom, teardownJsdom,
 } from './core/index.js';
 import config from '#root/nutin.config.js';
 
@@ -87,7 +87,13 @@ async function runTests() {
 
   const testResults = await runQueuedTests();
 
+  if (testResults.failed > 0) process.exitCode = 1;
+
   if (coverageEnabled) await runCoverage(testResults);
 }
 
-runTests();
+runTests().catch((err) => {
+  print.boldError(`Unexpected error: ${err.message}`);
+  print.grayError(err.stack);
+  process.exitCode = 1;
+});

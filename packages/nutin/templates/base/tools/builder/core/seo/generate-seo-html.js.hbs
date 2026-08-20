@@ -115,9 +115,8 @@ export async function generateSeoHtml() {
     }
   }
 
-  const bundleUrl = await buildSsrBundle();
-
   try {
+    const bundleUrl = await buildSsrBundle();
     await warnForRoutesMissingSeoConfig(bundleUrl, seoConfig.routes, defaultLanguage, baseUrl);
 
     for (const route of seoConfig.routes) {

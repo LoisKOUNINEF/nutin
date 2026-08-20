@@ -9,6 +9,7 @@ describe('promptBoolean', () => {
     createInterfaceSpy = spyOn(readline, 'createInterface').andCallFake(() => ({
       question: (_question, callback) => callback(answer),
       close: () => {},
+      on: () => {},
     }));
   });
 
@@ -34,5 +35,20 @@ describe('promptBoolean', () => {
   it('resolves false for anything else', async () => {
     answer = 'maybe';
     expect(await promptBoolean('continue?')).toBe(false);
+  });
+
+  it('resolves false instead of hanging if stdin closes before an answer', async () => {
+    createInterfaceSpy.restore();
+    let closeHandler;
+    createInterfaceSpy = spyOn(readline, 'createInterface').andCallFake(() => ({
+      question: () => {},
+      close: () => {},
+      on: (event, handler) => { if (event === 'close') closeHandler = handler; },
+    }));
+
+    const resultPromise = promptBoolean('continue?');
+    closeHandler();
+
+    expect(await resultPromise).toBe(false);
   });
 });

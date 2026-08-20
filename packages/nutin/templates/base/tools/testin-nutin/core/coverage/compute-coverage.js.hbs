@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { errorExit } from '../../../utils/index.js';
 
 // V8 ranges within a script are always disjoint or strictly nested, never partially
 // overlapping. The smallest range containing an offset holds the true execution count
@@ -102,7 +103,12 @@ export function computeFileCoverage({ functions }, sourceText) {
 
 export function buildCoverageReport(scopedResults) {
   return scopedResults.map(entry => {
-    const sourceText = fs.readFileSync(entry.filePath, 'utf-8');
+    let sourceText;
+    try {
+      sourceText = fs.readFileSync(entry.filePath, 'utf-8');
+    } catch (err) {
+      errorExit(err, 'coverage/compute-coverage');
+    }
     const coverage = computeFileCoverage(entry, sourceText);
     return { file: path.relative(process.cwd(), entry.filePath), ...coverage };
   });

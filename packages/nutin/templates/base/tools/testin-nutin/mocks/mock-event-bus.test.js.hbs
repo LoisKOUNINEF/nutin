@@ -12,6 +12,15 @@ describe('MockEventBus', () => {
     expect(bus.emit.calls).toEqual([['greet', 'hello']]);
   });
 
+  it('on() is a trackable mock', () => {
+    const bus = new MockEventBus();
+    const handler = () => {};
+    bus.on('greet', handler);
+
+    expect(bus.on).toHaveBeenCalled();
+    expect(bus.on).toHaveBeenCalledWith('greet', handler);
+  });
+
   it('off() removes a previously registered handler', () => {
     const bus = new MockEventBus();
     let callCount = 0;
@@ -49,6 +58,7 @@ describe('MockEventBus', () => {
 
     expect(bus.emit.calls).toEqual([]);
     expect(bus.subscribe.calls).toEqual([]);
+    expect(bus.on.calls).toEqual([]);
 
     bus.emit('greet', 'y');
     expect(callCount).toBe(1); // only the pre-reset emit reached the handler

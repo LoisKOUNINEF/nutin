@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { print, toTsPath } from '../printer.js';
+import { errorExit } from '../../../utils/index.js';
 import config from '#root/nutin.config.js';
 
 const REPORT_PATH = path.join('coverage', 'summary.md');
@@ -8,8 +9,12 @@ const REPORT_PATH = path.join('coverage', 'summary.md');
 export function writeSummaryReport(report, globals, testResults) {
   if (!report.length) return;
 
-  fs.mkdirSync(path.dirname(REPORT_PATH), { recursive: true });
-  fs.writeFileSync(REPORT_PATH, buildMarkdown(report, globals, testResults));
+  try {
+    fs.mkdirSync(path.dirname(REPORT_PATH), { recursive: true });
+    fs.writeFileSync(REPORT_PATH, buildMarkdown(report, globals, testResults));
+  } catch (err) {
+    errorExit(err, 'coverage/write-summary-report');
+  }
   print.info(`Wrote ${REPORT_PATH}\n`);
 }
 

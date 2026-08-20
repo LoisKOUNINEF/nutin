@@ -113,7 +113,7 @@ async function mergeJson() {
       JSON.stringify(combined, null, 2)
     );
   }
-  removeJsonFiles(PATHS.tempApp);
+  await removeJsonFiles(PATHS.tempApp);
 }
 
 mergeJson().catch((err) => {

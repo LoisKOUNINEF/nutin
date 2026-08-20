@@ -1,6 +1,7 @@
 import path from 'path';
 import Queue from './queue.js';
 import { printStart, printSummary, printResults } from '../index.js';
+import { setupJsdom, teardownJsdom } from '../globals/jsdom-setup.js';
 
 const testQueue = new Queue();
 let todo = 0;
@@ -14,7 +15,7 @@ export function setCurrentTestFile(file) {
 }
 
 export function addTest(test) {
-  testQueue.enqueue(test.isTodo ? { ...test, file: currentTestFile } : test);
+  testQueue.enqueue({ ...test, file: currentTestFile });
 }
 
 export async function runQueuedTests() {
@@ -22,10 +23,11 @@ export async function runQueuedTests() {
   const startTime = performance.now();
   const testAmount = testQueue.length;
   const results = [];
+  let previousSuiteKey = null;
   let previousSuite = null;
   let previousSuiteAfterAll = null;
   let test;
-  
+
   const runAfterAll = async (suiteName, afterAllFn) => {
     if (!afterAllFn) return;
     try {
@@ -41,13 +43,32 @@ export async function runQueuedTests() {
     }
   };
 
+  const suiteKey = (t) => `${t.file}::${t.suiteName}`;
+
   for (let i = 0; i < testAmount; i++) {
     test = testQueue.deque();
 
-    if (test.suiteName !== previousSuite) {
-      teardownJsdom();
+    if (suiteKey(test) !== previousSuiteKey) {
       await runAfterAll(previousSuite, previousSuiteAfterAll);
-      setupJsdom();
+      if (previousSuiteKey !== null) teardownJsdom();
+
+      try {
+        setupJsdom();
+      } catch (err) {
+        failed++;
+        results.push({
+          suiteName: test.suiteName,
+          status: 'failed',
+          name: 'setupJsdom',
+          error: err.stack
+        });
+        previousSuiteKey = suiteKey(test);
+        previousSuite = test.suiteName;
+        previousSuiteAfterAll = null;
+        continue;
+      }
+
+      previousSuiteKey = suiteKey(test);
       previousSuite = test.suiteName;
       previousSuiteAfterAll = test.afterAll;
       if (test.beforeAll) {
@@ -84,10 +105,11 @@ export async function runQueuedTests() {
       testError = err;
     }
 
+    let afterEachError = null;
     try {
       if (test.afterEach) await test.afterEach();
     } catch (err) {
-      if (!testError) testError = err;
+      afterEachError = err;
     }
 
     if (testError) {
@@ -106,11 +128,21 @@ export async function runQueuedTests() {
         name: test.testName
       });
     }
+
+    if (afterEachError) {
+      failed++;
+      results.push({
+        suiteName: test.suiteName,
+        status: 'failed',
+        name: `${test.testName} (afterEach)`,
+        error: afterEachError.stack
+      });
+    }
   }
 
-  if (previousSuite !== null) {
-    teardownJsdom();
+  if (previousSuiteKey !== null) {
     await runAfterAll(previousSuite, previousSuiteAfterAll);
+    teardownJsdom();
   }
 
   const endTime = performance.now();

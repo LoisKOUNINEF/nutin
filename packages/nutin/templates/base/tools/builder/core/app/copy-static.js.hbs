@@ -24,8 +24,7 @@ async function copyStatic() {
       try {
         await copyFile(file, dest);
       } catch (err) {
-        print.error(`Failed to copy: ${file}. ${err.message}`);
-        exit(1);
+        throw new Error(`Failed to copy: ${file}. ${err.message}`, { cause: err });
       }
     }
   }
@@ -48,8 +47,9 @@ async function copyFavicon() {
 
   try {
     await copyFile(srcPath, destPath);
-  } catch {
-    print.warn('No favicon found at public/favicon.ico');
+  } catch (err) {
+    if (err.code === 'ENOENT') print.warn('No favicon found at public/favicon.ico');
+    else errorExit(err, 'copy-static');
   }
 }
 
@@ -66,7 +66,7 @@ async function copyConfig() {
       await copyJsonFiles(srcPath, path.join(PATHS.temp, 'config'));
       await copyFile(path.resolve('nutin.config.js'), path.join(PATHS.temp, 'nutin.config.js'));
     }
-  } catch {
+  } catch (err) {
     errorExit(err, 'copy-static');
   }
 }

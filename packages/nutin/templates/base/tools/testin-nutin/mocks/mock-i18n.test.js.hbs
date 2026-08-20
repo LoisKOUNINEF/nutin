@@ -6,16 +6,26 @@ describe('MockI18n', () => {
     expect(i18n.currentLanguage).toBe('fr');
   });
 
-  it('translate/loadTranslations etc. are bare mocks: createMockMethod() ignores the default-impl function passed to it', () => {
-    // Every method below is built as `createMockMethod(someDefaultImpl)`, but
-    // createMockMethod() takes no parameters - the passed-in default impl is
-    // silently dropped. Calling these without an explicit .mockImplementation()
-    // first therefore always returns undefined, regardless of the "real-looking"
-    // logic written inline in mock-i18n.js.
+  it('translate/getBrowserLanguage run their built-in default implementation without needing .mockImplementation', () => {
     const i18n = new MockI18n();
 
-    expect(i18n.translate('some.key')).toBe(undefined);
-    expect(i18n.getBrowserLanguage()).toBe(undefined);
+    // No translations set — translate() falls back to returning the key itself.
+    expect(i18n.translate('some.key')).toBe('some.key');
+    expect(i18n.getBrowserLanguage()).toBe('en');
+  });
+
+  it('loadTranslations/initTranslations run their default implementation and update currentLanguage', async () => {
+    const i18n = new MockI18n('en', ['en', 'fr']);
+
+    await i18n.loadTranslations('fr');
+    expect(i18n.currentLanguage).toBe('fr');
+  });
+
+  it('translate is still trackable as a mock alongside its default implementation', () => {
+    const i18n = new MockI18n();
+    i18n.translate('some.key');
+
+    expect(i18n.translate).toHaveBeenCalledWith('some.key');
   });
 
   it('translate can be given real interpolation behavior via .mockImplementation', () => {

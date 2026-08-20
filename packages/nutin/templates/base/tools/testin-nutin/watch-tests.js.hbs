@@ -10,12 +10,28 @@ const watcher = chokidar.watch(['src', 'test', 'unit', 'e2e'], {
 
 print.boldHead('Watching for test changes...')
 
-watcher.on('change', (filePath) => {
-  console.clear();
-  print.boldInfo(`\n🔄 File changed: ${path.relative(process.cwd(), filePath)}\n`);
+watcher.on('error', (err) => {
+  print.boldError(`\nWatcher error: ${err.message}`);
+});
 
-  exec('node --experimental-modules testin-nutin/runner.js', (err, stdout, stderr) => {
-    if (stdout) process.stdout.write(stdout);
-    if (stderr) process.stderr.write(stderr);
-  });
+let isRunning = false;
+let runTimeout = null;
+
+watcher.on('change', (filePath) => {
+  if (runTimeout) clearTimeout(runTimeout);
+
+  runTimeout = setTimeout(() => {
+    if (isRunning) return;
+    isRunning = true;
+
+    console.clear();
+    print.boldInfo(`\n🔄 File changed: ${path.relative(process.cwd(), filePath)}\n`);
+
+    exec('node --experimental-modules testin-nutin/runner.js', { maxBuffer: 10 * 1024 * 1024 }, (err, stdout, stderr) => {
+      if (stdout) process.stdout.write(stdout);
+      if (stderr) process.stderr.write(stderr);
+      if (err) print.boldError(`\nTest run failed: ${err.message}`);
+      isRunning = false;
+    });
+  }, 100);
 });

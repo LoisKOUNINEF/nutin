@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { JSDOM } from 'jsdom';
+import { print } from '../../../utils/index.js';
 import config from '#root/nutin.config.js';
 
 let currentDom = null;
@@ -82,7 +83,9 @@ export function teardownJsdom() {
   if (currentDom) {
     try {
       currentDom.window.close();
-    } catch {}
+    } catch (err) {
+      print.grayError(`[jsdom] window.close() failed: ${err.message}`);
+    }
   }
 
   currentDom = null;

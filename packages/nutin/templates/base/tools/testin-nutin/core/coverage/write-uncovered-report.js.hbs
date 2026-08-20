@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { print } from '../printer.js';
+import { errorExit } from '../../../utils/index.js';
 import config from '#root/nutin.config.js';
 
 const REPORT_PATH = path.join('coverage', 'uncovered.md');
@@ -14,8 +15,12 @@ export async function maybeWriteUncoveredReport(report) {
 
   if (!config.testinNutin.coverage.reportUncovered) return;
 
-  fs.mkdirSync(path.dirname(REPORT_PATH), { recursive: true });
-  fs.writeFileSync(REPORT_PATH, buildMarkdown(uncovered));
+  try {
+    fs.mkdirSync(path.dirname(REPORT_PATH), { recursive: true });
+    fs.writeFileSync(REPORT_PATH, buildMarkdown(uncovered));
+  } catch (err) {
+    errorExit(err, 'coverage/write-uncovered-report');
+  }
   print.info(`Wrote ${REPORT_PATH}\n`);
 }
 

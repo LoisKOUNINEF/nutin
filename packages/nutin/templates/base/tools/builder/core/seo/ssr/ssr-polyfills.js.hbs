@@ -14,8 +14,11 @@ import path from 'path';
 function setGlobal(target, key, value) {
   try {
     Object.defineProperty(target, key, { value, writable: true, configurable: true, enumerable: true });
-  } catch {
-    // genuinely non-configurable — skip, whatever Node/linkedom already provides stands
+  } catch (err) {
+    // Object.defineProperty throws a TypeError for a genuinely non-configurable
+    // property — skip it and let whatever Node/linkedom already provides stand.
+    // Anything else is unexpected and shouldn't be silently swallowed.
+    if (!(err instanceof TypeError)) throw err;
   }
 }
 

@@ -8,6 +8,7 @@ const PLACEHOLDER = '__TEMPLATE_PLACEHOLDER__';
 
 export async function mergeMinifiedTemplates() {
   const htmlFiles = await getFilesRecursive(PATHS.tempApp, 'html');
+  const failures = [];
 
   for (const htmlPath of htmlFiles) {
     const jsPath = htmlPath.replace(/\.html$/, '.js');
@@ -21,9 +22,7 @@ export async function mergeMinifiedTemplates() {
       try {
         let jsContent = await fs.readFile(jsPath, 'utf-8');
         if (!jsContent.includes(PLACEHOLDER)) {
-          print.boldError(`WARNING: No matching placeholder in ${jsFilename}`);
-          print.error(`Make sure the template const is \`${PLACEHOLDER}\`.`);
-          exit(1);
+          throw new Error(`No matching placeholder in ${jsFilename}. Make sure the template const is \`${PLACEHOLDER}\`.`);
         }
 
         jsContent = jsContent.replace(PLACEHOLDER, minifiedHtml);
@@ -31,9 +30,15 @@ export async function mergeMinifiedTemplates() {
         await fs.unlink(htmlPath);
       } catch (err) {
         print.boldError(`ERROR: Cannot update ${jsFilename}. ${err.message}`);
+        failures.push(jsFilename);
       }
     } catch (err) {
       print.boldError(`ERROR: Failed to read ${htmlFilename}. ${err.message}`);
+      failures.push(htmlFilename);
     }
+  }
+
+  if (failures.length) {
+    throw new Error(`Failed to merge ${failures.length} template(s): ${failures.join(', ')}`);
   }
 }

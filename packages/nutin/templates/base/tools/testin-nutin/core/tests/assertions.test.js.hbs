@@ -67,4 +67,31 @@ describe('assertions', () => {
     expect(notErr).not.toThrow();
     expect(notErr).not.toThrow('messsage');
   });
+  it('should support toThrow with an async function that rejects', async () => {
+    const rejects = async () => { throw new Error('async failure'); };
+    const resolves = async () => 'ok';
+    await expect(rejects).toThrow();
+    await expect(rejects).toThrow('async failure');
+    await expect(resolves).not.toThrow();
+  });
+  it('should throw a distinguishable AssertionError on failure', () => {
+    let caught;
+    try {
+      expect(1).toBe(2);
+    } catch (err) {
+      caught = err;
+    }
+    expect(caught).toBeInstanceOf(AssertionError);
+  });
+  it('.not should not swallow an unrelated runtime error from the matcher itself', () => {
+    // `x instanceof undefined` throws a TypeError — a bug in the test, not a
+    // legitimate assertion mismatch, so it must not be reported as a pass.
+    let caught;
+    try {
+      expect({}).not.toBeInstanceOf(undefined);
+    } catch (err) {
+      caught = err;
+    }
+    expect(caught).toBeInstanceOf(TypeError);
+  });
 });

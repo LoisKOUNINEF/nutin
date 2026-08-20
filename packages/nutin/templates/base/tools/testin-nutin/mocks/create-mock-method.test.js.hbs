@@ -39,4 +39,26 @@ describe('createMockMethod', () => {
     expect(fn.calls).toEqual([]);
     expect(fn()).toBe(undefined);
   });
+
+  it('falls back to the given default implementation', () => {
+    const fn = createMockMethod((a, b) => a + b);
+
+    expect(fn(2, 3)).toBe(5);
+  });
+
+  it('mockImplementation overrides the default implementation', () => {
+    const fn = createMockMethod(() => 'default');
+    fn.mockImplementation(() => 'overridden');
+
+    expect(fn()).toBe('overridden');
+  });
+
+  it('mockReset restores the default implementation', () => {
+    const fn = createMockMethod(() => 'default');
+    fn.mockImplementation(() => 'overridden');
+
+    fn.mockReset();
+
+    expect(fn()).toBe('default');
+  });
 });
