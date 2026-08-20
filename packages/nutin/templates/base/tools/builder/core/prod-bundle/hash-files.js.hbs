@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { PATHS } from './paths.js';
-import { print, getFilesRecursive } from '../../utils/index.js';
+import { PATHS } from '../app/paths.js';
+import { print, getFilesRecursive, errorExit } from '../../../utils/index.js';
 
 function addHashToFiles(distDir) {
   const files = getFilesRecursive(distDir, ['.js', '.css']);
@@ -44,4 +44,8 @@ function updateHtmlReferences(htmlPath, fileMap) {
   fs.writeFileSync(htmlPath, html);
 }
 
-addHashToFiles(PATHS.tempSource);
+try {
+  addHashToFiles(PATHS.tempSource)
+} catch(err) {
+  errorExit(err, 'hash-files');
+}

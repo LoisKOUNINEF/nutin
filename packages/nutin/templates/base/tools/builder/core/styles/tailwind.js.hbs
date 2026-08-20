@@ -1,9 +1,9 @@
 import { execFileSync } from 'child_process';
 import * as fs from 'fs';
 import path from 'path';
-import { print, runCommand, promptBoolean } from '../../utils/index.js';
-import { PATHS } from './paths.js';
-import { builderConfig } from '../builder.config.js';
+import { print, runCommand, promptBoolean } from '../../../utils/index.js';
+import { PATHS } from '../app/paths.js';
+import { builderConfig } from '../../builder.config.js';
 
 const REQUIRED_DEPS = [
   { name: 'tailwindcss', version: '^4.3.0' },

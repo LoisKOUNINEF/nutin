@@ -1,8 +1,7 @@
 import { readFile } from 'fs/promises';
-import { exit } from 'process';
 import path from 'path';
-import { print } from '../../utils/index.js';
-import { PATHS } from './paths.js';
+import { print, errorExit } from '../../../utils/index.js';
+import { PATHS } from '../app/paths.js';
 import { addTags } from './add-tags.js';
 
 async function validateHtml() {
@@ -29,9 +28,6 @@ async function validateHtml() {
   }
 }
 
-function errorExit(message) {
-  print.boldError(`[ERROR] ${message}`);
-  exit(1);
-}
-
-validateHtml();
+validateHtml().catch((err) => {
+  errorExit(err, 'validate-html');
+});

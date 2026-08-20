@@ -1,0 +1,9 @@
+import { runCommand, print, errorExit } from "../../../utils/index.js";
+
+async function compileTS() {
+  await runCommand('tsc', ['--project', 'tsconfig.json']);
+}
+
+compileTS().catch((err) => {
+  errorExit(err, 'compile-ts');
+});

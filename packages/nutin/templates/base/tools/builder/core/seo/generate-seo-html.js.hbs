@@ -1,8 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { exit } from 'process';
-import { PATHS } from '../paths.js';
-import { print } from '../../../utils/index.js';
+import { PATHS } from '../app/paths.js';
+import { print, errorExit } from '../../../utils/index.js';
 import { buildSsrBundle, cleanupSsrBundle } from './ssr/ssr-bundle.js';
 import { renderRoute } from './ssr/ssr-render.js';
 import { builderConfig } from '../../builder.config.js';
@@ -43,8 +42,7 @@ async function processRoute(template, baseUrl, defaultLanguage, languages, route
     const ogImage = resolveLocaleValue(route.ogImage, defaultLanguage);
 
     if (!title || !description) {
-      print.boldError(`[generate-seo-html] Missing title or description for route "${route.path}" in seo.json`);
-      exit(1);
+      errorExit(`Missing title or description for route "${route.path}" in seo.json`, 'generate-seo-html');
     }
 
     const pageUrl = `${baseUrl}${routeSuffix}`;
@@ -71,8 +69,7 @@ export async function generateSeoHtml() {
   const template = fs.readFileSync(templatePath, 'utf-8');
 
   if (!template.includes('</head>')) {
-    print.boldError('[generate-seo-html] index.html is missing a </head> tag — cannot inject SEO tags');
-    exit(1);
+    errorExit('index.html is missing a </head> tag — cannot inject SEO tags', 'generate-seo-html');
   }
 
   const seoConfigPath = path.join(PATHS.temp, 'config', 'seo.json');
@@ -108,12 +105,13 @@ export async function generateSeoHtml() {
       const lines = missing
         .map(({ path, field, lang }) => `  - route "${path}": missing "${field}.${lang}" (no language has a value for this field)`)
         .join('\n');
-      print.boldError(
-        `[generate-seo-html] config/seo.json is missing required content:\n${lines}\n\n` +
+
+      errorExit(
+        `config/seo.json is missing required content:\n${lines}\n\n` +
         `Add these keys under the matching route's "title"/"description" in config/seo.json. ` +
         `Configured languages (config/languages.json): ${languages.join(', ')}.`
+        , 'generate-seo-html'
       );
-      exit(1);
     }
   }
 

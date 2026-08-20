@@ -1,6 +1,17 @@
 import process from 'process';
 import nutinConfig from '../../nutin.config.js';
 
+const wellKnownNonSEORoutes = [
+  '/400',
+  '/401',
+  '/403',
+  '/404',
+  '/500',
+  '/502',
+  '/503',
+  '/504',
+]
+
 export const builderConfig = {
   ...nutinConfig.builder,
   isProd: process.env.NODE_ENV === 'production',
@@ -8,5 +19,5 @@ export const builderConfig = {
   i18n: nutinConfig.i18n,
   tailwind: nutinConfig.tailwind,
   generateSEO: nutinConfig.generateSEOFiles,
-  WELL_KNOWN_NON_SEO_ROUTES: ['/404', '/403', '/500'],
+  WELL_KNOWN_NON_SEO_ROUTES: wellKnownNonSEORoutes,
 };

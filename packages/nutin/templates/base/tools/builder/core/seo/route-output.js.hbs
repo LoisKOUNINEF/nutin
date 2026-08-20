@@ -1,8 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { exit } from 'process';
-import { PATHS } from '../paths.js';
-import { print } from '../../../utils/index.js';
+import { PATHS } from '../app/paths.js';
+import { print, errorExit } from '../../../utils/index.js';
 import { applySubstitutions } from './html-substitutions.js';
 import { getAppRoutePaths } from './ssr/ssr-render.js';
 import { builderConfig } from '../../builder.config.js';
@@ -22,11 +21,11 @@ export function validateMockParams(route) {
   const missing = requiredParams.filter((name) => !(name in provided));
 
   if (missing.length > 0) {
-    print.boldError(
-      `[generate-seo-html] Route "${route.path}" has dynamic segment(s) but is missing "mockParams" ` +
+    errorExit(
+      `Route "${route.path}" has dynamic segment(s) but is missing "mockParams" ` +
       `for: ${missing.join(', ')}. Add a "mockParams" object to this route in config/seo.json.`
+      , 'generate-seo-html'
     );
-    exit(1);
   }
 }
 
@@ -34,8 +33,7 @@ export async function writeRouteHtml({ template, lang, title, description, pageU
   let html = applySubstitutions(template, lang, title, description, pageUrl, ogImage);
 
   if (html === template) {
-    print.boldError(`[generate-seo-html] Failed to apply any changes for ${routePath} (lang "${lang}") — index.html may be missing a </head> tag`);
-    exit(1);
+    errorExit(`Failed to apply any changes for ${routePath} (lang "${lang}") — index.html may be missing a </head> tag`, 'generate-seo-html');
   }
 
   html = html.replace(
@@ -58,7 +56,7 @@ export async function warnForRoutesMissingSeoConfig(bundleUrl, seoRoutes, defaul
     if (seoRoutePaths.has(path)) continue;
 
     if (builderConfig.WELL_KNOWN_NON_SEO_ROUTES.includes(path)) {
-      print.boldGray(`[generate-seo-html] Route "${path}" has no matching entry in config/seo.json — probably intentional.`);
+      continue;
     } else {
       print.error(`[generate-seo-html] Route "${path}" has no matching entry in config/seo.json; consider adding it so this route gets SEO HTML, sitemap, and meta tags.`);
     }

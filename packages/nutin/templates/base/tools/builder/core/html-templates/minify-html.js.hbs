@@ -1,9 +1,7 @@
 import { minify } from 'html-minifier-terser';
 import fs from 'fs';
-import { exit } from 'process';
-import { getFilesRecursive, print } from '../../utils/index.js';
-import { PATHS } from './paths.js';
-import { builderConfig } from '../builder.config.js';
+import { getFilesRecursive, print } from '../../../utils/index.js';
+import { PATHS } from '../app/paths.js';
 
 export async function minifyHTML(html) {
   return minify(html, {
@@ -22,9 +20,8 @@ export async function minifyHTML(html) {
 const TEMPLATE_REGEX =
   /const\s+(template|templateFn)\s*=?\s*(?:\(.*?\)\s*=>\s*)?`([\s\S]*?)`/gm;
 
-async function minifyInlineHTML() {
-  const extension = builderConfig.isProd ? '.ts' : '.js';
-  const jsFiles = getFilesRecursive(PATHS.tempApp, extension);
+export async function minifyInlineHTML() {
+  const jsFiles = getFilesRecursive(PATHS.tempApp, '.js');
 
   for (const file of jsFiles) {
     let code = fs.readFileSync(file, 'utf8');
@@ -47,8 +44,3 @@ async function minifyInlineHTML() {
     }
   }
 }
-
-minifyInlineHTML().catch((err) => {
-  print.boldError(`Unexpected error: ${err.message}`);
-  exit(1);
-});

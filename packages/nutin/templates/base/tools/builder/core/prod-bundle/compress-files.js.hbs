@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { gzipSync, brotliCompressSync, constants } from 'zlib';
-import { print, getFilesRecursive } from '../../utils/index.js';
-import { PATHS } from './paths.js';
+import { print, getFilesRecursive, errorExit } from '../../../utils/index.js';
+import { PATHS } from '../app/paths.js';
 
 function compressStaticAssets() {
   const files = getFilesRecursive(
@@ -30,4 +30,8 @@ function compressStaticAssets() {
   };
 }
 
-compressStaticAssets();
+try {
+  compressStaticAssets()
+} catch(err) {
+  errorExit(err, 'compress-files');
+}

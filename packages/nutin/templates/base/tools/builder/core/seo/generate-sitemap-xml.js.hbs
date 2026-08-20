@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { exit } from 'process';
-import { PATHS } from '../paths.js';
+import { PATHS } from '../app/paths.js';
 import { print } from '../../../utils/index.js';
 import { builderConfig } from '../../builder.config.js';
 

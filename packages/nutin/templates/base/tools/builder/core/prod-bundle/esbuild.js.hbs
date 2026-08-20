@@ -1,9 +1,8 @@
 import esbuild from 'esbuild';
 import path from 'path';
-import { exit } from 'process';
-import { print } from '../../utils/index.js';
-import { PATHS } from './paths.js';
-import { builderConfig } from '../builder.config.js';
+import { print, errorExit } from '../../../utils/index.js';
+import { PATHS } from '../app/paths.js';
+import { builderConfig } from '../../builder.config.js';
 
 const ENTRY_FILE = path.join(PATHS.tempApp, 'main.ts');
 const OUT_FILE = path.join(PATHS.tempSource, 'bundle.js');
@@ -24,11 +23,8 @@ async function build() {
     outfile: OUT_FILE,
     keepNames: false,
   });
-
-  if (builderConfig.isVerbose) print.boldInfo(`✅ ESBuild complete.`);
 }
 
 build().catch((err) => {
-  print.boldError(`ESBuild failed: ${err.message}`);
-  exit(1);
+  errorExit(err, 'esbuild');
 });

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { PATHS } from '../paths.js';
+import { PATHS } from '../app/paths.js';
 import { print } from '../../../utils/index.js';
 
 export function generateRobotsTxt() {

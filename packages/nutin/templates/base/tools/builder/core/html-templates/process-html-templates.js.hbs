@@ -1,0 +1,18 @@
+import { print, errorExit } from '../../../utils/index.js';
+import { mergeMinifiedTemplates } from './merge-templates.js';
+import { minifyInlineHTML } from './minify-html.js';
+import { builderConfig } from '../../builder.config.js';
+
+async function processHTMLTemplates() {
+  if (builderConfig.inlineTemplates) {
+    await minifyInlineHTML();
+  } else {
+    await mergeMinifiedTemplates();
+  }
+}
+
+try {
+  processHTMLTemplates();
+} catch (err) {
+  errorExit(err);
+}

@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import { PATHS } from "./paths.js";
+import { PATHS } from "./app/paths.js";
 import { builderConfig } from '../builder.config.js';
-import { print } from "../../utils/index.js";
+import { print, errorExit } from "../../utils/index.js";
 
 function finalizeBuild() {
   if (builderConfig.isProd) removeFoldersAfterBundle();
@@ -29,6 +29,5 @@ function replaceDir(src, dest) {
 try {
   finalizeBuild();
 } catch(err) {
-  print.boldError(`Unexpected error: ${err.message}`);
-  exit(1);
+  errorExit(err, 'finalize-build')
 }

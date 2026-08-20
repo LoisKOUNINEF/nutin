@@ -1,10 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { exit } from 'process';
-import { getFilesRecursive, print } from '../../utils/index.js';
-import { BINARY_EXTENSIONS } from '../variables/binary-extensions.js';
+import { getFilesRecursive, print, errorExit } from '../../../utils/index.js';
+import { BINARY_EXTENSIONS } from '../../variables/binary-extensions.js';
 import { PATHS } from './paths.js';
-import { builderConfig } from '../builder.config.js';
+import { builderConfig } from '../../builder.config.js';
 
 async function copyStatic() {
   const extensions = [...BINARY_EXTENSIONS, '.html'];
@@ -68,8 +67,7 @@ async function copyConfig() {
       await copyFile(path.resolve('nutin.config.js'), path.join(PATHS.temp, 'nutin.config.js'));
     }
   } catch {
-    print.boldError('Issue when copying config files.');
-    exit(1);
+    errorExit(err, 'copy-static');
   }
 }
 
@@ -90,6 +88,5 @@ async function copyJsonFiles(sourceDir, destDir) {
 }
 
 copyStatic().catch((err) => {
-  print.boldError(`Unexpected error: ${err.message}`);
-  exit(1);
+  errorExit(err, 'copy-static');
 });

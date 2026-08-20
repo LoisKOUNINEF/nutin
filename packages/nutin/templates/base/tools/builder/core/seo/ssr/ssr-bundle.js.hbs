@@ -2,7 +2,7 @@ import esbuild from 'esbuild';
 import fs from 'fs';
 import path from 'path';
 import { pathToFileURL } from 'url';
-import { PATHS } from '../../paths.js';
+import { PATHS } from '../../app/paths.js';
 import { builderConfig } from '../../../builder.config.js';
 
 const SSR_DIR = path.join(PATHS.temp, '.ssr');

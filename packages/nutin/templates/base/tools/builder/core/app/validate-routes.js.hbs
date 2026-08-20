@@ -1,8 +1,7 @@
 import { readFileSync } from 'fs';
-import { exit } from 'process';
 import path from 'path';
 import ts from 'typescript';
-import { print } from '../../utils/index.js';
+import { print, errorExit } from '../../../utils/index.js';
 import { PATHS } from './paths.js';
 
 const ROUTES_FILE = path.join(PATHS.sourceApp, 'routes.ts');
@@ -71,9 +70,8 @@ function validateRoutes() {
 
 }
 
-function errorExit(message) {
-  print.boldError(`[ERROR] ${message}`);
-  exit(1);
+try {
+  validateRoutes();
+} catch(err) {
+  errorExit(err, 'validate-routes');
 }
-
-validateRoutes();

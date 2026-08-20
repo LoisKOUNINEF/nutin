@@ -1,19 +1,16 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { exit } from 'process';
-import { getFilesRecursive, print } from '../../utils/index.js';
+import { getFilesRecursive, print } from '../../../utils/index.js';
+import { PATHS } from '../app/paths.js';
 import { minifyHTML } from './minify-html.js';
-import { PATHS } from './paths.js';
-import { builderConfig } from '../builder.config.js';
 
 const PLACEHOLDER = '__TEMPLATE_PLACEHOLDER__';
 
-async function mergeTemplates() {
+export async function mergeMinifiedTemplates() {
   const htmlFiles = await getFilesRecursive(PATHS.tempApp, 'html');
-  const fileExtension = builderConfig.isProd ? '.ts' : '.js';
 
   for (const htmlPath of htmlFiles) {
-    const jsPath = htmlPath.replace(/\.html$/, fileExtension);
+    const jsPath = htmlPath.replace(/\.html$/, '.js');
     const htmlFilename = path.basename(htmlPath);
     const jsFilename = path.basename(jsPath);
 
@@ -40,8 +37,3 @@ async function mergeTemplates() {
     }
   }
 }
-
-mergeTemplates().catch((err) => {
-  print.boldError(`Unexpected error: ${err.message}`);
-  exit(1);
-});
