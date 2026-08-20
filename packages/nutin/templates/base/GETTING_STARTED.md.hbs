@@ -57,14 +57,17 @@ import { MyModule } from 'relative/path/to/my-module.js';
 
 ## Generate components, views and services
 
-`{{packageManager}} run generate <component|view|service> ELEMENT_NAME`
-
-Supports nested paths, for example:
-
-`{{packageManager}} run generate component path/to/my-component`
-
 Generated elements are automatically exported from the corresponding barrel file:
 `src/app/<components|views|services>/index.ts`.
+
+
+```bash
+{{packageManager}} run generate <component|view|service> ELEMENT_NAME
+
+# Examples
+{{packageManager}} run generate component my-component # Target dir: src/app/components/my-component/
+{{packageManager}} run generate component path/to/my-component/ # Target dir: src/app/components/path/to/my-component/
+```
 
 ## A typical component
 

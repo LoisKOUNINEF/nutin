@@ -13,7 +13,7 @@
   - Globally scoped stylesheets, co-located with feature files. **Use unique class names.** *Note: Nutin's naming convention encourages prefixes `home__header`*.
   - Optional SEO static files generation: `config/seo.json` is used by production builder to generate static HTML files to be served to bots, via real SSR of your components (only title, description and ogImage remain hand-authored content). Also generates `robots.txt` and `sitemap.xml` from `config/seo.json` (supports per-route `disallow` / `disallowBots`).
   - New interface `AppEventMap` only for app-level events. Nutin internal events are no longer defined in `globals.d.ts`. Payload types are now objects.
-  - EventBus exposes domain facades for navigation and lifecycle events. Subscribing functions (`on*`) return a closure function to abstract unsubscription. it remains directly usable in app-level events / domain facades.
+  - EventBus exposes domain facades for `Navigation` and `Lifecycle` events. Subscribing functions (`on*`) return a closure function to abstract unsubscription. it remains directly usable in app-level events / domain facades.
 ```ts
 // emit
 Navigation.navigateTo('path');
@@ -23,8 +23,7 @@ const unsub = Navigation.onNavigate(this.doStuff);
 unsub()
 ```
   - i18n now uses URL: aligns with common practices & allows SEO to render static HTML files for each language.
-  - New CLI command `nutin-add docker`
-    Now supports brotli compression and all 4 package manager (npm, yarn, pnpm, bun) out of the box.
+  - New CLI command `nutin-add docker`. Dockerfile now builds a brotli-enabled image.
   - New CLI command `nutin-update` (update Nutin to latest patch / minor). `nutin-update` diffs your project against the new templates and merges changes, reporting any conflicts it can't resolve automatically.
   - New file: `GETTING_STARTED.md` - gives a new Nutin developer enough architectural context and concrete conventions to start working without immediately having to consult the full documentation.
   - New file: `AGENTS.md` - gives LLMs the minimal context they need to start working with you in a Nutin project.

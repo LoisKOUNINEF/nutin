@@ -1,4 +1,24 @@
-# Deployment Helpers ( Dockerfile / Nginx config )
+# Nutin - Docker Documentation
+
+**IMPORTANT NOTE: Adapt port(s) as needed** 
+
+- Default port: 
+
+`9090`
+
+- Dockerfile 
+
+`ARG PORT=####`
+
+- nginx.conf 
+
+```nginx
+server {
+    # ---------------------------
+    # LISTEN PORTS
+    # ---------------------------
+    listen ####;
+``` 
 
 ## Table of Contents
 
@@ -7,34 +27,25 @@
 - [Gzip compression](#gzip-compression)
 - [Brotli compression](#brotli-compression)
 
-- You may use the config files and Dockerfile exactly as-is for production deployments. Modify if you need custom caching rules or add external APIs to CSP.
-- *TO FIX - Should be handled by `nutin-add docker`*: Adapt ports as needed in both `Dockerfile` and `nginx.conf`.
-
-
-production Nginx configuration
-Brotli support
-gzip fallback
-static-file caching
-SPA routing
-security headers
-precompressed asset serving
-multi-stage Docker build
-minimal Alpine runtime
-
+You may use the Dockerfile exactly as-is for production deployments. Modify if you need custom caching rules or add external APIs to CSP.
 
 ## Dockerfile
 
 A preconfigured, multi-stage Dockerfile that
-- Builds your application in a Node environment
-- `CUSTOM IMAGE` Serves the final assets using Nginx Alpine image
+- Builds your application in a Node environment 
+- Builds a brotli-enabled Nginx image:
+```
+FROM alpine
+RUN apk add --no-cache nginx nginx-mod-http-brotli
+```
+- Serves the final assets
 - Includes an optional container healthcheck
 - Exposes ports for reverse proxies like Traefik
-- Is designed for speed, small image size, and security.
-- Works out of the box with npm, yarn, pnpm, and bun — no manual tweaks needed. `nutin-add docker` detects your package manager and renders the matching install/lockfile lines. `corepack enable` is run for you (needed for pnpm/yarn); pnpm's install step also auto-approves dependency build scripts (`pnpm approve-builds --all`) since pnpm ≥10 blocks them by default in a fresh, non-interactive install and native deps like `esbuild` need their postinstall step to run.
+- Works out of the box with npm, yarn, pnpm, and bun — `nutin-add docker` detects your package manager and renders the matching install/lockfile lines.
 
 ## Compression
 
-Gzip (`.gz`) and Brotli (`.br`) compression are handled by Nutin's builder (`tools/builder/core/compress-files.js`).
+Gzip (`.gz`) and Brotli (`.br`) compression are handled by Nutin's builder (`tools/builder/core/prod-bundle/compress-files.js`).
 
 Params:
 ```js
@@ -61,384 +72,25 @@ brotli: {
 
 Gzip is globally enabled.
 
-- `gzip on`
+```
+gzip on # enables gzip compression for responses
+gzip_static on # serves .gz files if present
+gzip_proxied any # makes gzip work through a proxy
+```
 
-Enables gzip compression for responses
-
-- `gzip_static on`, 
-
-Serves `.gz` files if they are present.                     
 *Note: you can enable / disable gzip_static only for specific locations in nginx.conf if you don't want it to be enabled globally.*
 
-- `gzip_proxied any`
+### Brotli compression
 
-Makes gzip work even when the request is forwarded through a proxy.
+Brotli is globally enabled.
 
-- `gzip_vary on`
-
-Prevents caching issues when some clients accept gzip and others do not.
+```
+brotli on; # compresses anything not precompressed
+brotli_static on; # serves .br files if present
+```
 
 ### Headers
 
 *Reminder: when you use `add_header` in a child location block, it replaces ALL headers from the parent context rather than merging them.*
 - You need to repeat the security headers in each location block that uses add_header. 
 - This config uses nginx `map` directives to define headers once, then reuse them.
-
-#### Content-Security-Policy
-
-One of the most effective defenses against Cross-Site Scripting (XSS), data injection, and content hijacking.                               
-It defines where your app is allowed to load resources from (scripts, images, fonts, APIs, etc.).                                  
-Browsers will block or warn if any resource violates the policy.
-
-- `base-uri 'self'`
-
-**Important anti-exfiltration protection.**                      
-Prevents an attacker from changing your document base and redirecting relative URLs elsewhere.
-
-- `default-src 'self'`
-
-All unspecified resource types (e.g., media, frames) are only allowed from the same origin.
-
-- `script-src 'self'`
-
-Only load JS from your own domain. Prevents loading third-party or injected scripts.                      
-**Whitelist third-party scripts:** `script-src 'self' https://cdn.jsdelivr.net;`
-
-- `style-src 'self' 'unsafe-inline'`
-
-Allows inline `style=""` attributes and `<style\>` tags.                              
-**The 'unsafe-inline' weakens security slightly but is needed for inline styles. Remove it if you only use external CSS files.**                                 
-**Whitelist third-party:** `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;`
-
-- `img-src 'self' data: https:`
-
-Allow images from same origin, data: URIs (for base64 images), and any HTTPS domain.
-
-- `font-src 'self'`
-
-Only allow webfonts from your own domain.                       
-**Whitelist third-party fonts:** `font-src 'self' https://fonts.gstatic.com;`
-
-- `connect-src 'self'`
-
-Only allow your app to make network requests to itself.                     
-**If your app needs to make API calls:** `connect-src 'self' https://api.example.com;`
-
-- `object-src 'none'`
-
-Disables old plugin-based embeds (Flash, etc.) entirely.
-
-- `form-action 'self'`
-
-Forms can only submit to your own origin. Prevents data exfiltration through fake forms.
-
-- `frame-ancestors 'none'`
-
-Block the site from being embedded in iframes (anti-clickjacking). Supersedes `X-Frame-Options` header for newer browsers.
-
-#### Permissions-Policy
-
-Restricts or allows access to browser APIs (like camera, microphone, geolocation, fullscreen, USB, etc.) for your site and any embedded frames (iframes)
-
-- `geolocation=()`
-
-No origin can use the Geolocation API. Calls to navigator.geolocation.getCurrentPosition() will be denied.
-
-- `microphone=()`
-
-Prevents access to the device microphone (e.g., through WebRTC or getUserMedia).
-
-- `camera=()`
-
-Prevents access to the device camera.
-
-- Allow origins
-
-*Empty parentheses mean 'allow for no one'* including main origin.                         
-Allow only your origin: `geolocation=(self)`                            
-Allow specific trusted origins: `geolocation=(self "https://trusted-origin.com")`
-
-#### X-Content-Type-Options
-
-Stops browsers from MIME-type sniffing — guessing the content type of a file.                                     
-This prevents attacks where an attacker uploads a file disguised as one type (e.g., .jpg) but containing executable code (.js, .html). With `nosniff`, the browser treats it strictly as an image and fails to execute if it’s not valid.
-
-#### Referrer-Policy
-
-Controls what gets sent in the Referer HTTP header when a user navigates away from your site or loads resources from another domain.
-This helps protect user privacy and sensitive URL data (like tokens or IDs).
-
-- `no-referrer`
-
-Send no referer at all.
-
-- `no-referrer-when-downgrade`
-
-Default in some browsers. Sends Referer only for HTTPS->HTTPS requests.
-
-- `strict-origin`
-
-Send only the origin (no path/query) for HTTPS->HTTPS requests.
-
-- `strict-origin-when-cross-origin`
-
-Send the full URL only when same-origin; otherwise, send just the origin (no path or query).
-
-- `origin-when-cross-origin`
-
-Sends origin for cross-origin requests but full path for same-origin.
-
-- `unsafe-url`
-
-**(not recommended)** Always send the full Referer.
-
-#### Testing Tools
-
-You can validate your CSP and Permissions-Policy with:
-
-- https://securityheaders.com — scans and scores your live site.
-- https://csp-evaluator.withgoogle.com — Google tool that checks for unsafe directives.
-- https://tools.keycdn.com/curl - inspect response headers.
-- Browser DevTools → Network tab → Response Headers — inspect if headers are being sent correctly.
-
-### Main route handler
-
-Defines how Nginx serves files for your web app’s main route (/).
-
-```
-location / {
-    try_files $uri $uri/ /index.html;
-}
-```
-
-Try to serve the file matching the request path ($uri) — e.g. /app.js. If it’s a directory ($uri/), try to serve its index file. If neither exists, fall back to /index.html.
-
-### Static assets with long cache
-
-This tells browsers (and CDNs) to cache static assets aggressively for performance.                          
-*Don’t use long caching on non-versioned assets (like /app.js without a hash).*
-*If you change files often, use shorter caching (`expires 1d;`).*
-
-```
-location ~* \.(js|css|png|jpg|jpeg|gif|avif|ico|svg|woff|woff2|ttf|eot)$ {
-    expires 1y;
-    add_header Cache-Control "public, immutable";
-}
-```
-
-- `location ~* \.(...)$`
-
-`~*` means case-insensitive regex match — applies to all file extensions listed (JavaScript, CSS, images, fonts, etc.).
-
-- `expires 1y;`
-
-Adds an Expires HTTP header set one year in the future.
-
-- `add_header Cache-Control "public, immutable";`
-
-Adds a modern Cache-Control header:                            
-`public`: The resource can be cached by browsers and intermediate caches (CDNs, reverse proxies).                                
-`immutable`: The file will never change, so browsers don’t even revalidate it.
-
-### HTML files (no cache)
-
-Ensures your HTML files (especially index.html) are never cached. Browsers always fetch the latest version.
-
-```
-location ~* \.html$ {
-    expires -1;
-    add_header Cache-Control "no-cache, no-store, must-revalidate";
-    add_header Pragma "no-cache";
-}
-```
-
-- `expires -1;`
-
-Tells the browser that the file is already expired.
-
-- `Cache-Control: no-cache, no-store, must-revalidate`
-
-Forces browsers to always re-download and not even use a local copy.
-
-- `Pragma: no-cache`
-
-Legacy header for older HTTP/1.0 caches.
-
-### Headers for older browsers (legacy compatibility)
-
-#### X-XSS-Protection
-
-Enables a legacy built-in XSS filter in older browsers.
-If the browser detects reflected XSS patterns, it either sanitizes or blocks the page.            
-Replaced by CSP header (stronger protection) in modern browsers.
-
-- `0` 
-
-Disables XSS filter.
-
-- `1`
-
-Enables XSS filter.
-
-- `1; mode=block`
-
-Enables XSS filter and block the page entirely when an attack is detected.
-
-#### X-Frame-Options
-
-Block the site from being embedded in iframes (anti-clickjacking).                    
-- `DENY` 
-
-No domain can frame your content — not even your own site.
-
-- `SAMEORIGIN`
-
-Only pages from your own origin can embed your site in an iframe.
-
-- `ALLOW-FROM https://example.com`
-
-(Deprecated) Used to allow a specific external domain.
-
-### Health check endpoint
-
-Provides a lightweight HTTP health endpoint for monitoring or container orchestration.
-
-``` 
-location /health {
-    access_log off;
-    add_header Content-Type text/plain always;
-    add_header Cache-Control "no-store" always;
-    return 200 "healthy\n";
-}
-```
-
-- `access_log off`
-
-Disables logging for this route (less noise in logs).
-
-- `return 200 "healthy\n"`
-
-Instantly returns a simple 200 OK response.
-
-- `add_header Content-Type text/plain`
-
-Ensures plain text content type.
-
-- `add_header Cache-Control "no-store"`
-
-Ensures the health check response itself is never cached.
-
-### 404 handling
-
-SPAs rarely hit a true 404 (the `try_files ... /index.html` fallback on the main route usually wins), but the config still defines a dedicated error page with the same security headers as other routes:
-
-```
-error_page 404 /404.html;
-
-location = /404.html {
-    internal;
-    try_files /404.html =404;
-    expires -1;
-    add_header Cache-Control "no-cache, no-store, must-revalidate" always;
-
-    # Security headers
-    add_header X-Frame-Options $frame_options always;
-    add_header X-Content-Type-Options $content_type_options always;
-    add_header X-XSS-Protection $xss_protection always;
-    add_header Referrer-Policy $referrer_policy always;
-    add_header Permissions-Policy $permissions_policy always;
-    add_header Content-Security-Policy $csp_policy always;
-}
-```
-
-### Hide Nginx version
-
-`server_tokens off;` 
-
-Prevents Nginx from revealing its version number in response headers / error pages (like “502 Bad Gateway”).                           
-Reduces information leakage: attackers can’t fingerprint your exact Nginx version to target known vulnerabilities.
-
-
-
-
-### Brotli compression
-
-Brotli is enabled by default — no manual setup required. The final stage of the generated `Dockerfile` builds nginx from `alpine` directly (rather than the stock `nginx:alpine` image, which has no brotli module):
-
-```
-FROM alpine
-RUN apk add --no-cache nginx nginx-mod-http-brotli
-```
-
-`nginx.conf` enables it globally, mirroring the gzip config:
-
-```
-brotli on;
-brotli_static on;
-```
-
-`brotli_static` serves the `.br` files already produced by the builder; `brotli` compresses on the fly for anything not precompressed.
-
-### Additional Brotli tuning (optional)
-
-The two directives above are all that's shipped by default. For finer control over compression level, buffers, or MIME types, you can add these to `nginx.conf`:
-
-```
-# Compression level (0-11)
-# Recommended values:
-# - 4-6 for dynamic content (balance between speed and compression)
-# - 11 for pre-compressed static files
-brotli_comp_level 6;
-
-# Minimum file size to compress (in bytes)
-brotli_min_length 256;
-
-# Buffer size and count for compression
-# Format: number size
-# 16 buffers of 8k each = 128KB total
-brotli_buffers 16 8k;
-
-# Window size for compression
-# Larger values = better compression but more memory usage
-# Can be specified in bytes (e.g., 512k) or as a power of 2 (10-24)
-# Default: 24 (16MB)
-brotli_window 512k;
-
-# MIME types to compress
-brotli_types
-    # Text files
-    text/plain
-    text/css
-    text/xml
-    text/javascript
-    text/x-component
-    text/x-cross-domain-policy
-    
-    # Application files
-    application/javascript
-    application/x-javascript
-    application/json
-    application/ld+json
-    application/xml
-    application/rss+xml
-    application/atom+xml
-    application/xhtml+xml
-    application/x-font-ttf
-    application/x-font-opentype
-    application/vnd.ms-fontobject
-    application/manifest+json
-    application/x-web-app-manifest+json
-    
-    # Font files
-    font/ttf
-    font/eot
-    font/otf
-    font/opentype
-    font/woff
-    font/woff2
-    
-    # Image files
-    image/svg+xml
-    image/x-icon
-    image/vnd.microsoft.icon;
-```

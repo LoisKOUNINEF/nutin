@@ -47,9 +47,8 @@ export function generateJson({ targetPath, name }) {
   const localesDir = `${targetPath}/locales`;
   fs.mkdirSync(localesDir, { recursive: true });
 
-  const template = targetPath.includes('view') ? jsonTemplate(name) : `{ "default": "${name.pascal} works !"}`;
+  const template = jsonTemplate(name);
 
-  // include "meta" keys for views, empty JSON for components
   const failedLangs = [];
   for (const lang of LANGUAGES) {
     try {

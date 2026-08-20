@@ -21,7 +21,6 @@ This documents `testin-nutin`, nutin's built-in test toolkit, shipped by default
 ```json
 "testin-nutin": "<pm> run build && node tools/testin-nutin/runner.js",
 "testin-nutin:watch": "<pm> run build && node tools/testin-nutin/watch-tests.js"
-"testin-nutin:only": "node tools/testin-nutin/runner.js",
 "testin-nutin:coverage": "<pm> run build && node tools/testin-nutin/runner.js --coverage",
 ```
 
@@ -303,7 +302,7 @@ after printing which metric(s) missed and by how much — useful as a CI gate.
 ```js
 testinNutin: {
   includeFramework: true,  // test Nutin source - src/core
-  includeTools: false,     // test tools/ (builder, testin-nutin, etc.)
+  includeTools: false,     // test Nutin tooling - tools/ (builder, testin-nutin, etc.)
   includeApp: false,       // enable to use testin-nutin for application tests
   verbose: false,          // log test suites and individual `it` tests
   coverage: {
@@ -312,8 +311,8 @@ testinNutin: {
     reportUncovered: true, // generates an .md report of uncovered lines, functions and branches in coverage/
   },
   jsdomOptions: {
-    runScripts: false,     // or true ("dangerously") to execute scripts in the DOM
-    resources: false,      // or true ("usable") to load external resources
+    runScripts: false,     // enable to execute scripts in the DOM
+    resources: false,
     freezeGlobals: false,
     pretendToBeVisual: true,
   },

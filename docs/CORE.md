@@ -1,10 +1,10 @@
-# nutin framework
+# Nutin - Core documentation
 
 ## Table of Contents
 
 - [Base class hierarchy](#base-class-hierarchy)
-- [Render lifecycle](#render-lifecycle)
 - [`data-*` attribute conventions](#data--attribute-conventions)
+- [Render lifecycle](#render-lifecycle)
 - [Children / composition](#children--composition)
 - [Events](#events)
 - [Security](#security)
@@ -12,20 +12,6 @@
 - [Other core services](#other-core-services)
 - [Public API surface](#public-api-surface)
 - [Minimal worked example](#minimal-worked-example)
-
-## Philosophy
-
-- **No virtual DOM, no diffing.** `render()` does a full `element.innerHTML =`
-  replace of a component's own subtree every time.
-- **Convention over configuration via `data-*` attributes.** Instead of a
-  template directive language or JSX bindings, plain HTML strings are scanned
-  after each render for `data-event`, `data-i18n`, `data-pipe`,
-  `data-component`, etc., and wired up imperatively.
-- **Singletons for app-wide state.** Services (event bus, router, i18n, http
-  client, pipe registry) are all `Service` subclasses accessed through
-  `getInstance()`, never `new`.
-- **Everything goes through `core/index.ts`.** App code never deep-imports
-  `core/base-classes/...` or `core/services/...`.
 
 ## Base class hierarchy
 
@@ -63,8 +49,38 @@ BaseComponent<T>               — render/hydrate/destroy engine, data-* parsing
 `tools/builder` finds the sibling `.html` file and inlines its
 (minified) markup in place of that placeholder — so the `.html` + `.ts` pair
 becomes one self-contained component with an inline template.
-- User can opt for inlined templates by setting `inlineTemplates: true` in `nutin.config.js`.
+- User can opt for inlined templates by enabling `nutin.config.js.inlineTemplates`.
 
+## `data-*` attribute conventions
+
+| Attribute | Purpose |
+|---|---|
+| `data-event="event:handler[:arg1,arg2,...]"` | Declarative DOM event delegation — binds `event` on this element to `this[handler](...)`. See [Events](#events). |
+| `data-i18n="key"` | Marks an element for translation. Sets `placeholder` (inputs) or `textContent` to `I18nService.translate(key, existingText)`. |
+| `data-pipe="pipeName[:args]\|pipe2..."` | Pipes the element's value/text through one or more registered pipes (chainable with `\|`), writing the result back. |
+| `data-pipe-source="..."` | Optional override for the raw value fed into `data-pipe` (default: the element's own value/textContent). |
+| `data-optional` | Removes the element post-render if it ends up "empty" (empty `src`, empty input value, empty/`"undefined"`/`"null"` text or attribute). |
+| `data-component="selector"` | Marks a mount point for a **child** component, matched against a `ComponentConfig.selector`. See [Children](#children--composition). |
+| `data-catalog="selector"` | Marks a container to be populated with a **repeated list** of children, one per item in an array. |
+| `data-bind="propKey"` | `Component`-only two-way field binding: `props[propKey]` is written into the element on render, and `getValues()` reads it back. |
+| `data-index` | Set automatically on catalog item wrappers (`0`, `1`, ...) for styling/lookup. |
+
+Example:
+
+```html
+<button data-event="click:handleHome">Go back</button>
+```
+
+`data-pipe` accepts comma-separated args after a `:` and chains with `|`
+(left-to-right); `data-pipe-source` overrides what value feeds the pipe:
+
+```html
+<div data-pipe="capitalizeAll"></div>
+<div data-pipe="date:fr-FR,long,time"></div>
+<div data-pipe="date|capitalizeAll"></div>
+<div data-pipe="date:en-US,long,time|capitalizeAll"></div>
+<div data-pipe="capitalizeAll" data-pipe-source="raw text to capitalize"></div>
+```
 
 ## Render lifecycle
 
@@ -98,37 +114,6 @@ Overridable hooks (all no-op by default): `onBeforeRender`, `onAfterRender`,
 `onExit()`, but these are called by the **router**, not by `render()`/
 `destroy()` — they fire on navigation, not on every re-render.
 
-## `data-*` attribute conventions
-
-| Attribute | Purpose |
-|---|---|
-| `data-event="event:handler[:arg1,arg2,...]"` | Declarative DOM event delegation — binds `event` on this element to `this[handler](...)`. See [Events](#events). |
-| `data-i18n="key"` | Marks an element for translation. Sets `placeholder` (inputs) or `textContent` to `I18nService.translate(key, existingText)`. |
-| `data-pipe="pipeName[:args]\|pipe2..."` | Pipes the element's value/text through one or more registered pipes (chainable with `\|`), writing the result back. |
-| `data-pipe-source="..."` | Optional override for the raw value fed into `data-pipe` (default: the element's own value/textContent). |
-| `data-optional` | Removes the element post-render if it ends up "empty" (empty `src`, empty input value, empty/`"undefined"`/`"null"` text or attribute). |
-| `data-component="selector"` | Marks a mount point for a **child** component, matched against a `ComponentConfig.selector`. See [Children](#children--composition). |
-| `data-catalog="selector"` | Marks a container to be populated with a **repeated list** of children, one per item in an array. |
-| `data-bind="propKey"` | `Component`-only two-way field binding: `props[propKey]` is written into the element on render, and `getValues()` reads it back. |
-| `data-index` | Set automatically on catalog item wrappers (`0`, `1`, ...) for styling/lookup. |
-
-Example:
-
-```html
-<button data-event="click:handleHome">Go back</button>
-```
-
-`data-pipe` accepts comma-separated args after a `:` and chains with `|`
-(left-to-right); `data-pipe-source` overrides what value feeds the pipe:
-
-```html
-<div data-pipe="capitalizeAll"></div>
-<div data-pipe="date:fr-FR,long,time"></div>
-<div data-pipe="date|capitalizeAll"></div>
-<div data-pipe="date:en-US,long,time|capitalizeAll"></div>
-<div data-pipe="capitalizeAll" data-pipe-source="raw text to capitalize"></div>
-```
-
 ### `data-optional` in detail
 
 Two checks run on every `[data-optional]` element on each render; either one
@@ -157,9 +142,11 @@ A parent declares children by overriding `childConfigs()`:
 
 ```ts
 public childConfigs(): ComponentConfig[] {
-  return [
-    { selector: 'my-child', factory: (el) => new MyChildComponent({ mountTarget: el }) },
-  ];
+  return [{ 
+    // matched to <div data-component="my-child">
+    selector: 'my-child', 
+    factory: (el) => new MyChildComponent(el, { /*...*/ })
+  }];
 }
 ```
 
@@ -179,7 +166,15 @@ same child-mounting path. Include it inside `childConfigs()`:
 
 ```ts
 childConfigs() {
-  return [...this.catalogConfig({ array: this.items, elementName: 'item', selector: 'items', component: (el, item) => new ItemComponent({ mountTarget: el }) })];
+  return [
+    ...this.catalogConfig({ 
+      array: this.items, 
+      elementName: 'item',
+      // matched to <div data-catalog="items"> 
+      selector: 'items', 
+      component: MyComponent 
+    })
+  ];
 }
 ```
 
@@ -250,9 +245,9 @@ interface EventMap extends FrameworkEventMap, AppEventMap {}
 
 Prefer `this.listen(event, callback)` (available on every `BaseComponent`)
 over calling `AppEventBus.subscribe` directly — it auto-registers the
-subscription for cleanup on `destroy()`. `this.listenToRenderEvents([...])`
-is a shortcut that re-runs `this.render()` whenever any of the given events
-fire.
+subscription for cleanup on `destroy()`. 
+
+`this.listenToRenderEvents([...])` is a shortcut that re-runs `this.render()` whenever any of the given events fire.
 
 Two facades wrap the generic bus with ergonomic named methods (each
 `onXxx` returns an unsubscribe function):
@@ -303,16 +298,6 @@ strings before inserting them into `innerHTML` or an attribute. Most exact
 plain `escapeHtml`; `@value` specifically routes through a variant that's
 aware of `input`/`textarea`/`contenteditable` elements, escaping their
 current value/`innerText`.
-
-XSS test cases worth trying against `strict`/`normal` sanitization:
-
-```
-"><script>alert('XSS')</script>
-"><img src=x onerror=alert('XSS')>
-"><svg onload=alert('XSS')>
-${alert('XSS')}                      (template literal escape, if using backticks)
-" onmouseover="alert('XSS')"
-```
 
 ## Router
 
@@ -391,29 +376,6 @@ AppRouter(appRoutes);
   `apply(name, value, args)`. Backs the `data-pipe` attribute; app-defined
   pipes are registered once at startup in `main.ts`. Applying an unregistered
   pipe name logs a `console.warn` and passes the value through unchanged; `register()` logs a `console.warn` if that name is already taken.
-
-## Public API surface
-
-Everything is imported from `core/index.ts` — never deep-import
-`core/base-classes/...` or `core/services/...`:
-
-```ts
-import {
-  View, Component, Service,
-  SecurityHelper, TrustLevel,
-  AppEventBus, Lifecycle, Navigation,
-  AppRouter, Routes, RouteGuard,
-  I18nService, AppHttpClient, AppPipeRegistry,
-} from '../../core/index.js';
-```
-
-A handful of internal helpers (`TokenHelper`, `PipeHelper`, `I18nHelper`,
-`ChildrenHelper`, `EventHelper`, `DomHelper`, and the `CatalogHelper` class
-itself — as opposed to its `CatalogConfig`/`CatalogItemConfig` types, which
-are exported) aren't re-exported from `core/index`. They're importable only
-via their real relative path under
-`core/base-classes/base-component/helpers/`, as shown in
-[Custom tokens](#custom-tokens) above.
 
 ## Minimal worked example
 
