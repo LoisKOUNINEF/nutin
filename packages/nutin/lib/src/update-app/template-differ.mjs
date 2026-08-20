@@ -11,6 +11,38 @@ function contentEquals(a, b) {
   return a === b;
 }
 
+// Paths the user is expected to hand-edit right after `create-app` — their generated
+// content is just placeholder/starter scaffolding, so nutin-update must never rewrite
+// or conflict-flag them.
+const FULLY_EXCLUDED_PATTERNS = [
+  /^config\/[^/]+\.json$/,
+  /^src\/app(\/|$)/,
+  /^src\/assets(\/|$)/,
+];
+
+// Like FULLY_EXCLUDED_PATTERNS, but only for files that already existed before this
+// update — a brand new file introduced by a newer template version should still be added.
+const ADD_ONLY_PATTERNS = [
+  /^src\/styles(\/|$)/,
+];
+
+function toPosixPath(relPath) {
+  return relPath.split(path.sep).join('/');
+}
+
+function excludeUserOwnedPaths(oldTree, newTree) {
+  for (const relPath of new Set([...oldTree.keys(), ...newTree.keys()])) {
+    const posixPath = toPosixPath(relPath);
+    const fullyExcluded = FULLY_EXCLUDED_PATTERNS.some((re) => re.test(posixPath));
+    const preexistingAddOnly = ADD_ONLY_PATTERNS.some((re) => re.test(posixPath)) && oldTree.has(relPath);
+
+    if (fullyExcluded || preexistingAddOnly) {
+      oldTree.delete(relPath);
+      newTree.delete(relPath);
+    }
+  }
+}
+
 export class TemplateDiffer {
   constructor() {
     this.fileGenerator = new FileGenerator();
@@ -23,6 +55,8 @@ export class TemplateDiffer {
       this.fileGenerator.collectTemplateTree(oldTemplatesRoot, oldContext),
       this.fileGenerator.collectTemplateTree(newTemplatesRoot, newContext),
     ]);
+
+    excludeUserOwnedPaths(oldTree, newTree);
 
     const toUpdate = [];
     const toAdd = [];
