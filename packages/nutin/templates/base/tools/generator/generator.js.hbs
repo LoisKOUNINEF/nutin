@@ -36,9 +36,9 @@ const creators = {
     print.section(`Generating component: ${name.capitalized}`);
 
     try {
-      if (nutinConfig.generator.generateStylesheet) generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
       generateFile({ name, targetPath, templateFn: componentTemplate, suffix: suffix });
       if (!nutinConfig.inlineTemplates) generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: suffix, extension: 'html' });
+      if (nutinConfig.generator.generateStylesheet) generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
       if (nutinConfig.generator.generateLocales) await generateLocales({ targetPath, name });
       appendToIndex({ name, targetPath, suffix: suffix });
       if (nutinConfig.generator.generateTest) await generateTest({ name, targetPath, suffix });
@@ -51,9 +51,9 @@ const creators = {
     print.section(`Generating view: ${name.capitalized}`);
 
     try {
-      if (nutinConfig.generator.generateStylesheet) generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
       generateFile({ name, targetPath, templateFn: viewTemplate, suffix: suffix });
       if (!nutinConfig.inlineTemplates) generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: suffix, extension: 'html' });
+      if (nutinConfig.generator.generateStylesheet) generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
       if (nutinConfig.generator.generateLocales) await generateLocales({ targetPath, name });
       appendToIndex({ name, targetPath, suffix: suffix });
       if (nutinConfig.generator.generateTest) await generateTest({ name, targetPath, suffix });
