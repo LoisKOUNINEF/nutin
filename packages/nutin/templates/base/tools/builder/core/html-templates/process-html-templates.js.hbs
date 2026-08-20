@@ -4,11 +4,8 @@ import { minifyInlineHTML } from './minify-html.js';
 import { builderConfig } from '../../builder.config.js';
 
 async function processHTMLTemplates() {
-  if (builderConfig.inlineTemplates) {
-    await minifyInlineHTML();
-  } else {
-    await mergeMinifiedTemplates();
-  }
+  await mergeMinifiedTemplates();
+  if (builderConfig.inlineTemplates) await minifyInlineHTML();
 }
 
 try {
