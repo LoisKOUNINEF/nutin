@@ -7,7 +7,7 @@
 - [A typical component](#a-typical-component)
 - [Features and configuration](#features-and-configuration)
 - [Styling](#styling)
-- [Register global components](#register-global-components)
+- [Global layout components](#global-layout-components)
 - [Testing](#testing)
 - [Useful links](#useful-links)
 
@@ -147,9 +147,11 @@ Nutin uses SASS (.scss) as its default styling solution.
 
 Tailwind CSS v4 is also supported as an optional utility-first CSS layer.
 
-## Register global components
+## Global layout components
 
-If you need components outside `<main>` (such as `<header>` or `<footer>`), initialize them in `main.ts`.
+If you need components to render outside `<main>` (such as `<header>` or `<footer>`), initialize them in `main.ts`. 
+
+Those components are outside the `View`s rendering target (`<main id="app">`), so they will be present on each route.
 
 *Note*: `View` subclasses inherit `hideHeader()` / `revealHeader()` and `hideFooter()` / `revealFooter()`, which target the elements with the corresponding id (`#header` and `#footer`).
 
