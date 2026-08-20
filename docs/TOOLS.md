@@ -219,8 +219,8 @@ route is fully localized; the other is left flat on purpose - will trigger a war
     - server-render each route to static HTML, plus `robots.txt`/`sitemap.xml` — see [SEO files generation](#seo-files-generation) for full behavior.
 13. `finalize-build.js`
     - remove existing dist/ folder.
+    - *production*: remove unused files and folders.
     - rename dist-build to dist
-    - *production*: remove unused folder beforehand.
 
 ### Core script
 
