@@ -3,6 +3,7 @@
 ## Table of contents
 
 - [Project structure](#project-structure)
+- [Running your app](#running-your-app)
 - [Imports](#imports)
 - [Generate components, views and services](#generate-components-views-and-services)
 - [A typical component](#a-typical-component)
@@ -35,6 +36,18 @@ tools/    -- build, development, generator and testing
 nutin.config.js
 ```
 
+## Running your app
+
+```bash
+# Development
+{{packageManager}} run serve # build and serve
+{{packageManager}} run dev   # build and serve with live reload
+
+# Build
+{{packageManager}} run build      # build the application
+{{packageManager}} run build:prod # build the application for production
+```
+
 ## Imports
 
 Imports must use **relative paths** and end with `.js` extension.
@@ -44,7 +57,7 @@ import { MyModule } from 'relative/path/to/my-module.js';
 
 ## Generate components, views and services
 
-- `{{packageManager}} run generate <component|view|service> ELEMENT_NAME`
+`{{packageManager}} run generate <component|view|service> ELEMENT_NAME`
 
 Supports nested paths, for example:
 
@@ -75,7 +88,9 @@ export class ProductCardComponent extends Component {
     this._product = config;
   }
 
+  // Declares children mounted into the data-component / data-catalog placeholders below.
   public childConfigs(): ComponentConfig[] {
+    // Single child, matched to <div data-component="product-details">
     const detailsComponent = {
       selector: `product-details`,
       factory: (el) => new ProductDetailsComponent(
@@ -84,6 +99,7 @@ export class ProductCardComponent extends Component {
       )
     };
 
+    // One child per item in _product.tags, matched to <div data-catalog="product-tags">
     const tagsCatalog = this.catalogConfig({
       selector: 'product-tags',
       array: this._product.tags,
@@ -109,7 +125,6 @@ export class ProductCardComponent extends Component {
   class="product-card"
 >
   <h2 class="product-card__name">${product.name}</h2>
-  <span data-pipe="currency">${product.price}</span>
   <div data-component="product-details"></div>
   <div data-catalog="product-tags"></div>
 </div>
@@ -151,7 +166,7 @@ Main Nutin configuration and tool options. See the inline comments for details.
 
 ## Styling
 
-Nutin uses SASS (.scss) as its default styling solution.
+Nutin uses SASS (`.scss` syntax - plain CSS compatible) as its default styling solution.
 
 Tailwind CSS v4 is also supported as an optional utility-first CSS layer.
 
