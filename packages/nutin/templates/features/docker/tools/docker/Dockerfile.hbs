@@ -23,6 +23,7 @@ RUN {{ciCommand}} || pnpm approve-builds --all
 {{else}}
 RUN {{ciCommand}}
 {{/if}}
+COPY tsconfig.json .
 COPY ./src ./src
 COPY ./public ./public
 COPY ./nutin.config.js .

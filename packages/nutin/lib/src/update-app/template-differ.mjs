@@ -29,6 +29,7 @@ export class TemplateDiffer {
     const conflicts = [];
     const unknown = [];
     const removedByUser = [];
+    const noLongerGenerated = [];
 
     for (const relPath of new Set([...oldTree.keys(), ...newTree.keys()])) {
       const oldEntry = oldTree.get(relPath);
@@ -59,7 +60,11 @@ export class TemplateDiffer {
       }
 
       if (!newEntry) {
-        // Nutin no longer generates this file; leave it alone either way.
+        // Nutin no longer generates this file; leave it alone either way,
+        // but warn if it's still on disk since it may now be stale/broken.
+        if (existsOnDisk) {
+          noLongerGenerated.push({ relPath });
+        }
         continue;
       }
 
@@ -80,6 +85,6 @@ export class TemplateDiffer {
       }
     }
 
-    return { toUpdate, toAdd, conflicts, unknown, removedByUser };
+    return { toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated };
   }
 }

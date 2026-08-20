@@ -88,8 +88,8 @@ export class ProjectUpdater {
   }
 
   async applyChangeSet(projectPath, meta, changeSet, { yes }) {
-    const { toUpdate, toAdd, conflicts, unknown, removedByUser } = changeSet;
-    printUpdateSummary({ toUpdate, toAdd, conflicts, unknown, removedByUser });
+    const { toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated } = changeSet;
+    printUpdateSummary({ toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated });
 
     if (toUpdate.length === 0 && toAdd.length === 0 && conflicts.length === 0) {
       print.boldSuccess('\n✅ Nothing to update.');

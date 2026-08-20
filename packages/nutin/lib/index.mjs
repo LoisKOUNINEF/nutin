@@ -69,7 +69,7 @@ export function updateAppCommand(command) {
     .option('-y, --yes', 'Skip the confirmation prompt and apply safe updates immediately')
     .option('--from <path>', 'Use a local templates/ directory as the old baseline instead of fetching from npm')
     .action(async (cliOptions) => {
-      print.blue('🚀 nutin — update');
+      print.boldSuccess('🚀 nutin — update');
 
       try {
         await updateProject(process.cwd(), cliOptions);

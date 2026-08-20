@@ -3,6 +3,7 @@
 ## Table of contents
 
 - [Project structure](#project-structure)
+- [Imports](#imports)
 - [Generate components, views and services](#generate-components-views-and-services)
 - [A typical component](#a-typical-component)
 - [Features and configuration](#features-and-configuration)
@@ -32,6 +33,13 @@ src/
 tools/    -- build, development, generator and testing
 
 nutin.config.js
+```
+
+## Imports
+
+Imports must use **relative paths** and end with `.js` extension.
+```js
+import { MyModule } from 'relative/path/to/my-module.js';
 ```
 
 ## Generate components, views and services
@@ -192,6 +200,10 @@ To use TestinNutin for application tests, enable:
 testinNutin: {
   includeApp: true,
 }
+```
+*Note:* TestinNutin files use root imports.
+```js
+import { MyModule } from '#root/dist/src/path/to/my-module.js';
 ```
 
 See [TestinNutin docs](https://nutin.org/docs/testin-nutin).
