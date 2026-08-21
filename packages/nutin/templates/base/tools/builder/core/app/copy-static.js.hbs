@@ -9,6 +9,11 @@ async function copyStatic() {
   const extensions = [...BINARY_EXTENSIONS, '.html'];
   if (builderConfig.isProd) extensions.push('.ts');
 
+  // Every build starts from a clean dist-build: a failed/interrupted prior
+  // build never gets renamed away by finalize-build.js, so a stale sibling
+  // (already merged, placeholder gone) can otherwise sit next to the next
+  // run's fresh output and trip merge-templates.js's per-sibling check.
+  await fs.rm(PATHS.temp, { recursive: true, force: true });
   await ensureDir(PATHS.tempSource);
 
   await copyFavicon();
