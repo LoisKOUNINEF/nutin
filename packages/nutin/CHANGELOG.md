@@ -4,7 +4,7 @@
 
 - Breaking:
   - Node engine requirement raised to `>=22` (was `>=18`).
-  - Removed All libraries except `Pipes` since they didn't fit nutin's philosophy.
+  - Removed all libraries (except `Pipes`) since they didn't fit nutin's philosophy.
   - Removed `Store`: It created confusion and had questionable usefulness. Besides, services already handles what Store was supposed to.
 
 - Main features
@@ -33,16 +33,16 @@ unsub()
   - BaseComponent responsibilities: Render lifecycle, Hydration, DOM lifecycle, Event subscriptions (DOM and bus), Teardown, Render guard, Composition orchestration.
   - Component responsibilities: Props (className, style, data-bindings), Config + defaults + normalization, Template generation via `templateFn`
   - View responsibilities: Route params, Navigation hooks (onEnter/onExit), View identity (viewName)
-  - EventBus methods with automatic unsubscribe: `listen(event, callback`, `listenToRenderEvents(events[])`. *Note*: `listenToRenderEvents`'s force` param has been removed - no longer needed.
-  - AppEventBus can still be used directly if needed (`once`...) but must be unsubscribed manually via `onBeforeDestroy` hook.
+  - Components and Views subclasses inherit methods with automatic unsubscribe: `listen(event, callback`, `listenToRenderEvents(events[])`. *Note*: `listenToRenderEvents`'s `force` param has been removed - no longer needed. AppEventBus can still be used directly if needed (`once`...) but must be unsubscribed manually via `onBeforeDestroy` hook.
   - Proper lifecycle hooks
 ```ts
+// Component hooks
 onBeforeRender()
 onAfterRender()
 onBeforeDestroy()
 onAfterDestroy()
 
-// existing View hooks - called by router
+// View hooks - called by router
 onEnter()
 onExit()
 ```

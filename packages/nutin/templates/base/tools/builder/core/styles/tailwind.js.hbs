@@ -32,6 +32,9 @@ const getInstallCommand = (packageManager, deps) => {
 const missingDeps = REQUIRED_DEPS.filter(dep => !isInstalled(dep.name));
 
 if (missingDeps.length) {
+  if (builderConfig.isProd) {
+    errorExit('Tailwind CSS is enabled (tailwind: true) but its dependencies are missing.\nRun "npm install" before rebuilding');
+  }
   const packageManager = getPackageManager();
   const installCommand = getInstallCommand(packageManager, missingDeps);
 
@@ -52,11 +55,8 @@ if (missingDeps.length) {
   }
 
   const [command, ...args] = installCommand.split(' ');
-  // npm silently skips installing new devDependencies when NODE_ENV=production
-  // (as it is during `build:prod`), so this subprocess must not inherit it.
-  const { NODE_ENV: _NODE_ENV, ...installEnv } = process.env;
   try {
-    await runCommand(command, args, { env: installEnv });
+    await runCommand(command, args);
   } catch (err) {
     errorExit(err, 'tailwind-install');
   }

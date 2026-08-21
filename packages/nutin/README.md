@@ -38,3 +38,9 @@ nutin-add docker
 # update Nutin while preserving your changes
 nutin-update
 ```
+
+## Useful links
+
+- [Nutin website](https://www.nutin.org)
+- [First app tutorial](https://www.nutin.org/tutorial)
+- [Repository documentation](https://github.com/LoisKOUNINEF/nutin/tree/main/docs)

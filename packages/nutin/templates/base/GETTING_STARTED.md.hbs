@@ -169,9 +169,14 @@ Main Nutin configuration and tool options. See the inline comments for details.
 
 ## Styling
 
-Nutin uses SASS (`.scss` syntax, compatible with plain CSS) as its default styling solution.
+- Nutin uses SASS (`.scss` syntax, compatible with plain CSS) as its default styling solution.
 
-Tailwind CSS v4 is also supported as an optional utility-first CSS layer.
+- Tailwind CSS v4 is also supported as an optional utility-first CSS layer.
+
+**IMPORTANT:** Installing Tailwind CSS dependencies will print warnings `npm warn install-scripts`.
+
+This is expected (npm 12's default install-script allowlisting) and safe to ignore.
+If you want the warning gone anyway, run `npm install-scripts approve <package>`, but note this grants that package's install scripts blanket trust on every future install.
 
 ## Global layout components
 
