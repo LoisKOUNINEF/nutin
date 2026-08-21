@@ -23,7 +23,7 @@ export function validateDockerPorts(rawPorts) {
     const port = rawPorts[i];
 
     if (typeof port !== 'number' || !Number.isInteger(port)) {
-      throw new Error(`nutin.config.js: "dockerPorts[${i}]" must be an integer (got ${typeof port}: ${JSON.stringify(port)}). Ports must be numbers, e.g. 8080 not "8080".`);
+      throw new Error(`nutin.config.js: "dockerPorts[${i}]" must be an integer; ports must be numbers, e.g. 9090 not "9090".`);
     }
 
     if (port < MIN_PORT) {

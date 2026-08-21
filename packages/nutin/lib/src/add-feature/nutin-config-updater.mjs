@@ -5,7 +5,7 @@ import { print } from '../utils/print.mjs';
 const fs = fsExtra.default;
 
 const GENERATE_SEO_LINE_RE = /^([ \t]*generateSEOFiles:[^\n]*\n)/m;
-const DOCKER_PORTS_LINE = '  dockerPorts: [9090],     // Ports the Docker container exposes/listens on — edit as needed\n';
+const DOCKER_PORTS_LINE = '\n// Nutin features\n  dockerPorts: [9090],     // Ports the Docker container exposes/listens on — edit as needed\n';
 
 export async function updateNutinConfig(projectPath, feature) {
   if (feature.key !== 'docker') return;
