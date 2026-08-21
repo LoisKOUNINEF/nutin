@@ -67,7 +67,7 @@ const input = path.join(PATHS.source, 'styles', 'tailwind.css');
 const output = path.join(PATHS.tempSource, 'tw-out.css');
 const mainCss = path.join(PATHS.tempSource, 'main.css');
 
-const args = ['-i', input, '-o', output];
+const args = ['-i', input, '-o', output, '--silent'];
 if (builderConfig.isProd) args.push('--minify');
 
 try {
