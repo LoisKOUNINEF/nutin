@@ -91,37 +91,41 @@ route is fully localized; the other is left flat on purpose - will trigger a war
 nutin-add docker
 ```
 
-**IMPORTANT NOTE: Adapt port(s) as needed** 
+### Ports
 
-- Default port: 
+Container port(s) are configured via `nutin.config.js`'s top-level `dockerPorts` (`number[]`):
 
-`9090`
+```js
+export default {
+  tailwind: false,
+  i18n: false,
+  inlineTemplates: false,
 
-- Dockerfile 
+  generateSEOFiles: false,
+  dockerPorts: [9090, 3000], // validated by docker:build
+}
+```
 
-`ARG PORT=####`
+`nutin-add docker` scaffolds the explicit default `dockerPorts: [9090]`. 
 
-- nginx.conf 
+Emptying the array (`dockerPorts: []`) or deleting it makes `docker:build` fail with a clear error.
 
-```nginx
-server {
-    # ---------------------------
-    # LISTEN PORTS
-    # ---------------------------
-    listen ####;
-``` 
+- Port range
 
-#### ROADMAP
+Each port must be a registered/user port: **1024–49151**. 
+Ports below 1024 are privileged (may require elevated host privileges to bind); ports 49152 and above are the OS's ephemeral range. 
 
-- Set ports in Dockerfile and nginx.conf on build time.
-    Guideline:
-    - Entrypoint: `nutin.config.js`. New attribute `builder.dockerPorts` string[]
-    - New builder script: validate-docker - same pattern as validate-html
-    - `__PORTS_PLACEHOLDER__` instead of hardcoded ports in Dockerfile and nginx.conf - same as external .html templates merge pattern
-    - App must be reachable on each specified port, either one or many.
-    - Proper error handling
-    - Ensure nginx file correctness (spacings, indents...)
-    - Document it
+`docker:build` rejects anything outside that range with a clear error.
+
+Every configured port is:
+- exposed by the built image (`EXPOSE`)
+- listened on by nginx (one `listen <port>;` per port)
+
+The container healthcheck always targets the *first* configured port.
+
+Ports are substituted into `tools/docker/Dockerfile` and `tools/docker/nginx.conf` by `tools/docker/scripts/validate-docker.js`, which reads the git-tracked `tools/docker/Dockerfile.template` / `tools/docker/nginx.conf.template` and (re)writes the real, gitignored `Dockerfile` / `nginx.conf`. This runs automatically as the first step of `npm run docker:build`. 
+
+Changing ports only requires editing `nutin.config.js` and rebuilding.
 
 ### Dockerfile
 
@@ -160,7 +164,7 @@ brotli: {
 ### Nginx Config
 
 **This Nginx config assumes the use of a reverse proxy** (i.e. Traefik), so it:
-- uses non-standard port(s) (default: 9090).
+- uses non-standard port(s), configurable via `nutin.config.js`'s top-level `dockerPorts` (see [Ports](#ports) above).
 - does not include `add_header Strict-Transport-Security  "max-age=63072000" always;`. Add it here only if Nginx is exposed directly over HTTPS.
 
 #### Gzip

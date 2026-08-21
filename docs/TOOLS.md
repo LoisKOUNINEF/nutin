@@ -7,7 +7,7 @@ Switching package manager in an existing nutin app requires adapting:
 - **breaking**: `tools/dev/dev-serve.js`
 - **breaking**: `tools/dev/watcher.js`
 - *cosmetic*: `tools/generator/generator.js` and `tools/builder/builder.js`
-- **breaking**: `tools/docker/Dockerfile` *(with docker feature already added)*
+- **breaking**: `tools/docker/Dockerfile.template` *(with docker feature already added)*
 
 ## Table of Contents
 
@@ -60,6 +60,8 @@ Switching package manager in an existing nutin app requires adapting:
 <pm> run docker:build
 <pm> run docker:run
 ```
+
+  `docker:build` first runs `tools/docker/scripts/validate-docker.js` directly (validates the top-level `dockerPorts` from `nutin.config.js` and regenerates `tools/docker/Dockerfile`/`nginx.conf` from their `.template` counterparts), then invokes `docker build`.
 
 ## Generator
 

@@ -20,13 +20,12 @@
     "publish": "npm publish --access public"
   },
   "keywords": [
-    "nutin",
-    "Frontend",
-    "SPA",
-    "Learning",
-    "Minimalist",
-    "Lighweight",
-    "Customizable"
+    "Nutin",
+    "Vanilla",
+    "Framework",
+    "Freedom",
+    "Structure",
+    "Ownership"
   ],
   "author": "Loïs Kouninef <loiskouninef@gmail.com>",
   "license": "MIT",

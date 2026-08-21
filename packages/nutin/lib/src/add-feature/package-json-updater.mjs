@@ -22,15 +22,16 @@ function mergeAdditive(target, additions) {
   return { merged, added, skipped };
 }
 
-export async function updatePackageJson(projectPath, feature, context) {
+export async function updatePackageJson(projectPath, feature) {
   const packageJsonPath = path.join(projectPath, 'package.json');
   const packageJson = await fs.readJSON(packageJsonPath);
+  
   const isDocker = feature.key === 'docker';
 
   let scripts = {};
 
   if (isDocker) {
-    scripts = getDockerScripts(context);
+    scripts = getDockerScripts();
   } else {
     return;
   }

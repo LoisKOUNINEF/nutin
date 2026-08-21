@@ -7,13 +7,12 @@ export function printSummary(todo, passed, failed, time) {
   const totalTime = time.toFixed(2);
   const total = passed + failed;
 
-  if (todo > 0) print.boldWarn(`\n⚠️ To do: ${todo}\n`);
-
   print.boldBlue(`Test Summary`);
   print.boldInfo(`✓ ${passed} passed`);
   print.boldError(`✗ ${failed} failed`);
   print.info(`📖 ${total} total`);
-  print.info(`⌚️ Time: ${totalTime}ms \n`);
+  print.info(`⌚️ Time: ${totalTime}ms\n`);
+  if (todo > 0) print.boldWarn(`⚠️ To do: ${todo}\n`);
 }
 
 export function printResults(results) {

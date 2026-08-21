@@ -9,6 +9,7 @@ import { installDependencies } from '../common/package-json-helper.mjs';
 import { readProjectMeta, updateProjectMeta } from '../common/project-meta.mjs';
 import { FeatureContextBuilder } from './feature-context-builder.mjs';
 import { updatePackageJson } from './package-json-updater.mjs';
+import { updateNutinConfig } from './nutin-config-updater.mjs';
 
 const fs = fsExtra.default;
 const __filename = fileURLToPath(import.meta.url);
@@ -60,7 +61,8 @@ export class FeatureAdder {
 
     await this.fileGenerator.processTemplateDirectory(featureTemplateDir, projectPath, context, { skipExisting: true });
 
-    await updatePackageJson(projectPath, feature, context);
+    await updatePackageJson(projectPath, feature);
+    await updateNutinConfig(projectPath, feature);
   }
 
   async runPostAddTasks(projectPath, feature, context) {

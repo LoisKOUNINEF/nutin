@@ -1,8 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { generateFile, appendToIndex, generateJson } from './handle-file.js';
-import { LANGUAGES } from '../utils/languages.js';
+import { generateFile, appendToIndex } from './handle-file.js';
 
 describe('handle-file', () => {
   let tmpDir;
@@ -69,30 +68,5 @@ describe('handle-file', () => {
 
     const indexContent = fs.readFileSync(path.join(basePath, 'index.ts'), 'utf8');
     expect(indexContent).toBe("export * from './existing.js';\nexport * from './widget/widget.component.js';\n");
-  });
-
-  it('generateJson writes one locale file per configured language for a non-view target', () => {
-    const targetPath = path.join(tmpDir, 'components', 'widget');
-    const name = { kebab: 'widget', pascal: 'Widget', camel: 'widget', capitalized: 'Widget' };
-
-    generateJson({ targetPath, name });
-
-    for (const lang of LANGUAGES) {
-      const localeFile = path.join(targetPath, 'locales', `${lang}.json`);
-      expect(fs.existsSync(localeFile)).toBeTruthy();
-      expect(fs.readFileSync(localeFile, 'utf8')).toBe('{ "default": "Widget works !"}');
-    }
-  });
-
-  it('generateJson uses the view template for a view target', () => {
-    const targetPath = path.join(tmpDir, 'views', 'widget-view');
-    const name = { kebab: 'widget-view', pascal: 'WidgetView', camel: 'widgetView', capitalized: 'Widget-View' };
-
-    generateJson({ targetPath, name });
-
-    const localeFile = path.join(targetPath, 'locales', `${LANGUAGES[0]}.json`);
-    const content = fs.readFileSync(localeFile, 'utf8');
-    expect(content).toContain('WidgetView works !');
-    expect(content).not.toBe('{ "default": "WidgetView works !"}');
   });
 });

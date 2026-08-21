@@ -3,17 +3,24 @@
 ## 2.0.0
 
 - Breaking:
-  - Node engine requirement raised to `>=22` (was `>=18`).
-  - Removed all libraries (except `Pipes`) since they didn't fit nutin's philosophy.
-  - Removed `Store`: It created confusion and had questionable usefulness. Besides, services already handles what Store was supposed to.
+    - Node engine requirement raised to `>=22` (was `>=18`).
+    - Removed all libraries (except `Pipes`) since they didn't fit nutin's philosophy.
+    - Removed `Store`: It created confusion and had questionable usefulness. Besides, services already handles what Store was supposed to.
 
 - Main features
-  - New main config file: `nutin.config.js` - Nutin features (i18n, inlineTemplates, tailwind, generateSEOFiles), builder, generator, testing.
-  - Can now use Tailwind (v4) as an optional utility layer alongside SASS.
-  - Globally scoped stylesheets, co-located with feature files. **Use unique class names.** *Note: Nutin's naming convention encourages prefixes `home__header`*.
-  - Optional SEO static files generation: `config/seo.json` is used by production builder to generate static HTML files to be served to bots, via real SSR of your components (only title, description and ogImage remain hand-authored content). Also generates `robots.txt` and `sitemap.xml` from `config/seo.json` (supports per-route `disallow` / `disallowBots`).
-  - New interface `AppEventMap` only for app-level events. Nutin internal events are no longer defined in `globals.d.ts`. Payload types are now objects.
-  - EventBus exposes domain facades for `Navigation` and `Lifecycle` events. Subscribing functions (`on*`) return a closure function to abstract unsubscription. it remains directly usable in app-level events / domain facades.
+    - New main config file: `nutin.config.js` - Nutin features (i18n, inlineTemplates, tailwind, generateSEOFiles), builder, generator, testing.
+    - Can now use Tailwind (v4) as an optional utility layer alongside SASS.
+    - Globally scoped stylesheets, co-located with feature files. **Use unique class names.** *Note: Nutin's naming convention encourages prefixes `home__header`*.
+    - Optional SEO static files generation: `config/seo.json` is used by production builder to generate static HTML files to be served to bots, via real SSR of your components (only title, description and ogImage remain hand-authored content). Also generates `robots.txt` and `sitemap.xml` from `config/seo.json` (supports per-route `disallow` / `disallowBots`).
+    - New interface `AppEventMap` only for app-level events. Nutin internal events are no longer defined in `globals.d.ts`. Payload types are now objects.
+    - i18n now uses URL: aligns with common practices & allows SEO to render static HTML files for each language.
+    - New CLI command `nutin-update` (update Nutin to latest patch / minor). `nutin-update` diffs your project against the new templates and merges changes, reporting any conflicts it can't resolve automatically.
+    - New CLI command `nutin-add docker`.
+    - New file: `GETTING_STARTED.md` - gives a new Nutin developer enough architectural context and concrete conventions to start working without immediately having to consult the full documentation.
+    - New file: `AGENTS.md` - gives LLMs the minimal context they need to start working with you in a Nutin project.
+    - Docker: Ports are configurable via `nutin.config.js`. Dockerfile now builds a brotli-enabled image.
+    - TestinNutin: Added code coverage summary (branches / functions/ lines), `it.todo`, clock mocking (`setTimeout / setInterval`).
+    - EventBus exposes domain facades for `Navigation` and `Lifecycle` events. Subscribing functions (`on*`) return a closure function to abstract unsubscription. it remains directly usable in app-level events / domain facades.
 ```ts
 // emit
 Navigation.navigateTo('path');
@@ -22,19 +29,13 @@ const unsub = Navigation.onNavigate(this.doStuff);
 // onDestroy
 unsub()
 ```
-  - i18n now uses URL: aligns with common practices & allows SEO to render static HTML files for each language.
-  - New CLI command `nutin-add docker`. Dockerfile now builds a brotli-enabled image.
-  - New CLI command `nutin-update` (update Nutin to latest patch / minor). `nutin-update` diffs your project against the new templates and merges changes, reporting any conflicts it can't resolve automatically.
-  - New file: `GETTING_STARTED.md` - gives a new Nutin developer enough architectural context and concrete conventions to start working without immediately having to consult the full documentation.
-  - New file: `AGENTS.md` - gives LLMs the minimal context they need to start working with you in a Nutin project.
-  - TestinNutin: Added code coverage summary (branches / functions/ lines), `it.todo`, clock mocking (`setTimeout / setInterval`).
 
 - Cleaner base classes responsibilities
-  - BaseComponent responsibilities: Render lifecycle, Hydration, DOM lifecycle, Event subscriptions (DOM and bus), Teardown, Render guard, Composition orchestration.
-  - Component responsibilities: Props (className, style, data-bindings), Config + defaults + normalization, Template generation via `templateFn`
-  - View responsibilities: Route params, Navigation hooks (onEnter/onExit), View identity (viewName)
-  - Components and Views subclasses inherit methods with automatic unsubscribe: `listen(event, callback`, `listenToRenderEvents(events[])`. *Note*: `listenToRenderEvents`'s `force` param has been removed - no longer needed. AppEventBus can still be used directly if needed (`once`...) but must be unsubscribed manually via `onBeforeDestroy` hook.
-  - Proper lifecycle hooks
+    - BaseComponent responsibilities: Render lifecycle, Hydration, DOM lifecycle, Event subscriptions (DOM and bus), Teardown, Render guard, Composition orchestration.
+    - Component responsibilities: Props (className, style, data-bindings), Config + defaults + normalization, Template generation via `templateFn`
+    - View responsibilities: Route params, Navigation hooks (onEnter/onExit), View identity (viewName)
+    - Components and Views subclasses inherit methods with automatic unsubscribe: `listen(event, callback`, `listenToRenderEvents(events[])`. *Note*: `listenToRenderEvents`'s `force` param has been removed - no longer needed. AppEventBus can still be used directly if needed (`once`...) but must be unsubscribed manually via `onBeforeDestroy` hook.
+    - Proper lifecycle hooks
 ```ts
 // Component hooks
 onBeforeRender()
@@ -46,7 +47,7 @@ onAfterDestroy()
 onEnter()
 onExit()
 ```
-  - Service now exposes a single `getInstance()` method that accepts arguments, only on first call.
+- Services now exposes a single `getInstance()` method that accepts arguments, only on first call.
 
 - Numerous bug fixes
 

@@ -70,15 +70,16 @@ export function getInstallCommand(packageManager) {
   }
 }
 
-export function getDockerScripts({ projectName, packageManager }) {
+export function getDockerScripts() {
+  const dockerScriptsDir = 'node tools/docker/scripts'
   return {
-    "docker:build": `docker build -t ${projectName} -f tools/docker/Dockerfile .`,
-    "docker:run": `docker run -p 9090:9090 ${projectName}:latest`
+    "docker:build": `${dockerScriptsDir}/docker-build.js`,
+    "docker:run": `${dockerScriptsDir}/docker-run.js`
   };
 }
 
 export function getAllScripts(context) {
-  const { packageManager, projectName, docker } = context;
+  const { packageManager, docker } = context;
 
   const baseScripts = {
     "build": "node tools/builder/builder.js",
@@ -95,7 +96,7 @@ export function getAllScripts(context) {
 
   let scripts = { ...baseScripts };
 
-  if (docker) scripts = { ...scripts, ...getDockerScripts({ projectName, packageManager }) };
+  if (docker) scripts = { ...scripts, ...getDockerScripts() };
 
   return scripts;
 }
