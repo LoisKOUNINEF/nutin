@@ -85,6 +85,12 @@ route is fully localized; the other is left flat on purpose - will trigger a war
 
 ## Docker
 
+### Add to an app
+
+```bash
+nutin-add docker
+```
+
 **IMPORTANT NOTE: Adapt port(s) as needed** 
 
 - Default port: 
@@ -104,6 +110,17 @@ server {
     # ---------------------------
     listen ####;
 ``` 
+
+#### ROADMAP
+
+- Add ports in Dockerfile and nginx.conf on build time via `nutin.config.js` with new attribute `builder.dockerPorts`
+    Guideline:
+    - `__PORTS_PLACEHOLDER__` + replacement - same as external .html templates merge pattern
+    - ensure string and arrays of strings function properly
+    - proper error handling
+    - document it
+
+
 
 ### Dockerfile
 

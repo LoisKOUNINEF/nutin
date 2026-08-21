@@ -4,7 +4,7 @@
 
 Nutin provides the structure and tooling you'd expect from a framework, while keeping the underlying web platform visible and giving you code ownership.
 
-**Your app owns Nutin — not the other way around.** The framework source lives alongside your application, so you can read it, modify it, and make it yours. Nutin's update system is designed to preserve those changes.
+**Your app owns Nutin — not the other way around.** The source code lives alongside your application, so you can read it, modify it, and make it yours. Nutin's update system is designed to preserve those changes.
 
 Nutin is deliberately pragmatic, lightweight, and dependency-free on runtime.
 
@@ -25,18 +25,18 @@ nutin-new # or create-nutin-app
 npx @nutin/cli
 ```
 
-## Add Docker
-
-```bash
-# add docker to an existing app
-nutin-add docker
-```
-
 ## Update Nutin
 
 ```bash
 # update Nutin while preserving your changes
 nutin-update
+```
+
+## Add Docker
+
+```bash
+# ready-to-use Dockerfile for Nutin apps
+nutin-add docker
 ```
 
 ## Useful links
