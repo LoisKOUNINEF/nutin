@@ -113,14 +113,15 @@ server {
 
 #### ROADMAP
 
-- Add ports in Dockerfile and nginx.conf on build time via `nutin.config.js` with new attribute `builder.dockerPorts`
+- Set ports in Dockerfile and nginx.conf on build time.
     Guideline:
-    - `__PORTS_PLACEHOLDER__` + replacement - same as external .html templates merge pattern
-    - ensure string and arrays of strings function properly
-    - proper error handling
-    - document it
-
-
+    - Entrypoint: `nutin.config.js`. New attribute `builder.dockerPorts` string[]
+    - New builder script: validate-docker - same pattern as validate-html
+    - `__PORTS_PLACEHOLDER__` instead of hardcoded ports in Dockerfile and nginx.conf - same as external .html templates merge pattern
+    - App must be reachable on each specified port, either one or many.
+    - Proper error handling
+    - Ensure nginx file correctness (spacings, indents...)
+    - Document it
 
 ### Dockerfile
 
