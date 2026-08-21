@@ -60,7 +60,7 @@ describe('globals beforeEach/All and afterEach/All', () => {
   overwrites the first (no stacking/composition).
 - DOM helpers: `$(selector)` / `$$(selector)` (`querySelector`/
   `querySelectorAll` shorthands), `click(el)`, `type(el, text)`.
-- `setupJsdom` / `teardownJsdom` / `resetDom` / `flushPromises` are also
+- `setupJsdom` / `teardownJsdom` / `resetDom` / `flushPromises` / `silenceConsole` are also
   exposed as globals if a test needs to manage the DOM environment directly.
 
 ## Assertions
@@ -318,23 +318,3 @@ testinNutin: {
   },
 }
 ```
-
-## Where to look in code
-
-All paths below are relative to a generated app's `tools/testin-nutin/`:
-
-* `core/globals/` — `assertion-lib.js` (extend the matcher set here),
-  `clock.js`, `jsdom-setup.js`, `register-test-globals.js`,
-  `silence-console.js`, `spyon.js`.
-* `core/coverage` - `collect-coverage.js`, `compute-coverage.js`, `write-summary-report.js`, `write-uncovered-report.js`.
-* `core/queue/` — `queue.js` (linked-list `Queue`), `test-discovery.js`,
-  `test-queue.js` (drives `runQueuedTests()` off that `Queue`).
-* `core/tests/` — the toolkit's own tests for the assertions/globals/clock
-  above.
-* `core/printer.js` — re-exports the hand-rolled `chalk`/`print` console
-  helpers from the repo-wide `tools/utils/print.js` and provides printer methods (`printSummary`...).
-* `mocks/` — see [Mocking core services](#mocking-core-services).
-* `runner.js` / `watch-tests.js` — the two entrypoints.
-
-***The test runner's execution queue owes its design to ThePrimeagen's Data
-Structures and Algorithms course.***
