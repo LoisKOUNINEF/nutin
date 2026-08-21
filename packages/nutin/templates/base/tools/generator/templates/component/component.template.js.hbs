@@ -1,5 +1,5 @@
-import { getRelToCore } from "../../utils/get-rel-to-core.js";
-import nutinConfig from "../../../nutin.config.js";
+import { getRelToCore } from "../../../utils/get-rel-to-core.js";
+import nutinConfig from "../../../../nutin.config.js";
 
 export const componentTemplate = (name, targetPath) => {
   const relToCore = getRelToCore(targetPath);

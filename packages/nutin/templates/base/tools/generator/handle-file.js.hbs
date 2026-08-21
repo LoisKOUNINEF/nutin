@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { print, LANGUAGES } from '../utils/index.js';
-import { jsonTemplate } from './templates/index.js';
+import { localeTemplate } from './templates/index.js';
 
 export function generateFile({
   name,
@@ -43,11 +43,11 @@ export function appendToIndex({ name, targetPath, suffix }) {
   }
 }
 
-export function generateJson({ targetPath, name }) {
+export function generateLocalesJson({ targetPath, name }) {
   const localesDir = `${targetPath}/locales`;
   fs.mkdirSync(localesDir, { recursive: true });
 
-  const template = jsonTemplate(name);
+  const template = localeTemplate(name);
 
   const failedLangs = [];
   for (const lang of LANGUAGES) {

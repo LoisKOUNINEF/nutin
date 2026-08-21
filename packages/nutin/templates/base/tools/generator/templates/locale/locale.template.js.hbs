@@ -1,4 +1,4 @@
-export const jsonTemplate = (name) => `{
+export const localeTemplate = (name) => `{
   "default": "${name.pascal} works !"
 }
 `;

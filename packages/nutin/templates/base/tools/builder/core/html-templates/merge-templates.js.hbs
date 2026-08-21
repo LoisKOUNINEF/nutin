@@ -29,11 +29,11 @@ export async function mergeMinifiedTemplates() {
         await fs.writeFile(jsPath, jsContent);
         await fs.unlink(htmlPath);
       } catch (err) {
-        print.boldError(`ERROR: Cannot update ${jsFilename}. ${err.message}`);
+        throw new Error(`ERROR: Cannot update ${jsFilename}. ${err.message}`);
         failures.push(jsFilename);
       }
     } catch (err) {
-      print.boldError(`ERROR: Failed to read ${htmlFilename}. ${err.message}`);
+      throw new Error(`ERROR: Failed to read ${htmlFilename}. ${err.message}`);
       failures.push(htmlFilename);
     }
   }

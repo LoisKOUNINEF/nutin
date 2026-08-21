@@ -55,13 +55,13 @@ becomes one self-contained component with an inline template.
 
 | Attribute | Purpose |
 |---|---|
+| `data-component="selector"` | Marks a mount point for a **child** component, matched against a `ComponentConfig.selector`. See [Children](#children--composition). |
+| `data-catalog="selector"` | Marks a container to be populated with a **repeated list** of children, one per item in an array. |
 | `data-event="event:handler[:arg1,arg2,...]"` | Declarative DOM event delegation — binds `event` on this element to `this[handler](...)`. See [Events](#events). |
-| `data-i18n="key"` | Marks an element for translation. Sets `placeholder` (inputs) or `textContent` to `I18nService.translate(key, existingText)`. |
 | `data-pipe="pipeName[:args]\|pipe2..."` | Pipes the element's value/text through one or more registered pipes (chainable with `\|`), writing the result back. |
 | `data-pipe-source="..."` | Optional override for the raw value fed into `data-pipe` (default: the element's own value/textContent). |
 | `data-optional` | Removes the element post-render if it ends up "empty" (empty `src`, empty input value, empty/`"undefined"`/`"null"` text or attribute). |
-| `data-component="selector"` | Marks a mount point for a **child** component, matched against a `ComponentConfig.selector`. See [Children](#children--composition). |
-| `data-catalog="selector"` | Marks a container to be populated with a **repeated list** of children, one per item in an array. |
+| `data-i18n="key"` | Marks an element for translation. Sets `placeholder` (inputs) or `textContent` to `I18nService.translate(key, existingText)`. |
 | `data-bind="propKey"` | `Component`-only two-way field binding: `props[propKey]` is written into the element on render, and `getValues()` reads it back. |
 | `data-index` | Set automatically on catalog item wrappers (`0`, `1`, ...) for styling/lookup. |
 

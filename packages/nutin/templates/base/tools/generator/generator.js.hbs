@@ -2,7 +2,7 @@
 
 import path from "path";
 import { allFormats, getLastWord, print, promptBoolean, errorExit } from "../utils/index.js";
-import { generateFile, appendToIndex, generateJson } from "./handle-file.js";
+import { generateFile, appendToIndex, generateLocalesJson } from "./handle-file.js";
 import { serviceTemplate, componentTemplate, viewTemplate, htmlTemplate, scssTemplate, testTemplate } from "./templates/index.js";
 import nutinConfig from "../../nutin.config.js";
 
@@ -93,7 +93,7 @@ async function generateTest({ targetPath, name, suffix }) {
 async function generateLocales({ targetPath, name }) {
   let isGenerate = true;
   if (!nutinConfig.i18n) {
-    print.warn('⚠️ Enable i18n in nutin.config.js to use json-based content.');
+    print.warn('⚠️ Enable i18n in nutin.config.js to use json-based content per language.');
     if (!process.stdin.isTTY) {
       print.warn('Non-interactive shell detected — skipping locales file generation.');
       isGenerate = false;
@@ -101,7 +101,7 @@ async function generateLocales({ targetPath, name }) {
       isGenerate = await promptBoolean('Do you want to generate the locales file(s) anyway ?');
     }
   }
-  if (isGenerate) generateJson({ targetPath, name });
+  if (isGenerate) generateLocalesJson({ targetPath, name });
 }
 
 function showUsageAndExit(message) {

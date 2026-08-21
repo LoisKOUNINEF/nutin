@@ -6,7 +6,7 @@ Switching package manager in an existing nutin app requires adapting:
 
 - **breaking**: `tools/dev/dev-serve.js`
 - **breaking**: `tools/dev/watcher.js`
-- non-breaking: `tools/generator/generator.js` and `tools/builder/builder.js`
+- *cosmetic*: `tools/generator/generator.js` and `tools/builder/builder.js`
 - **breaking**: `tools/docker/Dockerfile` *(with docker feature already added)*
 
 ## Table of Contents

@@ -1,4 +1,4 @@
-import { getRelToCore } from "../../utils/get-rel-to-core.js";
+import { getRelToCore } from "../../../utils/get-rel-to-core.js";
 
 export const serviceTemplate = (name, targetPath) => {
   const relToCore = getRelToCore(targetPath);
