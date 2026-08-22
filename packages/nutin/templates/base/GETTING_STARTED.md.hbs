@@ -16,8 +16,6 @@
 
 ```
 config/   -- configure i18n and SEO files
-  languages.json
-  seo.json
 
 src/
   app/
@@ -92,7 +90,7 @@ export class ProductCardComponent extends Component {
   }
 
   // Declares children mounted into the data-component / data-catalog placeholders below.
-  public childConfigs(): ComponentConfig[] {
+  public registerChildren(): ComponentConfig[] {
     // Single child, matched to <div data-component="product-details">
     const detailsComponent = {
       selector: `product-details`,
@@ -103,7 +101,7 @@ export class ProductCardComponent extends Component {
     };
 
     // One child per item in _product.tags, matched to <div data-catalog="product-tags">
-    const tagsCatalog = this.catalogConfig({
+    const tagsCatalog = this.createCatalogComponents({
       selector: 'product-tags',
       array: this._product.tags,
       component: ProductTagsComponent,
@@ -184,7 +182,7 @@ Main Nutin configuration and tool options. See the inline comments for details.
 
 If you need components to render outside `<main>` (such as a header or footer), register them with `registerGlobals()` in `main.ts`.
 
-Global components are mounted directly in `<body>` and remain present across route changes. Use `before` for components that should appear before `<main>` and `after` for components that should appear after it. Each entry is `{ component, id }`: `component` is the class itself (constructed internally, so you never handle `mountTarget`), and `id` is stamped onto its rendered root element.
+Global components are mounted directly in `<body>` and remain present across route changes. Use `before` for components that should appear before `<main>` and `after` for components that should appear after it.
 
 ```ts
 registerGlobals({
@@ -193,7 +191,7 @@ registerGlobals({
 });
 ```
 
-**Note**: `hideGlobals(globalIds: string[])` / `revealGlobals(globalIds: string[])` are exported alongside `registerGlobals` and can be called from any component or view to toggle visibility of the ids you registered.
+**Note**: `hideGlobals(globalIds: string[])` / `revealGlobals(globalIds: string[])` are exported alongside `registerGlobals` and can be called to toggle visibility of the ids you registered.
 
 ## Testing
 

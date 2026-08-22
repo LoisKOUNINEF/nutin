@@ -1,4 +1,4 @@
-import { registerGlobals, hideGlobals, revealGlobals } from '#root/dist/src/core/services/globals/globals.js';
+import { registerGlobals, hideGlobals, revealGlobals, Globals } from '#root/dist/src/core/services/globals/globals.js';
 
 function makeComponent(tag = 'div') {
   return class {
@@ -18,6 +18,10 @@ describe('globals (registerGlobals)', () => {
     [...document.body.children].forEach((el) => {
       if (el.id !== 'app') el.remove();
     });
+    // Globals is a process-wide singleton (like every other Service) - drop
+    // its registered-id state so a later test's ids can't collide with an
+    // earlier one's.
+    Globals.testingResetAll();
   });
 
   it('is defined', () => {
@@ -79,6 +83,21 @@ describe('globals (registerGlobals)', () => {
       after: [{ component: TrackingComponent, id: 'b' }],
     });
     expect(seen).toEqual(['body', 'body']);
+  });
+
+  it('registering a duplicate id warns and skips the second mount', () => {
+    const warnSpy = spyOn(console, 'warn');
+    warnSpy.andCallFake(() => {});
+
+    registerGlobals({ before: [{ component: makeComponent('header'), id: 'dup' }] });
+    registerGlobals({ after: [{ component: makeComponent('footer'), id: 'dup' }] });
+
+    const matches = [...document.body.children].filter((el) => el.id === 'dup');
+    expect(matches.length).toBe(1);
+    expect(matches[0].tagName).toBe('HEADER');
+    expect(warnSpy.callCount).toBe(1);
+
+    warnSpy.restore();
   });
 });
 

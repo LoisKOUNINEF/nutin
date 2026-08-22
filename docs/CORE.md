@@ -380,10 +380,13 @@ AppRouter(appRoutes);
   the given order. Each entry is `{ component, id }`: `component` is a bare
   class, constructed internally as `new component(mountTarget)` — callers
   never see or cast `mountTarget` themselves — and `id` is stamped onto the
-  rendered root element. `hideGlobals(globalIds: string[])` /
+  rendered root element; registering an `id` that's already registered logs a
+  `console.warn` and skips it. `hideGlobals(globalIds: string[])` /
   `revealGlobals(globalIds: string[])` (same module) toggle `display` on the
   elements with the given ids, and can be called from any component or view.
-  Call `registerGlobals` once in `main.ts`, alongside
+  Backed by a `Globals` service (`Service<Globals>`, like every other file in
+  `core/services/`) tracking what's been mounted; call `registerGlobals` once
+  in `main.ts`, alongside
   `registerPipes()`/`AppRouter(routes)`.
 
 ## Minimal worked example

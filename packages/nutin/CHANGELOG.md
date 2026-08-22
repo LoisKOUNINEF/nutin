@@ -3,6 +3,8 @@
 ## 2.0.0
 
 - Breaking:
+    - `BaseComponent`'s `childConfigs()` and `catalogConfig` functions renamed to `registerChildren` and `createCatalogComponents`.
+    Clearer, more intuitive API. The small semantic mismatch for `registerChildren` is nuanced by its return type `ComponentConfig[]`.
     - Node engine requirement raised to `>=22` (was `>=18`).
     - Removed all libraries (except `Pipes`) since they didn't fit nutin's philosophy.
     - Removed `Store`: It created confusion and had questionable usefulness. Besides, services already handles what Store was supposed to.
