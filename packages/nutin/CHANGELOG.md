@@ -8,7 +8,7 @@
     - Removed `Store`: It created confusion and had questionable usefulness. Besides, services already handles what Store was supposed to.
 
 - Main features
-    - New main config file: `nutin.config.js` - Nutin features (i18n, inlineTemplates, tailwind, generateSEOFiles), builder, generator, testing.
+    - New main config file: `nutin.config.js` - Nutin features (i18n, tailwind, generateSEOFiles), builder, generator, testing.
     - Can now use Tailwind (v4) as an optional utility layer alongside SASS.
     - Globally scoped stylesheets, co-located with feature files. **Use unique class names.** *Note: Nutin's naming convention encourages prefixes `home__header`*.
     - Optional SEO static files generation: `config/seo.json` is used by production builder to generate static HTML files to be served to bots, via real SSR of your components (only title, description and ogImage remain hand-authored content). Also generates `robots.txt` and `sitemap.xml` from `config/seo.json` (supports per-route `disallow` / `disallowBots`).

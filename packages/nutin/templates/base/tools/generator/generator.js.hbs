@@ -38,7 +38,7 @@ const creators = {
 
     try {
       generateFile({ name, targetPath, templateFn: componentTemplate, suffix: suffix });
-      if (!nutinConfig.inlineTemplates) generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: suffix, extension: 'html' });
+      generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: suffix, extension: 'html' });
       if (nutinConfig.generator.generateStylesheet) generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
       if (nutinConfig.generator.generateLocales) await generateLocales({ targetPath, name });
       appendToIndex({ name, targetPath, suffix: suffix });
@@ -53,7 +53,7 @@ const creators = {
 
     try {
       generateFile({ name, targetPath, templateFn: viewTemplate, suffix: suffix });
-      if (!nutinConfig.inlineTemplates) generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: suffix, extension: 'html' });
+      generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: suffix, extension: 'html' });
       if (nutinConfig.generator.generateStylesheet) generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
       if (nutinConfig.generator.generateLocales) await generateLocales({ targetPath, name });
       appendToIndex({ name, targetPath, suffix: suffix });

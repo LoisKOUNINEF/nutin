@@ -41,42 +41,6 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
     return key in this.routeParams && this.routeParams[key] !== undefined;
   }
 
-/**
- * Hide header
- * Container div must have id="header"
- */
-  protected hideHeader(): void {
-    const header = document.getElementById('header') as HTMLElement;
-    if (header) header.style.cssText = 'display: none';
-  }
-
-/**
- * Hide footer
- * Container div must have id="footer"
- */
-  protected hideFooter(): void {
-    const footer = document.getElementById('footer') as HTMLElement;
-    if (footer) footer.style.cssText = 'display: none';
-  }
-
-/**
- * Reveal header
- * Container div must have id="header"
- */
-  protected revealHeader(): void {
-    const header = document.getElementById('header') as HTMLElement;
-    if (header) header.style.cssText = 'display: block';
-  }
-
-/**
- * Reveal footer
- * Container div must have id="footer"
- */
-  protected revealFooter(): void {
-    const footer = document.getElementById('footer') as HTMLElement;
-    if (footer) footer.style.cssText = 'display: block';
-  }
-
   private getKebabCaseViewName(): string {
     const className = this.constructor.name;
     const baseName = className.replace(/View$/, '');

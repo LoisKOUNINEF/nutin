@@ -14,10 +14,6 @@ describe('View', () => {
   afterEach(() => {
     app.innerHTML = '';
     app = null;
-    const header = document.getElementById('header');
-    if (header) header.remove();
-    const footer = document.getElementById('footer');
-    if (footer) footer.remove();
   });
 
   it('derives a kebab-case viewName from the class name, stripping a trailing "View"', () => {
@@ -68,38 +64,6 @@ describe('View', () => {
     const params = view.getRouteParams();
     params.id = 'mutated';
     expect(view.getRouteParam('id')).toBe('1');
-  });
-
-  it('hideHeader/revealHeader toggle the #header element display style when present', () => {
-    const header = document.createElement('div');
-    header.id = 'header';
-    document.body.appendChild(header);
-
-    const view = new HomeView({});
-    view.hideHeader();
-    expect(header.style.display).toBe('none');
-
-    view.revealHeader();
-    expect(header.style.display).toBe('block');
-  });
-
-  it('hideFooter/revealFooter toggle the #footer element display style when present', () => {
-    const footer = document.createElement('div');
-    footer.id = 'footer';
-    document.body.appendChild(footer);
-
-    const view = new HomeView({});
-    view.hideFooter();
-    expect(footer.style.display).toBe('none');
-
-    view.revealFooter();
-    expect(footer.style.display).toBe('block');
-  });
-
-  it('hideHeader/hideFooter are no-ops when the elements are absent', () => {
-    const view = new HomeView({});
-    expect(() => view.hideHeader()).not.toThrow();
-    expect(() => view.hideFooter()).not.toThrow();
   });
 
   it('onEnter and onExit are present as no-op hooks', () => {

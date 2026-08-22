@@ -33,7 +33,6 @@ const wellKnownNonSEORoutes = [
 export const builderConfig = {
   ...nutinConfig.builder,
   isProd: process.env.NODE_ENV === 'production',
-  inlineTemplates: nutinConfig.inlineTemplates,
   i18n: nutinConfig.i18n,
   tailwind: nutinConfig.tailwind,
   generateSEO: nutinConfig.generateSEOFiles,

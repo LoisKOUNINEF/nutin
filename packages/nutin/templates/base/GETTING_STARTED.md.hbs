@@ -4,7 +4,6 @@
 
 - [Project structure](#project-structure)
 - [Running your app](#running-your-app)
-- [Imports](#imports)
 - [Generate components, views and services](#generate-components-views-and-services)
 - [A typical component](#a-typical-component)
 - [Features and configuration](#features-and-configuration)
@@ -16,7 +15,7 @@
 ## Project structure
 
 ```
-config/
+config/   -- configure i18n and SEO files
   languages.json
   seo.json
 
@@ -33,7 +32,7 @@ src/
 
 tools/    -- build, development, generator and testing
 
-nutin.config.js
+nutin.config.js   -- features and configuration
 ```
 
 ## Running your app
@@ -48,7 +47,7 @@ nutin.config.js
 {{packageManager}} run build:prod # build the application for production
 ```
 
-## Imports
+### Imports
 
 Imports must use **relative paths** and end with `.js` extension.
 
@@ -81,7 +80,7 @@ components/
 ```
 
 ```ts
-// The builder replaces __TEMPLATE_PLACEHOLDER__ with the component's .html sibling.
+// The builder injects the component's .html template here.
 const templateFn = (product: Product) => `__TEMPLATE_PLACEHOLDER__`;
 
 export class ProductCardComponent extends Component {
@@ -117,6 +116,7 @@ export class ProductCardComponent extends Component {
     ];
   }
 
+  // Referenced by the data-event attribute in the template.
   private _goToProductPage(productId: string): void {
     Navigation.navigateTo(`/product/${productId}`);
   }
@@ -144,6 +144,10 @@ export class ProductCardComponent extends Component {
 }
 ```
 
+A template can also be written directly inline (skip the `.html` file and the placeholder). 
+
+Defining both an inline template and an external `.html` file, or neither, fails the build.
+
 ## Features and configuration
 
 Nutin features are enabled in `nutin.config.js`.
@@ -152,7 +156,7 @@ Nutin features are enabled in `nutin.config.js`.
 
 Main Nutin configuration and tool options. See the inline comments for details.
 
-- `tailwind`, `i18n`, `inlineTemplates`, `generateSEOFiles` — top-level features.
+- `tailwind`, `i18n`, `generateSEOFiles` — top-level features.
 - `generator.*` — controls what the generator scaffolds.
 - `builder.*` — controls build behavior.
 - `testinNutin.*` — controls TestinNutin.
@@ -174,37 +178,22 @@ Main Nutin configuration and tool options. See the inline comments for details.
 
 - Tailwind CSS v4 is also supported as an optional utility-first CSS layer.
 
-**IMPORTANT:** Installing Tailwind CSS dependencies will print warnings `npm warn install-scripts`.
-
-This is expected (npm 12's default install-script allowlisting) and safe to ignore.
-If you want the warning gone anyway, run `npm install-scripts approve <package>`, but note this grants that package's install scripts blanket trust on every future install.
+**Note:** Installing Tailwind CSS dependencies may print `npm warn install-scripts`. This is expected with npm 12's default install-script allowlisting and is safe to ignore.
 
 ## Global layout components
 
-If you need components to render outside `<main>` (such as `<header>` or `<footer>`), initialize them in `main.ts`. 
+If you need components to render outside `<main>` (such as a header or footer), register them with `registerGlobals()` in `main.ts`.
 
-Those components are outside the `View`s rendering target (`<main id="app">`), so they will be present on each route.
-
-*Note*: `View` subclasses inherit `hideHeader()` / `revealHeader()` and `hideFooter()` / `revealFooter()`, which target the elements with the corresponding id (`#header` and `#footer`).
+Global components are mounted directly in `<body>` and remain present across route changes. Use `before` for components that should appear before `<main>` and `after` for components that should appear after it. Each entry is `{ component, id }`: `component` is the class itself (constructed internally, so you never handle `mountTarget`), and `id` is stamped onto its rendered root element.
 
 ```ts
-class App {
-  private _header: HeaderComponent;
-  private _footer: FooterComponent;
-  private _mountTarget = 'body' as unknown as HTMLElement;
-
-  constructor() {
-    registerPipes();
-    AppRouter(appRoutes);
-
-    this._header = new HeaderComponent(this._mountTarget);
-    document.body.prepend(this.header.render());
-
-    this._footer = new FooterComponent(this._mountTarget);
-    document.body.append(this.footer.render());
-  }
-}
+registerGlobals({
+  before: [{ component: HeaderComponent, id: 'header' }],
+  after: [{ component: FooterComponent, id: 'footer' }],
+});
 ```
+
+**Note**: `hideGlobals(globalIds: string[])` / `revealGlobals(globalIds: string[])` are exported alongside `registerGlobals` and can be called from any component or view to toggle visibility of the ids you registered.
 
 ## Testing
 
@@ -231,7 +220,7 @@ testinNutin: {
 import { MyModule } from '#root/dist/src/path/to/my-module.js';
 ```
 
-See [TestinNutin docs](https://nutin.org/docs/testin-nutin).
+See **[TestinNutin docs](https://nutin.org/docs/testin-nutin)**.
 
 ## Useful links
 

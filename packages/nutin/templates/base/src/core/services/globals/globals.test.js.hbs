@@ -1,0 +1,130 @@
+import { registerGlobals, hideGlobals, revealGlobals } from '#root/dist/src/core/services/globals/globals.js';
+
+function makeComponent(tag = 'div') {
+  return class {
+    constructor(mountTarget) {
+      this.mountTarget = mountTarget;
+    }
+    render() {
+      return document.createElement(tag);
+    }
+  };
+}
+
+describe('globals (registerGlobals)', () => {
+  afterEach(() => {
+    // registerGlobals mounts directly onto document.body (a sibling of the
+    // pre-existing <main id="app">), so only strip what each test added.
+    [...document.body.children].forEach((el) => {
+      if (el.id !== 'app') el.remove();
+    });
+  });
+
+  it('is defined', () => {
+    expect(registerGlobals).toBeDefined();
+  });
+
+  it('touches nothing when called with no options', () => {
+    registerGlobals({});
+    expect(document.body.children.length).toBe(1); // just #app
+  });
+
+  it('prepends a single "before" entry ahead of the existing #app, stamping its id', () => {
+    registerGlobals({ before: [{ component: makeComponent('header'), id: 'header' }] });
+    expect(document.body.firstElementChild.tagName).toBe('HEADER');
+    expect(document.body.firstElementChild.id).toBe('header');
+    expect(document.body.children[1].id).toBe('app');
+  });
+
+  it('appends a single "after" entry behind the existing #app, stamping its id', () => {
+    registerGlobals({ after: [{ component: makeComponent('footer'), id: 'footer' }] });
+    expect(document.body.lastElementChild.tagName).toBe('FOOTER');
+    expect(document.body.lastElementChild.id).toBe('footer');
+  });
+
+  it('mounts multiple "before" entries in the given order (not reversed)', () => {
+    registerGlobals({
+      before: [
+        { component: makeComponent('div'), id: 'first' },
+        { component: makeComponent('div'), id: 'second' },
+      ],
+    });
+    const ids = [...document.body.children].filter((el) => el.id !== 'app').map((el) => el.id);
+    expect(ids).toEqual(['first', 'second']);
+  });
+
+  it('mounts multiple "after" entries in the given order (not reversed)', () => {
+    registerGlobals({
+      after: [
+        { component: makeComponent('div'), id: 'first' },
+        { component: makeComponent('div'), id: 'second' },
+      ],
+    });
+    const ids = [...document.body.children].filter((el) => el.id !== 'app').map((el) => el.id);
+    expect(ids).toEqual(['first', 'second']);
+  });
+
+  it('passes the same mountTarget value through to every constructed component', () => {
+    const seen = [];
+    class TrackingComponent {
+      constructor(mountTarget) {
+        seen.push(mountTarget);
+      }
+      render() {
+        return document.createElement('div');
+      }
+    }
+    registerGlobals({
+      before: [{ component: TrackingComponent, id: 'a' }],
+      after: [{ component: TrackingComponent, id: 'b' }],
+    });
+    expect(seen).toEqual(['body', 'body']);
+  });
+});
+
+describe('globals (hideGlobals/revealGlobals)', () => {
+  afterEach(() => {
+    [...document.body.children].forEach((el) => {
+      if (el.id !== 'app') el.remove();
+    });
+  });
+
+  it('toggle display for every given id that is present', () => {
+    const header = document.createElement('div');
+    header.id = 'header';
+    document.body.appendChild(header);
+    const footer = document.createElement('div');
+    footer.id = 'footer';
+    document.body.appendChild(footer);
+
+    hideGlobals(['header', 'footer']);
+    expect(header.style.display).toBe('none');
+    expect(footer.style.display).toBe('none');
+
+    revealGlobals(['header', 'footer']);
+    expect(header.style.display).toBe('block');
+    expect(footer.style.display).toBe('block');
+  });
+
+  it('only touch the display property, leaving other inline styles intact', () => {
+    const header = document.createElement('div');
+    header.id = 'header';
+    header.style.cssText = 'background: coral; padding: 8px';
+    document.body.appendChild(header);
+
+    hideGlobals(['header']);
+    expect(header.style.display).toBe('none');
+    expect(header.style.background).toBe('coral');
+    expect(header.style.padding).toBe('8px');
+
+    revealGlobals(['header']);
+    expect(header.style.display).toBe('block');
+    expect(header.style.background).toBe('coral');
+    expect(header.style.padding).toBe('8px');
+  });
+
+  it('are no-ops for ids that are absent', () => {
+    expect(() => hideGlobals(['missing'])).not.toThrow();
+    expect(() => revealGlobals(['missing'])).not.toThrow();
+  });
+});

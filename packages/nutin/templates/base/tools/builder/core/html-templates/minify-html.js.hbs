@@ -1,7 +1,4 @@
 import { minify } from 'html-minifier-terser';
-import fs from 'fs';
-import { getFilesRecursive, print } from '../../../utils/index.js';
-import { PATHS } from '../app/paths.js';
 
 export async function minifyHTML(html) {
   return minify(html, {
@@ -15,32 +12,4 @@ export async function minifyHTML(html) {
     minifyCSS: true,
     minifyJS: true,
   });
-}
-
-const TEMPLATE_REGEX =
-  /const\s+(template|templateFn)\s*=?\s*(?:\(.*?\)\s*=>\s*)?`([\s\S]*?)`/gm;
-
-export async function minifyInlineHTML() {
-  const jsFiles = getFilesRecursive(PATHS.tempApp, '.js');
-
-  for (const file of jsFiles) {
-    let code = fs.readFileSync(file, 'utf8');
-    let hasChanges = false;
-
-    const matches = [...code.matchAll(TEMPLATE_REGEX)];
-
-    if (matches.length) {
-      for (const match of matches) {
-        const [full, , html] = match;
-        const minified = await minifyHTML(html);
-        const minifiedBlock = full.replace(html, minified);
-        code = code.replace(full, minifiedBlock);
-        hasChanges = true;
-      }
-    }
-
-    if (hasChanges) {
-      fs.writeFileSync(file, code, 'utf8');
-    }
-  }
 }

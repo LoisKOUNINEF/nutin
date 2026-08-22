@@ -25,9 +25,7 @@ BaseComponent<T>               — render/hydrate/destroy engine, data-* parsing
 
 - **`View`** — one per route. Built from a template string and mounted at
   `#app` by default. Adds route params (`getRouteParams`/`getRouteParam`) and
-  router-only hooks `onEnter()`/`onExit()`. Also exposes `hideNavbar()` /
-  `revealNavbar()` and `hideFooter()` / `revealFooter()`, which toggle
-  `display` on elements with `id="navbar"` / `id="footer"` in the page shell.
+  router-only hooks `onEnter()`/`onExit()`.
 - **`Component`** — reusable, non-routed UI.
   Built from a `config` object via `templateFn`, supports `data-bind` two-way
   field binding and `getValues()` to read bound fields back out.
@@ -376,6 +374,17 @@ AppRouter(appRoutes);
   `apply(name, value, args)`. Backs the `data-pipe` attribute; app-defined
   pipes are registered once at startup in `main.ts`. Applying an unregistered
   pipe name logs a `console.warn` and passes the value through unchanged; `register()` logs a `console.warn` if that name is already taken.
+- **`registerGlobals({ before?, after? })`** — mounts components outside
+  `<main id="app">` (e.g. a header/footer that should persist across every
+  route) by prepending/appending their rendered output to `document.body`, in
+  the given order. Each entry is `{ component, id }`: `component` is a bare
+  class, constructed internally as `new component(mountTarget)` — callers
+  never see or cast `mountTarget` themselves — and `id` is stamped onto the
+  rendered root element. `hideGlobals(globalIds: string[])` /
+  `revealGlobals(globalIds: string[])` (same module) toggle `display` on the
+  elements with the given ids, and can be called from any component or view.
+  Call `registerGlobals` once in `main.ts`, alongside
+  `registerPipes()`/`AppRouter(routes)`.
 
 ## Minimal worked example
 

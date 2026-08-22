@@ -79,6 +79,7 @@ Tokens: `@value`, `@id`, `@class`, `@textContent`, `@event`, `@target`, `@attr:n
   - `Navigation` — `navigateTo(path)`/`onNavigate`, `reload()`/`onReload`.
   - `Lifecycle` — `viewMount(viewName)`/`onViewMount`, `viewUnmount(viewName)`/`onViewUnmount`, plus generic `beforeRender`/`afterRender`/`beforeDestroy`/`afterDestroy`.
 - `AppRouter(routes)` — call once in `main.ts`; routes support `:param`/`:param?` and per-route guards.
+- `registerGlobals({ before?, after? })` — each entry is `{ component, id }` (a bare class, constructed internally); mounts them outside `<main id="app">` (`before`/`after` control placement relative to it), stamping each root element with `id`. `hideGlobals(ids)`/`revealGlobals(ids)` (same module) toggle visibility by those ids from any component or view. Call once in `main.ts`.
 - `AppHttpClient` — `get/post/put/patch/delete<T>(endpoint, data?, config?)`; non-OK responses throw `HttpError`.
 - `I18nService` — `translate(key, fallback?)`, `setCurrentLanguage(lang)`; language list comes from `config/languages.json`.
 - `AppPipeRegistry` — `register(name, fn)` / `apply(name, value, args)`; backs `data-pipe`.
@@ -117,7 +118,7 @@ AppPipeRegistry.register('json');
 ### `nutin.config.js`
 
 Central options/tools config (see the inline comments for details):
-- `inlineTemplates`, `i18n`, `tailwind`, `generateSEO`, `dockerPorts` — top-level feature toggles (`dockerPorts` only applies once the docker feature is added).
+- `i18n`, `tailwind`, `generateSEO`, `dockerPorts` — top-level feature toggles (`dockerPorts` only applies once the docker feature is added).
 - `generator.{generateStylesheet, generateLocales, generateTest}` — what the generator scaffolds alongside new elements.
 - `builder.{sass.paths, esbuild}` — build pipeline behavior.
 - `testinNutin.{includeFramework, includeTools, includeApp, verbose, jsdomOptions}` — test discovery/environment.
