@@ -3,6 +3,8 @@ import config from '#root/nutin.config.js';
 
 export { chalk, print } from '../../utils/index.js';
 
+const verboseEnabled = process.argv.includes('--verbose');
+
 export function printSummary(todo, passed, failed, time) {
   const totalTime = time.toFixed(2);
   const total = passed + failed;
@@ -21,7 +23,7 @@ export function printResults(results) {
 
   sortedResults.forEach(result => {
     if (result.status === 'passed') {
-      if (config.testinNutin.verbose ) console.log(`${chalk.green('✓')} ${chalk.cyan(`${result.suiteName}`)} - ${chalk.green(`${result.name}`)}`);
+      if (verboseEnabled) console.log(`${chalk.green('✓')} ${chalk.cyan(`${result.suiteName}`)} - ${chalk.green(`${result.name}`)}`);
     } else if (result.status === 'todo') {
       print.warn(`TODO: ${result.name} in ${toTsPath(result.file)}`);
     } else {

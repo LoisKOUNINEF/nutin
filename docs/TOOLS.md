@@ -52,6 +52,7 @@ Switching package manager in an existing nutin app requires adapting:
 <pm> run testin-nutin           # build, then run once
 <pm> run testin-nutin:watch     # build once, then re-run on file changes
 <pm> run testin-nutin:coverage  # run and outputs coverage. Fails if below threshold defined in nutin.config.js.testinNutin.coverage.threshold
+<pm> run testin-nutin:verbose   # run and log each test suite and test as it runs
 ```
 
 * Docker (with docker feature added - `nutin-add docker`):

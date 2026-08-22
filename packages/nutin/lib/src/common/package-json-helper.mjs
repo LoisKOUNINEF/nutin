@@ -91,7 +91,8 @@ export function getAllScripts(context) {
     "generate": "node tools/generator/generator.js",
     "testin-nutin": `${packageManager} run build && node tools/testin-nutin/runner.js`,
     "testin-nutin:watch": `${packageManager} run build && node tools/testin-nutin/watch-tests.js`,
-    "testin-nutin:coverage": `${packageManager} run build && node tools/testin-nutin/runner.js --coverage`
+    "testin-nutin:coverage": `${packageManager} run build && node tools/testin-nutin/runner.js --coverage`,
+    "testin-nutin:verbose": `${packageManager} run build && node tools/testin-nutin/runner.js --verbose`
   };
 
   let scripts = { ...baseScripts };

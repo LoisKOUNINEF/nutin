@@ -22,6 +22,7 @@ This documents `testin-nutin`, nutin's built-in test toolkit, shipped by default
 "testin-nutin": "<pm> run build && node tools/testin-nutin/runner.js",
 "testin-nutin:watch": "<pm> run build && node tools/testin-nutin/watch-tests.js"
 "testin-nutin:coverage": "<pm> run build && node tools/testin-nutin/runner.js --coverage",
+"testin-nutin:verbose": "<pm> run build && node tools/testin-nutin/runner.js --verbose",
 ```
 
 The test environment loads the **built development output** (not bundled nor minified) `dist/src/index.html` into jsdom (see [How a run works](#how-a-run-works)) — running `testin-nutin:only` directly only works if `dist/` is already up to date.
@@ -237,7 +238,8 @@ The shared spy factory itself lives at `mocks/create-mock-method.js`.
    and recorded as a failure rather than aborting the run.
 5. Console output (`print.js`, hand-rolled ANSI colors, no `chalk`
    dependency): failing tests are always printed with their stack trace;
-   passing tests are only printed if `config.verbose`. A final summary
+   passing tests are only printed when run with `--verbose` (i.e. via
+   `<pm> run testin-nutin:verbose`). A final summary
    prints pass/fail counts and elapsed time.
 
 `<pm> run testin-nutin:watch` builds once, then runs `watch-tests.js`: a
@@ -304,7 +306,6 @@ testinNutin: {
   includeFramework: true,  // test Nutin source - src/core
   includeTools: false,     // test Nutin tooling - tools/ (builder, testin-nutin, etc.)
   includeApp: false,       // enable to use testin-nutin for application tests
-  verbose: false,          // log test suites and individual `it` tests
   coverage: {
     enabled: false,        // include coverage in the normal test command
     threshold: 95,         // exit with code 1 if any global coverage metric falls below the threshold

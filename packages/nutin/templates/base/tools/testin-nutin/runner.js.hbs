@@ -8,7 +8,8 @@ import config from '#root/nutin.config.js';
 
 const args = process.argv.slice(2);
 const coverageEnabled = args.includes('--coverage') || Boolean(config.testinNutin.coverage?.enabled);
-const fileFilters = args.filter(arg => arg !== '--coverage');
+const verboseEnabled = args.includes('--verbose');
+const fileFilters = args.filter(arg => arg !== '--coverage' && arg !== '--verbose');
 
 // Tests import and run the compiled build output (dist/src/)
 // and has no sourcemap back to the .ts sources
@@ -72,7 +73,7 @@ async function runCoverage(testResults) {
 }
 
 async function runTests() {
-  if (config.testinNutin.verbose) print.head('Test suites :');
+  if (verboseEnabled) print.head('Test suites :');
 
   if (coverageEnabled) await startCoverage();
 
