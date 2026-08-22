@@ -2,27 +2,32 @@
 
 ## 2.0.0
 
-- Breaking:
-    - `BaseComponent`'s `childConfigs()` and `catalogConfig` functions renamed to `registerChildren` and `createCatalogComponents`.
-    Clearer, more intuitive API. The small semantic mismatch for `registerChildren` is nuanced by its return type `ComponentConfig[]`.
-    - Node engine requirement raised to `>=22` (was `>=18`).
-    - Removed all libraries (except `Pipes`) since they didn't fit nutin's philosophy.
-    - Removed `Store`: It created confusion and had questionable usefulness. Besides, services already handles what Store was supposed to.
+### Breaking Changes
 
-- Main features
-    - New main config file: `nutin.config.js` - Nutin features (i18n, tailwind, generateSEOFiles), builder, generator, testing.
-    - Can now use Tailwind (v4) as an optional utility layer alongside SASS.
-    - Globally scoped stylesheets, co-located with feature files. **Use unique class names.** *Note: Nutin's naming convention encourages prefixes `home__header`*.
-    - Optional SEO static files generation: `config/seo.json` is used by production builder to generate static HTML files to be served to bots, via real SSR of your components (only title, description and ogImage remain hand-authored content). Also generates `robots.txt` and `sitemap.xml` from `config/seo.json` (supports per-route `disallow` / `disallowBots`).
-    - New interface `AppEventMap` only for app-level events. Nutin internal events are no longer defined in `globals.d.ts`. Payload types are now objects.
-    - i18n now uses URL: aligns with common practices & allows SEO to render static HTML files for each language.
-    - New CLI command `nutin-update` (update Nutin to latest patch / minor). `nutin-update` diffs your project against the new templates and merges changes, reporting any conflicts it can't resolve automatically.
-    - New CLI command `nutin-add docker`.
-    - New file: `GETTING_STARTED.md` - gives a new Nutin developer enough architectural context and concrete conventions to start working without immediately having to consult the full documentation.
-    - New file: `AGENTS.md` - gives LLMs the minimal context they need to start working with you in a Nutin project.
-    - Docker: Ports are configurable via `nutin.config.js`. Dockerfile now builds a brotli-enabled image.
-    - TestinNutin: Added code coverage summary (branches / functions/ lines), `it.todo`, clock mocking (`setTimeout / setInterval`).
-    - EventBus exposes domain facades for `Navigation` and `Lifecycle` events. Subscribing functions (`on*`) return a closure function to abstract unsubscription. it remains directly usable in app-level events / domain facades.
+* Renamed `BaseComponent`'s `childConfigs()` to `registerChildren()` and `catalogConfig` to `createCatalogComponents()`.
+* Raised the required Node.js version from `>=18` to `>=22`.
+* Removed all libraries except `Pipes`, as they did not fit Nutin's philosophy.
+* Removed `Store`. Its responsibilities were unclear and largely duplicated what services already provide.
+* Removed the `force` parameter from `listenToRenderEvents()`. It is no longer needed.
+
+### Architecture & API
+
+* Clarified and separated the responsibilities of the base classes:
+  * **`BaseComponent`**: render lifecycle, hydration, DOM lifecycle, DOM and EventBus subscriptions, teardown, render guard, and composition orchestration.
+  * **`Component`**: props (`className`, `style`, `data-bindings`), configuration/defaults/normalization, and template generation through `templateFn`.
+  * **`View`**: route parameters, navigation hooks (`onEnter()` / `onExit()`), and view identity (`viewName`).
+
+* Components and Views now inherit `listen()` and `listenToRenderEvents()` methods with automatic unsubscription.
+* Added explicit lifecycle hooks:
+  * **Component:** `onBeforeRender()`, `onAfterRender()`, `onBeforeDestroy()`, `onAfterDestroy()`
+  * **View:** `onEnter()`, `onExit()`
+
+* Simplified the EventBus API:
+    * Added `AppEventMap` for app-level events. Nutin's internal events are no longer declared in `globals.d.ts`.
+    * Event payload types are now objects.
+    * EventBus now exposes domain facades for `Navigation` and `Lifecycle` events.
+    * Event subscription functions (`on*`) now return a closure for unsubscription.
+    * `AppEventBus` can still be used directly when needed (`once()`, etc.), but subscriptions must then be unsubscribed manually through the `onBeforeDestroy()` hook.
 ```ts
 // emit
 Navigation.navigateTo('path');
@@ -32,26 +37,46 @@ const unsub = Navigation.onNavigate(this.doStuff);
 unsub()
 ```
 
-- Cleaner base classes responsibilities
-    - BaseComponent responsibilities: Render lifecycle, Hydration, DOM lifecycle, Event subscriptions (DOM and bus), Teardown, Render guard, Composition orchestration.
-    - Component responsibilities: Props (className, style, data-bindings), Config + defaults + normalization, Template generation via `templateFn`
-    - View responsibilities: Route params, Navigation hooks (onEnter/onExit), View identity (viewName)
-    - Components and Views subclasses inherit methods with automatic unsubscribe: `listen(event, callback`, `listenToRenderEvents(events[])`. *Note*: `listenToRenderEvents`'s `force` param has been removed - no longer needed. AppEventBus can still be used directly if needed (`once`...) but must be unsubscribed manually via `onBeforeDestroy` hook.
-    - Proper lifecycle hooks
-```ts
-// Component hooks
-onBeforeRender()
-onAfterRender()
-onBeforeDestroy()
-onAfterDestroy()
+### Services
 
-// View hooks - called by router
-onEnter()
-onExit()
-```
-- Services now exposes a single `getInstance()` method that accepts arguments, only on first call.
+* Services now expose a single `getInstance()` method.
+* Arguments can be passed to `getInstance()`, but are only used during the first instantiation.
 
-- Numerous bug fixes
+### Configuration & Build
+
+* Added `nutin.config.js` as the central configuration file for Nutin options, builder, generator, and testing.
+* Added optional Tailwind CSS v4 support as a utility layer alongside SASS.
+* Added globally scoped stylesheets co-located with feature files. **Use unique class names.** Nutin's naming convention encourages prefixes such as `home__header`.
+* HTML templates can now be either inline or external `.html` files. Defining both, or neither, fails the build.
+* Added configurable Docker ports through `nutin.config.js`.
+* Dockerfile now builds a Brotli-enabled image.
+
+### SEO & i18n
+
+* Added optional generation of static SEO files from `config/seo.json`.
+  * Production builds generate static HTML for each route using the actual components.
+  * Only `title`, `description`, and `ogImage` remain hand-authored SEO content.
+  * Generates `robots.txt` and `sitemap.xml`.
+  * Supports per-route `disallow` and `disallowBots`.
+
+* i18n now uses the URL, aligning with common practices and allowing static SEO HTML to be generated for each language.
+
+### CLI & Developer Experience
+
+* Added `nutin-update`, which updates Nutin to the latest patch or minor version by diffing the project against the new templates and merging compatible changes. Unresolved conflicts are reported.
+* Added `nutin-add docker`.
+* Added `GETTING_STARTED.md`, providing the architectural context and conventions needed to start working with a Nutin project without immediately consulting the full documentation.
+* Added `AGENTS.md`, providing LLMs with the minimal context required to work effectively in a Nutin project.
+
+### TestinNutin
+
+* Added code coverage summaries for branches, functions, and lines.
+* Added `it.todo`.
+* Added clock mocking for `setTimeout` and `setInterval`.
+
+### Bug Fixes
+
+* Numerous bug fixes and stability improvements.
 
 ## 1.3.1
 
