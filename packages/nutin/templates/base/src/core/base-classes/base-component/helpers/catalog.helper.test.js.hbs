@@ -13,14 +13,14 @@ describe('CatalogHelper', () => {
     scope = null;
   });
 
-  it('returns an empty array when config.array is missing or empty', () => {
-    expect(CatalogHelper.generateCatalog({ array: [], selector: 'x', elementName: 'item' }, scope)).toEqual([]);
+  it('returns an empty array when config.items is missing or empty', () => {
+    expect(CatalogHelper.generateCatalog({ items: [], selector: 'x', elementName: 'item' }, scope)).toEqual([]);
     expect(CatalogHelper.generateCatalog({ selector: 'x', elementName: 'item' }, scope)).toEqual([]);
   });
 
   it('returns an empty array when no matching [data-catalog] container exists', () => {
     const configs = CatalogHelper.generateCatalog(
-      { array: [{ id: 1 }], selector: 'missing', elementName: 'item' },
+      { items: [{ id: 1 }], selector: 'missing', elementName: 'item' },
       scope
     );
     expect(configs).toEqual([]);
@@ -29,7 +29,7 @@ describe('CatalogHelper', () => {
   it('builds a wrapper + inner [data-component] element per array item inside each matching container', () => {
     scope.innerHTML = '<div data-catalog="list"></div>';
     CatalogHelper.generateCatalog(
-      { array: [{ id: 1 }, { id: 2 }], selector: 'list', elementName: 'item', component: class {} },
+      { items: [{ id: 1 }, { id: 2 }], selector: 'list', elementName: 'item', component: class {} },
       scope
     );
 
@@ -44,7 +44,7 @@ describe('CatalogHelper', () => {
   it('clears any pre-existing content in the container before building', () => {
     scope.innerHTML = '<div data-catalog="list"><span class="stale"></span></div>';
     CatalogHelper.generateCatalog(
-      { array: [{ id: 1 }], selector: 'list', elementName: 'item', component: class {} },
+      { items: [{ id: 1 }], selector: 'list', elementName: 'item', component: class {} },
       scope
     );
     expect(scope.querySelector('.stale')).toBe(null);
@@ -53,7 +53,7 @@ describe('CatalogHelper', () => {
   it('uses the configured elementTag for the wrapper element', () => {
     scope.innerHTML = '<div data-catalog="list"></div>';
     CatalogHelper.generateCatalog(
-      { array: [{ id: 1 }], selector: 'list', elementName: 'item', elementTag: 'li', component: class {} },
+      { items: [{ id: 1 }], selector: 'list', elementName: 'item', elementTag: 'li', component: class {} },
       scope
     );
     const wrapper = scope.querySelector('[data-catalog="list"]').firstElementChild;
@@ -69,7 +69,7 @@ describe('CatalogHelper', () => {
 
     const configs = CatalogHelper.generateCatalog(
       {
-        array: [{ id: 1 }],
+        items: [{ id: 1 }],
         selector: 'list',
         elementName: 'item',
         component: FakeComponent,
@@ -96,7 +96,7 @@ describe('CatalogHelper', () => {
     const fakeScope = { querySelectorAll: () => [null, realContainer] };
 
     const configs = CatalogHelper.generateCatalog(
-      { array: [{ id: 1 }], selector: 'list', elementName: 'item', component: class {} },
+      { items: [{ id: 1 }], selector: 'list', elementName: 'item', component: class {} },
       fakeScope
     );
 
@@ -111,7 +111,7 @@ describe('CatalogHelper', () => {
     }
 
     const configs = CatalogHelper.generateCatalog(
-      { array: ['red', 'blue'], selector: 'list', elementName: 'item', component: FakeComponent },
+      { items: ['red', 'blue'], selector: 'list', elementName: 'item', component: FakeComponent },
       scope
     );
 

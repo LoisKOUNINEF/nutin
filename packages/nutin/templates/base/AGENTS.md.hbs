@@ -40,12 +40,12 @@ BaseComponent<T>     — render/destroy engine, data-* parsing, children
 - `render()`: `onBeforeRender()` → sanitize + set `innerHTML` → mount children (`data-component`/`data-catalog`) → parse `data-i18n`/`data-pipe` → bind `data-event` listeners → `onAfterRender()`. Runs in full on every `render()` call — no virtual DOM/diffing.
 - `destroy()`: unbinds events, unsubscribes bus listeners, destroys children, removes the element.
 - `Service`: direct `new` throws — always use `MyService.getInstance()` (or the exported const). Auto-binds all methods to the instance. `registerCleanup(fn)` for teardown; `Service.destroyAll()` runs on `beforeunload`.
-- Overridable hooks (all no-op by default): `onBeforeRender`, `onAfterRender`, `onBeforeDestroy`, `onAfterDestroy`, `generateTemplate()`, `childConfigs()`. `View` adds router-only `onEnter()`/`onExit()`.
+- Overridable hooks (all no-op by default): `onBeforeRender`, `onAfterRender`, `onBeforeDestroy`, `onAfterDestroy`, `generateTemplate()`, `registerChildren()`. `View` adds router-only `onEnter()`/`onExit()`.
 
 ## Children components
 
-- Override `childConfigs(): ComponentConfig[]` to declare children — matched against `[data-component="selector"]` elements in the rendered template. ComponentConfig: `{ selector: 'my-selector', factory: (el) => new MyComponent(el, {...} )}`.
-- For repeated lists, use the inherited `catalogConfig({ array, elementName, selector, component })` inside `childConfigs()` instead of hand-writing one entry per item — targets `[data-catalog="selector"]`.
+- Override `registerChildren(): ComponentConfig[]` to declare children — matched against `[data-component="selector"]` elements in the rendered template. ComponentConfig: `{ selector: 'my-selector', factory: (el) => new MyComponent(el, {...} )}`.
+- For repeated lists, use the inherited `createCatalogComponents({ items, elementName, selector, component })` inside `registerChildren()` instead of hand-writing one entry per item — targets `[data-catalog="selector"]`.
 
 ## `data-*` attributes
 
@@ -56,8 +56,8 @@ BaseComponent<T>     — render/destroy engine, data-* parsing, children
 | `data-pipe="name[:args]\|name2..."` | Pipes value/text through registered pipes, chainable with `\|`. |
 | `data-pipe-source="..."` | Overrides the raw value fed into `data-pipe`. |
 | `data-optional` | Removes the element post-render if it ends up empty (tag-specific check: `src`/`value`/`textContent`). |
-| `data-component="selector"` | Child component mount point, from `childConfigs()`. |
-| `data-catalog="selector"` | Repeated-children mount point, from `catalogConfig()`. |
+| `data-component="selector"` | Child component mount point, from `registerChildren()`. |
+| `data-catalog="selector"` | Repeated-children mount point, from `createCatalogComponents()`. |
 | `data-bind="propKey"` | `Component`-only two-way field binding; read back with `getValues()`. |
 
 ## DOM events binding

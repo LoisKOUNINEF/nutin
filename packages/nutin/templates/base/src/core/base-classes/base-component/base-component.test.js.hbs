@@ -62,9 +62,9 @@ describe('BaseComponent', () => {
     expect(component.getElement().tagName).toBe('SECTION');
   });
 
-  it('defaults childConfigs() to an empty array', () => {
+  it('defaults registerChildren() to an empty array', () => {
     const component = new TestComponent();
-    expect(component.childConfigs()).toEqual([]);
+    expect(component.registerChildren()).toEqual([]);
   });
 
   it('render() runs the full pipeline in order', () => {
@@ -141,12 +141,12 @@ describe('BaseComponent', () => {
     component.destroy();
   });
 
-  it('catalogConfig() delegates to CatalogHelper.generateCatalog scoped to the component element', () => {
+  it('createCatalogComponents() delegates to CatalogHelper.generateCatalog scoped to the component element', () => {
     const component = new TestComponent();
     component.getElement().innerHTML = '<div data-catalog="list"></div>';
 
-    const configs = component.catalogConfig({
-      array: [{ id: 1 }],
+    const configs = component.createCatalogComponents({
+      items: [{ id: 1 }],
       selector: 'list',
       elementName: 'item',
       component: class {},

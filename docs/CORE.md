@@ -108,7 +108,7 @@ onAfterDestroy()
 
 Overridable hooks (all no-op by default): `onBeforeRender`, `onAfterRender`,
 `onBeforeDestroy`, `onAfterDestroy`, `generateTemplate()` (returns `''`),
-`childConfigs()` (returns `[]`). `View` additionally exposes `onEnter()` /
+`registerChildren()` (returns `[]`). `View` additionally exposes `onEnter()` /
 `onExit()`, but these are called by the **router**, not by `render()`/
 `destroy()` — they fire on navigation, not on every re-render.
 
@@ -136,10 +136,10 @@ afterward regardless:
 
 ## Children / composition
 
-A parent declares children by overriding `childConfigs()`:
+A parent declares children by overriding `registerChildren()`:
 
 ```ts
-public childConfigs(): ComponentConfig[] {
+public registerChildren(): ComponentConfig[] {
   return [{ 
     // matched to <div data-component="my-child">
     selector: 'my-child', 
@@ -155,18 +155,18 @@ recursively destroys all tracked children (which in turn tear down their own
 listeners, bus subscriptions, and grandchildren) before removing the parent's
 own element.
 
-**Repeated children** use `catalogConfig()` instead of hand-writing one entry
-per item — given `{ array, elementName, selector, component }` it clears a
+**Repeated children** use `createCatalogComponents()` instead of hand-writing one entry
+per item — given `{ items, elementName, selector, component }` it clears a
 `[data-catalog="selector"]` container, generates one wrapper (with
 `data-index`) and `data-component="elementName-i"` per array item, and
 returns the matching `ComponentConfig[]`, which then flows through the exact
-same child-mounting path. Include it inside `childConfigs()`:
+same child-mounting path. Include it inside `registerChildren()`:
 
 ```ts
-childConfigs() {
+registerChildren() {
   return [
-    ...this.catalogConfig({ 
-      array: this.items, 
+    ...this.createCatalogComponents({ 
+      items: this.items, 
       elementName: 'item',
       // matched to <div data-catalog="items"> 
       selector: 'items', 

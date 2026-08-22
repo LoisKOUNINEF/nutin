@@ -19,7 +19,7 @@ describe('ChildrenHelper', () => {
     const factoryCalls = [];
 
     const component = {
-      childConfigs: () => [{
+      registerChildren: () => [{
         selector: 'widget',
         factory: (el) => {
           factoryCalls.push(el);
@@ -40,10 +40,10 @@ describe('ChildrenHelper', () => {
     expect(children.length).toBe(1);
   });
 
-  it('instantiates one child per matched element for a single childConfigs entry', () => {
+  it('instantiates one child per matched element for a single registerChildren entry', () => {
     element.innerHTML = '<div data-component="widget"></div><div data-component="widget"></div>';
     const component = {
-      childConfigs: () => [{
+      registerChildren: () => [{
         selector: 'widget',
         factory: () => ({ render: () => {}, destroy: () => {} }),
       }],
@@ -55,8 +55,8 @@ describe('ChildrenHelper', () => {
     expect(children.length).toBe(2);
   });
 
-  it('does nothing when there are no childConfigs', () => {
-    const component = { childConfigs: () => [] };
+  it('does nothing when there are no registerChildren', () => {
+    const component = { registerChildren: () => [] };
     const children = [];
     ChildrenHelper.addChildren(component, element, children);
     expect(children.length).toBe(0);

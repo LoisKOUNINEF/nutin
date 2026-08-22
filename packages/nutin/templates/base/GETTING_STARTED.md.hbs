@@ -103,7 +103,7 @@ export class ProductCardComponent extends Component {
     // One child per item in _product.tags, matched to <div data-catalog="product-tags">
     const tagsCatalog = this.createCatalogComponents({
       selector: 'product-tags',
-      array: this._product.tags,
+      items: this._product.tags,
       component: ProductTagsComponent,
       elementName: 'product-tag'
     });

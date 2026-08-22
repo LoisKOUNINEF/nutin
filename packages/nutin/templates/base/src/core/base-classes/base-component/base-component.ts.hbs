@@ -122,7 +122,7 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
     ChildrenHelper.addChildren(this, this.element, this._children);
   }
 
-  protected catalogConfig(config: CatalogConfig): ComponentConfig[] {
+  protected createCatalogComponents(config: CatalogConfig): ComponentConfig[] {
     return CatalogHelper.generateCatalog(config, this.element);
   }
 
