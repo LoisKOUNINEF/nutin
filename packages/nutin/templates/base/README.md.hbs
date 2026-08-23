@@ -1,24 +1,15 @@
-# {{projectName}} - Built with nutin
+# {{projectName}} - Built with Nutin
 
-## Start
+## Development
 
-- `{{packageManager}} run serve` (rebuild), `{{packageManager}} run serve:only` (no rebuild), `{{packageManager}} run dev` (watch).
+- `{{packageManager}} run serve` — build and serve
+- `{{packageManager}} run dev` — build and serve with live reload
 
 ## Build
 
-- `{{packageManager}} run build` (dev) or `{{packageManager}} run build:prod` (production)
+- `{{packageManager}} run build` — build the application
+- `{{packageManager}} run build:prod` — build the application for production
 
-	Accepts `--bundle` (= build:prod) and `--log` (verbose output) flags
+## Getting started
 
-## Generate Component, View, Service
-
-- `{{packageManager}} run generate ELEMENT ELEMENT_NAME`
-
-	Supports nested paths.
-
-{{#if testinNutin}}
-## Test
-
-- `{{packageManager}} run test:rebuild`, `{{packageManager}} run test`, `{{packageManager}} run test:watch`.
-
-{{/if}}
+See [Getting Started](GETTING_STARTED.md) for project-specific guidance.

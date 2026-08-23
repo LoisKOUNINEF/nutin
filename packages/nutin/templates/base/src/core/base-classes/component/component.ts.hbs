@@ -1,24 +1,17 @@
-import { BaseComponent, ButtonManager, BaseButton, BaseComponentOptions } from '../../index.js';
+import { BaseComponent, BaseComponentOptions } from '../../index.js';
 import { ConfigHelper } from './helpers/config.helper.js';
 import { DataBindingHelper } from './helpers/data-binding.helper.js';
-
-export interface ComponentButton extends BaseButton {
-  // if needed for Component-specific properties
-}
 
 export interface ComponentProps {
   // Common HTML attributes - extend as needed
   className?: string;
   style?: string;
   textContent?: string;
-  
+
   // Form field bindings - extend as needed
   name?: string;
   email?: string;
-  
-  // Dynamic buttons
-  buttons?: ComponentButton[];
-  
+
   // Allow for additional data-bind attributes
   [key: string]: any;
 }
@@ -45,7 +38,9 @@ interface ComponentOptions<K = any> extends BaseComponentOptions {
 export abstract class Component<T extends HTMLElement = HTMLElement, K = any> extends BaseComponent<T> {
   protected config: K;
   protected props: ComponentProps;
-  private buttonManager: ButtonManager;
+  private _templateFn: (config?: K) => string;
+  private _normalizeKeys: (keyof K)[];
+  private _defaults: Partial<K>;
 
   constructor({
     templateFn = () => '',
@@ -55,35 +50,36 @@ export abstract class Component<T extends HTMLElement = HTMLElement, K = any> ex
     config,
     normalizeKeys = [],
     defaults = {},
+    trustLevel,
   }: ComponentOptions) {
-    const template = ConfigHelper.createNormalizedTemplate({
-      config, defaults, normalizeKeys, templateFn,
-    });
-    super({template, mountTarget, tagName});
+    super({ mountTarget, tagName, trustLevel });
 
     this.config = ConfigHelper.setConfigValue(config, normalizeKeys);
     this.props = props;
-    this.buttonManager = this.createButtonManager();
+    this._templateFn = templateFn;
+    this._normalizeKeys = normalizeKeys as (keyof K)[];
+    this._defaults = defaults;
   }
 
   public getValues(): Record<string, string> {
     return DataBindingHelper.getDataBindingValues(this.element);
   }
 
-  public override render(): HTMLElement {
-    this.applyProps();
-    this.appendDynamicButtons();
-    this.autoBindEvents();
-    this.parseDataAttributes();
-    return super.render();
+  protected override generateTemplate(): string {
+    return ConfigHelper.createNormalizedTemplate({
+      config: this.config,
+      defaults: this._defaults,
+      normalizeKeys: this._normalizeKeys,
+      templateFn: this._templateFn,
+    });
   }
 
-  private createButtonManager(): ButtonManager {
-    return new ButtonManager(
-      this, 
-      this.props.buttons, 
-      { containerClassName: 'component-buttons' }
-    );
+  protected override onBeforeRender(): void {
+    this.applyProps();
+  }
+
+  protected override onAfterRender(): void {
+    this.applyDataBindings();
   }
 
   private applyProps(): void {
@@ -91,13 +87,8 @@ export abstract class Component<T extends HTMLElement = HTMLElement, K = any> ex
       this.element.classList.add(this.props.className);
     }
     if (this.props.style) {
-      this.element.style = this.props.style;
+      this.element.style.cssText = this.props.style;
     }
-    this.applyDataBindings();
-  }
-
-  private appendDynamicButtons(): void {
-    this.buttonManager.appendTo(this.element);
   }
 
   private applyDataBindings(): void {

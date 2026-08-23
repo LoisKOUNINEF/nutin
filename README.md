@@ -1,23 +1,27 @@
-# nutin-toolkit Monorepo
+# Nutin Monorepo
 
-Monorepo for the nutin toolkit project - `A minimal frontend toolkit crafted for learning and lean applications` -. Contains the toolkit's NPM package, the project's website and the tutorial app.
+`The structure of a framework. The freedom of vanilla.`
 
-- [nutin](packages/nutin/README.md)
-- [website](apps/website/README.md)
-- [tutorial app](apps/tutorial)
+Nutin provides the structure and tooling you'd expect from a framework, while keeping the underlying web platform visible and giving you code ownership.
 
-*Visit the [website](https://www.nutin.org) or the [NPM package page](https://www.npmjs.com/org/nutin).*                                                                      
+**Your app owns Nutin — not the other way around.** The source code lives alongside your application, so you can read it, modify it, and make it yours. Nutin's update system is designed to preserve those changes.
+
+Nutin is deliberately pragmatic, lightweight, and dependency-free on runtime.
+
+**[Create your first app →](https://www.nutin.org/tutorial).**
+
+## Repository
+
+- **[NPM package](packages/nutin/README.md)** — Nutin CLI, generator and templates
+- **[Website](apps/website/README.md)** — Nutin's website, built with Nutin
+- **[Tutorial app](apps/tutorial)** — Working example of the application built in the tutorial
+
 ## 📄 Docs
 
-- [data-\* Attributes](docs/DATA_ATTRIBUTES.md)
-- [stylin-nutin](docs/STYLIN_NUTIN.md)
-- [Libraries](docs/LIBS.md)
-- [testin-nutin](docs/TESTIN_NUTIN.md)
-- [Tools](docs/TOOLS.md)
-- [Deployment Helpers](docs/DEPLOYMENT_HELPERS.md)
-- [Base Classes](docs/BASE_CLASSES.md)
-- [Native Services](docs/SERVICES.md)
-- [Monorepo Workflows](docs/WORKFLOWS.md)
+- **[Core](docs/CORE.md)**: Core functionalities
+- **[Testing](docs/TESTING.md)**: Built-in testing toolkit - used to test Nutin and available for application tests.
+- **[Docker](docs/DOCKER.md)**: Multi-stage `Dockerfile` and ready-to-use `nginx.conf`
+- **[Tools](docs/TOOLS.md)**: Generator, builder, development environment.
 
 ## 📝 Contributing
 

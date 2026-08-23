@@ -1,20 +1,4 @@
-declare type CoreEventMap = {
-    'navigate': string;
-    'reload': string;
-    'view-mount': string;
-    'view-render': string;
-    'view-unmount': string;
-    'track-pageview': { page: string };
-    'popover-opened': string;
-    'popover-close': string;
-    {{#if i18n}}
-    'language-changed': string;
-    {{/if}}
-    // Add other events and their payload types here
+declare interface AppEventMap {
+    // Add app-specific event types here
+    // 'event': { /* payload? */ }
 };
-
-declare type StoreEventMap = {[ K in `store:${string}` ]: any; };
-
-// Merged event map
-declare type EventMap = CoreEventMap & StoreEventMap;
-declare type EventKey = keyof EventMap;

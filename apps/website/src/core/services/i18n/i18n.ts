@@ -99,6 +99,7 @@ export class I18n extends Service<I18n> {
   public resetTranslations(): void {
     this._translations = {};
     this._defaultTranslations = {};
+    localStorage.removeItem(this._localStorageKey);
     this._currentLanguage = this._DEFAULT_LANGUAGE;
   }
 

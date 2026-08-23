@@ -1,212 +1,128 @@
-# Tools Docs
+# Nutin - Tools documentation
+
+***IMPORTANT NOTE:*** 
+
+Switching package manager in an existing nutin app requires adapting: 
+
+- **breaking**: `tools/dev/dev-serve.js`
+- **breaking**: `tools/dev/watcher.js`
+- *cosmetic*: `tools/generator/generator.js` and `tools/builder/builder.js`
+- **breaking**: `tools/docker/Dockerfile.template` *(with docker feature already added)*
+
+## Table of Contents
+
+- [Package.json scripts](#packagejson-scripts)
+- [Generator](#generator)
+- [Builder](#builder)
 
 ## Package.json scripts
 
 * Development server :
-*NOTE: If you switch package manager in an existing nutin app, you'll need to modify : `tools/dev-serve.js`, `tools/watcher.js`.*
 
 ```bash
 # build (dev environment) and serve
-npm run serve
+<pm> run serve
+
+# build (prod environment) and serve
+<pm> run serve:prod
 
 # without build (use existing 'dist' output)
-npm run serve:only
+<pm> run serve:only
 
-npm run dev
-
-## `serve` and `dev` commands can be executed with flags
-### `--bundle` : prod (bundled) output
-### `--log` : verbose builder output
+# build (dev environment) and serve with live reload
+<pm> run dev
 ```
 
 * Build for production:
 
 ```bash
-npm run build:prod
-# or
-npm run build --bundle
-
-## both commands can be executed with flag `--log` : verbose output
+<pm> run build:prod
+# runs: NODE_ENV=production node tools/builder/builder.js
 ```
 
 * Generate a component, view or service:
 
 ```bash
-# kebab-case name
-# supports nested path
-npm run generate ELEMENT ELEMENT_NAME
-
-##
-npm run generate component my-component
-npm run generate view my-view
-npm run generate service my-service
+<pm> run generate ELEMENT ELEMENT_NAME
 ```
 
-- Runs generator: `npm run generate component widgets/my-widget` -> this creates: 
-    - `src/app/components/widgets/my-widget/my-widget.component.ts`.
-    - `locales` fragments with i18n feature enabled.
-    - `src/app/components/widgets/my-widget/my-widget.component.html` with external templates feature enabled. 
-    - optionally `styles/components/_my-widget.scss` with stylin-nutin feature enabled (forwarded by `styles/components/_index.scss`).
-
-* Run tests (testin-nutin toolkit):
+* Run tests (testin-nutin toolkit, shipped in base — no feature flag needed):
 
 ```bash
-npm run test
-npm run test:rebuild
-npm run test:watch
+<pm> run testin-nutin           # build, then run once
+<pm> run testin-nutin:watch     # build once, then re-run on file changes
+<pm> run testin-nutin:coverage  # run and outputs coverage. Fails if below threshold defined in nutin.config.js.testinNutin.coverage.threshold
+<pm> run testin-nutin:verbose   # run and log each test suite and test as it runs
 ```
 
-* Versioning
+* Docker (with docker feature added - `nutin-add docker`):
 
 ```bash
-npm run patch
-npm run minor
-npm run major
+<pm> run docker:build
+<pm> run docker:run
 ```
 
-## Project layout
+  `docker:build` first runs `tools/docker/scripts/validate-docker.js` directly (validates the top-level `dockerPorts` from `nutin.config.js` and regenerates `tools/docker/Dockerfile`/`nginx.conf` from their `.template` counterparts), then invokes `docker build`.
 
-```
-public/
-src/
-	app/
-	  components/
-	    my-component/
-	      my-component.component.ts
-	      my-component.component.html
-	  services/
-	  	my-service/
-	  		my-service.service.ts
-	  views/
-	    home/
-	      home.view.ts
-	      home.view.html
-  	routes.ts
-  	main.ts
-	assets/
-	core/  -- nutin's code
-	libs/  -- nutin's libraries
-	styles/
-	index.html
-tools/  -- builder, deployment, dev, generator
-builder.config.js
-package.json
-tsconfig.json
-```
+## Generator
+
+* Usage: `<pm> run generate TYPE PATH/TO/NAME`).
+* `type` is a string (`component` || `view` || `service`).
+* `path` is a target path where files will be created; the script normalizes / extracts the last word to derive the `name`. Files will be created in `TYPE_FOLDER/PATH/TO/NAME/NAME.ts` or in `TYPE_FOLDER/NAME/NAME.ts` if only `name` was provided.
+
+### Templates
+
+* `component.template.js` — creates a TypeScript component class that imports `Component` from `core/index.js` (relative path computed by `getRelToCore`) and sets `const templateFn = () => '__TEMPLATE_PLACEHOLDER__';` (or the literal HTML if `inlineTemplates` is off).
+* `view.template.js` — similar to component but for `View`; sets `const template = '__TEMPLATE_PLACEHOLDER__';`.
+* `service.template.js` — simple singleton `Service` pattern.
+* *If external templates are used* `html.template.js` — minimal HTML snippet: `<div>{Name} works !</div>`.
+* *If `generator.generateLocales` is on* : `json.template.js` — default i18n JSON
+* `scss.template.js` — currently a no-op stub (`() => '\n'`); styles are hand-authored, not scaffolded with boilerplate.
+* *If `generator.generateTest` is on* : `test.template.js` — minimal `.test.js` file.
+
+**Notes**
+
+* Generator-produced components and views intentionally include the `__TEMPLATE_PLACEHOLDER__` token. This is by design: the build step `merge-templates.js` uses this token to inject HTML templates into those files.
+* *If `generator.generateStylesheet` is on* : The generator writes a (currently blank) `.scss` file co-located next to the component/view's own `.ts` file
+* *If `generator.generateLocales` is on* : The generator also creates locale fragments when — it relies on `LANGUAGES` from `config/languages.json` at your project root.
 
 ## Builder
+
+* If you add new asset formats, update `tools/builder/app/binary-extensions.js`.
 
 ### Build flow
 
 `tools/builder/builder.js` is the orchestrator (executable Node script). It runs a fixed sequence of core steps (in this order):
 
-1. `copy-static.js` 
-    — copy files from `src/` into `dist-build/src/` (assets/static + JSONs) respecting known binary extensions.
-2. *If i18n is used* : `build-i18n.js` 
+1. `copy-static.js`
+    — copy files from `src/` into `dist-build/src/` (assets/static + JSONs), the favicon, and `config/`/`nutin.config.js`, respecting known binary extensions.
+2. `validate-routes.js`
+    — statically parse `src/app/routes.ts`'s `appRoutes` object literal (TypeScript compiler API, no execution) and fail the build if any route key is duplicated (an earlier duplicate would be silently unreachable).
+3. `tsc.js`
+    — run the TypeScript compiler.
+    - eventhough it could be skipped for production build (using `esbuild`), it runs for Type checking.
+4. *If `inlineTemplates` is `false`* : `merge-templates.js`
+    — minify each external HTML template then replace the matching `.js` file's `__TEMPLATE_PLACEHOLDER__` token with it.
+    *If `inlineTemplates` is `true`* : `minify-html.js`
+    — minify inline templates in place instead.
+5. `sass.js`
+    — compile `src/styles/main.scss` (plus every component/view's co-located `.scss`) and write `dist-build/src/main.css`.
+6. *If `tailwind` is configured* : `tailwind.js`
+    — compile Tailwind CSS.
+7. *If i18n is used* : `build-i18n.js`
     — find JSON locale fragments and merge them into per-locale files under `dist-build/src/locales/`.
-3. `minify-html.js` 
-    - Minify html inline templates. 
-    - *when using external templates* : `merge-templates.js` — minify HTML template then replace `__TEMPLATE_PLACEHOLDER__` tokens with minified template.
-4. `sass.js` 
-    — compile `src/styles/main.scss` and write `dist-build/src/main.css`.
-5. `validate-html.js`
+8. `validate-html.js`
 	- add app entrypoint script tag and stylesheet link tag in index.html
-    — run lightweight checks over `dist-build/src/index.html`  to ensure required tags exist.
-6. `esbuild.js`
+    — run lightweight checks over `dist-build/src/index.html` to ensure required tags exist.
+9. *production only* : `esbuild.js`
     - run esbuild
-7. `hash-files.js`
+10. *production only* : `hash-files.js`
     - hash `.js` and `.css` files
-8. `compress-files.js`
+11. *production only* : `compress-files.js`
     - compress files with gzip (`.js` `.css` `.json` `.svg` `ttf` `otf` `eot`)
-9. `finalize-build.js`
+12. *production only, if `generateSEO` is enabled* : `generate-seo-files.js`
+    - server-render each route to static HTML, plus `robots.txt`/`sitemap.xml` — see [SEO files generation](#seo-files-generation) for full behavior.
+13. `finalize-build.js`
     - remove existing dist/ folder.
+    - *production*: remove unused files and folders.
     - rename dist-build to dist
-    - *production*: remove unused folder beforehand.
-
-## Core script
-
-### `core/copy-static.js`
-
-* Purpose:
-    - copy files into `dist-build/src/` while handling binary files and JSON files specially.
-* Uses: `tools/builder/variables/binary-extensions.js` (set of known binary extensions) and `tools/utils/get-files-recursive.js`.
-* If you add new asset formats, update `binary-extensions.js`.
-
-### `core/build-i18n.js`
-
-* Only if i18n feature is used.
-* Purpose: merge many small locale JSON files scattered under `src/app` into unified locale files under `dist-build/src/locales/<lang>.json`.
-* Behavior:
-    - It uses `getFilesRecursive(sourceRoot, '.json')` to find JSON files.
-    - It groups JSON files by filename (the filename without `.json` is considered the locale code — e.g. `en.json`, `fr.json`).
-    - It then removes the original JSON fragments under `dist-build/src/app` (calling `removeJsonFiles(cleanupDir)`).
-* If no locale JSONs are present, the step will effectively do nothing (no files created).
-
-### `core/merge-templates.js`
-
-* Only if external template are used.
-* Purpose: inject external HTML templates into JS files by replacing `__TEMPLATE_PLACEHOLDER__` tokens.
-* Behavior:
-  * The script operates on `dist-build/src/app`. It looks for `foo.html foo.js` in the app tree.
-  * For each matching HTML / JS file, it reads the HTML, minifies it, and writes the HTML string where the placeholder was found.
-* The component & view generator creates TS files with the literal `__TEMPLATE_PLACEHOLDER__`.
-
-* If you don't provide external `.html` files, the templateFn / template content will remain and the component/view will render it.
-
-### `core/sass.js`
-
-* Scans paths defined in `builder.config.js`.
-* Compile `src/styles/main.scss` into a single `dist-build/src/main.css` using `sass` (`sass.compileAsync`).
-* Add new .sccs folder paths in builder.config.js if needed.
-
-### `core/validate-html.js`
-
-* Purpose: inject the main script tag and main stylesheet ref, then run a few checks on HTML before finishing the build.
-* Behavior : it reads `index.html` file, add app's entrypoint script tag and stylesheet link tag, validates tags and errors out if expected nodes are missing.
-
-### `core/esbuild.js`
-
-Runs esbuild with config from `builder.config.js`.
-
-### `core/hash-files.js`
-
-Hash `.js` and `.css` files.
-
-### `core/compress-files.js`
-
-Compress files with gzip (`.js` `.css` `.json` `.svg` `ttf` `otf` `eot`).                                     
-*Note: Uncomment Brotli compression if you intend to use it.*
-
-### `core/finalize-build.js`
-
-* If production build (esbuild) : removes unnecessary folders from `dist-build`.
-* Removes exisiting (if any) `dist` folder.
-* Renames `dist-build` to `dist`.
-
-## Generator
-
-* Usage: `npm run generate TYPE PATH/TO/NAME`).
-* `type` is a string (`component` || `view` || `service`).
-* `path` is a target path where files will be created; the script normalizes / extracts the last word to derive the `name`. Files will be created in `TYPE_FOLDER/PATH/TO/NAME/NAME.ts` or in `TYPE_FOLDER/NAME/NAME.ts` if only `name` was provided.
-
-### What `handle-file.js` does
-
-* `generateFile({ name, targetPath, templateFn, suffix, extension = 'ts' })` 
-    — creates the target directory and writes a file `${targetPath}/${name.kebab}.${suffix}.${extension}` using `templateFn(name, targetPath)` as content.
-* `generateJson({ targetPath, name })` *only with i18n feature*
-    — creates a `locales` directory beneath the target and writes JSON files for each language present in `src/app/languages.js`'s exported `LANGUAGES` array. For `view` targets, the JSON template includes `meta` keys; for other targets a minimal default JSON is written.
-
-### Templates
-
-* `component.template.js` — creates a TypeScript component class that imports `Component` from `core/index.js` (relative path computed by `getRelToCore`) and sets `const templateFn = () => \'__TEMPLATE\_PLACEHOLDER__\';\`.
-* `view.template.js` — similar to component but for `View`; sets `const template = \'__TEMPLATE\_PLACEHOLDER__\';\`.
-* `service.template.js` — simple singleton `Service` pattern.
-* *If external templates are used* `html.template.js` — minimal HTML snippet (*If i18n is used* : references i18n key by kebab name: `<div data-i18n="<name>.default"></div>`).
-* *If i18n is used* : `json.template.js` — default JSON
-* `scss.template.js` — `@use` variables, mixins, and sass:map.
-
-**Notes**
-
-* *If external templates are used* : Generator-produced components and views intentionally include the `__TEMPLATE_PLACEHOLDER__` token. This is by design: the build step `merge-templates.js` uses this token to inject HTML templates into those files.
-* *If stylin-nutin is used* : The generator will ask for a `.scss` file creation in `styles/components` / `styles/view` (forwarded by `_index.sccs` barrel files.
-* *If i18n is used* : The generator will also create locale fragments when `generateJson` is invoked — but it relies on `LANGUAGES` exported from your project (the generator imports `config/languages.json` from root). If that file doesn't exist in your project, the generator will throw.

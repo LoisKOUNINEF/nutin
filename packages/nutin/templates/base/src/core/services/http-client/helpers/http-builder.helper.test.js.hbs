@@ -75,6 +75,11 @@ describe('HttpBuilder', () => {
     expect(url.search).toBe('?page=1&limit=10');
   });
 
+  it('buildRequestUrl leaves an existing query in the endpoint untouched when no new params are passed', () => {
+    const url = HttpBuilder.buildRequestUrl('https://api.example.com?page=1');
+    expect(url.search).toBe('?page=1');
+  });
+
   // Tests for buildRequestOptions
   it('buildRequestOptions sets GET without body', () => {
     const options = HttpBuilder.buildRequestOptions(
@@ -105,5 +110,25 @@ describe('HttpBuilder', () => {
     const options = HttpBuilder.buildRequestOptions('GET', null, {}, mockAbortSignal);
     expect(options.body).toBeUndefined();
     expect(options.headers).toBeUndefined();
+  });
+
+  it('buildRequestOptions sets PUT with body', () => {
+    const data = { id: 1, name: 'Updated' };
+    const options = HttpBuilder.buildRequestOptions('PUT', data, {}, mockAbortSignal);
+    expect(options.method).toBe('PUT');
+    expect(options.body).toBe(JSON.stringify(data));
+  });
+
+  it('buildRequestOptions sets PATCH with body', () => {
+    const data = { name: 'Patched' };
+    const options = HttpBuilder.buildRequestOptions('PATCH', data, {}, mockAbortSignal);
+    expect(options.method).toBe('PATCH');
+    expect(options.body).toBe(JSON.stringify(data));
+  });
+
+  it('buildRequestOptions sets DELETE without body', () => {
+    const options = HttpBuilder.buildRequestOptions('DELETE', undefined, {}, mockAbortSignal);
+    expect(options.method).toBe('DELETE');
+    expect(options.body).toBeUndefined();
   });
 })

@@ -1,11 +1,12 @@
-# [nutin](https://www.nutin.org)
+# [Nutin](https://www.nutin.org)
 
-**Build SPAs by understanding SPAs. A minimal frontend toolkit crafted for learning and lean applications.**                    
-Includes essential features out of the box.                          
-*Pure TypeScript, SASS, and DOM-driven components — zero runtime dependencies.*
+`The structure of a framework. The freedom of vanilla.`
 
-- Required : Node >=18 
-- **JSDOM requirement** (testin-nutin companion) : `{ node: '^20.19.0 || ^22.12.0 || >=24.0.0' }`
+Nutin provides the structure and tooling you'd expect from a framework, while keeping the underlying web platform visible and giving you code ownership.
+
+**Your app owns Nutin — not the other way around.** The source code lives alongside your application, so you can read it, modify it, and make it yours. Nutin's update system is designed to preserve those changes.
+
+Nutin is deliberately pragmatic, lightweight, and dependency-free on runtime.
 
 ## Install
 
@@ -18,44 +19,28 @@ npm install -g @nutin/cli
 
 ```bash
 # create a new app
-create-nutin-app # or
-nutin-new
+nutin-new # or create-nutin-app
 
 # without global installation
 npx @nutin/cli
 ```
 
-- Flags
+## Update Nutin
 
 ```bash
-# argument: project-name (prompt if not provided)
-
-# Help
--h --help
-
-# Defaults settings - see below
--d --defaults
-
-# Package manager
--pm --package-manager <manager> # npm (Default), yarn, pnpm, bun
-
-# Presets
---preset <minimal|standard|full|cicd>
-	# minimal: external templates
-	# standard: minimal + i18n & built-in SCSS classes
-	# full: standard + deployment helpers & built-in testing toolkit
-	# cicd: minimal + deployment helpers
-
-# Features
---i18n # Use i18n & json-based content
---deploy-helper # Use Docker & deployment helpers
---testin-nutin # Use testin-nutin toolkit
---transition # Use animated view transitions. Note: May interfere with CSS `position: fixed`, `z-index`...
+# update Nutin while preserving your changes
+nutin-update
 ```
 
-## [First app tutorial](https://www.nutin.org/tutorial)
+## Add Docker
 
-## 📄 Docs
+```bash
+# ready-to-use Dockerfile for Nutin apps
+nutin-add docker
+```
 
-- Docs on [website](https://www.nutin.org).
-- Docs on [repository](https://github.com/LoisKOUNINEF/nutin/tree/main/docs).
+## Useful links
+
+- [Nutin website](https://www.nutin.org)
+- [First app tutorial](https://www.nutin.org/tutorial)
+- [Repository documentation](https://github.com/LoisKOUNINEF/nutin/tree/main/docs)

@@ -6,7 +6,7 @@ remove_old_images() {
   for image in "${images[@]}"; do
     docker image ls "$image" --format "{{.Repository}}:{{.Tag}}" | 
     sort -r | 
-    tail -n +3 | 
+    tail -n +4 | 
     xargs -r docker rmi || true
   done
 }

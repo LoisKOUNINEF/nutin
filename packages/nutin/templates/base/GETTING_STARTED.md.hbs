@@ -1,0 +1,227 @@
+# Getting started
+
+## Table of contents
+
+- [Project structure](#project-structure)
+- [Running your app](#running-your-app)
+- [Generate components, views and services](#generate-components-views-and-services)
+- [A typical component](#a-typical-component)
+- [Features and configuration](#features-and-configuration)
+- [Styling](#styling)
+- [Global layout components](#global-layout-components)
+- [Testing](#testing)
+- [Useful links](#useful-links)
+
+## Project structure
+
+```
+config/   -- configure i18n and SEO files
+
+src/
+  app/
+    components/
+    services/
+    views/
+    routes.ts
+    main.ts
+  assets/
+  core/   -- Nutin framework source
+  styles/
+
+tools/    -- build, development, generator and testing
+
+nutin.config.js   -- features and configuration
+```
+
+## Running your app
+
+```bash
+# Development
+{{packageManager}} run serve # build and serve
+{{packageManager}} run dev   # build and serve with live reload
+
+# Build
+{{packageManager}} run build      # build the application
+{{packageManager}} run build:prod # build the application for production
+```
+
+### Imports
+
+Imports must use **relative paths** and end with `.js` extension.
+
+```js
+import { Foo } from 'relative/path/to/foo.js';
+```
+
+## Generate components, views and services
+
+Generated elements are automatically exported from the corresponding barrel file:
+`src/app/<components|views|services>/index.ts`.
+
+
+```bash
+{{packageManager}} run generate <component|view|service> ELEMENT_NAME
+
+# Examples
+{{packageManager}} run generate component my-component # Target dir: src/app/components/my-component/
+{{packageManager}} run generate component path/to/my-component/ # Target dir: src/app/components/path/to/my-component/
+```
+
+## A typical component
+
+```bash
+components/
+  product-card/
+    product-card.component.html
+    product-card.component.scss
+    product-card.component.ts
+```
+
+```ts
+// The builder injects the component's .html template here.
+const templateFn = (product: Product) => `__TEMPLATE_PLACEHOLDER__`;
+
+export class ProductCardComponent extends Component {
+  private _product: Product;
+
+  constructor(mountTarget: HTMLElement, config: Product) {
+    super({ templateFn, mountTarget, config });
+    this._product = config;
+  }
+
+  // Declares children mounted into the data-component / data-catalog placeholders below.
+  public registerChildren(): ComponentConfig[] {
+    // Single child, matched to <div data-component="product-details">
+    const detailsComponent = {
+      selector: `product-details`,
+      factory: (el) => new ProductDetailsComponent(
+        el, 
+        { config: this._product.details },
+      )
+    };
+
+    // One child per item in _product.tags, matched to <div data-catalog="product-tags">
+    const tagsCatalog = this.createCatalogComponents({
+      selector: 'product-tags',
+      items: this._product.tags,
+      component: ProductTagsComponent,
+      elementName: 'product-tag'
+    });
+
+    return [
+      detailsComponent,
+      ...tagsCatalog
+    ];
+  }
+
+  // Referenced by the data-event attribute in the template.
+  private _goToProductPage(productId: string): void {
+    Navigation.navigateTo(`/product/${productId}`);
+  }
+}
+```
+
+```html
+<div
+  data-event="click:_goToProductPage:${product.id}"
+  class="product-card"
+>
+  <h2 class="product-card__name">${product.name}</h2>
+  <div data-component="product-details"></div>
+  <div data-catalog="product-tags"></div>
+</div>
+```
+
+```scss
+.product-card {
+  // component styles
+}
+
+.product-card__name {
+  // element styles
+}
+```
+
+A template can also be written directly inline (skip the `.html` file and the placeholder). 
+
+Defining both an inline template and an external `.html` file, or neither, fails the build.
+
+## Features and configuration
+
+Nutin features are enabled in `nutin.config.js`.
+
+### `nutin.config.js`
+
+Main Nutin configuration and tool options. See the inline comments for details.
+
+- `tailwind`, `i18n`, `generateSEOFiles` — top-level features, `false` by default.
+- `generator.*` — controls what the generator scaffolds.
+- `builder.*` — controls build behavior.
+- `testinNutin.*` — controls TestinNutin.
+
+### `config/seo.json`
+
+- Register your routes' description, title and ogImage here.
+- Data is used to generate static `index.html` per route, `robots.txt`, and `sitemap.xml`.
+- Unused if `nutin.config.js -> generateSEOFiles` is disabled.
+
+### `config/languages.json`
+
+- Register supported languages for i18n here.
+- Unused if `nutin.config.js -> i18n` is disabled.
+
+## Styling
+
+- Nutin uses SASS (`.scss` syntax, compatible with plain CSS) as its default styling solution.
+
+- Tailwind CSS v4 is also supported as an optional utility-first CSS layer.
+
+**Note:** Installing Tailwind CSS dependencies may print `npm warn install-scripts`. This is expected with npm 12's default install-script allowlisting and is safe to ignore.
+
+## Global layout components
+
+If you need components to render outside `<main>` (such as a header or footer), register them with `registerGlobals()` in `main.ts` constructor.
+
+Global components are mounted directly in `<body>` and remain present across route changes. Use `before` for components that should appear before `<main>` and `after` for components that should appear after it.
+
+```ts
+registerGlobals({
+  before: [{ component: HeaderComponent, id: 'header' }],
+  after: [{ component: FooterComponent, id: 'footer' }],
+});
+```
+
+**Note**: `hideGlobals(globalIds: string[])` / `revealGlobals(globalIds: string[])` are exported alongside `registerGlobals` and can be called to toggle visibility of the ids you registered.
+
+## Testing
+
+You can use any testing tool you prefer for application code.
+
+This project includes TestinNutin, Nutin's lightweight testing toolkit. Nutin itself is tested exclusively with it, and the tests are included in the generated project so you can:
+- use them as executable documentation;
+- run and modify Nutin's tests when modifying its code.
+
+Run the tests with:
+
+`{{packageManager}} run testin-nutin`
+
+To use TestinNutin for application tests, enable:
+
+```js
+// nutin.config.js
+testinNutin: {
+  includeApp: true,
+}
+```
+*Note:* TestinNutin files use root imports.
+```js
+import { MyModule } from '#root/dist/src/path/to/my-module.js';
+```
+
+See **[TestinNutin docs](https://nutin.org/docs/testin-nutin)**.
+
+## Useful links
+
+- [Nutin website](https://www.nutin.org)
+- [First app tutorial](https://www.nutin.org/tutorial)
+- [Repository documentation](https://github.com/LoisKOUNINEF/nutin/tree/main/docs)
