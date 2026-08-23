@@ -1,4 +1,4 @@
-import { ButtonManager } from "src/core/index.js";
+import { ButtonManager } from "../../components/utils/index.js";
 
 export interface IPopoverDomElements {
 	wrapper: HTMLElement;

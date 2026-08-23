@@ -1,4 +1,5 @@
-import { Component, ComponentConfig, IAnchorConfig } from '../../../core/index.js';
+import { Component, ComponentConfig } from '../../../core/index.js';
+import { IAnchorConfig } from '../../../libs/index.js';
 import { AnchorComponent } from '../index.js';
 
 const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
@@ -20,9 +21,9 @@ export class TableOfContentComponent extends Component {
     }));
   }
 
-  public childConfigs(): ComponentConfig[] {
-    return this.catalogConfig({
-      array: this.createAnchorConfigs(),
+  public registerChildren(): ComponentConfig[] {
+    return this.createCatalogComponents({
+      items: this.createAnchorConfigs(),
       elementName: 'anchor',
       selector: 'table-of-content',
       component: AnchorComponent,

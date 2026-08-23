@@ -4,9 +4,12 @@ import { I18nHelper } from './helpers/i18n.helper.js';
 import { PipeHelper } from './helpers/pipe.helper.js';
 import { ChildrenHelper } from './helpers/children.helper.js';
 import { CatalogHelper, CatalogConfig } from './helpers/catalog.helper.js';
-import { Component, ComponentOptions, AppEventBus } from '../../index.js';
+import { Component, AppEventBus } from '../../index.js';
 import { SecurityHelper, TrustLevel } from './helpers/security.helper.js';
+
+export { SecurityHelper, TrustLevel } from './helpers/security.helper.js';
 export { CatalogItemConfig, CatalogConfig, CatalogItemPrimitive } from './helpers/catalog.helper.js';
+export { TokenHelper } from './helpers/token.helper.js';
 
 /**```typescript
  * export interface ComponentConfig {
@@ -29,52 +32,79 @@ export interface BaseComponentOptions {
 
 export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
   private _children: BaseComponent[] = [];
+  private _isRendering = false;
   protected element: T;
   protected eventListeners: Array<[EventTarget, string, EventListener]> = [];
-  private _options: ComponentOptions;
+  private _busSubscriptions: Array<[EventKey, (data: any) => void]> = [];
+  protected trustLevel: TrustLevel | undefined;
 
   constructor({
-    template = '',
     mountTarget = '#app',
     tagName = 'div',
     trustLevel
   }: BaseComponentOptions) {
-    this.element = DomHelper.createElement<T>(tagName, template, trustLevel);
-    this._options = { template, mountTarget, tagName, trustLevel };
-    this.parseDataAttributes();
-    this.autoBindEvents();
+    this.trustLevel = trustLevel;
+    this.element = DomHelper.createElement<T>(tagName, '', trustLevel);
     DomHelper.mountElement(this.element, mountTarget);
   }
 
-  public childConfigs(): ComponentConfig[] {
-    return [];
-  }
-
-  public destroy(): void {
-    EventHelper.destroyEvents(this.eventListeners);
-    ChildrenHelper.destroyChildren(this._children);
-    this.element.remove();
-  }
-
-  public render(): HTMLElement {
-    this.addChildren();
-    DomHelper.cleanupOptionalContent();
+  public getElement(): T {
     return this.element;
   }
 
-/**
- * ```typescript
-interface CatalogConfig extends ComponentOptions {
-  array: CatalogItemConfig[];
-  elementName: string;
-  elementTag?: keyof HTMLElementTagNameMap;
-  selector: string;
-  component: new (el: HTMLElement, data: any) => BaseComponent;
-};
-  ```
-*/
-  protected catalogConfig(config: CatalogConfig): ComponentConfig[] {
-    return CatalogHelper.generateCatalog(config, this.element);
+  public registerChildren(): ComponentConfig[] {
+    return [];
+  }
+
+  public render(): HTMLElement {
+    if (this._isRendering) return this.element;
+    this._isRendering = true;
+
+    try {
+      this.onBeforeRender();
+      this.element.innerHTML = SecurityHelper.sanitizeTemplate(
+        this.generateTemplate(),
+        this.trustLevel
+      );
+      this.compose();
+      this.hydrate();
+      this.autoBindEvents()
+      this.onAfterRender();
+      return this.element;
+    } finally {
+      this._isRendering = false;
+    }
+  }
+
+  public destroy(): void {
+    this.onBeforeDestroy();
+    EventHelper.destroyEvents(this.eventListeners);
+    this._busSubscriptions.forEach(([event, callback]) => {
+      AppEventBus.off(event, callback);
+    });
+    this._busSubscriptions = [];
+    ChildrenHelper.destroyChildren(this._children);
+    this.element.remove();
+    this.onAfterDestroy();
+  }
+
+  // Lifecycle hooks — override in subclasses as needed
+  protected onBeforeRender(): void {}
+  protected onAfterRender(): void {}
+  protected onBeforeDestroy(): void {}
+  protected onAfterDestroy(): void {}
+
+  protected generateTemplate(): string {
+    return '';
+  }
+
+  protected hydrate(): void {
+    this.parseDataAttributes();
+    DomHelper.cleanupOptionalContent();
+  }
+
+  protected compose(): void {
+    this.addChildren();
   }
 
   protected parseDataAttributes(): void {
@@ -91,15 +121,22 @@ interface CatalogConfig extends ComponentOptions {
   protected addChildren(): void {
     ChildrenHelper.addChildren(this, this.element, this._children);
   }
-  
-  protected forceRender(): void {
-    this.element.innerHTML = SecurityHelper.sanitizeTemplate(this._options.template, this._options.trustLevel);
-    this.render();
+
+  protected createCatalogComponents(config: CatalogConfig): ComponentConfig[] {
+    return CatalogHelper.generateCatalog(config, this.element);
   }
 
-  protected listenToRenderEvents(events: EventKey[], force: boolean = false): void {
+  protected listen<K extends EventKey>(
+    event: K,
+    callback: (data: EventMap[K]) => void
+  ): void {
+    AppEventBus.subscribe(event, callback);
+    this._busSubscriptions.push([event, callback]);
+  }
+
+  protected listenToRenderEvents(events: EventKey[]): void {
     events.forEach((event: EventKey) => {
-      AppEventBus.subscribe(event, () => force ? this.forceRender() : this.render());
-    })
+      this.listen(event, () => this.render());
+    });
   }
 }

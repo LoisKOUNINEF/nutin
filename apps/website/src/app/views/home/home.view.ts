@@ -1,4 +1,4 @@
-import { AppEventBus, ComponentConfig, View } from '../../../core/index.js';
+import { Navigation, ComponentConfig, View } from '../../../core/index.js';
 import { ButtonComponent, HomeExtrasComponent, HomePhilosophyComponent, HomePillarsComponent, SnippetComponent } from '../../components/index.js';
 
 const template = `__TEMPLATE_PLACEHOLDER__`;
@@ -8,7 +8,7 @@ export class HomeView extends View {
     super({template});
   }
 
-  public childConfigs(): ComponentConfig[] {
+  public registerChildren(): ComponentConfig[] {
     return [{
       selector: 'tutorial-link',
       factory: (el) => new ButtonComponent(el, {
@@ -51,7 +51,7 @@ export class HomeView extends View {
   }
 
   private navigateTo(name: string) {
-    AppEventBus.emit('navigate', `/${name}`);
+    Navigation.navigateTo(`/${name}`);
     window.scrollTo({ top: 0 });
   }
 }

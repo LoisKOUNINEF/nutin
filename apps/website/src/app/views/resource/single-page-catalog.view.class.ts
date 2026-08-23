@@ -20,15 +20,15 @@ export abstract class SinglePageCatalogView extends ResourceView {
         index: index,
       }
     });
-    return this.catalogConfig({
-      array: sectionsWithAnchor,
+    return this.createCatalogComponents({
+      items: sectionsWithAnchor,
       elementName: `${this.viewName}-${this.sectionComponentSelector}-section`,
       selector: this.sectionComponentSelector,
       component: SectionComponent,
     });
   }
 
-  public childConfigs(): ComponentConfig[] {
+  public registerChildren(): ComponentConfig[] {
     return [ 
       this.renderTableOfContent(), 
       ...this.renderCatalog()

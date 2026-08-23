@@ -1,0 +1,12 @@
+{
+  "baseUrl": "https://my-website.com",
+  "disallowBots": [],
+  "routes": [
+    {
+      "path": "/",
+      "title": "new2",
+      "description": "new2",
+      "ogImage": "/assets/images/og-cover.jpg"
+    }
+  ]
+}

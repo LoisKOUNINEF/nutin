@@ -1,4 +1,6 @@
 import { NavigationManager } from '#root/dist/src/core/services/router/helpers/navigation-manager.helper.js';
+import { I18nService } from '#root/dist/src/core/services/index.js';
+import { CONFIG } from '#root/dist/src/core/config.js';
 
 describe('NavigationManager', () => {
   it('should normalize paths by removing trailing slashes', () => {
@@ -6,12 +8,6 @@ describe('NavigationManager', () => {
     expect(NavigationManager.normalizePath('/about///')).toBe('/about');
     expect(NavigationManager.normalizePath('/')).toBe('/');
     expect(NavigationManager.normalizePath('')).toBe('/');
-  });
-
-  it('should determine if pushState should be used', () => {
-    expect(NavigationManager.shouldPushState(true, '/home', '/about')).toBe(true);
-    expect(NavigationManager.shouldPushState(false, '/home', '/about')).toBe(false);
-    expect(NavigationManager.shouldPushState(true, '/about', '/about')).toBe(false);
   });
 
   it('should call pushState when conditions are met', () => {
@@ -47,5 +43,152 @@ describe('NavigationManager', () => {
     // This test assumes a DOM-like environment
     const currentPath = window.location.pathname;
     expect(NavigationManager.getCurrentPath()).toBe(currentPath);
+  });
+
+  it('extractLocale returns the original path untouched when CONFIG.i18n is disabled', () => {
+    CONFIG.i18n = false;
+    expect(NavigationManager.extractLocale('/fr/about')).toEqual({ locale: null, strippedPath: '/fr/about' });
+  });
+
+  it('extractLocale strips a recognized locale prefix when CONFIG.i18n is enabled', () => {
+    CONFIG.i18n = true;
+    I18nService['_LANGUAGES'] = ['en', 'fr'];
+    try {
+      expect(NavigationManager.extractLocale('/fr/about')).toEqual({ locale: 'fr', strippedPath: '/about' });
+      expect(NavigationManager.extractLocale('/fr')).toEqual({ locale: 'fr', strippedPath: '/' });
+    } finally {
+      CONFIG.i18n = false;
+    }
+  });
+
+  it('extractLocale leaves the path untouched when the first segment is not a recognized locale', () => {
+    CONFIG.i18n = true;
+    I18nService['_LANGUAGES'] = ['en', 'fr'];
+    try {
+      expect(NavigationManager.extractLocale('/about')).toEqual({ locale: null, strippedPath: '/about' });
+    } finally {
+      CONFIG.i18n = false;
+    }
+  });
+
+  it('addLocalePrefix returns the path unchanged when CONFIG.i18n is disabled', () => {
+    CONFIG.i18n = false;
+    expect(NavigationManager.addLocalePrefix('/about')).toBe('/about');
+  });
+
+  it('addLocalePrefix prefixes the path with the current language when CONFIG.i18n is enabled', () => {
+    CONFIG.i18n = true;
+    I18nService['_LANGUAGES'] = ['en', 'fr'];
+    I18nService['_currentLanguage'] = 'fr';
+    try {
+      expect(NavigationManager.addLocalePrefix('/about')).toBe('/fr/about');
+      expect(NavigationManager.addLocalePrefix('/')).toBe('/fr');
+    } finally {
+      CONFIG.i18n = false;
+      I18nService['_currentLanguage'] = 'en';
+    }
+  });
+
+  it('getCurrentLocale reads the locale from the current URL path when CONFIG.i18n is enabled', () => {
+    CONFIG.i18n = true;
+    I18nService['_LANGUAGES'] = ['en', 'fr'];
+    window.history.pushState({}, '', '/fr/about');
+    try {
+      expect(NavigationManager.getCurrentLocale()).toBe('fr');
+    } finally {
+      CONFIG.i18n = false;
+      window.history.pushState({}, '', '/');
+    }
+  });
+
+  it('getCurrentLocale returns null when CONFIG.i18n is disabled', () => {
+    window.history.pushState({}, '', '/fr/about');
+    try {
+      expect(NavigationManager.getCurrentLocale()).toBe(null);
+    } finally {
+      window.history.pushState({}, '', '/');
+    }
+  });
+
+  it('updateLocaleInUrl pushes a new URL when the locale-prefixed path differs from the current one', () => {
+    CONFIG.i18n = true;
+    I18nService['_LANGUAGES'] = ['en', 'fr'];
+    I18nService['_currentLanguage'] = 'fr';
+    window.history.pushState({}, '', '/about');
+
+    const originalPushState = window.history.pushState;
+    const calls = [];
+    window.history.pushState = (...args) => {
+      calls.push(args);
+      originalPushState.apply(window.history, args);
+    };
+
+    try {
+      NavigationManager.updateLocaleInUrl();
+      expect(calls.length).toBe(1);
+      expect(calls[0][2]).toBe('/fr/about');
+    } finally {
+      window.history.pushState = originalPushState;
+      CONFIG.i18n = false;
+      I18nService['_currentLanguage'] = 'en';
+      window.history.pushState({}, '', '/');
+    }
+  });
+
+  it('updateLocaleInUrl handles a root pathname that collapses to an empty string when stripped', () => {
+    CONFIG.i18n = false;
+    window.history.pushState({}, '', '/');
+
+    const originalPushState = window.history.pushState;
+    window.history.pushState = () => {};
+
+    try {
+      expect(() => NavigationManager.updateLocaleInUrl()).not.toThrow();
+    } finally {
+      window.history.pushState = originalPushState;
+    }
+  });
+
+  it('updateLocaleInUrl does nothing when the URL already has the correct locale prefix', () => {
+    CONFIG.i18n = true;
+    I18nService['_LANGUAGES'] = ['en', 'fr'];
+    I18nService['_currentLanguage'] = 'fr';
+    window.history.pushState({}, '', '/fr/about');
+
+    const originalPushState = window.history.pushState;
+    let called = false;
+    window.history.pushState = () => { called = true; };
+
+    try {
+      NavigationManager.updateLocaleInUrl();
+      expect(called).toBe(false);
+    } finally {
+      window.history.pushState = originalPushState;
+      CONFIG.i18n = false;
+      I18nService['_currentLanguage'] = 'en';
+      window.history.pushState({}, '', '/');
+    }
+  });
+
+  it('matchPattern matches a required param', () => {
+    expect(NavigationManager.matchPattern('/posts/:id', '/posts/123')).toEqual({ id: '123' });
+  });
+
+  it('matchPattern does not match when a required param segment is missing', () => {
+    expect(NavigationManager.matchPattern('/posts/:id', '/posts')).toBe(null);
+  });
+
+  it('matchPattern matches an optional param when present, and omits it when absent', () => {
+    expect(NavigationManager.matchPattern('/users/:id?', '/users/123')).toEqual({ id: '123' });
+    expect(NavigationManager.matchPattern('/users/:id?', '/users')).toEqual({});
+  });
+
+  it('matchPattern matches multiple params in the same pattern', () => {
+    expect(NavigationManager.matchPattern('/posts/:postId/comments/:commentId', '/posts/1/comments/2'))
+      .toEqual({ postId: '1', commentId: '2' });
+  });
+
+  it('matchPattern returns null when the path does not match the pattern at all', () => {
+    expect(NavigationManager.matchPattern('/posts/:id', '/other/123')).toBe(null);
   });
 });

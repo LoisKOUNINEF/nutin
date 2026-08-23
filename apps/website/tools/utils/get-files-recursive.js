@@ -16,7 +16,12 @@ export function getFilesRecursive(dir, extension) {
 
   function findFilesRecursively(currentDir) {
     const files = [];
-    const items = fs.readdirSync(currentDir, { withFileTypes: true });
+    let items;
+    try {
+      items = fs.readdirSync(currentDir, { withFileTypes: true });
+    } catch (err) {
+      throw new Error(`Failed to read directory "${currentDir}": ${err.message}`, { cause: err });
+    }
 
     for (const item of items) {
       const fullPath = path.join(currentDir, item.name);

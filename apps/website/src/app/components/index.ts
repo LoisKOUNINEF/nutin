@@ -1,5 +1,5 @@
-export * from './common/button/button.component.js';
-export * from './common/anchor/anchor.component.js';
+export * from '../../libs/components/button/button.component.js';
+export * from '../../libs/components/anchor/anchor.component.js';
 export * from './globals/navbar/navbar.component.js';
 export * from './globals/footer/footer.component.js';
 export * from './section/section.component.js';
