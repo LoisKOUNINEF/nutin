@@ -25,5 +25,5 @@ export async function updateNutinConfig(projectPath, feature) {
 
   const updated = content.replace(GENERATE_SEO_LINE_RE, `$1${DOCKER_PORTS_LINE}`);
   await fs.writeFile(configPath, updated);
-  print.warn('Added "dockerPorts" to nutin.config.js — edit it if you need a different port.');
+  print.warn('Added "dockerPorts" to nutin.config.js — edit it if you need different port(s).');
 }

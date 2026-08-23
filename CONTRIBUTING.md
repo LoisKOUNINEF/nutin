@@ -42,13 +42,13 @@ Users can always pick options or deviate later.
 
 ### Design heuristics
 
+Nutin favors simplicity and clear APIs over feature accumulation.
+
 When introducing a new feature, ask:
 
 1. Is this architecture or productivity?
-2. Will most projects eventually use it?
-3. Does this improve or worsen the user experience?
-4. Can the implementation remain modular while the public API stays simple?
-5. Am I exposing a capability, or leaking an implementation detail?
+2. Am I exposing a capability, or leaking an implementation detail?
+3. Can the implementation remain modular while the public API stays simple?
 
 If unsure, choose the simpler public API.
 

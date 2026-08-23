@@ -50,7 +50,7 @@ nutin.config.js   -- features and configuration
 Imports must use **relative paths** and end with `.js` extension.
 
 ```js
-import { MyModule } from 'relative/path/to/my-module.js';
+import { Foo } from 'relative/path/to/foo.js';
 ```
 
 ## Generate components, views and services
@@ -95,8 +95,8 @@ export class ProductCardComponent extends Component {
     const detailsComponent = {
       selector: `product-details`,
       factory: (el) => new ProductDetailsComponent(
-        el,
-        this._product.details,
+        el, 
+        { config: this._product.details },
       )
     };
 
@@ -154,7 +154,7 @@ Nutin features are enabled in `nutin.config.js`.
 
 Main Nutin configuration and tool options. See the inline comments for details.
 
-- `tailwind`, `i18n`, `generateSEOFiles` — top-level features.
+- `tailwind`, `i18n`, `generateSEOFiles` — top-level features, `false` by default.
 - `generator.*` — controls what the generator scaffolds.
 - `builder.*` — controls build behavior.
 - `testinNutin.*` — controls TestinNutin.
@@ -180,7 +180,7 @@ Main Nutin configuration and tool options. See the inline comments for details.
 
 ## Global layout components
 
-If you need components to render outside `<main>` (such as a header or footer), register them with `registerGlobals()` in `main.ts`.
+If you need components to render outside `<main>` (such as a header or footer), register them with `registerGlobals()` in `main.ts` constructor.
 
 Global components are mounted directly in `<body>` and remain present across route changes. Use `before` for components that should appear before `<main>` and `after` for components that should appear after it.
 

@@ -1,5 +1,5 @@
 # nutin testing toolkit (testin-nutin)
-<pm>
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -25,18 +25,16 @@ This documents `testin-nutin`, nutin's built-in test toolkit, shipped by default
 "testin-nutin:verbose": "<pm> run build && node tools/testin-nutin/runner.js --verbose",
 ```
 
-The test environment loads the **built development output** (not bundled nor minified) `dist/src/index.html` into jsdom (see [How a run works](#how-a-run-works)) — running `testin-nutin:only` directly only works if `dist/` is already up to date.
+- The test environment loads the **built development output** (not bundled nor minified) `dist/src/index.html` into jsdom.
 
-Every generated app's `package.json` gets an `"imports": { "#root/*.js": "./*.js" }`
+- Every generated app's `package.json` gets an `"imports": { "#root/*.js": "./*.js" }`
 entry (added by the CLI's `json-manager.mjs`, not a template file), so test
-files can write `import config from '#root/nutin.config.js'` instead of a
-long chain of `../../..`.
+files can write `import { foo } from '#root/path/to/foo.js'`.
 
 ## Writing a test
 
 Files matching `*.test.js`, anywhere under a configured origin directory, are
-discovered automatically (see [Config](#config)). Global API, installed by
-the runner before any test file loads — no imports needed in test files:
+discovered automatically (see [Config](#config)). Global API, installed before any test file loads:
 
 ```js
 describe('globals beforeEach/All and afterEach/All', () => {
@@ -121,7 +119,7 @@ value is awaited before restoring, so the spies stay installed for the
 whole async operation.
 
 Use it for expected-but-noisy console output you don't need to assert
-on — e.g. a real `console.warn` from calling `registerPipes()` when the
+on — e.g. the real `console.warn` from calling `registerPipes()` when the
 pipes are already registered (`AppPipeRegistry` is a shared singleton, so
 several suites call it defensively; see `pipes.test.js`/
 `pipe-registry.test.js`). If a test
@@ -159,28 +157,28 @@ useRealTimers();
   for chains of timers scheduling further timers, where exact delays don't
   matter.
 - `runOnlyPendingTimers()` — fires only the timers pending **at the moment
-  of the call** (one "wave"); timers newly scheduled by those callbacks are
+  of the call**; timers newly scheduled by those callbacks are
   left for a later call, unlike `runAllTimers()`.
 - `clearAllTimers()` — drops all pending timers without firing them.
 - `getTimerCount()` — number of currently pending timers.
 - `setSystemTime(msOrDate)` — sets the virtual clock directly (accepts a
   `Date` or a ms timestamp), without firing anything.
 
-`advanceTimersByTime()` and `runAllTimers()` both guard against infinite
+- `advanceTimersByTime()` and `runAllTimers()` both guard against infinite
 loops — e.g. a zero-delay `setInterval` that keeps rescheduling itself —
 and throw a descriptive error after 100,000 timer firings.
 
-Every function above except `useFakeTimers`/`useRealTimers` throws
+- Every function above except `useFakeTimers`/`useRealTimers` throws
 `"<name>() requires useFakeTimers() to be called first"` if called before
 fakes are installed, so the usual pattern is
 `beforeEach(() => useFakeTimers())` / `afterEach(() => useRealTimers())` —
 the latter matters even on a passing test, since fakes otherwise leak into
 later suites.
 
-Under fake timers, `Date.now()` and no-arg `new Date()` return the virtual
+- Under fake timers, `Date.now()` and no-arg `new Date()` return the virtual
 clock; `new Date(explicit args)` still constructs a real, unaffected date.
 
-See `testin-nutin/core/tests/clock.test.js` for the full behavior this
+- See `testin-nutin/core/tests/clock.test.js` for the full behavior this
 covers.
 
 ## Mocking core services
@@ -216,45 +214,13 @@ dependency as a typed constructor param.
 
 The shared spy factory itself lives at `mocks/create-mock-method.js`.
 
-## How a run works
-
-`node tools/testin-nutin/runner.js` (alias `<pm> run testin-nutin:only`; `<pm> run testin-nutin` runs a build first):
-
-1. Installs test globals (`registerTestGlobals()`).
-2. Resolves test files by recursively scanning an `origins` list for
-   `*.test.js` (`getTestFiles`, plain `fs.readdirSync`, no glob lib) —
-   `origins` isn't itself a config key, it's built at runtime from
-   `testinNutin.includeFramework` (adds the framework's own test dirs),
-   `testinNutin.includeTools` (adds `tools`), and `testinNutin.includeApp`
-   (adds `src/app`). Optional CLI args filter files by substring match.
-3. For each file: sets up a fresh jsdom, `import()`s the file (this just
-   *registers* its `describe`/`it` calls into a queue — nothing runs yet),
-   tears the jsdom down. Import errors are caught and printed, not thrown.
-4. `runQueuedTests()` then executes the queue: strictly **sequential**, one
-   test at a time. jsdom is reset **per suite boundary** (not per test) —
-   detected when `test.suiteName` changes — running the outgoing suite's
-   `afterAll` then the incoming suite's `beforeAll`. Each test runs
-   `beforeEach → testFn → afterEach`, all awaited; a thrown error is caught
-   and recorded as a failure rather than aborting the run.
-5. Console output (`print.js`, hand-rolled ANSI colors, no `chalk`
-   dependency): failing tests are always printed with their stack trace;
-   passing tests are only printed when run with `--verbose` (i.e. via
-   `<pm> run testin-nutin:verbose`). A final summary
-   prints pass/fail counts and elapsed time.
-
-`<pm> run testin-nutin:watch` builds once, then runs `watch-tests.js`: a
-chokidar watcher on `src`/`test`/`unit`/`e2e` that re-runs the **entire**
-suite (`node tools/testin-nutin/runner.js` via `child_process.exec`) on any
-change — no selective re-run, and no rebuild between runs.
-
 ## Coverage
 
 Run it with `<pm> run testin-nutin:coverage`, or set `testinNutin.coverage.enabled: true` to make
 it the default for the plain `testin-nutin` command.
 
 Coverage is real V8 precise coverage, collected via `node:inspector`'s
-`Profiler` API (`core/coverage/collect-coverage.js`) — not a static/AST
-instrumenter.
+`Profiler` API (`core/coverage/collect-coverage.js`).
 
 **Scope**: only the **compiled** output under `dist/src/core`
 (when `includeFramework`) and `dist/src/app` (when `includeApp`). **`tools/`
@@ -273,27 +239,23 @@ each intentionally lightweight rather than exact:
   short-circuits, loop bodies) — reuses data V8 already collects, no AST
   parsing involved.
 
-Output is a per-file `console.table` (paths are shown with a cosmetic
+- Output is a per-file `console.table` (paths are shown with a cosmetic
 `.ts` extension, though coverage is measured against the compiled `.js`)
-plus a global `branches/functions/lines %` summary line — which also shows
-the configured `testinNutin.coverage.threshold`, when set, for context
-(e.g. `Global:  88.0% branches, 95.0% functions, 92.3% lines  (threshold: 95%)`).
+plus a global `branches/functions/lines %` summary line.
 
-`coverage/summary.md` is written **unconditionally** on every coverage run
+- `coverage/summary.md` is written **unconditionally** on every coverage run
 that produces a non-empty report — the test summary (pass/fail/todo/total/time,
 same numbers `printSummary` already prints for every run), the per-file
-table, and the global percentages (plus the threshold, when set), all
-persisted as a standing artifact (e.g. for CI). Unlike `uncovered.md`
-below, it isn't gated by `reportUncovered` and doesn't depend on whether
-anything is actually uncovered or whether the threshold passed.
+table, and the global percentages (plus the threshold), all
+persisted as a standing artifact.
 
-If `testinNutin.coverage.reportUncovered` is true and anything is actually
+- If `testinNutin.coverage.reportUncovered` is true and anything is actually
 uncovered, `coverage/uncovered.md` is written listing uncovered
 lines/branches/functions per file (otherwise a run with nothing uncovered
 just prints "🎉 No uncovered code found."). **Line numbers in that report
 refer to the compiled `dist/src/` output, not the original `.ts` source.**
 
-If `testinNutin.coverage.threshold` is a number and any global metric
+- If `testinNutin.coverage.threshold` is a number and any global metric
 (lines/functions/branches) falls below it, the process exits with code 1
 after printing which metric(s) missed and by how much — useful as a CI gate.
 
@@ -303,19 +265,21 @@ after printing which metric(s) missed and by how much — useful as a CI gate.
 
 ```js
 testinNutin: {
-  includeFramework: true,  // test Nutin source - src/core
-  includeTools: false,     // test Nutin tooling - tools/ (builder, testin-nutin, etc.)
-  includeApp: false,       // enable to use testin-nutin for application tests
-  coverage: {
-    enabled: false,        // include coverage in the normal test command
-    threshold: 95,         // exit with code 1 if any global coverage metric falls below the threshold
-    reportUncovered: true, // generates an .md report of uncovered lines, functions and branches in coverage/
-  },
-  jsdomOptions: {
-    runScripts: false,     // enable to execute scripts in the DOM
-    resources: false,
-    freezeGlobals: false,
-    pretendToBeVisual: true,
-  },
+    includeFramework: true,  // Test Nutin source - src/core
+    includeTools: false,     // Test tools/ (builder, testin-nutin, etc.)
+    includeApp: false,       // Include application tests
+
+    coverage: {
+      enabled: false,        // Include coverage in the normal test command
+      threshold: 95,         // Fail if any global coverage metric falls below this threshold
+      reportUncovered: true, // Generate a report of uncovered lines, functions and branches
+    },
+
+    jsdomOptions: {
+      runScripts: false,
+      resources: false,
+      freezeGlobals: false,
+      pretendToBeVisual: true,
+    },
 }
 ```

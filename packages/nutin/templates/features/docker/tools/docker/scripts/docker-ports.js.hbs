@@ -34,6 +34,10 @@ export function validateDockerPorts(rawPorts) {
       throw new Error(`nutin.config.js: "dockerPorts[${i}]" (${port}) is in the OS ephemeral port range (49152-65535) — use a registered port between ${MIN_PORT} and ${MAX_PORT}.`);
     }
 
+    if (port < MIN_PORT || port > MAX_PORT) {
+      throw new Error(`nutin.config.js: "dockerPorts[${i}]" (${port}) is outside of port range (${MIN_PORT} / ${MAX_PORT} .`);
+    }
+
     if (seen.has(port)) {
       throw new Error(`nutin.config.js: "dockerPorts" contains duplicate port ${port} — each port must be listed once.`);
     }
