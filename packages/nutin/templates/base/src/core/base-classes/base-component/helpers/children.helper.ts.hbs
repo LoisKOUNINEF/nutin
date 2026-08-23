@@ -6,7 +6,7 @@ export class ChildrenHelper {
     element: HTMLElement, 
     children: BaseComponent[]
   ): void {
-    const configs: ComponentConfig[] = component.childConfigs();
+    const configs: ComponentConfig[] = component.registerChildren();
     configs.forEach(config => {
       element.querySelectorAll(`[data-component="${config.selector}"]`).forEach(el => {
         if (el instanceof HTMLElement) {

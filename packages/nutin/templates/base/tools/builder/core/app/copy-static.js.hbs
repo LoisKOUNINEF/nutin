@@ -1,0 +1,97 @@
+import fs from 'fs/promises';
+import path from 'path';
+import { getFilesRecursive, print, errorExit } from '../../../utils/index.js';
+import { BINARY_EXTENSIONS } from './binary-extensions.js';
+import { PATHS } from './paths.js';
+import { builderConfig } from '../../builder.config.js';
+
+async function copyStatic() {
+  const extensions = [...BINARY_EXTENSIONS, '.html'];
+  if (builderConfig.isProd) extensions.push('.ts');
+
+  // Every build starts from a clean dist-build: a failed/interrupted prior
+  // build never gets renamed away by finalize-build.js, so a stale sibling
+  // (already merged, placeholder gone) can otherwise sit next to the next
+  // run's fresh output and trip merge-templates.js's per-sibling check.
+  await fs.rm(PATHS.temp, { recursive: true, force: true });
+  await ensureDir(PATHS.tempSource);
+
+  await copyFavicon();
+  await copyConfig();
+
+  for (const extension of extensions) {
+    const files = await getFilesRecursive(PATHS.source, extension);
+
+    for (const file of files) {
+      const relative = path.relative(PATHS.source, file);
+      const dest = path.join(PATHS.tempSource, relative);
+
+      try {
+        await copyFile(file, dest);
+      } catch (err) {
+        throw new Error(`Failed to copy: ${file}. ${err.message}`, { cause: err });
+      }
+    }
+  }
+
+  if (builderConfig.isProd) await copyJsonFiles(PATHS.source, PATHS.tempSource);
+}
+
+async function ensureDir(dir) {
+  await fs.mkdir(dir, { recursive: true });
+}
+
+async function copyFile(src, dest) {
+  await ensureDir(path.dirname(dest));
+  await fs.copyFile(src, dest);
+}
+
+async function copyFavicon() {
+  const srcPath = path.resolve(path.join('public', 'favicon.ico'));
+  const destPath = path.join(PATHS.tempSource, 'favicon.ico');
+
+  try {
+    await copyFile(srcPath, destPath);
+  } catch (err) {
+    if (err.code === 'ENOENT') print.warn('No favicon found at public/favicon.ico');
+    else errorExit(err, 'copy-static');
+  }
+}
+
+async function copyConfig() {
+  const srcPath = path.resolve(path.join('config'));
+  const temp = builderConfig.isProd ? PATHS.temp : PATHS.tempSource;
+  const destPath = path.join(temp, 'config');
+  try {
+    await copyJsonFiles(srcPath, destPath);
+    await copyFile(path.resolve('nutin.config.js'), path.join(temp, 'nutin.config.js'));
+
+    // for testin-nutin tests to run
+    if (!builderConfig.isProd) {
+      await copyJsonFiles(srcPath, path.join(PATHS.temp, 'config'));
+      await copyFile(path.resolve('nutin.config.js'), path.join(PATHS.temp, 'nutin.config.js'));
+    }
+  } catch (err) {
+    errorExit(err, 'copy-static');
+  }
+}
+
+async function copyJsonFiles(sourceDir, destDir) {
+  const items = await fs.readdir(sourceDir, { withFileTypes: true });
+
+  for (const item of items) {
+    const sourcePath = path.join(sourceDir, item.name);
+    const destPath = path.join(destDir, item.name);
+
+    if (item.isDirectory()) {
+      await copyJsonFiles(sourcePath, destPath);
+    } else if (item.isFile() && path.extname(item.name) === '.json') {
+      await fs.mkdir(path.dirname(destPath), { recursive: true });
+      await fs.copyFile(sourcePath, destPath);
+    }
+  }
+}
+
+copyStatic().catch((err) => {
+  errorExit(err, 'copy-static');
+});

@@ -1,7 +1,7 @@
 import { Component, ComponentConfig, ComponentOptions } from "../../index.js";
 
 export interface CatalogConfig extends ComponentOptions {
-  array: CatalogItemConfig[];
+  items: CatalogItemConfig[];
   elementName: string;
   elementTag?: keyof HTMLElementTagNameMap;
   selector: string;
@@ -24,7 +24,7 @@ export type CatalogItemConfig<T = any> =
 /**
  * ```typescript
 interface CatalogConfig extends ComponentOptions {
-  array: CatalogItemConfig[];
+  items: CatalogItemConfig[];
   elementName: string;
   elementTag?: keyof HTMLElementTagNameMap;
   selector: string;
@@ -37,22 +37,23 @@ type CatalogItemConfig<T = any> =
 */
 export class CatalogHelper {
   public static generateCatalog(config: CatalogConfig, scope: Element = document.documentElement): ComponentConfig[] {
-    if (!config.array || config.array.length < 1) return [];
+    if (!config.items || config.items.length < 1) return [];
 
     const componentConfigs: ComponentConfig[] = [];
     const containers = scope.querySelectorAll(`[data-catalog="${config.selector}"]`);
 
     containers.forEach((container) => {
-      if (!container || !(container instanceof HTMLElement) || (container.firstElementChild)) return;
-      componentConfigs.push(...this.getComponentConfigArray(config, container))
+      if (!container || !(container instanceof HTMLElement)) return;
+      componentConfigs.push(...this.getComponentConfigItems(config, container))
     })
 
     return componentConfigs;
   }
 
-  private static getComponentConfigArray(config: CatalogConfig, container: HTMLElement): ComponentConfig[] {
+  private static getComponentConfigItems(config: CatalogConfig, container: HTMLElement): ComponentConfig[] {
+    container.innerHTML = '';
     const componentConfigs: ComponentConfig[] = [];
-    for (let i = 0; i < config.array.length; i++) {
+    for (let i = 0; i < config.items.length; i++) {
       this.createElements(i, config, container);
       this.pushConfig(i, componentConfigs, config);
     }
@@ -83,7 +84,7 @@ export class CatalogHelper {
   }
 
   private static getConfigWithIndex(config: CatalogConfig, index: number): CatalogItemConfig {
-    const item = config.array[index];
+    const item = config.items[index];
     return (item && typeof item === 'object')
       ? { ...(item as object), index: index }
       : { value: item, index: index };    

@@ -127,11 +127,75 @@ describe('EventBus', () => {
   });
   it('should reset all service instances', () => {
     const eventBus1 = EventBus.getInstance();
-      
+
     EventBus.testingResetAll();
-      
+
     const eventBus2 = EventBus.getInstance();
-      
+
     expect(eventBus1).not.toBe(eventBus2);
+  });
+
+  it('should only invoke a once() handler on the first emit', () => {
+    let callCount = 0;
+    eventBus.once('user-login', () => { callCount++; });
+
+    eventBus.emit('user-login', { userId: '1' });
+    expect(callCount).toBe(1);
+
+    eventBus.emit('user-login', { userId: '2' });
+    expect(callCount).toBe(1);
+  });
+
+  it('should auto-unsubscribe a once() handler from _subscriptions after it fires', () => {
+    eventBus.once('user-login', () => {});
+    expect(eventBus._subscriptions.length).toBe(1);
+
+    eventBus.emit('user-login', {});
+    expect(eventBus._subscriptions.length).toBe(0);
+  });
+
+  it('should not remove a once() subscription before it has fired', () => {
+    eventBus.once('user-login', () => {});
+    eventBus.emit('notification', {});
+    expect(eventBus._subscriptions.length).toBe(1);
+  });
+
+  it('should let a once() handler and a regular subscriber on the same event coexist', () => {
+    let onceCalls = 0;
+    let regularCalls = 0;
+    eventBus.once('notification', () => { onceCalls++; });
+    eventBus.subscribe('notification', () => { regularCalls++; });
+
+    eventBus.emit('notification', {});
+    expect(onceCalls).toBe(1);
+    expect(regularCalls).toBe(1);
+
+    eventBus.emit('notification', {});
+    expect(onceCalls).toBe(1);
+    expect(regularCalls).toBe(2);
+  });
+
+  it('off(event) with no callback removes every handler for that event', () => {
+    let callsA = 0;
+    let callsB = 0;
+    eventBus.subscribe('notification', () => { callsA++; });
+    eventBus.subscribe('notification', () => { callsB++; });
+
+    eventBus.off('notification');
+    eventBus.emit('notification', {});
+
+    expect(callsA).toBe(0);
+    expect(callsB).toBe(0);
+    expect(eventBus.handlers['notification']).toBeUndefined();
+  });
+
+  it('off(event) with no callback does not affect other events', () => {
+    let called = false;
+    eventBus.subscribe('user-login', () => { called = true; });
+
+    eventBus.off('notification');
+    eventBus.emit('user-login', {});
+
+    expect(called).toBe(true);
   });
 });

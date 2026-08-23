@@ -11,7 +11,6 @@ post_job() {
 
   "$script_dir/remove-old-images.sh"
   "$script_dir/docker-logout.sh"
-  "$script_dir/scale-backend.sh"
 
   yaml_read_only
 

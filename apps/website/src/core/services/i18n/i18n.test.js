@@ -106,7 +106,7 @@ describe('i18n module', async () => {
     expect(I18nService.translate('home.title')).toBe('My App');
     I18nService.resetTranslations();
 
-    // missing translation
+    // missing translation key
     Object.defineProperty(navigator, 'language', {
       writable: true,
       configurable: true,
@@ -115,7 +115,9 @@ describe('i18n module', async () => {
     await I18nService.initTranslations();
     expect(navigator.language).toBe('fr-FR');
     expect(I18nService.currentLanguage).toBe('fr');
+    // existing key - should use currentLanguage
     expect(I18nService.translate('home.title')).toBe('Mon App');
+    // missing key - should use defaultLanguage
     expect(I18nService.translate('home.subtitle')).toBe('English subtitle');
   });
 

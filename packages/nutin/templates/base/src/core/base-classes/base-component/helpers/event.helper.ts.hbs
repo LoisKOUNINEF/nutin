@@ -8,8 +8,8 @@ export class EventHelper {
     eventListeners: Array<[EventTarget, string, EventListener]>
   ): void {
     element.querySelectorAll('[data-event]').forEach(el => {
-      const parts = el.getAttribute('data-event')!.split(':');
-      const [eventName, handlerName, argsString] = parts;
+      const [eventName, handlerName, ...argParts] = el.getAttribute('data-event')!.split(':');
+      const argsString = argParts.length ? argParts.join(':') : '';
 
       if (!handlerName || !eventName) return;
 
