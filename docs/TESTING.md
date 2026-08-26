@@ -1,5 +1,7 @@
 # nutin testing toolkit (testin-nutin)
 
+This documents `testin-nutin`, nutin's built-in test toolkit, shipped by default - Nutin source code is tested exclusively with it. It's a small hand-built test runner + jsdom environment + assertion library + service mocks.
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -9,12 +11,8 @@
 - [Silencing console output](#silencing-console-output)
 - [Clock](#clock)
 - [Mocking core services](#mocking-core-services)
-- [How a run works](#how-a-run-works)
 - [Coverage](#coverage)
 - [Config](#config)
-- [Where to look in code](#where-to-look-in-code)
-
-This documents `testin-nutin`, nutin's built-in test toolkit, shipped by default - Nutin source code is tested exclusively with it. It's a small hand-built test runner + jsdom environment + assertion library + service mocks.
 
 ## Overview
 

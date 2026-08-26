@@ -18,10 +18,10 @@ Nutin is deliberately pragmatic, lightweight, and dependency-free on runtime.
 
 ## 📄 Docs
 
-- **[Core](docs/CORE.md)**: Core functionalities
+- **[API](docs/API.md)**: Nutin core functionalities.
+- **[Options and features](docs/OPTIONS_AND_FEATURES.md)**: Tailwind CSS, i18n...
 - **[Testing](docs/TESTING.md)**: Built-in testing toolkit - used to test Nutin and available for application tests.
-- **[Docker](docs/DOCKER.md)**: Multi-stage `Dockerfile` and ready-to-use `nginx.conf`
-- **[Tools](docs/TOOLS.md)**: Generator, builder, development environment.
+- **[Tools](docs/TOOLS.md)**: Scripts, Generator, builder.
 
 ## 📝 Contributing
 
