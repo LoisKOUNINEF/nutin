@@ -26,8 +26,7 @@ This documents `testin-nutin`, Nutin's built-in test toolkit, shipped by default
 - The test environment loads the **built development output** (not bundled nor minified) `dist/src/index.html` into jsdom.
 
 - Every generated app's `package.json` gets an `"imports": { "#root/*.js": "./*.js" }`
-entry (added by the CLI's `json-manager.mjs`, not a template file), so test
-files can write `import { foo } from '#root/path/to/foo.js'`.
+entry, so test files can write `import { foo } from '#root/path/to/foo.js'`.
 
 ## Writing a test
 
@@ -118,10 +117,10 @@ whole async operation.
 
 Use it for expected-but-noisy console output you don't need to assert
 on — e.g. the real `console.warn` from calling `registerPipes()` when the
-pipes are already registered (`AppPipeRegistry` is a shared singleton, so
-several suites call it defensively; see `pipes.test.js`/
-`pipe-registry.test.js`). If a test
-needs to assert *what* was logged (`.callCount`, `.lastCall`), use
+pipes are already registered (see `pipes.test.js`/
+`pipe-registry.test.js`). 
+
+If a test needs to assert *what* was logged (`.callCount`, `.lastCall`), use
 `spyOn(console, 'method')` directly instead — `silenceConsole` doesn't
 expose the underlying spy handle.
 
@@ -193,11 +192,7 @@ fn.mockReset()                  // clear calls + both overrides
 ```
 
 Unlike `spyOn`, an unconfigured mock method returns `undefined` — there's no
-"original" to fall back to. `MockI18n` passes a default
-implementation function into `createMockMethod(fn)`, but the factory ignores
-any argument — those inline defaults are dead code, so e.g.
-`mockI18n.translate('key')` returns `undefined` until a test explicitly
-calls `.mockImplementation(...)` on it.
+"original" to fall back to.
 
 There's no auto-mocking or DI container — substitution is manual constructor
 injection, since the core event-bus facades and similar services take their
@@ -222,11 +217,10 @@ Coverage is real V8 precise coverage, collected via `node:inspector`'s
 
 **Scope**: only the **compiled** output under `dist/src/core`
 (when `includeFramework`) and `dist/src/app` (when `includeApp`). **`tools/`
-is never scoped into coverage, even when `includeTools: true`** — tools
+is never scoped into coverage**, even when `includeTools: true` — tools
 tests run, but don't count toward the report or the threshold.
 
-Three metrics are computed per file (`core/coverage/compute-coverage.js`),
-each intentionally lightweight rather than exact:
+Three metrics are computed per file, each intentionally lightweight rather than exact:
 
 - **Lines** — samples the execution count at each line's first
   non-whitespace character; not full statement-level coverage.
@@ -237,8 +231,8 @@ each intentionally lightweight rather than exact:
   short-circuits, loop bodies) — reuses data V8 already collects, no AST
   parsing involved.
 
-- Output is a per-file `console.table` (paths are shown with a cosmetic
-`.ts` extension, though coverage is measured against the compiled `.js`)
+- Output is a per-file `console.table` *(paths are shown with a cosmetic
+`.ts` extension, though coverage is measured against the compiled `.js`)*
 plus a global `branches/functions/lines %` summary line.
 
 - `coverage/summary.md` is written **unconditionally** on every coverage run
@@ -247,11 +241,10 @@ same numbers `printSummary` already prints for every run), the per-file
 table, and the global percentages (plus the threshold), all
 persisted as a standing artifact.
 
-- If `testinNutin.coverage.reportUncovered` is true and anything is actually
+- If `testinNutin.coverage.reportUncovered` is true and anything is
 uncovered, `coverage/uncovered.md` is written listing uncovered
-lines/branches/functions per file (otherwise a run with nothing uncovered
-just prints "🎉 No uncovered code found."). **Line numbers in that report
-refer to the compiled `dist/src/` output, not the original `.ts` source.**
+lines/branches/functions per file. **Line numbers in that report
+refer to the compiled `dist/src/[core, app]/*.js` output, not the original `.ts` source.**
 
 - If `testinNutin.coverage.threshold` is a number and any global metric
 (lines/functions/branches) falls below it, the process exits with code 1

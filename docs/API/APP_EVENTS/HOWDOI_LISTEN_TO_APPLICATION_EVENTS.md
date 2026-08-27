@@ -28,4 +28,4 @@ AppEventBus.off('language-changed', callback); // omit callback to remove ALL ha
 
 - `subscribe`/`once` return `void`, not an unsubscribe function — to unsubscribe you must call `AppEventBus.off(event, callback)` yourself with the same callback reference. This is why `this.listen(...)` (which handles that bookkeeping for you) is preferred inside a component/view.
 
-See [How do I register event types?](./HOWDOI_REGISTER_EVENT_TYPES.md) for adding your own typed events to `EventMap`.
+See [How do I emit events?](./HOWDOI_EMIT_EVENTS.md) for adding your own typed events to `EventMap`.

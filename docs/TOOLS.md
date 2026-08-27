@@ -7,7 +7,7 @@ Switching package manager in an existing Nutin app requires adapting:
 - **breaking**: `tools/dev/dev-serve.js`
 - **breaking**: `tools/dev/watcher.js`
 - *cosmetic*: `tools/generator/generator.js` and `tools/builder/builder.js`
-- **breaking**: `tools/docker/Dockerfile.template` *(with docker feature already added)*
+- **breaking** *(if Docker feature is already added)*: `tools/docker/Dockerfile.template` 
 
 ## Table of Contents
 
@@ -46,6 +46,8 @@ Switching package manager in an existing Nutin app requires adapting:
 <pm> run generate ELEMENT ELEMENT_NAME
 ```
 
+See [Generator](#generator)
+
 * Run tests (testin-nutin toolkit, shipped in base — no feature flag needed):
 
 ```bash
@@ -55,7 +57,9 @@ Switching package manager in an existing Nutin app requires adapting:
 <pm> run testin-nutin:verbose   # run and log each test suite and test as it runs
 ```
 
-* Docker (with docker feature added - See [How do I use the Docker feature?](./OPTIONS_AND_FEATURES/HOWDOI_USE_DOCKER_FEATURE.md)):
+See [testin-nutin documentation](./TESTING.md)
+
+* Docker (with docker feature added
 
 ```bash
 <pm> run docker:build
@@ -63,6 +67,8 @@ Switching package manager in an existing Nutin app requires adapting:
 ```
 
 `docker:build` first validates the top-level `dockerPorts` from `nutin.config.js` and regenerates `tools/docker/Dockerfile`/`nginx.conf` from their `.template` counterparts, then invokes `docker build`.
+
+See [How do I use the Docker feature?](./OPTIONS_AND_FEATURES/HOWDOI_USE_DOCKER_FEATURE.md)):
 
 ## Generator
 
@@ -87,4 +93,4 @@ Switching package manager in an existing Nutin app requires adapting:
 
 - You can configure SASS paths to be compiled in `nutin.config.js`.
 - You can configure ESBuild options in `nutin.config.js`.
-- If you add new asset formats, update `tools/builder/app/binary-extensions.js`.
+- If you need new asset formats to be included in the built output, add them in `tools/builder/app/binary-extensions.js`.

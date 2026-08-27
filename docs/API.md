@@ -4,6 +4,7 @@
 
 ### Components
 
+- [What is a component?](./API/COMPONENTS/WHATIS_A_COMPONENT.md)
 - [How do I create a component?](./API/COMPONENTS/HOWDOI_CREATE_A_COMPONENT.md)
 - [How do I register child components?](./API/COMPONENTS/HOWDOI_REGISTER_CHILD_COMPONENTS.md)
 - [How do I pass data to a component?](./API/COMPONENTS/HOWDOI_PASS_DATA_TO_A_COMPONENT.md)
@@ -14,6 +15,7 @@
 
 ### Views and routing
 
+- [What is a view?](./API/VIEWS_AND_ROUTING/WHATIS_A_VIEW.md)
 - [How do I create a view?](./API/VIEWS_AND_ROUTING/HOWDOI_CREATE_A_VIEW.md)
 - [How do I register a route?](./API/VIEWS_AND_ROUTING/HOWDOI_REGISTER_A_ROUTE.md)
 - [How do I access route parameters?](./API/VIEWS_AND_ROUTING/HOWDOI_ACCESS_ROUTE_PARAMS.md)
@@ -22,8 +24,9 @@
 
 ### App Events
 
+- [What are events in Nutin?](./API/APP_EVENTS/WHATARE_EVENTS_IN_NUTIN.md)
 - [How do I listen to application events?](./API/APP_EVENTS/HOWDOI_LISTEN_TO_APPLICATION_EVENTS.md)
-- [How do I register event types?](./API/APP_EVENTS/HOWDOI_REGISTER_EVENT_TYPES.md)
+- [How do I emit events?](./API/APP_EVENTS/HOWDOI_EMIT_EVENTS.md)
 
 ### Lifecycle hooks
 
@@ -31,6 +34,7 @@
 
 ### Services
 
+- [What is a service?](./API/SERVICES/WHATIS_A_SERVICE.md)
 - [How do I create a service?](./API/SERVICES/HOWDOI_CREATE_A_SERVICE.md)
 - [How do I use a service?](./API/SERVICES/HOWDOI_USE_A_SERVICE.md)
 - [How do I register service cleanup?](./API/SERVICES/HOWDOI_REGISTER_SERVICE_CLEANUP.md)
