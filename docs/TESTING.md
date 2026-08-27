@@ -1,6 +1,6 @@
-# nutin testing toolkit (testin-nutin)
+# Nutin - Testing toolkit documentation
 
-This documents `testin-nutin`, nutin's built-in test toolkit, shipped by default - Nutin source code is tested exclusively with it. It's a small hand-built test runner + jsdom environment + assertion library + service mocks.
+This documents `testin-nutin`, Nutin's built-in test toolkit, shipped by default - Nutin source code is tested exclusively with it. It's a small hand-built test runner + jsdom environment + assertion library + service mocks.
 
 ## Table of Contents
 

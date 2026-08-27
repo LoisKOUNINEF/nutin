@@ -2,7 +2,7 @@
 
 ***IMPORTANT NOTE:*** 
 
-Switching package manager in an existing nutin app requires adapting: 
+Switching package manager in an existing Nutin app requires adapting: 
 
 - **breaking**: `tools/dev/dev-serve.js`
 - **breaking**: `tools/dev/watcher.js`
