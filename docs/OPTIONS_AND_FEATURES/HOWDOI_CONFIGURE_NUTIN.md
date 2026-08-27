@@ -12,4 +12,4 @@
 ## Specialized configuration files
 
 - `config/languages.json`: Configure supported languages and default language. *See [How do I use i18n](HOWDOI_USE_I18N.md)*
-- `config/seo.json`: Configure route paths to generate SEO files. *See [How do I use SEO files generation](HOWDOI_USE_SEO_FILES_GENERATION.md)*
+- `config/seo.json`: Configure route paths to generate SEO files. *See [How do I use SEO files generation](HOWDOI_USE_SEO_FILE_GENERATION.md)*

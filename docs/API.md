@@ -7,10 +7,10 @@
 - [How do I create a component?](./API/COMPONENTS/HOWDOI_CREATE_A_COMPONENT.md)
 - [How do I register child components?](./API/COMPONENTS/HOWDOI_REGISTER_CHILD_COMPONENTS.md)
 - [How do I pass data to a component?](./API/COMPONENTS/HOWDOI_PASS_DATA_TO_A_COMPONENT.md)
-- [How do I control HTML sanitization?](./API/COMPONENTS/HOWDOI_CONTROL_HTML_SANITIZATION.md)
 - [How do I handle DOM events?](./API/COMPONENTS/HOWDOI_HANDLE_DOM_EVENTS.md)
 - [How do I render a component dynamically?](./API/COMPONENTS/HOWDOI_RENDER_A_COMPONENT_DYNAMICALLY.md)
 - [How do I remove empty elements?](./API/COMPONENTS/HOWDOI_REMOVE_EMPTY_ELEMENTS.md)
+- [How do I control HTML sanitization?](./API/COMPONENTS/HOWDOI_CONTROL_HTML_SANITIZATION.md)
 
 ### Views and routing
 

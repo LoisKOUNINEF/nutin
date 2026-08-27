@@ -46,7 +46,7 @@ export default {
 
 ### i18n option enabled
 
-**See [How do I use i18n](howdoi-use-i18n.md)** to help you enable i18n in your project.
+**See [How do I use i18n](HOWDOI_USE_I18N.md)** to help you enable i18n in your project.
 
 ```json
 // With i18n enabled and, in this example, `config/languages.json` listing `en`+`fr`

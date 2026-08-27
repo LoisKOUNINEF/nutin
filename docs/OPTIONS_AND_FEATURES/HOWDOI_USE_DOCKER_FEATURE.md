@@ -2,7 +2,7 @@
 
 ## What is the Docker feature?
 
-A ready-to-use `Dockerfile` designed for Nutin applications, with an Nginx configuration file.
+A ready-to-use `Dockerfile` designed for Nutin applications, paired with an Nginx configuration file.
 
 ## Add feature to your app
 
@@ -69,7 +69,7 @@ RUN apk add --no-cache nginx nginx-mod-http-brotli
 
 ## Compression
 
-Gzip (`.gz`) and Brotli (`.br`) compression are handled on production build.
+Gzip (`.gz`) and Brotli (`.br`) compression are handled on production build - independent from Docker feature.
 
 Params:
 ```js
