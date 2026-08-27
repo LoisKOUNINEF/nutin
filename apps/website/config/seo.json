@@ -1,11 +1,17 @@
 {
-  "baseUrl": "https://my-website.com",
+  "baseUrl": "https://nutin.org",
   "disallowBots": [],
   "routes": [
     {
       "path": "/",
-      "title": "new2",
-      "description": "new2",
+      "title": "Nutin website",
+      "description": "Nutin toolkit website. Documentation, tutorial, and blog articles",
+      "ogImage": "/assets/images/og-cover.jpg"
+    },
+    {
+      "path": "/get-started",
+      "title": "Get Started",
+      "description": "Nutin onboarding: installation, new app creation, project structure, first steps.",
       "ogImage": "/assets/images/og-cover.jpg"
     }
   ]
