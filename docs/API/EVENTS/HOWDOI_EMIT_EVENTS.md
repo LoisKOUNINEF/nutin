@@ -18,7 +18,6 @@ Events and their payloads are typed via a global `EventMap`, built from the fram
 // src/app/globals.d.ts
 declare interface AppEventMap {
   'my-event': {};
-  'my-payload-event': { myObject: { /* ... */ } };
 }
 ```
 
