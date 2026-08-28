@@ -28,4 +28,4 @@ Inside a component or view, prefer `this.listen(event, callback)` over calling `
 
 ## DOM events
 
-`data-event="click:_handler"` attributes in a template — local to one component/view, bound and rebound on every render, and torn down automatically in `destroy()`. Unrelated to the app event bus. See [How do I handle DOM events?](../COMPONENTS/HOWDOI_HANDLE_DOM_EVENTS.md).
+`data-event="click:_handler"` attributes in a template — local to one component/view, bound and rebound on every render, and torn down automatically in `destroy()`. Unrelated to the app event bus. See [How do I handle DOM events?](./HOWDOI_HANDLE_DOM_EVENTS.md).

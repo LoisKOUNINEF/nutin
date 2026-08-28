@@ -1,4 +1,4 @@
-# How do I render a component dynamically?
+# How do I update a component on state change?
 
 There's no separate "dynamic render" API — dynamic rendering relies on events. You can also call `.render()` on it whenever you want.
 
@@ -36,9 +36,9 @@ For a component that should live outside the router's view tree (a header/footer
 
 - Views are rendered dynamically by the `Router` — see [How do I navigate?](../VIEWS_AND_ROUTING/HOWDOI_NAVIGATE.md).
 
-- You could still call `listenToRenderEvents` on views, but this is not the intended way of updating elements. Nutin favors small components that should be updated independently.
+- You could still call `listenToRenderEvents` or call `render()` on views, but this is not the intended way of updating elements. Nutin favors small components that should be updated independently.
 
-- You could still call `render()` on views, but this is **not** meant as an update system.
+- ***Note:*** `Router` listens to the `reload` event to re-render the view itself - destroys and rebuilds the whole `<main>` DOM.
 
 ## Gotchas
 
