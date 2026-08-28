@@ -71,25 +71,6 @@ RUN apk add --no-cache nginx nginx-mod-http-brotli
 - Includes an optional container healthcheck
 - Exposes ports for reverse proxies
 
-## Compression
-
-Gzip (`.gz`) and Brotli (`.br`) compression are handled on production build - independent from Docker feature.
-
-Params:
-```js
-gzip: {
-  level: 9,
-  memLevel: 9,
-  windowBits: 15
-}
-
-brotli: {
-  [constants.BROTLI_PARAM_QUALITY]: 11,
-  [constants.BROTLI_PARAM_MODE]: constants.BROTLI_MODE_GENERIC,
-  [constants.BROTLI_PARAM_SIZE_HINT]: content.length
-}
-```
-
 ## Nginx config
 
 **This Nginx config assumes the use of a reverse proxy**, so it:
@@ -122,3 +103,22 @@ brotli_static on; # serves .br files if present
 - *Reminder: when you use `add_header` in a child location block, it replaces ALL headers from the parent context rather than merging them.*
 
 You need to repeat the security headers in each location block that uses add_header. 
+
+## Compression
+
+Gzip (`.gz`) and Brotli (`.br`) compression are handled on production build - independent from Docker feature.
+
+Params:
+```js
+gzip: {
+  level: 9,
+  memLevel: 9,
+  windowBits: 15
+}
+
+brotli: {
+  [constants.BROTLI_PARAM_QUALITY]: 11,
+  [constants.BROTLI_PARAM_MODE]: constants.BROTLI_MODE_GENERIC,
+  [constants.BROTLI_PARAM_SIZE_HINT]: content.length
+}
+```
