@@ -20,7 +20,7 @@ export default {
 }
 ```
 
-### Default example *(i18n option disabled)* 
+### Default example 
 
 ```json
 {
@@ -44,7 +44,7 @@ export default {
 }
 ```
 
-### i18n option enabled
+### With i18n option enabled
 
 **See [How do I use i18n](HOWDOI_USE_I18N.md)** to help you enable i18n in your project.
 
@@ -72,7 +72,6 @@ export default {
 ```
 
 `ogImage` stays flat even on the localized route.
-
 
 ## Route fields
 

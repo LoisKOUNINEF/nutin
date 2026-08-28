@@ -10,7 +10,7 @@
 
 - [How do I use Tailwind CSS?](./OPTIONS_AND_FEATURES/HOWDOI_USE_TAILWIND_CSS.md)
 - [How do I use i18n?](./OPTIONS_AND_FEATURES/HOWDOI_USE_I18N.md)
-- [How do I use the SEO file generation?](./OPTIONS_AND_FEATURES/HOWDOI_USE_SEO_FILE_GENERATION.md)
+- [How do I use SEO file generation?](./OPTIONS_AND_FEATURES/HOWDOI_USE_SEO_FILE_GENERATION.md)
 
 ### Features
 

@@ -4,7 +4,11 @@
 
 A ready-to-use `Dockerfile` designed for Nutin applications, paired with an Nginx configuration file.
 
-## Add feature to your app
+Nutin creates the actual `Dockerfile` and `nginx.conf` at build time from their `.templates` source.
+
+It assumes the use of a reverse proxy - See [Nginx config](#nginx-config).
+
+## Add docker to your app
 
 ```bash
 nutin-add docker
@@ -86,7 +90,7 @@ brotli: {
 }
 ```
 
-## Nginx Config
+## Nginx config
 
 **This Nginx config assumes the use of a reverse proxy**, so it:
 - uses non-standard port(s), configurable via `nutin.config.js`'s top-level `dockerPorts` (see [Configure ports](#configure-ports) above).
