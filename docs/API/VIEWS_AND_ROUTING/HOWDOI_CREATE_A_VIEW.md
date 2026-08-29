@@ -2,13 +2,25 @@
 
 A view is a routed page — one per route, mounted and destroyed by the [router](./HOWDOI_REGISTER_A_ROUTE.md).
 
+## Generate a view
+
+```bash
+npm run generate view foo # target directory: src/app/views/foo
+```
+
+See [How do I configure Nutin](../../OPTIONS_AND_FEATURES/HOWDOI_CONFIGURE_NUTIN.md) for generator options.
+
+## Register children
+
+See [How do I register child components](../COMPONENTS/HOWDOI_REGISTER_CHILD_COMPONENTS.md)
+
 ```ts
-// home.view.ts
+// foo.view.ts
 import { View, ComponentConfig } from '../../../core/index.js';
 
-const template = `<h1 data-i18n="home.title"></h1>`;
+const template = `<h1>Title</h1>`;
 
-export class HomeView extends View {
+export class FooView extends View {
   constructor() {
     super({ template });
   }
@@ -21,7 +33,7 @@ export class HomeView extends View {
 
 ```ts
 export const appRoutes: Routes = {
-  '/': () => new HomeView(),
+  '/foo': () => new FooView(),
 };
 ```
 

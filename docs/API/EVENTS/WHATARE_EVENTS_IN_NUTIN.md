@@ -1,5 +1,11 @@
 # What are events in Nutin?
 
+## DOM events
+
+`data-event="click:_handler"` attributes in a template — local to one component/view, bound and rebound on every render, and torn down automatically in `destroy()`. 
+
+See [How do I handle DOM events?](./HOWDOI_HANDLE_DOM_EVENTS.md).
+
 ## Application events `AppEventBus` — the app-wide pub/sub bus
 
 Application events handle the communication between modules. 
@@ -25,7 +31,3 @@ Inside a component or view, prefer `this.listen(event, callback)` over calling `
 - `Navigation.navigateTo(path)` / `Navigation.reload()` — consumed by the router itself..
 - `Lifecycle.onViewMount(cb)` / `Lifecycle.onViewUnmount(cb)` — the only two `Lifecycle` events Nutin actually emits, fired by the router on every navigation.
 - `Lifecycle.beforeRender()`/`afterRender()`/`beforeDestroy()`/`afterDestroy()` - Nutin never emits these particular `Lifecycle` events itself. See [What lifecycle hooks are available?](../LIFECYCLE_HOOKS/WHAT_LIFECYCLE_HOOKS_ARE_AVAILABLE.md) for the full breakdown.
-
-## DOM events
-
-`data-event="click:_handler"` attributes in a template — local to one component/view, bound and rebound on every render, and torn down automatically in `destroy()`. Unrelated to the app event bus. See [How do I handle DOM events?](./HOWDOI_HANDLE_DOM_EVENTS.md).

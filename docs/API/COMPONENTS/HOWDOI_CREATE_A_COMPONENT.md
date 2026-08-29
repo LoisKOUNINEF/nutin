@@ -1,6 +1,14 @@
 # How do I create a component?
 
-## Extend `Component`
+## Generate component
+
+```bash
+npm run generate component greeting # target directory: src/app/components/greeting
+```
+
+See [How do I configure Nutin](../../OPTIONS_AND_FEATURES/HOWDOI_CONFIGURE_NUTIN.md) for generator options.
+
+## Modify component
 
 ```ts
 // greeting.component.ts
@@ -34,7 +42,20 @@ export class GreetingComponent extends Component<HTMLDivElement, GreetingConfig>
 }
 ```
 
+## Render component
+
 ```ts
+// in a parent component
+registerChildren(): ComponentConfig[] {
+  return [
+    {
+      selector: 'my-greeting-selector',
+      factory: (el) => new GreetingComponent(el, { name: 'Ada' })
+    }
+  ]
+}
+
+// calling render directly
 const greeting = new GreetingComponent(el, { name: 'Ada' });
 greeting.render();
 ```
