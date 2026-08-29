@@ -6,8 +6,6 @@
 npm run generate service example # target directory: src/app/services/example
 ```
 
-See [How do I configure Nutin](../../OPTIONS_AND_FEATURES/HOWDOI_CONFIGURE_NUTIN.md) for generator options.
-
 ## Example service
 
 ```ts

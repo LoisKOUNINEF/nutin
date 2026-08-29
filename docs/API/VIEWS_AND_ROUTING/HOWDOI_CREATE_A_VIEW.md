@@ -8,8 +8,6 @@ A view is a routed page — one per route, mounted and destroyed by the [router]
 npm run generate view foo # target directory: src/app/views/foo
 ```
 
-See [How do I configure Nutin](../../OPTIONS_AND_FEATURES/HOWDOI_CONFIGURE_NUTIN.md) for generator options.
-
 ## Register children
 
 See [How do I register child components](../COMPONENTS/HOWDOI_REGISTER_CHILD_COMPONENTS.md)
@@ -46,7 +44,7 @@ export const appRoutes: Routes = {
 - `View` tracks route params and adds router-only hooks `onEnter()`/`onExit()` — see [How do I access route parameters?](./HOWDOI_ACCESS_ROUTE_PARAMS.md) and [What lifecycle hooks are available?](../LIFECYCLE_HOOKS/WHAT_LIFECYCLE_HOOKS_ARE_AVAILABLE.md).
 - Views are constructed via a factory function referenced from the route table, not instantiated directly by application code the way components are.
 
-## `viewName`
+## `ViewOptions`
 
 ```ts
 interface ViewOptions {
@@ -54,8 +52,9 @@ interface ViewOptions {
   mountTarget?: string | HTMLElement; // default: '#app'
   tagName?: keyof HTMLElementTagNameMap; // default: 'section'
   viewName?: string;
-  trustLevel?: 'strict' | 'normal' | 'trusted';
+  trustLevel?: 'strict' | 'normal' | 'trusted'; // default: 'normal'
 }
 ```
 
-`viewName` (minus `View` suffix) is what's emitted in the `view-mount`/`view-unmount` events fired by the router; see [How do I listen to application events?](../APP_EVENTS/HOWDOI_LISTEN_TO_APPLICATION_EVENTS.md).
+`viewName` is used as the route's `document.title` - will default to kebab-cased `viewName`.
+`viewName` is emitted in the `view-mount`/`view-unmount` events fired by the router; see [How do I listen to application events?](../APP_EVENTS/HOWDOI_LISTEN_TO_APPLICATION_EVENTS.md).

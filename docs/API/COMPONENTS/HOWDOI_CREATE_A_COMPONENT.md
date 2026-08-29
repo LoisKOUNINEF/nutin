@@ -6,8 +6,6 @@
 npm run generate component greeting # target directory: src/app/components/greeting
 ```
 
-See [How do I configure Nutin](../../OPTIONS_AND_FEATURES/HOWDOI_CONFIGURE_NUTIN.md) for generator options.
-
 ## Modify component
 
 ```ts

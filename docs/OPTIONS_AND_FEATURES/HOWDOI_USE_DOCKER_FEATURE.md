@@ -4,7 +4,7 @@
 
 A ready-to-use `Dockerfile` designed for Nutin applications, paired with an Nginx configuration file.
 
-Nutin creates the actual `Dockerfile` and `nginx.conf` at build time from their `.templates` source.
+The actual `Dockerfile` and `nginx.conf` files are generated at build time from their `.templates` counterparts.
 
 It assumes the use of a reverse proxy - See [Nginx config](#nginx-config).
 

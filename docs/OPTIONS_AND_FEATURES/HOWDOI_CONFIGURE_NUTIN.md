@@ -5,7 +5,6 @@
 **`nutin.config.js`** - See inline comments in the actual file for details
 
 - `i18n`, `tailwind`, `generateSEO` — top-level option toggles.
-- `generator.{generateStylesheet, generateLocales, generateTest}` — what the generator scaffolds alongside new elements.
 - `builder.{sass.paths, esbuild}` — build pipeline behavior.
 - `testinNutin.{includeFramework, includeTools, includeApp, coverage, jsdomOptions}` — built-in testing toolkit.
 
