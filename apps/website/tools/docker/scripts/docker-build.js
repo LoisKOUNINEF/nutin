@@ -9,7 +9,8 @@ const { name: projectName } = JSON.parse(readFileSync(path.join(process.cwd(), '
 
 runScript(path.join(process.cwd(), 'tools', 'docker', 'scripts', 'validate-docker.js'), 'Validating Docker configuration...');
 
-const args = ['build', '-t', projectName, '-f', 'tools/docker/Dockerfile', '.'];
+const repoRoot = path.resolve(process.cwd(), '..', '..');
+const args = ['build', '-t', projectName, '-f', 'tools/docker/Dockerfile', repoRoot];
 print.boldSection(`Running: docker ${args.join(' ')}`);
 
 const child = spawn('docker', args, { stdio: 'inherit' });

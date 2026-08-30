@@ -1,21 +1,15 @@
 ARG NODE_VERSION=22.23.2
 ARG ALPINE_VERSION=3.20
-ARG PORT="9090"
+ARG PORT="9090 9091"
 
 FROM node:${NODE_VERSION}-alpine AS builder
 WORKDIR /usr/src/app
 RUN corepack enable
-COPY package.json package-lock.json* .
+COPY package.json package-lock.json .
+COPY apps/website/package.json apps/website/package.json
 RUN npm ci
-COPY tsconfig.json .
-COPY ./src ./src
-COPY ./public ./public
-COPY ./nutin.config.js .
-COPY ./config ./config
-COPY ./tools/builder ./tools/builder
-COPY ./tools/docker ./tools/docker
-COPY ./tools/utils ./tools/utils
-RUN npm run build:prod
+COPY apps/website ./apps/website
+RUN npm run build:prod -w website
 
 FROM alpine:${ALPINE_VERSION}
 ARG PORT
@@ -24,8 +18,8 @@ ENV PORT=${PORT}
 RUN apk add --no-cache nginx nginx-mod-http-brotli
 
 RUN rm -f /etc/nginx/http.d/default.conf
-COPY --from=builder /usr/src/app/tools/docker/nginx.conf /etc/nginx/http.d/default.conf
-COPY --from=builder /usr/src/app/dist/src /usr/share/nginx/html
+COPY --from=builder /usr/src/app/apps/website/tools/docker/nginx.conf /etc/nginx/http.d/default.conf
+COPY --from=builder /usr/src/app/apps/website/dist/src /usr/share/nginx/html
 
 EXPOSE ${PORT}
 
