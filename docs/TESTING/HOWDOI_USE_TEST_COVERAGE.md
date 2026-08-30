@@ -7,7 +7,7 @@
 <pm> run testin-nutin:coverage
 ```
 
-- Via `nutin.config.js`:
+- via `nutin.config.js`:
 
 ```js
 testinNutin: {
@@ -25,10 +25,11 @@ testinNutin: {
 Coverage is real V8 precise coverage, collected via `node:inspector`'s
 `Profiler` API (`core/coverage/collect-coverage.js`).
 
-**Scope**: only the **compiled** output under `dist/src/core`
-(when `includeFramework`) and `dist/src/app` (when `includeApp`). **`tools/`
-is never scoped into coverage**, even when `includeTools: true` — tools
-tests run, but don't count toward the report or the threshold.
+### Scope
+
+- When `includeFramework` (default: `true`): `(dist)/src/core`
+- When `includeApp` (default: `false`): `(dist)/src/app` 
+- **`tools/` is never counted into coverage**.
 
 ## Metrics
 
