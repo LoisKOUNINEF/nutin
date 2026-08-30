@@ -9,8 +9,8 @@ class App {
 
     registerGlobals({
       before: [
-        { component: UnderDevelopmentComponent, id: 'under-development' },
         { component: NavbarComponent, id: 'navbar' }, 
+        { component: UnderDevelopmentComponent, id: 'under-development' },
       ],
       after: [{ component: FooterComponent, id: 'footer' }],
     });

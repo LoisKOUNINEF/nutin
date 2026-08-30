@@ -1,13 +1,14 @@
+@use "mixins";
+
 .under-development {
   padding-left: 2rem;
   padding-top: 3rem;
   padding-bottom: 1rem;
   background: var(--error);
   font-size: 1.2rem;
-}
-
-.under-development__title {
-  font-size: 2rem;
+  @include mixins.respond-to(medium) {
+    padding-top: 6rem;
+  }
 }
 
 .under-development__docs {
