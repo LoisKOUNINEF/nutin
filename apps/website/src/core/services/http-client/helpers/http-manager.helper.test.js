@@ -55,6 +55,26 @@ describe('HttpManager', () => {
     expect(thrown).toBe(true);
   });
 
+  it('should throw HttpError with a null response body when the error body is not valid JSON', async () => {
+    const mockResponse = new Response('plain text failure', {
+      status: 500,
+      statusText: 'Internal Server Error',
+      headers: { 'Content-Type': 'text/plain' }
+    });
+
+    let thrown = false;
+    try {
+      await HttpManager.validateResponse(mockResponse);
+    } catch (e) {
+      thrown = true;
+      expect(e).toBeInstanceOf(HttpError);
+      expect(e.status).toBe(500);
+      expect(e.statusText).toBe('Internal Server Error');
+      expect(e.response).toBe(null);
+    }
+    expect(thrown).toBe(true);
+  });
+
   it('should detect JSON content types', () => {
     expect(HttpManager.isJsonResponse('application/json')).toBe(true);
     expect(HttpManager.isJsonResponse('application/json; charset=utf-8')).toBe(true);

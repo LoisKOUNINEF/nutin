@@ -1,0 +1,6 @@
+{
+	"id": 2,
+	"sectionId": 10,
+	"content": "// emit\nNavigation.navigateTo('path');\n// closure\nconst unsub = Navigation.onNavigate(this.doStuff);\n// onDestroy\nunsub()",
+	"type": "ts"
+}

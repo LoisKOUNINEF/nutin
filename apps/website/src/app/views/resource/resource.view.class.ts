@@ -1,18 +1,19 @@
-import { AppEventBus, View } from '../../../core/index.js';
+import { Lifecycle, View } from '../../../core/index.js';
 import { PrismHighlighter } from '../../helpers/index.js';
 
 export abstract class ResourceView extends View {
   protected abstract sections: ISection[];
   protected abstract sectionsIndexSelector: string;
   protected abstract sectionComponentSelector: string;
+  private _unsubViewMount: () => void;
 
   constructor({template = ''}) {
     super({template});
-    AppEventBus.subscribe('view-mount', this.applyPrism);
+    this._unsubViewMount = Lifecycle.onViewMount(this.applyPrism);
   }
 
   onExit(): void {
-    AppEventBus.off('view-mount', this.applyPrism);
+    this._unsubViewMount();
     this.sections = [];
   }
   

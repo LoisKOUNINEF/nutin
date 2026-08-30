@@ -43,7 +43,7 @@ export abstract class TopicView extends ResourceView {
     }
   }
 
-  public childConfigs(): ComponentConfig[] {
+  public registerChildren(): ComponentConfig[] {
     const configs: ComponentConfig[] = [ this.renderSidebar() ];
     return this.getTopicConfig(configs);
   }

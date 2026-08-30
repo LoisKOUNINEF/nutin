@@ -1,4 +1,5 @@
-import { Component, ComponentConfig, IAnchorConfig } from '../../../core/index.js';
+import { Component, ComponentConfig } from '../../../core/index.js';
+import { IAnchorConfig } from '../../../libs/index.js';
 import { AnchorComponent, SnippetComponent } from '../index.js';
 
 const templateFn = (_config: ISectionConfig) => `__TEMPLATE_PLACEHOLDER__`;
@@ -41,9 +42,9 @@ export class SectionComponent extends Component {
     };
   }
 
-  public childConfigs(): ComponentConfig[] {
-    const catalogConfigs =  this.catalogConfig({
-      array: this._section.snippets,
+  public registerChildren(): ComponentConfig[] {
+    const catalogConfigs =  this.createCatalogComponents({
+      items: this._section.snippets,
       elementName: `snippet-${this._section.id}`,
       selector: `snippet-container-${this._section.id}`,
       component: SnippetComponent

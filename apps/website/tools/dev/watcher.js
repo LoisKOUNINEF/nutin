@@ -11,6 +11,10 @@ const watcher = chokidar.watch(['src'], {
 let isBuilding = false;
 let buildTimeout = null;
 
+watcher.on('error', (err) => {
+  print.boldError(`\nWatcher error: ${err.message}`);
+});
+
 watcher.on('change', (filePath) => {
   if (buildTimeout) {
     clearTimeout(buildTimeout);
@@ -24,15 +28,19 @@ watcher.on('change', (filePath) => {
     print.boldInfo(`\n🔄 File changed: ${path.relative(process.cwd(), filePath)}\n`);
     print.info('\nRebuilding...');
 
-    const command = 'npm run build';
-    
-    exec(command, (err, stdout, stderr) => {
+    const command = 'npm run build --silent';
+
+    exec(command, { maxBuffer: 10 * 1024 * 1024 }, (err, stdout, stderr) => {
       if (stdout) process.stdout.write(stdout);
       if (stderr) process.stderr.write(stderr);
       if (err) {
-        print.error(`\n❌ Build failed: ${err.message}`);
+        if (err.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER') {
+          print.boldError(`\nBuild output exceeded the buffer size — raise maxBuffer in tools/dev/watcher.js.`);
+        } else {
+          print.boldError(`\nBuild failed: ${err.message}`);
+        }
       } else {
-        print.boldHead('Watching for changes...');
+        print.boldBlue('Watching for changes...');
       }
       isBuilding = false;
     });
@@ -40,5 +48,5 @@ watcher.on('change', (filePath) => {
 });
 
 watcher.on('ready', () => {
-  print.boldHead('\nWatching for changes on http://localhost:9090...\n');
+  print.boldBlue('Watching for changes...');
 });

@@ -1,0 +1,82 @@
+import { PipeHelper } from '#root/dist/src/core/base-classes/base-component/helpers/pipe.helper.js';
+import { AppPipeRegistry } from '#root/dist/src/core/services/index.js';
+
+describe('PipeHelper', () => {
+  let container;
+
+  beforeAll(() => {
+    AppPipeRegistry.register('upper', (value) => String(value).toUpperCase());
+    AppPipeRegistry.register('suffix', (value, suffix) => `${value}${suffix}`);
+    AppPipeRegistry.register('join', (value, a, b) => `${value}-${a}-${b}`);
+  });
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    container.remove();
+    container = null;
+  });
+
+  it('reads from textContent and writes the piped result back to textContent for a plain element', () => {
+    container.innerHTML = '<span data-pipe="upper">hi</span>';
+    PipeHelper.parsePipeAttributes(container);
+    expect(container.querySelector('span').textContent).toBe('HI');
+  });
+
+  it('reads from .value and writes the piped result back to .value for an input element', () => {
+    container.innerHTML = '<input data-pipe="upper" value="hi">';
+    PipeHelper.parsePipeAttributes(container);
+    expect(container.querySelector('input').value).toBe('HI');
+  });
+
+  it('reads from .value for a textarea element', () => {
+    container.innerHTML = '<textarea data-pipe="upper">hi</textarea>';
+    PipeHelper.parsePipeAttributes(container);
+    expect(container.querySelector('textarea').value).toBe('HI');
+  });
+
+  it('prefers data-pipe-source over the element value when present', () => {
+    container.innerHTML = '<span data-pipe="upper" data-pipe-source="from source">ignored</span>';
+    PipeHelper.parsePipeAttributes(container);
+    expect(container.querySelector('span').textContent).toBe('FROM SOURCE');
+  });
+
+  it('chains multiple pipes separated by |', () => {
+    container.innerHTML = '<span data-pipe="upper|suffix:!">hi</span>';
+    PipeHelper.parsePipeAttributes(container);
+    expect(container.querySelector('span').textContent).toBe('HI!');
+  });
+
+  it('passes comma-separated arguments to the pipe function', () => {
+    container.innerHTML = '<span data-pipe="join:x,y">hi</span>';
+    PipeHelper.parsePipeAttributes(container);
+    expect(container.querySelector('span').textContent).toBe('hi-x-y');
+  });
+
+  it('does nothing when the element has no data-pipe attribute', () => {
+    container.innerHTML = '<span>hi</span>';
+    PipeHelper.parsePipeAttributes(container);
+    expect(container.querySelector('span').textContent).toBe('hi');
+  });
+
+  it('does nothing when the data-pipe attribute is empty', () => {
+    container.innerHTML = '<span data-pipe="">hi</span>';
+    PipeHelper.parsePipeAttributes(container);
+    expect(container.querySelector('span').textContent).toBe('hi');
+  });
+
+  it('prefers data-pipe-source over .value for an input element', () => {
+    container.innerHTML = '<input data-pipe="upper" data-pipe-source="from source" value="ignored">';
+    PipeHelper.parsePipeAttributes(container);
+    expect(container.querySelector('input').value).toBe('FROM SOURCE');
+  });
+
+  it('stops processing pipes when a pipe segment resolves to an empty name', () => {
+    container.innerHTML = '<span data-pipe=":arg">hi</span>';
+    PipeHelper.parsePipeAttributes(container);
+    expect(container.querySelector('span').textContent).toBe('hi');
+  });
+});

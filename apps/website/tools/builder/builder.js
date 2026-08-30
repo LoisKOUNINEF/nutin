@@ -1,30 +1,36 @@
 #!/usr/bin/env node
 
 import path from 'path';
-import { print, isProd, runScript } from '../utils/index.js';
+import { print, runScript } from '../utils/index.js';
+import { builderConfig } from './builder.config.js';
 
 const scriptsDir = path.join(process.cwd(), 'tools', 'builder', 'core');
 
-if (!isProd) print.boldInfo('For production, use build:prod.\n');
-print.boldHead(`Starting build...\n`);
+print.boldHead(`\nStarting build...`);
 
-runScript(path.join(scriptsDir, 'copy-static.js'), 'Copying files...');
+runScript(path.join(scriptsDir, 'app', 'copy-static.js'), 'Copying files...');
 
-if(!isProd) runScript(path.join(scriptsDir, 'tsc.js'), 'Running TypeScript compiler...');
+runScript(path.join(scriptsDir, 'html-index', 'validate-html.js'), 'Processing index.html...');
+runScript(path.join(scriptsDir, 'app', 'validate-routes.js'), 'Validating app routes...');
 
-runScript(path.join(scriptsDir, 'merge-templates.js'), 'Merging HTML templates in temp files...');
-runScript(path.join(scriptsDir, 'build-i18n.js'), 'Combining locales for production...');
-runScript(path.join(scriptsDir, 'sass.js'), 'Compiling styles from main.scss...');
-runScript(path.join(scriptsDir, 'validate-html.js'), 'Adding and validating tags in index.html...');
+runScript(path.join(scriptsDir, 'app', 'compile-ts.js'), 'Compiling TypeScript...');
 
-if (isProd) {
-	runScript(path.join(scriptsDir, 'esbuild.js'), 'Running esbuild...');
-	runScript(path.join(scriptsDir, 'hash-files.js'), 'Hashing files...');
-	runScript(path.join(scriptsDir, 'compress-files.js'), 'Compressing files...');
+runScript(path.join(scriptsDir, 'html-templates', 'process-html-templates.js'), 'Processing HTML templates...');
+
+runScript(path.join(scriptsDir, 'styles', 'sass.js'), 'Compiling styles...');
+if (builderConfig.tailwind) runScript(path.join(scriptsDir, 'styles', 'tailwind.js'), 'Compiling Tailwind CSS...');
+
+if (builderConfig.i18n) runScript(path.join(scriptsDir, 'i18n', 'build-i18n.js'), 'Combining locales...');
+
+if (builderConfig.isProd) {
+	runScript(path.join(scriptsDir, 'prod-bundle', 'esbuild.js'), 'Running esbuild...');
+	runScript(path.join(scriptsDir, 'prod-bundle', 'hash-files.js'), 'Hashing files...');
+	runScript(path.join(scriptsDir, 'prod-bundle', 'compress-files.js'), 'Compressing files...');
+	if (builderConfig.generateSEO) runScript(path.join(scriptsDir, 'seo', 'generate-seo-files.js'), 'Generating SEO Files...');
 }
 
 runScript(path.join(scriptsDir, 'finalize-build.js'), 'Finalizing build...')
 
 print.boldSuccess(`\nBuild successful!\n`);
 
-if (!isProd) print.boldInfo('For production, use build:prod.');
+if (!builderConfig.isProd) print.info('For production, use "npm run build:prod"');
