@@ -11,6 +11,6 @@ Switching package manager in an existing Nutin app requires adapting:
 
 ## Table of Contents
 
-- [Package.json scripts](./TOOLS/PACKAGE_JSON_SCRIPTS.md)
+- [Development environment](./TOOLS/DEVELOPMENT_ENVIRONMENT.md)
 - [Generator](./TOOLS/GENERATOR.md)
 - [Builder](./TOOLS/BUILDER.md)

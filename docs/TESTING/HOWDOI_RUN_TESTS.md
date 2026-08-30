@@ -4,10 +4,10 @@ The test environment loads the **built development output** (not bundled nor min
 
 ```bash
 # Commands support file filter
-<pm> run testin-nutin # Build and runs test suites
-<pm> run testin-nutin:watch # Watch mode
-<pm> run testin-nutin:coverage # Run test coverage
-<pm> run testin-nutin:verbose # Print test suites and individual tests
+<pm> run testin-nutin           # build, then run once
+<pm> run testin-nutin:watch     # build once, then re-run on file changes
+<pm> run testin-nutin:coverage  # run and outputs coverage.
+<pm> run testin-nutin:verbose   # run and log each test suite and test as it runs
 ```
 
 See [How do I write a test?](./HOWDOI_WRITE_A_TEST.md).

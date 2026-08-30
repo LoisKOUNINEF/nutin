@@ -11,14 +11,14 @@
 
 ## Files generated
 
-- `<type>/<name>/<name>.<type>.ts`
+- Component class: `<type>/<name>/<name>.<type>.ts`
 
 Generator-produced components and views intentionally include the `__TEMPLATE_PLACEHOLDER__` token. This is by design: the build step `merge-templates.js` uses this token to inject HTML templates into those files.
 
-- `<type>/<name>/<name>.<type>.html`
+- HTML template: `<type>/<name>/<name>.<type>.html`
 
 A template can also be written directly inline (remove the `.html` file and the `__TEMPLATE_PLACEHOLDER__` token). Defining both an inline template and an external `.html` file, or neither, fails the build.
 
-- `<type>/<name>/<name>.<type>.scss`
-- *If `i18n` is on* : `<type>/<name>/locales/*.json` - from `config/languages.json`'s `LANGUAGES`
-- *If `testinNutin.includeApp` is on* : `<type>/<name>/<name>.<type>.test.js`
+- Stylesheet: `<type>/<name>/<name>.<type>.scss`
+- *when `i18n` is on*: Locale files: `<type>/<name>/locales/*.json` - from `config/languages.json`'s `LANGUAGES`
+- *when `testinNutin.includeApp` is on*: Test files: `<type>/<name>/<name>.<type>.test.js`
