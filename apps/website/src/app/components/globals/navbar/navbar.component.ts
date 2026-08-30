@@ -1,4 +1,5 @@
-import { AppEventBus, BaseButton, Component, ComponentConfig } from '../../../../core/index.js';
+import { Navigation, Component, ComponentConfig } from '../../../../core/index.js';
+import { BaseButton } from '../../../../libs/index.js';
 import { ButtonComponent } from '../../index.js';
 
 const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
@@ -22,7 +23,7 @@ export class NavbarComponent extends Component<HTMLHeadingElement> {
     super({templateFn, mountTarget, tagName: 'header'});
   }
 
-  childConfigs(): ComponentConfig[] {
+  registerChildren(): ComponentConfig[] {
     const fixedButtons = this.createFixedButtons();
     const dropdownButtonsCatalog = this.getDropdownButtonsCatalog();
     return [ ...fixedButtons, ...dropdownButtonsCatalog ];
@@ -52,7 +53,7 @@ export class NavbarComponent extends Component<HTMLHeadingElement> {
   private handleNavigation(path: string) {
     const isDocs = (this.dropdownLinks as ReadonlyArray<string>).includes(path);
     const navigateTo = this.returnUrl(path, isDocs);
-    AppEventBus.emit('navigate', `/${navigateTo}`);
+    Navigation.navigateTo(`/${navigateTo}`);
     this.toggleDropdown(isDocs);
   }
 
@@ -89,8 +90,8 @@ export class NavbarComponent extends Component<HTMLHeadingElement> {
       return this.getBtnConfig(link);
     });
 
-    return this.catalogConfig({
-        array: dropdownButtons,
+    return this.createCatalogComponents({
+        items: dropdownButtons,
         selector: 'dropdown-buttons',
         component: ButtonComponent,
         elementName: 'dropdown-btn'

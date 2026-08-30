@@ -1,4 +1,6 @@
 {
-  "languages": ["en", "fr"],
+  "languages": [
+    "en"
+  ],
   "defaultLanguage": "en"
 }

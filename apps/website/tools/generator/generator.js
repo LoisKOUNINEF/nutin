@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 
 import path from "path";
-import { allFormats, getLastWord, print, promptBoolean } from "../utils/index.js";
-import { generateFile, appendToIndex, generateJson, generateStylesheet } from "./handle-file.js";
-import { serviceTemplate, componentTemplate, viewTemplate, htmlTemplate } from "./templates/index.js";
+import { allFormats, getLastWord, print, promptBoolean, errorExit } from "../utils/index.js";
+import { generateFile, appendToIndex, generateLocalesJson } from "./handle-file.js";
+import { serviceTemplate, componentTemplate, viewTemplate, htmlTemplate, scssTemplate, testTemplate } from "./templates/index.js";
+import nutinConfig from "../../nutin.config.js";
 
 // Constants and Setup
 const [, , rawType, rawFullPath] = process.argv;
 
 if (!rawType || !rawFullPath) {
   showUsageAndExit("Missing arguments.");
+  process.exit(1);
 }
 
 const type = allFormats(rawType);
@@ -19,39 +21,43 @@ const targetPath = path.join('src', 'app', `${type.kebab}s/${fullPath.kebab}`);
 
 // Creator Mapping
 const creators = {
-  service: (name, targetPath) => {
-    print.section(`Creating service: ${name.capitalized}`);
+  service: async (name, targetPath) => {
+    const suffix = 'service';
+    print.section(`Generating service: ${name.capitalized}`);
     try {
-      generateFile({ name, targetPath, templateFn: serviceTemplate, suffix: 'service' });
-      appendToIndex({ name, targetPath, suffix: 'service' });
+      generateFile({ name, targetPath, templateFn: serviceTemplate, suffix: suffix });
+      appendToIndex({ name, targetPath, suffix: suffix });
+      if (nutinConfig.generator.generateTest) await generateTest({ name, targetPath, suffix: suffix });
     } catch (err) {
       handleError("Failed to generate service", err);
     }
   },
   component: async (name, targetPath) => {
-    print.section(`Creating component: ${name.capitalized}`);
-    const doCreateStylesheet = await promptBoolean('Create component\'s stylesheet in styles/components ?');
+    const suffix = 'component';
+    print.section(`Generating component: ${name.capitalized}`);
 
     try {
-      generateFile({ name, targetPath, templateFn: componentTemplate, suffix: 'component' });
-      generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: 'component', extension: 'html' });
-      generateJson({ targetPath, name });
-      if (doCreateStylesheet) generateStylesheet({ name, suffix: 'component' });
-      appendToIndex({ name, targetPath, suffix: 'component' });
+      generateFile({ name, targetPath, templateFn: componentTemplate, suffix: suffix });
+      generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: suffix, extension: 'html' });
+      if (nutinConfig.generator.generateStylesheet) generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
+      if (nutinConfig.generator.generateLocales) await generateLocales({ targetPath, name });
+      appendToIndex({ name, targetPath, suffix: suffix });
+      if (nutinConfig.generator.generateTest) await generateTest({ name, targetPath, suffix });
     } catch (err) {
       handleError("Failed to generate component", err);
     }
   },
   view: async (name, targetPath) => {
-    print.section(`Creating view: ${name.capitalized}`);
-    const doCreateStylesheet = await promptBoolean('Create component\'s stylesheet in styles/components ?');
+    const suffix = 'view';
+    print.section(`Generating view: ${name.capitalized}`);
 
     try {
-      generateFile({ name, targetPath, templateFn: viewTemplate, suffix: 'view' });
-      generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: 'view', extension: 'html' });
-      generateJson({ targetPath, name });
-      if (doCreateStylesheet) generateStylesheet({ name, suffix: 'view' });
-      appendToIndex({name, targetPath, suffix: 'view' });
+      generateFile({ name, targetPath, templateFn: viewTemplate, suffix: suffix });
+      generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: suffix, extension: 'html' });
+      if (nutinConfig.generator.generateStylesheet) generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
+      if (nutinConfig.generator.generateLocales) await generateLocales({ targetPath, name });
+      appendToIndex({ name, targetPath, suffix: suffix });
+      if (nutinConfig.generator.generateTest) await generateTest({ name, targetPath, suffix });
     } catch (err) {
       handleError("Failed to generate view", err);
     }
@@ -63,21 +69,48 @@ const create = creators[type.kebab];
 
 if (create) {
   await create(name, targetPath);
-  print.boldSuccess(`\n${type.capitalized} ${name.capitalized} has been generated.\n`)
+  print.boldSuccess(`\n${type.capitalized} ${name.capitalized} generated in ${targetPath}.\n`)
 } else {
   showUsageAndExit(`Unsupported type: '${type.kebab}'`);
+  process.exit(1);
 }
 
 // Helper Functions
+async function generateTest({ targetPath, name, suffix }) {
+  let isGenerate = true;
+  if (!nutinConfig.testinNutin.includeApp) {
+    print.warn('⚠️ Enable includeApp in nutin.config.js testinNutin object to use test files.');
+    if (!process.stdin.isTTY) {
+      print.warn('Non-interactive shell detected — skipping test file generation.');
+      isGenerate = false;
+    } else {
+      isGenerate = await promptBoolean('Do you want to generate the test file anyway ?');
+    }
+  }
+  if (isGenerate) generateFile({ targetPath, name, templateFn: testTemplate, extension: 'test.js', suffix: suffix });
+}
+
+async function generateLocales({ targetPath, name }) {
+  let isGenerate = true;
+  if (!nutinConfig.i18n) {
+    print.warn('⚠️ Enable i18n in nutin.config.js to use json-based content per language.');
+    if (!process.stdin.isTTY) {
+      print.warn('Non-interactive shell detected — skipping locales file generation.');
+      isGenerate = false;
+    } else {
+      isGenerate = await promptBoolean('Do you want to generate the locales file(s) anyway ?');
+    }
+  }
+  if (isGenerate) generateLocalesJson({ targetPath, name });
+}
+
 function showUsageAndExit(message) {
-  print.boldError(`\n❌ ${message}`);
-  print.boldError("Usage: npm run generate <type> <path>");
-  print.boldError(`Supported types: ${Object.keys(creators).join(", ")}`);
+  print.boldError(`\n${message}`);
+  print.warn("Usage: npm run generate <type> <path>");
+  print.warn(`Supported types: ${Object.keys(creators).join(", ")}`);
   process.exit(1);
 }
 
 function handleError(context, error) {
-  print.boldError(`\n❌ ${context}`);
-  print.boldError(error instanceof Error ? error.message : error);
-  process.exit(1);
+  errorExit(error, context);
 }

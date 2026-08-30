@@ -1,13 +1,48 @@
-import { I18nService, View } from "../../../index.js";
+import { I18nService } from "../../../index.js";
+import { Language } from "../../i18n/languages.js";
+import { CONFIG } from "../../../config.js";
 
 /**
  * Navigation - handles path normalization and history management
  */
 export class NavigationManager {
+  public static extractLocale(path: string): { locale: Language | null; strippedPath: string } {
+    if (!CONFIG.i18n) return { locale: null, strippedPath: path };
+
+    const segments = path.split('/').filter(Boolean);
+    const first = segments[0] as Language;
+    if (first && I18nService.languages.includes(first)) {
+      const rest = segments.slice(1).join('/');
+      return { locale: first, strippedPath: rest ? `/${rest}` : '/' };
+    }
+    return { locale: null, strippedPath: path };
+  }
+
+  public static addLocalePrefix(strippedPath: string): string {
+    if (!CONFIG.i18n) return strippedPath;
+
+    const lang = I18nService.currentLanguage;
+    return strippedPath === '/' ? `/${lang}` : `/${lang}${strippedPath}`;
+  }
+
+  public static getCurrentLocale(): Language | null {
+    return this.extractLocale(window.location.pathname).locale;
+  }
+
+  public static updateLocaleInUrl(): void {
+    const rawPathname = (new URL(window.location.pathname, window.location.origin).pathname || '/').replace(/\/+$/, '') || '/';
+    const { strippedPath } = this.extractLocale(rawPathname);
+    const newUrl = this.addLocalePrefix(strippedPath);
+    if (newUrl !== window.location.pathname) {
+      window.history.pushState({}, '', newUrl);
+    }
+  }
+
   public static normalizePath(path: string): string {
     const collapsed = path.replace(/\/\/+/g, '/');
     const url = new URL(collapsed, window.location.origin);
-    return (url.pathname || '/').replace(/\/+$/, '') || '/';
+    const pathname = (url.pathname || '/').replace(/\/+$/, '') || '/';
+    return this.extractLocale(pathname).strippedPath;
   }
 
   public static updateHistory(
@@ -15,21 +50,10 @@ export class NavigationManager {
     currentPath: string,
     pushState: boolean
   ): void {
-    if (this.shouldPushState(pushState, currentPath, normalizedPath)) {
-      window.history.pushState({}, '', normalizedPath);
+    const localizedPath = this.addLocalePrefix(normalizedPath);
+    if (pushState && window.location.pathname !== localizedPath) {
+      window.history.pushState({}, '', localizedPath);
     }
-  }
-
-  public static updateMetaContent(currentView: View): void {
-    if (!currentView.shouldUpdateMetaContent()) return;
-
-    const strippedName = currentView.viewName.replace('-view', '');
-    const title = `${strippedName}.meta.title`;
-    const description = `${strippedName}.meta.description`;
-
-    document.title = I18nService.translate(title);
-    document.querySelector('meta[name="description"]')
-      ?.setAttribute('content', I18nService.translate(description));
   }
 
   public static getCurrentPath(): string {
@@ -62,13 +86,5 @@ export class NavigationManager {
       }
     });
     return params;
-  }
-
-  private static shouldPushState(
-    pushState: boolean,
-    currentPath: string,
-    normalizedPath: string
-  ): boolean {
-    return pushState && currentPath !== normalizedPath;
   }
 }

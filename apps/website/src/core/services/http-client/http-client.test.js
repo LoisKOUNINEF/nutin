@@ -204,6 +204,49 @@ describe('HttpClient', () => {
     expect(lastCall.options.headers['Authorization']).toBe('Bearer custom-token');
   });
 
+  it('should invoke request interceptors with the final url and options before sending', async () => {
+    fetchMock.mockJsonResponse('https://api.example.com/users', []);
+    const calls = [];
+    httpClient.addRequestInterceptor((url, options) => calls.push({ url, options }));
+
+    await httpClient.get('https://api.example.com/users');
+
+    expect(calls.length).toBe(1);
+    expect(calls[0].url).toBe('https://api.example.com/users');
+    expect(calls[0].options.method).toBe('GET');
+  });
+
+  it('should invoke response interceptors with the raw fetch response', async () => {
+    fetchMock.mockJsonResponse('https://api.example.com/users', []);
+    const received = [];
+    httpClient.addResponseInterceptor((response) => received.push(response));
+
+    await httpClient.get('https://api.example.com/users');
+
+    expect(received.length).toBe(1);
+    expect(received[0].ok).toBe(true);
+  });
+
+  it('should propagate a non-timeout error thrown while parsing the response', async () => {
+    fetchMock.mockResponse('https://api.example.com/broken', {
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      headers: { get: () => 'application/json' },
+      json: () => Promise.reject(new Error('Malformed JSON')),
+      text: () => Promise.resolve('not json'),
+    });
+
+    let thrown = false;
+    try {
+      await httpClient.get('https://api.example.com/broken');
+    } catch (error) {
+      thrown = true;
+      expect(error.message).toBe('Malformed JSON');
+    }
+    expect(thrown).toBe(true);
+  });
+
   it('should handle HTTP errors', async () => {
     fetchMock.mockError('https://api.example.com/users', 404, { message: 'Not found' });
         

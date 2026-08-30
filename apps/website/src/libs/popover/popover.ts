@@ -1,4 +1,5 @@
-import { View, ButtonManager, BaseButton, ComponentConfig, AppPipeRegistry, CatalogConfig, AppEventBus } from '../../core/index.js';
+import { View, ComponentConfig, AppPipeRegistry, CatalogConfig, AppEventBus } from '../../core/index.js';
+import { ButtonManager, BaseButton } from '../components/utils/index.js';
 import { FocusTrapHelper, IFocusTrapOptions } from './helpers/focus-trap.helper.js';
 import { IPopoverDomElements, PopoverDomHelper } from './helpers/popover-dom.helper.js';
 
@@ -45,7 +46,7 @@ export class PopoverView extends View {
     AppEventBus.subscribe('popover-close', () => this.destroy());
   }
 
-  public childConfigs(): ComponentConfig[] {
+  public registerChildren(): ComponentConfig[] {
     return [
       ...this._components,
       ...this.catalogConfigs()
@@ -55,13 +56,9 @@ export class PopoverView extends View {
   public catalogConfigs(): ComponentConfig[] {
     const configs: ComponentConfig[] = []
     this._catalogs.map((catalog) => {
-      configs.push(...this.catalogConfig(catalog));
+      configs.push(...this.createCatalogComponents(catalog));
     })
     return configs;
-  }
-
-  public override shouldUpdateMetaContent(): boolean {
-    return false;
   }
 
   public override render(): HTMLElement {

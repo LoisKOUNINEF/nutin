@@ -1,5 +1,6 @@
 import { normalizeString } from '../../helpers/index.js';
-import { AppEventBus, BaseButton, Component, ComponentConfig, IAnchorConfig } from '../../../core/index.js';
+import { Navigation, Component, ComponentConfig } from '../../../core/index.js';
+import { BaseButton, IAnchorConfig } from '../../../libs/index.js';
 import { AnchorComponent, ButtonComponent } from '../index.js';
 
 interface ISidebarConfig {
@@ -66,9 +67,9 @@ export class SidebarComponent extends Component {
     };
   }
 
-  public childConfigs(): ComponentConfig[] {
-    const catalogConfigs = this.catalogConfig({
-      array: this.createSidebarButtons(),
+  public registerChildren(): ComponentConfig[] {
+    const catalogConfigs = this.createCatalogComponents({
+      items: this.createSidebarButtons(),
       elementName: `${this._viewName}-sidebar-element`,
       selector: 'resource-sidebar',
       component: ButtonComponent,
@@ -79,7 +80,7 @@ export class SidebarComponent extends Component {
 
   private navigateToTopic(name: ISection['name']) {
     const normalizedName = normalizeString(name);
-    AppEventBus.emit('navigate', `/docs/${this._viewName}/${normalizedName}`);
+    Navigation.navigateTo(`/docs/${this._viewName}/${normalizedName}`);
     window.scrollTo({ top: 0 });
   }
 }

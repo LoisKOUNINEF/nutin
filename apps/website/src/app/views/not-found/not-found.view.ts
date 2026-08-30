@@ -1,4 +1,4 @@
-import { AppEventBus, ComponentConfig, View } from '../../../core/index.js';
+import { Navigation, ComponentConfig, View } from '../../../core/index.js';
 import { ButtonComponent } from '../../components/index.js';
 
 const template = `__TEMPLATE_PLACEHOLDER__`;
@@ -8,7 +8,7 @@ export class NotFoundView extends View {
     super({template});
   }
 
-  childConfigs(): ComponentConfig[] {
+  registerChildren(): ComponentConfig[] {
     const btnClass = 'u-bg-inherit u-font-large u-padd-y-medium u-color-prim u-italic';
     return [
       { 
@@ -19,6 +19,6 @@ export class NotFoundView extends View {
   }
 
   handleHome() {
-    AppEventBus.emit('navigate', '/');
+    Navigation.navigateTo('/');
   }
 }

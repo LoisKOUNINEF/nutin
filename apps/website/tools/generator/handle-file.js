@@ -1,8 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { print, LANGUAGES } from '../utils/index.js';
-import { jsonTemplate } from './templates/index.js';
-import { scssTemplate } from './templates/index.js';
+import { localeTemplate } from './templates/index.js';
 
 export function generateFile({
   name,
@@ -12,7 +11,7 @@ export function generateFile({
   extension = 'ts',
 }) {
   fs.mkdirSync(targetPath, { recursive: true });
-  const template = templateFn(name, targetPath);
+  const template = templateFn(name, targetPath, suffix);
   const filePath = `${targetPath}/${name.kebab}.${suffix}.${extension}`;
 
   if (fs.existsSync(filePath)) {
@@ -38,47 +37,29 @@ export function appendToIndex({ name, targetPath, suffix }) {
 
   try {
     fs.appendFileSync(indexFilePath, lineToAppend, 'utf8');
-    print.info(`${suffix}s/index.ts updated.`);
+    print.gray(`${suffix}s/index.ts updated.`);
   } catch (err) {
-    print.error(`Error appending line: ${err}`);
+    throw new Error(`Failed to update ${indexFilePath}: ${err.message}`, { cause: err });
   }
 }
 
-export function generateJson({ targetPath, name }) {
+export function generateLocalesJson({ targetPath, name }) {
   const localesDir = `${targetPath}/locales`;
   fs.mkdirSync(localesDir, { recursive: true });
 
-  const template = targetPath.includes('view') ? jsonTemplate(name) : `{ "default": "${name.pascal} works !"}`;
+  const template = localeTemplate(name);
 
-// include "meta" keys for views, empty JSON for components
-  LANGUAGES.forEach((lang) => {
-    fs.writeFileSync(`${localesDir}/${lang}.json`, template);
-  });
-}
-
-export function generateStylesheet({ name, suffix }) {
-  const template = scssTemplate();
-  const stylesPath = path.join('src', 'styles', `${suffix}s`);
-  const filePath = path.join(stylesPath, `_${name.kebab}.${suffix}.scss`);
-  const indexPath = path.join(stylesPath, `_index.scss`);
-  
-  if (!fs.existsSync(stylesPath) || !fs.existsSync(indexPath)) {
-    print.boldError('Non existing path');
-    process.exit(1);
-  }
-  if (fs.existsSync(filePath)) {
-    print.boldError('A file with this name already exists');
-    process.exit(1);
+  const failedLangs = [];
+  for (const lang of LANGUAGES) {
+    try {
+      fs.writeFileSync(`${localesDir}/${lang}.json`, template);
+    } catch (err) {
+      print.error(`Failed to write locale file for "${lang}": ${err.message}`);
+      failedLangs.push(lang);
+    }
   }
 
-  fs.writeFileSync(filePath, template);
-
-  const lineToAppend = `@forward "${name.kebab}.${suffix}";\n`;
-
-  try {
-    fs.appendFileSync(indexPath, lineToAppend, 'utf8');
-  } catch (err) {
-    print.error(`Error appending line: ${err}`);
+  if (failedLangs.length) {
+    throw new Error(`Failed to generate locale file(s) for: ${failedLangs.join(', ')}`);
   }
 }
-

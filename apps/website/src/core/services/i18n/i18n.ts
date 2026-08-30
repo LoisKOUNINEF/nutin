@@ -1,5 +1,6 @@
 import { DEFAULT_LANGUAGE, LANGUAGES, Language, Translations } from './languages.js';
 import { AppEventBus, Service } from '../../index.js';
+import { CONFIG } from '../../config.js';
 
 export class I18n extends Service<I18n> {
   private readonly _DEFAULT_LANGUAGE: Language = DEFAULT_LANGUAGE;
@@ -35,7 +36,11 @@ export class I18n extends Service<I18n> {
     this._currentLanguage = lang;
     this.savePreferences();
     await this.loadTranslations(lang);
-    AppEventBus.emit('language-changed');
+    AppEventBus.emit('language-changed', { lang });
+  }
+
+  public onLanguageChange(callback: (payload: { lang: string }) => void) {
+    AppEventBus.subscribe('language-changed', callback);
   }
 
   public async loadTranslations(lang: Language): Promise<void> {
@@ -108,9 +113,21 @@ export class I18n extends Service<I18n> {
     this.dispose();
   }
 
-  private getPreferredLanguage() {
-    return this.getPreferences() || navigator.language.split('-')[0] as Language;
-  };
+  private getPreferredLanguage(): Language {
+    const urlLocale = this.getLocaleFromUrl();
+    if (urlLocale) return urlLocale;
+    const stored = this.getPreferences();
+    if (stored && this._LANGUAGES.includes(stored as Language)) return stored as Language;
+    const browserLang = navigator.language.split('-')[0] as Language;
+    return this._LANGUAGES.includes(browserLang) ? browserLang : this._DEFAULT_LANGUAGE;
+  }
+
+  private getLocaleFromUrl(): Language | null {
+    if (!CONFIG.i18n) return null;
+
+    const first = window.location.pathname.split('/').filter(Boolean)[0] as Language;
+    return first && this._LANGUAGES.includes(first) ? first : null;
+  }
 
   private async loadDefaultTranslations(): Promise<void> {
     try {
