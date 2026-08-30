@@ -8,3 +8,4 @@ export * from './sidebar/sidebar.component.js';
 export * from './table-of-content/table-of-content.component.js';
 
 export * from './home-section/index.js';
+export * from './globals/under-development/under-development.component.js';

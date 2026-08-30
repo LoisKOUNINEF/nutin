@@ -1,0 +1,28 @@
+.under-development {
+  padding-left: 2rem;
+  padding-top: 3rem;
+  padding-bottom: 1rem;
+  background: var(--error);
+  font-size: 1.2rem;
+}
+
+.under-development__title {
+  font-size: 2rem;
+}
+
+.under-development__docs {
+  font-size: 1.5rem;
+  text-decoration: underline;
+  &:hover {
+    color: var(--background);
+  }
+
+  @media (hover: none) {
+    &:hover { 
+    color: var(--text);
+    }
+  }
+
+  &:focus-visible {
+  }
+}

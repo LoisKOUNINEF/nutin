@@ -1,5 +1,5 @@
 import { AppRouter, Service, I18nService, registerPipes, registerGlobals } from '../core/index.js';
-import { FooterComponent, NavbarComponent } from './components/index.js';
+import { FooterComponent, NavbarComponent, UnderDevelopmentComponent } from './components/index.js';
 import { appRoutes } from './routes.js';
 
 class App {
@@ -8,7 +8,10 @@ class App {
     AppRouter(appRoutes);
 
     registerGlobals({
-      before: [{ component: NavbarComponent, id: 'navbar' }],
+      before: [
+        { component: UnderDevelopmentComponent, id: 'under-development' },
+        { component: NavbarComponent, id: 'navbar' }, 
+      ],
       after: [{ component: FooterComponent, id: 'footer' }],
     });
   }
