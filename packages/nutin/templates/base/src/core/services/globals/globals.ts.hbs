@@ -21,6 +21,7 @@ export interface RegisterGlobalsOptions {
 
 export class Globals extends Service<Globals> {
   private _mounted: Record<string, GlobalMountable> = {};
+  private _originalDisplay: Record<string, string> = {};
 
   constructor() { super(); }
 
@@ -51,23 +52,28 @@ export class Globals extends Service<Globals> {
   }
 
   public hide(globalIds: string[]): void {
-    this.setDisplay(globalIds, 'none');
-  }
-
-  public reveal(globalIds: string[]): void {
-    this.setDisplay(globalIds, 'block');
-  }
-
-  private setDisplay(globalIds: string[], display: 'none' | 'block'): void {
     globalIds.forEach((id) => {
       const el = document.getElementById(id) as HTMLElement | null;
-      if (el) el.style.display = display;
+      if (!el) return;
+      if (!(id in this._originalDisplay)) {
+        this._originalDisplay[id] = el.style.display || getComputedStyle(el).display;
+      }
+      el.style.display = 'none';
+    });
+  }
+
+  public reveal(globalIds: string[], display?: string): void {
+    globalIds.forEach((id) => {
+      const el = document.getElementById(id) as HTMLElement | null;
+      if (!el) return;
+      el.style.display = display ?? this._originalDisplay[id] ?? 'block';
     });
   }
 
   protected onDestroy(): void {
     Object.values(this._mounted).forEach((instance) => instance.destroy?.());
     this._mounted = {};
+    this._originalDisplay = {};
   }
 }
 
@@ -89,7 +95,10 @@ export const hideGlobals = (globalIds: string[]): void => {
   Globals.getInstance().hide(globalIds);
 };
 
-/** Reveal the elements with the given ids (as registered via `registerGlobals`). */
-export const revealGlobals = (globalIds: string[]): void => {
-  Globals.getInstance().reveal(globalIds);
+/**
+ * Reveal the elements with the given ids (as registered via `registerGlobals`), restoring
+ * each element's display value as captured by `hideGlobals` — pass `display` to override.
+ */
+export const revealGlobals = (globalIds: string[], display?: string): void => {
+  Globals.getInstance().reveal(globalIds, display);
 };

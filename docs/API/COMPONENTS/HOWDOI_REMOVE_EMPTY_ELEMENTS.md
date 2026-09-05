@@ -30,8 +30,4 @@ Only relevant when Check 1 doesn't already force removal:
 | `<img>` | `.src` is empty |
 | `<input>` / `<textarea>` | `.value` is empty/whitespace |
 | `<audio>` / `<video>` / `<source>` | the `src` **attribute** is missing (checked as an attribute, not the resolved property) |
-| anything else | trimmed `textContent` is empty, or literally `"undefined"` |
-
-## Gotcha
-
-The two checks aren't symmetric: Check 1 treats both `"undefined"` and `"null"` as empty for the attribute's own value, but Check 2's generic `textContent` fallback only treats `"undefined"` as empty. A `<span data-optional>null</span>` (literal text, not an interpolated attribute) is **kept**, not removed.
+| anything else | trimmed `textContent` is empty, or literally `"undefined"` or `"null"` |

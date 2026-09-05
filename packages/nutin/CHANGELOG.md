@@ -7,6 +7,8 @@
 - Restored `document.title` updates on route change, regressed silently in 2.0.0's rewrite, default to the view's `viewName`. Precedence: `config/seo.json` (with `generateSEOFiles` enabled) -> the view's locales `title` (with i18n enabled) -> fallback to default.
 - Removed a redundant duplicate translation-file fetch on startup when i18n is enabled.
 - `HttpClient`'s constructor `defaultHeaders` are now actually merged into outgoing requests (previously silently dropped — only per-call `config.headers` were sent).
+- `data-optional` elements with literal `"null"` text content (e.g. `<span data-optional>null</span>`) are now correctly removed, matching the existing `"undefined"` handling.
+- `revealGlobals` now restores the element's original `display` value by default (captured automatically by `hideGlobals`), instead of always forcing `block`; an optional second argument still allows an explicit override.
 
 ## 2.0.0
 

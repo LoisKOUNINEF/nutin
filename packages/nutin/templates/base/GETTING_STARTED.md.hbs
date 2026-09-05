@@ -8,15 +8,12 @@
 - [A typical component](#a-typical-component)
 - [Features and configuration](#features-and-configuration)
 - [Styling](#styling)
-- [Global layout components](#global-layout-components)
 - [Testing](#testing)
 - [Useful links](#useful-links)
 
 ## Project structure
 
 ```
-config/   -- configure i18n and SEO files
-
 src/
   app/
     components/
@@ -152,15 +149,15 @@ Defining both an inline template and an external `.html` file, or neither, fails
 
 `nutin.config.js` - Main Nutin configuration and tool options. See the inline comments for details.
 
-- `tailwind`, `i18n`, `generateSEOFiles` — top-level features, `false` by default.
+- `tailwind`, `i18n`, `generateSEOFiles` — top-level features, `false` by default. 
+See [Options and features](https://github.com/LoisKOUNINEF/nutin/tree/main/docs/OPTIONS_AND_FEATURES.md).
 - `builder.*` — controls build behavior.
-- `testinNutin.*` — controls TestinNutin.
+- `testinNutin.*` — controls Nutin's built-in testing toolkit.
 
 ### Specialized files
 
-- `config/seo.json` - with generateSEOFiles enabled. Register your routes' description, title and ogImage here.
-
-- `config/languages.json` - with i18n enabled. Register supported languages here.
+- `config/seo.json` - with `generateSEOFiles` enabled. Register your routes' description, title and ogImage here.
+- `config/languages.json` - with `i18n` enabled. Register supported languages here.
 
 ## Styling
 
@@ -170,26 +167,11 @@ Defining both an inline template and an external `.html` file, or neither, fails
 
 **Note:** Installing Tailwind CSS dependencies may print `npm warn install-scripts`. This is expected with npm 12's default install-script allowlisting and is safe to ignore.
 
-## Global layout components
-
-If you need components to render outside `<main>` (such as a header or footer), register them with `registerGlobals()` in `main.ts` constructor.
-
-Global components are mounted directly in `<body>` and remain present across route changes. Use `before` for components that should appear before `<main>` and `after` for components that should appear after it.
-
-```ts
-registerGlobals({
-  before: [{ component: HeaderComponent, id: 'header' }],
-  after: [{ component: FooterComponent, id: 'footer' }],
-});
-```
-
-**Note**: `hideGlobals(globalIds: string[])` / `revealGlobals(globalIds: string[])` are exported alongside `registerGlobals` and can be called to toggle visibility of the ids you registered.
-
 ## Testing
 
 You can use any testing tool you prefer for application code.
 
-This project includes TestinNutin, Nutin's lightweight testing toolkit. Nutin itself is tested exclusively with it, and the tests are included in the generated project so you can:
+This project includes [testin-nutin, Nutin's lightweight testing toolkit](https://github.com/LoisKOUNINEF/nutin/tree/main/docs/TESTING.md). Nutin itself is tested exclusively with it, and the tests are included in the generated project so you can:
 - use them as executable documentation;
 - run and modify Nutin's tests when modifying its code.
 
@@ -197,7 +179,7 @@ Run the tests with:
 
 `{{packageManager}} run testin-nutin`
 
-To use TestinNutin for application tests, enable:
+To use testin-nutin for application tests, enable:
 
 ```js
 // nutin.config.js
@@ -210,10 +192,8 @@ testinNutin: {
 import { MyModule } from '#root/dist/src/path/to/my-module.js';
 ```
 
-See **[TestinNutin docs](https://nutin.org/docs/testin-nutin)**.
-
 ## Useful links
 
-- [Repository documentation](https://github.com/LoisKOUNINEF/nutin/tree/main/docs)
+- [Repository documentation](https://github.com/LoisKOUNINEF/nutin/tree/main/docs/API.md)
 - [First app tutorial](https://www.nutin.org/tutorial)
 - [Nutin website](https://www.nutin.org)
