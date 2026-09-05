@@ -58,5 +58,6 @@ interface ViewOptions {
 
 `viewName` is required — it's the view's identity, and there's no auto-derived default.
 
-On every route change, `document.title` is resolved in this order: the matching route's `title` in `config/seo.json` when `generateSEOFiles` is enabled (resolved per-language when i18n is on); then, when i18n is enabled, the view's own locale file's top-level `title` key (resolved per-language, namespaced under the view's `viewName` — see [How do I use i18n?](../../OPTIONS_AND_FEATURES/HOWDOI_USE_I18N.md)); finally the view's `viewName` itself, if nothing else matches. See [How do I use SEO files generation?](../../OPTIONS_AND_FEATURES/HOWDOI_USE_SEO_FILE_GENERATION.md).
+On every route change, `document.title` is resolved in this order: matching route's `config/seo.json` (with `generateSEOFiles` enabled - see [How do I use SEO files generation?](../../OPTIONS_AND_FEATURES/HOWDOI_USE_SEO_FILE_GENERATION.md)) -> the view's locale file's `title` key (with `i18n` enabled — see [How do I use i18n?](../../OPTIONS_AND_FEATURES/HOWDOI_USE_I18N.md)) -> the view's `viewName` itself.
+
 `viewName` is emitted in the `view-mount`/`view-unmount` events fired by the router; see [How do I listen to application events?](../APP_EVENTS/HOWDOI_LISTEN_TO_APPLICATION_EVENTS.md).

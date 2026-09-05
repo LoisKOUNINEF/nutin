@@ -3,13 +3,13 @@
 ## Table of contents
 
 - [Project structure](#project-structure)
-- [Running your app](#running-your-app)
-- [Generate components, views and services](#generate-components-views-and-services)
-- [A typical component](#a-typical-component)
+- [How do I run my app?](#running-your-app)
+- [How do I generate components, views and services?](#generate-components-views-and-services)
+- [What does a typical component look like?](#a-typical-component)
 - [Features and configuration](#features-and-configuration)
 - [Styling](#styling)
 - [Testing](#testing)
-- [Useful links](#useful-links)
+- [Go further](#go-further)
 
 ## Project structure
 
@@ -30,7 +30,7 @@ tools/    -- build, development, generator and testing
 nutin.config.js   -- features and configuration
 ```
 
-## Running your app
+## How do I run my app?
 
 ```bash
 # Development
@@ -50,7 +50,7 @@ Imports must use **relative paths** and end with `.js` extension.
 import { Foo } from 'relative/path/to/foo.js';
 ```
 
-## Generate components, views and services
+## How do I generate components, views and services?
 
 Generated elements are automatically exported from the corresponding barrel file:
 `src/app/<components|views|services>/index.ts`.
@@ -64,7 +64,7 @@ Generated elements are automatically exported from the corresponding barrel file
 {{packageManager}} run generate component path/to/my-component/ # Target dir: src/app/components/path/to/my-component/
 ```
 
-## A typical component
+## What does a typical component look like?
 
 ```bash
 components/
@@ -171,7 +171,7 @@ See [Options and features](https://github.com/LoisKOUNINEF/nutin/tree/main/docs/
 
 You can use any testing tool you prefer for application code.
 
-This project includes [testin-nutin, Nutin's lightweight testing toolkit](https://github.com/LoisKOUNINEF/nutin/tree/main/docs/TESTING.md). Nutin itself is tested exclusively with it, and the tests are included in the generated project so you can:
+This project includes [testin-nutin](https://github.com/LoisKOUNINEF/nutin/tree/main/docs/TESTING.md), Nutin's lightweight testing toolkit. Nutin itself is tested exclusively with it, and the tests are included in the generated project so you can:
 - use them as executable documentation;
 - run and modify Nutin's tests when modifying its code.
 
@@ -192,7 +192,7 @@ testinNutin: {
 import { MyModule } from '#root/dist/src/path/to/my-module.js';
 ```
 
-## Useful links
+## Go further
 
 - [Repository documentation](https://github.com/LoisKOUNINEF/nutin/tree/main/docs/API.md)
 - [First app tutorial](https://www.nutin.org/tutorial)
