@@ -12,7 +12,6 @@ class App {
 document.addEventListener('DOMContentLoaded', async () => {
   if (nutinConfig.i18n) {
     await I18nService.initTranslations();
-    await I18nService.loadTranslations(I18nService.currentLanguage);
   }
   new App();
 });

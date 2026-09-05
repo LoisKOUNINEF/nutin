@@ -23,5 +23,5 @@ Generator-produced components and views intentionally include the `__TEMPLATE_PL
 A template can also be written directly inline (remove the `.html` file and the `__TEMPLATE_PLACEHOLDER__` token). Defining both an inline template and an external `.html` file, or neither, fails the build.
 
 - Stylesheet: `<name>.<type>.scss`
-- *when `i18n` is on*: Locale files: `locales/*.json` - from `config/languages.json`'s `LANGUAGES`
+- *when `i18n` is on*: Locale files: `locales/*.json` - from `config/languages.json`'s `LANGUAGES`. For a view, each file is seeded with a top-level `title` key (used as a `document.title` fallback — see [How do I create a view?](../API/VIEWS_AND_ROUTING/HOWDOI_CREATE_A_VIEW.md)); component locale files don't get one.
 - *when `testinNutin.includeApp` is on*: Test files: `<name>.<type>.test.js`

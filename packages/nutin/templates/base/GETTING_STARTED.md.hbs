@@ -148,27 +148,19 @@ Defining both an inline template and an external `.html` file, or neither, fails
 
 ## Features and configuration
 
-Nutin features are enabled in `nutin.config.js`.
+### Main file
 
-### `nutin.config.js`
-
-Main Nutin configuration and tool options. See the inline comments for details.
+`nutin.config.js` - Main Nutin configuration and tool options. See the inline comments for details.
 
 - `tailwind`, `i18n`, `generateSEOFiles` — top-level features, `false` by default.
-- `generator.*` — controls what the generator scaffolds.
 - `builder.*` — controls build behavior.
 - `testinNutin.*` — controls TestinNutin.
 
-### `config/seo.json`
+### Specialized files
 
-- Register your routes' description, title and ogImage here.
-- Data is used to generate static `index.html` per route, `robots.txt`, and `sitemap.xml`.
-- Unused if `nutin.config.js -> generateSEOFiles` is disabled.
+- `config/seo.json` - with generateSEOFiles enabled. Register your routes' description, title and ogImage here.
 
-### `config/languages.json`
-
-- Register supported languages for i18n here.
-- Unused if `nutin.config.js -> i18n` is disabled.
+- `config/languages.json` - with i18n enabled. Register supported languages here.
 
 ## Styling
 
@@ -222,6 +214,6 @@ See **[TestinNutin docs](https://nutin.org/docs/testin-nutin)**.
 
 ## Useful links
 
-- [Nutin website](https://www.nutin.org)
-- [First app tutorial](https://www.nutin.org/tutorial)
 - [Repository documentation](https://github.com/LoisKOUNINEF/nutin/tree/main/docs)
+- [First app tutorial](https://www.nutin.org/tutorial)
+- [Nutin website](https://www.nutin.org)

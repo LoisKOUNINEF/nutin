@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.1
+
+- `View`'s `viewName` is now a required constructor option. Every `View` subclass must now pass `viewName` explicitly.
+- Removed the `generator` object from `nutin.config.js`. The generator now always scaffolds a stylesheet, and gates locale/test file generation on the existing `i18n` and `testinNutin.includeApp` flags.
+- Restored `document.title` updates on route change, regressed silently in 2.0.0's rewrite, default to the view's `viewName`. Precedence: `config/seo.json` (with `generateSEOFiles` enabled) -> the view's locales `title` (with i18n enabled) -> fallback to default.
+- Removed a redundant duplicate translation-file fetch on startup when i18n is enabled.
+- `HttpClient`'s constructor `defaultHeaders` are now actually merged into outgoing requests (previously silently dropped — only per-call `config.headers` were sent).
+
 ## 2.0.0
 
 Version 2.0.0 focuses on simplicity and clear APIs over feature accumulation: fewer abstractions, clearer responsibilities, and a more focused API. 

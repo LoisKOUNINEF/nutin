@@ -9,6 +9,8 @@ export default {
 }
 ```
 
+`route.title` is also consumed at runtime: on every route change, `document.title` is set from the matching route's `title` here (falling back to the view's `viewName` when `generateSEOFiles` is off or no route matches) — see [How do I create a view?](../API/VIEWS_AND_ROUTING/HOWDOI_CREATE_A_VIEW.md).
+
 ## Configuration file
 
 ```json

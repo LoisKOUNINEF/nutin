@@ -20,7 +20,7 @@ const template = `<h1>Title</h1>`;
 
 export class FooView extends View {
   constructor() {
-    super({ template });
+    super({ template, viewName: 'foo' });
   }
 
   public registerChildren(): ComponentConfig[] {
@@ -51,10 +51,12 @@ interface ViewOptions {
   template?: string;
   mountTarget?: string | HTMLElement; // default: '#app'
   tagName?: keyof HTMLElementTagNameMap; // default: 'section'
-  viewName?: string;
+  viewName: string;
   trustLevel?: 'strict' | 'normal' | 'trusted'; // default: 'normal'
 }
 ```
 
-`viewName` is used as the route's `document.title` - will default to kebab-cased `viewName`.
+`viewName` is required — it's the view's identity, and there's no auto-derived default.
+
+On every route change, `document.title` is resolved in this order: the matching route's `title` in `config/seo.json` when `generateSEOFiles` is enabled (resolved per-language when i18n is on); then, when i18n is enabled, the view's own locale file's top-level `title` key (resolved per-language, namespaced under the view's `viewName` — see [How do I use i18n?](../../OPTIONS_AND_FEATURES/HOWDOI_USE_I18N.md)); finally the view's `viewName` itself, if nothing else matches. See [How do I use SEO files generation?](../../OPTIONS_AND_FEATURES/HOWDOI_USE_SEO_FILE_GENERATION.md).
 `viewName` is emitted in the `view-mount`/`view-unmount` events fired by the router; see [How do I listen to application events?](../APP_EVENTS/HOWDOI_LISTEN_TO_APPLICATION_EVENTS.md).
