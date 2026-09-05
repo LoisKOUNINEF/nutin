@@ -2,10 +2,13 @@ import { BaseComponent, ComponentConfig } from '../base-component.js';
 
 export class ChildrenHelper {
   public static addChildren(
-    component: BaseComponent, 
-    element: HTMLElement, 
+    component: BaseComponent,
+    element: HTMLElement,
     children: BaseComponent[]
   ): void {
+    this.destroyChildren(children);
+    children.length = 0;
+
     const configs: ComponentConfig[] = component.registerChildren();
     configs.forEach(config => {
       element.querySelectorAll(`[data-component="${config.selector}"]`).forEach(el => {

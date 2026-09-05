@@ -10,6 +10,7 @@
 - `data-optional` elements with literal `"null"` text content (e.g. `<span data-optional>null</span>`) are now correctly removed, matching the existing `"undefined"` handling.
 - `revealGlobals` now restores the element's original `display` value by default (captured automatically by `hideGlobals`), instead of always forcing `block`; an optional second argument still allows an explicit override.
 - A `data-pipe` chain segment with an empty name (e.g. `data-pipe=":arg"`) now logs a warning and is skipped, instead of silently aborting the entire chain with no write-back.
+- Previously-mounted child components (single or catalog) are now properly destroyed before a re-render mounts their replacements, closing a leaked-listener/subscription bug that affected every re-rendering component.
 
 ## 2.0.0
 

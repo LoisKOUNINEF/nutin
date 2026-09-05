@@ -62,6 +62,28 @@ describe('ChildrenHelper', () => {
     expect(children.length).toBe(0);
   });
 
+  it('destroys previously-tracked children and resets the array before mounting new ones on a second call', () => {
+    let destroyCount = 0;
+    element.innerHTML = '<div data-component="widget"></div>';
+    const component = {
+      registerChildren: () => [{
+        selector: 'widget',
+        factory: () => ({ render: () => {}, destroy: () => destroyCount++ }),
+      }],
+    };
+
+    const children = [];
+    ChildrenHelper.addChildren(component, element, children);
+    expect(children.length).toBe(1);
+    expect(destroyCount).toBe(0);
+
+    element.innerHTML = '<div data-component="widget"></div>';
+    ChildrenHelper.addChildren(component, element, children);
+
+    expect(destroyCount).toBe(1);
+    expect(children.length).toBe(1);
+  });
+
   it('destroyChildren calls destroy on every child', () => {
     let destroyCount = 0;
     const children = [
