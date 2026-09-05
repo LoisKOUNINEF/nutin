@@ -98,6 +98,12 @@ export class ProjectUpdater {
     }
 
     if (!yes && (toUpdate.length > 0 || toAdd.length > 0)) {
+      if (!process.stdin.isTTY) {
+        print.warn('\n⚠️ Non-interactive shell detected — skipping the confirmation prompt.');
+        print.boldInfo('Re-run with --yes to apply these updates automatically. No files were changed.');
+        return;
+      }
+
       const { proceed } = await inquirer.prompt([
         {
           type: 'confirm',

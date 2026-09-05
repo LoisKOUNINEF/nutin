@@ -43,11 +43,11 @@ export function appendToIndex({ name, targetPath, suffix }) {
   }
 }
 
-export function generateLocalesJson({ targetPath, name }) {
+export function generateLocalesJson({ targetPath, name, isView }) {
   const localesDir = `${targetPath}/locales`;
   fs.mkdirSync(localesDir, { recursive: true });
 
-  const template = localeTemplate(name);
+  const template = localeTemplate(name, isView);
 
   const failedLangs = [];
   for (const lang of LANGUAGES) {

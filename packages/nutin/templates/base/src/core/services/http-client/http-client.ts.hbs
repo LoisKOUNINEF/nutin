@@ -56,7 +56,10 @@ export class HttpClient extends Service<HttpClient> {
   ): Promise<T> {
     const { controller, timeoutId } = HttpManager.createAbortController(config?.timeout);
     const fullUrl = `${this._baseUrl}${endpoint}`;
-    const mergedConfig = { ...this._defaultHeaders, ...config };
+    const mergedConfig: IRequestConfig = {
+      ...config,
+      headers: { ...this._defaultHeaders, ...config?.headers },
+    };
 
     try {
       const url = HttpBuilder.buildRequestUrl(fullUrl, config?.queryParams);

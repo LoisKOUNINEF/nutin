@@ -22,7 +22,7 @@ dependency as a typed constructor param.
 |---|---|---|---|
 | `MockEventBus` | `mocks/mock-event-bus.js` | `AppEventBus` | `on`/`off`/`emit` form a real in-memory pub/sub; `subscribe` is a bare mock (doesn't actually register — asymmetric with `on`) |
 | `MockHttpClient` | `mocks/mock-http-client.js` | `AppHttpClient` | `get`/`post`/`put`/`patch`/`delete`, all bare mocks |
-| `MockI18n` | `mocks/mock-i18n.js` | `I18nService` | `translate`, `loadTranslations`, etc. (bare mocks, see gotcha above); real `currentLanguage` getter; `setTranslations()`/`setDefaultTranslations()` to seed state directly |
+| `MockI18n` | `mocks/mock-i18n.js` | `I18nService` | `translate`, `loadTranslations`, etc. (bare mocks); real `currentLanguage` getter; `setTranslations()`/`setDefaultTranslations()` to seed state directly |
 | `MockRouter` | `mocks/mock-router.js` | `Router`/`AppRouter` | `navigate`, `handlePopState`, `handleNotFound`, `handleGuards`, `initializeEventListeners` — names match the real class 1:1, though several are `private` there |
 
 The shared spy factory itself lives at `mocks/create-mock-method.js`.

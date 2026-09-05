@@ -1,5 +1,22 @@
 # Changelog
 
+## 2.1.0
+
+### Breaking Changes
+
+- `View`'s `viewName` is now a required constructor option. Every `View` subclass must now pass `viewName` explicitly.
+- Removed the `generator` object from `nutin.config.js`. The generator now always scaffolds a stylesheet, and gates locale/test file generation on the existing `i18n` and `testinNutin.includeApp` flags.
+
+### Fixes
+
+- Restored `document.title` updates on route change, regressed silently in 2.0.0's rewrite, default to the view's `viewName`.
+- Fixed leaked-listener/subscription bug that affected every re-rendering component. Previously-mounted child components (single or catalog) are now properly destroyed before a re-render mounts their replacements.
+- `HttpClient`'s constructor `defaultHeaders` are now actually merged into outgoing requests (previously silently dropped — only per-call `config.headers` were sent).
+- `data-optional` elements with literal `"null"` text content (e.g. `<span data-optional>null</span>`) are now correctly removed, matching the existing `"undefined"` handling.
+- `revealGlobals` now restores the element's original `display` value by default (captured automatically by `hideGlobals`), instead of always forcing `block`; an optional second argument still allows an explicit override.
+- A `data-pipe` chain segment with an empty name (e.g. `data-pipe=":arg"`) now logs a warning and is skipped, instead of silently aborting the entire chain with no write-back.
+- Removed a redundant duplicate translation-file fetch on startup when i18n is enabled.
+
 ## 2.0.0
 
 Version 2.0.0 focuses on simplicity and clear APIs over feature accumulation: fewer abstractions, clearer responsibilities, and a more focused API. 

@@ -42,7 +42,7 @@
 ### Global layout
 
 - [How do I mount global components?](./API/GLOBAL_LAYOUT/HOWDOI_MOUNT_GLOBAL_COMPONENTS.md)
-- [How do I hide global components?](./API/GLOBAL_LAYOUT/HOWDOI_HIDE_GLOBAL_COMPONENTS.md)
+- [How do I toggle global components?](./API/GLOBAL_LAYOUT/HOWDOI_TOGGLE_GLOBAL_COMPONENTS.md)
 
 ### Pipes
 
