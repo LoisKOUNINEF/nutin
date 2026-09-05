@@ -15,7 +15,7 @@ class UserCardComponent extends Component {
 
 Each call re-runs the whole pipeline — regenerating the template, rebuilding children/catalogs from scratch, and rebinding events. There's no diffing/patching, so a full re-render is the only update mechanism.
 
-See [How do I listen to application events?](../APP_EVENTS/HOWDOI_LISTEN_TO_APPLICATION_EVENTS.md)
+See [How do I listen to application events?](../EVENTS/HOWDOI_LISTEN_TO_APPLICATION_EVENTS.md)
 
 ## Manual instantiate + render
 

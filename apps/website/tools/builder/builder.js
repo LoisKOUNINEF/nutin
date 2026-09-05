@@ -10,6 +10,8 @@ print.boldHead(`\nStarting build...`);
 
 runScript(path.join(scriptsDir, 'app', 'copy-static.js'), 'Copying files...');
 
+runScript(path.join(scriptsDir, 'docs', 'generate-docs.js'), 'Generating docs manifest...');
+
 runScript(path.join(scriptsDir, 'html-index', 'validate-html.js'), 'Processing index.html...');
 runScript(path.join(scriptsDir, 'app', 'validate-routes.js'), 'Validating app routes...');
 

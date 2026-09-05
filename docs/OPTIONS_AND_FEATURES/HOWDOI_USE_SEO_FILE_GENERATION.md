@@ -1,4 +1,4 @@
-# How do I use SEO files generation?
+# How do I use SEO file generation?
 
 ## Enable option
 

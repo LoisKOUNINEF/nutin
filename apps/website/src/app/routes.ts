@@ -1,26 +1,19 @@
 import { Routes } from "../core/index.js";
-import { 
+import {
   ChangelogView,
-  CoreView, 
-  GetStartedView, 
-  HomeView, 
-  LibrariesView, 
-  NotFoundView, 
-  StylinNutinView, 
-  TestinNutinView, 
-  ToolsView, 
-  TutorialView 
+  DocsView,
+  GetStartedView,
+  HomeView,
+  NotFoundView,
+  TutorialView
 } from "./views/index.js";
+import { Guards } from "./guards.js";
 
 export const appRoutes: Routes = {
   '/': () => new HomeView(),
   '/get-started': () => new GetStartedView(),
   '/tutorial': () => new TutorialView(),
-  '/docs/core/:topic?': () => new CoreView(),
-  '/docs/libraries/:topic?': () => new LibrariesView(),
-  '/docs/stylin-nutin/:topic?': () => new StylinNutinView(),
-  '/docs/testin-nutin/:topic?': () => new TestinNutinView(),
-  '/docs/tools/:topic?': () => new ToolsView(),
+  '/docs/:slug?': { view: () => new DocsView(), guards: [Guards.docPageExists()] },
   '/changelog': () => new ChangelogView(),
   '/404': () => new NotFoundView(),
 }

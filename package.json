@@ -28,6 +28,7 @@
     "jsdom": "^26.1.0",
     "linkedom": "^0.18.12",
     "live-server": "^1.2.2",
+    "marked": "^18.0.11",
     "sass": "^1.89.0",
     "typescript": "^5.8.3"
   }

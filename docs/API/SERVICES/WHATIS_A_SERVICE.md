@@ -19,4 +19,4 @@ A service has two independent teardown paths — `dispose()` (runs `registerClea
 
 ## Nutin services are services too
 
-Nutin's own cross-cutting pieces are built the same way application services are. As an example, `AppEventBus` (the app event bus — see [What are events in Nutin?](../APP_EVENTS/WHATARE_EVENTS_IN_NUTIN.md)) and `Router` (see [How do I register a route?](../VIEWS_AND_ROUTING/HOWDOI_REGISTER_A_ROUTE.md)) are both `Service` singletons under the hood.
+Nutin's own cross-cutting pieces are built the same way application services are. As an example, `AppEventBus` (the app event bus — see [What are events in Nutin?](../EVENTS/WHATARE_EVENTS_IN_NUTIN.md)) and `Router` (see [How do I register a route?](../VIEWS_AND_ROUTING/HOWDOI_REGISTER_A_ROUTE.md)) are both `Service` singletons under the hood.

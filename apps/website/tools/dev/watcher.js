@@ -3,7 +3,7 @@ import { exec } from 'child_process';
 import path from 'path';
 import { print } from '../utils/index.js'
 
-const watcher = chokidar.watch(['src'], {
+const watcher = chokidar.watch(['src', '../../docs'], {
   ignored: /(^|[/\\])\../,
   persistent: true,
 });

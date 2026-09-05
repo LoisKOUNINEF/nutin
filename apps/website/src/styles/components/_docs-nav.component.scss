@@ -1,0 +1,67 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+
+.docs-nav__container {
+	position: sticky;
+	top: 3rem;
+	width: 22vw;
+	padding-bottom: map.get($spacings, 'largest');
+	overflow-y: auto;
+	max-height: calc(100vh - 3rem);
+
+	@include mixins.respond-to(medium) {
+		position: static;
+		width: 100%;
+		max-height: none;
+	}
+}
+
+.docs-nav__sections,
+.docs-nav__groups,
+.docs-nav__pages {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.docs-nav__section {
+	margin-bottom: map.get($spacings, 'large');
+}
+
+.docs-nav__section-title {
+	display: block;
+	font-weight: 600;
+	color: var(--primary);
+	margin-bottom: map.get($spacings, 'small');
+}
+
+.docs-nav__group {
+	margin-bottom: map.get($spacings, 'medium');
+}
+
+.docs-nav__group-title {
+	display: block;
+	font-size: map.get($font-sizes, 'small');
+	color: var(--text-muted);
+	margin-bottom: map.get($spacings, 'smallest');
+}
+
+.docs-nav__link {
+	display: block;
+	padding: map.get($spacings, 'smallest') 0;
+	color: var(--text);
+
+	&:hover {
+		color: var(--primary);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--primary);
+	}
+}
+
+.docs-nav__link--active {
+	font-weight: bold;
+	color: var(--primary);
+}

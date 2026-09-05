@@ -9,3 +9,5 @@ export * from './table-of-content/table-of-content.component.js';
 
 export * from './home-section/index.js';
 export * from './globals/under-development/under-development.component.js';
+export * from './docs-nav/docs-nav.component.js';
+export * from './doc-content/doc-content.component.js';

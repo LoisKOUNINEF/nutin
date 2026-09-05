@@ -60,4 +60,4 @@ interface ViewOptions {
 
 On every route change, `document.title` is resolved in this order: matching route's `config/seo.json` (with `generateSEOFiles` enabled - see [How do I use SEO files generation?](../../OPTIONS_AND_FEATURES/HOWDOI_USE_SEO_FILE_GENERATION.md)) -> the view's locale file's `title` key (with `i18n` enabled — see [How do I use i18n?](../../OPTIONS_AND_FEATURES/HOWDOI_USE_I18N.md)) -> the view's `viewName` itself.
 
-`viewName` is emitted in the `view-mount`/`view-unmount` events fired by the router; see [How do I listen to application events?](../APP_EVENTS/HOWDOI_LISTEN_TO_APPLICATION_EVENTS.md).
+`viewName` is emitted in the `view-mount`/`view-unmount` events fired by the router; see [How do I listen to application events?](../EVENTS/HOWDOI_LISTEN_TO_APPLICATION_EVENTS.md).

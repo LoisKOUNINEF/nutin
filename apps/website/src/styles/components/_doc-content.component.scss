@@ -1,0 +1,66 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+
+.doc-content {
+	@include mixins.flex-row;
+	gap: map.get($spacings, 'largest');
+
+	@include mixins.respond-to(medium) {
+		@include mixins.flex-column;
+	}
+}
+
+.doc-content__body {
+	max-width: 90ch;
+
+	pre {
+		border-radius: map.get($border-radius, 'medium');
+		overflow-x: auto;
+		padding: map.get($spacings, 'medium');
+	}
+
+	code {
+		font-size: map.get($font-sizes, 'small');
+	}
+
+	a {
+		color: var(--primary);
+		&:hover {
+			color: color-mix(in srgb, var(--primary), transparent 20%);
+		}
+	}
+}
+
+.doc-toc {
+	flex-shrink: 0;
+	width: 18vw;
+	font-size: map.get($font-sizes, 'small');
+
+	@include mixins.respond-to(medium) {
+		width: 100%;
+	}
+}
+
+.doc-toc__title {
+	display: block;
+	font-weight: 600;
+	color: var(--text-muted);
+	margin-bottom: map.get($spacings, 'small');
+}
+
+.doc-toc__item {
+	list-style: none;
+	padding: map.get($spacings, 'smallest') 0;
+
+	a {
+		color: var(--text-muted);
+		&:hover {
+			color: var(--primary);
+		}
+	}
+}
+
+.doc-toc__item--depth-3 {
+	padding-left: map.get($spacings, 'medium');
+}

@@ -39,5 +39,5 @@ It returns `''` for `null`/`undefined` and stringifies other values first.
 
 ## Per-token escaping
 
-Most exact [`data-event`](./HOWDOI_HANDLE_DOM_EVENTS.md) tokens (`@id`, `@class`, `@textContent`, ...) are escaped via plain `escapeHtml`. `@value` specifically routes through a variant aware of `<input>`/`<textarea>`/`contenteditable` elements, escaping their current value/`innerText`. 
+Most exact [`data-event`](../EVENTS/HOWDOI_HANDLE_DOM_EVENTS.md) tokens (`@id`, `@class`, `@textContent`, ...) are escaped via plain `escapeHtml`. `@value` specifically routes through a variant aware of `<input>`/`<textarea>`/`contenteditable` elements, escaping their current value/`innerText`. 
 This escaping is always on, regardless of the component's `trustLevel` — trust level only affects the template-string-to-`innerHTML` path, not `data-event`, `data-i18n`, or `data-pipe` output.

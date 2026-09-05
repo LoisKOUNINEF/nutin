@@ -2,8 +2,8 @@
   "title": "Nutin",
   "catchphrase": "The structure of a framework.",
   "subcatchphrase": "The freedom of vamilla.",
-  "briefing-1": "Built as a learning journey into how modern frameworks work.",
-  "briefing-2": "Minimal, readable, and yours to modify.",
+  "briefing-1": "Your app owns Nutin — not the other way around.",
+  "briefing-2": "The source code lives alongside your application, so you can read it, modify it, and make it yours.",
   "snippet": "Quick Start\n",
   "tutorial-link": "Build your first nutin app"
 } 

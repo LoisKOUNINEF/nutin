@@ -32,4 +32,4 @@ This mounts them as **siblings of `<main id="app">`**, not inside it — global 
 
 Registering an `id` that's already registered logs `console.warn('Global "${id}" is already registered - skipping.')` and skips that entry entirely — the earlier-mounted element for that id is left in place, nothing is replaced.
 
-Use `hideGlobals`/`revealGlobals` to toggle visibility of already-mounted globals from anywhere in the app — see [How do I hide global components?](./HOWDOI_HIDE_GLOBAL_COMPONENTS.md).
+Use `hideGlobals`/`revealGlobals` to toggle visibility of already-mounted globals from anywhere in the app — see [How do I toggle global components?](./HOWDOI_TOGGLE_GLOBAL_COMPONENTS.md).
