@@ -1,4 +1,4 @@
-# How do I hide global components?
+# How do I toggle global components?
 
 ```ts
 import { hideGlobals, revealGlobals } from '../../../core/index.js';

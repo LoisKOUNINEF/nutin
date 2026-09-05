@@ -6,7 +6,7 @@
 - [How do I run my app?](#running-your-app)
 - [How do I generate components, views and services?](#generate-components-views-and-services)
 - [What does a typical component look like?](#a-typical-component)
-- [Features and configuration](#features-and-configuration)
+- [Options and configuration](#options-and-configuration)
 - [Styling](#styling)
 - [Testing](#testing)
 - [Go further](#go-further)
@@ -30,6 +30,14 @@ tools/    -- build, development, generator and testing
 nutin.config.js   -- features and configuration
 ```
 
+### Imports
+
+Imports use **relative paths** and end with `.js` extension.
+
+```js
+import { Foo } from 'relative/path/to/foo.js';
+```
+
 ## How do I run my app?
 
 ```bash
@@ -40,14 +48,6 @@ nutin.config.js   -- features and configuration
 # Build
 {{packageManager}} run build      # build the application
 {{packageManager}} run build:prod # build the application for production
-```
-
-### Imports
-
-Imports must use **relative paths** and end with `.js` extension.
-
-```js
-import { Foo } from 'relative/path/to/foo.js';
 ```
 
 ## How do I generate components, views and services?
@@ -143,7 +143,7 @@ A template can also be written directly inline (skip the `.html` file and the pl
 
 Defining both an inline template and an external `.html` file, or neither, fails the build.
 
-## Features and configuration
+## Options and configuration
 
 ### Main file
 
