@@ -9,6 +9,7 @@
 - `HttpClient`'s constructor `defaultHeaders` are now actually merged into outgoing requests (previously silently dropped — only per-call `config.headers` were sent).
 - `data-optional` elements with literal `"null"` text content (e.g. `<span data-optional>null</span>`) are now correctly removed, matching the existing `"undefined"` handling.
 - `revealGlobals` now restores the element's original `display` value by default (captured automatically by `hideGlobals`), instead of always forcing `block`; an optional second argument still allows an explicit override.
+- A `data-pipe` chain segment with an empty name (e.g. `data-pipe=":arg"`) now logs a warning and is skipped, instead of silently aborting the entire chain with no write-back.
 
 ## 2.0.0
 

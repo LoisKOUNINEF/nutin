@@ -13,10 +13,10 @@
 - **Chaining**: separate pipe names with `|` — each runs left-to-right on the previous result.
 - **Args**: after `:`, comma-separated, passed positionally to the pipe function.
 - **`data-pipe-source`**: overrides what value feeds the pipe, instead of the element's own value/text. An *empty string* still counts as an explicit override (checked by presence, not truthiness).
+- **Empty segment name**: a segment with no name (e.g. `data-pipe=":arg"`) logs a warning and is skipped — the rest of the chain still runs, the same as calling an unregistered pipe name (see [How do I create pipes?](./HOWDOI_CREATE_PIPES.md)).
 
 See [What pipes are available?](./WHAT_PIPES_ARE_AVAILABLE.md) for the built-in list, and [How do I create pipes?](./HOWDOI_CREATE_PIPES.md) to register your own.
 
 ## Gotchas
 
-- If any pipe segment's name is empty (e.g. `data-pipe=":arg"`), the whole chain aborts silently — the element is left completely untouched, and nothing is logged. This is different from naming an *unregistered* pipe, which logs a warning and passes the value through unchanged (see [How do I create pipes?](./HOWDOI_CREATE_PIPES.md)).
 - An empty `data-pipe` attribute is a no-op.
