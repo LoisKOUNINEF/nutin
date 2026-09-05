@@ -53,7 +53,3 @@ AppHttpClient.addResponseInterceptor((response) => console.log('←', response.s
 ```
 
 The request interceptor fires once per call, right before `fetch`, with the fully built URL and request options. The response interceptor fires with the raw `Response` right after `fetch` resolves — **before** error-status validation, so it sees failed (4xx/5xx) responses too, ahead of the `HttpError` throw.
-
-## Gotcha: constructor default headers aren't sent
-
-`HttpClient`'s constructor accepts `defaultHeaders` (e.g. `{ 'Content-Type': 'application/json' }`), but they currently aren't merged into the actual outgoing request — only headers passed explicitly via a call's own `config.headers` are sent. Don't rely on constructor defaults; pass headers per call when you need them, as in the `createUser` example above.

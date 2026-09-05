@@ -106,7 +106,7 @@ You need to repeat the security headers in each location block that uses add_hea
 
 ## Compression
 
-Gzip (`.gz`) and Brotli (`.br`) compression are handled on production build - independent from Docker feature.
+Gzip (`.gz`) and Brotli (`.br`) compression is handled on production build - independent from Docker feature.
 
 Params:
 ```js

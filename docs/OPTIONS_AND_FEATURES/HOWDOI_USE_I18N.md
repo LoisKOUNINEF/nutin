@@ -42,13 +42,4 @@ In HTML templates, use `data-i18n` attribute to register keys.
 language value -> default language value -> text content -> raw key
 ```
 
-## Optional: Enable locale generation
-
-```js
-// nutin.config.js
-export default {
-  generator: {
-    generateLocales: true // Generate locale files alongside components and views
-  }
-}
-```
+A generated view's locale file also gets a top-level `title` key, consumed as a `document.title` fallback — see [How do I create a view?](../API/VIEWS_AND_ROUTING/HOWDOI_CREATE_A_VIEW.md).

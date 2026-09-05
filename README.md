@@ -8,7 +8,7 @@ Nutin provides the structure and tooling you'd expect from a framework, while ke
 
 Nutin is deliberately pragmatic, lightweight, and dependency-free on runtime.
 
-**[Create your first app →](https://www.nutin.org/tutorial).**
+**[Create your first app →](https://www.nutin.org/tutorial)**
 
 ## Repository
 

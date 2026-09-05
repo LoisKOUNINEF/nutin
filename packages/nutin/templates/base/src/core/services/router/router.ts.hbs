@@ -15,6 +15,7 @@ export type IRouter = InstanceType<typeof Router>;
 export interface RouteMatch {
   route: RouteConfig;
   params: Record<string, string>;
+  pattern: string;
 }
 
 class Router extends Service<Router> {
@@ -69,10 +70,11 @@ class Router extends Service<Router> {
     this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
     this._currentParams = routeMatch.params;
     this._currentView = ViewRenderManager.renderNewView(
-      guardResult.viewConstructor!, 
+      guardResult.viewConstructor!,
       routeMatch.params
     );
-    
+
+    NavigationManager.updateDocumentTitle(this._currentView, routeMatch.pattern);
     NavigationManager.updateHistory(normalizedPath, currentPath, pushState);
     window.scrollTo({ top: 0 });
   }
@@ -122,7 +124,7 @@ class Router extends Service<Router> {
     for (const [pattern, routeConfig] of Object.entries(this.routes)) {
       const match = NavigationManager.matchPattern(pattern, path);
       if (match) {
-        return { route: routeConfig, params: match };
+        return { route: routeConfig, params: match, pattern };
       }
     }
     return null;
@@ -145,7 +147,8 @@ class Router extends Service<Router> {
     this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
     this._currentParams = {};
     this._currentView = ViewRenderManager.renderNewView(notFoundConstructor, {});
-    
+
+    NavigationManager.updateDocumentTitle(this._currentView, '/404');
     NavigationManager.updateHistory(normalizedPath, currentPath, pushState);
   }
 

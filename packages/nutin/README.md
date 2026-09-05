@@ -32,15 +32,12 @@ npx @nutin/cli
 nutin-update
 ```
 
-## Add Docker
+## Add Feature
 
 ```bash
-# ready-to-use Dockerfile for Nutin apps
-nutin-add docker
+nutin-add <feature>
 ```
 
-## Useful links
+## Documentation
 
-- [Nutin website](https://www.nutin.org)
-- [First app tutorial](https://www.nutin.org/tutorial)
-- [Repository documentation](https://github.com/LoisKOUNINEF/nutin/tree/main/docs)
+- [Repository documentation](https://github.com/LoisKOUNINEF/nutin/tree/main/docs/API.md)
