@@ -18,7 +18,7 @@ export abstract class TopicView extends ResourceView {
 
     if (!topic) return configs;
 
-    return [ ...configs, this.renderTopic(topic) ];    
+    return [ ...configs, this.renderTopic(topic), ];    
   }
 
   private renderTopic(topic: ISection): ComponentConfig {

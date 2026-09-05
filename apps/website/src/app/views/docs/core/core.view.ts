@@ -3,12 +3,12 @@ import CoreSections from "./sections/core.sections.js";
 
 const template = `__TEMPLATE_PLACEHOLDER__`;
 
-export class CoreDocsView extends TopicView {
+export class CoreView extends TopicView {
   protected sections: ISection[] = CoreSections;
   protected sectionsIndexSelector = 'core-sidebar';
   protected sectionComponentSelector = 'core-topic';
 
   constructor() {
-    super({template});
+    super({template, viewName: 'core'});
   }
 }

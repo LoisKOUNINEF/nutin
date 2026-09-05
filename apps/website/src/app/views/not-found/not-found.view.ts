@@ -5,7 +5,7 @@ const template = `__TEMPLATE_PLACEHOLDER__`;
 
 export class NotFoundView extends View {
   constructor() {
-    super({template});
+    super({template, viewName: 'not-found'});
   }
 
   registerChildren(): ComponentConfig[] {

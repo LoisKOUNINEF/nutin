@@ -109,6 +109,12 @@ describe('DomHelper', () => {
     expect(container.querySelector('span')).toBe(null);
   });
 
+  it('cleanupOptionalContent removes an optional element whose textContent is the literal string "null"', () => {
+    container.innerHTML = '<span data-optional>null</span>';
+    DomHelper.cleanupOptionalContent();
+    expect(container.querySelector('span')).toBe(null);
+  });
+
   it('cleanupOptionalContent keeps an optional element with real textContent', () => {
     container.innerHTML = '<span data-optional>hello</span>';
     DomHelper.cleanupOptionalContent();

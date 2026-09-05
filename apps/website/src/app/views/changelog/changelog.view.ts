@@ -10,7 +10,7 @@ export class ChangelogView extends SinglePageCatalogView {
   protected sectionsIndexSelector: string = '';
 
   constructor() {
-    super({template});
+    super({template, viewName: 'changelog'});
   }
 
   onBeforeRender() {

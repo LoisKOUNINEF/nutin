@@ -7,8 +7,8 @@ export abstract class ResourceView extends View {
   protected abstract sectionComponentSelector: string;
   private _unsubViewMount: () => void;
 
-  constructor({template = ''}) {
-    super({template});
+  constructor({template = '', viewName = 'resource'}) {
+    super({ template, viewName });
     this._unsubViewMount = Lifecycle.onViewMount(this.applyPrism);
   }
 

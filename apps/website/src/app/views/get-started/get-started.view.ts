@@ -8,7 +8,7 @@ export class GetStartedView extends SinglePageCatalogView {
   protected sectionComponentSelector: string = 'get-started-sections';
   protected sectionsIndexSelector: string = '';
   constructor() {
-    super({template});
+    super({template, viewName: 'get-started'});
   }
 
 }

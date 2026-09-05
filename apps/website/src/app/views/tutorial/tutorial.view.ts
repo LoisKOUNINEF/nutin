@@ -10,6 +10,6 @@ export class TutorialView extends SinglePageCatalogView {
   protected tocHref = 'tutorial-toc';
 
   constructor() {
-    super({template});
+    super({template, viewName: 'tutorial'});
   }
 }

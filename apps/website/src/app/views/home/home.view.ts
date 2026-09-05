@@ -5,7 +5,7 @@ const template = `__TEMPLATE_PLACEHOLDER__`;
 
 export class HomeView extends View {
   constructor() {
-    super({template});
+    super({template, viewName: 'home'});
   }
 
   public registerChildren(): ComponentConfig[] {

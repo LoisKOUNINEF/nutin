@@ -1,8 +1,4 @@
 {
-  "meta": {
-    "title": "Tutoriel",
-    "description": "Développez votre première app nutin : une liste de tâches."
-  },
   "title": "Tutoriel",
   "presentation": "C'est la toute première app que j'ai développée pour me familiariser avec mon propre outil, car `la construction est un processus très différent de l'usage`. Il va sans dire que ce premier projet devait être quelque chose de spécial, marquant, quelque chose que je n'avais jamais fait auparavant.\nFinalement, c'est une liste de tâches. A défaut d'originalité, cela permet un énième un jeu de mots nul avec nutin, donc ça en vaut la peine.\nNous allons utiliser les paramètres par défaut, et couvrirons la création de composant, de vue et de service, les composants enfants, et le routing dynamique. Nous utiliserons également les pipes et les bibliothèques snackbar et popover incluses.",
   "live-link": "Voir une version live de l'application.",
