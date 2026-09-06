@@ -17,8 +17,7 @@ function renderPageLink(slug: string, currentSlug: string): string {
       <a
         href="/docs/${slug}"
         class="docs-nav__link${activeClass}"
-        data-slug="${slug}"
-        data-event="click:_navigateTo:@dataset:slug"
+        data-event="click:_navigateTo:@attr:href"
       >${page.title}</a>
     </li>
   `;
@@ -61,7 +60,7 @@ export class DocsNavComponent extends Component<HTMLElement, IDocsNavConfig> {
     super({ templateFn, mountTarget, config, props: { className: 'docs-nav__container' } });
   }
 
-  private _navigateTo(slug: string): void {
-    navigateToDoc(slug);
+  private _navigateTo(href: string): void {
+    navigateToDoc(href);
   }
 }

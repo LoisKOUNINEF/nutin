@@ -16,9 +16,68 @@
 	// sizing to content and getting squeezed alongside the sidebar/toc.
 	flex: 1 1 auto;
 	min-width: 0;
+	// The sitewide root font-size is a fixed 18px (its clamp() has no vw term),
+	// so give this prose column its own fluid size instead of touching that.
+	font-size: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);
+	line-height: 1.9;
 
 	p, li, ul, ol, blockquote, h1, h2, h3, h4, h5, h6 {
 		max-width: 90ch;
+	}
+
+	p, ul, ol, blockquote {
+		margin-bottom: map.get($spacings, 'large');
+	}
+
+	li {
+		margin-bottom: map.get($spacings, 'smallest');
+	}
+
+	h1, h2, h3, h4, h5, h6 {
+		font-family: $secondary-font;
+		color: var(--primary);
+		line-height: 1.25;
+	}
+
+	h1, h2, h3, h4 {
+		font-weight: bold;
+	}
+
+	h5, h6 {
+		font-weight: 600;
+	}
+
+	h1 {
+		font-size: clamp(2rem, 1.7rem + 1.5vw, 2.75rem);
+		margin-top: 0;
+		margin-bottom: map.get($spacings, 'large');
+	}
+
+	h2 {
+		font-size: clamp(1.5rem, 1.3rem + 1vw, 2rem);
+		margin-top: map.get($spacings, 'largest');
+		margin-bottom: map.get($spacings, 'medium');
+	}
+
+	h3, h4, h5, h6 {
+		margin-top: map.get($spacings, 'large');
+		margin-bottom: map.get($spacings, 'small');
+	}
+
+	h3 {
+		font-size: clamp(1.25rem, 1.1rem + 0.75vw, 1.625rem);
+	}
+
+	h4 {
+		font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+	}
+
+	h5 {
+		font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+	}
+
+	h6 {
+		font-size: clamp(0.875rem, 0.85rem + 0.2vw, 1rem);
 	}
 
 	pre {
@@ -34,8 +93,11 @@
 		margin-bottom: map.get($spacings, 'medium');
 	}
 
+	// em, not rem: lets inline code scale with whatever element contains it
+	// (a heading's clamp()-driven size, or the fluid paragraph base size)
+	// instead of being pinned to the root font-size.
 	code {
-		font-size: map.get($font-sizes, 'small');
+		font-size: 0.875em;
 	}
 
 	a {

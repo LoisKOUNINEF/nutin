@@ -35,6 +35,7 @@
 
 .docs-nav__section-title {
 	display: block;
+	font-size: 1.25rem;
 	font-weight: 600;
 	color: var(--primary);
 	margin-bottom: map.get($spacings, 'small');
@@ -46,8 +47,8 @@
 
 .docs-nav__group-title {
 	display: block;
-	font-size: map.get($font-sizes, 'small');
-	color: var(--text-muted);
+	font-size: 1.125rem;
+	color: var(--primary);
 	margin-bottom: map.get($spacings, 'smallest');
 }
 

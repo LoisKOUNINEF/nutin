@@ -165,7 +165,7 @@ function renderPage(sourcePath, slugMap) {
         // Internal links carry a data-event hook so DocContentComponent can route them
         // through the SPA router instead of triggering a full page reload.
         const navAttrs = internalSlug
-          ? ` data-slug="${internalSlug}" data-event="click:_navigateTo:@dataset:slug"`
+          ? ` data-event="click:_navigateTo:@attr:href"`
           : '';
         return `<a href="${href}"${titleAttr}${navAttrs}>${text}</a>`;
       },

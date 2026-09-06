@@ -42,7 +42,7 @@ export class DocContentComponent extends Component<HTMLElement, IDocContentConfi
     PrismHighlighter.apply();
   }
 
-  private _navigateTo(slug: string): void {
-    navigateToDoc(slug);
+  private _navigateTo(href: string): void {
+    navigateToDoc(href);
   }
 }

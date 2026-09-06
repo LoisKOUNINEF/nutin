@@ -48,11 +48,25 @@ export class NavigationManager {
   public static updateHistory(
     normalizedPath: string,
     currentPath: string,
-    pushState: boolean
+    pushState: boolean,
+    hash?: string
   ): void {
-    const localizedPath = this.addLocalePrefix(normalizedPath);
-    if (pushState && window.location.pathname !== localizedPath) {
+    const localizedPath = this.addLocalePrefix(normalizedPath) + (hash ? `#${hash}` : '');
+    const currentUrl = window.location.pathname + window.location.hash;
+    if (pushState && currentUrl !== localizedPath) {
       window.history.pushState({}, '', localizedPath);
+    }
+  }
+
+  // Scrolls to the element matching `hash` (a bare fragment, no leading "#") if it
+  // exists; falls back to the top of the page otherwise (no hash, or a stale/broken
+  // id) — matches the browser's own native fallback for an unresolvable fragment.
+  public static scrollToHash(hash?: string): void {
+    const target = hash ? document.getElementById(hash) : null;
+    if (target) {
+      target.scrollIntoView({ block: 'start' });
+    } else {
+      window.scrollTo({ top: 0 });
     }
   }
 
