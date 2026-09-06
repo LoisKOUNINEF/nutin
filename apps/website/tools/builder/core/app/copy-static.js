@@ -17,6 +17,7 @@ async function copyStatic() {
   await ensureDir(PATHS.tempSource);
 
   await copyFavicon();
+  await copyPrism();
   await copyConfig();
 
   for (const extension of extensions) {
@@ -54,6 +55,18 @@ async function copyFavicon() {
     await copyFile(srcPath, destPath);
   } catch (err) {
     if (err.code === 'ENOENT') print.warn('No favicon found at public/favicon.ico');
+    else errorExit(err, 'copy-static');
+  }
+}
+
+async function copyPrism() {
+  const srcPath = path.join(PATHS.sourceApp, 'helpers', 'prism', 'prism.js');
+  const destPath = path.join(PATHS.tempSource, 'prism.js');
+
+  try {
+    await copyFile(srcPath, destPath);
+  } catch (err) {
+    if (err.code === 'ENOENT') print.warn('No prism.js found at src/app/helpers/prism/prism.js');
     else errorExit(err, 'copy-static');
   }
 }

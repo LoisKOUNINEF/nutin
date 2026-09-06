@@ -5,7 +5,8 @@
 .docs-nav__container {
 	position: sticky;
 	top: 3rem;
-	width: 22vw;
+	width: 25vw;
+	margin-right: map.get($spacings, 'largest');
 	padding-bottom: map.get($spacings, 'largest');
 	overflow-y: auto;
 	max-height: calc(100vh - 3rem);

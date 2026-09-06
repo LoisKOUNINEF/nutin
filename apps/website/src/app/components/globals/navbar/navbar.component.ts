@@ -5,15 +5,9 @@ import { ButtonComponent } from '../../index.js';
 const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
 
 export class NavbarComponent extends Component<HTMLHeadingElement> {
-  private readonly dropdownLinks = [
-    'core',
-    'libraries',
-    'stylin-nutin',
-    'testin-nutin',
-    'tools'
-  ] as const;
   private readonly fixedLinks = [
     'tutorial',
+    'docs',
     'changelog'
   ] as const;
   private readonly btnClass = 'c-round-btn' as const;
@@ -25,8 +19,7 @@ export class NavbarComponent extends Component<HTMLHeadingElement> {
 
   registerChildren(): ComponentConfig[] {
     const fixedButtons = this.createFixedButtons();
-    const dropdownButtonsCatalog = this.getDropdownButtonsCatalog();
-    return [ ...fixedButtons, ...dropdownButtonsCatalog ];
+    return [ ...fixedButtons ];
   }
 
   private createFixedButtons(): ComponentConfig[] {
@@ -37,7 +30,7 @@ export class NavbarComponent extends Component<HTMLHeadingElement> {
         }
       }
     )
-    return [ ...fixedButtons, this.createDropdownButton() ]
+    return [ ...fixedButtons ]
   }
 
   private getBtnConfig(name: string): BaseButton {
@@ -51,50 +44,12 @@ export class NavbarComponent extends Component<HTMLHeadingElement> {
   }
 
   private handleNavigation(path: string) {
-    const isDocs = (this.dropdownLinks as ReadonlyArray<string>).includes(path);
-    const navigateTo = this.returnUrl(path, isDocs);
+    const navigateTo = this.returnUrl(path);
     Navigation.navigateTo(`/${navigateTo}`);
-    this.toggleDropdown(isDocs);
   }
 
-  private returnUrl(path: string, isDocs: boolean): string {
+  private returnUrl(path: string): string {
     if (path === 'home') return '';
-    if (isDocs) return `docs/${path}`;
     return path;
-  }
-
-  private createDropdownButton(): ComponentConfig {
-    const dropdownBtn = { 
-      i18nKey: `navbar.documentation`, 
-      callback: () => this.toggleDropdown(),
-      className: this.btnClass,
-    };
-
-    return {
-      selector: 'extend-dropdown',
-      factory: (el) => new ButtonComponent(el, dropdownBtn)
-    }
-  }
-
-  private toggleDropdown(isDocs: boolean = true) {
-    const dropdown = document.getElementById('dropdown');
-    if (!isDocs) {
-      dropdown?.classList.remove(this.dropdownClass);
-    } else {
-      dropdown?.classList.toggle(this.dropdownClass);
-    }
-  }
-
-  private getDropdownButtonsCatalog(): ComponentConfig[] {
-    const dropdownButtons = this.dropdownLinks.map((link) => {
-      return this.getBtnConfig(link);
-    });
-
-    return this.createCatalogComponents({
-        items: dropdownButtons,
-        selector: 'dropdown-buttons',
-        component: ButtonComponent,
-        elementName: 'dropdown-btn'
-    });
   }
 }
