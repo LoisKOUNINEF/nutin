@@ -5,9 +5,9 @@
 
 ## Docs
 
-Monorepo's `docs` folder is the main documentation source (secondaries: `packages/nutin/CHANGELOG.md`, `packages/nutin/templates/base/GETTING_STARTED.md`). Website docs pages are therefore generated from `docs/` markdown files, using `marked` dependency with a custom build step (`scripts/generate-docs.mjs`, `apps/website/tools/builder/core/docs/generate-docs.js`).
+Monorepo's `docs` folder represents the single documentation source (*Exceptions*: `packages/nutin/CHANGELOG.md` - is part of the `nutin` package, `packages/nutin/templates/base/GETTING_STARTED.md.hbs` - base documentation present in every generated app). 
 
-Each subfolder in `docs` gets its own Table of Contents file in `docs` root. ToC entries should match related file's h1 - will warn if it doesnt.
+Website docs pages are therefore generated from `docs/` markdown files, using `marked` dependency with a custom build step (`scripts/generate-docs.mjs`, `apps/website/tools/builder/core/docs/generate-docs.js`).
 
 ## Helpers
 

@@ -12,12 +12,25 @@
 }
 
 .doc-content__body {
-	max-width: 90ch;
+	// Fills whatever space .doc-toc (flex-shrink: 0) doesn't take, instead of
+	// sizing to content and getting squeezed alongside the sidebar/toc.
+	flex: 1 1 auto;
+	min-width: 0;
+
+	p, li, ul, ol, blockquote, h1, h2, h3, h4, h5, h6 {
+		max-width: 90ch;
+	}
 
 	pre {
 		border-radius: map.get($border-radius, 'medium');
 		overflow-x: auto;
 		padding: map.get($spacings, 'medium');
+	}
+
+	// Doubled selector bumps specificity above prism.scss's `pre[class*=language-]`
+	// rule, which otherwise wins the cascade (equal specificity, loaded later)
+	// and zeroes this margin via its `margin: .5em 0` shorthand.
+	&.doc-content__body pre {
 		margin-bottom: map.get($spacings, 'medium');
 	}
 

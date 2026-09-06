@@ -5,8 +5,11 @@
 .docs-nav__container {
 	position: sticky;
 	top: 3rem;
-	width: 25vw;
-	margin-right: map.get($spacings, 'largest');
+	min-width: 20vw;
+	// Otherwise flex-shrink:1 (the default) lets this shrink well below 30vw
+	// whenever the row's total desired width exceeds .resource__section.
+	flex-shrink: 0;
+	margin-right: 3rem;
 	padding-bottom: map.get($spacings, 'largest');
 	overflow-y: auto;
 	max-height: calc(100vh - 3rem);

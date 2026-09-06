@@ -56,7 +56,9 @@ const templateFn = (_config: IDocsNavConfig) => `
 
 export class DocsNavComponent extends Component<HTMLElement, IDocsNavConfig> {
   constructor(mountTarget: HTMLElement, config: IDocsNavConfig) {
-    super({ templateFn, mountTarget, config });
+    // Mounting replaces the `docs-nav__container` placeholder outright, so its
+    // class must be re-applied here or the sidebar width/spacing CSS never matches.
+    super({ templateFn, mountTarget, config, props: { className: 'docs-nav__container' } });
   }
 
   private _navigateTo(slug: string): void {

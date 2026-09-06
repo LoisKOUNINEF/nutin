@@ -33,7 +33,9 @@ const templateFn = (_config: IDocContentConfig) => `
 
 export class DocContentComponent extends Component<HTMLElement, IDocContentConfig> {
   constructor(mountTarget: HTMLElement, config: IDocContentConfig) {
-    super({ templateFn, mountTarget, config, trustLevel: 'trusted' });
+    // Mounting replaces the `doc-content` placeholder outright, so its class
+    // must be re-applied here or the body/TOC flex-row layout CSS never matches.
+    super({ templateFn, mountTarget, config, trustLevel: 'trusted', props: { className: 'doc-content' } });
   }
 
   protected override onAfterRender(): void {
