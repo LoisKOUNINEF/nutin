@@ -24,8 +24,7 @@ export class HomeView extends View {
         sectionId: 0,
         content: 'npx @nutin/cli my-app',
         type: 'bash',
-      },
-      { className: 'snippet__code' })
+      })
     },{
       selector: 'snippet-run',
       factory: (el) => new SnippetComponent(el, {
@@ -33,8 +32,7 @@ export class HomeView extends View {
         sectionId: 0,
         content: 'cd my-app\nnpm run serve # app is reachable on port 9090',
         type: 'bash',
-      },
-      { className: 'snippet__code' })
+      })
     },{
       selector: 'snippet-generate',
       factory: (el) => new SnippetComponent(el, {
@@ -42,8 +40,7 @@ export class HomeView extends View {
         sectionId: 0,
         content: 'npm run generate component hello-world',
         type: 'bash',
-      },
-      { className: 'snippet__code' })
+      })
     },{
       selector: 'snippet-hello',
       factory: (el) => new SnippetComponent(el, {
@@ -51,8 +48,7 @@ export class HomeView extends View {
         sectionId: 0,
         content: '&lt;!-- components/hello-world/hello-world.component.html --&gt;\n&lt;div&gt;Hello, world!&lt;/div&gt;',
         type: 'html',
-      },
-      { className: 'snippet__code' })
+      })
     },{
       selector: 'snippet-register-ts',
       factory: (el) => new SnippetComponent(el, {
@@ -72,8 +68,7 @@ class HomeView extends View {
   }
 }`,
         type: 'ts',
-      },
-      { className: 'snippet__code' })
+      })
     },{
       selector: 'snippet-register-html',
       factory: (el) => new SnippetComponent(el, {
@@ -83,8 +78,7 @@ class HomeView extends View {
 &lt;!-- ... --&gt;
 &lt;div data-component="hello"&gt;&lt;/div&gt;`,
         type: 'html',
-      },
-      { className: 'snippet__code' })
+      })
     },{
       selector: 'snippet-see',
       factory: (el) => new SnippetComponent(el, {
@@ -92,8 +86,7 @@ class HomeView extends View {
         sectionId: 0,
         content: 'npm run dev # live reload on changes',
         type: 'bash',
-      },
-      { className: 'snippet__code' })
+      })
     }]
   }
 

@@ -93,7 +93,6 @@
 	color: var(--primary);
 	@include mixins.respond-to(medium) {
    	width: 100%;
-		// font-size: map.get($font-sizes, 'large');
 	}
 }
 
@@ -105,7 +104,7 @@
 	padding-top: map.get($spacings, medium);
 	@include mixins.respond-to(medium) {
    	width: 100%;
-		font-size: 1.5rem;
+		padding-left: map.get($spacings, small);
 	}
 	
 }
