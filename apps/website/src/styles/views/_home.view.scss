@@ -256,3 +256,10 @@
 		color: var(--text);
 	}
 }
+
+.home__pillars-section {
+	padding-top: 2rem;
+	.grid {
+		max-width: 150ch;
+	}
+}
