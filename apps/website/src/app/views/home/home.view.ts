@@ -1,5 +1,5 @@
 import { Navigation, ComponentConfig, View } from '../../../core/index.js';
-import { ButtonComponent, SnippetComponent, HomePillarsComponent } from '../../components/index.js';
+import { SnippetComponent, HomePillarsComponent } from '../../components/index.js';
 
 const template = `__TEMPLATE_PLACEHOLDER__`;
 
@@ -10,20 +10,6 @@ export class HomeView extends View {
 
   public registerChildren(): ComponentConfig[] {
     return [{
-      selector: 'tutorial-link',
-      factory: (el) => new ButtonComponent(el , {
-        i18nKey: 'home.tutorial-link',
-        callback: () => this.navigateTo('tutorial'),
-        className: 'home__cta-row-btn-primary card pillar-card arrow-top-right-svg'
-      })
-    },{
-      selector: 'docs-link',
-      factory: (el) => new ButtonComponent(el , {
-        i18nKey: 'home.docs-link',
-        callback: () => this.navigateTo('docs'),
-        className: 'home__cta-row-btn-secondary card pillar-card arrow-top-right-svg'
-      })
-    },{
       selector: 'home-pillars',
       factory: (el) => new HomePillarsComponent(el)
     },

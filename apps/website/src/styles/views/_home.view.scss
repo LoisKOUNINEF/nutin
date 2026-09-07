@@ -229,58 +229,33 @@
 	}
 }
 
-.home__cta-row { 
-	transition: ease-in-out .2s;
-	display: flex;
-	align-items: flex-end; 
-	flex-wrap: wrap;
-  padding-top: map.get($spacings, 'large');
-  padding-left: map.get($spacings, 'large');
-  font-weight: 600;
-  gap: 50px;
-}
-  
-.home__cta-row-btn-primary {
-	transition: ease-in-out .2s;
-	color: var(--primary)!important;
-	// border: 1px solid var(--primary); 
-	// padding: 5px 20px; 
-	border-radius: map.get($border-radius, large);
-	cursor: pointer; 
+.home__cta-row {
+	grid-template-columns: repeat(2, 1fr);
+	padding-top: map.get($spacings, 'large');
+	@include mixins.respond-to(medium) {
+		grid-template-columns: repeat(1, 1fr);
+	}
 
-	&:hover {
-		color: var(--primary-hover)!important;
+	.card {
+		cursor: pointer;
+		transition: ease-in-out .2s;
+		svg {
+			transition: ease-in-out .2s;
+  		stroke: var(--text);
+		}
+		&:hover {
+			border-color: var(--primary);
+			svg {
+	  		scale: 1.1;
+			}
+		}
+		&:focus-visible {
+			outline: 2px solid var(--primary);
+		}
 	}
-	&:focus-visible {
-		outline: 2px solid var(--primary);
-	}
-	&:active {
-		background-color: var(--background);
-	}
-	@media (hover: none) {
-	  &:hover {
-			color: var(--primary)!important;
-	  }
-	}
-}
-
-.home__cta-row-btn-secondary { 
-	background-color: var(--background);
-	border-radius: map.get($border-radius, large);
-	cursor: pointer; 
-
-	&:hover {
-		color: var(--primary-hover)!important;
-	}
-	&:focus-visible {
-		outline: 2px solid var(--primary);
-	}
-	&:active {
-		background-color: var(--background);
-	}
-	@media (hover: none) {
-	  &:hover {
-			color: var(--text)!important;
-	  }
+	.card-title {
+		font-size: 1.1rem;
+		font-weight: 400;
+		color: var(--text);
 	}
 }
