@@ -1,9 +1,18 @@
 {
   "title": "Nutin",
-  "catchphrase": "The structure of a framework.",
-  "subcatchphrase": "The freedom of vamilla.",
-  "briefing-1": "Your app owns Nutin — not the other way around.",
-  "briefing-2": "The source code lives alongside your application, so you can read it, modify it, and make it yours.",
-  "snippet": "Quick Start\n",
-  "tutorial-link": "Build your first nutin app"
+  "catchphrase": "Framework structure. Vanilla freedom.",
+  "subcatchphrase": "Your app owns Nutin. Not the other way around.",
+  "start": "First steps",
+  "build": "Start building",
+  "snippet-create": "Create a project",
+  "snippet-run": "Run the project",
+  "snippet-generate": "Generate a new component",
+  "snippet-hello": "Make the component say hello",
+  "snippet-register": "Register the component in the `Home` view",
+  "snippet-see": "See it running",
+  "achieved": "You've got the basics.",
+  "explore": "Explore Nutin",
+  "learn-more": "Why Nutin?",
+  "tutorial-link": "Continue with the tutorial",
+  "docs-link": "Browse Nutin documentation"
 } 

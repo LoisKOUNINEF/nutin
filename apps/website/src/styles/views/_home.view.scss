@@ -62,8 +62,10 @@
 }
 
 .home__header {
-	padding-left: map.get($spacings, largest);
-	padding-bottom: map.get($spacings, largest);
+	padding: map.get($spacings, largest);
+	p {
+		padding-bottom: map.get($spacings, large);
+	}
 	@include mixins.flex-column;
 	@include mixins.respond-to(medium) {
 		padding-left: map.get($spacings, medium);
@@ -81,7 +83,7 @@
 	padding-top: map.get($spacings, small);
 	@include mixins.respond-to(medium) {
    	width: 100%;
-		font-size: map.get($font-sizes, 'large');
+		// font-size: map.get($font-sizes, 'large');
  	}
 }
 
@@ -91,17 +93,19 @@
 	color: var(--primary);
 	@include mixins.respond-to(medium) {
    	width: 100%;
-		font-size: map.get($font-sizes, 'large');
+		// font-size: map.get($font-sizes, 'large');
 	}
 }
 
-.home__briefing {
-	max-width: 60ch;
-	font-size: 1.3rem;
+.home__section-header {
+	max-width: 70ch;
+	color: var(--text-muted);
+	font-size: 1.5rem;
+	font-weight: 600;
 	padding-top: map.get($spacings, medium);
 	@include mixins.respond-to(medium) {
    	width: 100%;
-		font-size: 1.2rem;
+		font-size: 1.5rem;
 	}
 	
 }
@@ -124,7 +128,7 @@
 }
 
 .home__snippet-container {
-	max-width: 100ch;
+	max-width: 150ch;
 	background-color: var(--surface);
 	padding-top: map.get($spacings, 'large');
 	padding-bottom: map.get($spacings, 'medium');
@@ -154,20 +158,23 @@
 .home__snippet {
 	font-size: map.get($font-sizes, 'large');
 	padding-top: map.get($spacings, 'large');
-	width: 100%;
+	min-width: 100%;
 	.snippet__code {
-		width: 95%;
+		max-width: 100ch;
 		@include mixins.respond-to(medium) {
-			width: auto;
+			// width: auto;
 		}
 	}
-	pre {
+	// Doubled selector bumps specificity above prism.scss's `pre[class*=language-]`
+	// rule, which otherwise wins the cascade (equal specificity, loaded later)
+	// and overrides background/padding/margin with its own theme's values.
+	&.home__snippet pre {
 		background: linear-gradient(to top, var(--background), var(--background));
-		border-radius: 1rem;
-		font-size: map.get($font-sizes, 'medium');
-		padding-top: map.get($spacings, 'large');
-		padding-left: map.get($spacings, 'large');
 		background-color: inherit;
+		border-radius: 1rem;
+		margin: 0;
+		padding: map.get($spacings, 'large') 0 0 map.get($spacings, 'large');
+		font-size: map.get($font-sizes, 'medium');
 		code {
 			color: var(--primary);
 		}
@@ -224,59 +231,56 @@
 
 .home__cta-row { 
 	transition: ease-in-out .2s;
-	display: flex; 
-	gap: 10px; 
+	display: flex;
 	align-items: flex-end; 
 	flex-wrap: wrap;
   padding-top: map.get($spacings, 'large');
+  padding-left: map.get($spacings, 'large');
+  font-weight: 600;
+  gap: 50px;
 }
   
 .home__cta-row-btn-primary {
 	transition: ease-in-out .2s;
-	background-color: var(--primary);
-	color: var(--background) !important;
-	border: 1px solid var(--primary); 
-	padding: 9px 20px; 
+	color: var(--primary)!important;
+	// border: 1px solid var(--primary); 
+	// padding: 5px 20px; 
 	border-radius: map.get($border-radius, large);
-	font-size: map.get($font-sizes, small); 
 	cursor: pointer; 
 
 	&:hover {
-		transform: translateY(-2px);
-		background-color: color-mix(in oklch, var(--primary) 100%, black 10%);
+		color: var(--primary-hover)!important;
 	}
 	&:focus-visible {
 		outline: 2px solid var(--primary);
 	}
 	&:active {
-		transform: translateY(-1px);
+		background-color: var(--background);
 	}
 	@media (hover: none) {
 	  &:hover {
-		transform: translateY(0);
+			color: var(--primary)!important;
 	  }
 	}
 }
 
 .home__cta-row-btn-secondary { 
 	background-color: var(--background);
-	padding: 9px 20px; 
-	border: 1px solid var(--secondary); 
 	border-radius: map.get($border-radius, large);
-	font-size: map.get($font-sizes, small);
 	cursor: pointer; 
+
 	&:hover {
-		transform: translateY(-2px);
+		color: var(--primary-hover)!important;
 	}
 	&:focus-visible {
 		outline: 2px solid var(--primary);
 	}
 	&:active {
-		transform: translateY(-1px);
+		background-color: var(--background);
 	}
 	@media (hover: none) {
 	  &:hover {
-			transform: translateY(0);
+			color: var(--text)!important;
 	  }
 	}
 }

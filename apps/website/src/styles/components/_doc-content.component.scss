@@ -33,7 +33,7 @@
 		margin-bottom: map.get($spacings, 'smallest');
 	}
 
-	h1, h2, h3, h4, h5, h6 {
+	h2, h3, h4, h5, h6 {
 		font-family: $secondary-font;
 		color: var(--primary);
 		line-height: 1.25;
@@ -49,6 +49,7 @@
 
 	h1 {
 		font-size: clamp(2rem, 1.7rem + 1.5vw, 2.75rem);
+		color: var(--primary);
 		margin-top: 0;
 		margin-bottom: map.get($spacings, 'large');
 	}

@@ -14,13 +14,13 @@
 }
 
 .resource__section {
+	padding-top: 2rem;
 	width: 80%;
 	p {
 		max-width: 100ch;
 	}
 	h2 {
 		font-weight: bold;
-		color: var(--primary);
 	}
 	@include mixins.respond-to(small) {
 		width: 100%;
@@ -36,9 +36,9 @@
 	margin-left: clamp(1rem, 5vw, 10rem);
   margin-right: clamp(1rem, 5vw, 10rem);
 	h1 {
+		color: var(--primary);
 		padding-top: map.get($spacings, 'largest');
 		padding-bottom: map.get($spacings, 'largest');
-		color: var(--primary);
 		font-weight: bold;
 	}
 	h2 {

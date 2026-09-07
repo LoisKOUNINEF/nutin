@@ -12,13 +12,4 @@ export class ChangelogView extends SinglePageCatalogView {
   constructor() {
     super({template, viewName: 'changelog'});
   }
-
-  onBeforeRender() {
-    hideGlobals(['under-development']);
-  }
-
-  onBeforeDestroy() {
-    revealGlobals(['under-development']);
-  }
-
 }
