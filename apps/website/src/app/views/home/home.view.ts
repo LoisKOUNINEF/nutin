@@ -1,5 +1,5 @@
 import { Navigation, ComponentConfig, View } from '../../../core/index.js';
-import { SnippetComponent, HomePillarsComponent } from '../../components/index.js';
+import { SnippetComponent, ReadMoreComponent } from '../../components/index.js';
 
 const template = `__TEMPLATE_PLACEHOLDER__`;
 
@@ -10,8 +10,8 @@ export class HomeView extends View {
 
   public registerChildren(): ComponentConfig[] {
     return [{
-      selector: 'home-pillars',
-      factory: (el) => new HomePillarsComponent(el)
+      selector: 'read-more',
+      factory: (el) => new ReadMoreComponent(el)
     },
     ...this.getSnippetsConfig()]
   }

@@ -149,10 +149,9 @@ Instead, list the problems your application actually has.
 | Testing                 | Yes                         | Usually                                   |
 | Highly reactive UI      | Yes                         | Specialized solutions may become valuable |
 
-The second column is deliberately boring.
-
+```text
 The web platform is capable of doing all of these things.
-
+```
 But **capable of doing something** and **pleasant to maintain while doing it yourself** are different questions.
 
 That distinction is where architecture begins.
@@ -496,3 +495,5 @@ Then decide which ones are worth solving yourself and which ones are worth deleg
 If you're looking for the middle ground — explicit structure, lifecycle management, routing, and tooling while staying close to the DOM and HTML — [Nutin](https://nutin.org/) is designed specifically for that kind of application.
 
 *The framework is a means of organizing the application, not the reason the application exists.*
+
+
