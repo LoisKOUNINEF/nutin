@@ -9,9 +9,8 @@
       "ogImage": "/assets/images/og-cover.jpg"
     },
     {
-      "path": "/get-started",
-      "title": "Get Started",
-      "description": "Nutin onboarding: installation, new app creation, project structure, first steps.",
+      "path": "/articles/:slug?",
+      "dynamicFrom": "articles",
       "ogImage": "/assets/images/og-cover.jpg"
     }
   ]

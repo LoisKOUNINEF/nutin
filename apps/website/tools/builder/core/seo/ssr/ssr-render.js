@@ -25,7 +25,7 @@ export async function getAppRoutePaths(bundleUrl, lang, pageUrl) {
  * .render(), returning the resulting real markup. Fresh linkedom window + cache-busted
  * dynamic import per call, so no singleton state (I18nService, etc.) leaks between renders.
  */
-export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFetch, lang, pageUrl, i18nEnabled }) {
+export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFetch, preloadManifest, lang, pageUrl, i18nEnabled }) {
   // Passing a real URL instance as `location` gives `.pathname`/`.href`
   // which is what I18n's getLocaleFromUrl() actually reads.
   const { window } = parseHTML('<!doctype html><html><body></body></html>', { location: new URL(pageUrl) });
@@ -41,7 +41,10 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
   try {
     const bundle = await import(`${bundleUrl}?ssr=${renderIndex++}`);
     ({ Service } = bundle);
-    const { appRoutes, I18nService, RouteGuardsManager, registerPipes } = bundle;
+    const {
+      appRoutes, I18nService, RouteGuardsManager, registerPipes,
+      DocsManifestService, ChangelogManifestService, TutorialManifestService, ArticlesManifestService,
+    } = bundle;
 
     const routeConfig = appRoutes[appRoutesKey];
     if (!routeConfig) {
@@ -54,6 +57,20 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
     registerPipes();
 
     if (i18nEnabled) await I18nService.setCurrentLanguage(lang);
+
+    // Manifest-driven views (docs/changelog/tutorial/articles) read their manifest service's
+    // already-loaded data synchronously in registerChildren() — main.ts normally loads it at
+    // bootstrap, which never runs here, so it must be preloaded before .render() or the view
+    // finds no page and renders its empty state instead of real content.
+    if (preloadManifest) {
+      const manifestServices = {
+        docs: DocsManifestService,
+        changelog: ChangelogManifestService,
+        tutorial: TutorialManifestService,
+        articles: ArticlesManifestService,
+      };
+      await manifestServices[preloadManifest]?.load();
+    }
 
     const viewConstructor = RouteGuardsManager.getViewConstructor(routeConfig);
     const view = viewConstructor();
