@@ -29,6 +29,7 @@
     "src/libs"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "src/app/views/tutorial/sections"
   ]
 }

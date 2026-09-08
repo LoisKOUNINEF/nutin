@@ -1,6 +1,11 @@
 import { AppRouter, Service, I18nService, registerPipes, registerGlobals } from '../core/index.js';
 import { FooterComponent, NavbarComponent } from './components/index.js';
-import { DocsManifestService } from './services/index.js';
+import {
+  ArticlesManifestService,
+  ChangelogManifestService,
+  DocsManifestService,
+  TutorialManifestService
+} from './services/index.js';
 import { appRoutes } from './routes.js';
 
 class App {
@@ -17,7 +22,12 @@ class App {
 
 document.addEventListener('DOMContentLoaded', async () => {
   await I18nService.initTranslations();
-  await DocsManifestService.load();
+  await Promise.all([
+    DocsManifestService.load(),
+    ChangelogManifestService.load(),
+    TutorialManifestService.load(),
+    ArticlesManifestService.load(),
+  ]);
   new App();
 });
 

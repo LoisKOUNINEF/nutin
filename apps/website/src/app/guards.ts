@@ -1,11 +1,12 @@
 import { RouteGuard } from '../core/index.js';
-import { DocsManifestService } from './services/index.js';
+import { ResourceManifest } from './services/index.js';
 
 export const Guards = {
-  docPageExists: (): RouteGuard => {
+  resourcePageExists: (manifest: ResourceManifest<any>): RouteGuard => {
     return (params) => {
-      const slug = params.slug || DocsManifestService.firstSlug;
-      return (!!slug && !!DocsManifestService.getPage(slug)) || '/404';
+      if (!manifest.hasPages) return true;
+      const slug = params.slug || manifest.firstSlug;
+      return (!!slug && !!manifest.getPage(slug)) || '/404';
     };
   },
 };

@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-// Documentation compiler: reads the repo's `docs/` Markdown tree and produces a single
-// manifest (`apps/website/generated/docs.json`) that the website consumes as a normal
-// build input. `docs/` is the only source of truth for documentation content — this
-// script is the sole place that understands its filesystem layout.
+// Documentation compiler: reads each collection's Markdown tree under `resources/`
+// and produces one manifest per collection (e.g. `apps/website/generated/docs.json`)
+// that the website consumes as a normal build input. `resources/<collection>/` is the
+// only source of truth for that collection's content — this script is the sole place
+// that understands its filesystem layout.
 
 import * as fs from 'fs';
 import * as path from 'path';
@@ -11,19 +12,54 @@ import { Marked } from 'marked';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
-const DOCS_DIR = path.join(ROOT, 'docs');
-const OUTPUT_FILE = path.join(ROOT, 'apps', 'website', 'generated', 'docs.json');
-
-const HUB_FILES = ['API.md', 'OPTIONS_AND_FEATURES.md', 'TESTING.md', 'TOOLS.md'];
 
 // Checked longest/most-specific first. HOWDOI_ is dropped outright (the remaining
 // verb phrase reads fine alone, e.g. "create-a-component"); the WHAT* prefixes are
 // normalized instead of dropped, since "a-component" alone is a poor slug.
-const PREFIX_REPLACEMENTS = [
+// docs/-specific — the other collections' filenames don't use this convention.
+const DOCS_PREFIX_REPLACEMENTS = [
   ['HOWDOI_', ''],
   ['WHATARE_', 'what-are-'],
   ['WHATIS_', 'what-is-'],
   ['WHAT_', 'what-'],
+];
+
+const stripDocsHubTitle = (t) => t.replace(/^Nutin\s*-\s*/i, '').replace(/\s*documentation$/i, '');
+const identity = (t) => t;
+
+const COLLECTIONS = [
+  {
+    id: 'docs',
+    dir: path.join(ROOT, 'resources', 'docs'),
+    hubFiles: ['API.md', 'OPTIONS_AND_FEATURES.md', 'TESTING.md', 'TOOLS.md'],
+    output: path.join(ROOT, 'apps', 'website', 'generated', 'docs.json'),
+    stripH1: stripDocsHubTitle,
+    prefixReplacements: DOCS_PREFIX_REPLACEMENTS,
+  },
+  {
+    id: 'changelog',
+    dir: path.join(ROOT, 'resources', 'changelog'),
+    hubFiles: ['CHANGELOG.md'],
+    output: path.join(ROOT, 'apps', 'website', 'generated', 'changelog.json'),
+    stripH1: identity,
+    prefixReplacements: [],
+  },
+  {
+    id: 'tutorial',
+    dir: path.join(ROOT, 'resources', 'tutorial'),
+    hubFiles: ['TUTORIAL.md'],
+    output: path.join(ROOT, 'apps', 'website', 'generated', 'tutorial.json'),
+    stripH1: identity,
+    prefixReplacements: [],
+  },
+  {
+    id: 'articles',
+    dir: path.join(ROOT, 'resources', 'articles'),
+    hubFiles: ['ARTICLES.md'],
+    output: path.join(ROOT, 'apps', 'website', 'generated', 'articles.json'),
+    stripH1: identity,
+    prefixReplacements: [],
+  },
 ];
 
 function fail(message) {
@@ -38,17 +74,17 @@ function slugify(text) {
     .replace(/^-+|-+$/g, '');
 }
 
-function slugFromFilename(fileName) {
+function slugFromFilename(fileName, prefixReplacements) {
   const base = fileName.replace(/\.md$/, '');
-  const [prefix, replacement] = PREFIX_REPLACEMENTS.find(([p]) => base.startsWith(p)) ?? ['', ''];
+  const [prefix, replacement] = prefixReplacements.find(([p]) => base.startsWith(p)) ?? ['', ''];
   const rest = base.slice(prefix.length).toLowerCase().replace(/_/g, '-');
-  return `${replacement}${rest}`;
+  return replacement ? `${replacement}${rest}` : slugify(rest);
 }
 
-// --- Pass 1: parse the 4 hub files for section/group/page structure and ordering ---
+// --- Pass 1: parse a collection's hub files for section/group/page structure and ordering ---
 
-function parseHub(hubFile) {
-  const hubPath = path.join(DOCS_DIR, hubFile);
+function parseHub(collection, hubFile) {
+  const hubPath = path.join(collection.dir, hubFile);
   const raw = fs.readFileSync(hubPath, 'utf8');
   const lines = raw.split('\n');
 
@@ -66,9 +102,7 @@ function parseHub(hubFile) {
     const item = line.match(/^-\s+\[(.+?)\]\((.+?)\)\s*$/);
 
     if (h1 && title === id) {
-      // Hub H1s are all "Nutin - <Section> documentation" — strip the boilerplate
-      // so the site nav shows a short section label instead of repeating it 4x.
-      title = h1[1].trim().replace(/^Nutin\s*-\s*/i, '').replace(/\s*documentation$/i, '');
+      title = collection.stripH1(h1[1].trim());
       continue;
     }
     if (h2Toc) {
@@ -86,7 +120,7 @@ function parseHub(hubFile) {
     }
     if (item) {
       const [, linkTitle, relPath] = item;
-      const resolved = path.normalize(path.join(DOCS_DIR, relPath));
+      const resolved = path.normalize(path.join(collection.dir, relPath));
       const target = currentGroup ?? (currentGroup = { id: null, title: null, pages: [] });
       if (!groups.includes(target)) groups.push(target);
       target.pages.push({ title: linkTitle.trim(), source: resolved });
@@ -101,9 +135,9 @@ function parseHub(hubFile) {
   };
 }
 
-// --- Build the sourcePath -> slug lookup, and validate no collisions ---
+// --- Build the sourcePath -> slug lookup for one collection, and validate no collisions ---
 
-function buildSlugMap(hubs) {
+function buildSlugMap(collection, hubs) {
   const slugMap = new Map(); // absolute source path -> slug
   const seenSlugs = new Map(); // slug -> source path (for collision detection)
 
@@ -111,7 +145,7 @@ function buildSlugMap(hubs) {
     for (const group of hub.groups) {
       for (const page of group.pages) {
         const fileName = path.basename(page.source);
-        const slug = slugFromFilename(fileName);
+        const slug = slugFromFilename(fileName, collection.prefixReplacements);
 
         if (seenSlugs.has(slug) && seenSlugs.get(slug) !== page.source) {
           fail(`Duplicate slug "${slug}" produced by both "${seenSlugs.get(slug)}" and "${page.source}"`);
@@ -127,7 +161,7 @@ function buildSlugMap(hubs) {
 
 // --- Pass 2: convert each leaf page's Markdown to HTML, rewriting headings/links ---
 
-function renderPage(sourcePath, slugMap) {
+function renderPage(collection, sourcePath, slugMap) {
   const dir = path.dirname(sourcePath);
   const markdown = fs.readFileSync(sourcePath, 'utf8');
   const headings = [];
@@ -158,7 +192,7 @@ function renderPage(sourcePath, slugMap) {
             );
           }
           internalSlug = slug;
-          href = fragment ? `/docs/${slug}#${fragment}` : `/docs/${slug}`;
+          href = fragment ? `/${collection.id}/${slug}#${fragment}` : `/${collection.id}/${slug}`;
         }
 
         const titleAttr = token.title ? ` title="${token.title}"` : '';
@@ -186,11 +220,11 @@ function renderPage(sourcePath, slugMap) {
   return { title, description, html, headings: headings.filter((h) => h.depth > 1) };
 }
 
-function main() {
-  if (!fs.existsSync(DOCS_DIR)) fail(`docs/ directory not found at "${DOCS_DIR}"`);
+function compileCollection(collection) {
+  if (!fs.existsSync(collection.dir)) fail(`"${collection.id}" directory not found at "${collection.dir}"`);
 
-  const hubs = HUB_FILES.map(parseHub);
-  const slugMap = buildSlugMap(hubs);
+  const hubs = collection.hubFiles.map((hubFile) => parseHub(collection, hubFile));
+  const slugMap = buildSlugMap(collection, hubs);
 
   const sections = [];
   const pages = {};
@@ -212,11 +246,11 @@ function main() {
     for (const group of hub.groups) {
       for (const pageRef of group.pages) {
         const slug = slugMap.get(pageRef.source);
-        const rendered = renderPage(pageRef.source, slugMap);
+        const rendered = renderPage(collection, pageRef.source, slugMap);
 
         if (rendered.title !== pageRef.title) {
           console.warn(
-            `\x1b[33mgenerate-docs - warning: title mismatch for "${slug}": ` +
+            `\x1b[33mgenerate-docs - warning: title mismatch for "${collection.id}/${slug}": ` +
             `hub TOC says "${pageRef.title}", H1 says "${rendered.title}"\x1b[0m`
           );
         }
@@ -236,9 +270,16 @@ function main() {
     }
   }
 
-  fs.mkdirSync(path.dirname(OUTPUT_FILE), { recursive: true });
-  fs.writeFileSync(OUTPUT_FILE, JSON.stringify({ sections, pages }, null, 2));
-  console.log(`\x1b[1;32mgenerate-docs: wrote ${Object.keys(pages).length} pages to ${path.relative(ROOT, OUTPUT_FILE)}\x1b[0m`);
+  fs.mkdirSync(path.dirname(collection.output), { recursive: true });
+  fs.writeFileSync(collection.output, JSON.stringify({ sections, pages }, null, 2));
+  console.log(
+    `\x1b[1;32mgenerate-docs: wrote ${Object.keys(pages).length} "${collection.id}" pages to ` +
+    `${path.relative(ROOT, collection.output)}\x1b[0m`
+  );
+}
+
+function main() {
+  for (const collection of COLLECTIONS) compileCollection(collection);
 }
 
 main();
