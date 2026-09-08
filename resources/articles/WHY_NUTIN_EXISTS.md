@@ -164,7 +164,7 @@ And it provides a useful constraint for the future:
 
 **Nutin should only grow when real problems give it a reason to grow.**
 
-## Why Nutin exists
+## Why Nutin
 
 There are already many excellent frontend frameworks.
 

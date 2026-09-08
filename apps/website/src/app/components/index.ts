@@ -3,7 +3,6 @@ export * from '../../libs/components/anchor/anchor.component.js';
 export * from './globals/navbar/navbar.component.js';
 export * from './globals/footer/footer.component.js';
 export * from './snippet/snippet.component.js';
-export * from './table-of-content/table-of-content.component.js';
 
 export * from './home-section/index.js';
 export * from './resource-nav/resource-nav.component.js';
