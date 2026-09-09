@@ -1,4 +1,8 @@
-{ 
+{
+	"documentation": "Documentation",
+	"tutorial": "Tutorial",
+	"changelog": "Changelog",
+	"why-nutin": "Why Nutin?",
 	"repo": "Project Repository",
 	"contact": "Contact",
 	"prism": "Code snippets highlighted with PrismJS."

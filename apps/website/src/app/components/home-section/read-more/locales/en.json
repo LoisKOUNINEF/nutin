@@ -7,6 +7,6 @@
 	"article-spa-desc": "A small single-page application can stay surprisingly simple, but there is a point where simplicity starts working against you...",
 	"article-vdom-title": "Direct DOM Manipulation vs. Virtual DOM: What's the Difference?",
 	"article-vdom-desc": "If you've worked with modern frontend frameworks, you've probably heard that applications should not manipulate the DOM directly...",
-	"article-nutin-title": "Why Nutin exists?",
+	"article-nutin-title": "Why Nutin?",
 	"article-nutin-desc": "Nutin started with a simple question: How far can you take a real web application without using a frontend framework? At the time..."
 }

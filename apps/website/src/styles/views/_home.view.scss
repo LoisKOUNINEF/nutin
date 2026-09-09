@@ -55,6 +55,7 @@
 	border-radius: map.get($border-radius, pill);
 	background: rgba($secondary-color, .3);
 	color: var(--text-muted);
+	cursor: pointer;
 }
 
 .home__version-live {

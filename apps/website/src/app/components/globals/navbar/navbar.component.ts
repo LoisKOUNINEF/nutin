@@ -7,8 +7,7 @@ const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
 export class NavbarComponent extends Component<HTMLHeadingElement> {
   private readonly fixedLinks = [
     'tutorial',
-    'docs',
-    'changelog'
+    'docs'
   ] as const;
   private readonly btnClass = 'c-round-btn' as const;
   private readonly dropdownClass = 'navbar__dropdown-visible' as const;

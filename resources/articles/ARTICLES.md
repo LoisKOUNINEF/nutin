@@ -6,4 +6,4 @@
 - [When Does a Vanilla JavaScript Application Need Structure?](./WHEN_DOES_A_VANILLA_JAVASCRIPT_APPLICATION_NEED_STRUCTURE.md)
 - [How to Structure a Small SPA](./HOW_TO_STRUCTURE_A_SMALL_SPA.md)
 - [Direct DOM Manipulation vs. Virtual DOM: What's the Difference?](./DIRECT_DOM_MANIPULATION_VS_VIRTUAL_DOM_WHATS_THE_DIFFERENCE.md)
-- [Why Nutin Exists?](./WHY_NUTIN_EXISTS.md)
+- [Why Nutin?](./WHY_NUTIN.md)

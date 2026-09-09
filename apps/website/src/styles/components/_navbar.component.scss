@@ -95,7 +95,7 @@
 		padding: 0;
 		padding-bottom: map.get($spacings, 'smallest');
 		height: auto;
-		border-bottom: .4rem solid var(--secondary);
+		border-bottom: .4rem solid var(--primary);
 	}
 }
 
@@ -145,9 +145,8 @@
 			display: none;
 		}
 		& > div {
-    		@include mixins.flex-column;
-  		}
-		& > div:nth-child(odd) {
+	    	@include mixins.flex-column;
+	    	width: 100%;
 			padding-left: map.get($spacings, 'smallest');
   		}
 	}

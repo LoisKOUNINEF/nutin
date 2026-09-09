@@ -1,6 +1,32 @@
 <div class="footer u-rounded">
 	<div class="footer__body">
-		<section>
+		<section class="footer__internals">
+			<p>
+				<button
+					data-event="click:navigateTo:docs"
+					data-i18n="footer.documentation" 
+				></button>
+			</p>
+			<p>
+				<button 
+					data-event="click:navigateTo:tutorial"
+					data-i18n="footer.tutorial" 
+				></button>
+			</p>
+			<p>
+				<button 
+					data-event="click:navigateTo:changelog"
+					data-i18n="footer.changelog" 
+				></button>
+			</p>
+			<p>
+				<button 
+					data-event="click:navigateTo:articles/why-nutin"
+					data-i18n="footer.why-nutin" 
+				></button>
+			</p>
+		</section>
+		<section class="footer__externals">
 			<p class="external-svg">
 				<a 
 					data-i18n="footer.repo" 
@@ -14,8 +40,6 @@
 					href="mailto:nutin.toolkit@gmail.com"
 				></a>
 			</p>
-		</section>
-		<section>
 			<p class="u-italic external-svg">
 				<a 
 					data-i18n="footer.prism" 

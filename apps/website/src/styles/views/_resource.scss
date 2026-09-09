@@ -10,6 +10,12 @@
 	}
 	@include mixins.respond-to(medium) {
 		@include mixins.flex-column;
+		padding-left: 1rem;
+		padding-right: 1rem;
+		ul {
+			padding-left: 1rem;
+			padding-right: 1rem;
+		}
 	}
 }
 
