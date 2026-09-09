@@ -18,7 +18,7 @@ type TrustLevel = 'strict' | 'normal' | 'trusted'; // default: 'normal'
 | Level | Behavior |
 |---|---|
 | `trusted` | No sanitization at all — the template string is used verbatim. |
-| `normal` (default) | Strips `<script>` tags and any attribute whose name starts with `on` (`onclick`, `onerror`, ...). |
+| `normal` | Default. Strips `<script>` tags and any attribute whose name starts with `on` (`onclick`, `onerror`, ...). |
 | `strict` | Everything `normal` does, plus strips `<iframe>`, `<object>`, `<embed>` tags, and removes `href`/`src`/`action`/`formaction`/`poster`/`background` attributes whose value is a `javascript:`/`data:` URL (including whitespace-obfuscated variants like `java\tscript:`). |
 
 `trustLevel` is per-instance and applies to every render — there's no per-fragment "trust this bit only" option. If any part of a `'trusted'` component's template includes untrusted user data, that data is unsanitized.

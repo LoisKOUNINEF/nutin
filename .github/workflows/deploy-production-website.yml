@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "apps/website/**"
+      - "resources/**"
       - ".github/workflows/deploy-production-website.yml"
 
 jobs:

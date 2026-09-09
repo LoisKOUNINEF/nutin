@@ -46,4 +46,4 @@ Used in TopicParamView to ensure that the URL has the correct format when render
 
 - Usage : `npm run code-to-json -- SOURCE_FILE --output DEST_FILE`
 Translates newlines to `\n` and tabs to `\t`. Also escapes double quotes `"` and translates `<` and `>` to `&lt;` and `&gt;`.                                                                  
-*Requires some manual copy / pasting, but is good enough for such a project.*
+*Requires some manual copy / pasting, but is good enough since most of the content is rendered from Markdown.*

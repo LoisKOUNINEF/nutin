@@ -58,6 +58,7 @@ em, i {
   	padding: 3rem map.get($spacings, largest);
   	@include mixins.respond-to(medium) {
   		padding: map.get($spacings, largest)*4 0;
+  		padding-bottom: map.get($spacings, largest);
   	}
 	}
 

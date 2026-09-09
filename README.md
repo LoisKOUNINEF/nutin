@@ -1,20 +1,20 @@
 # Nutin Monorepo
 
-`The structure of a framework. The freedom of vanilla.`
+`Framework structure. Vanilla freedom.`
 
 Nutin provides the structure and tooling you'd expect from a framework, while keeping the underlying web platform visible and giving you code ownership.
 
 **Your app owns Nutin — not the other way around.** The source code lives alongside your application, so you can read it, modify it, and make it yours. Nutin's update system is designed to preserve those changes.
 
-Nutin is deliberately pragmatic, lightweight, and dependency-free on runtime.
+Nutin is deliberately pragmatic, focused, and dependency-free on runtime.
 
-**[Create your first app →](https://www.nutin.org/tutorial)**
+**[Create your first app →](https://www.nutin.org/)**
 
-## Repository
+## 🗃️ Repository
 
 - **[NPM package](packages/nutin/README.md)** — Nutin CLI, generator and templates
 - **[Website](apps/website/README.md)** — Nutin's website, built with Nutin
-- **[Tutorial app](apps/tutorial)** — Working example of the application built in the tutorial
+- **[Tutorial app](apps/tutorial)** — Working example of the application built in the tutorial - See [Tutorial](resources/tutorial/TUTORIAL.md)
 
 ## 📄 Docs
 
@@ -23,10 +23,13 @@ Nutin is deliberately pragmatic, lightweight, and dependency-free on runtime.
 - **[Testing](resources/docs/TESTING.md)**: Built-in testing toolkit - used to test Nutin and available for application tests.
 - **[Tools](resources/docs/TOOLS.md)**: Scripts, Generator, builder.
 
+## 📚 Changelog
+
+- [Per version changes](resources/changelog/CHANGELOG.md)
+
 ## 📝 Contributing
 
 - [Contributing Guide](CONTRIBUTING.md)
 - [Security Policy](SECURITY.md)
 - [Report a Bug](../../issues/new?template=bug_report.yml)
-- [Request a Feature](../../issues/new?template=feature_request.yml)
-- [Join Discussions](../../discussions)                                   
+- [Request a Feature](../../issues/new?template=feature_request.yml)                           

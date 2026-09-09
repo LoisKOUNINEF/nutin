@@ -6,6 +6,7 @@ on:
       - staging
     paths:
       - "apps/website/**"
+      - "resources/**"
       - ".github/workflows/deploy-staging-website.yml"
 
 jobs:

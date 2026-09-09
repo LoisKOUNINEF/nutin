@@ -3,6 +3,8 @@
 @use "mixins";
 
 .resource {
+	margin-left: clamp(1rem, 5vw, 10rem);
+  	margin-right: clamp(1rem, 5vw, 10rem);
 	width: 100%;
 	@include mixins.flex-row;
 	@include mixins.respond-to(small) {
@@ -12,9 +14,10 @@
 		@include mixins.flex-column;
 		padding-left: 1rem;
 		padding-right: 1rem;
-		ul {
-			padding-left: 1rem;
-			padding-right: 1rem;
+		margin-left: 0;
+	  	margin-right: 0;
+		li {
+			margin-left: 1rem;
 		}
 	}
 }
