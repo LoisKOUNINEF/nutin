@@ -1,8 +1,8 @@
 # What is a component?
 
-A component is a self-mounting, reusable UI unit. Every component extends `Component`, which extends `BaseComponent`.
+A component is a **self-mounting, reusable UI unit**. Every component extends `Component`, which extends `BaseComponent`.
 
-Constructing a component creates and mounts its root element immediately (at `mountTarget`) — but it isn't rendered until `render()` runs, either called by hand or because a parent's `registerChildren()` mounted it as a child and rendered it.
+Constructing a component creates and mounts its root element immediately (at `mountTarget`) — but it isn't rendered until `render()` runs, either called by hand or via a parent's `registerChildren()`.
 
 ## What a component owns
 
