@@ -73,7 +73,7 @@ The important variable is not size by itself.
 
 It is **how difficult the relationships between parts have become to reason about**.
 
-# What does it mean for an application to "need structure"?
+## What does it mean for an application to "need structure"?
 
 Structure is sometimes confused with a particular technology, but it does not necessarily mean:
 
@@ -107,7 +107,7 @@ An explicit data owner makes the architecture easier to reason about.
 
 Structure is therefore less about adding abstractions and more about **making important relationships visible**.
 
-# The warning signs of accidental architecture
+## The warning signs of accidental architecture
 
 Most applications don't suddenly become unmaintainable.
 
@@ -115,7 +115,7 @@ Instead, the architecture slowly becomes accidental.
 
 Here are some of the more useful warning signs.
 
-## 1. DOM manipulation is scattered everywhere
+### 1. DOM manipulation is scattered everywhere
 
 Imagine that several unrelated functions can modify the same part of the interface:
 
@@ -142,7 +142,7 @@ The problem appears when there is no longer a clear answer to:
 
 > **Who owns this piece of UI?**
 
-## 2. Event listeners have unclear ownership
+### 2. Event listeners have unclear ownership
 
 Dynamic interfaces make this particularly visible.
 
@@ -181,7 +181,7 @@ You also need a reliable answer to:
 
 > **What happens when this thing goes away?**
 
-## 3. Shared data has no obvious owner
+### 3. Shared data has no obvious owner
 
 Suppose several parts of an application need the current shopping cart.
 
@@ -199,7 +199,7 @@ A useful architectural question is:
 
 > **Where is the source of truth?**
 
-## 4. Navigation leaks into UI components
+### 4. Navigation leaks into UI components
 
 A button shouldn't necessarily need to understand the entire routing architecture.
 
@@ -209,7 +209,7 @@ Again, the issue isn't that the latter cannot work.
 
 It is that the relationships have become difficult to see.
 
-## 5. Rendering is triggered from everywhere
+### 5. Rendering is triggered from everywhere
 
 This is one of the more significant warning signs.
 
@@ -233,7 +233,7 @@ Eventually someone asks:
 
 If the answer is "it depends on which function happened to change the data," your rendering model may be becoming accidental.
 
-## 6. Cleanup becomes difficult
+### 6. Cleanup becomes difficult
 
 This is one of the strongest signals that an application needs architectural boundaries.
 
@@ -258,7 +258,7 @@ What happens to:
 
 If your application has dynamic UI and there is no clear destruction model, complexity is accumulating around lifecycle.
 
-## 7. One feature requires touching unrelated code
+### 7. One feature requires touching unrelated code
 
 This is perhaps the broadest architectural smell.
 

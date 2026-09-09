@@ -315,9 +315,9 @@ This is an important distinction.
 
 A framework does not have to solve every possible frontend problem to be useful.
 
-## One example of the middle ground: Nutin
+## One example of the middle ground: [Nutin](https://nutin.org/docs)
 
-This is the architectural space Nutin is designed to occupy.
+This is the architectural space [Nutin](https://nutin.org/docs) is designed to occupy.
 
 Nutin provides application structure around the problems that tend to become repetitive or error-prone in small SPAs while keeping the underlying web platform visible.
 

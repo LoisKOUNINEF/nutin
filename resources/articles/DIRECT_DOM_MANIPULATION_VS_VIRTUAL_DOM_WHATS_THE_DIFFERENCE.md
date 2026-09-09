@@ -108,7 +108,7 @@ At larger scale, manually coordinating all those relationships can become a sign
 
 This is one of the problems that rendering abstractions attempt to solve.
 
-# What is a Virtual DOM?
+## What is a Virtual DOM?
 
 A **Virtual DOM** is an in-memory representation of UI structure.
 
@@ -152,7 +152,7 @@ There is also no single standardized Virtual DOM implementation. Different frame
 
 So "Virtual DOM" describes a family of rendering techniques rather than one specific technology.
 
-# What does a Virtual DOM actually solve?
+## What does a Virtual DOM actually solve?
 
 The most useful way to understand Virtual DOM is not as a performance trick.
 
@@ -179,7 +179,7 @@ the UI should look like this.
 
 The rendering system is responsible for working out how to get from the previous UI to the new UI.
 
-## Declarative rendering
+### Declarative rendering
 
 A declarative rendering model describes the desired result rather than every individual mutation required to produce it.
 
@@ -187,7 +187,7 @@ The developer describes the relationship between application state and interface
 
 The rendering system handles the mechanics of applying that description to the browser.
 
-## Reconciliation
+### Reconciliation
 
 Once the UI is represented as data, the framework can compare different versions of that representation.
 
@@ -215,7 +215,7 @@ It can then update the corresponding DOM node rather than requiring application 
 
 The details vary considerably between implementations, but the general idea is **compare UI descriptions, determine necessary changes, apply those changes to the real DOM.**
 
-## Reactive updates
+### Reactive updates
 
 Virtual DOM systems are commonly associated with reactive frameworks.
 
@@ -239,7 +239,7 @@ This means application code does not necessarily have to identify every DOM node
 
 That can be a substantial productivity benefit for complex interfaces.
 
-# Virtual DOM is not the same thing as reactivity
+## Virtual DOM is not the same thing as reactivity
 
 These concepts are closely associated, but they are not synonyms.
 
@@ -276,7 +276,7 @@ It is therefore more accurate to think of them as different dimensions:
 
 Real frameworks can combine these mechanisms in different ways: **direct DOM manipulation and reactive rendering are not opposites**.
 
-# What does the Virtual DOM cost?
+## What does the Virtual DOM cost?
 
 The benefits of a Virtual DOM do come with a trade-off.
 
@@ -313,7 +313,7 @@ That can include:
 
 Whether that is worthwhile depends on the application.
 
-# Direct DOM manipulation does not mean manually updating everything
+## Direct DOM manipulation does not mean manually updating everything
 
 There is a common false dichotomy in frontend discussions:
 
@@ -364,7 +364,7 @@ A Virtual DOM can make some architectural problems easier, but it does not autom
 
 Likewise, direct DOM manipulation does not prevent an application from having strong boundaries.
 
-# Explicit rendering vs. reactive rendering
+## Explicit rendering vs. reactive rendering
 
 Another useful distinction is between **explicit rendering** and **reactive rendering**.
 
@@ -408,7 +408,7 @@ For a small application, explicit coordination may be straightforward.
 
 For a complex application with extensive state relationships, delegating that responsibility to a rendering system can be extremely valuable.
 
-# When does direct DOM manipulation make sense?
+## When does direct DOM manipulation make sense?
 
 Direct DOM manipulation is a reasonable choice when the application's UI complexity remains manageable.
 
@@ -426,7 +426,7 @@ For example, it can work well when:
 
 A simple mechanism that is sufficient for the workload can be a very good engineering choice.
 
-# When does a Virtual DOM become valuable?
+## When does a Virtual DOM become valuable?
 
 The balance changes as UI complexity increases.
 
@@ -446,7 +446,7 @@ The important threshold is not a specific number of components or lines of code;
 
 If that coordination becomes one of the application's major sources of complexity, automated reconciliation can provide substantial value. That is a meaningful abstraction.
 
-# Virtual DOM is not the only alternative
+## Virtual DOM is not the only alternative
 
 It is also important not to turn this into a choice between two boxes:
 
@@ -472,7 +472,7 @@ The real question is therefore broader:
 
 > **How should this application determine which parts of the UI need to change?**
 
-# Performance: don't reduce the discussion to benchmarks
+## Performance: don't reduce the discussion to benchmarks
 
 Performance is often where discussions about rendering models become unnecessarily ideological.
 
@@ -502,7 +502,7 @@ There is no universal winner.
 
 > **"Which rendering model does the required amount of work most effectively for this application's workload?"**
 
-# Nutin's direct-DOM approach
+## Nutin's direct-DOM approach
 
 Nutin takes a deliberate position on this trade-off.
 
@@ -524,7 +524,7 @@ That is not intended as a claim that direct DOM manipulation is universally bett
 
 It reflects the type of application Nutin is designed to support: small and medium-sized SPAs where explicit ownership, understandable rendering, and a relatively small runtime model are valuable.
 
-# A deliberately limited rendering model
+## A deliberately limited rendering model
 
 Nutin also does not attempt to solve every possible UI rendering problem, nor to provide sophisticated Virtual DOM reconciliation intended for extremely reactive interfaces. This is deliberate.
 
@@ -534,13 +534,13 @@ Choosing a smaller rendering model means accepting its boundaries.
 
 The goal is not to eliminate complexity from software; it is to avoid introducing complexity that the application does not need.
 
-# How should you choose?
+## How should you choose?
 
 There is no universal threshold at which one rendering strategy becomes "correct."
 
 Instead, consider where the complexity of your application actually lives.
 
-## Direct DOM and explicit rendering may be a good fit when:
+### Direct DOM and explicit rendering may be a good fit when:
 
 * the UI is manageable;
 * state relationships are straightforward;
@@ -555,7 +555,7 @@ The main benefit is not a theoretical promise of superior performance.
 
 It is that the rendering path can remain relatively direct and understandable.
 
-## A Virtual DOM or reconciliation-based approach may be a good fit when:
+### A Virtual DOM or reconciliation-based approach may be a good fit when:
 
 * UI state is highly interconnected;
 * many components depend on changing state;
@@ -568,7 +568,7 @@ In these circumstances, the additional runtime machinery can be a worthwhile tra
 
 > **I would rather let the rendering system coordinate these UI transitions than make every part of my application coordinate them explicitly** is a legitimate engineering decision.
 
-## Other reactive approaches may be a better fit when:
+### Other reactive approaches may be a better fit when:
 
 * fine-grained updates are central to the application;
 * precise state-to-UI dependencies matter;
@@ -577,7 +577,7 @@ In these circumstances, the additional runtime machinery can be a worthwhile tra
 
 The ecosystem offers more choices than simply "DOM versus Virtual DOM."
 
-# Conclusion
+## Conclusion
 
 Direct DOM manipulation and Virtual DOM rendering are not opposing philosophies of good and bad frontend development.
 
@@ -619,8 +619,4 @@ ask:
 
 Choose the rendering machinery that solves your application's actual problems — not the one that happens to be fashionable.
 
-#############################
-######TODO: update link######
-#############################
-
-If you're interested in a small SPA architecture built around direct DOM rendering, explicit lifecycle management, and HTML templates, see how Nutin approaches **Rendering**, **Components**, **Lifecycle**, and **Templates** in its documentation.
+If you're interested in a small SPA architecture built around direct DOM rendering, explicit lifecycle management, and HTML templates, see how [Nutin approaches **Rendering**, **Components**, **Lifecycle**, and **Templates**](https://nutin.org/docs) in its documentation.

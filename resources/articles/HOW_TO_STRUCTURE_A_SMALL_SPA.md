@@ -35,7 +35,7 @@ These responsibilities are related, but they are not identical.
 
 The goal is not to create one abstraction for every responsibility, but to make it obvious **who owns what**.
 
-# A deliberately small architecture
+## A deliberately small architecture
 
 For a modest application, something like this can be enough:
 
@@ -63,7 +63,7 @@ Or by feature, or by domain.
 
 What matters is the boundary represented by each area.
 
-# Components: reusable UI, not miniature applications
+## Components: reusable UI, not miniature applications
 
 A component is useful when a piece of UI has a meaningful boundary.
 
@@ -82,7 +82,7 @@ That makes them good candidates for independent UI units.
 
 A component can emit an event or invoke an operation without becoming responsible for the whole application workflow.
 
-## Don't componentize everything
+### Don't componentize everything
 
 Ask:
 
@@ -98,7 +98,7 @@ If the answer is no, keeping it inside a larger component or view may be the bet
 
 The objective is not maximum component count, it is useful boundaries.
 
-# Application operations and shared data
+## Application operations and shared data
 
 Suppose several parts of the application need access to the current user.
 
@@ -133,7 +133,7 @@ The architectural principle is more important than the implementation:
 
 That does not mean all state belongs in one global store. Only data that genuinely needs to be shared should be given a broader owner.
 
-# Routing should solve one problem
+## Routing should solve one problem
 
 Routing answers a relatively simple question:
 
@@ -176,9 +176,9 @@ Those responsibilities belong to different parts of the application.
 
 The router should primarily manage navigation.
 
-# Rendering: what causes the UI to update?
+## Rendering: what causes the UI to update?
 
-## Direct DOM manipulation
+### Direct DOM manipulation
 
 An interaction directly changes the relevant DOM:
 
@@ -192,7 +192,7 @@ DOM update
 
 This can be perfectly adequate for localized interactions.
 
-## Explicit rendering
+### Explicit rendering
 
 A state change causes a component or view to render:
 
@@ -206,7 +206,7 @@ DOM
 
 This makes the update mechanism explicit.
 
-## Reactive rendering
+### Reactive rendering
 
 A state change automatically propagates to dependent UI:
 
@@ -220,7 +220,7 @@ UI update
 
 This can become valuable when relationships between state and UI become numerous or difficult to manage manually.
 
-# Lifecycle is about ownership
+## Lifecycle is about ownership
 
 Dynamic interfaces create another architectural problem: resources have lifetimes.
 
@@ -254,7 +254,7 @@ A good component model makes creation and destruction explicit enough that devel
 
 > **If this UI disappears, what else disappears with it?**
 
-# Don't over-architect a small SPA
+## Don't over-architect a small SPA
 
 *Speaking from experience:* It is tempting to try and solve all architectural questions for your 2 page SPA. Please don't.
 
@@ -281,7 +281,7 @@ Abstraction has a cost.
 
 Solve the actual problems you have, and add abstraction when the application gives you a concrete reason to.
 
-# What architecture looks like in Nutin
+## What architecture looks like in [Nutin](https://nutin.org/docs)
 
 Nutin is one example of an approach with clear boundaries.
 
@@ -304,13 +304,9 @@ Nutin aims to support the application's architecture rather than become the arch
 
 Its tooling and framework code can be inspected and modified, and developers can bypass its abstractions when their application needs something different.
 
-#############################
-######TODO: update link######
-#############################
+For implementation details, see the relevant [Nutin documentation](https://nutin.org/docs) for Components, Views, Services, Routing, Lifecycle, Configuration, Testing, and Getting Started.
 
-For implementation details, see the relevant [Nutin documentation](/docs/) for Components, Views, Services, Routing, Lifecycle, Configuration, Testing, and Getting Started.
-
-# When is this architecture enough?
+## When is this architecture enough?
 
 A component/view/service model is useful for a broad class of applications.
 
@@ -337,13 +333,9 @@ You may eventually reach a point where:
 
 At that point, introducing additional infrastructure or adopting a more opinionated framework may be more than reasonable.
 
-#############################
-######TODO: update link######
-#############################
+This is the same principle explored in [How much frontend framework do you actually need?](https://nutin.org/articles/how-much-frontend-framework-do-you-actually-need): choose the amount of infrastructure that solves the problems you actually have.
 
-This is the same principle explored in [How much frontend framework do you actually need?]: choose the amount of infrastructure that solves the problems you actually have.
-
-# Clear boundaries are more valuable than a perfect architecture
+## Clear boundaries are more valuable than a perfect architecture
 
 The architecture should make responsibility obvious.
 
