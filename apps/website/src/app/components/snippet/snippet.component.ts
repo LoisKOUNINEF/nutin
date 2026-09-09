@@ -1,4 +1,5 @@
 import { Component } from '../../../core/index.js';
+import { PrismHighlighter } from '../../helpers/index.js';
 
 const templateFn = (_snippet: ISnippet) => `__TEMPLATE_PLACEHOLDER__`;
 
@@ -11,5 +12,10 @@ export class SnippetComponent extends Component {
       tagName: 'section',
       props
     });
+  }
+
+  protected override onAfterRender(): void {
+    PrismHighlighter.apply();
+    super.onAfterRender();
   }
 }

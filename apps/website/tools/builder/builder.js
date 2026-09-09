@@ -1,14 +1,21 @@
 #!/usr/bin/env node
 
 import path from 'path';
-import { print, runScript } from '../utils/index.js';
+import { print, runScript, acquireBuildLock } from '../utils/index.js';
 import { builderConfig } from './builder.config.js';
+
+// Must happen before copy-static.js wipes/recreates dist-build — a second build
+// starting mid-run (a manual build, another dev watcher instance, ...) would
+// otherwise race it. See tools/utils/build-lock.js.
+await acquireBuildLock();
 
 const scriptsDir = path.join(process.cwd(), 'tools', 'builder', 'core');
 
 print.boldHead(`\nStarting build...`);
 
 runScript(path.join(scriptsDir, 'app', 'copy-static.js'), 'Copying files...');
+
+runScript(path.join(scriptsDir, 'docs', 'generate-docs.js'), 'Generating resource manifests...');
 
 runScript(path.join(scriptsDir, 'html-index', 'validate-html.js'), 'Processing index.html...');
 runScript(path.join(scriptsDir, 'app', 'validate-routes.js'), 'Validating app routes...');

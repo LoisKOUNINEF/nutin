@@ -145,11 +145,10 @@
 			display: none;
 		}
 		& > div {
-    	@include mixins.flex-column;
-  	}
-		& > div:nth-child(odd) {
+	    	@include mixins.flex-column;
+	    	width: 100%;
 			padding-left: map.get($spacings, 'smallest');
-  	}
+  		}
 	}
 }
 

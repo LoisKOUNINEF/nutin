@@ -40,7 +40,7 @@ export class DomHelper {
       }
 
       const content = el.textContent?.trim();
-      return !content || content === "undefined";
+      return !content || content === "undefined" || content === "null";
     };
 
     const isValueUndefined = (el: HTMLElement): boolean => {

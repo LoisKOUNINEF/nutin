@@ -1,8 +1,5 @@
 {
-  "meta" : {
-    "title": "Page introuvable",
-    "description": "Page 404"
-  },
+  "title": "Page introuvable",
   "content": "Cette page n'existe pas.",
   "redirect": "Retourner à l'accueil."
 }

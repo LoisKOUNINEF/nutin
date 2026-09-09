@@ -25,7 +25,9 @@
   gap: 12px;
   max-width: 100ch;
   @include mixins.respond-to(medium) {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(1, 1fr);
+    padding: 0 .5rem;
+    gap: 20px;
   }
 }
 
@@ -84,14 +86,34 @@
 }
 .card-title {
   font-weight: 600;
-  font-size: 16px;
+  font-size: 1rem;
   color: var(--primary);
 }
 
 .card-desc {
-  font-size: 15px;
+  font-size: 0.95rem;
   color: var(--text);
   line-height: 1.6;
 }
 
 .card-empty { background: transparent; border: none; }
+
+// Same interactive treatment as .home__cta-row .card (tutorial/docs links),
+// applied selectively to card(s) that should behave like a link — the shape
+// (icon + card-title + card-desc) otherwise stays the plain pillar-card look.
+.card-link {
+  cursor: pointer;
+  transition: ease-in-out .2s;
+  svg {
+    transition: ease-in-out .2s;
+  }
+  &:hover {
+    border-color: var(--primary);
+    svg {
+      scale: 1.1;
+    }
+  }
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+  }
+}

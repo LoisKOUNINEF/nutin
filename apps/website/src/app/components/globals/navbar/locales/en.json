@@ -1,13 +1,6 @@
 { 
 	"home": "Home",
-	"documentation": "Documentation",
+	"docs": "Documentation",
 	"tutorial": "Tutorial",
-	"core": "Core",
-	"services": "Services",
-	"libraries": "Libraries",
-	"stylin-nutin": "StylinNutin",
-	"testin-nutin": "TestinNutin",
-	"tools": "Tools",
-	"get-started": "Get Started",
 	"changelog": "Changelog"
 }

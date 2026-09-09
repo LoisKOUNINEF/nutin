@@ -1,5 +1,11 @@
 import { AppRouter, Service, I18nService, registerPipes, registerGlobals } from '../core/index.js';
-import { FooterComponent, NavbarComponent, UnderDevelopmentComponent } from './components/index.js';
+import { FooterComponent, NavbarComponent } from './components/index.js';
+import {
+  ArticlesManifestService,
+  ChangelogManifestService,
+  DocsManifestService,
+  TutorialManifestService
+} from './services/index.js';
 import { appRoutes } from './routes.js';
 
 class App {
@@ -8,10 +14,7 @@ class App {
     AppRouter(appRoutes);
 
     registerGlobals({
-      before: [
-        { component: NavbarComponent, id: 'navbar' }, 
-        { component: UnderDevelopmentComponent, id: 'under-development' },
-      ],
+      before: [{ component: NavbarComponent, id: 'navbar' }],
       after: [{ component: FooterComponent, id: 'footer' }],
     });
   }
@@ -19,7 +22,12 @@ class App {
 
 document.addEventListener('DOMContentLoaded', async () => {
   await I18nService.initTranslations();
-  await I18nService.loadTranslations(I18nService.currentLanguage);
+  await Promise.all([
+    DocsManifestService.load(),
+    ChangelogManifestService.load(),
+    TutorialManifestService.load(),
+    ArticlesManifestService.load(),
+  ]);
   new App();
 });
 

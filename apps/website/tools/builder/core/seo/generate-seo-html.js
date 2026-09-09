@@ -7,11 +7,12 @@ import { renderRoute } from './ssr/ssr-render.js';
 import { builderConfig } from '../../builder.config.js';
 import { resolveLocaleValue, valueForLangWithFallback, collectI18nSeoIssues } from './i18n-resolution.js';
 import { segmentsOf, validateMockParams, writeRouteHtml, warnForRoutesMissingSeoConfig } from './route-output.js';
+import { expandDynamicRoutes } from './dynamic-routes.js';
 
 async function processRoute(template, baseUrl, defaultLanguage, languages, route, bundleUrl) {
   validateMockParams(route);
 
-  const routeSuffix = route.path === '/' ? '' : route.path;
+  const routeSuffix = route.outputPath;
 
   if (builderConfig.i18n) {
     for (const lang of languages) {
@@ -25,6 +26,7 @@ async function processRoute(template, baseUrl, defaultLanguage, languages, route
         appRoutesKey: route.path,
         mockParams: route.mockParams,
         mockFetch: route.mockFetch,
+        preloadManifest: route.preloadManifest,
         lang,
         pageUrl,
         i18nEnabled: builderConfig.i18n,
@@ -51,6 +53,7 @@ async function processRoute(template, baseUrl, defaultLanguage, languages, route
       appRoutesKey: route.path,
       mockParams: route.mockParams,
       mockFetch: route.mockFetch,
+      preloadManifest: route.preloadManifest,
       lang: defaultLanguage,
       pageUrl,
       i18nEnabled: builderConfig.i18n,
@@ -74,6 +77,7 @@ export async function generateSeoHtml() {
 
   const seoConfigPath = path.join(PATHS.temp, 'config', 'seo.json');
   const seoConfig = JSON.parse(fs.readFileSync(seoConfigPath, 'utf-8'));
+  seoConfig.routes = expandDynamicRoutes(seoConfig.routes);
   const baseUrl = seoConfig.baseUrl.replace(/\/$/, '');
 
   const languagesConfigPath = path.join(PATHS.temp, 'config', 'languages.json');

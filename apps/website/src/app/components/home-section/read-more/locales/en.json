@@ -1,0 +1,12 @@
+{ 
+	"article-framework-title": "How Much Frontend Framework Do You Actually Need?",
+	"article-framework-desc": "There is a point in the life of a small frontend application where...",
+	"article-vanilla-title": "When Does a Vanilla JavaScript Application Need Structure?",
+	"article-vanilla-desc": "A vanilla JavaScript application can start remarkably simply. You might have an index.html, an app.ts, a few modules...",
+	"article-spa-title": "How to Structure a Small SPA",
+	"article-spa-desc": "A small single-page application can stay surprisingly simple, but there is a point where simplicity starts working against you...",
+	"article-vdom-title": "Direct DOM Manipulation vs. Virtual DOM: What's the Difference?",
+	"article-vdom-desc": "If you've worked with modern frontend frameworks, you've probably heard that applications should not manipulate the DOM directly...",
+	"article-nutin-title": "Why Nutin?",
+	"article-nutin-desc": "Nutin started with a simple question: How far can you take a real web application without using a frontend framework? At the time..."
+}

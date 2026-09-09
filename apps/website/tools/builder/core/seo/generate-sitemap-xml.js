@@ -3,12 +3,13 @@ import path from 'path';
 import { PATHS } from '../app/paths.js';
 import { print } from '../../../utils/index.js';
 import { builderConfig } from '../../builder.config.js';
+import { expandDynamicRoutes } from './dynamic-routes.js';
 
 function collectUrls(baseUrl, routes, languages) {
   const urls = [];
 
-  for (const route of routes) {
-    const routeSuffix = route.path === '/' ? '' : route.path;
+  for (const route of expandDynamicRoutes(routes)) {
+    const routeSuffix = route.outputPath;
 
     if (builderConfig.i18n) {
       for (const lang of languages) {

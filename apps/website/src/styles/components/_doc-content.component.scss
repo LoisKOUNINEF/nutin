@@ -1,0 +1,143 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+
+.doc-content {
+	@include mixins.flex-row;
+	gap: map.get($spacings, 'largest');
+
+	@include mixins.respond-to(medium) {
+		@include mixins.flex-column;
+	}
+}
+
+.doc-content__body {
+	// Fills whatever space .doc-toc (flex-shrink: 0) doesn't take, instead of
+	// sizing to content and getting squeezed alongside the sidebar/toc.
+	flex: 1 1 auto;
+	min-width: 0;
+	// The sitewide root font-size is a fixed 18px (its clamp() has no vw term),
+	// so give this prose column its own fluid size instead of touching that.
+	font-size: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);
+	line-height: 1.9;
+
+	p, li, ul, ol, blockquote, h1, h2, h3, h4, h5, h6 {
+		max-width: 90ch;
+	}
+
+	p, ul, ol, blockquote {
+		margin-bottom: map.get($spacings, 'large');
+	}
+
+	li {
+		margin-bottom: map.get($spacings, 'smallest');
+	}
+
+	h2, h3, h4, h5, h6 {
+		font-family: $secondary-font;
+		color: var(--primary);
+		line-height: 1.25;
+	}
+
+	h1, h2, h3, h4 {
+		font-weight: bold;
+	}
+
+	h5, h6 {
+		font-weight: 600;
+	}
+
+	h1 {
+		font-size: clamp(2rem, 1.7rem + 1.5vw, 2.75rem);
+		color: var(--primary);
+		margin-top: 0;
+		margin-bottom: map.get($spacings, 'large');
+	}
+
+	h2 {
+		font-size: clamp(1.5rem, 1.3rem + 1vw, 2rem);
+		margin-top: map.get($spacings, 'largest');
+		margin-bottom: map.get($spacings, 'medium');
+	}
+
+	h3, h4, h5, h6 {
+		margin-top: map.get($spacings, 'large');
+		margin-bottom: map.get($spacings, 'small');
+	}
+
+	h3 {
+		font-size: clamp(1.25rem, 1.1rem + 0.75vw, 1.625rem);
+	}
+
+	h4 {
+		font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+	}
+
+	h5 {
+		font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+	}
+
+	h6 {
+		font-size: clamp(0.875rem, 0.85rem + 0.2vw, 1rem);
+	}
+
+	pre {
+		border-radius: map.get($border-radius, 'medium');
+		overflow-x: auto;
+		padding: map.get($spacings, 'medium');
+	}
+
+	// Doubled selector bumps specificity above prism.scss's `pre[class*=language-]`
+	// rule, which otherwise wins the cascade (equal specificity, loaded later)
+	// and zeroes this margin via its `margin: .5em 0` shorthand.
+	&.doc-content__body pre {
+		margin-bottom: map.get($spacings, 'medium');
+	}
+
+	// em, not rem: lets inline code scale with whatever element contains it
+	// (a heading's clamp()-driven size, or the fluid paragraph base size)
+	// instead of being pinned to the root font-size.
+	code {
+		font-size: 0.875em;
+	}
+
+	a {
+		color: var(--primary);
+		&:hover {
+			color: color-mix(in srgb, var(--primary), transparent 20%);
+		}
+	}
+}
+
+.doc-toc {
+	flex-shrink: 0;
+	width: 18vw;
+	font-size: map.get($font-sizes, 'small');
+
+	@include mixins.respond-to(medium) {
+		width: 100%;
+	}
+}
+
+.doc-toc__title {
+	display: block;
+	font-weight: 600;
+	color: var(--text-muted);
+	margin-bottom: map.get($spacings, 'small');
+}
+
+.doc-toc__item {
+	list-style: none;
+	padding: map.get($spacings, 'smallest') 0;
+
+	a {
+		color: var(--text-muted);
+		&:hover {
+			color: var(--primary);
+		}
+	}
+}
+
+.doc-toc__item--depth-3 {
+	padding-left: map.get($spacings, 'medium');
+}
