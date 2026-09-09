@@ -1,4 +1,4 @@
-import { I18nService } from "../../../index.js";
+import { I18nService, View } from "../../../index.js";
 import { Language } from "../../i18n/languages.js";
 import { CONFIG } from "../../../config.js";
 
@@ -48,16 +48,46 @@ export class NavigationManager {
   public static updateHistory(
     normalizedPath: string,
     currentPath: string,
-    pushState: boolean
+    pushState: boolean,
+    hash?: string
   ): void {
-    const localizedPath = this.addLocalePrefix(normalizedPath);
-    if (pushState && window.location.pathname !== localizedPath) {
+    const localizedPath = this.addLocalePrefix(normalizedPath) + (hash ? `#${hash}` : '');
+    const currentUrl = window.location.pathname + window.location.hash;
+    if (pushState && currentUrl !== localizedPath) {
       window.history.pushState({}, '', localizedPath);
+    }
+  }
+
+  // Scrolls to the element matching `hash` (a bare fragment, no leading "#") if it
+  // exists; falls back to the top of the page otherwise (no hash, or a stale/broken
+  // id) — matches the browser's own native fallback for an unresolvable fragment.
+  public static scrollToHash(hash?: string): void {
+    const target = hash ? document.getElementById(hash) : null;
+    if (target) {
+      target.scrollIntoView({ block: 'start' });
+    } else {
+      window.scrollTo({ top: 0 });
     }
   }
 
   public static getCurrentPath(): string {
     return this.normalizePath(window.location.pathname);
+  }
+
+  public static updateDocumentTitle(view: View, pattern: string): void {
+    const route = CONFIG.generateSEOFiles
+      ? CONFIG.seo?.routes?.find((r) => r.path === pattern)
+      : undefined;
+    const seoTitle = route?.title ? this.resolveSeoTitle(route.title) : undefined;
+    const localeTitle = CONFIG.i18n ? I18nService.getTranslationObject<string>(`${view.viewName}.title`) : null;
+    document.title = seoTitle || localeTitle || view.viewName;
+  }
+
+  private static resolveSeoTitle(title: string | Record<string, string>): string | undefined {
+    if (typeof title !== 'object') return title;
+    const lang = I18nService.currentLanguage;
+    const defaultLang = I18nService.defaultLanguage;
+    return title[lang] ?? title[defaultLang] ?? Object.values(title)[0];
   }
 
   public static matchPattern(pattern: string, path: string): Record<string, string> | null {

@@ -2,7 +2,7 @@ import { viewTemplate } from './view.template.js';
 
 describe('viewTemplate', () => {
   it('renders a view class importing View via the relative core path', () => {
-    const name = { pascal: 'Widget' };
+    const name = { kebab: 'widget', pascal: 'Widget' };
     const targetPath = 'src/app/components/widget';
 
     // The generator always leaves the html body as a placeholder — the builder
@@ -14,7 +14,7 @@ const template = \`__TEMPLATE_PLACEHOLDER__\`;
 
 export class WidgetView extends View {
   constructor() {
-    super({template});
+    super({ template, viewName: 'widget' });
   }
 
 }

@@ -191,4 +191,112 @@ describe('NavigationManager', () => {
   it('matchPattern returns null when the path does not match the pattern at all', () => {
     expect(NavigationManager.matchPattern('/posts/:id', '/other/123')).toBe(null);
   });
+
+  it('updateDocumentTitle falls back to the view\'s viewName when generateSEOFiles is disabled', () => {
+    CONFIG.generateSEOFiles = false;
+    CONFIG.seo = { routes: [{ path: '/', title: 'Should not be used' }] };
+    try {
+      NavigationManager.updateDocumentTitle({ viewName: 'home' }, '/');
+      expect(document.title).toBe('home');
+    } finally {
+      CONFIG.generateSEOFiles = false;
+    }
+  });
+
+  it('updateDocumentTitle falls back to the view\'s viewName when no seo.json route matches the pattern', () => {
+    CONFIG.generateSEOFiles = true;
+    CONFIG.seo = { routes: [{ path: '/other', title: 'Other' }] };
+    try {
+      NavigationManager.updateDocumentTitle({ viewName: 'home' }, '/');
+      expect(document.title).toBe('home');
+    } finally {
+      CONFIG.generateSEOFiles = false;
+    }
+  });
+
+  it('updateDocumentTitle uses a flat seo.json title when generateSEOFiles is enabled and the pattern matches', () => {
+    CONFIG.generateSEOFiles = true;
+    CONFIG.seo = { routes: [{ path: '/', title: 'My App — Home' }] };
+    try {
+      NavigationManager.updateDocumentTitle({ viewName: 'home' }, '/');
+      expect(document.title).toBe('My App — Home');
+    } finally {
+      CONFIG.generateSEOFiles = false;
+    }
+  });
+
+  it('updateDocumentTitle resolves a per-language seo.json title to the current language', () => {
+    CONFIG.generateSEOFiles = true;
+    CONFIG.seo = { routes: [{ path: '/', title: { en: 'Home', fr: 'Accueil' } }] };
+    I18nService['_LANGUAGES'] = ['en', 'fr'];
+    I18nService['_currentLanguage'] = 'fr';
+    try {
+      NavigationManager.updateDocumentTitle({ viewName: 'home' }, '/');
+      expect(document.title).toBe('Accueil');
+    } finally {
+      CONFIG.generateSEOFiles = false;
+      I18nService['_currentLanguage'] = 'en';
+    }
+  });
+
+  it('updateDocumentTitle falls back to the default language, then any available language, then viewName', () => {
+    CONFIG.generateSEOFiles = true;
+    I18nService['_LANGUAGES'] = ['en', 'fr'];
+
+    CONFIG.seo = { routes: [{ path: '/', title: { fr: 'Accueil' } }] };
+    I18nService['_currentLanguage'] = 'en';
+    try {
+      // current lang ('en') missing -> falls back to default lang's value, present here as 'fr' only,
+      // so it falls further to the first available value
+      NavigationManager.updateDocumentTitle({ viewName: 'home' }, '/');
+      expect(document.title).toBe('Accueil');
+
+      CONFIG.seo = { routes: [{ path: '/', title: {} }] };
+      NavigationManager.updateDocumentTitle({ viewName: 'home' }, '/');
+      expect(document.title).toBe('home');
+    } finally {
+      CONFIG.generateSEOFiles = false;
+      I18nService['_currentLanguage'] = 'en';
+    }
+  });
+
+  it('updateDocumentTitle uses the view\'s locale title when i18n is enabled and no seo.json route matches', () => {
+    CONFIG.i18n = true;
+    CONFIG.generateSEOFiles = false;
+    I18nService['_translations'] = { home: { title: 'Accueil' } };
+    try {
+      NavigationManager.updateDocumentTitle({ viewName: 'home' }, '/');
+      expect(document.title).toBe('Accueil');
+    } finally {
+      CONFIG.i18n = false;
+      I18nService['_translations'] = {};
+    }
+  });
+
+  it('updateDocumentTitle prefers seo.json title over the locale title when both are present', () => {
+    CONFIG.i18n = true;
+    CONFIG.generateSEOFiles = true;
+    CONFIG.seo = { routes: [{ path: '/', title: 'From seo.json' }] };
+    I18nService['_translations'] = { home: { title: 'From locale' } };
+    try {
+      NavigationManager.updateDocumentTitle({ viewName: 'home' }, '/');
+      expect(document.title).toBe('From seo.json');
+    } finally {
+      CONFIG.i18n = false;
+      CONFIG.generateSEOFiles = false;
+      I18nService['_translations'] = {};
+    }
+  });
+
+  it('updateDocumentTitle ignores the locale title when i18n is disabled, falling back to viewName', () => {
+    CONFIG.i18n = false;
+    CONFIG.generateSEOFiles = false;
+    I18nService['_translations'] = { home: { title: 'Should not be used' } };
+    try {
+      NavigationManager.updateDocumentTitle({ viewName: 'home' }, '/');
+      expect(document.title).toBe('home');
+    } finally {
+      I18nService['_translations'] = {};
+    }
+  });
 });

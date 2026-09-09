@@ -1,11 +1,11 @@
 import { BaseComponent, BaseComponentOptions } from '../../index.js';
 
 export interface ViewOptions extends BaseComponentOptions {
-  viewName?: string;
+  viewName: string;
 }
 
 export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComponent<T> {
-  public viewName: string;
+  private _viewName: string;
   protected routeParams: Record<string, string> = {};
   private _template: string;
 
@@ -17,8 +17,13 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
     trustLevel,
   }: ViewOptions) {
     super({ mountTarget, tagName, trustLevel });
+    if (!viewName) throw new Error('View requires a viewName.');
     this._template = template ?? '';
-    this.viewName = viewName || this.getKebabCaseViewName();
+    this._viewName = viewName;
+  }
+
+  public get viewName(): string {
+    return this._viewName;
   }
 
   protected override generateTemplate(): string {
@@ -39,12 +44,6 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
 
   public hasRouteParam(key: string): boolean {
     return key in this.routeParams && this.routeParams[key] !== undefined;
-  }
-
-  private getKebabCaseViewName(): string {
-    const className = this.constructor.name;
-    const baseName = className.replace(/View$/, '');
-    return baseName.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
   }
 
   // Navigation hooks — called by router only, never by render lifecycle

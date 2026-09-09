@@ -27,7 +27,7 @@ const creators = {
     try {
       generateFile({ name, targetPath, templateFn: serviceTemplate, suffix: suffix });
       appendToIndex({ name, targetPath, suffix: suffix });
-      if (nutinConfig.generator.generateTest) await generateTest({ name, targetPath, suffix: suffix });
+      await generateTest({ name, targetPath, suffix: suffix });
     } catch (err) {
       handleError("Failed to generate service", err);
     }
@@ -39,10 +39,10 @@ const creators = {
     try {
       generateFile({ name, targetPath, templateFn: componentTemplate, suffix: suffix });
       generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: suffix, extension: 'html' });
-      if (nutinConfig.generator.generateStylesheet) generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
-      if (nutinConfig.generator.generateLocales) await generateLocales({ targetPath, name });
+      generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
+      await generateLocales({ targetPath, name, isView: false });
       appendToIndex({ name, targetPath, suffix: suffix });
-      if (nutinConfig.generator.generateTest) await generateTest({ name, targetPath, suffix });
+      await generateTest({ name, targetPath, suffix });
     } catch (err) {
       handleError("Failed to generate component", err);
     }
@@ -54,10 +54,10 @@ const creators = {
     try {
       generateFile({ name, targetPath, templateFn: viewTemplate, suffix: suffix });
       generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: suffix, extension: 'html' });
-      if (nutinConfig.generator.generateStylesheet) generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
-      if (nutinConfig.generator.generateLocales) await generateLocales({ targetPath, name });
+      generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
+      await generateLocales({ targetPath, name, isView: true });
       appendToIndex({ name, targetPath, suffix: suffix });
-      if (nutinConfig.generator.generateTest) await generateTest({ name, targetPath, suffix });
+      await generateTest({ name, targetPath, suffix });
     } catch (err) {
       handleError("Failed to generate view", err);
     }
@@ -77,31 +77,11 @@ if (create) {
 
 // Helper Functions
 async function generateTest({ targetPath, name, suffix }) {
-  let isGenerate = true;
-  if (!nutinConfig.testinNutin.includeApp) {
-    print.warn('⚠️ Enable includeApp in nutin.config.js testinNutin object to use test files.');
-    if (!process.stdin.isTTY) {
-      print.warn('Non-interactive shell detected — skipping test file generation.');
-      isGenerate = false;
-    } else {
-      isGenerate = await promptBoolean('Do you want to generate the test file anyway ?');
-    }
-  }
-  if (isGenerate) generateFile({ targetPath, name, templateFn: testTemplate, extension: 'test.js', suffix: suffix });
+  if (nutinConfig.testinNutin.includeApp) generateFile({ targetPath, name, templateFn: testTemplate, extension: 'test.js', suffix: suffix });
 }
 
-async function generateLocales({ targetPath, name }) {
-  let isGenerate = true;
-  if (!nutinConfig.i18n) {
-    print.warn('⚠️ Enable i18n in nutin.config.js to use json-based content per language.');
-    if (!process.stdin.isTTY) {
-      print.warn('Non-interactive shell detected — skipping locales file generation.');
-      isGenerate = false;
-    } else {
-      isGenerate = await promptBoolean('Do you want to generate the locales file(s) anyway ?');
-    }
-  }
-  if (isGenerate) generateLocalesJson({ targetPath, name });
+async function generateLocales({ targetPath, name, isView }) {
+  if (nutinConfig.i18n) generateLocalesJson({ targetPath, name, isView });
 }
 
 function showUsageAndExit(message) {

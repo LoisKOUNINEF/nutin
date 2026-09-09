@@ -7,30 +7,97 @@
       ></h1>
       <span 
         class="home__version"
-      ><span class="home__version-live">●</span> v1.3.1</span>
+        data-event="click:navigateTo:changelog"
+      ><span class="home__version-live">●</span> v2.1.0</span>
     </div>
     <div class="home__header">
       <p data-i18n="home.catchphrase" class="home__catchphrase"></p>
       <p data-i18n="home.subcatchphrase" class="home__subcatchphrase"></p>
-      <div class="home__briefing">
-        <p data-i18n="home.briefing-1"></p>
-        <p data-i18n="home.briefing-2"></p>
-      <div class="home__cta-row">
-        <div data-component="cta-row-get-started-btn"></div>
+    </div>
+    <div>
+      <div class="home__section-header">
+        <h2 data-i18n="home.start"></h2>
+      </div>
+      <div class="home__snippet-container">
+        <h2 data-i18n="home.snippet-create"></h2>
+        <div class="home__snippet">
+          <span data-component="snippet-create"></span>
+        </div>
+        <h2 data-i18n="home.snippet-run"></h2>
+        <div class="home__snippet">
+          <span data-component="snippet-run"></span>
+        </div>
       </div>
     </div>
-  </div>
-  <div data-component="home-pillars"></div>
-  <div data-component="home-philosophy"></div>
-    <div class="home__snippet-container">
-      <h2 data-i18n="home.snippet"></h2>
-      <div class="home__snippet">
-        <span data-component="snippet"></span>
+    <div>
+      <div class="home__section-header">
+        <h2 data-i18n="home.build"></h2>
+      </div>
+      <div class="home__snippet-container">
+        <h2 data-i18n="home.snippet-generate"></h2>
+        <div class="home__snippet">
+          <span data-component="snippet-generate"></span>
+        </div>
+        <h2 data-i18n="home.snippet-hello"></h2>
+        <div class="home__snippet">
+          <span data-component="snippet-hello"></span>
+        </div>
+        <h2 data-i18n="home.snippet-register"></h2>
+        <div class="home__snippet">
+          <span data-component="snippet-register-ts"></span>
+        </div>
+        <div class="home__snippet">
+          <span data-component="snippet-register-html"></span>
+        </div>
+        <h2 data-i18n="home.snippet-see"></h2>
+        <div class="home__snippet">
+          <span data-component="snippet-see"></span>
+        </div>
       </div>
     </div>
-    <div data-component="home-extras"></div>
-    <div class="home__tutorial-link-container">
-      <div data-component="tutorial-link"></div>
+    <div>
+      <div class="home__section-header">
+        <h2 data-i18n="home.achieved"></h2>
+      </div>
+      <div class="grid home__cta-row">
+        <div class="card pillar-card" data-event="click:navigateTo:tutorial">
+          <!-- tutorial: three connected steps progressing forward -->
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="4"  cy="12" r="2"/>
+            <circle cx="12" cy="12" r="2"/>
+            <circle cx="20" cy="12" r="2"/>
+            <line x1="6"  y1="12" x2="10" y2="12"/>
+            <line x1="14" y1="12" x2="18" y2="12"/>
+            <polyline points="17,9 20,12 17,15"/>
+          </svg>
+          <p data-i18n="home.tutorial-link" class="card-title arrow-top-right-svg"></p>
+        </div>
+        <div class="card pillar-card" data-event="click:navigateTo:docs">
+          <!-- file-text / docs -->
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
+            <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/>
+            <path d="M9 9l1 0"/>
+            <path d="M9 13l6 0"/>
+            <path d="M9 17l6 0"/>
+          </svg>
+          <p data-i18n="home.docs-link" class="card-title arrow-top-right-svg"></p>
+        </div>
+        <div class="card pillar-card" data-event="click:navigateTo:articles/why-nutin">
+          <!-- lightbulb: the idea behind why Nutin exists -->
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 16a5 5 0 1 1 6 0a3.5 3.5 0 0 0 -1 3a2 2 0 0 1 -4 0a3.5 3.5 0 0 0 -1 -3"/>
+            <path d="M9.7 17l4.6 0"/>
+          </svg>
+          <p data-i18n="read-more.article-nutin-title" class="card-title"></p>
+        </div>
+      </div>
+    </div>
+    <div class="home__read-more-section">
+      <div class="home__section-header">
+        <h2 data-i18n="home.read-more"></h2>
+      </div>
+      <div data-component="read-more"></div>
     </div>
   </div>
 </div>

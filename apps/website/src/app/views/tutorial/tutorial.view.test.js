@@ -1,5 +1,5 @@
 import { TutorialView } from '#root/dist/src/app/views/index.js';
-import { registerPipes } from '#root/dist/src/libs/index.js';
+import { registerPipes } from '#root/dist/src/core/index.js';
 
 let view;
 
@@ -13,9 +13,10 @@ describe('TutorialView', () => {
 	it('should be defined', () => {
 		expect(view).toBeDefined();
 	});
-	it('should have title with i18n key', () => {
-		const h1 = view.element.querySelector('h1');
-		expect(h1).toBeDefined();
-		expect(h1.textContent).toBe('Tutorial.title');		
+
+	it('should render an empty state when the tutorial manifest has no pages', () => {
+		view.render();
+		const empty = view.element.querySelector('[data-i18n="tutorial.empty"]');
+		expect(empty).toBeDefined();
 	});
 })

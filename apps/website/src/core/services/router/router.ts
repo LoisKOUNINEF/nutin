@@ -15,6 +15,7 @@ export type IRouter = InstanceType<typeof Router>;
 export interface RouteMatch {
   route: RouteConfig;
   params: Record<string, string>;
+  pattern: string;
 }
 
 class Router extends Service<Router> {
@@ -28,7 +29,7 @@ class Router extends Service<Router> {
   constructor(private routes: Routes) {
     super();
     this.initializeEventListeners();
-    this.navigate(NavigationManager.getCurrentPath());
+    this.navigate(NavigationManager.getCurrentPath() + window.location.hash);
     this.registerCleanup(this.removeEventListeners);
   }
 
@@ -42,13 +43,14 @@ class Router extends Service<Router> {
 
   public async reload(): Promise<void> {
     const currentRoute = NavigationManager.getCurrentPath();
-    await this.navigate(currentRoute, false);
+    await this.navigate(currentRoute + window.location.hash, false);
   }
 
   public async navigate(path: string | '', pushState: boolean = true): Promise<void> {
-    const normalizedPath = NavigationManager.normalizePath(path);
+    const [rawPath = '', hash] = path.split('#');
+    const normalizedPath = NavigationManager.normalizePath(rawPath);
     const currentPath = NavigationManager.getCurrentPath();
-    
+
     // Try to match the route with parameters
     const routeMatch = this.matchRoute(normalizedPath);
 
@@ -58,23 +60,24 @@ class Router extends Service<Router> {
     }
 
     const guardResult = await this.handleGuards(
-      normalizedPath, 
-      routeMatch.route, 
-      routeMatch.params, 
+      normalizedPath,
+      routeMatch.route,
+      routeMatch.params,
       pushState
     );
-    
+
     if (!guardResult) return;
 
     this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
     this._currentParams = routeMatch.params;
     this._currentView = ViewRenderManager.renderNewView(
-      guardResult.viewConstructor!, 
+      guardResult.viewConstructor!,
       routeMatch.params
     );
-    
-    NavigationManager.updateHistory(normalizedPath, currentPath, pushState);
-    window.scrollTo({ top: 0 });
+
+    NavigationManager.updateDocumentTitle(this._currentView, routeMatch.pattern);
+    NavigationManager.updateHistory(normalizedPath, currentPath, pushState, hash);
+    NavigationManager.scrollToHash(hash);
   }
 
   public getCurrentParams(): Record<string, string> {
@@ -109,7 +112,7 @@ class Router extends Service<Router> {
     if (newLocale && newLocale !== I18nService.currentLanguage) {
       await I18nService.setCurrentLanguage(newLocale as Language);
     }
-    this.navigate(NavigationManager.getCurrentPath(), false);
+    this.navigate(NavigationManager.getCurrentPath() + window.location.hash, false);
   }
 
   /**
@@ -122,7 +125,7 @@ class Router extends Service<Router> {
     for (const [pattern, routeConfig] of Object.entries(this.routes)) {
       const match = NavigationManager.matchPattern(pattern, path);
       if (match) {
-        return { route: routeConfig, params: match };
+        return { route: routeConfig, params: match, pattern };
       }
     }
     return null;
@@ -145,7 +148,8 @@ class Router extends Service<Router> {
     this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
     this._currentParams = {};
     this._currentView = ViewRenderManager.renderNewView(notFoundConstructor, {});
-    
+
+    NavigationManager.updateDocumentTitle(this._currentView, '/404');
     NavigationManager.updateHistory(normalizedPath, currentPath, pushState);
   }
 

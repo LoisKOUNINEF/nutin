@@ -31,12 +31,12 @@ export class PopoverView extends View {
     template,
     buttons = [],
     onClose,
-    viewName,
+    viewName = 'popover',
     components = [],
     catalogs = [],
     focusTrapOptions = {}
   }: PopoverOptions) {
-    super({ template, tagName: 'div', mountTarget: 'body' });
+    super({ template, tagName: 'div', mountTarget: 'body', viewName });
     this._onClose = onClose;
     this._components = components;
     this._catalogs = catalogs;

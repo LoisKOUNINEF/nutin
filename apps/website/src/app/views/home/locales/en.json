@@ -1,13 +1,18 @@
 {
-  "meta" : {
-    "title": "nutin",
-    "description": "nutin website (documentation, tutorial)."
-  },
-  "title": "nutin",
-  "catchphrase": "Minimalist, transparent TypeScript framework.",
-  "subcatchphrase": "Explicit. No magic. Opiniated where it matters.",
-  "briefing-1": "Built as a learning journey into how modern frameworks work.",
-  "briefing-2": "Minimal, readable, and yours to modify.",
-  "snippet": "Quick Start\n",
-  "tutorial-link": "Build your first nutin app"
+  "title": "Nutin",
+  "catchphrase": "Framework structure. Vanilla freedom.",
+  "subcatchphrase": "Your app owns Nutin. Not the other way around.",
+  "start": "First steps",
+  "build": "Start building",
+  "snippet-create": "Create a project",
+  "snippet-run": "Run the project",
+  "snippet-generate": "Generate a new component",
+  "snippet-hello": "Make the component say hello",
+  "snippet-register": "Register the component in the `Home` view",
+  "snippet-see": "See it running",
+  "achieved": "You've got the basics.",
+  "explore": "Explore Nutin",
+  "read-more": "Read more",
+  "tutorial-link": "Continue with the tutorial",
+  "docs-link": "Browse Nutin documentation"
 } 

@@ -74,9 +74,16 @@ describe('PipeHelper', () => {
     expect(container.querySelector('input').value).toBe('FROM SOURCE');
   });
 
-  it('stops processing pipes when a pipe segment resolves to an empty name', () => {
-    container.innerHTML = '<span data-pipe=":arg">hi</span>';
+  it('warns and skips a pipe segment that resolves to an empty name, continuing the rest of the chain', () => {
+    const warnSpy = spyOn(console, 'warn');
+    warnSpy.andCallFake(() => {});
+
+    container.innerHTML = '<span data-pipe=":arg|upper">hi</span>';
     PipeHelper.parsePipeAttributes(container);
-    expect(container.querySelector('span').textContent).toBe('hi');
+
+    expect(container.querySelector('span').textContent).toBe('HI');
+    expect(warnSpy.callCount).toBe(1);
+
+    warnSpy.restore();
   });
 });

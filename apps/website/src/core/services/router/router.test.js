@@ -21,6 +21,7 @@ describe('Router', () => {
 
   beforeEach(() => {
     CONFIG.i18n = false;
+    CONFIG.generateSEOFiles = false;
     window.history.pushState({}, '', '/');
   });
 
@@ -30,6 +31,7 @@ describe('Router', () => {
       router = null;
     }
     CONFIG.i18n = false;
+    CONFIG.generateSEOFiles = false;
     window.history.pushState({}, '', '/');
   });
 
@@ -209,6 +211,82 @@ describe('Router', () => {
     await flushPromises();
 
     expect(home.calls.some(c => c[0] === 'render')).toBe(true);
+  });
+
+  it('sets document.title to the view\'s viewName when generateSEOFiles is disabled', async () => {
+    CONFIG.generateSEOFiles = false;
+    CONFIG.seo = { routes: [{ path: '/', title: 'Should not be used' }] };
+
+    const home = makeView('home');
+    router = AppRouter({ '/': () => home });
+    await flushPromises();
+
+    expect(document.title).toBe('home');
+  });
+
+  it('falls back to the view\'s viewName when generateSEOFiles is enabled but no seo.json route matches', async () => {
+    CONFIG.generateSEOFiles = true;
+    CONFIG.seo = { routes: [] };
+
+    const home = makeView('home');
+    router = AppRouter({ '/': () => home });
+    await flushPromises();
+
+    expect(document.title).toBe('home');
+  });
+
+  it('sets document.title from config/seo.json when generateSEOFiles is enabled and a route matches', async () => {
+    CONFIG.generateSEOFiles = true;
+    CONFIG.seo = { routes: [{ path: '/', title: 'My App — Home' }] };
+
+    const home = makeView('home');
+    router = AppRouter({ '/': () => home });
+    await flushPromises();
+
+    expect(document.title).toBe('My App — Home');
+  });
+
+  it('sets document.title for the /404 route', async () => {
+    CONFIG.generateSEOFiles = true;
+    CONFIG.seo = { routes: [{ path: '/404', title: 'Not Found' }] };
+
+    const home = makeView('home');
+    const notFound = makeView('not-found');
+    router = AppRouter({ '/': () => home, '/404': () => notFound });
+    await flushPromises();
+
+    await router.navigate('/nope');
+
+    expect(document.title).toBe('Not Found');
+  });
+
+  it('resolves a per-language title when i18n is enabled', async () => {
+    CONFIG.i18n = true;
+    CONFIG.generateSEOFiles = true;
+    CONFIG.seo = { routes: [{ path: '/', title: { en: 'Home', fr: 'Accueil' } }] };
+    I18nService['_LANGUAGES'] = ['en', 'fr'];
+    I18nService['_currentLanguage'] = 'fr';
+
+    const home = makeView('home');
+    router = AppRouter({ '/': () => home });
+    await flushPromises();
+
+    expect(document.title).toBe('Accueil');
+
+    I18nService['_currentLanguage'] = 'en';
+  });
+
+  it('falls back to the view\'s locale title when i18n is enabled and no seo.json route matches', async () => {
+    CONFIG.i18n = true;
+    I18nService['_translations'] = { home: { title: 'Accueil' } };
+
+    const home = makeView('home');
+    router = AppRouter({ '/': () => home });
+    await flushPromises();
+
+    expect(document.title).toBe('Accueil');
+
+    I18nService['_translations'] = {};
   });
 
   it('removeEventListeners() stops the router from responding to further navigate/popstate events', async () => {

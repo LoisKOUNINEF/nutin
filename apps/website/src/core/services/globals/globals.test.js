@@ -106,6 +106,9 @@ describe('globals (hideGlobals/revealGlobals)', () => {
     [...document.body.children].forEach((el) => {
       if (el.id !== 'app') el.remove();
     });
+    // Globals is a process-wide singleton - drop its captured-display state so
+    // a later test's ids can't inherit an earlier test's original display value.
+    Globals.testingResetAll();
   });
 
   it('toggle display for every given id that is present', () => {
@@ -145,5 +148,40 @@ describe('globals (hideGlobals/revealGlobals)', () => {
   it('are no-ops for ids that are absent', () => {
     expect(() => hideGlobals(['missing'])).not.toThrow();
     expect(() => revealGlobals(['missing'])).not.toThrow();
+  });
+
+  it('revealGlobals restores the display value captured when hideGlobals was called', () => {
+    const header = document.createElement('div');
+    header.id = 'header';
+    header.style.display = 'flex';
+    document.body.appendChild(header);
+
+    hideGlobals(['header']);
+    expect(header.style.display).toBe('none');
+
+    revealGlobals(['header']);
+    expect(header.style.display).toBe('flex');
+  });
+
+  it('revealGlobals accepts an explicit display override that wins over the captured value', () => {
+    const header = document.createElement('div');
+    header.id = 'header';
+    header.style.display = 'flex';
+    document.body.appendChild(header);
+
+    hideGlobals(['header']);
+    revealGlobals(['header'], 'inline-block');
+
+    expect(header.style.display).toBe('inline-block');
+  });
+
+  it('revealGlobals falls back to "block" when there is no prior hideGlobals call for that id', () => {
+    const header = document.createElement('div');
+    header.id = 'header';
+    document.body.appendChild(header);
+
+    revealGlobals(['header']);
+
+    expect(header.style.display).toBe('block');
   });
 });

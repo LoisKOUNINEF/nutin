@@ -197,11 +197,39 @@ describe('HttpClient', () => {
 
   it('should handle custom headers', async () => {
     fetchMock.mockJsonResponse('https://api.example.com/users', []);
-    
+
     await httpClient.get('https://api.example.com/users', { headers: { 'Authorization': 'Bearer custom-token' } });
-    
+
     const lastCall = fetchMock.getLastCall();
     expect(lastCall.options.headers['Authorization']).toBe('Bearer custom-token');
+  });
+
+  it('should send the constructor default headers on a request with no custom headers', async () => {
+    fetchMock.mockJsonResponse('https://api.example.com/users', []);
+
+    await httpClient.get('https://api.example.com/users');
+
+    const lastCall = fetchMock.getLastCall();
+    expect(lastCall.options.headers['Content-Type']).toBe('application/json');
+  });
+
+  it('should merge default headers with per-call headers on different keys', async () => {
+    fetchMock.mockJsonResponse('https://api.example.com/users', []);
+
+    await httpClient.get('https://api.example.com/users', { headers: { 'Authorization': 'Bearer custom-token' } });
+
+    const lastCall = fetchMock.getLastCall();
+    expect(lastCall.options.headers['Content-Type']).toBe('application/json');
+    expect(lastCall.options.headers['Authorization']).toBe('Bearer custom-token');
+  });
+
+  it('should let a per-call header override a default header on the same key', async () => {
+    fetchMock.mockJsonResponse('https://api.example.com/users', []);
+
+    await httpClient.get('https://api.example.com/users', { headers: { 'Content-Type': 'text/plain' } });
+
+    const lastCall = fetchMock.getLastCall();
+    expect(lastCall.options.headers['Content-Type']).toBe('text/plain');
   });
 
   it('should invoke request interceptors with the final url and options before sending', async () => {

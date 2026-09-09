@@ -10,7 +10,7 @@ const template = \`${htmlTemplate}\`;
 
 export class ${name.pascal}View extends View {
   constructor() {
-    super({template});
+    super({ template, viewName: '${name.kebab}' });
   }
 
 }
