@@ -5,6 +5,10 @@
 .doc-content {
 	@include mixins.flex-row;
 	gap: map.get($spacings, 'largest');
+	// Without this, a flex item's default min-width:auto lets a wide, unwrapped
+	// <pre> line (white-space:pre) drag this whole row wider than the viewport
+	// instead of shrinking and letting the pre's own overflow-x:auto scroll it.
+	min-width: 0;
 
 	@include mixins.respond-to(medium) {
 		@include mixins.flex-column;

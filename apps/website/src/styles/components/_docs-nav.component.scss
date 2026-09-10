@@ -5,13 +5,18 @@
 .docs-nav__container {
 	position: sticky;
 	top: 3rem;
-	min-width: 20vw;
+	// A fixed width (not min-width) keeps this footprint constant whether or
+	// not the scrollbar below is actually showing — otherwise its shrink-to-fit
+	// auto width grows to include the scrollbar track only when items overflow,
+	// squeezing .doc-content__body and .doc-toc closer together.
+	width: 20vw;
 	// Otherwise flex-shrink:1 (the default) lets this shrink well below 30vw
 	// whenever the row's total desired width exceeds .resource__section.
 	flex-shrink: 0;
 	margin-right: 3rem;
 	padding-bottom: map.get($spacings, 'largest');
 	overflow-y: auto;
+	scrollbar-gutter: stable;
 	max-height: calc(100vh - 3rem);
 
 	@include mixins.respond-to(medium) {
