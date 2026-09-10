@@ -17,6 +17,7 @@
 	padding-top: map.get($spacings, 'small');
 	padding-left: map.get($spacings, 'largest');
 	padding-right: map.get($spacings, 'large');
+  	border-bottom: 5px solid var(--surface);
 	border-style: groovy;
 	button {
 		padding-top: .3rem;
@@ -145,7 +146,6 @@
 		}
 		& > div {
 	    	@include mixins.flex-column;
-	    	width: 70%;
 			padding-left: map.get($spacings, 'smallest');
   		}
 	}
