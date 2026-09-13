@@ -281,7 +281,7 @@ Abstraction has a cost.
 
 Solve the actual problems you have, and add abstraction when the application gives you a concrete reason to.
 
-## What architecture looks like in [Nutin](https://nutin.org/docs)
+## What architecture looks like in Nutin
 
 Nutin is one example of an approach with clear boundaries.
 

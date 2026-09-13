@@ -139,7 +139,7 @@
 	}
 	@include mixins.respond-to(medium) {
 		width: 100%;
-		@include mixins.flex-between;
+		justify-content: space-around;
 		// svg is displayed in .navbar__header on smaller screens
 		svg {
 			display: none;

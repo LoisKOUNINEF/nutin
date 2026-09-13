@@ -21,6 +21,32 @@ em, i {
   font-style: italic;
 }
 
+table, tbody, tfoot, thead {
+	border: 1px solid var(--primary);
+	margin-bottom: 1rem;
+}
+
+td, th {
+	border-bottom: 1px solid var(--primary);
+	border-right: 1px solid var(--primary);
+	padding-left: 1rem;
+	padding-right: 1rem;
+}
+
+th {
+	font-weight: 600;
+}
+
+tr > td:last-of-type {
+    border-right: none;
+}
+
+tbody > tr:last-of-type {
+  td {
+  	border-bottom: none;
+  }
+}
+
 *,
 *::before,
 *::after {
@@ -57,7 +83,7 @@ em, i {
 		flex: 1;
   	padding: 3rem map.get($spacings, largest);
   	@include mixins.respond-to(medium) {
-  		padding: map.get($spacings, largest)*4 0;
+  		padding: map.get($spacings, largest)*3 0;
   		padding-bottom: map.get($spacings, largest);
   	}
 	}

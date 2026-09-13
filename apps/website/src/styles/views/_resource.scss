@@ -6,6 +6,9 @@
 	margin-left: clamp(1rem, 5vw, 10rem);
   	margin-right: clamp(1rem, 5vw, 10rem);
 	width: 100%;
+		li {
+			margin-left: 2rem;
+		}
 	@include mixins.flex-row;
 	@include mixins.respond-to(small) {
 		@include mixins.flex-column;

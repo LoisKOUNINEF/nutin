@@ -19,9 +19,40 @@ Add Alpine's CDN script to `src/index.html`'s `<head>`, pinned to an exact versi
 
 The `cdn.min.js` build calls `Alpine.start()` automatically — no extra init script needed.
 
-### Keep Alpine markup outside Nutin's mount root
+### Sharing Alpine state with Nutin's rendered content
+
+To let `@click`/`x-text`/etc. *inside* component and view templates read and mutate shared Alpine state, declare `x-data` directly on `#app` itself:
+
+```html
+<!-- src/index.html -->
+<body>
+  <main id="app" x-data="{ count: 0 }"></main>
+</body>
+```
+
+Then, inside any component's or view's own `.html` template, use directives with **no local
+`x-data`** — they inherit the scope from `#app` by normal DOM ancestry:
+
+```html
+<!-- e.g. home.view.html -->
+<button @click="count++">Increment</button>
+<span x-text="count"></span>
+```
+
+Every view and component root gets appended into (or removed from) `#app` as a child, but the element `#app` itself is permanent for the life of the page.
+
+Alpine's mutation observer re-binds freshly-inserted elements to the still-alive `#app` scope automatically.
+
+Reach for the sibling-of-`#app` pattern below for state that's genuinely independent of anything Nutin
+renders (e.g. a global UI toggle unrelated to routed content); reach for `x-data` on `#app` when
+component/view markup itself needs to read or write that state.
+
+### Keeping Alpine markup outside Nutin's mount root
 
 Nutin only ever creates and updates DOM inside the element it mounts a component into (`#app` by default).
+
+This pattern keeps Alpine state completely isolated — content inside `#app` can't
+read it, since a sibling isn't an ancestor of `#app`'s children. 
 
 Any markup that lives as a **sibling of `#app`** is never touched by Nutin, so it's safe ground for Alpine to own:
 
@@ -37,8 +68,12 @@ Any markup that lives as a **sibling of `#app`** is never touched by Nutin, so i
 </body>
 ```
 
-**Do not** place `x-data` roots inside a Nutin component's or view's own rendered subtree — a future
-`render()` call would wipe them out along with any Alpine state.
+**Do not** place `x-data` roots inside a Nutin component's or view's own rendered subtree (i.e. as
+part of what `generateTemplate()` returns) — a `render()` call replaces that element's
+`innerHTML`, wiping out the `x-data` root and its state along with it. This is true even if the
+component itself never calls `render()` again: an ancestor's re-render, or a view navigation
+(which always `destroy()`s the old view), tears down and rebuilds the whole subtree regardless of
+what the component itself does.
 
 ### Notes
 

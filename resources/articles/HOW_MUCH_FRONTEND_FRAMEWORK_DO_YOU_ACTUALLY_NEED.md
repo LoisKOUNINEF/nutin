@@ -149,9 +149,9 @@ Instead, list the problems your application actually has.
 | Testing                 | Yes                         | Usually                                   |
 | Highly reactive UI      | Yes                         | Specialized solutions may become valuable |
 
-```text
+
 The web platform is capable of doing all of these things.
-```
+
 But **capable of doing something** and **pleasant to maintain while doing it yourself** are different questions.
 
 That distinction is where architecture begins.
@@ -315,7 +315,7 @@ This is an important distinction.
 
 A framework does not have to solve every possible frontend problem to be useful.
 
-## One example of the middle ground: [Nutin](https://nutin.org/docs)
+## One example of the middle ground: Nutin
 
 This is the architectural space [Nutin](https://nutin.org/docs) is designed to occupy.
 
