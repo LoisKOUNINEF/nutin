@@ -37,6 +37,19 @@ async function processRoute(template, baseUrl, defaultLanguage, languages, route
         outputSegments: [lang, ...segmentsOf(routeSuffix)],
         routePath: route.path,
       });
+
+      // Bare "/" is served directly by nginx (try_files .../index.html) and is what
+      // gets linked/shared externally; link-preview bots don't run the client-side
+      // locale redirect, so this exact document needs real tags of its own. Canonical
+      // still points at the localized page (pageUrl already resolves to that here) to
+      // avoid duplicate-content issues.
+      if (routeSuffix === '' && lang === defaultLanguage) {
+        await writeRouteHtml({
+          template, lang, title, description, pageUrl, ogImage, body,
+          outputSegments: [],
+          routePath: route.path,
+        });
+      }
     }
   } else {
     const title = resolveLocaleValue(route.title, defaultLanguage);

@@ -149,9 +149,9 @@ Instead, list the problems your application actually has.
 | Testing                 | Yes                         | Usually                                   |
 | Highly reactive UI      | Yes                         | Specialized solutions may become valuable |
 
-```text
+
 The web platform is capable of doing all of these things.
-```
+
 But **capable of doing something** and **pleasant to maintain while doing it yourself** are different questions.
 
 That distinction is where architecture begins.
@@ -194,9 +194,7 @@ You accept one form of complexity because another form is more expensive for you
 
 The useful question is therefore not:
 
-> “Does this framework add complexity?”
-
-Every sufficiently capable abstraction adds some.
+> “Does this framework add complexity?” - Every sufficiently capable abstraction adds some.
 
 The useful question is:
 
@@ -210,9 +208,7 @@ Neither conclusion is ideological; it is an engineering trade-off.
 
 ## The opposite problem: doing everything yourself
 
-There is an equally common mistake on the other side.
-
-“Just use vanilla JavaScript” because the application is small is often exactly right.
+Using vanilla JavaScript because the application is small is often exactly right.
 
 A few modules. A few DOM elements. Some event listeners. A little CSS.
 
@@ -231,9 +227,7 @@ But now the application has to answer architectural questions:
 * How are reusable pieces registered?
 * How is the application built and tested?
 
-You can answer every one of those questions yourself, create conventions, abstractions, lifecycle rules, and infrastructure around the application.
-
-But eventually you have built a framework.
+You can answer every one of those questions yourself, create conventions, abstractions, lifecycle rules, and infrastructure around the application. But eventually you have built a framework.
 
 The important thing is to recognize what is happening.
 
@@ -315,13 +309,15 @@ This is an important distinction.
 
 A framework does not have to solve every possible frontend problem to be useful.
 
-## One example of the middle ground: [Nutin](https://nutin.org/docs)
+## One example of the middle ground: Nutin
 
 This is the architectural space [Nutin](https://nutin.org/docs) is designed to occupy.
 
 Nutin provides application structure around the problems that tend to become repetitive or error-prone in small SPAs while keeping the underlying web platform visible.
 
 Its components and views establish explicit UI boundaries. Services provide a consistent place for application-level data and state. Routing, build tooling, and development environment are provided rather than assembled from scratch.
+
+### Rendering
 
 The rendering model is deliberately different from frameworks built around a Virtual DOM.
 
@@ -333,6 +329,8 @@ For an application whose UI requires sophisticated, highly reactive state propag
 
 For an application where explicit rendering and straightforward DOM operations are sufficient, introducing that machinery may not provide enough value to justify it.
 
+### Templates
+
 The same philosophy applies to templates.
 
 Nutin templates remain HTML and use standard `data-*` attributes such as `data-component`, `data-i18n`, and `data-pipe`. There is no requirement to replace HTML with a proprietary markup language simply to establish component structure.
@@ -342,6 +340,8 @@ The goal is not to hide the platform.
 It is to avoid repeatedly rebuilding the pieces of application architecture that sit around it.
 
 Nutin also has no runtime dependencies. This means an application does not acquire a runtime dependency chain simply because it uses Nutin; it does not mean the development and build tooling has no dependencies.
+
+### Code is exposed
 
 Perhaps more importantly, Nutin's own framework and tooling code is exposed and modifiable.
 
@@ -494,6 +494,6 @@ Then decide which ones are worth solving yourself and which ones are worth deleg
 
 If you're looking for the middle ground — explicit structure, lifecycle management, routing, and tooling while staying close to the DOM and HTML — [Nutin](https://nutin.org/) is designed specifically for that kind of application.
 
-*The framework is a means of organizing the application, not the reason the application exists.*
+***The framework is a means of organizing the application, not the reason the application exists.***
 
 

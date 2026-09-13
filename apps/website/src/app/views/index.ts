@@ -5,3 +5,4 @@ export * from './tutorial/tutorial.view.js';
 export * from './docs/index.js';
 export * from './changelog/changelog.view.js';
 export * from './articles/articles.view.js';
+export * from './guides/guides.view.js';

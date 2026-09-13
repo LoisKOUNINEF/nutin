@@ -1,6 +1,6 @@
 # Why Nutin?
 
-Nutin started with a simple question:
+[Nutin](https://nutin.org/) started with a simple question:
 
 **How far can you take a real web application without using a frontend framework?**
 
@@ -30,11 +30,9 @@ So I built an event system.
 
 Other problems followed the same pattern. When something became repetitive or difficult to manage, I looked for the smallest abstraction that solved it.
 
-There was no grand architecture behind this process.
+There was no grand architecture behind this process. I wasn't sitting down to design a frontend framework and then implementing its features one by one. I was building an application, encountering problems, and solving those problems.
 
-I wasn't sitting down to design a frontend framework and then implementing its features one by one. I was building an application, encountering problems, and solving those problems.
-
-That distinction shaped Nutin more than any particular feature. It grew because the applications using it gave it reasons to grow.
+That shaped Nutin more than any particular feature. It grew because the applications using it gave it reasons to grow.
 
 ## From application code to a toolkit
 
@@ -42,9 +40,7 @@ Eventually, the abstractions stopped feeling like application-specific code.
 
 The component system could be reused. So could the router. So could the event system and the other pieces that had accumulated around them.
 
-At some point, I realized I wasn't simply building an application anymore.
-
-I was building a small toolkit for building applications like it.
+At some point, I realized I wasn't simply building an application anymore. I was building a small toolkit for building applications like it.
 
 That toolkit became Nutin.
 
@@ -52,43 +48,37 @@ Its purpose was still the same: provide structure where a real application needs
 
 And because I was using Nutin to build actual applications, its development continued to be driven by actual problems.
 
-That was useful.
-
-It also created a trap.
+That was useful; it also created a trap.
 
 ## When useful becomes too much
 
-The easiest way to grow is to keep adding things.
+The obvious, easy way to grow is to keep adding things.
 
 A feature solves a problem. Then another feature makes a different problem easier. A utility makes sense. A library looks useful. An abstraction cleans up a particular case.
-
-Individually, these decisions can all be reasonable.
 
 Nutin became increasingly capable. It accumulated more abstractions, more libraries and more ways of doing things.
 
 Some of them were genuinely useful. Some solved problems I had encountered. Others were technically interesting or convenient to have.
 
-But usefulness alone wasn't enough.
+But usefulness alone wasn't enough. All these reasonable decisions just made Nutin harder to use.
 
 The original goal had never been to build the most capable tool possible.
 
 It had been to make application development more structured **without introducing unnecessary machinery**.
 
-By version 1.3.1, Nutin had become a capable toolkit.
+I didn't know it at the time, but by version 1.3.1, Nutin had started drifting away from the reason it existed. What solved application-specific problems lived alongside generic concerns, sometimes within the same module. 
 
-It had also started drifting away from the reason it existed. 
+That was the point where adding another feature no longer was the answer.
 
-That was the point where adding another feature no longer felt like the obvious way forward.
-
-The more important question became:
+The more important question was:
 
 **Does this belong here at all?**
 
 ## The road to 2.0
 
-Nutin 2.0 grew out of that question.
+[Nutin 2.0](https://nutin.org/changelog/2-0-0) grew out of that question.
 
-In fact, I had plenty ready-to-ship additional features. Luckily, I realized it was the wrong direction for Nutin.
+In fact, I had plenty additional features that were ready to ship. Luckily, I realized soon enough it wasn't the right path for Nutin.
 
 Instead of asking what else it could do, I went back through it and asked what it actually needed to do.
 
@@ -100,19 +90,17 @@ Many things were removed completely.
 
 That included features that worked perfectly well. They simply didn't justify the additional concepts, APIs and maintenance they introduced.
 
-Removing something isn't admitting that it was badly built. 
+Removing something isn't admitting that it was badly built. Sometimes it means recognizing that it shouldn't have been built in the first place.
 
-Sometimes it means recognizing that it shouldn't have been built in the first place.
-
-The result is a very different kind of major version.
-
-Nutin 2.0 isn't primarily an expansion of Nutin 1.x. It is a deliberate reduction.
+The result is a very different kind of major version. Nutin 2.0 isn't primarily an expansion of Nutin 1.x. It is a deliberate reduction.
 
 **The goal wasn't to make Nutin capable of more things. It was to make the things Nutin does more focused.**
 
+Cutting features wasn’t just about simplicity; it gave me the time and focus to make the remaining functionality solid, with proper lifecycle management, error handling, and no leaks or race conditions.
+
 ## What remained
 
-The parts that survived are the parts that still make sense when viewed through the original constraint.
+The parts that survived are the parts that still make sense when viewed through the original constraint. 
 
 Components provide structure for reusable UI.
 
@@ -122,7 +110,7 @@ Routing connects the application to URLs and navigation.
 
 Events provide explicit communication between otherwise independent pieces.
 
-Pipes handle transformations without requiring a larger state or rendering system.
+Services handle shared resources.
 
 And underneath all of it is still the browser.
 
@@ -132,25 +120,25 @@ That is also why Nutin is intentionally unopinionated about many things.
 
 You can use the browser APIs directly.
 
-You can use SASS or Tailwind.
-
 You can bring in another library when you actually need one.
+
+You can use plain CSS, SASS or Tailwind.
 
 You don't have to give up the tools you already know.
 
-The framework is there to provide structure, not to become the environment in which everything else has to live.
+Nutin is there to provide structure and an enjoyable developer experience, not to become the environment in which everything else has to live.
 
-## A framework built by using it
+## Built by using it
 
 Looking back, the most important part of Nutin's history isn't any particular API.
 
-It's how those APIs came to exist.
+It's how those APIs came to exist and evolve.
 
 Nutin wasn't designed in isolation and then tested against imaginary applications. It was built by using it.
 
 The problems came first. The abstractions came afterward.
 
-That doesn't mean every decision was perfect. In fact, the history of Nutin is partly a record of decisions that eventually needed to be reconsidered.
+That doesn't mean every decision was perfect. In fact, the history of Nutin is largely a record of decisions that eventually needed to be reconsidered.
 
 But that process is useful.
 
@@ -184,4 +172,4 @@ It became too complicated because solving problems can become a problem of its o
 
 And I'm now aware that sometimes the best way to move a project forward is to remove things rather than add them.
 
-**Nutin is smaller today not because fewer features are inherently better, but because every abstraction should have a reason to be there.**
+**Nutin is smaller today not because fewer features are inherently better, but because every abstraction has earned its place.**

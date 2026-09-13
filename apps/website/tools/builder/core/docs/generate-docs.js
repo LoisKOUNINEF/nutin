@@ -11,7 +11,7 @@ import { PATHS } from '../app/paths.js';
 const COMPILER_SCRIPT = path.resolve(process.cwd(), '..', '..', 'scripts', 'generate-docs.mjs');
 const MANIFEST_SOURCE_DIR = path.resolve(process.cwd(), 'generated');
 const MANIFEST_DEST_DIR = path.join(PATHS.tempSource, 'generated');
-const MANIFESTS = ['docs.json', 'changelog.json', 'tutorial.json', 'articles.json'];
+const MANIFESTS = ['docs.json', 'changelog.json', 'tutorial.json', 'articles.json', 'guides.json'];
 
 runScript(COMPILER_SCRIPT, 'Compiling resources/ into manifests...');
 

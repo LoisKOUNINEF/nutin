@@ -30,6 +30,7 @@ $light-theme: (
 	overlay: rgb(10 18 14 / 52%),            // #0A120E85
 	disabled-bg: rgb(220 228 218),           // #DCE4DA
 	disabled-text: rgb(140 160 140),         // #8CA08C
+	code-inlined-bg: rgba(22, 28, 24, .1),
 );
 
 $dark-theme: (
@@ -51,6 +52,7 @@ $dark-theme: (
 	overlay: rgb(0 0 0 / 68%),               // #000000AD
 	disabled-bg: rgb(38 48 44),              // #26302C
 	disabled-text: rgb(100 120 110),         // #64786E
+	code-inlined-bg: rgba(232, 236, 234, .2),
 );
 
 // ! Dark Theme !

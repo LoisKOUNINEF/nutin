@@ -619,4 +619,4 @@ ask:
 
 Choose the rendering machinery that solves your application's actual problems — not the one that happens to be fashionable.
 
-If you're interested in a small SPA architecture built around direct DOM rendering, explicit lifecycle management, and HTML templates, see how [Nutin approaches **Rendering**, **Components**, **Lifecycle**, and **Templates**](https://nutin.org/docs) in its documentation.
+If you're interested in a small SPA architecture built around direct DOM rendering, explicit lifecycle management, and HTML templates, see how [Nutin](https://nutin.org/) approaches **Rendering**, **Components**, **Lifecycle**, and **Templates** in its [documentation](https://nutin.org/docs).
