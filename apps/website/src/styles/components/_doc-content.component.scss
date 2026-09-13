@@ -5,6 +5,10 @@
 .doc-content {
 	@include mixins.flex-row;
 	gap: map.get($spacings, 'largest');
+	// Without this, a flex item's default min-width:auto lets a wide, unwrapped
+	// <pre> line (white-space:pre) drag this whole row wider than the viewport
+	// instead of shrinking and letting the pre's own overflow-x:auto scroll it.
+	min-width: 0;
 
 	@include mixins.respond-to(medium) {
 		@include mixins.flex-column;
@@ -52,6 +56,7 @@
 		color: var(--primary);
 		margin-top: 0;
 		margin-bottom: map.get($spacings, 'large');
+		max-width: 40ch;
 	}
 
 	h2 {
@@ -81,10 +86,24 @@
 		font-size: clamp(0.875rem, 0.85rem + 0.2vw, 1rem);
 	}
 
+	// em, not rem: lets inline code scale with whatever element contains it
+	// (a heading's clamp()-driven size, or the fluid paragraph base size)
+	// instead of being pinned to the root font-size.
+	code {
+		letter-spacing: .1rem;
+		background: var(--code-inlined-bg);
+		padding-left: .2rem;
+	}
+
 	pre {
 		border-radius: map.get($border-radius, 'medium');
 		overflow-x: auto;
 		padding: map.get($spacings, 'medium');
+		code {
+			letter-spacing: 0;
+			background: inherit;
+			padding-left: 0;
+		}
 	}
 
 	// Doubled selector bumps specificity above prism.scss's `pre[class*=language-]`
@@ -94,15 +113,9 @@
 		margin-bottom: map.get($spacings, 'medium');
 	}
 
-	// em, not rem: lets inline code scale with whatever element contains it
-	// (a heading's clamp()-driven size, or the fluid paragraph base size)
-	// instead of being pinned to the root font-size.
-	code {
-		font-size: 0.875em;
-	}
-
 	a {
 		color: var(--primary);
+		text-decoration: underline;
 		&:hover {
 			color: color-mix(in srgb, var(--primary), transparent 20%);
 		}

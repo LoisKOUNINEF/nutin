@@ -4,8 +4,8 @@
   "routes": [
     {
       "path": "/",
-      "title": "Nutin website",
-      "description": "Nutin toolkit website. Documentation, tutorial, and blog articles",
+      "title": {"en": "Nutin website"},
+      "description": {"en": "Nutin toolkit website. Documentation, tutorial, and blog articles"},
       "ogImage": "/assets/images/og-cover.jpg"
     },
     {

@@ -61,7 +61,7 @@ src/
 
 Or by feature, or by domain.
 
-What matters is the boundary represented by each area.
+What matters is the **boundary** represented by each area.
 
 ## Components: reusable UI, not miniature applications
 
@@ -78,7 +78,7 @@ For example:
 
 These elements have their own behavior, state, DOM, events, or lifecycle.
 
-That makes them good candidates for independent UI units.
+That makes them good candidates for **independent UI units**.
 
 A component can emit an event or invoke an operation without becoming responsible for the whole application workflow.
 
@@ -96,7 +96,7 @@ Ask:
 
 If the answer is no, keeping it inside a larger component or view may be the better choice.
 
-The objective is not maximum component count, it is useful boundaries.
+The objective is not maximum component count, it is **useful boundaries**.
 
 ## Application operations and shared data
 
@@ -256,19 +256,11 @@ A good component model makes creation and destruction explicit enough that devel
 
 ## Don't over-architect a small SPA
 
-*Speaking from experience:* It is tempting to try and solve all architectural questions for your 2 page SPA. Please don't.
-
 You don't want your used-to-be-simple application suddenly get:
 
 * repositories,
-* use cases,
 * dependency injection,
-* factories,
 * adapters,
-* abstraction layers,
-* state machines,
-* event buses,
-* generic base classes,
 * five levels of directories,
 
 and end up with an architecture that is considerably harder to understand than the original application.
@@ -281,7 +273,7 @@ Abstraction has a cost.
 
 Solve the actual problems you have, and add abstraction when the application gives you a concrete reason to.
 
-## What architecture looks like in [Nutin](https://nutin.org/docs)
+## What architecture looks like in Nutin
 
 Nutin is one example of an approach with clear boundaries.
 
@@ -296,7 +288,6 @@ In Nutin, the concepts map roughly like this:
 | Rendering                              | Explicit/event-driven rendering |
 | Lifecycle                              | Component lifecycle             |
 | Templates                              | HTML                            |
-| Configuration                          | `nutin.config.js`               |
 
 Nutin is not intended to dictate what an application's architecture must be. It is to ensure a clear separation of responsibilities.
 
@@ -333,7 +324,7 @@ You may eventually reach a point where:
 
 At that point, introducing additional infrastructure or adopting a more opinionated framework may be more than reasonable.
 
-This is the same principle explored in [How much frontend framework do you actually need?](https://nutin.org/articles/how-much-frontend-framework-do-you-actually-need): choose the amount of infrastructure that solves the problems you actually have.
+This is the same principle explored in [How much frontend framework do you actually need?](https://nutin.org/articles/how-much-frontend-framework-do-you-actually-need): **choose the amount of infrastructure that solves the problems you actually have**.
 
 ## Clear boundaries are more valuable than a perfect architecture
 

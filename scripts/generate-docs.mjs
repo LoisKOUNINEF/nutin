@@ -60,6 +60,14 @@ const COLLECTIONS = [
     stripH1: identity,
     prefixReplacements: [],
   },
+  {
+    id: 'guides',
+    dir: path.join(ROOT, 'resources', 'guides'),
+    hubFiles: ['GUIDES.md'],
+    output: path.join(ROOT, 'apps', 'website', 'generated', 'guides.json'),
+    stripH1: identity,
+    prefixReplacements: [],
+  },
 ];
 
 function fail(message) {

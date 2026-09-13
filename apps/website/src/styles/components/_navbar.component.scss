@@ -17,6 +17,7 @@
 	padding-top: map.get($spacings, 'small');
 	padding-left: map.get($spacings, 'largest');
 	padding-right: map.get($spacings, 'large');
+  	border-bottom: 5px solid var(--surface);
 	border-style: groovy;
 	button {
 		padding-top: .3rem;
@@ -138,14 +139,13 @@
 	}
 	@include mixins.respond-to(medium) {
 		width: 100%;
-		@include mixins.flex-between;
+		justify-content: space-around;
 		// svg is displayed in .navbar__header on smaller screens
 		svg {
 			display: none;
 		}
 		& > div {
 	    	@include mixins.flex-column;
-	    	width: 70%;
 			padding-left: map.get($spacings, 'smallest');
   		}
 	}
