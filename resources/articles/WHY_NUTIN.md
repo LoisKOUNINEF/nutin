@@ -1,6 +1,6 @@
 # Why Nutin?
 
-Nutin started with a simple question:
+[Nutin](https://nutin.org/) started with a simple question:
 
 **How far can you take a real web application without using a frontend framework?**
 
@@ -76,7 +76,7 @@ The more important question was:
 
 ## The road to 2.0
 
-Nutin 2.0 grew out of that question.
+[Nutin 2.0](https://nutin.org/changelog/2-0-0) grew out of that question.
 
 In fact, I had plenty additional features that were ready to ship. Luckily, I realized soon enough it wasn't the right path for Nutin.
 
