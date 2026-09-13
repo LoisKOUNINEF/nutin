@@ -113,7 +113,7 @@ Most applications don't suddenly become unmaintainable.
 
 Instead, the architecture slowly becomes accidental.
 
-Here are some of the more useful warning signs.
+Here are some useful warning signs.
 
 ### 1. DOM manipulation is scattered everywhere
 
@@ -207,7 +207,7 @@ Likewise, route parsing, page initialization, data fetching, and DOM rendering d
 
 Again, the issue isn't that the latter cannot work.
 
-It is that the relationships have become difficult to see.
+It is that the **relationships have become difficult to see**.
 
 ### 5. Rendering is triggered from everywhere
 
@@ -256,7 +256,7 @@ What happens to:
 * child components?
 * references to DOM nodes?
 
-If your application has dynamic UI and there is no clear destruction model, complexity is accumulating around lifecycle.
+If your application has dynamic UI and there is no clear destruction model, **complexity is accumulating around lifecycle**.
 
 ### 7. One feature requires touching unrelated code
 
@@ -408,7 +408,7 @@ Good reasons include:
 
 Don't turn every `<div>` into a component.
 
-A component should earn its abstraction.
+A component should **earn its abstraction**.
 
 ### Step 3 — Establish ownership
 
@@ -472,7 +472,7 @@ State change
 Render
 ```
 
-The update model should be intentional.
+**The update model should be intentional.**
 
 ### Step 7 — Only then consider reactivity
 
@@ -506,7 +506,7 @@ and:
 
 > "I adopt a framework that defines almost everything for me."
 
-You can remain close to the browser while adopting explicit architectural conventions.
+**You can remain close to the browser while adopting explicit architectural conventions.**
 
 This is particularly useful for applications where the main problem is organizational rather than reactive.
 
@@ -535,7 +535,7 @@ while still preferring:
 
 The idea behind Nutin is not that vanilla JavaScript is inadequate.
 
-It is that there is a useful point between ad-hoc DOM code and a highly reactive framework.
+It is that there is a **useful point between ad-hoc DOM code and a highly reactive framework.**
 
 Nutin provides explicit application structure around concepts such as:
 
