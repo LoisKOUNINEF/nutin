@@ -32,16 +32,27 @@ export class EventHelper {
   }
 
   private static createBoundHandler(
-    el: Element, 
-    component: BaseComponent, 
-    handler: (...args: any[]) => void, 
+    el: Element,
+    component: BaseComponent,
+    handler: (...args: any[]) => void,
     rawArgs: string[]
   ): EventListener {
     return (event: Event) => {
+      if (this.isModifiedAnchorClick(el, event)) return;
+
       const resolvedArgs = rawArgs.map(arg => TokenHelper.resolve(arg.trim(), el, event));
 
       handler.call(component, ...resolvedArgs);
     };
+  }
+
+  // Lets a real <a href> fall through to native browser behavior (open in new tab, etc.)
+  // on a modified or non-primary click, instead of always intercepting via preventDefault.
+  private static isModifiedAnchorClick(el: Element, event: Event): boolean {
+    if (event.type !== 'click' || el.tagName !== 'A' || !el.getAttribute('href')) return false;
+
+    const mouseEvent = event as MouseEvent;
+    return mouseEvent.ctrlKey || mouseEvent.metaKey || mouseEvent.shiftKey || mouseEvent.altKey || mouseEvent.button !== 0;
   }
 
   private static addEvent(

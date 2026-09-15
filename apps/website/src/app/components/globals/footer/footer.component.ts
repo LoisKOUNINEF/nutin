@@ -12,7 +12,7 @@ export class FooterComponent extends Component {
     ThemeTogglerService.toggleTheme();
   }
 
-  private navigateTo(name: string) {
-    Navigation.navigateTo(`/${name}`);
+  private _navigateTo(href: string): void {
+    Navigation.navigateTo(href);
   }
 }
