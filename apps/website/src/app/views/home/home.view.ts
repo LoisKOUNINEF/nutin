@@ -9,11 +9,9 @@ export class HomeView extends View {
   }
 
   public registerChildren(): ComponentConfig[] {
-    return [{
-      selector: 'read-more',
-      factory: (el) => new ReadMoreComponent(el)
-    },
-    ...this.getSnippetsConfig()]
+    return [
+      ...this.getSnippetsConfig()
+    ]
   }
 
   private getSnippetsConfig(): ComponentConfig[] {

@@ -7,3 +7,4 @@ export * from './changelog/changelog.view.js';
 export * from './articles/articles.view.js';
 export * from './guides/guides.view.js';
 export * from './roadmap/roadmap.view.js';
+export * from './articles-index/articles-index.view.js';

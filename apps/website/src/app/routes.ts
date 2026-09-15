@@ -1,6 +1,7 @@
 import { Routes } from "../core/index.js";
 import {
   ArticlesView,
+  ArticlesIndexView,
   ChangelogView,
   DocsView,
   GuidesView,
@@ -26,6 +27,7 @@ export const appRoutes: Routes = {
   '/tutorial/:slug?': { view: () => new TutorialView(), guards: [Guards.resourcePageExists(TutorialManifestService)] },
   '/changelog/:slug?': { view: () => new ChangelogView(), guards: [Guards.resourcePageExists(ChangelogManifestService)] },
   '/articles/:slug?': { view: () => new ArticlesView(), guards: [Guards.resourcePageExists(ArticlesManifestService)] },
+  '/articles-index': () => new ArticlesIndexView(),
   '/roadmap/:slug?': { view: () => new RoadmapView(), guards: [Guards.resourcePageExists(RoadmapManifestService)] },
   '/404': () => new NotFoundView(),
 }
