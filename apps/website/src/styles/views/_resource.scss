@@ -14,6 +14,7 @@
 	}
 	@include mixins.respond-to(medium) {
 		@include mixins.flex-column;
+		flex-direction: column-reverse;
 		padding-left: 1rem;
 		padding-right: 1rem;
 		margin-left: 0;

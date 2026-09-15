@@ -5,7 +5,7 @@
 .footer {
 	position: sticky;
 	bottom: 0;
-	padding: map.get($spacings, 'medium');
+	padding: map.get($spacings, 'medium') map.get($spacings, 'largest');
 	width: 100%;
   border-top: 5px solid var(--surface);
   color: var(--text-muted);

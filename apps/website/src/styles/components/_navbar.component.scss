@@ -23,6 +23,7 @@
 		padding-top: .3rem;
 		transition: ease-in-out 0.2s;
 		&:hover {
+	      	text-decoration: none;
 			background-color: var(--secondary);
 			color: var(--background);
 			padding-top: 0;
@@ -33,7 +34,6 @@
 		}
 		@media (hover: none) {
 	    &:hover {
-	      text-decoration: none;
 	      background-color: inherit;
 	      color: inherit;
 				padding-bottom: 0;
