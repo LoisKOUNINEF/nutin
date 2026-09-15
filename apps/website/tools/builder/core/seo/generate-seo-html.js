@@ -38,7 +38,7 @@ async function processRoute(template, baseUrl, defaultLanguage, languages, route
       const ogImage = toAbsoluteUrl(valueForLangWithFallback(route.ogImage, lang, defaultLanguage), baseUrl);
 
       const pageUrl = `${baseUrl}/${lang}${routeSuffix}`;
-      const body = await renderRoute({
+      const { body, navbar, footer } = await renderRoute({
         bundleUrl,
         appRoutesKey: route.path,
         mockParams: route.mockParams,
@@ -50,7 +50,7 @@ async function processRoute(template, baseUrl, defaultLanguage, languages, route
       });
 
       await writeRouteHtml({
-        template, lang, title, description, pageUrl, ogImage, body, hreflangLinks,
+        template, lang, title, description, pageUrl, ogImage, body, navbar, footer, hreflangLinks,
         outputSegments: [lang, ...segmentsOf(routeSuffix)],
         routePath: route.path,
       });
@@ -65,7 +65,7 @@ async function processRoute(template, baseUrl, defaultLanguage, languages, route
     }
 
     const pageUrl = `${baseUrl}${routeSuffix}`;
-    const body = await renderRoute({
+    const { body, navbar, footer } = await renderRoute({
       bundleUrl,
       appRoutesKey: route.path,
       mockParams: route.mockParams,
@@ -77,7 +77,7 @@ async function processRoute(template, baseUrl, defaultLanguage, languages, route
     });
 
     await writeRouteHtml({
-      template, lang: defaultLanguage, title, description, pageUrl, ogImage, body,
+      template, lang: defaultLanguage, title, description, pageUrl, ogImage, body, navbar, footer,
       outputSegments: segmentsOf(routeSuffix),
       routePath: route.path,
     });

@@ -12,6 +12,7 @@ const OUT_FILE = path.join(SSR_DIR, 'ssr-bundle.mjs');
 const ENTRY_CONTENT = `export { appRoutes } from './routes.js';
 export { I18nService, Service, registerPipes } from '../core/index.js';
 export { RouteGuardsManager } from '../core/services/router/helpers/route-guard-manager.helper.js';
+export { NavbarComponent, FooterComponent } from './components/index.js';
 export {
   DocsManifestService,
   ChangelogManifestService,

@@ -29,7 +29,7 @@ export function validateMockParams(route) {
   }
 }
 
-export async function writeRouteHtml({ template, lang, title, description, pageUrl, ogImage, body, outputSegments, routePath, hreflangLinks }) {
+export async function writeRouteHtml({ template, lang, title, description, pageUrl, ogImage, body, navbar, footer, outputSegments, routePath, hreflangLinks }) {
   let html = applySubstitutions(template, lang, title, description, pageUrl, ogImage, hreflangLinks);
 
   if (html === template) {
@@ -38,7 +38,7 @@ export async function writeRouteHtml({ template, lang, title, description, pageU
 
   html = html.replace(
     /<main\s+id=["']app["'][^>]*>[\s\S]*?<\/main>/,
-    `<main id="app">\n${body}\n  </main>`
+    `${navbar}\n<main id="app">\n${body}\n  </main>\n${footer}`
   );
 
   const outputDir = path.join(PATHS.tempSource, ...outputSegments);

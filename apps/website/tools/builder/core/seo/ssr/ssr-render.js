@@ -43,6 +43,7 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
     ({ Service } = bundle);
     const {
       appRoutes, I18nService, RouteGuardsManager, registerPipes,
+      NavbarComponent, FooterComponent,
       DocsManifestService, ChangelogManifestService, TutorialManifestService, ArticlesManifestService,
     } = bundle;
 
@@ -80,10 +81,15 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
 
     const element = view.render();
 
+    // Static/i18n-only globals — no route-specific data or active-link-by-route logic —
+    // so rendering them per (route, lang) call is safe and needs no cross-call caching.
+    const navbar = new NavbarComponent('body').render().outerHTML;
+    const footer = new FooterComponent('body').render().outerHTML;
+
     await Promise.all(trackedFetches);
     await Promise.resolve();
 
-    return element.outerHTML;
+    return { body: element.outerHTML, navbar, footer };
   } catch (err) {
     throw new Error(
       `[ssr] Failed to render route "${appRoutesKey}" (lang "${lang}", view "${constructorName}"): ${err.message}${hintForError(err)}`,

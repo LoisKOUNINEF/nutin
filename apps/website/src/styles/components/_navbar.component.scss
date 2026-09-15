@@ -19,7 +19,7 @@
 	padding-right: map.get($spacings, 'large');
   	border-bottom: 5px solid var(--surface);
 	border-style: groovy;
-	button {
+	.c-round-btn {
 		padding-top: .3rem;
 		transition: ease-in-out 0.2s;
 		&:hover {
