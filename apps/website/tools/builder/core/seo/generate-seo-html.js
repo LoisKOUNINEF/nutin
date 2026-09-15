@@ -9,16 +9,33 @@ import { resolveLocaleValue, valueForLangWithFallback, collectI18nSeoIssues } fr
 import { segmentsOf, validateMockParams, writeRouteHtml, warnForRoutesMissingSeoConfig } from './route-output.js';
 import { expandDynamicRoutes } from './dynamic-routes.js';
 
+// og:image/twitter:image require an absolute URL for Discord/Twitter to resolve them;
+// every other absolute field (og:url, canonical) is already baseUrl-prefixed, so ogImage
+// (a repo-relative path in config/seo.json) needs the same treatment.
+function toAbsoluteUrl(urlOrPath, baseUrl) {
+  if (!urlOrPath) return urlOrPath;
+  return /^https?:\/\//.test(urlOrPath) ? urlOrPath : `${baseUrl}${urlOrPath}`;
+}
+
 async function processRoute(template, baseUrl, defaultLanguage, languages, route, bundleUrl) {
   validateMockParams(route);
 
   const routeSuffix = route.outputPath;
 
   if (builderConfig.i18n) {
+    // Same for every language variant of this route — lets crawlers know these URLs
+    // are alternates of one page rather than duplicate/competing content. x-default
+    // points at the default language since that's also where nginx redirects an
+    // unprefixed request to (see tools/docker/nginx.conf's "location = /").
+    const hreflangLinks = [
+      ...languages.map((l) => ({ hreflang: l, href: `${baseUrl}/${l}${routeSuffix}/` })),
+      { hreflang: 'x-default', href: `${baseUrl}/${defaultLanguage}${routeSuffix}/` },
+    ];
+
     for (const lang of languages) {
       const title = valueForLangWithFallback(route.title, lang, defaultLanguage);
       const description = valueForLangWithFallback(route.description, lang, defaultLanguage);
-      const ogImage = valueForLangWithFallback(route.ogImage, lang, defaultLanguage);
+      const ogImage = toAbsoluteUrl(valueForLangWithFallback(route.ogImage, lang, defaultLanguage), baseUrl);
 
       const pageUrl = `${baseUrl}/${lang}${routeSuffix}`;
       const body = await renderRoute({
@@ -33,28 +50,15 @@ async function processRoute(template, baseUrl, defaultLanguage, languages, route
       });
 
       await writeRouteHtml({
-        template, lang, title, description, pageUrl, ogImage, body,
+        template, lang, title, description, pageUrl, ogImage, body, hreflangLinks,
         outputSegments: [lang, ...segmentsOf(routeSuffix)],
         routePath: route.path,
       });
-
-      // Bare "/" is served directly by nginx (try_files .../index.html) and is what
-      // gets linked/shared externally; link-preview bots don't run the client-side
-      // locale redirect, so this exact document needs real tags of its own. Canonical
-      // still points at the localized page (pageUrl already resolves to that here) to
-      // avoid duplicate-content issues.
-      if (routeSuffix === '' && lang === defaultLanguage) {
-        await writeRouteHtml({
-          template, lang, title, description, pageUrl, ogImage, body,
-          outputSegments: [],
-          routePath: route.path,
-        });
-      }
     }
   } else {
     const title = resolveLocaleValue(route.title, defaultLanguage);
     const description = resolveLocaleValue(route.description, defaultLanguage);
-    const ogImage = resolveLocaleValue(route.ogImage, defaultLanguage);
+    const ogImage = toAbsoluteUrl(resolveLocaleValue(route.ogImage, defaultLanguage), baseUrl);
 
     if (!title || !description) {
       errorExit(`Missing title or description for route "${route.path}" in seo.json`, 'generate-seo-html');
