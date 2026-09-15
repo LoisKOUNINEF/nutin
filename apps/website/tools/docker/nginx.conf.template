@@ -56,6 +56,12 @@ server {
     # Hide nginx version
     server_tokens off;
 
+    # Redirect bare "/" to the default language so the served URL always matches
+    # each page's canonical/og:url (avoids indexable duplicate-content at both URLs).
+    location = / {
+        return 301 /en/$is_args$args;
+    }
+
     # SPA routing: serve index.html for unknown paths
     location / {
         try_files $uri $uri/ /index.html;

@@ -68,6 +68,14 @@ const COLLECTIONS = [
     stripH1: identity,
     prefixReplacements: [],
   },
+  {
+    id: 'roadmap',
+    dir: path.join(ROOT, 'resources', 'roadmap'),
+    hubFiles: ['INDEX.md'],
+    output: path.join(ROOT, 'apps', 'website', 'generated', 'roadmap.json'),
+    stripH1: identity,
+    prefixReplacements: [],
+  },
 ];
 
 function fail(message) {

@@ -5,3 +5,4 @@ export * from './changelog-manifest/changelog-manifest.service.js';
 export * from './tutorial-manifest/tutorial-manifest.service.js';
 export * from './articles-manifest/articles-manifest.service.js';
 export * from './guides-manifest/guides-manifest.service.js';
+export * from './roadmap-manifest/roadmap-manifest.service.js';

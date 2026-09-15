@@ -6,6 +6,7 @@
 .home__wrapper {
 	margin-left: clamp(1rem, 5vw, 10rem);
   margin-right: clamp(1rem, 5vw, 10rem);
+  padding-bottom: 4rem;
   h1 {
 		font-size: 1.5rem;
 		padding-top: map.get($spacings, 'medium');
@@ -209,12 +210,5 @@
 		font-size: 1.1rem;
 		font-weight: 400;
 		color: var(--text);
-	}
-}
-
-.home__read-more-section {
-	padding-top: 2rem;
-	.grid {
-		max-width: 150ch;
 	}
 }

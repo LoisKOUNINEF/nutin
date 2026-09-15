@@ -1,6 +1,6 @@
 <nav class="navbar">
   <section class="navbar__header">
-    <span data-event="click:handleNavigation:home"><img src="/assets/images/logo-trans.avif" alt="nutin's logo. A frame opened on the top left through which a plant grows."></span>
+    <a href="/" data-event="click:_navigateTo:@attr:href"><img src="/assets/images/logo-trans.avif" alt="nutin's logo. A frame opened on the top left through which a plant grows."></a>
     <div class="navbar__github-icon"><a 
       href='https://github.com/LoisKOUNINEF/nutin' 
       target="_blank"
@@ -9,9 +9,9 @@
     </a></div>
   </section>
   <section class="navbar__resources">
-    <div data-component="docs"></div>
-    <div data-component="guides"></div>
-    <div data-component="tutorial"></div>
+    <div><a href="/docs" class="c-round-btn" data-i18n="navbar.docs" data-event="click:_navigateTo:@attr:href"></a></div>
+    <div><a href="/guides" class="c-round-btn" data-i18n="navbar.guides" data-event="click:_navigateTo:@attr:href"></a></div>
+    <div><a href="/tutorial" class="c-round-btn" data-i18n="navbar.tutorial" data-event="click:_navigateTo:@attr:href"></a></div>
     <div><a 
       href='https://github.com/LoisKOUNINEF/nutin' 
       target="_blank"

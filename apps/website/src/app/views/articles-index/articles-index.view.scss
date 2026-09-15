@@ -1,0 +1,13 @@
+.articles-index {
+  h1 {
+        font-size: 3rem;
+        font-weight: 600;
+        color: var(--primary);
+    }
+    padding-top: 2rem;
+    margin-left: clamp(1rem, 5vw, 10rem);
+    margin-right: clamp(1rem, 5vw, 10rem);
+    .grid {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}

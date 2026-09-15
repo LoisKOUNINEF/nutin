@@ -5,7 +5,8 @@ import {
   ChangelogManifestService,
   DocsManifestService,
   GuidesManifestService,
-  TutorialManifestService
+  TutorialManifestService,
+  RoadmapManifestService
 } from './services/index.js';
 import { appRoutes } from './routes.js';
 
@@ -29,6 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     TutorialManifestService.load(),
     ArticlesManifestService.load(),
     GuidesManifestService.load(),
+    RoadmapManifestService.load(),
   ]);
   new App();
 });

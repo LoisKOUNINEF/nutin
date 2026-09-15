@@ -2,57 +2,82 @@
 	<div class="footer__body">
 		<section class="footer__internals">
 			<p>
-				<button 
-					data-event="click:navigateTo:articles/why-nutin"
-					data-i18n="footer.why-nutin" 
-				></button>
+				<a
+					href="/articles/why-nutin"
+					data-event="click:_navigateTo:@attr:href"
+					data-i18n="footer.why-nutin"
+				></a>
 			</p>
 			<p>
-				<button
-					data-event="click:navigateTo:docs"
-					data-i18n="footer.documentation" 
-				></button>
+				<a
+					href="/docs"
+					data-event="click:_navigateTo:@attr:href"
+					data-i18n="footer.documentation"
+				></a>
 			</p>
 			<p>
-				<button
-					data-event="click:navigateTo:guides"
-					data-i18n="footer.guides" 
-				></button>
+				<a
+					href="/guides"
+					data-event="click:_navigateTo:@attr:href"
+					data-i18n="footer.guides"
+				></a>
 			</p>
 			<p>
-				<button 
-					data-event="click:navigateTo:tutorial"
-					data-i18n="footer.tutorial" 
-				></button>
+				<a
+					href="/tutorial"
+					data-event="click:_navigateTo:@attr:href"
+					data-i18n="footer.tutorial"
+				></a>
 			</p>
 			<p>
-				<button 
-					data-event="click:navigateTo:changelog"
-					data-i18n="footer.changelog" 
-				></button>
+				<a
+					href="/changelog"
+					data-event="click:_navigateTo:@attr:href"
+					data-i18n="footer.changelog"
+				></a>
+			</p>
+			<p>
+				<a
+					href="/roadmap"
+					data-event="click:_navigateTo:@attr:href"
+					data-i18n="footer.roadmap"
+				></a>
 			</p>
 		</section>
 		<section class="footer__externals">
-			<p class="external-svg">
-				<a 
-					data-i18n="footer.repo" 
-					href="https://github.com/LoisKOUNINEF/nutin.git" 
-					target="_blank"
-				></a>
-			</p>
+			<div class="footer__externals-resource">
 			<p>
-				<a 
-					data-i18n="footer.contact" 
-					href="mailto:nutin.toolkit@gmail.com"
+				<a
+					href="/articles-index"
+					data-event="click:_navigateTo:@attr:href"
+					data-i18n="footer.articles"
 				></a>
 			</p>
-			<p class="u-italic external-svg">
-				<a 
-					data-i18n="footer.prism" 
-					href="https://prismjs.com" 
-					target="_blank"
-				></a>
-			</p>
+			</div>
+			<div class="footer__externals-resource">
+				<p class="external-svg">
+					<a 
+						data-i18n="footer.repo" 
+						href="https://github.com/LoisKOUNINEF/nutin.git" 
+						target="_blank"
+					></a>
+				</p>
+				<p>
+					<a 
+						data-i18n="footer.contact" 
+						href="mailto:nutin.toolkit@gmail.com"
+					></a>
+				</p>
+			</div>
+			<div class="footer__externals-resource">
+				<p class="u-italic external-svg">
+					<a 
+						data-i18n="footer.prism" 
+						href="https://prismjs.com" 
+						target="_blank"
+					></a>
+				</p>
+			</div>
 		</section>
 	</div>
 	<div class="footer__nutin">
