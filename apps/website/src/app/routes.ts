@@ -6,14 +6,16 @@ import {
   GuidesView,
   HomeView,
   NotFoundView,
-  TutorialView
+  TutorialView,
+  RoadmapView
 } from "./views/index.js";
 import {
   ArticlesManifestService,
   ChangelogManifestService,
   DocsManifestService,
   GuidesManifestService,
-  TutorialManifestService
+  TutorialManifestService,
+  RoadmapManifestService
 } from "./services/index.js";
 import { Guards } from "./guards.js";
 
@@ -24,5 +26,6 @@ export const appRoutes: Routes = {
   '/tutorial/:slug?': { view: () => new TutorialView(), guards: [Guards.resourcePageExists(TutorialManifestService)] },
   '/changelog/:slug?': { view: () => new ChangelogView(), guards: [Guards.resourcePageExists(ChangelogManifestService)] },
   '/articles/:slug?': { view: () => new ArticlesView(), guards: [Guards.resourcePageExists(ArticlesManifestService)] },
+  '/roadmap/:slug?': { view: () => new RoadmapView(), guards: [Guards.resourcePageExists(RoadmapManifestService)] },
   '/404': () => new NotFoundView(),
 }

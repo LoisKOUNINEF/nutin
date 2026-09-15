@@ -28,7 +28,11 @@ export async function getAppRoutePaths(bundleUrl, lang, pageUrl) {
 export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFetch, preloadManifest, lang, pageUrl, i18nEnabled }) {
   // Passing a real URL instance as `location` gives `.pathname`/`.href`
   // which is what I18n's getLocaleFromUrl() actually reads.
-  const { window } = parseHTML('<!doctype html><html><body></body></html>', { location: new URL(pageUrl) });
+  // <main id="app"> mirrors index.html's real mount target — View defaults to mounting
+  // there (view.ts), and without it the View tree is never attached to `document`, so
+  // DomHelper.cleanupOptionalContent()'s document-wide `[data-optional]` query silently
+  // misses it, leaking raw "undefined" text for any unset optional field (e.g. snippets).
+  const { window } = parseHTML('<!doctype html><html><body><main id="app"></main></body></html>', { location: new URL(pageUrl) });
   const { trackedFetches } = installGlobals(window, {
     lang,
     mockFetch: mockFetch ?? {},
@@ -83,8 +87,14 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
 
     // Static/i18n-only globals — no route-specific data or active-link-by-route logic —
     // so rendering them per (route, lang) call is safe and needs no cross-call caching.
-    const navbar = new NavbarComponent('body').render().outerHTML;
-    const footer = new FooterComponent('body').render().outerHTML;
+    // ids are set to match Globals.register's mount() — the client relies on these ids to
+    // find and remove this static markup before mounting its own live copy on boot.
+    const navbarElement = new NavbarComponent('body').render();
+    navbarElement.id = 'navbar';
+    const footerElement = new FooterComponent('body').render();
+    footerElement.id = 'footer';
+    const navbar = navbarElement.outerHTML;
+    const footer = footerElement.outerHTML;
 
     await Promise.all(trackedFetches);
     await Promise.resolve();

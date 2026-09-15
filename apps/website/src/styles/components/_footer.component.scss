@@ -14,7 +14,7 @@
 
 .footer__body {
   @include mixins.flex-between;
-  align-items: flex-start;
+  align-items: stretch;
 
   @include mixins.respond-to(medium) {
     display: block;
@@ -71,4 +71,11 @@
       color: var(--accent);
     }
   }
+}
+
+.footer__externals {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
 }
