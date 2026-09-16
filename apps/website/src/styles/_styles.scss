@@ -86,6 +86,9 @@ tbody > tr:last-of-type {
   		padding: map.get($spacings, largest)*2 0;
   		padding-bottom: map.get($spacings, largest);
   	}
+    @media (min-width: 993px) and (max-width: 1201px) {
+  		padding: map.get($spacings, largest)*2 0;
+    }
 	}
 
 	h1 {

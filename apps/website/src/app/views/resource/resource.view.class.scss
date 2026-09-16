@@ -23,6 +23,19 @@
             margin-left: 1rem;
         }
     }
+    // iPad/iPad mini landscape (993-1201px): row layout stays (unlike the
+    // respond-to(large) block above), but the desktop clamp() margin here
+    // combined with .resource__section's 80% width below otherwise squeezes
+    // .resource-content__body down to ~25% of the viewport.
+    @media (min-width: 993px) and (max-width: 1201px) {
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: map.get($spacings, 'large');
+        padding-right: map.get($spacings, 'large');
+        li {
+            margin-left: 1rem;
+        }
+    }
 }
 
 .resource__section {
@@ -38,6 +51,9 @@
         width: 100%;
     }
     @include mixins.respond-to(large) {
+        width: 100%;
+    }
+    @media (min-width: 993px) and (max-width: 1201px) {
         width: 100%;
     }
 }
