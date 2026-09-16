@@ -1,4 +1,4 @@
-import { Component } from '../../../../core/index.js';
+import { Component } from '../../../core/index.js';
 
 const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
 

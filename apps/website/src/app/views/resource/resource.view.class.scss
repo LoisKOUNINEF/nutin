@@ -1,0 +1,88 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+.resource {
+    margin-left: clamp(1rem, 5vw, 10rem);
+    margin-right: clamp(1rem, 5vw, 10rem);
+    width: 100%;
+        li {
+            margin-left: 2rem;
+        }
+    @include mixins.flex-row;
+    @include mixins.respond-to(small) {
+        @include mixins.flex-column;
+    }
+    @include mixins.respond-to(large) {
+        @include mixins.flex-column;
+        flex-direction: column-reverse;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        margin-left: 0;
+        margin-right: 0;
+        li {
+            margin-left: 1rem;
+        }
+    }
+    // iPad/iPad mini landscape (993-1201px): row layout stays (unlike the
+    // respond-to(large) block above), but the desktop clamp() margin here
+    // combined with .resource__section's 80% width below otherwise squeezes
+    // .resource-content__body down to ~25% of the viewport.
+    @media (min-width: 993px) and (max-width: 1201px) {
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: map.get($spacings, 'large');
+        padding-right: map.get($spacings, 'large');
+        li {
+            margin-left: 1rem;
+        }
+    }
+}
+
+.resource__section {
+    padding-top: 2rem;
+    width: 80%;
+    p {
+        max-width: 100ch;
+    }
+    h2 {
+        font-weight: bold;
+    }
+    @include mixins.respond-to(small) {
+        width: 100%;
+    }
+    @include mixins.respond-to(large) {
+        width: 100%;
+    }
+    @media (min-width: 993px) and (max-width: 1201px) {
+        width: 100%;
+    }
+}
+
+.resource__single {
+    padding-left: map.get($spacings, 'largest');
+    padding-right: map.get($spacings, 'largest');
+    margin-left: clamp(1rem, 5vw, 10rem);
+  margin-right: clamp(1rem, 5vw, 10rem);
+    h1 {
+        color: var(--primary);
+        padding-top: map.get($spacings, 'largest');
+        padding-bottom: map.get($spacings, 'largest');
+        font-weight: bold;
+    }
+    h2 {
+        color: var(--primary);
+        font-weight: bold;
+    }
+    p {
+        max-width: 100ch;
+    }
+    @include mixins.respond-to(large) {
+        padding-left: map.get($spacings, 'small');
+        padding-right: map.get($spacings, 'small');
+        margin-left: 0;
+        margin-right: 0;
+        h1 {
+            padding-top: 0; 
+        }
+    }
+}
