@@ -2,29 +2,25 @@
 @use "variables" as *;
 @use "mixins";
 
-.home-section { 
-	padding: 2.5rem 0;
-	h2 { 
-		font-size: 1.2rem; 
-		font-weight: 500; 
-		margin-bottom: 0.5rem; 
-	}
-  .home-section__sub { 
-  	line-height: 1.7; 
-  	margin-bottom: map.get($spacings, large); 
-  	max-width: 60ch;
-  }
+.home-extras { 
+    padding: 2.5rem 0;
+    h2 { 
+        font-size: 1.2rem; 
+        font-weight: 500; 
+        margin-bottom: 0.5rem; 
+    }
   @include mixins.respond-to(medium) {
     padding: map.get($spacings, largest) map.get($spacings, small);
   }
 }
 
 .grid {
+  max-width: 150ch;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  max-width: 100ch;
   @include mixins.respond-to(medium) {
+    width: 100%;
     grid-template-columns: repeat(1, 1fr);
     padding: 0 .5rem;
     gap: 20px;

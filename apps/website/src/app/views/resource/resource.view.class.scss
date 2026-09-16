@@ -1,0 +1,72 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+.resource {
+    margin-left: clamp(1rem, 5vw, 10rem);
+    margin-right: clamp(1rem, 5vw, 10rem);
+    width: 100%;
+        li {
+            margin-left: 2rem;
+        }
+    @include mixins.flex-row;
+    @include mixins.respond-to(small) {
+        @include mixins.flex-column;
+    }
+    @include mixins.respond-to(medium) {
+        @include mixins.flex-column;
+        flex-direction: column-reverse;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        margin-left: 0;
+        margin-right: 0;
+        li {
+            margin-left: 1rem;
+        }
+    }
+}
+
+.resource__section {
+    padding-top: 2rem;
+    width: 80%;
+    p {
+        max-width: 100ch;
+    }
+    h2 {
+        font-weight: bold;
+    }
+    @include mixins.respond-to(small) {
+        width: 100%;
+    }
+    @include mixins.respond-to(medium) {
+        width: 100%;
+    }
+}
+
+.resource__single {
+    padding-left: map.get($spacings, 'largest');
+    padding-right: map.get($spacings, 'largest');
+    margin-left: clamp(1rem, 5vw, 10rem);
+  margin-right: clamp(1rem, 5vw, 10rem);
+    h1 {
+        color: var(--primary);
+        padding-top: map.get($spacings, 'largest');
+        padding-bottom: map.get($spacings, 'largest');
+        font-weight: bold;
+    }
+    h2 {
+        color: var(--primary);
+        font-weight: bold;
+    }
+    p {
+        max-width: 100ch;
+    }
+    @include mixins.respond-to(medium) {
+        padding-left: map.get($spacings, 'small');
+        padding-right: map.get($spacings, 'small');
+        margin-left: 0;
+        margin-right: 0;
+        h1 {
+            padding-top: 0; 
+        }
+    }
+}

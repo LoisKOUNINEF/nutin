@@ -3,10 +3,10 @@
 @use "mixins";
 
 .footer {
-	position: sticky;
-	bottom: 0;
-	padding: map.get($spacings, 'medium') map.get($spacings, 'largest');
-	width: 100%;
+    position: sticky;
+    bottom: 0;
+    padding: map.get($spacings, 'medium') map.get($spacings, 'largest');
+    width: 100%;
   border-top: 5px solid var(--surface);
   color: var(--text-muted);
   @include mixins.rounded;
@@ -21,9 +21,9 @@
   }
 
   section {
-  	@include mixins.respond-to(medium) {
-    	padding-bottom: map.get($spacings, 'small');
-  	}
+    @include mixins.respond-to(medium) {
+        padding-bottom: map.get($spacings, 'small');
+    }
   }
   a {
     &:focus-visible {
