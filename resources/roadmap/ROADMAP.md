@@ -18,13 +18,11 @@ Add a JavaScript option to Nutin's project generator alongside the existing Type
 
 JavaScript projects will provide the same core Nutin architecture. 
 
-**Known trade-off:** TypeScript-specific compile-time guarantees, such as event name and payload checking, will not be available.
+**Trade-off:** TypeScript-specific compile-time guarantees, such as event name and payload checking, will not be available.
 
 ## SEO files generation
 
 Improve SEO file generation with multiple fixes and stability improvements.
-
-This includes making the generation process more reliable and addressing issues discovered through the Nutin website and documentation workflow.
 
 ## Markdown feature
 
@@ -32,6 +30,6 @@ Add an opt-in Markdown feature to Nutin for applications that need to manage Mar
 
 The feature will provide a configurable way to turn Markdown files into application content, including metadata, ordering, navigation, and rendering.
 
-It will be designed as an add-on rather than a core Nutin feature, keeping Markdown-related functionality out of applications that do not need it.
+It will be designed as an add-on (`nutin-add markdown`) rather than a core Nutin feature, keeping Markdown-related functionality out of applications that do not need it.
 
-*SEO and SSR support for Markdown content will be addressed separately.*
+*SEO support for Markdown content will be addressed separately.*

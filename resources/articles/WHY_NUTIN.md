@@ -1,6 +1,6 @@
 # Why Nutin?
 
-[Nutin](https://nutin.org/) started with a simple question:
+Nutin started with a simple question:
 
 **How far can you take a real web application without using a frontend framework?**
 
