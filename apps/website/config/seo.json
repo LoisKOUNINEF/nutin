@@ -5,13 +5,44 @@
     {
       "path": "/",
       "title": {"en": "Nutin website"},
-      "description": {"en": "Nutin toolkit website. Documentation, tutorial, and blog articles"},
-      "ogImage": "/assets/images/og-cover.jpg"
+      "description": {"en": "Nutin framework website. Documentation, guides, tutorial, and articles"},
+      "ogImage": "/assets/images/og-covers/og-cover-home.jpg"
+    },
+    {
+      "path": "/docs/:slug?",
+      "dynamicFrom": "docs",
+      "ogImage": "/assets/images/og-covers/og-cover-docs.jpg"
+    },
+    {
+      "path": "/guides/:slug?",
+      "dynamicFrom": "guides",
+      "ogImage": "/assets/images/og-covers/og-cover-guides.jpg"
+    },
+    {
+      "path": "/tutorial/:slug?",
+      "dynamicFrom": "tutorial",
+      "ogImage": "/assets/images/og-covers/og-cover-tutorial.jpg"
+    },
+    {
+      "path": "/changelog/:slug?",
+      "dynamicFrom": "changelog",
+      "ogImage": "/assets/images/og-covers/og-cover-changelog.jpg"
+    },
+    {
+      "path": "/roadmap/:slug?",
+      "dynamicFrom": "roadmap",
+      "ogImage": "/assets/images/og-covers/og-cover-roadmap.jpg"
     },
     {
       "path": "/articles/:slug?",
       "dynamicFrom": "articles",
-      "ogImage": "/assets/images/og-cover.jpg"
+      "ogImage": "/assets/images/og-covers/og-cover-articles.jpg"
+    },
+    {
+      "path": "/articles-index",
+      "title": {"en": "Nutin articles"},
+      "description": {"en": "Articles about topics such as software architecture, engineering decisions and frontend development."},
+      "ogImage": "/assets/images/og-covers/og-cover-articles.jpg"
     }
   ]
 }

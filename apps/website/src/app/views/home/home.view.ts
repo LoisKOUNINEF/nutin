@@ -90,7 +90,7 @@ class HomeView extends View {
       factory: (el) => new SnippetComponent(el, {
         id: 0,
         sectionId: 0,
-        content: 'npm run dev # live reload on changes',
+        content: 'npm run dev # port 9090 - watch mode',
         type: 'bash',
       })
     }]

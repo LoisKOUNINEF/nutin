@@ -18,7 +18,7 @@ Add a JavaScript option to Nutin's project generator alongside the existing Type
 
 JavaScript projects will provide the same core Nutin architecture. 
 
-**Known trade-off:** TypeScript-specific compile-time guarantees, such as event name and payload checking, will not be available.
+**Trade-off:** TypeScript-specific compile-time guarantees, such as event name and payload checking, will not be available.
 
 ## SEO files generation
 

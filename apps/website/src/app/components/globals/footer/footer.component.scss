@@ -26,6 +26,14 @@
     }
   }
   a {
+    &:hover {
+      color: var(--primary);
+    }
+    @media (hover: none) {
+      &:hover {
+        color: inherit;
+      }
+    }
     &:focus-visible {
       outline: 2px solid var(--primary);
     }
@@ -62,13 +70,13 @@
   cursor: help;
   transition: ease-in-out .7s;
   font-weight: bold;
-  color: var(--accent);
+  color: var(--secondary);
   &:hover {
-    color: $secondary-color;
+    color: var(--primary);
   }
   @media (hover: none) {
     &:hover {
-      color: var(--accent);
+      color: var(--secondary);
     }
   }
 }

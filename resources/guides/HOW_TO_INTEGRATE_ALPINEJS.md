@@ -1,10 +1,10 @@
 # How to integrate AlpineJS?
 
-Nutin strongly supports [AlpineJS](https://alpinejs.dev). This is a manual integration pattern.
+Nutin trully admires [AlpineJS](https://alpinejs.dev). 
 
-## Recommended approach: CDN
+This is a manual integration pattern if you want to use this great tool within your Nutin application.
 
-### Load Alpine
+## Load Alpine
 
 Add Alpine's CDN script to `src/index.html`'s `<head>`, pinned to an exact version:
 
@@ -19,7 +19,7 @@ Add Alpine's CDN script to `src/index.html`'s `<head>`, pinned to an exact versi
 
 The `cdn.min.js` build calls `Alpine.start()` automatically — no extra init script needed.
 
-### Sharing Alpine state with Nutin's rendered content
+## Sharing Alpine state with Nutin's rendered content
 
 To let `@click`/`x-text`/etc. *inside* component and view templates read and mutate shared Alpine state, declare `x-data` directly on `#app` itself:
 
@@ -47,7 +47,7 @@ Reach for the sibling-of-`#app` pattern below for state that's genuinely indepen
 renders (e.g. a global UI toggle unrelated to routed content); reach for `x-data` on `#app` when
 component/view markup itself needs to read or write that state.
 
-### Keeping Alpine markup outside Nutin's mount root
+## Keeping Alpine markup outside Nutin's mount root
 
 Nutin only ever creates and updates DOM inside the element it mounts a component into (`#app` by default).
 
@@ -68,14 +68,16 @@ Any markup that lives as a **sibling of `#app`** is never touched by Nutin, so i
 </body>
 ```
 
-**Do not** place `x-data` roots inside a Nutin component's or view's own rendered subtree (i.e. as
-part of what `generateTemplate()` returns) — a `render()` call replaces that element's
-`innerHTML`, wiping out the `x-data` root and its state along with it. This is true even if the
-component itself never calls `render()` again: an ancestor's re-render, or a view navigation
-(which always `destroy()`s the old view), tears down and rebuilds the whole subtree regardless of
-what the component itself does.
+## Important
 
-### Notes
+**`x-data` roots should never live inside a component's or view's own rendered subtree.**
+
+If the component re-renders, it replaces that element's `innerHTML`, wiping out the `x-data` root 
+and its state along with it.
+
+This is also true when an ancestor's re-render, or a view navigation tears down and rebuilds the whole subtree.
+
+## Notes
 
 - Pin an exact Alpine version rather than `@3`/`latest` to avoid silent breakage on upstream releases.
 - This CDN approach adds zero build-tool involvement. 
