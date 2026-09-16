@@ -65,55 +65,17 @@
         }
         }
     }
-
-    svg {
-        transition: ease-in-out .2s;
-        path {
-            transition: ease-in-out .2s;
-            fill: var(--text);
-        }
-        &:hover {
-            transform: translateY(-2px);
-            scale: 1.05;
-            path {
-                fill: var(--secondary);
-            }
-        }
-        @media (hover: none) {
-        &:hover {
-                transform: translateY(0);
-                scale: 1;
-                path {
-                    fill: var(--text);
-                }
-        }
-        }
-    }
     @include mixins.respond-to(medium) {
     backdrop-filter: blur(30px);
-        @include mixins.flex-column;
+        // @include mixins.flex-column;
         @include mixins.flex-center;
-        padding: 0;
-        padding-bottom: map.get($spacings, 'smallest');
+        padding: map.get($spacings, 'small');
+        padding-bottom: map.get($spacings, 'small');
         height: auto;
     }
 }
 
 .navbar__header {
-    // svg is displayed in .navbar__resources on wider screens
-    svg {
-        display: none;
-    }
-    @include mixins.respond-to(medium) {
-        @include mixins.flex-between;
-        padding-right: map.get($spacings, 'small');
-        padding-left: map.get($spacings, 'smallest');
-        width: 100%;
-        svg {
-            @include mixins.display-svg;
-            padding-right: map.get($spacings, 'smallest');
-        }
-    }
 }
 
 .navbar__github-icon {

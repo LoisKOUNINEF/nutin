@@ -83,7 +83,7 @@ tbody > tr:last-of-type {
 		flex: 1;
   	padding: 3rem map.get($spacings, largest);
   	@include mixins.respond-to(medium) {
-  		padding: map.get($spacings, largest)*3 0;
+  		padding: map.get($spacings, largest)*2 0;
   		padding-bottom: map.get($spacings, largest);
   	}
 	}
