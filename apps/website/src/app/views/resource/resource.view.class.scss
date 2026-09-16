@@ -12,7 +12,7 @@
     @include mixins.respond-to(small) {
         @include mixins.flex-column;
     }
-    @include mixins.respond-to(medium) {
+    @include mixins.respond-to(large) {
         @include mixins.flex-column;
         flex-direction: column-reverse;
         padding-left: 1rem;
@@ -37,7 +37,7 @@
     @include mixins.respond-to(small) {
         width: 100%;
     }
-    @include mixins.respond-to(medium) {
+    @include mixins.respond-to(large) {
         width: 100%;
     }
 }
@@ -60,7 +60,7 @@
     p {
         max-width: 100ch;
     }
-    @include mixins.respond-to(medium) {
+    @include mixins.respond-to(large) {
         padding-left: map.get($spacings, 'small');
         padding-right: map.get($spacings, 'small');
         margin-left: 0;

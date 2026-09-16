@@ -10,7 +10,7 @@
     // instead of shrinking and letting the pre's own overflow-x:auto scroll it.
     min-width: 0;
 
-    @include mixins.respond-to(medium) {
+    @include mixins.respond-to(large) {
         @include mixins.flex-column;
     }
 }
@@ -127,7 +127,7 @@
     width: 18vw;
     font-size: map.get($font-sizes, 'small');
 
-    @include mixins.respond-to(medium) {
+    @include mixins.respond-to(large) {
         width: 100%;
     }
 }

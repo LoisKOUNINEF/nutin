@@ -19,7 +19,7 @@
     scrollbar-gutter: stable;
     max-height: calc(100vh - 3rem);
 
-    @include mixins.respond-to(medium) {
+    @include mixins.respond-to(large) {
         position: static;
         width: 100%;
         max-height: none;
