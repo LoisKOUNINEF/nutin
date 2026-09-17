@@ -28,4 +28,4 @@ npm run generate service task
 ```ts
 ```
 
-**[Next step →](3_TURN_YOUR_TASK_LIST_INTO_A_PAGE.md)**
+**[Next step →](3_BUILD_THE_UI_FOR_A_TASK.md)**
