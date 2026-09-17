@@ -1,0 +1,1 @@
+# 6. Delete a task
