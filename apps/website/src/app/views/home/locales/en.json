@@ -8,7 +8,7 @@
   "snippet-run": "Run the project",
   "snippet-generate": "Generate a new component",
   "snippet-hello": "Make the component say hello",
-  "snippet-register": "Register the component in the `Home` view",
+  "snippet-register": "Register the component",
   "snippet-see": "See it running",
   "achieved": "You've got the basics.",
   "explore": "Explore Nutin",

@@ -2,6 +2,8 @@
 
 We are going to build a basic CRUD application in the form of a to-do list.
 
+*Estimated time:* 30 minutes.
+
 - [See what you'll build](https://nutin-todo.nutin.org)
 
 - [Refer to the full app code if you ever get lost](https://github.com/LoisKOUNINEF/nutin/tree/main/apps/tutorial)
@@ -37,7 +39,7 @@ src/
         |---- main.ts
 ```
 
-## How the pieces fit together
+### How the pieces fit together
 
 * Views **orchestrate**
 * Components **handle UI**
