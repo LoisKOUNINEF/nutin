@@ -1,20 +1,36 @@
 # 5. Add your first interaction
 
+## Let the service add tasks
+
+```ts
+class TaskService extends Service<TaskService> {
+    /* ... */
+    public addTask(task: ITask): ITask[] {
+        this._tasks.push(task);
+        return this.tasks;
+    }
+}
+```
+
 ## Generate the component
 
 ```bash
 npm run generate component add-task
+# Creates src/app/components/add-task/add-task.component.ts|html|scss
 ```
 
-## Placeholder only - dynamic id
+## Call the service
 
-## Service returns real tasks
+### TS
 
+### HTML
 
-## Component emits an event
+### Style it a bit
 
-## View listens to it
+## Re-render the view
 
-## View updates and re-renders
+### Emit an event
+
+### Listen to an event
 
 **[Next step →](6_MAKE_TASKS_DISAPPEAR.md)**

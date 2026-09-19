@@ -12,7 +12,6 @@ You built the application using:
 - Services to manage application data
 - Events to connect application behavior
 - Lifecycle and rendering to control when UI is created and destroyed
-- Pipes to transform data for display
 
 ## Go further
 
