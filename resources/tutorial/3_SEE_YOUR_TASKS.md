@@ -7,7 +7,7 @@ npm run generate view task-catalog
 # Creates src/app/views/task-catalog/task-catalog.view.ts|html|scss
 ```
 
-## Render your tasks
+## Render your tasks + routeParams
 
 ```ts
 class TaskCatalogView extends View {
@@ -27,9 +27,9 @@ class TaskCatalogView extends View {
     registerChildren(): ComponentConfig[] {
         // One TaskCardComponent is created for each task.
         return this.createCatalogComponents({
-            array: this._tasks,
-            selector: 'tasks',
-            elementName: 'task',
+            items: this._tasks,
+            selector: 'task-cards',
+            elementName: 'task-card',
             component: TaskCardComponent,
             elementTag: 'article'
         })
@@ -40,17 +40,49 @@ class TaskCatalogView extends View {
 ## Add the target in the template
 
 ```html
-<div>
-    <div data-catalog="tasks"></div>
+<div class="task-catalog">
+    <h1>Nutin Todo</h1>
+    <div class="task-catalog__task-cards">
+        <!-- data-catalog attribute = "selector" target -->
+        <div data-catalog="task-cards" class="task-catalog__task-cards"></div>
+    </div>
 </div>
+```
+
+## Style it a bit
+
+```css
+.task-catalog {
+    h1 {
+        font-size: 2.5rem;
+    }
+}
+
+.task-catalog__task-cards {
+    padding: 2rem;
+    max-width: 25vw;
+    display: grid;
+    gap: 12px;
+}
 ```
 
 ## Add the route
 
 ```ts
-// routes.ts
+// src/app/routes.ts
+
+export const appRoutes: Routes = {
+    // Make your new page the landing page
+    '/': () => new TaskCatalogView(),
+}
 ```
 
 ## Remove the default `HomeView`
+
+```bash
+rm -rf src/app/views/home
+```
+
+- Remove the export in `src/app/views/index.ts` and the import in `src/app/routes.ts`.
 
 **[Next step →](4_GIVE_YOUR_TASKS_SOMEWHERE_TO_LIVE.md)**

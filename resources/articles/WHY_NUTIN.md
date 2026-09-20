@@ -2,7 +2,7 @@
 
 Nutin started with a simple question:
 
-**How far can you take a real web application without using a frontend framework?**
+**How to make a web application maintainable without using a frontend framework?**
 
 At the time, the goal wasn't to build a framework. It was to build a structured application with TypeScript, HTML and SASS, and keep the browser close to the surface. 
 

@@ -34,22 +34,26 @@ class TaskService extends Service<TaskService> {
     public get tasks(): ITask[] {
         return this._tasks;
     }
+
+    public getTask(id: number): ITask | undefined {
+        return this._tasks.find((task) => task.id === id);
+    }
 }
 ```
 
 ## Use the service in the view
 
 ```ts
+import { taskService } from '../../services/index.js';
+
 class TaskCatalogView extends View {
-    registerChildren(): ComponentConfig[] {
-        return this.createCatalogComponents({
-            array: taskService.tasks, // 
-            selector: 'tasks',
-            elementName: 'task',
-            component: TaskCardComponent,
-            elementTag: 'article'
-        })
-    }
+  private _tasks: ITask[];
+
+  /* ... */
+
+  onBeforeRender(): void {
+    this._tasks = taskService.tasks;
+  }
 }
 ```
 

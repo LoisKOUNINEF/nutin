@@ -6,9 +6,9 @@ You built a **working CRUD application**. Tasks can be created, updated, and del
 
 You built the application using:
 
-- Routes to navigate between pages
-- Views to orchestrate each page
 - Components to build reusable UI
+- Views to orchestrate each page
+- Routes to navigate between pages
 - Services to manage application data
 - Events to connect application behavior
 - Lifecycle and rendering to control when UI is created and destroyed
