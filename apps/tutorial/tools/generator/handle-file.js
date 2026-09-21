@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { print } from '../utils/index.js';
-import { scssTemplate } from './templates/index.js';
+import { print, LANGUAGES } from '../utils/index.js';
+import { localeTemplate } from './templates/index.js';
 
 export function generateFile({
   name,
@@ -11,7 +11,7 @@ export function generateFile({
   extension = 'ts',
 }) {
   fs.mkdirSync(targetPath, { recursive: true });
-  const template = templateFn(name, targetPath);
+  const template = templateFn(name, targetPath, suffix);
   const filePath = `${targetPath}/${name.kebab}.${suffix}.${extension}`;
 
   if (fs.existsSync(filePath)) {
@@ -37,30 +37,29 @@ export function appendToIndex({ name, targetPath, suffix }) {
 
   try {
     fs.appendFileSync(indexFilePath, lineToAppend, 'utf8');
-    print.info(`${suffix}s/index.ts updated.`);
+    print.gray(`${suffix}s/index.ts updated.`);
   } catch (err) {
-    print.error(`Error appending line: ${err}`);
+    throw new Error(`Failed to update ${indexFilePath}: ${err.message}`, { cause: err });
   }
 }
 
-export function generateStylesheet(name) {
-  const template = scssTemplate();
-  const componentsStylePath = path.join('src', 'styles', 'components');
-  const filePath = path.join(componentsStylePath, `_${name.kebab}.scss`);
-  const indexPath = path.join(componentsStylePath, `_index.scss`);
+export function generateLocalesJson({ targetPath, name, isView }) {
+  const localesDir = `${targetPath}/locales`;
+  fs.mkdirSync(localesDir, { recursive: true });
 
-  if (fs.existsSync(filePath)) {
-    print.boldError('A file with this name already exists');
-    process.exit(1);
+  const template = localeTemplate(name, isView);
+
+  const failedLangs = [];
+  for (const lang of LANGUAGES) {
+    try {
+      fs.writeFileSync(`${localesDir}/${lang}.json`, template);
+    } catch (err) {
+      print.error(`Failed to write locale file for "${lang}": ${err.message}`);
+      failedLangs.push(lang);
+    }
   }
-  fs.writeFileSync(filePath, template);
 
-  const lineToAppend = `@forward "${name.kebab}";\n`;
-
-  try {
-    fs.appendFileSync(indexPath, lineToAppend, 'utf8');
-  } catch (err) {
-    print.error(`Error appending line: ${err}`);
+  if (failedLangs.length) {
+    throw new Error(`Failed to generate locale file(s) for: ${failedLangs.join(', ')}`);
   }
 }
-

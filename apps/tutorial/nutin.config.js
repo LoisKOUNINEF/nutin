@@ -1,0 +1,47 @@
+export default {
+  // Nutin options
+  tailwind: false,         // Enable Tailwind CSS v4
+  i18n: false,             // Enable i18n; configure languages in config/languages.json
+  generateSEOFiles: false, // Generate per-route HTML, robots.txt and sitemap.xml; configure SEO data in config/seo.json
+
+// Nutin features
+  dockerPorts: [9092],     // Ports the Docker container exposes/listens on — edit as needed
+
+  // Build pipeline
+  builder: {
+    sass: {
+      paths: [ 
+        'base', 
+      ], // Directories in styles/ to include in the Sass load path
+    },
+
+    esbuild: {
+      bundle: true,
+      minify: true,
+      sourcemap: false,
+      target: ['es2015'],
+      drop: ['console', 'debugger'],
+    },
+  },
+
+  // Testing toolkit
+  // `npm run testin-nutin`
+  testinNutin: {
+    includeFramework: true,  // Test Nutin source - src/core
+    includeTools: false,     // Test tools/ (builder, testin-nutin, etc.)
+    includeApp: false,       // Include application tests
+
+    coverage: {
+      enabled: false,        // Include coverage in the normal test command
+      threshold: 95,         // Fail if any global coverage metric falls below this threshold
+      reportUncovered: true, // Generate a report of uncovered lines, functions and branches
+    },
+
+    jsdomOptions: {
+      runScripts: false,
+      resources: false,
+      freezeGlobals: false,
+      pretendToBeVisual: true,
+    },
+  },
+}

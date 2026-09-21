@@ -3,13 +3,13 @@ import { TokenHelper } from './token.helper.js';
 
 export class EventHelper {
   public static bindEvents(
-    component: BaseComponent, 
-    element: HTMLElement, 
-    eventListeners: Array<[string, EventListener]>
+    component: BaseComponent,
+    element: HTMLElement,
+    eventListeners: Array<[EventTarget, string, EventListener]>
   ): void {
     element.querySelectorAll('[data-event]').forEach(el => {
-      const parts = el.getAttribute('data-event')!.split(':');
-      const [eventName, handlerName, argsString] = parts;
+      const [eventName, handlerName, ...argParts] = el.getAttribute('data-event')!.split(':');
+      const argsString = argParts.length ? argParts.join(':') : '';
 
       if (!handlerName || !eventName) return;
 
@@ -20,6 +20,14 @@ export class EventHelper {
         const boundHandler = this.createBoundHandler(el, component, handler, rawArgs);
         this.addEvent(el, eventName, boundHandler, eventListeners);
       }
+    });
+  }
+
+  public static destroyEvents(
+    eventListeners: Array<[EventTarget, string, EventListener]>
+  ): void {
+    eventListeners.forEach(([target, event, listener]) => {
+      target.removeEventListener(event, listener);
     });
   }
 
@@ -37,21 +45,12 @@ export class EventHelper {
   }
 
   private static addEvent(
-    target: EventTarget, 
-    event: string, 
-    listener: EventListener, 
-    eventListeners: Array<[string, EventListener]>
+    target: EventTarget,
+    event: string,
+    listener: EventListener,
+    eventListeners: Array<[EventTarget, string, EventListener]>
   ): void {
     target.addEventListener(event, listener);
-    eventListeners.push([event, listener]);
-  }
-
-  public static destroyEvents(
-    element: HTMLElement, 
-    eventListeners: Array<[string, EventListener]>
-  ): void {
-    eventListeners.forEach(([event, listener]) => {
-      element.removeEventListener(event, listener);
-    });
+    eventListeners.push([target, event, listener]);
   }
 }
