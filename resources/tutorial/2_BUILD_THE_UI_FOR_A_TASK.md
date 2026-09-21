@@ -46,19 +46,24 @@ export class TaskCardComponent extends Component {
 ```css
 .task-card {
     padding: 1.5rem;
+    padding-bottom: .5rem;
     line-height: 2;
-    max-width: 100ch;
+    width: 100ch;
+    max-width: 20vw;
+    overflow: hidden;
     background: #F1F1EF;
     border: 1px solid #D6D6D2;;
     border-radius: 8px;
     h2 {
         font-size: 1.5rem;
         font-weight: bold;
+        text-wrap: nowrap;
     }
     p {
         font-size: 1.1rem;
         overflow: hidden;
         max-height: 4rem;
+        padding-bottom: 1rem;
     }
 }
 ```

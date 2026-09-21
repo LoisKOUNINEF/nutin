@@ -14,3 +14,22 @@
   display: grid;
   gap: 12px;
 }
+
+.task-catalog__tutorial-link {
+  padding: 2rem;
+  a {
+    line-height: 2rem;
+    padding: 1rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: underline;
+    text-underline-offset: 8px;
+    color: #121212;
+    background: #F1F1EF;
+    border-radius: 10px;
+    border: 2px solid #D6D6D2;
+    &:hover {
+      border: 2px solid #B2B2AD;
+    }
+  }
+}
