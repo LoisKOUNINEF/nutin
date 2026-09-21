@@ -182,8 +182,3 @@ export class TaskCardComponent extends Component {
 ```
 
 **[Next step →](8_TAKE_A_LOOK_AT_WHAT_YOU_VE_BUILT.md)**
-
-
-
-
-    

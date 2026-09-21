@@ -1,0 +1,30 @@
+ARG NODE_VERSION=22.23.2
+ARG ALPINE_VERSION=3.20
+ARG PORT=9092
+
+FROM node:${NODE_VERSION}-alpine AS builder
+WORKDIR /usr/src/app
+RUN corepack enable
+COPY package.json package-lock.json .
+COPY apps/tutorial/package.json apps/tutorial/package.json
+COPY scripts/generate-docs.mjs scripts/generate-docs.mjs
+RUN npm ci
+COPY apps/tutorial ./apps/tutorial
+RUN npm run build:prod -w tutorial
+
+FROM alpine:${ALPINE_VERSION}
+ARG PORT
+ENV PORT=${PORT}
+
+RUN apk add --no-cache nginx nginx-mod-http-brotli
+
+RUN rm -f /etc/nginx/http.d/default.conf
+COPY --from=builder /usr/src/app/apps/tutorial/tools/docker/nginx.conf /etc/nginx/http.d/default.conf
+COPY --from=builder /usr/src/app/apps/tutorial/dist/src /usr/share/nginx/html
+
+EXPOSE ${PORT}
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:__PRIMARY_PORT_PLACEHOLDER__/health || exit 1
+
+CMD ["nginx", "-g", "daemon off;"]
