@@ -1,67 +1,52 @@
-import { AppEventBus, ComponentConfig, View } from '../../../core/index.js';
-import { TaskComponent, AddTaskComponent, TaskDetailsComponent } from '../../components/index.js';
-import { TasksService } from '../../services/index.js';
+import { View, ComponentConfig } from '../../../core/index.js';
+import { AddTaskComponent, TaskInputsComponent, TaskCardComponent } from '../../components/index.js';
+import { taskService } from '../../services/index.js';
 
-const template = `
-<div data-component="add-task"></div>
-<div style="display:flex;">
-  <div data-catalog="task-catalog" class="task-catalog__sidebar"></div>
-  <div data-component="task-details"></div>
-</div>
-`;
+const template = `__TEMPLATE_PLACEHOLDER__`;
 
 export class TaskCatalogView extends View {
-  private _tasks: Task[] = [];
-
+  private _tasks: ITask[] = [];
   constructor() {
-    super({template});
-    AppEventBus.subscribe('task-updated', () => this.forceRender());
+    super({ template, viewName: 'task-catalog' });
+        this.listenToRenderEvents(['task-event']);
   }
 
-  protected override forceRender(): void {
-    this._tasks = TasksService.tasks;
-    return super.forceRender();
+  onBeforeRender(): void {
+    this._tasks = taskService.tasks;
   }
 
-  public onEnter() {
-    this._tasks = TasksService.tasks;
-  }
+    registerChildren(): ComponentConfig[] {
+        // One TaskCardComponent is created for each task.
+        const taskCatalogChildren: ComponentConfig[] = [
+            {
+                selector: 'add-task',
+                factory: (el) => new AddTaskComponent(el),
+            },...this.createCatalogComponents({
+            items: this._tasks,
+            selector: 'task-cards',
+            elementName: 'task-card',
+            component: TaskCardComponent,
+            elementTag: 'article'
+        })]
 
-  public childConfigs(): ComponentConfig[] { 
-    const addTaskConfig: ComponentConfig = {
-      selector: `add-task`,
-      factory: (el) => new AddTaskComponent(el)
-    };
+        if (this.hasRouteParam('id')) {
+            taskCatalogChildren.push(...this.getTaskInputsChild());
+        }
 
-    const configs = [addTaskConfig, ...this.catalogConfigs()];
+        return taskCatalogChildren;
+    }
+  
+    private getTaskInputsChild(): ComponentConfig[] {
+        const taskId = this.getRouteParam('id') || 0;
+        const task = taskService.getTask(+taskId);
+        if (!task) return [];
 
-    if (this.hasRouteParam('id')) {
-      configs.push(...this.detailsConfigs());
+        return [
+            { 
+                selector: `task-inputs`,
+                factory: (el) => new TaskInputsComponent(el, task)
+            }
+        ]  
     }
 
-    return configs;
-  }
-
-  private catalogConfigs(): ComponentConfig[] {
-    return this.catalogConfig({
-      array: this._tasks,
-      elementName: 'task',
-      selector: 'task-catalog',
-      component: TaskComponent
-    });
-
-  }
-  
-  private detailsConfigs(): ComponentConfig[] {
-    const taskId = this.getRouteParam('id') || 0;
-    const task = this._tasks.find((task) => task.id === +taskId);
-    if (!task) return [];
-
-    return [
-      { 
-        selector: `task-details`,
-        factory: (el) => new TaskDetailsComponent(el, task)
-      }
-    ]  
-  }
 }

@@ -1,0 +1,30 @@
+import esbuild from 'esbuild';
+import path from 'path';
+import { print, errorExit } from '../../../utils/index.js';
+import { PATHS } from '../app/paths.js';
+import { builderConfig } from '../../builder.config.js';
+
+const ENTRY_FILE = path.join(PATHS.tempApp, 'main.ts');
+const OUT_FILE = path.join(PATHS.tempSource, 'bundle.js');
+
+async function build() {
+  await esbuild.build({
+    ...builderConfig.esbuild,
+    platform: 'browser',
+    format: 'esm',
+    legalComments: 'none',
+    loader: {
+      '.json': 'json',
+    },
+    define: {
+      'process.env.NODE_ENV': '"production"',
+    },
+    entryPoints: [ENTRY_FILE],
+    outfile: OUT_FILE,
+    keepNames: false,
+  });
+}
+
+build().catch((err) => {
+  errorExit(err, 'esbuild');
+});

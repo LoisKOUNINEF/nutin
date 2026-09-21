@@ -4,7 +4,7 @@
 
 ```ts
 export class MyView extends View {
-  protected onBeforeRender(): void {
+  constructor() {
     this.listen('language-changed', () => console.log('language changed'));
     this.listenToRenderEvents(['language-changed']); // re-render whenever it fires
   }
@@ -14,6 +14,8 @@ export class MyView extends View {
 - `this.listen(event, callback)` (available on every component/view) subscribes and automatically unsubscribes it on destroy. Prefer this over calling `AppEventBus.subscribe` directly, which has no automatic cleanup.
 
 - `this.listenToRenderEvents([...events])` is a shortcut that re-renders the component whenever any of the given events fire - uses `this.listen` under the hood.
+
+- Using these in `onBeforeRender()` is leaky - renders per event double each time.
 
 ## Directly via `AppEventBus`
 

@@ -1,0 +1,43 @@
+import fs from 'fs';
+import path from 'path';
+import { PATHS } from '../app/paths.js';
+import { print } from '../../../utils/index.js';
+import { builderConfig } from '../../builder.config.js';
+
+function collectUrls(baseUrl, routes, languages) {
+  const urls = [];
+
+  for (const route of routes) {
+    const routeSuffix = route.path === '/' ? '' : route.path;
+
+    if (builderConfig.i18n) {
+      for (const lang of languages) {
+        urls.push(`${baseUrl}/${lang}${routeSuffix}/`);
+      }
+    } else {
+      urls.push(`${baseUrl}${routeSuffix}/`);
+    }
+  }
+
+  return urls;
+}
+
+function buildSitemapXml(urls) {
+  const urlEntries = urls.map(loc => `  <url>\n    <loc>${loc}</loc>\n  </url>`).join('\n');
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urlEntries}\n</urlset>\n`;
+}
+
+export function generateSitemapXml() {
+  const seoConfigPath = path.join(PATHS.temp, 'config', 'seo.json');
+  const seoConfig = JSON.parse(fs.readFileSync(seoConfigPath, 'utf-8'));
+  const baseUrl = seoConfig.baseUrl.replace(/\/$/, '');
+
+  const languagesConfigPath = path.join(PATHS.temp, 'config', 'languages.json');
+  const { languages } = JSON.parse(fs.readFileSync(languagesConfigPath, 'utf-8'));
+
+  const urls = collectUrls(baseUrl, seoConfig.routes, languages);
+  const xml = buildSitemapXml(urls);
+
+  const outputPath = path.join(PATHS.tempSource, 'sitemap.xml');
+  fs.writeFileSync(outputPath, xml, 'utf-8');
+}

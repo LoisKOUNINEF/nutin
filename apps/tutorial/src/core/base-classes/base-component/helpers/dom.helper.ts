@@ -1,28 +1,81 @@
+import { SecurityHelper, TrustLevel } from "./security.helper.js";
+
+interface DomElementConfig {
+  target: Element | null;
+  mountTarget: string | HTMLElement; 
+  element: HTMLElement
+}
+
 export class DomHelper {
   public static mountElement(element: HTMLElement, mountTarget: string | HTMLElement): void {
     const target = typeof mountTarget === 'string' 
       ? document.querySelector(mountTarget) 
       : mountTarget;
 
-    if (target instanceof HTMLElement) {
-      if (typeof mountTarget === 'string') {
-        // Append mode
-        target.appendChild(element);
-      } else {
-        // Replace placeholder mode
-        target.replaceWith(element);
-      }
-    } else {
-      console.warn('Invalid mount target for component:', mountTarget);
-    }
+    this.appendOrReplace({ target, element, mountTarget });
   }
 
   public static createElement<T extends HTMLElement>(
     tagName: keyof HTMLElementTagNameMap, 
-    template: string = ''
+    template: string = '',
+    trustLevel?: TrustLevel
   ): T {
     const element = document.createElement(tagName) as T;
-    element.innerHTML = template;
+    element.innerHTML = SecurityHelper.sanitizeTemplate(template, trustLevel);
     return element;
+  }
+  
+  public static cleanupOptionalContent(): void {
+    const isEmpty = (el: HTMLElement): boolean => {
+      if (el instanceof HTMLImageElement) {
+        return !el.src || el.src.trim() === "";
+      }
+
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+        return !el.value?.trim();
+      }
+
+      if (el instanceof HTMLMediaElement || el instanceof HTMLSourceElement) {
+        return !el.getAttribute("src");
+      }
+
+      const content = el.textContent?.trim();
+      return !content || content === "undefined" || content === "null";
+    };
+
+    const isValueUndefined = (el: HTMLElement): boolean => {
+      const value = el.getAttribute("data-optional");
+      /*
+      A bare/empty data-optional (getAttribute returns "") is a plain marker and
+      defers entirely to isEmpty(el) below rather than forcing removal itself.
+      Only a present-but-blank value (whitespace) or the literal string produced
+      by interpolating an undefined/null expression counts as "value undefined".
+      */
+      if (!value) return false;
+      return (
+        value.trim() === '' ||
+        value === "undefined" ||
+        value === "null"
+      );
+    }
+
+    document.querySelectorAll<HTMLElement>("[data-optional]").forEach(el => {
+      if (isValueUndefined(el) || isEmpty(el)) el.remove();
+      el.removeAttribute("data-optional");
+    });
+  }
+
+  private static appendOrReplace(config: DomElementConfig) {
+    if (config.target instanceof HTMLElement) {
+      if (typeof config.mountTarget === 'string') {
+        // Append mode
+        config.target.appendChild(config.element);
+      } else {
+        // Replace placeholder mode
+        config.target.replaceWith(config.element);
+      }
+    } else {
+      return;
+    }
   }
 }
