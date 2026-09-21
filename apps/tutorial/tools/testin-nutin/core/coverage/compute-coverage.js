@@ -1,0 +1,115 @@
+import fs from 'fs';
+import path from 'path';
+import { errorExit } from '../../../utils/index.js';
+
+// V8 ranges within a script are always disjoint or strictly nested, never partially
+// overlapping. The smallest range containing an offset holds the true execution count
+// for that offset - e.g. "this function ran 5x but this one branch inside it ran 0x".
+function countAt(offset, ranges) {
+  let best = null;
+  for (const range of ranges) {
+    if (offset < range.startOffset || offset >= range.endOffset) continue;
+    if (!best || (range.endOffset - range.startOffset) < (best.endOffset - best.startOffset)) {
+      best = range;
+    }
+  }
+  return best ? best.count : 0;
+}
+
+function buildLineStarts(sourceText) {
+  const starts = [0];
+  for (let i = 0; i < sourceText.length; i++) {
+    if (sourceText[i] === '\n') starts.push(i + 1);
+  }
+  return starts;
+}
+
+function offsetToLine(offset, lineStarts) {
+  let lo = 0, hi = lineStarts.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (lineStarts[mid] <= offset) lo = mid; else hi = mid - 1;
+  }
+  return lo + 1; // 1-indexed
+}
+
+// V8 sometimes reports an empty functionName (e.g. accessors, unnamed callbacks).
+// Fall back to reading the source at the function's own start offset instead of a
+// meaningless placeholder - covers `constructor(`, `get foo(`, method names, etc.
+// Only treat a leading identifier as a real name when it's immediately followed by
+// `(` (a param list) - otherwise it's just an arrow function's bare parameter (e.g.
+// `c => ...`), which isn't a name at all, so fall through to a source snippet instead.
+function deriveLabel(sourceText, startOffset) {
+  const snippet = sourceText.slice(startOffset, startOffset + 60);
+  const named = snippet.match(/^\s*(?:get |set )?([A-Za-z_$][\w$]*)\s*\(/);
+  if (named) return named[1];
+  return snippet.trim().split('\n')[0].slice(0, 30) || '<anonymous>';
+}
+
+export function computeFileCoverage({ functions }, sourceText) {
+  const allRanges = functions.flatMap(fn => fn.ranges);
+  const lineStarts = buildLineStarts(sourceText);
+
+  // Line coverage: sample the count at each line's first non-whitespace character.
+  // Not statement/branch-accurate, but simple and good enough for a lightweight report.
+  let offset = 0;
+  let totalLines = 0;
+  let coveredLines = 0;
+  const uncoveredLines = [];
+  for (const line of sourceText.split('\n')) {
+    const firstChar = line.search(/\S/);
+    if (firstChar !== -1) {
+      totalLines++;
+      if (countAt(offset + firstChar, allRanges) > 0) coveredLines++;
+      else uncoveredLines.push(offsetToLine(offset + firstChar, lineStarts));
+    }
+    offset += line.length + 1;
+  }
+
+  // Function coverage: every functions[] entry except the whole-script pseudo-function,
+  // identified by its first range spanning the entire file.
+  const realFunctions = functions.filter(fn => {
+    const [topRange] = fn.ranges;
+    return !(topRange.startOffset === 0 && topRange.endOffset === sourceText.length);
+  });
+  const coveredFunctions = realFunctions.filter(fn => fn.ranges[0].count > 0).length;
+  const uncoveredFunctions = realFunctions
+    .filter(fn => fn.ranges[0].count === 0)
+    .map(fn => ({
+      name: fn.functionName || deriveLabel(sourceText, fn.ranges[0].startOffset),
+      line: offsetToLine(fn.ranges[0].startOffset, lineStarts),
+    }));
+
+  // Branch coverage: every range beyond a function's own top-level range (index 0)
+  // is a nested conditional block V8 already tracked while collecting detailed
+  // coverage - if/else arms, ternary branches, switch cases, logical short-circuits,
+  // loop bodies. No AST parsing needed, just reusing data already being collected.
+  const allBranchRanges = functions.flatMap(fn => fn.ranges.slice(1));
+  const coveredBranches = allBranchRanges.filter(r => r.count > 0).length;
+  const uncoveredBranches = allBranchRanges
+    .filter(r => r.count === 0)
+    .map(r => offsetToLine(r.startOffset, lineStarts))
+    .sort((a, b) => a - b);
+
+  return {
+    totalLines, coveredLines, uncoveredLines,
+    linesPct: totalLines ? (coveredLines / totalLines) * 100 : 100,
+    totalBranches: allBranchRanges.length, coveredBranches, uncoveredBranches,
+    branchesPct: allBranchRanges.length ? (coveredBranches / allBranchRanges.length) * 100 : 100,
+    totalFunctions: realFunctions.length, coveredFunctions, uncoveredFunctions,
+    functionsPct: realFunctions.length ? (coveredFunctions / realFunctions.length) * 100 : 100,
+  };
+}
+
+export function buildCoverageReport(scopedResults) {
+  return scopedResults.map(entry => {
+    let sourceText;
+    try {
+      sourceText = fs.readFileSync(entry.filePath, 'utf-8');
+    } catch (err) {
+      errorExit(err, 'coverage/compute-coverage');
+    }
+    const coverage = computeFileCoverage(entry, sourceText);
+    return { file: path.relative(process.cwd(), entry.filePath), ...coverage };
+  });
+}

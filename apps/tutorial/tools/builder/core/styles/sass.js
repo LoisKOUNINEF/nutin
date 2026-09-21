@@ -1,0 +1,40 @@
+import * as sass from 'sass';
+import * as fs from 'fs';
+import path from 'path';
+import { getFilesRecursive, print, errorExit } from '../../../utils/index.js';
+import { PATHS } from '../app/paths.js';
+import { builderConfig } from '../../builder.config.js';
+
+const stylesOutput = path.join(PATHS.tempSource, 'main.css');
+
+// global styles (partials)
+const stylesPath = path.join(PATHS.source, 'styles');
+const scssOrigins = builderConfig.sass.paths;
+const scssPath = (origin) => path.join(stylesPath, origin);
+const stylesInput = scssOrigins.map(origin => scssPath(origin));
+const pathsToLoad = [ ...stylesInput ];
+
+try {
+  const mainResult = await sass.compileAsync(path.join(stylesPath, 'main.scss'), {
+    loadPaths: [ ...pathsToLoad ],
+    style: 'compressed'
+  });
+  fs.writeFileSync(stylesOutput, mainResult.css);
+
+  // features styles
+  const appInput = path.join(PATHS.source, 'app');
+  const appStyles = [
+    ...getFilesRecursive(path.join(appInput, 'components'), 'scss'),
+    ...getFilesRecursive(path.join(appInput, 'views'), 'scss')
+  ];
+
+  for (const style of appStyles) {
+    const result = await sass.compileAsync(style, {
+      loadPaths: [ ...pathsToLoad ],
+      style: 'compressed'
+    })
+    fs.appendFileSync(stylesOutput, result.css);
+  }
+} catch (err) {
+  errorExit(err, 'sass');
+}

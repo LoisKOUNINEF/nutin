@@ -47,6 +47,22 @@ export class TokenHelper {
     );
   }
 
+/** Register a new exact token like "@foo" */
+  public static registerCustomToken(
+    name: string,
+    resolver: (el: HTMLElement, ev: Event) => any
+  ): void {
+    this.customResolvers[name] = resolver;
+  }
+
+/** Register a new prefixed token like "@style:" */
+  public static registerPrefixedToken(
+    prefix: string,
+    resolver: (suffix: string, el: HTMLElement) => any
+  ): void {
+    PREFIXED_TOKEN_RESOLVERS[prefix] = resolver;
+  }
+
   private static resolveExact(token: string, el: HTMLElement, ev: Event): any | null {
     const resolver = EXACT_TOKEN_RESOLVERS[token];
     return resolver ? resolver(el, ev) : null;
@@ -79,21 +95,5 @@ export class TokenHelper {
       return Number(token);
     }
     return null;
-  }
-
-/** Register a new exact token like "@foo" */
-  public static registerCustomToken(
-    name: string,
-    resolver: (el: HTMLElement, ev: Event) => any
-  ) {
-    this.customResolvers[name] = resolver;
-  }
-
-/** Register a new prefixed token like "@style:" */
-  public static registerPrefixedToken(
-    prefix: string,
-    resolver: (suffix: string, el: HTMLElement) => any
-  ) {
-    PREFIXED_TOKEN_RESOLVERS[prefix] = resolver;
   }
 }

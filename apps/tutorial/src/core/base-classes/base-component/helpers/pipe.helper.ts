@@ -29,7 +29,10 @@ export class PipeHelper {
     for (const pipe of pipes) {
       const [pipeName, ...argParts] = pipe.split(':');
 
-      if(!pipeName) return;
+      if (!pipeName) {
+        console.warn(`Empty pipe name in segment "${pipe}" - skipping.`);
+        continue;
+      }
 
       const args = argParts.length ? argParts.join(':').split(',') : [];
       value = AppPipeRegistry.apply(pipeName.trim(), value, args.map(a => a.trim()));

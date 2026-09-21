@@ -1,0 +1,13 @@
+.add-task {
+  padding: 2rem;
+  button {
+    background: #3C3C3A;
+    color: #FAFAF9;
+    padding: 1rem 1.5rem;
+    font-size: 1.2rem;
+    border-radius: 8px;
+    &:hover {
+      background: #2C2C2A;
+    }
+  }
+}

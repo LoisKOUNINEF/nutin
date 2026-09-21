@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import liveServer from 'live-server';
+import { print } from '../utils/index.js';
 
 const params = {
   port: 9090,
@@ -20,4 +21,13 @@ const params = {
   ]
 };
 
-liveServer.start(params);
+try {
+  liveServer.start(params);
+} catch (err) {
+  if (err.code === 'EADDRINUSE') {
+    print.boldError(`Port ${params.port} is already in use — stop the process using it or change the dev port.`);
+  } else {
+    print.boldError(`live-server failed to start: ${err.message}`);
+  }
+  process.exit(1);
+}

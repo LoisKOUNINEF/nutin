@@ -2,7 +2,7 @@ import { Service } from "../../index.js";
 
 export type IEventBus = InstanceType<typeof EventBus>;
 
-type Subscription<K extends EventKey = EventKey> = {
+export type Subscription<K extends EventKey = EventKey> = {
   event: K;
   callback: (data: EventMap[K]) => void;
   once?: boolean;
@@ -34,18 +34,6 @@ export class EventBus extends Service<EventBus> {
     this.addHandler(event, callback, true);
   }
 
-  private addHandler<K extends EventKey>(
-    event: K,
-    callback: (data: EventMap[K]) => void,
-    once: boolean
-  ) {
-    if (!this.handlers[event]) {
-      this.handlers[event] = [];
-    }
-    this.handlers[event]!.push(callback);
-    this._subscriptions.push({ event, callback, once });
-  }
-
   public emit<K extends EventKey>(event: K, data?: EventMap[K]): void {
     const callbacks = this.handlers[event];
     if (!callbacks) return;
@@ -70,7 +58,10 @@ export class EventBus extends Service<EventBus> {
     if (!handlers) return;
 
     if (callback) {
-      this.handlers[event] = handlers.filter(h => h !== callback);
+      (this.handlers as Record<
+        EventKey,
+        Array<(data: EventMap[K]) => void>
+      >)[event] = handlers.filter(h => h !== callback);
     } else {
       delete this.handlers[event];
     }
@@ -80,7 +71,21 @@ export class EventBus extends Service<EventBus> {
     );
   }
 
-  private cleanupEventListeners = () => {
+  private addHandler<K extends EventKey>(
+    event: K,
+    callback: (data: EventMap[K]) => void,
+    once: boolean
+  ): void {
+    if (!this.handlers[event]) {
+      this.handlers[event] = [];
+    }
+    (
+      this.handlers as Record<EventKey, Array<(data: EventMap[K]) => void>>
+    )[event].push(callback);
+    this._subscriptions.push({ event, callback, once } as Subscription);
+  }
+
+  private cleanupEventListeners = (): void => {
     this._subscriptions.forEach(({ event, callback }) => {
       this.off(event, callback);
     });

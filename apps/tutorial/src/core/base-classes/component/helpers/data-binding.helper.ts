@@ -1,7 +1,7 @@
 import { ComponentProps } from "../component.js";
 
 export class DataBindingHelper {
-  static applyDataBindings(element: HTMLElement, props: ComponentProps): void {
+  public static applyDataBindings(element: HTMLElement, props: ComponentProps): void {
     const bindEls = element.querySelectorAll('[data-bind]');
     bindEls.forEach(el => {
       const key = el.getAttribute('data-bind');
@@ -18,7 +18,7 @@ export class DataBindingHelper {
     });
   }
 
-  static getDataBindingValues(element: HTMLElement): Record<string, string> {
+  public static getDataBindingValues(element: HTMLElement): Record<string, string> {
     const values: Record<string, string> = {};
     element.querySelectorAll('[data-bind]').forEach(el => {
       const key = el.getAttribute('data-bind');

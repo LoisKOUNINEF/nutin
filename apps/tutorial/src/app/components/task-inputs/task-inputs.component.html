@@ -1,0 +1,16 @@
+<div class="task-inputs">
+  <form>
+    <input
+      type="text"
+      id="name"
+      placeholder="Name"
+      value="${_task.name}"
+      data-event="change:_editTask:name,@value"
+    />
+    <textarea
+      id="content"
+      placeholder="Task details..."
+      data-event="change:_editTask:content,@value"
+    >${_task.content ?? ''}</textarea>
+  </form>
+</div>

@@ -1,0 +1,16 @@
+.task-catalog {
+  h1 {
+    font-size: 2.5rem;
+  }
+}
+
+.task-catalog__body {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr 2fr);
+}
+
+.task-catalog__task-cards {
+  padding: 2rem;
+  display: grid;
+  gap: 12px;
+}

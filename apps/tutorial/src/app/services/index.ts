@@ -1,1 +1,2 @@
-export * from './tasks/tasks.service.js';
+// global services export
+export * from './task/task.service.js';

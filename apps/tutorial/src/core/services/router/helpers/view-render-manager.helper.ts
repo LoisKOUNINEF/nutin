@@ -1,64 +1,41 @@
-import { View, AppEventBus } from '../../../index.js';
+import { View, Lifecycle } from '../../../index.js';
 
 /**
  * handles all view rendering.
  */
 export class ViewRenderManager {
-  static async transitionOutCurrentView(currentView: View | null): Promise<null> {
+  public static async transitionOutCurrentView(currentView: View | null): Promise<null> {
     if (!currentView) return null;
     currentView.destroy();
-    this.emitEvent('view-unmount', currentView.viewName);
+    currentView.onExit();
+    Lifecycle.viewUnmount(currentView.viewName);
     return null;
   }
 
-  static renderNewView(
+  public static renderNewView(
     viewConstructor: () => View,
     params: Record<string, string> = {}
   ): View {
     const view = viewConstructor();
+    ViewRenderManager.clearStaleMountContent(view);
 
     // Set route parameters before rendering
     view.setRouteParams(params);
 
     view.render();
+    view.onEnter();
 
-    this.cleanupOptionalContent();
-
-    this.emitEvent('view-mount', view.viewName);
+    Lifecycle.viewMount(view.viewName);
     return view;
   }
 
-  static cleanupOptionalContent() {
-    const isEmpty = (el: HTMLElement): boolean => {
-      const attrName = el.dataset.optional?.trim();
+  private static clearStaleMountContent(view: View): void {
+    const viewElement = view.getElement();
+    const container = viewElement.parentElement;
+    if (!container) return;
 
-      if (attrName && attrName !== "") {
-        const attrValue = el.getAttribute(attrName);
-        return !attrValue || attrValue.trim() === "" || attrValue === "undefined";
-      }
-
-      if (el instanceof HTMLImageElement) {
-        return !el.src || el.src.trim() === "";
-      }
-
-      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
-        return !el.value?.trim();
-      }
-
-      if (el instanceof HTMLMediaElement || el instanceof HTMLSourceElement) {
-        return !el.getAttribute("src");
-      }
-
-      const content = el.textContent?.trim();
-      return !content || content === "undefined";
-    };
-
-    document.querySelectorAll<HTMLElement>("[data-optional]").forEach(el => {
-      if (isEmpty(el)) el.remove();
+    Array.from(container.childNodes).forEach((node) => {
+      if (node !== viewElement) node.remove();
     });
-  }
-
-  static emitEvent(event: EventKey, viewName: string): void {
-    AppEventBus.emit(event, viewName);
   }
 }

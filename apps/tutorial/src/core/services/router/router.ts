@@ -1,11 +1,11 @@
-import { View, AppEventBus } from '../../index.js';
+import { View, Navigation, Service, I18nService, AppEventBus } from '../../index.js';
+import { Language } from '../i18n/languages.js';
 import { Routes, RouteConfig, RouteGuardsManager, GuardResult } from './helpers/route-guard-manager.helper.js';
 import { ViewRenderManager } from './helpers/view-render-manager.helper.js';
 import { NavigationManager } from './helpers/navigation-manager.helper.js';
 
 // centralized export
 export { Routes, RouteGuard } from './helpers/route-guard-manager.helper.js';
-export { ViewRenderManager } from './helpers/view-render-manager.helper.js';
 
 /**
  * IRouter is a type alias for the instance of Router, not a true interface 
@@ -15,85 +15,30 @@ export type IRouter = InstanceType<typeof Router>;
 export interface RouteMatch {
   route: RouteConfig;
   params: Record<string, string>;
+  pattern: string;
 }
 
-class Router {
+class Router extends Service<Router> {
   private _currentView: View | null = null;
   private _currentParams: Record<string, string> = {};
+  private onPopState = () => this.handlePopState();
+  private onNavigate = (data: { path: string }) => this.navigate(data.path);
+  private onReload = () => this.reload();
+  private _busSubscriptions: Array<() => void> = [];
 
   constructor(private routes: Routes) {
+    super();
     this.initializeEventListeners();
     this.navigate(NavigationManager.getCurrentPath());
+    this.registerCleanup(this.removeEventListeners);
   }
 
-  private initializeEventListeners(): void {
-    window.addEventListener('popstate', () => this.handlePopState());
-    AppEventBus.subscribe('navigate', (path: string) => this.navigate(path));
-    AppEventBus.subscribe('reload', () => this.reload());
-  }
-
-  private handlePopState(): void {
-    this.navigate(NavigationManager.getCurrentPath(), false);
-  }
-
-  /**
-   * Match a path against route patterns, supporting optional parameters
-   * Examples:
-   * - '/users/:id?' matches '/users' and '/users/123'
-   * - '/posts/:id' matches '/posts/123' but not '/posts'
-   */
-  private matchRoute(path: string): RouteMatch | null {
-    for (const [pattern, routeConfig] of Object.entries(this.routes)) {
-      const match = NavigationManager.matchPattern(pattern, path);
-      if (match) {
-        return { route: routeConfig, params: match };
-      }
-    }
-    return null;
-  }
-
-  private async handleNotFound(
-    normalizedPath: string, 
-    currentPath: string, 
-    pushState: boolean
-  ): Promise<void> {
-    const notFoundRoute = this.routes['/404'];
-
-    if (!notFoundRoute) {
-      console.error('No 404 route defined');
-      return;
-    }
-
-    const notFoundConstructor = RouteGuardsManager.getViewConstructor(notFoundRoute);
-    
-    this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
-    this._currentParams = {};
-    this._currentView = ViewRenderManager.renderNewView(notFoundConstructor, {});
-    
-    NavigationManager.updateHistory(normalizedPath, currentPath, pushState);
-  }
-
-  private async handleGuards(
-    normalizedPath: string,
-    routeConfig: RouteConfig,
-    params: Record<string, string>,
-    pushState: boolean
-  ): Promise<GuardResult | false> {
-    const guardResult = await RouteGuardsManager.processRouteGuards(
-      routeConfig, 
-      normalizedPath,
-      params
-    );
-
-    if (!guardResult.allowed) {
-      if (guardResult.redirectTo) {
-        await this.navigate(guardResult.redirectTo, pushState);
-      }
-      // If no redirect, stay on current route (guard blocked navigation)
-      return false;
-    }
-
-    return guardResult;
+  public removeEventListeners(): void {
+    this._busSubscriptions.forEach((callback) => {
+      callback();
+    });
+    this._busSubscriptions = [];
+    window.removeEventListener('popstate', this.onPopState);
   }
 
   public async reload(): Promise<void> {
@@ -125,12 +70,13 @@ class Router {
     this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
     this._currentParams = routeMatch.params;
     this._currentView = ViewRenderManager.renderNewView(
-      guardResult.viewConstructor!, 
+      guardResult.viewConstructor!,
       routeMatch.params
     );
-    
-    NavigationManager.updateMetaContent(this._currentView);
+
+    NavigationManager.updateDocumentTitle(this._currentView, routeMatch.pattern);
     NavigationManager.updateHistory(normalizedPath, currentPath, pushState);
+    window.scrollTo({ top: 0 });
   }
 
   public getCurrentParams(): Record<string, string> {
@@ -140,6 +86,94 @@ class Router {
   public getParam(key: string): string | undefined {
     return this._currentParams[key];
   }
+
+  private initializeEventListeners(): void {
+    this.initializeNavigationEvents();
+    this.initializeI18nEvents();
+  }
+
+  private initializeNavigationEvents(): void {
+    window.addEventListener('popstate', this.onPopState);
+    const unsubOnNav = Navigation.onNavigate(this.onNavigate);
+    const unsubOnReload = Navigation.onReload(this.onReload);
+    this._busSubscriptions.push(unsubOnNav, unsubOnReload); 
+  }
+
+  private initializeI18nEvents(): void {
+    const onLangChanged = () => NavigationManager.updateLocaleInUrl();
+    AppEventBus.subscribe('language-changed', onLangChanged);
+    const unsubOnLang = () => AppEventBus.off('language-changed', onLangChanged);
+    this._busSubscriptions.push(unsubOnLang);    
+  }
+
+  private async handlePopState(): Promise<void> {
+    const newLocale = NavigationManager.getCurrentLocale();
+    if (newLocale && newLocale !== I18nService.currentLanguage) {
+      await I18nService.setCurrentLanguage(newLocale as Language);
+    }
+    this.navigate(NavigationManager.getCurrentPath(), false);
+  }
+
+  /**
+   * Match a path against route patterns, supporting optional parameters
+   * Examples:
+   * - '/users/:id?' matches '/users' and '/users/123'
+   * - '/posts/:id' matches '/posts/123' but not '/posts'
+   */
+  private matchRoute(path: string): RouteMatch | null {
+    for (const [pattern, routeConfig] of Object.entries(this.routes)) {
+      const match = NavigationManager.matchPattern(pattern, path);
+      if (match) {
+        return { route: routeConfig, params: match, pattern };
+      }
+    }
+    return null;
+  }
+
+  private async handleNotFound(
+    normalizedPath: string, 
+    currentPath: string, 
+    pushState: boolean
+  ): Promise<void> {
+    const notFoundRoute = this.routes['/404'];
+
+    if (!notFoundRoute) {
+      console.error('No 404 route defined');
+      return;
+    }
+
+    const notFoundConstructor = RouteGuardsManager.getViewConstructor(notFoundRoute);
+    
+    this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
+    this._currentParams = {};
+    this._currentView = ViewRenderManager.renderNewView(notFoundConstructor, {});
+
+    NavigationManager.updateDocumentTitle(this._currentView, '/404');
+    NavigationManager.updateHistory(normalizedPath, currentPath, pushState);
+  }
+
+  private async handleGuards(
+    normalizedPath: string,
+    routeConfig: RouteConfig,
+    params: Record<string, string>,
+    pushState: boolean
+  ): Promise<GuardResult | false> {
+    const guardResult = await RouteGuardsManager.processRouteGuards(
+      routeConfig, 
+      normalizedPath,
+      params
+    );
+
+    if (!guardResult.allowed) {
+      if (guardResult.redirectTo) {
+        await this.navigate(guardResult.redirectTo, pushState);
+      }
+      // If no redirect, stay on current route (guard blocked navigation)
+      return false;
+    }
+
+    return guardResult;
+  }
 }
 
-export const AppRouter = (routes: Routes) => new Router(routes);
+export const AppRouter = (routes: Routes) => Router.getInstance(routes);
