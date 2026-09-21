@@ -1,4 +1,4 @@
-import { ComponentConfig, View, ViewOptions } from '../../../core/index.js';
+import { ComponentConfig, NavigationManager, View, ViewOptions } from '../../../core/index.js';
 import { ResourceManifest } from '../../services/index.js';
 import { ResourceContentComponent, ResourceNavComponent } from '../../components/index.js';
 
@@ -24,6 +24,17 @@ export abstract class ResourceView extends View {
   // constructed. See routes.ts.
   private get slug(): string {
     return this.getRouteParam('slug') || this.manifest.firstSlug || '';
+  }
+
+  // Landing on the bare route (e.g. /docs) renders the manifest's first page
+  // via the fallback above, but the URL stays at /docs. Canonicalize it here
+  // so reload/back-forward/bookmarks resolve to the page actually shown.
+  // Safe to run unconditionally: onEnter() is only invoked by the client
+  // router (never during SSR), always after render, with route params set.
+  public onEnter(): void {
+    if (!this.getRouteParam('slug') && this.slug) {
+      NavigationManager.replaceState(`/${this.routePrefix}/${this.slug}`);
+    }
   }
 
   public registerChildren(): ComponentConfig[] {
