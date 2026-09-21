@@ -176,6 +176,7 @@ export class TaskCardComponent extends Component {
 
 ```css
 .task-card__actions {
+    padding-top: .5rem;
     display: flex;
     justify-content: flex-end;
 }

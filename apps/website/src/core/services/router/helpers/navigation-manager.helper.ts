@@ -58,6 +58,14 @@ export class NavigationManager {
     }
   }
 
+  // Rewrites the current history entry's URL to match content already rendered
+  // (e.g. a resource route that fell back to its first page) without adding a
+  // new back/forward-navigable entry.
+  public static replaceState(path: string): void {
+    const localizedPath = this.addLocalePrefix(path) + window.location.hash;
+    window.history.replaceState({}, '', localizedPath);
+  }
+
   // Scrolls to the element matching `hash` (a bare fragment, no leading "#") if it
   // exists; falls back to the top of the page otherwise (no hash, or a stale/broken
   // id) — matches the browser's own native fallback for an unresolvable fragment.
