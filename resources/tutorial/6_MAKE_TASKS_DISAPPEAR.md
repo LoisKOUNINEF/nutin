@@ -16,6 +16,7 @@ class TaskService extends Service<TaskService> {
 
 ```bash
 npm run generate component task-action
+# Creates src/app/components/task-action/task-action.component.ts|html|scss
 ```
 
 ## Pass configuration to the component

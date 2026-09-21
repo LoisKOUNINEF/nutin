@@ -18,6 +18,7 @@ class TaskService extends Service<TaskService> {
 
 ```bash
 npm run generate component task-inputs
+# Creates src/app/components/task-inputs/task-inputs.component.ts|html|scss
 ```
 
 ## Give the component a task
@@ -65,12 +66,12 @@ export class TaskInputsComponent extends Component {
 
 ```css
 .task-inputs {
-    padding: 1rem;
+    padding: 2rem;
     input {
         font-size: 1.5rem;
         font-weight: bold;
         padding: .2rem .5rem;
-        margin-bottom:.5rem;
+        margin-bottom: .5rem;
         width: 100%;
         background: #F1F1EF;
         border-radius: 8px;
@@ -78,6 +79,7 @@ export class TaskInputsComponent extends Component {
     textarea {
         width: 100%;
         font-size: 1.2rem;
+        padding: .5rem 1rem;
         background: #E5E5E2;
         border-radius: 8px;
     }
