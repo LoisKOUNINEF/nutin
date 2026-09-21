@@ -4,7 +4,7 @@
 
 ```ts
 class TaskService extends Service<TaskService> {
-    //
+    // Remove hardcoded tasks
     private _tasks: ITask[];
 
     constructor() {
@@ -13,13 +13,12 @@ class TaskService extends Service<TaskService> {
     }
     
     public addTask(): void {
-        // 'Dynamic' id
         let id = 0;
         if (this._tasks.length > 0){
             id = Math.max(...this._tasks.map(task => task.id)) + 1;
         }
 
-        const newTask: Task = {
+        const newTask: ITask = {
             id: id,
             name: `Task ${id + 1}`,
         };
@@ -36,6 +35,8 @@ npm run generate component add-task
 # Creates src/app/components/add-task/add-task.component.ts|html|scss
 ```
 
+## Add the callback
+
 ```ts
 import { taskService } from '../../services/index.js';
 
@@ -49,11 +50,15 @@ export class AddTaskComponent extends Component {
 }
 ```
 
+## Bind the callback
+
 ```html
 <div class="add-task">
     <button data-event="click:_addTask">Add Task</button>
 </div>
 ```
+
+## A little bit of styling
 
 ```css
 .add-task {
@@ -71,7 +76,7 @@ export class AddTaskComponent extends Component {
 }
 ```
 
-## View
+## Use the component in the view
 
 ```ts
 export class TaskCatalogView extends View {
@@ -98,7 +103,9 @@ export class TaskCatalogView extends View {
 </div>
 ```
 
-## Make the View able to react to changes
+## Make the view aware of task creation
+
+### Define an event
 
 ```ts
 // src/app/globals.d.ts
@@ -107,6 +114,8 @@ declare interface AppEventMap {
     'task-event': { taskId: number };
 }
 ```
+
+### Emit the event
 
 ```ts
 import { AppEventBus } from '../../../core/index.js';
@@ -120,6 +129,8 @@ class TaskService extends Service<TaskService> {
     }
 }
 ```
+
+### Listen to the event to re-render the view
 
 ```ts
 export class TaskCatalogView extends View {

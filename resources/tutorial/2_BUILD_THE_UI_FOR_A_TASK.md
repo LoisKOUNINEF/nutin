@@ -1,4 +1,4 @@
-# Build the UI for a task
+# 2. Build the UI for a task
 
 ## Give your tasks a shape
 
@@ -26,11 +26,7 @@ const templateFn = (_task: ITask) => `__TEMPLATE_PLACEHOLDER__`;
 
 export class TaskCardComponent extends Component {
   constructor(mountTarget: HTMLElement, config: ITask) {
-    super({
-      templateFn, 
-      config, 
-      mountTarget,
-    });
+    super({ templateFn, config, mountTarget });
   }
 }
 ```
@@ -40,6 +36,7 @@ export class TaskCardComponent extends Component {
 ```html
 <div class="task-card">
     <h2>${_task.name}</h2>
+    <!-- data-optional is removed if empty -->
     <p data-optional>${_task.content}</p>
 </div>
 ```
@@ -52,11 +49,16 @@ export class TaskCardComponent extends Component {
     line-height: 2;
     max-width: 100ch;
     background: #F1F1EF;
-    border: 1px solid #D6D6D2;
+    border: 1px solid #D6D6D2;;
     border-radius: 8px;
     h2 {
         font-size: 1.5rem;
         font-weight: bold;
+    }
+    p {
+        font-size: 1.1rem;
+        overflow: hidden;
+        max-height: 4rem;
     }
 }
 ```
@@ -65,16 +67,13 @@ export class TaskCardComponent extends Component {
 /* src/styles/_styles.scss */
 /* Global styles */
 :root {
+    font-size: clamp(16px, 18px, 20px);
     body {
         background-color: #FAFAF9;
         color: #121212;
         min-height: 100vh;
         width: 100%;
-        cursor: default;
         line-height: 1.8;
-        overflow-y: scroll;
-        overflow-x: hidden;
-        scrollbar-gutter: stable;
         padding: 1rem;
     }
 }

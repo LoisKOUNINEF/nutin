@@ -1,4 +1,4 @@
-# 4. See your tasks
+# 3. See your tasks
 
 ## Generate the view
 
@@ -7,7 +7,7 @@ npm run generate view task-catalog
 # Creates src/app/views/task-catalog/task-catalog.view.ts|html|scss
 ```
 
-## Render your tasks + routeParams
+## Render your tasks
 
 ```ts
 class TaskCatalogView extends View {
@@ -42,7 +42,7 @@ class TaskCatalogView extends View {
 ```html
 <div class="task-catalog">
     <h1>Nutin Todo</h1>
-    <div class="task-catalog__task-cards">
+    <div class="task-catalog__body">
         <!-- data-catalog attribute = "selector" target -->
         <div data-catalog="task-cards" class="task-catalog__task-cards"></div>
     </div>
@@ -58,9 +58,13 @@ class TaskCatalogView extends View {
     }
 }
 
+.task-catalog__body {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr 2fr);
+}
+
 .task-catalog__task-cards {
     padding: 2rem;
-    max-width: 25vw;
     display: grid;
     gap: 12px;
 }

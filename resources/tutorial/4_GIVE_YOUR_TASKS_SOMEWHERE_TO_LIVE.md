@@ -47,7 +47,7 @@ class TaskService extends Service<TaskService> {
 import { taskService } from '../../services/index.js';
 
 class TaskCatalogView extends View {
-  private _tasks: ITask[];
+  private _tasks: ITask[] = [];
 
   /* ... */
 

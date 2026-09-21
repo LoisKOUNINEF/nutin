@@ -20,6 +20,8 @@ class TaskService extends Service<TaskService> {
 npm run generate component task-inputs
 ```
 
+## Give the component a task
+
 ```ts
 const templateFn = (_task: ITask) => `__TEMPLATE_PLACEHOLDER__`;
 
@@ -37,6 +39,8 @@ export class TaskInputsComponent extends Component {
   }
 }
 ```
+
+## Handle changes
 
 ```html
 <div class="task-inputs">
@@ -56,6 +60,8 @@ export class TaskInputsComponent extends Component {
     </form>
 </div>
 ```
+
+## Add style
 
 ```css
 .task-inputs {
@@ -80,7 +86,7 @@ export class TaskInputsComponent extends Component {
 
 ## Use dynamic routing for your tasks
 
-### Register the route
+### Register a dynamic route
 
 ```ts
 // src/app/routes.ts
@@ -94,8 +100,6 @@ export const appRoutes: Routes = {
 ### Handle routeParams in the view
 
 ```ts
-
-
 export class TaskCatalogView extends View {
     /* ... */
 
@@ -105,6 +109,8 @@ export class TaskCatalogView extends View {
         if (this.hasRouteParam('id')) {
             taskCatalogChildren.push(...this.getTaskInputsChild());
         }
+
+        return taskCatalogChildren;
     }
   
     private getTaskInputsChild(): ComponentConfig[] {
@@ -143,7 +149,7 @@ export class TaskCardComponent extends Component {
             {
                 selector: 'edit',
                 factory: (el) => new TaskActionComponent(el, {
-                    callback: () => this.goToEdit(),
+                    callback: () => this._goToEdit(),
                     textContent: 'Edit',
                 })
             },
@@ -159,9 +165,18 @@ export class TaskCardComponent extends Component {
 ```html
 <div class="task-card">
     <!-- ... -->
-    <div data-component="edit"></div>
-    <div data-component="delete"></div>
+    <div class="task-card__actions">
+        <div data-component="edit"></div>
+        <div data-component="delete"></div>
+    </div>
 </div>
+```
+
+```css
+.task-card__actions {
+    display: flex;
+    justify-content: flex-end;
+}
 ```
 
 **[Next step →](8_TAKE_A_LOOK_AT_WHAT_YOU_VE_BUILT.md)**
