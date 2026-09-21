@@ -6,6 +6,7 @@ import { NavigationManager } from './helpers/navigation-manager.helper.js';
 
 // centralized export
 export { Routes, RouteGuard } from './helpers/route-guard-manager.helper.js';
+export { NavigationManager } from './helpers/navigation-manager.helper.js';
 
 /**
  * IRouter is a type alias for the instance of Router, not a true interface 
