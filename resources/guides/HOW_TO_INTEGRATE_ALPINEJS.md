@@ -15,7 +15,7 @@ Add Alpine's CDN script to `src/index.html`'s `<head>`, pinned to an exact versi
 </head>
 ```
 
-## Approach 1: Keeping Alpine markup outside Nutin's mount root
+## Approach 1: Keeping Alpine separated from Nutin
 
 This pattern keeps Alpine state completely isolated; it is never touched by Nutin, so it's safe ground for Alpine to own. 
 
@@ -61,7 +61,7 @@ registerGlobals({
 </body>
 ```
 
-## Approach 2: Sharing Alpine state with Nutin's rendered content
+## Approach 2: Using Alpine state inside Nutin
 
 To let `@click`/`x-text`/etc. *inside* component and view templates read and mutate shared Alpine state, declare `x-data` directly on `#app` itself - it is permanent for the life of the page:
 

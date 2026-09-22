@@ -33,3 +33,5 @@ The feature will provide a configurable way to turn Markdown files into applicat
 It will be designed as an add-on (`nutin-add markdown`) rather than a core Nutin feature, keeping Markdown-related functionality out of applications that do not need it.
 
 *SEO support for Markdown content will be addressed separately.*
+
+## Fixes

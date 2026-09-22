@@ -13,7 +13,7 @@ Nutin is deliberately pragmatic, focused, and dependency-free on runtime.
 ## 🗃️ Repository
 
 - **[NPM package](packages/nutin/README.md)** — Nutin CLI, generator and templates
-- **[Website](apps/website/README.md)** — Nutin's website, built with Nutin
+- **[Website](apps/website/README.md)** — Nutin's [website](https://nutin.org/), built with Nutin
 - **[Tutorial app](apps/tutorial)** — Working example of the application built in the tutorial - See [Tutorial](resources/tutorial/TUTORIAL.md)
 
 ## 📄 Docs
