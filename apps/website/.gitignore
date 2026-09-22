@@ -8,7 +8,7 @@ pnpm-debug.log*
 /dist/
 /dist-build/
 /.build-lock/
-
+/coverage/
 .DS_Store
 .DS_Store?
 ._*
