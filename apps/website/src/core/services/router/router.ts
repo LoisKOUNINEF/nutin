@@ -71,13 +71,19 @@ class Router extends Service<Router> {
 
     this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
     this._currentParams = routeMatch.params;
+
+    // Must run before renderNewView(): the view's onEnter() (e.g. ResourceView
+    // canonicalizing a bare route to its first-page slug) uses replaceState on
+    // whatever history entry is current, so that entry needs to already be
+    // this route's — not the previous view's — before onEnter() can fire.
+    NavigationManager.updateHistory(normalizedPath, currentPath, pushState, hash);
+
     this._currentView = ViewRenderManager.renderNewView(
       guardResult.viewConstructor!,
       routeMatch.params
     );
 
     NavigationManager.updateDocumentTitle(this._currentView, routeMatch.pattern);
-    NavigationManager.updateHistory(normalizedPath, currentPath, pushState, hash);
     NavigationManager.scrollToHash(hash);
   }
 

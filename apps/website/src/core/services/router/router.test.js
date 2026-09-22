@@ -60,6 +60,21 @@ describe('Router', () => {
     ]);
   });
 
+  it('navigate() applies a view\'s onEnter() history rewrite (e.g. ResourceView canonicalizing a bare route) without it being overwritten by the router\'s own history update', async () => {
+    const home = makeView('home');
+    const tutorial = makeView('tutorial');
+    tutorial.onEnter = () => {
+      tutorial.calls.push(['onEnter']);
+      window.history.replaceState({}, '', '/tutorial/first-page');
+    };
+    router = AppRouter({ '/': () => home, '/tutorial': () => tutorial });
+    await flushPromises();
+
+    await router.navigate('/tutorial');
+
+    expect(window.location.pathname).toBe('/tutorial/first-page');
+  });
+
   it('navigate() passes matched route params to the rendered view', async () => {
     const home = makeView('home');
     const userView = makeView('user');

@@ -1,5 +1,5 @@
-import { GuidesService } from '#root/dist/src/app/services/guides/guides.service.js';
+import { GuidesManifest } from '#root/dist/src/app/services/guides-manifest/guides-manifest.service.js';
 
-describe('GuidesService', () => {
-  it.todo('Write tests for GuidesService');
+describe('GuidesManifest', () => {
+  it.todo('Write tests for GuidesManifest');
 });
