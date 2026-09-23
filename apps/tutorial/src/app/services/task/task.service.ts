@@ -17,7 +17,7 @@ export class TaskService extends Service<TaskService> {
     return this._tasks.find((task) => task.id === id);
   }
 
-  public addTask(): void {
+  public createTask(): void {
     let id = 0;
     if (this._tasks.length > 0){
       id = Math.max(...this._tasks.map(task => task.id)) + 1;
@@ -32,7 +32,7 @@ export class TaskService extends Service<TaskService> {
     AppEventBus.emit('task-event', { taskId: newTask.id });
   }
     
-  public removeTask(id: number): void {
+  public deleteTask(id: number): void {
     this._tasks = this._tasks.filter((task: ITask) => task.id !== id);
     AppEventBus.emit('task-event', { taskId: id });
   }

@@ -5,7 +5,7 @@
 ```ts
 class TaskService extends Service<TaskService> {
     /* ... */
-    public removeTask(id: number): void {
+    public deleteTask(id: number): void {
         this._tasks = this._tasks.filter((task: ITask) => task.id !== id);
         AppEventBus.emit('task-event', { taskId: id });
     }
@@ -83,22 +83,22 @@ export class TaskCardComponent extends Component {
     registerChildren(): ComponentConfig[] {
         return [
             {
-                selector: 'delete',
+                selector: 'remove',
                 factory: (el) => new TaskActionComponent(el, 
                     // config
                     {
-                        callback: () => this._deleteTask(),
-                        textContent: 'Delete',
+                        callback: () => this._removeTask(),
+                        textContent: 'Remove',
                     },
                     // props
-                    { className: 'task-card__action-delete' },
+                    { className: 'task-card__action-remove' },
                 )
             },
         ]
     }
 
-    private _deleteTask(): void {
-        taskService.removeTask(this._task.id);
+    private _removeTask(): void {
+        taskService.deleteTask(this._task.id);
     }
 }
 ```
@@ -106,14 +106,14 @@ export class TaskCardComponent extends Component {
 ```html
 <div class="task-card">
     <!-- ... -->
-    <div data-component="delete"></div>
+    <div data-component="remove"></div>
 </div>
 ```
 
 ## Customize its style
 
 ```css
-.task-card__action-delete {
+.task-card__action-remove {
     button {
         color: #B05252;
         &:hover {

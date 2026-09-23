@@ -106,7 +106,7 @@ export class TaskCatalogView extends View {
     /* ... */
 
     registerChildren(): ComponentConfig[] {
-        const taskCatalogChildren: ComponentConfig[] = [ /* add-task, task-cards */ ];
+        const taskCatalogChildren: ComponentConfig[] = [ /* new-task, task-cards */ ];
 
         if (this.hasRouteParam('id')) {
             taskCatalogChildren.push(...this.getTaskInputsChild());

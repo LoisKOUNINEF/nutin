@@ -14,14 +14,14 @@ export class TaskCardComponent extends Component {
   registerChildren(): ComponentConfig[] {
     return [
       {
-        selector: 'delete',
+        selector: 'remove',
         factory: (el) => new TaskActionComponent(el, 
           {
-            callback: () => this._deleteTask(),
-            textContent: 'Delete',
+            callback: () => this._removeTask(),
+            textContent: 'Remove',
           },
           // props
-          { className: 'task-card__action-delete' },
+          { className: 'task-card__action-remove' },
         )
       },
       {
@@ -34,8 +34,8 @@ export class TaskCardComponent extends Component {
       ]
   }
 
-  private _deleteTask(): void {
-    taskService.removeTask(this._task.id);
+  private _removeTask(): void {
+    taskService.deleteTask(this._task.id);
   }
 
   private _goToEdit(): void {
