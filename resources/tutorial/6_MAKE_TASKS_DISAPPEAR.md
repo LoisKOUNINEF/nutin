@@ -113,7 +113,7 @@ export class TaskCardComponent extends Component {
 
 ## Customize its style
 
-```css
+```scss
 .task-card__action-remove {
     button {
         color: #B05252;

@@ -67,7 +67,7 @@ export class TaskInputsComponent extends Component {
 
 ## Add style
 
-```css
+```scss
 .task-inputs {
     padding: 2rem;
     input {
@@ -81,6 +81,7 @@ export class TaskInputsComponent extends Component {
     }
     textarea {
         width: 100%;
+        min-height: 20vh;
         font-size: 1.2rem;
         padding: .5rem 1rem;
         background: #E5E5E2;
@@ -181,7 +182,7 @@ export class TaskCardComponent extends Component {
 </div>
 ```
 
-```css
+```scss
 .task-card__actions {
     padding-top: .5rem;
     display: flex;

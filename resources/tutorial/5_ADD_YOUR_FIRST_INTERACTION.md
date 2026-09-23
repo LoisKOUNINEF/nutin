@@ -61,7 +61,7 @@ export class NewTaskComponent extends Component {
 
 ## A little bit of styling
 
-```css
+```scss
 .new-task {
     padding: 2rem;
     button {

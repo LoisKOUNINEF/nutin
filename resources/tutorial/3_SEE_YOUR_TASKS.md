@@ -56,7 +56,7 @@ export class TaskCatalogView extends View {
 
 ## Style it a bit
 
-```css
+```scss
 .task-catalog {
     h1 {
         font-size: 2.5rem;

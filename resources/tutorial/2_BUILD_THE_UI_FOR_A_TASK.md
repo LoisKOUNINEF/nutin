@@ -68,7 +68,7 @@ export class TaskCardComponent extends Component {
 }
 ```
 
-```css
+```scss
 /* src/styles/_styles.scss */
 /* Global styles */
 :root {
