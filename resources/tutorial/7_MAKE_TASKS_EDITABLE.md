@@ -3,7 +3,7 @@
 ## Let the service update tasks
 
 ```ts
-class TaskService extends Service<TaskService> {
+export class TaskService extends Service<TaskService> {
     /* ... */
     public updateTask(task: ITask): void {
         this._tasks = this._tasks.map((t) => {
@@ -24,6 +24,9 @@ npm run generate component task-inputs
 ## Give the component a task
 
 ```ts
+import { Component } from '../../../core/index.js';
+import { taskService } from '../../services/index.js';
+
 const templateFn = (_task: ITask) => `__TEMPLATE_PLACEHOLDER__`;
 
 export class TaskInputsComponent extends Component {
@@ -102,6 +105,9 @@ export const appRoutes: Routes = {
 ### Handle routeParams in the view
 
 ```ts
+/* ... */
+import { TaskInputsComponent } from '../../components/index.js';
+
 export class TaskCatalogView extends View {
     /* ... */
 
@@ -140,6 +146,7 @@ export class TaskCatalogView extends View {
 ### Navigate to the route
 
 ```ts
+/* ... */
 import { Navigation } from '../../../core/index.js';
 
 export class TaskCardComponent extends Component {
@@ -169,7 +176,7 @@ export class TaskCardComponent extends Component {
     <!-- ... -->
     <div class="task-card__actions">
         <div data-component="edit"></div>
-        <div data-component="delete"></div>
+        <div data-component="remove"></div>
     </div>
 </div>
 ```

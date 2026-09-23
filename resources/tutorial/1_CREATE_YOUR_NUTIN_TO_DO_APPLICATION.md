@@ -24,7 +24,7 @@ nutin-new nutin-todo
 
 ```bash
 cd nutin-todo
-npm run dev # Port 9090
+npm run serve # Port 9090 - use npm run dev for watch mode
 ```
 
 ## Project structure
@@ -35,8 +35,11 @@ src/
         |---- components/
         |---- services/
         |---- views/
-        |---- routes.ts
+        |---- globals.d.ts
         |---- main.ts
+        |---- routes.ts
+ |---- core     // Nutin source code
+ |---- styles
 ```
 
 ### How the pieces fit together

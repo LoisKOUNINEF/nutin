@@ -5,10 +5,8 @@ import { taskService } from '../../services/index.js';
 const templateFn = (_task: ITask) => `__TEMPLATE_PLACEHOLDER__`;
 
 export class TaskCardComponent extends Component {
-  private _task: ITask;
   constructor(mountTarget: HTMLElement, config: ITask) {
     super({ templateFn, config, mountTarget });
-    this._task = config;
   }
 
   registerChildren(): ComponentConfig[] {
@@ -35,10 +33,10 @@ export class TaskCardComponent extends Component {
   }
 
   private _removeTask(): void {
-    taskService.deleteTask(this._task.id);
+    taskService.deleteTask(this.config.id);
   }
 
   private _goToEdit(): void {
-    Navigation.navigateTo(`/tasks/${this._task.id}`)
+    Navigation.navigateTo(`/tasks/${this.config.id}`)
   }
 }

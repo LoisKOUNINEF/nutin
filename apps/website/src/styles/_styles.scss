@@ -55,7 +55,7 @@ tbody > tr:last-of-type {
 
 // Global styles
 :root {
-	font-size: clamp(16px, 18px, 20px);
+  font-size: clamp(16px, 0.909rem + 0.455vw, 20px);
 	@each $name, $value in $light-theme {
     --#{$name}: #{$value};
   }

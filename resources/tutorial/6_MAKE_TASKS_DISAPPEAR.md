@@ -3,7 +3,7 @@
 ## Let the service remove tasks
 
 ```ts
-class TaskService extends Service<TaskService> {
+export class TaskService extends Service<TaskService> {
     /* ... */
     public deleteTask(id: number): void {
         this._tasks = this._tasks.filter((task: ITask) => task.id !== id);
@@ -22,6 +22,8 @@ npm run generate component task-action
 ## Pass configuration to the component
 
 ```ts
+import { Component, ComponentProps } from '../../../core/index.js';
+
 export interface ITaskActionConfig {
     callback: () => void;
     textContent: string;
@@ -71,14 +73,13 @@ export class TaskActionComponent extends Component {
 ## Use it in the card
 
 ```ts
-export class TaskCardComponent extends Component {
-    // Keep a reference to task
-    private _task: ITask;
+/* ... */
+import { ComponentConfig } from '../../../core/index.js';
+import { taskService } from '../../services/index.js';
+import { TaskActionComponent } from '../index.js';
 
-    constructor(mountTarget: HTMLElement, config: ITask) {
-        /* ... */
-        this._task = config;
-    }
+export class TaskCardComponent extends Component {
+    constructor(mountTarget: HTMLElement, config: ITask) { /* ... */ }
 
     registerChildren(): ComponentConfig[] {
         return [
@@ -98,7 +99,7 @@ export class TaskCardComponent extends Component {
     }
 
     private _removeTask(): void {
-        taskService.deleteTask(this._task.id);
+        taskService.deleteTask(this.config.id);
     }
 }
 ```

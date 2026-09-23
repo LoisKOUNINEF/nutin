@@ -38,6 +38,7 @@ npm run generate component new-task
 ## Add the callback
 
 ```ts
+import { Component } from '../../../core/index.js';
 import { taskService } from '../../services/index.js';
 
 const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
@@ -45,15 +46,15 @@ const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
 export class NewTaskComponent extends Component {
     /* ... */
     private _newTask(): void {
-        taskService.addTask();
-  }
+        taskService.createTask();
+    }
 }
 ```
 
 ## Bind the callback
 
 ```html
-<div class="add-task">
+<div class="new-task">
     <button data-event="click:_newTask">New Task</button>
 </div>
 ```
@@ -79,6 +80,9 @@ export class NewTaskComponent extends Component {
 ## Use the component in the view
 
 ```ts
+/* ... */
+import { NewTaskComponent } from '../../components/index.js';
+
 export class TaskCatalogView extends View {
     /* ... */
 
@@ -88,7 +92,7 @@ export class TaskCatalogView extends View {
                 selector: 'new-task',
                 factory: (el) => new NewTaskComponent(el),
             },
-            /* ... */
+            ...this.createCatalogComponents({ /* ... */ })
         ]
     }
 }
@@ -118,9 +122,10 @@ declare interface AppEventMap {
 ### Emit the event
 
 ```ts
+/* ... */
 import { AppEventBus } from '../../../core/index.js';
 
-class TaskService extends Service<TaskService> {
+export class TaskService extends Service<TaskService> {
     /* ... */
     
     public createTask(): void {

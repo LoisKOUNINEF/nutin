@@ -7,6 +7,9 @@
 .task-catalog__body {
   display: grid;
   grid-template-columns: repeat(2, 1fr 2fr);
+  @media (max-width: 993px) {
+    grid-template-columns: repeat(1, 1fr);
+  }
 }
 
 .task-catalog__task-cards {

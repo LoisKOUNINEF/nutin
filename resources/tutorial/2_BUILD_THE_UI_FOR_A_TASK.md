@@ -21,6 +21,8 @@ npm run generate component task-card
 ## Give the component a task to render
 
 ```ts
+import { Component } from '../../../core/index.js';
+
 // The component's .html template is injected here.
 const templateFn = (_task: ITask) => `__TEMPLATE_PLACEHOLDER__`;
 
@@ -48,11 +50,9 @@ export class TaskCardComponent extends Component {
     padding: 1.5rem;
     padding-bottom: .5rem;
     line-height: 2;
-    width: 100ch;
-    max-width: 20vw;
     overflow: hidden;
     background: #F1F1EF;
-    border: 1px solid #D6D6D2;;
+    border: 1px solid #D6D6D2;
     border-radius: 8px;
     h2 {
         font-size: 1.5rem;
@@ -72,7 +72,8 @@ export class TaskCardComponent extends Component {
 /* src/styles/_styles.scss */
 /* Global styles */
 :root {
-    font-size: clamp(16px, 18px, 20px);
+    font-size: clamp(16px, 0.909rem + 0.455vw, 20px);
+    scrollbar-gutter: stable;
     body {
         background-color: #FAFAF9;
         color: #121212;
