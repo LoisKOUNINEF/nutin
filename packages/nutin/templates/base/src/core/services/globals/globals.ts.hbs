@@ -40,10 +40,6 @@ export class Globals extends Service<Globals> {
         console.warn(`Global "${id}" is already registered - skipping.`);
         return null;
       }
-      // Removes any statically pre-rendered element with this id (from the SEO/SSR build)
-      // before mounting the live one, mirroring ViewRenderManager.clearStaleMountContent's
-      // "wipe stale content, mount live" convention — otherwise both stay in the DOM.
-      document.getElementById(id)?.remove();
       const instance = new Component(mountTarget);
       const element = instance.render();
       element.id = id;

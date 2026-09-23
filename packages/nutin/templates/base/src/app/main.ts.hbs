@@ -1,12 +1,10 @@
 import nutinConfig from '../../nutin.config.js';
-import { AppRouter, Service, I18nService, registerPipes, registerGlobals } from '../core/index.js';
+import { AppRouter, Service, I18nService, registerPipes } from '../core/index.js';
 import { appRoutes } from './routes.js';
-import { appGlobals } from './app-globals.js';
 
 class App {
   constructor() {
     registerPipes();
-    registerGlobals(appGlobals);
     AppRouter(appRoutes);
   }
 }
