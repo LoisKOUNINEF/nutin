@@ -1,4 +1,5 @@
 import { ChildrenHelper } from '#root/dist/src/core/base-classes/base-component/helpers/children.helper.js';
+import { BaseComponent } from '#root/dist/src/core/index.js';
 
 describe('ChildrenHelper', () => {
   let element;
@@ -53,6 +54,29 @@ describe('ChildrenHelper', () => {
     ChildrenHelper.addChildren(component, element, children);
 
     expect(children.length).toBe(2);
+  });
+
+  it('keeps the placeholder attributes (except data-component) on the mounted child element', () => {
+    class Widget extends BaseComponent {
+      generateTemplate() { return '<p>widget</p>'; }
+    }
+    element.innerHTML = '<div data-component="widget" class="my-class" id="my-widget"></div>';
+    const component = {
+      registerChildren: () => [{
+        selector: 'widget',
+        factory: (el) => new Widget({ mountTarget: el }),
+      }],
+    };
+
+    const children = [];
+    ChildrenHelper.addChildren(component, element, children);
+
+    const childEl = children[0].getElement();
+    expect(element.contains(childEl)).toBe(true);
+    expect(childEl.classList.contains('my-class')).toBe(true);
+    expect(childEl.id).toBe('my-widget');
+    expect(childEl.hasAttribute('data-component')).toBe(false);
+    expect(childEl.innerHTML).toBe('<p>widget</p>');
   });
 
   it('does nothing when there are no registerChildren', () => {

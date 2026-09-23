@@ -39,6 +39,45 @@ describe('DomHelper', () => {
     expect(container.contains(el)).toBe(true);
   });
 
+  it('mountElement carries the placeholder attributes onto the element, merging classes', () => {
+    const placeholder = document.createElement('div');
+    placeholder.className = 'my-class other-class';
+    placeholder.id = 'foo';
+    placeholder.setAttribute('aria-label', 'Label');
+    placeholder.setAttribute('data-extra', 'bar');
+    container.appendChild(placeholder);
+
+    const el = document.createElement('span');
+    el.className = 'own-class';
+    DomHelper.mountElement(el, placeholder);
+
+    expect(el.classList.contains('own-class')).toBe(true);
+    expect(el.classList.contains('my-class')).toBe(true);
+    expect(el.classList.contains('other-class')).toBe(true);
+    expect(el.id).toBe('foo');
+    expect(el.getAttribute('aria-label')).toBe('Label');
+    expect(el.getAttribute('data-extra')).toBe('bar');
+  });
+
+  it('mountElement does not carry data-component over from the placeholder', () => {
+    const placeholder = document.createElement('div');
+    placeholder.setAttribute('data-component', 'widget');
+    container.appendChild(placeholder);
+
+    const el = document.createElement('span');
+    DomHelper.mountElement(el, placeholder);
+
+    expect(el.hasAttribute('data-component')).toBe(false);
+  });
+
+  it('mountElement leaves the element attributes untouched in append mode', () => {
+    container.className = 'container-class';
+    const el = document.createElement('span');
+    DomHelper.mountElement(el, '#mount-target');
+
+    expect(el.attributes.length).toBe(0);
+  });
+
   it('createElement creates an element with the given tag name', () => {
     const el = DomHelper.createElement('section');
     expect(el.tagName).toBe('SECTION');

@@ -14,6 +14,7 @@
 
 ### Fixes
 
+- Attributes set on a `data-component` placeholder (`class`, `id`, `aria-*`, `data-*`, …) are now kept on the mounted component's element instead of being dropped. Classes are merged with the component's own; `data-component` itself is not carried over. This applies to catalog items too.
 - Builds now take a lock (`.build-lock/`, gitignored) before touching `dist-build`, so concurrent builds (a manual build during `dev`, or stray watcher processes) no longer corrupt each other's output.
 - The dev watcher no longer drops a file change made while a rebuild is running. It now rebuilds again once the current build finishes.
 - Stopping `dev` now kills the whole process group of live-server and the watcher (including an in-flight build), so no orphaned watcher processes are left behind. On Windows, the process tree is killed with `taskkill` instead.
