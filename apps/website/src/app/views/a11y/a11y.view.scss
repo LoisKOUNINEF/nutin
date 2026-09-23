@@ -1,0 +1,200 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+
+.a11y {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    margin-left: clamp(1rem, 5vw, 10rem);
+    margin-right: clamp(1rem, 5vw, 10rem);
+    h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+    @include mixins.respond-to(medium) {
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+}
+
+// a11y-elements retheme: its --a11y-<component>-<token> custom properties
+// mapped onto the site's theme variables, so the demos follow light/dark mode.
+// On body, not :root: the dark theme overrides the site variables on
+// body.dark-theme, and a var() reference resolves where it is declared. Not
+// scoped to .a11y either: overlays portal themselves to <body>.
+body {
+    --a11y-avatar-color-surface: var(--border);
+    --a11y-avatar-color-text-muted: var(--text-muted);
+    --a11y-blocking-loader-color-overlay: var(--overlay);
+    --a11y-blocking-loader-color-text: var(--text);
+    --a11y-picture-color-text-muted: var(--text-muted);
+    --a11y-progress-color-primary: var(--primary);
+    --a11y-progress-color-surface: var(--border);
+    --a11y-progress-color-text-muted: var(--text-muted);
+    --a11y-skeleton-color-surface: var(--disabled-bg);
+    --a11y-spinner-color: var(--primary);
+
+    @each $control in checkbox, radio-group, switch, select {
+        --a11y-#{$control}-color-background: var(--background);
+        --a11y-#{$control}-color-surface: var(--surface);
+        --a11y-#{$control}-color-text: var(--text);
+        --a11y-#{$control}-color-text-muted: var(--text-muted);
+        --a11y-#{$control}-color-primary: var(--primary);
+        --a11y-#{$control}-color-border: var(--border);
+        --a11y-#{$control}-color-border-strong: var(--border-strong);
+        --a11y-#{$control}-color-disabled-bg: var(--disabled-bg);
+        --a11y-#{$control}-color-disabled-text: var(--disabled-text);
+    }
+
+    @each $overlay in modal, drawer, dropdown, context-menu, popover, tooltip, menu-item {
+        --a11y-#{$overlay}-color-background: var(--background);
+        --a11y-#{$overlay}-color-text: var(--text);
+    }
+    --a11y-modal-color-overlay: var(--overlay);
+    --a11y-drawer-color-overlay: var(--overlay);
+    --a11y-modal-color-secondary: var(--text-muted);
+    --a11y-modal-color-secondary-hover: var(--text);
+    --a11y-menu-item-color-secondary-hover: var(--text-muted);
+}
+
+// Shared by both demo pages. Top-level on purpose: overlay content is
+// portaled to <body> by a11y-elements, outside .a11y.
+.a11y-demo {
+    max-width: 150ch;
+    p {
+        line-height: 1.6;
+    }
+}
+
+.a11y-demo__back {
+    color: var(--text-muted);
+    text-decoration: none;
+    &:hover {
+        color: var(--primary);
+    }
+}
+
+.a11y-demo__lead {
+    font-size: 1.2rem;
+    margin-top: map.get($spacings, small);
+}
+
+.a11y-demo__section {
+    padding-top: map.get($spacings, largest);
+    scroll-margin-top: map.get($spacings, largest);
+    h2 {
+        font-size: 1.25rem;
+        color: var(--primary);
+        margin-bottom: map.get($spacings, small);
+    }
+}
+
+.a11y-demo__stage {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: map.get($spacings, medium);
+    margin-top: map.get($spacings, medium);
+    padding: map.get($spacings, large);
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+}
+
+.a11y-demo__stage--column {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.a11y-demo__skeletons {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    a11y-skeleton:last-child {
+        grid-column: 1 / -1;
+    }
+}
+
+.a11y-demo__button {
+    padding: map.get($spacings, small) map.get($spacings, medium);
+    border: 1px solid var(--primary);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--primary);
+    font: inherit;
+    cursor: pointer;
+    &:hover {
+        background: color-mix(in srgb, var(--primary), transparent 85%);
+    }
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+}
+
+.a11y-demo__link-button {
+    padding: map.get($spacings, smallest) 0;
+    border: none;
+    background: none;
+    color: var(--primary);
+    font: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.a11y-demo__drawer-list {
+    list-style: none;
+    padding: 0;
+}
+
+.a11y-demo__focusable {
+    padding: map.get($spacings, small) map.get($spacings, medium);
+    border: 1px dashed var(--primary);
+    border-radius: 8px;
+    cursor: pointer;
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+}
+
+.a11y-demo__picture {
+    max-width: 14rem;
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+}
+
+.a11y-demo__context-target {
+    width: 100%;
+    padding: map.get($spacings, largest);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    text-align: center;
+    color: var(--text-muted);
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+    }
+}
+
+.a11y__repo {
+    padding-top: map.get($spacings, largest);
+    line-height: 2rem;
+    a { 
+        background: var(--surface);
+        color: var(--primary);
+        padding: .3rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        text-underline-offset: 2px;
+        &:hover {
+            border: 1px solid var(--primary);
+        }
+        @media(hover: none) {
+            &:hover {
+                border: 1px solid var(--border);
+            }
+        }
+    }
+}
