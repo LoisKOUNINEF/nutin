@@ -6,6 +6,7 @@ import { NavigationManager } from './helpers/navigation-manager.helper.js';
 
 // centralized export
 export { Routes, RouteGuard } from './helpers/route-guard-manager.helper.js';
+export { NavigationManager } from './helpers/navigation-manager.helper.js';
 
 /**
  * IRouter is a type alias for the instance of Router, not a true interface 
@@ -29,7 +30,7 @@ class Router extends Service<Router> {
   constructor(private routes: Routes) {
     super();
     this.initializeEventListeners();
-    this.navigate(NavigationManager.getCurrentPath());
+    this.navigate(NavigationManager.getCurrentPath() + window.location.hash);
     this.registerCleanup(this.removeEventListeners);
   }
 
@@ -43,13 +44,14 @@ class Router extends Service<Router> {
 
   public async reload(): Promise<void> {
     const currentRoute = NavigationManager.getCurrentPath();
-    await this.navigate(currentRoute, false);
+    await this.navigate(currentRoute + window.location.hash, false);
   }
 
   public async navigate(path: string | '', pushState: boolean = true): Promise<void> {
-    const normalizedPath = NavigationManager.normalizePath(path);
+    const [rawPath = '', hash] = path.split('#');
+    const normalizedPath = NavigationManager.normalizePath(rawPath);
     const currentPath = NavigationManager.getCurrentPath();
-    
+
     // Try to match the route with parameters
     const routeMatch = this.matchRoute(normalizedPath);
 
@@ -59,24 +61,30 @@ class Router extends Service<Router> {
     }
 
     const guardResult = await this.handleGuards(
-      normalizedPath, 
-      routeMatch.route, 
-      routeMatch.params, 
+      normalizedPath,
+      routeMatch.route,
+      routeMatch.params,
       pushState
     );
-    
+
     if (!guardResult) return;
 
     this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
     this._currentParams = routeMatch.params;
+
+    // Must run before renderNewView(): a view's onEnter() may rewrite the URL via
+    // NavigationManager.replaceState (e.g. canonicalizing a bare route to a default
+    // sub-page), which acts on whatever history entry is current — so that entry needs
+    // to already be this route's, not the previous view's, before onEnter() fires.
+    NavigationManager.updateHistory(normalizedPath, currentPath, pushState, hash);
+
     this._currentView = ViewRenderManager.renderNewView(
       guardResult.viewConstructor!,
       routeMatch.params
     );
 
     NavigationManager.updateDocumentTitle(this._currentView, routeMatch.pattern);
-    NavigationManager.updateHistory(normalizedPath, currentPath, pushState);
-    window.scrollTo({ top: 0 });
+    NavigationManager.scrollToHash(hash);
   }
 
   public getCurrentParams(): Record<string, string> {
@@ -111,7 +119,7 @@ class Router extends Service<Router> {
     if (newLocale && newLocale !== I18nService.currentLanguage) {
       await I18nService.setCurrentLanguage(newLocale as Language);
     }
-    this.navigate(NavigationManager.getCurrentPath(), false);
+    this.navigate(NavigationManager.getCurrentPath() + window.location.hash, false);
   }
 
   /**

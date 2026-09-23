@@ -14,7 +14,7 @@ export function upsertInHead(html, pattern, replacement, fullTag) {
   return html.replace('</head>', `\n    ${fullTag}\n  </head>`);
 }
 
-export function applySubstitutions(template, lang, title, description, pageUrl, ogImage) {
+export function applySubstitutions(template, lang, title, description, pageUrl, ogImage, hreflangLinks = []) {
   let html = template;
 
   // lang attribute on <html>
@@ -53,6 +53,15 @@ export function applySubstitutions(template, lang, title, description, pageUrl, 
     `<meta property="og:url" content="${pageUrl}/" />`
   );
 
+  // hreflang alternates — one per active language plus x-default, so crawlers see
+  // these URLs as language variants of the same page rather than duplicate content
+  if (hreflangLinks.length > 0) {
+    const altTags = hreflangLinks
+      .map(({ hreflang, href }) => `<link rel="alternate" hreflang="${hreflang}" href="${href}" />`)
+      .join('\n    ');
+    html = html.replace('</head>', `\n    ${altTags}\n  </head>`);
+  }
+
   // og:title
   html = upsertInHead(html,
     /(<meta\s+property=["']og:title["']\s+content=)["'][^"']*["']/,
@@ -79,6 +88,20 @@ export function applySubstitutions(template, lang, title, description, pageUrl, 
     /(<meta\s+name=["']twitter:description["']\s+content=)["'][^"']*["']/,
     `$1"${escape(description)}"`,
     `<meta name="twitter:description" content="${escape(description)}" />`
+  );
+
+  // og:type
+  html = upsertInHead(html,
+    /(<meta\s+property=["']og:type["']\s+content=)["'][^"']*["']/,
+    `$1"website"`,
+    `<meta property="og:type" content="website" />`
+  );
+
+  // twitter:card — required for Twitter/X to render an image card at all
+  html = upsertInHead(html,
+    /(<meta\s+name=["']twitter:card["']\s+content=)["'][^"']*["']/,
+    `$1"summary_large_image"`,
+    `<meta name="twitter:card" content="summary_large_image" />`
   );
 
   // og:image + twitter:image — only when explicitly provided in route config

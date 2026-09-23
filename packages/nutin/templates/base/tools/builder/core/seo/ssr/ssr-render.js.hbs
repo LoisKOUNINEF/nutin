@@ -22,13 +22,18 @@ export async function getAppRoutePaths(bundleUrl, lang, pageUrl) {
 
 /**
  * Renders one (route, lang) pair by instantiating the real View via appRoutes and calling
- * .render(), returning the resulting real markup. Fresh linkedom window + cache-busted
+ * .render(), returning the resulting real markup — plus the app's globals (src/app/app-globals.ts),
+ * as `before`/`after` markup for route-output.js to place around `<main id="app">`. Fresh linkedom window + cache-busted
  * dynamic import per call, so no singleton state (I18nService, etc.) leaks between renders.
  */
 export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFetch, lang, pageUrl, i18nEnabled }) {
   // Passing a real URL instance as `location` gives `.pathname`/`.href`
   // which is what I18n's getLocaleFromUrl() actually reads.
-  const { window } = parseHTML('<!doctype html><html><body></body></html>', { location: new URL(pageUrl) });
+  // <main id="app"> mirrors index.html's real mount target — View defaults to mounting
+  // there (view.ts), and without it the View tree is never attached to `document`, so
+  // DomHelper.cleanupOptionalContent()'s document-wide `[data-optional]` query silently
+  // misses it, leaking raw "undefined" text for any unset optional field.
+  const { window } = parseHTML('<!doctype html><html><body><main id="app"></main></body></html>', { location: new URL(pageUrl) });
   const { trackedFetches } = installGlobals(window, {
     lang,
     mockFetch: mockFetch ?? {},
@@ -41,7 +46,7 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
   try {
     const bundle = await import(`${bundleUrl}?ssr=${renderIndex++}`);
     ({ Service } = bundle);
-    const { appRoutes, I18nService, RouteGuardsManager, registerPipes } = bundle;
+    const { appRoutes, appGlobals, I18nService, RouteGuardsManager, registerPipes } = bundle;
 
     const routeConfig = appRoutes[appRoutesKey];
     if (!routeConfig) {
@@ -63,10 +68,22 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
 
     const element = view.render();
 
+    // Globals persist across every route, so they're rendered per (route, lang) call like
+    // the view itself. ids match Globals.register's mount() — the client relies on them to
+    // remove this static markup before mounting its own live copy on boot.
+    const renderGlobals = (configs = []) => configs.map(({ component: Component, id }) => {
+      const globalElement = new Component('body').render();
+      globalElement.id = id;
+      return globalElement;
+    });
+    const beforeElements = renderGlobals(appGlobals.before);
+    const afterElements = renderGlobals(appGlobals.after);
+
     await Promise.all(trackedFetches);
     await Promise.resolve();
 
-    return element.outerHTML;
+    const toHtml = (elements) => elements.map((el) => el.outerHTML).join('\n');
+    return { body: element.outerHTML, before: toHtml(beforeElements), after: toHtml(afterElements) };
   } catch (err) {
     throw new Error(
       `[ssr] Failed to render route "${appRoutesKey}" (lang "${lang}", view "${constructorName}"): ${err.message}${hintForError(err)}`,

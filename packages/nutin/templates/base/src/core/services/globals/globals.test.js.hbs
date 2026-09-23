@@ -46,6 +46,17 @@ describe('globals (registerGlobals)', () => {
     expect(document.body.lastElementChild.id).toBe('footer');
   });
 
+  it('replaces a prerendered element with the same id instead of duplicating it', () => {
+    const prerendered = document.createElement('header');
+    prerendered.id = 'header';
+    document.body.prepend(prerendered);
+
+    registerGlobals({ before: [{ component: makeComponent('header'), id: 'header' }] });
+
+    expect(document.querySelectorAll('#header').length).toBe(1);
+    expect(document.getElementById('header')).not.toBe(prerendered);
+  });
+
   it('mounts multiple "before" entries in the given order (not reversed)', () => {
     registerGlobals({
       before: [

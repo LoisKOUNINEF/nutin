@@ -9,13 +9,20 @@ const SSR_DIR = path.join(PATHS.temp, '.ssr');
 const ENTRY_FILE = path.join(PATHS.tempApp, '__ssr-entry.ts');
 const OUT_FILE = path.join(SSR_DIR, 'ssr-bundle.mjs');
 
+// src/app is never touched by nutin-update, so a project created before app-globals.ts
+// existed won't have it — prerender no globals there instead of failing the build.
+const APP_GLOBALS_EXPORT = fs.existsSync(path.join(PATHS.tempApp, 'app-globals.ts'))
+  ? `export { appGlobals } from './app-globals.js';`
+  : `export const appGlobals = {};`;
+
 const ENTRY_CONTENT = `export { appRoutes } from './routes.js';
+${APP_GLOBALS_EXPORT}
 export { I18nService, Service, registerPipes } from '../core/index.js';
 export { RouteGuardsManager } from '../core/services/router/helpers/route-guard-manager.helper.js';
 `;
 
 /**
- * Bundles a synthetic entry (re-exporting appRoutes + I18nService/Service) targeting Node,
+ * Bundles a synthetic entry (re-exporting appRoutes/appGlobals + I18nService/Service) targeting Node,
  * so generate-seo-html.js can import it and render real Views in a linkedom environment.
  * Written outside dist-build/src so hash-files.js/compress-files.js never see it.
  */

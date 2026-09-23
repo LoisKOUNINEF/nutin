@@ -7,6 +7,20 @@
 - Dev builds (`dev`/`serve`/`build`) now bundle with esbuild too, unminified with a sourcemap and `console`/`debugger` kept, so npm runtime dependencies (e.g. `alpinejs`, `a11y-elements`) work in dev without import maps or vendoring. tsc's per-file output is still emitted for testin-nutin.
 - Sass now resolves `@use "pkg:<package>/<path>"` imports through `node_modules`.
 - The default `builder.esbuild.target` in `nutin.config.js` is now `es2020` (was `es2015`), which libraries relying on native `async` functions (e.g. Alpine) require. Existing projects keep their own `nutin.config.js` value.
+- New `src/app/app-globals.ts` (`appGlobals`), passed by `main.ts` to `registerGlobals`. When SEO files are generated, these globals (e.g. a header/footer) are now prerendered around `<main id="app">` in each route's static HTML, and `registerGlobals` removes a prerendered element with the same `id` before mounting the live one, so the page never shows duplicates. Projects updated with `nutin-update` (which never touches `src/app/`) keep building without the file; to opt in, add `src/app/app-globals.ts` and pass `appGlobals` to `registerGlobals` in `main.ts`.
+- Generated SEO HTML now includes `hreflang` alternates (one per language plus `x-default`) when i18n is enabled, `og:type` and `twitter:card` (`summary_large_image`) meta tags, and an absolute `og:image`/`twitter:image` URL (a relative `ogImage` in `config/seo.json` is now prefixed with `baseUrl`).
+- The router now supports `#hash` fragments: navigating to `path#id` keeps the hash in the URL and scrolls to the matching element, falling back to the top of the page. The hash is also kept on reload and on language change.
+- New `NavigationManager.replaceState(path)` (exported from `core/index.ts`) rewrites the current URL without adding a history entry. The router now updates history before rendering the new view, so a view's `onEnter()` can call it without the change being overwritten.
+- Docker feature: in i18n projects, nginx now redirects a bare `/` to the default language (generated into `nginx.conf` by `validate-docker` through a new `__ROOT_REDIRECT_PLACEHOLDER__` token, which a hand-edited `tools/docker/nginx.conf.template` must keep).
+
+### Fixes
+
+- Builds now take a lock (`.build-lock/`, gitignored) before touching `dist-build`, so concurrent builds (a manual build during `dev`, or stray watcher processes) no longer corrupt each other's output.
+- The dev watcher no longer drops a file change made while a rebuild is running. It now rebuilds again once the current build finishes.
+- Stopping `dev` now kills the whole process group of live-server and the watcher (including an in-flight build), so no orphaned watcher processes are left behind. On Windows, the process tree is killed with `taskkill` instead.
+- SSR now renders views into a real `<main id="app">`, so unset `data-optional` fields are removed from prerendered HTML instead of leaking the literal text `undefined`.
+- Ctrl/Cmd/Shift/Alt-clicks and middle-clicks on `<a href>` elements with a `data-event` click handler now fall through to the browser's native behaviour (e.g. open in a new tab), instead of being intercepted.
+- Docker feature: nginx now issues relative redirects (`absolute_redirect off`), so the trailing-slash redirect on prerendered routes no longer leaks the container's internal port or scheme behind a proxy. A route directory without its own `index.html` now serves the SPA shell instead of a 403.
 
 ## 2.1.0
 

@@ -39,6 +39,40 @@ describe('NavigationManager', () => {
     window.history.pushState = originalPushState;
   });
 
+  it('replaceState calls history.replaceState (not pushState) with the locale-prefixed path', () => {
+    const originalReplaceState = window.history.replaceState;
+    const originalPushState = window.history.pushState;
+    let pushCalled = false;
+    let replaceArgs = null;
+
+    window.history.pushState = () => { pushCalled = true; };
+    window.history.replaceState = (state, title, url) => { replaceArgs = url; };
+
+    try {
+      NavigationManager.replaceState('/section/first-page');
+      expect(replaceArgs).toBe('/section/first-page');
+      expect(pushCalled).toBe(false);
+    } finally {
+      window.history.replaceState = originalReplaceState;
+      window.history.pushState = originalPushState;
+    }
+  });
+
+  it('replaceState preserves an existing hash fragment', () => {
+    const originalReplaceState = window.history.replaceState;
+    window.history.pushState({}, '', '/section#some-heading');
+    let replaceArgs = null;
+    window.history.replaceState = (state, title, url) => { replaceArgs = url; };
+
+    try {
+      NavigationManager.replaceState('/section/first-page');
+      expect(replaceArgs).toBe('/section/first-page#some-heading');
+    } finally {
+      window.history.replaceState = originalReplaceState;
+      window.history.pushState({}, '', '/');
+    }
+  });
+
   it('should return current path from location', () => {
     // This test assumes a DOM-like environment
     const currentPath = window.location.pathname;
