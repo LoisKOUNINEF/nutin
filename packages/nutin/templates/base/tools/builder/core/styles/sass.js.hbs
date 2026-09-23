@@ -13,10 +13,13 @@ const scssOrigins = builderConfig.sass.paths;
 const scssPath = (origin) => path.join(stylesPath, origin);
 const stylesInput = scssOrigins.map(origin => scssPath(origin));
 const pathsToLoad = [ ...stylesInput ];
+// resolves `@use "pkg:<package>/<subpath>"` through node_modules (package exports)
+const importers = [ new sass.NodePackageImporter() ];
 
 try {
   const mainResult = await sass.compileAsync(path.join(stylesPath, 'main.scss'), {
     loadPaths: [ ...pathsToLoad ],
+    importers,
     style: 'compressed'
   });
   fs.writeFileSync(stylesOutput, mainResult.css);
@@ -31,6 +34,7 @@ try {
   for (const style of appStyles) {
     const result = await sass.compileAsync(style, {
       loadPaths: [ ...pathsToLoad ],
+      importers,
       style: 'compressed'
     })
     fs.appendFileSync(stylesOutput, result.css);

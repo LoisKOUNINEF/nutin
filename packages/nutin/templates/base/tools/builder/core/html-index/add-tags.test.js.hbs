@@ -22,7 +22,7 @@ describe('addTags', () => {
     const result = await addTags(html, filePath);
 
     expect(result).toBe(
-      '<html><head><title>T</title><link rel="stylesheet" href="/main.css"></head><body><script type="module" src="/app/main.js"></script></body></html>'
+      '<html><head><title>T</title><link rel="stylesheet" href="/main.css"></head><body><script type="module" src="/bundle.js"></script></body></html>'
     );
   });
 
@@ -32,7 +32,7 @@ describe('addTags', () => {
     const result = await addTags(html, filePath);
 
     expect(result).toBe(
-      '<html><link rel="stylesheet" href="/main.css"><title>T</title><body><script type="module" src="/app/main.js"></script></body></html>'
+      '<html><link rel="stylesheet" href="/main.css"><title>T</title><body><script type="module" src="/bundle.js"></script></body></html>'
     );
   });
 
@@ -42,7 +42,7 @@ describe('addTags', () => {
     const result = await addTags(html, filePath);
 
     expect(result).toBe(
-      '<html></html><link rel="stylesheet" href="/main.css"><script type="module" src="/app/main.js"></script>'
+      '<html></html><link rel="stylesheet" href="/main.css"><script type="module" src="/bundle.js"></script>'
     );
   });
 

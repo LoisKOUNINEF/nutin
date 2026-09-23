@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Changes
+
+- Dev builds (`dev`/`serve`/`build`) now bundle with esbuild too, unminified with a sourcemap and `console`/`debugger` kept, so npm runtime dependencies (e.g. `alpinejs`, `a11y-elements`) work in dev without import maps or vendoring. tsc's per-file output is still emitted for testin-nutin.
+- Sass now resolves `@use "pkg:<package>/<path>"` imports through `node_modules`.
+- The default `builder.esbuild.target` in `nutin.config.js` is now `es2020` (was `es2015`), which libraries relying on native `async` functions (e.g. Alpine) require. Existing projects keep their own `nutin.config.js` value.
+
 ## 2.1.0
 
 ### Breaking Changes
