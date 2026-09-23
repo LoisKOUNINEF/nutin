@@ -1,0 +1,141 @@
+<div class="a11y-demo">
+  <p>
+    <a href="/a11y" class="a11y-demo__back" data-event="click:_navigateTo:@attr:href" data-i18n="a11y-demo-overlays.back"></a>
+  </p>
+  <h1 data-i18n="a11y-demo-overlays.title"></h1>
+  <p class="a11y-demo__lead" data-i18n="a11y-demo-overlays.lead"></p>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-modal&gt;</code></h2>
+    <p data-i18n="a11y-demo-overlays.modal-desc"></p>
+    <div class="a11y-demo__stage">
+      <button type="button" class="a11y-demo__button" data-event="click:openOverlay:a11y-demo-modal" data-i18n="a11y-demo-overlays.modal-open"></button>
+    </div>
+    <a11y-modal id="a11y-demo-modal">
+      <h2>${t('modal-title')}</h2>
+      <p>${t('modal-body')}</p>
+      <a11y-switch label="${t('modal-switch')}">
+        <input type="checkbox" name="a11y-demo-modal-switch">
+      </a11y-switch>
+    </a11y-modal>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-drawer&gt;</code></h2>
+    <p data-i18n="a11y-demo-overlays.drawer-desc"></p>
+    <div class="a11y-demo__stage">
+      <button type="button" class="a11y-demo__button" data-event="click:openOverlay:a11y-demo-drawer-left" data-i18n="a11y-demo-overlays.drawer-open-left"></button>
+      <button type="button" class="a11y-demo__button" data-event="click:openOverlay:a11y-demo-drawer-right" data-i18n="a11y-demo-overlays.drawer-open-right"></button>
+    </div>
+    <a11y-drawer id="a11y-demo-drawer-left" edge="left">
+      <h2>${t('drawer-nav-title')}</h2>
+      <ul class="a11y-demo__drawer-list">
+        <li><button type="button" class="a11y-demo__link-button" data-a11y-demo-close>${t('drawer-nav-home')}</button></li>
+        <li><button type="button" class="a11y-demo__link-button" data-a11y-demo-close>${t('drawer-nav-docs')}</button></li>
+      </ul>
+    </a11y-drawer>
+    <a11y-drawer id="a11y-demo-drawer-right" edge="right">
+      <h2>${t('drawer-filters-title')}</h2>
+      <a11y-checkbox label="${t('drawer-filters-open')}">
+        <input type="checkbox" name="a11y-demo-filter-open" checked>
+      </a11y-checkbox>
+      <a11y-checkbox label="${t('drawer-filters-closed')}">
+        <input type="checkbox" name="a11y-demo-filter-closed">
+      </a11y-checkbox>
+      <button type="button" class="a11y-demo__button" data-a11y-demo-close>${t('drawer-filters-apply')}</button>
+    </a11y-drawer>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-emergency-dialog&gt;</code></h2>
+    <p data-i18n="a11y-demo-overlays.emergency-desc"></p>
+    <div class="a11y-demo__stage">
+      <button type="button" class="a11y-demo__button" data-event="click:openOverlay:a11y-demo-emergency" data-i18n="a11y-demo-overlays.emergency-open"></button>
+    </div>
+    <a11y-emergency-dialog id="a11y-demo-emergency">
+      <h2>${t('emergency-title')}</h2>
+      <p>${t('emergency-body')}</p>
+      <button type="button" class="a11y-demo__button" data-a11y-demo-close>${t('emergency-resolve')}</button>
+    </a11y-emergency-dialog>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-blocking-loader&gt;</code></h2>
+    <p data-i18n="a11y-demo-overlays.blocking-loader-desc"></p>
+    <div class="a11y-demo__stage">
+      <button type="button" class="a11y-demo__button" data-event="click:openBlockingLoader" data-i18n="a11y-demo-overlays.blocking-loader-open"></button>
+    </div>
+    <a11y-blocking-loader id="a11y-demo-blocking-loader" message="${t('blocking-loader-message')}"></a11y-blocking-loader>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-dropdown&gt;</code></h2>
+    <p data-i18n="a11y-demo-overlays.dropdown-desc"></p>
+    <div class="a11y-demo__stage">
+      <button type="button" class="a11y-demo__button" id="a11y-demo-dropdown-anchor" data-i18n="a11y-demo-overlays.dropdown-open"></button>
+    </div>
+    <a11y-dropdown id="a11y-demo-dropdown" anchor="a11y-demo-dropdown-anchor">
+      <div role="menuitem">${t('menu-edit')}</div>
+      <div role="menuitem">${t('menu-duplicate')}</div>
+      <div role="menuitem" aria-disabled="true">${t('menu-archive')}</div>
+      <div role="menuitem">${t('menu-delete')}</div>
+    </a11y-dropdown>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-context-menu&gt;</code></h2>
+    <p data-i18n="a11y-demo-overlays.context-menu-desc"></p>
+    <div class="a11y-demo__stage">
+      <div id="a11y-demo-context-target" class="a11y-demo__context-target" tabindex="0" data-i18n="a11y-demo-overlays.context-menu-target"></div>
+    </div>
+    <a11y-context-menu id="a11y-demo-context-menu" trigger="a11y-demo-context-target">
+      <div role="menuitem">${t('menu-copy')}</div>
+      <div role="menuitem">${t('menu-paste')}</div>
+      <div role="menuitem">${t('menu-delete')}</div>
+    </a11y-context-menu>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-popover&gt;</code></h2>
+    <p data-i18n="a11y-demo-overlays.popover-desc"></p>
+    <div class="a11y-demo__stage">
+      <button type="button" class="a11y-demo__button" id="a11y-demo-popover-anchor" data-event="click:toggleOverlay:a11y-demo-popover" data-i18n="a11y-demo-overlays.popover-open"></button>
+    </div>
+    <a11y-popover id="a11y-demo-popover" anchor="a11y-demo-popover-anchor" interactive>
+      <p>${t('popover-body')}</p>
+      <button type="button" class="a11y-demo__button" data-a11y-demo-close>${t('popover-close')}</button>
+    </a11y-popover>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-tooltip&gt;</code></h2>
+    <p data-i18n="a11y-demo-overlays.tooltip-desc"></p>
+    <div class="a11y-demo__stage">
+      <button type="button" class="a11y-demo__button" id="a11y-demo-tooltip-anchor" data-i18n="a11y-demo-overlays.tooltip-anchor"></button>
+    </div>
+    <a11y-tooltip id="a11y-demo-tooltip" anchor="a11y-demo-tooltip-anchor">${t('tooltip-text')}</a11y-tooltip>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-snackbar&gt;</code></h2>
+    <p data-i18n="a11y-demo-overlays.snackbar-desc"></p>
+    <div class="a11y-demo__stage">
+      <button type="button" class="a11y-demo__button" data-event="click:showSnackbar:info" data-i18n="a11y-demo-overlays.snackbar-open-info"></button>
+      <button type="button" class="a11y-demo__button" data-event="click:showSnackbar:success" data-i18n="a11y-demo-overlays.snackbar-open-success"></button>
+      <button type="button" class="a11y-demo__button" data-event="click:showSnackbar:error" data-i18n="a11y-demo-overlays.snackbar-open-error"></button>
+      <button type="button" class="a11y-demo__button" data-event="click:showSnackbarWithAction" data-i18n="a11y-demo-overlays.snackbar-open-action"></button>
+    </div>
+    <a11y-snackbar id="a11y-demo-snackbar"></a11y-snackbar>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-notification-banner&gt;</code></h2>
+    <p data-i18n="a11y-demo-overlays.banner-desc"></p>
+    <div class="a11y-demo__stage">
+      <button type="button" class="a11y-demo__button" data-event="click:showBanner:info" data-i18n="a11y-demo-overlays.banner-open-info"></button>
+      <button type="button" class="a11y-demo__button" data-event="click:showBanner:success" data-i18n="a11y-demo-overlays.banner-open-success"></button>
+      <button type="button" class="a11y-demo__button" data-event="click:showBanner:error" data-i18n="a11y-demo-overlays.banner-open-error"></button>
+    </div>
+    <a11y-notification-banner id="a11y-demo-banner"></a11y-notification-banner>
+  </section>
+</div>

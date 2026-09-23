@@ -3,9 +3,9 @@
 ## Let the service remove tasks
 
 ```ts
-class TaskService extends Service<TaskService> {
+export class TaskService extends Service<TaskService> {
     /* ... */
-    public removeTask(id: number): void {
+    public deleteTask(id: number): void {
         this._tasks = this._tasks.filter((task: ITask) => task.id !== id);
         AppEventBus.emit('task-event', { taskId: id });
     }
@@ -22,6 +22,8 @@ npm run generate component task-action
 ## Pass configuration to the component
 
 ```ts
+import { Component, ComponentProps } from '../../../core/index.js';
+
 export interface ITaskActionConfig {
     callback: () => void;
     textContent: string;
@@ -71,34 +73,33 @@ export class TaskActionComponent extends Component {
 ## Use it in the card
 
 ```ts
-export class TaskCardComponent extends Component {
-    // Keep a reference to task
-    private _task: ITask;
+/* ... */
+import { ComponentConfig } from '../../../core/index.js';
+import { taskService } from '../../services/index.js';
+import { TaskActionComponent } from '../index.js';
 
-    constructor(mountTarget: HTMLElement, config: ITask) {
-        /* ... */
-        this._task = config;
-    }
+export class TaskCardComponent extends Component {
+    constructor(mountTarget: HTMLElement, config: ITask) { /* ... */ }
 
     registerChildren(): ComponentConfig[] {
         return [
             {
-                selector: 'delete',
+                selector: 'remove',
                 factory: (el) => new TaskActionComponent(el, 
                     // config
                     {
-                        callback: () => this._deleteTask(),
-                        textContent: 'Delete',
+                        callback: () => this._removeTask(),
+                        textContent: 'Remove',
                     },
                     // props
-                    { className: 'task-card__action-delete' },
+                    { className: 'task-card__action-remove' },
                 )
             },
         ]
     }
 
-    private _deleteTask(): void {
-        taskService.removeTask(this._task.id);
+    private _removeTask(): void {
+        taskService.deleteTask(this.config.id);
     }
 }
 ```
@@ -106,14 +107,14 @@ export class TaskCardComponent extends Component {
 ```html
 <div class="task-card">
     <!-- ... -->
-    <div data-component="delete"></div>
+    <div data-component="remove"></div>
 </div>
 ```
 
 ## Customize its style
 
-```css
-.task-card__action-delete {
+```scss
+.task-card__action-remove {
     button {
         color: #B05252;
         &:hover {

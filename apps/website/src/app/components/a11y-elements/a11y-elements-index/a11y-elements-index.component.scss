@@ -1,0 +1,50 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+
+.a11y-index {
+    max-width: 150ch;
+    p {
+        line-height: 1.6;
+        margin-top: map.get($spacings, small);
+    }
+    .home-extras .grid {
+        grid-template-columns: repeat(2, 1fr);
+        @include mixins.respond-to(medium) {
+            grid-template-columns: repeat(1, 1fr);
+        }
+    }
+}
+
+.a11y-index__lead {
+    font-size: 1.5rem;
+    color: var(--secondary);
+}
+
+.a11y-index__pitch {
+    padding-top: 2rem;
+    p {
+        padding: .2rem 0;
+    }
+}
+
+.a11y-index__section {
+    padding-top: map.get($spacings, large);
+    h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary);
+    }
+    p {
+        padding: 1rem 0;
+    }
+    // SnippetComponent sizes its <pre> in vw (with vw min-widths per
+    // breakpoint), made for home's centered snippet cards; here it has to fill
+    // the text column instead so it lines up with the paragraphs.
+    .code-toolbar,
+    .snippet__code {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+}

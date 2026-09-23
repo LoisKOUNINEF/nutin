@@ -1,0 +1,148 @@
+<div class="a11y-demo">
+  <p>
+    <a href="/a11y" class="a11y-demo__back" data-event="click:_navigateTo:@attr:href" data-i18n="a11y-demo-elements.back"></a>
+  </p>
+  <h1 data-i18n="a11y-demo-elements.title"></h1>
+  <p class="a11y-demo__lead" data-i18n="a11y-demo-elements.lead"></p>
+
+  <section class="a11y-demo__section" id="a11y-demo-anchor-section">
+    <h2><code>&lt;a11y-anchor&gt;</code></h2>
+    <p data-i18n="a11y-demo-elements.anchor-desc"></p>
+    <div class="a11y-demo__stage">
+      <a11y-anchor><a href="#a11y-demo-visually-hidden">${t('anchor-internal')}</a></a11y-anchor>
+      <a11y-anchor><a href="https://www.w3.org/WAI/ARIA/apg/" target="_blank">${t('anchor-external')}</a></a11y-anchor>
+    </div>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-avatar&gt;</code></h2>
+    <p data-i18n="a11y-demo-elements.avatar-desc"></p>
+    <div class="a11y-demo__stage">
+      <a11y-avatar alt="Nutin" src="/assets/images/logo-small-trans.avif" size="3.5rem"></a11y-avatar>
+      <a11y-avatar alt="Jane Doe" src="/assets/images/missing-avatar.jpg" initials="JD" size="3.5rem"></a11y-avatar>
+      <a11y-avatar alt="Jane Doe" initials="JD" size="3.5rem" shape="square"></a11y-avatar>
+    </div>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-checkbox&gt;</code></h2>
+    <p data-i18n="a11y-demo-elements.checkbox-desc"></p>
+    <div class="a11y-demo__stage a11y-demo__stage--column">
+      <a11y-checkbox label="${t('checkbox-terms')}">
+        <input type="checkbox" name="a11y-demo-terms">
+      </a11y-checkbox>
+      <a11y-checkbox label="${t('checkbox-indeterminate')}" indeterminate>
+        <input type="checkbox" name="a11y-demo-all">
+      </a11y-checkbox>
+      <a11y-checkbox label="${t('checkbox-disabled')}">
+        <input type="checkbox" name="a11y-demo-disabled" checked disabled>
+      </a11y-checkbox>
+    </div>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-focusable&gt;</code></h2>
+    <p data-i18n="a11y-demo-elements.focusable-desc"></p>
+    <div class="a11y-demo__stage">
+      <a11y-focusable class="a11y-demo__focusable" data-event="click:countFocusable">${t('focusable-label')}</a11y-focusable>
+      <span>${t('focusable-count')} <strong id="a11y-demo-focusable-count">0</strong></span>
+    </div>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-picture&gt;</code></h2>
+    <p data-i18n="a11y-demo-elements.picture-desc"></p>
+    <div class="a11y-demo__stage">
+      <a11y-picture class="a11y-demo__picture">
+        <picture>
+          <img src="/assets/images/logo-trans.avif" alt="${t('picture-alt')}" loading="lazy" decoding="async">
+        </picture>
+        <figcaption>${t('picture-caption')}</figcaption>
+      </a11y-picture>
+      <a11y-picture class="a11y-demo__picture">
+        <picture>
+          <img src="/assets/images/logo-trans.avif" alt="" loading="lazy" decoding="async">
+        </picture>
+      </a11y-picture>
+    </div>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-progress&gt;</code></h2>
+    <p data-i18n="a11y-demo-elements.progress-desc"></p>
+    <div class="a11y-demo__stage a11y-demo__stage--column">
+      <a11y-progress id="a11y-demo-progress" value="40" max="100" label="${t('progress-label')}"></a11y-progress>
+      <button type="button" class="a11y-demo__button" data-event="click:stepProgress" data-i18n="a11y-demo-elements.progress-step"></button>
+    </div>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-radio-group&gt;</code></h2>
+    <p data-i18n="a11y-demo-elements.radio-group-desc"></p>
+    <div class="a11y-demo__stage">
+      <a11y-radio-group legend="${t('radio-group-legend')}">
+        <label><input type="radio" name="a11y-demo-plan" value="basic" checked> ${t('radio-group-basic')}</label>
+        <label><input type="radio" name="a11y-demo-plan" value="pro"> ${t('radio-group-pro')}</label>
+        <label><input type="radio" name="a11y-demo-plan" value="team" disabled> ${t('radio-group-team')}</label>
+      </a11y-radio-group>
+    </div>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-select&gt;</code></h2>
+    <p data-i18n="a11y-demo-elements.select-desc"></p>
+    <div class="a11y-demo__stage">
+      <a11y-select label="${t('select-label')}">
+        <select name="a11y-demo-framework">
+          <option value="nutin">Nutin</option>
+          <option value="vanilla">${t('select-vanilla')}</option>
+          <option value="other">${t('select-other')}</option>
+        </select>
+      </a11y-select>
+    </div>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-skeleton&gt;</code></h2>
+    <p data-i18n="a11y-demo-elements.skeleton-desc"></p>
+    <div class="a11y-demo__stage a11y-demo__skeletons">
+      <a11y-skeleton variant="circle" width="3.5rem" height="3.5rem"></a11y-skeleton>
+      <a11y-skeleton variant="text" lines="3"></a11y-skeleton>
+      <a11y-skeleton variant="rect" width="100%" height="6rem"></a11y-skeleton>
+    </div>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-spinner&gt;</code></h2>
+    <p data-i18n="a11y-demo-elements.spinner-desc"></p>
+    <div class="a11y-demo__stage">
+      <a11y-spinner label="${t('spinner-label')}"></a11y-spinner>
+      <a11y-spinner label="${t('spinner-label')}" size="3rem"></a11y-spinner>
+      <a11y-spinner label="${t('spinner-label')}" size="3rem" style="--a11y-spinner-color: var(--warning);"></a11y-spinner>
+    </div>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-switch&gt;</code></h2>
+    <p data-i18n="a11y-demo-elements.switch-desc"></p>
+    <div class="a11y-demo__stage a11y-demo__stage--column">
+      <a11y-switch label="${t('switch-notifications')}">
+        <input type="checkbox" name="a11y-demo-notifications" checked>
+      </a11y-switch>
+      <a11y-switch label="${t('switch-reduced-motion')}">
+        <input type="checkbox" name="a11y-demo-reduced-motion">
+      </a11y-switch>
+    </div>
+  </section>
+
+  <section class="a11y-demo__section" id="a11y-demo-visually-hidden" tabindex="-1">
+    <h2><code>&lt;a11y-visually-hidden&gt;</code></h2>
+    <p data-i18n="a11y-demo-elements.visually-hidden-desc"></p>
+    <div class="a11y-demo__stage">
+      <button type="button" class="a11y-demo__button">
+        <span aria-hidden="true">✕</span>
+        <a11y-visually-hidden>${t('visually-hidden-text')}</a11y-visually-hidden>
+      </button>
+    </div>
+  </section>
+</div>
