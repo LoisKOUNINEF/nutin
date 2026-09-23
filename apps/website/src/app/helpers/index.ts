@@ -2,3 +2,4 @@ export * from './sort/sort-by-id.helper.js';
 export * from './prism/prism-highlighter.js';
 export * from './normalize/normalize-string.js';
 export * from './navigate-to-doc/navigate-to-doc.helper.js';
+export * from './a11y-elements/load-a11y-elements.helper.js';

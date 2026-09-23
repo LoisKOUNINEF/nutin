@@ -1,5 +1,6 @@
 import { Routes } from "../core/index.js";
 import {
+  A11yView,
   ArticlesView,
   ArticlesIndexView,
   ChangelogView,
@@ -28,6 +29,7 @@ export const appRoutes: Routes = {
   '/changelog/:slug?': { view: () => new ChangelogView(), guards: [Guards.resourcePageExists(ChangelogManifestService)] },
   '/articles/:slug?': { view: () => new ArticlesView(), guards: [Guards.resourcePageExists(ArticlesManifestService)] },
   '/articles-index': () => new ArticlesIndexView(),
+  '/a11y/:page?': () => new A11yView(),
   '/roadmap/:slug?': { view: () => new RoadmapView(), guards: [Guards.resourcePageExists(RoadmapManifestService)] },
   '/404': () => new NotFoundView(),
 }

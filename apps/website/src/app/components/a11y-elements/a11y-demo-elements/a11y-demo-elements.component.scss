@@ -1,0 +1,13 @@
+.a11y-demo__back { 
+    background: var(--surface);
+    padding: .3rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    text-underline-offset: 2px;
+}
+
+.a11y-demo {
+    h1 {
+        padding-top: .5rem;
+    }
+}

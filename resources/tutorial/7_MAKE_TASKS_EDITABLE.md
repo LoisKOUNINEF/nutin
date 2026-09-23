@@ -3,7 +3,7 @@
 ## Let the service update tasks
 
 ```ts
-class TaskService extends Service<TaskService> {
+export class TaskService extends Service<TaskService> {
     /* ... */
     public updateTask(task: ITask): void {
         this._tasks = this._tasks.map((t) => {
@@ -24,6 +24,9 @@ npm run generate component task-inputs
 ## Give the component a task
 
 ```ts
+import { Component } from '../../../core/index.js';
+import { taskService } from '../../services/index.js';
+
 const templateFn = (_task: ITask) => `__TEMPLATE_PLACEHOLDER__`;
 
 export class TaskInputsComponent extends Component {
@@ -64,7 +67,7 @@ export class TaskInputsComponent extends Component {
 
 ## Add style
 
-```css
+```scss
 .task-inputs {
     padding: 2rem;
     input {
@@ -78,6 +81,7 @@ export class TaskInputsComponent extends Component {
     }
     textarea {
         width: 100%;
+        min-height: 20vh;
         font-size: 1.2rem;
         padding: .5rem 1rem;
         background: #E5E5E2;
@@ -102,11 +106,14 @@ export const appRoutes: Routes = {
 ### Handle routeParams in the view
 
 ```ts
+/* ... */
+import { TaskInputsComponent } from '../../components/index.js';
+
 export class TaskCatalogView extends View {
     /* ... */
 
     registerChildren(): ComponentConfig[] {
-        const taskCatalogChildren: ComponentConfig[] = [ /* add-task, task-cards */ ];
+        const taskCatalogChildren: ComponentConfig[] = [ /* new-task, task-cards */ ];
 
         if (this.hasRouteParam('id')) {
             taskCatalogChildren.push(...this.getTaskInputsChild());
@@ -140,6 +147,7 @@ export class TaskCatalogView extends View {
 ### Navigate to the route
 
 ```ts
+/* ... */
 import { Navigation } from '../../../core/index.js';
 
 export class TaskCardComponent extends Component {
@@ -169,12 +177,12 @@ export class TaskCardComponent extends Component {
     <!-- ... -->
     <div class="task-card__actions">
         <div data-component="edit"></div>
-        <div data-component="delete"></div>
+        <div data-component="remove"></div>
     </div>
 </div>
 ```
 
-```css
+```scss
 .task-card__actions {
     padding-top: .5rem;
     display: flex;

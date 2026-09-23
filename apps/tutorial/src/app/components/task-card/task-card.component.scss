@@ -2,8 +2,6 @@
   padding: 1.5rem;
   padding-bottom: .5rem;
   line-height: 2;
-  width: 100ch;
-  max-width: 20vw;
   overflow: hidden;
   background: #F1F1EF;
   border: 1px solid #D6D6D2;;
@@ -21,7 +19,7 @@
   }
 }
 
-.task-card__action-delete {
+.task-card__action-remove {
   button {
     color: #B05252;
     &:hover {

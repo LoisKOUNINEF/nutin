@@ -10,7 +10,9 @@ npm run generate service task
 ## Move your tasks to the service
 
 ```ts
-class TaskService extends Service<TaskService> {
+import { Service } from '../../../core/index.js';
+
+export class TaskService extends Service<TaskService> {
     private _tasks: ITask[] = [
         {
             id: 1,
@@ -29,7 +31,7 @@ class TaskService extends Service<TaskService> {
 ## Let the service return tasks
 
 ```ts
-class TaskService extends Service<TaskService> {
+export class TaskService extends Service<TaskService> {
     /* ... */
     public get tasks(): ITask[] {
         return this._tasks;
@@ -44,9 +46,10 @@ class TaskService extends Service<TaskService> {
 ## Use the service in the view
 
 ```ts
+/* ... */
 import { taskService } from '../../services/index.js';
 
-class TaskCatalogView extends View {
+export class TaskCatalogView extends View {
   private _tasks: ITask[] = [];
 
   /* ... */

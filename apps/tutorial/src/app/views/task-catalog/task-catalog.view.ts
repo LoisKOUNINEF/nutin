@@ -1,5 +1,5 @@
 import { View, ComponentConfig } from '../../../core/index.js';
-import { AddTaskComponent, TaskInputsComponent, TaskCardComponent } from '../../components/index.js';
+import { NewTaskComponent, TaskInputsComponent, TaskCardComponent } from '../../components/index.js';
 import { taskService } from '../../services/index.js';
 
 const template = `__TEMPLATE_PLACEHOLDER__`;
@@ -20,7 +20,7 @@ export class TaskCatalogView extends View {
         const taskCatalogChildren: ComponentConfig[] = [
             {
                 selector: 'add-task',
-                factory: (el) => new AddTaskComponent(el),
+                factory: (el) => new NewTaskComponent(el),
             },...this.createCatalogComponents({
             items: this._tasks,
             selector: 'task-cards',

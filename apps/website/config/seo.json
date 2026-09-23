@@ -43,6 +43,29 @@
       "title": {"en": "Nutin articles"},
       "description": {"en": "Articles about topics such as software architecture, engineering decisions and frontend development."},
       "ogImage": "/assets/images/og-covers/og-cover-articles.jpg"
+    },
+    {
+      "path": "/a11y/:page?",
+      "outputPath": "/a11y",
+      "title": {"en": "a11y-elements"},
+      "description": {"en": "Framework-agnostic accessibility Custom Elements: a Light DOM behavior layer, not a themed UI kit."},
+      "ogImage": "/assets/images/og-covers/og-cover-home.jpg"
+    },
+    {
+      "path": "/a11y/:page?",
+      "outputPath": "/a11y/elements",
+      "mockParams": {"page": "elements"},
+      "title": {"en": "a11y-elements: elements demo"},
+      "description": {"en": "Live demo of every a11y-elements accessibility component: form controls, links, images, and loading states."},
+      "ogImage": "/assets/images/og-covers/og-cover-home.jpg"
+    },
+    {
+      "path": "/a11y/:page?",
+      "outputPath": "/a11y/overlays",
+      "mockParams": {"page": "overlays"},
+      "title": {"en": "a11y-elements: overlays demo"},
+      "description": {"en": "Live demo of every a11y-elements overlay: modals, drawers, menus, tooltips, and notifications."},
+      "ogImage": "/assets/images/og-covers/og-cover-home.jpg"
     }
   ]
 }

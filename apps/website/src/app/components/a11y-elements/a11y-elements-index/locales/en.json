@@ -1,0 +1,17 @@
+{
+  "title": "a11y-elements",
+  "lead": "Framework-agnostic accessibility Custom Elements (Web Components).",
+  "sublead": "A behavior layer, not a themed UI kit.",
+  "light-dom": "Every element is Light DOM only (no Shadow DOM): it enhances real markup you author yourself, and you style it with your own CSS.",
+  "cdn": "This page loads the elements through the zero-build CDN bundles, the same way you would on a plain HTML page.",
+  "elements-title": "Elements demo",
+  "elements-desc": "Anchor, avatar, checkbox, focusable, picture, progress, radio group, select, skeleton, spinner, switch and visually-hidden.",
+  "overlays-title": "Overlays demo",
+  "overlays-desc": "Modal, drawer, emergency dialog, blocking loader, dropdown, context menu, popover, tooltip, snackbar and notification banner.",
+  "zero-build-title": "Zero-build",
+  "zero-build-desc": "Each element has its own self-contained browser bundle under dist/browser/**/define.js, so no bundler is needed: load the stylesheet once, then only the elements you use. Page-wide state is shared between bundles, so mixing several on one page is safe.",
+  "bundler-title": "Bundler / ESM",
+  "bundler-desc": "The package's exports map exposes per-component ESM output and .d.ts types. There is no default export: import each element you want, and its /element subpath when you need the class itself.",
+  "styling-title": "Styling",
+  "styling-desc": "Default styles are never auto-injected. Every visual value is a plain CSS custom property named --a11y-<component>-<token>, with the shipped look as its fallback, so customizing is just CSS. Every class the library adds is prefixed a11y-, and the shipped styles respect prefers-reduced-motion."
+}

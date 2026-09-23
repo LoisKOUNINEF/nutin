@@ -10,7 +10,10 @@ npm run generate view task-catalog
 ## Render your tasks
 
 ```ts
-class TaskCatalogView extends View {
+import { ComponentConfig, View } from '../../../core/index.js';
+import { TaskCardComponent } from '../../components/index.js';
+
+export class TaskCatalogView extends View {
     private _tasks: ITask[] = [
         {
             id: 1,
@@ -23,6 +26,8 @@ class TaskCatalogView extends View {
             content: 'This is the second task.'
         }
     ];
+
+    constructor() { /* ... */ }
 
     registerChildren(): ComponentConfig[] {
         // One TaskCardComponent is created for each task.
@@ -51,7 +56,7 @@ class TaskCatalogView extends View {
 
 ## Style it a bit
 
-```css
+```scss
 .task-catalog {
     h1 {
         font-size: 2.5rem;
@@ -61,6 +66,9 @@ class TaskCatalogView extends View {
 .task-catalog__body {
   display: grid;
   grid-template-columns: repeat(2, 1fr 2fr);
+  @media (max-width: 993px) {
+      grid-template-columns: repeat(1, 1fr);
+  }
 }
 
 .task-catalog__task-cards {
@@ -74,10 +82,13 @@ class TaskCatalogView extends View {
 
 ```ts
 // src/app/routes.ts
+/* ... */
+import { TaskCatalogView } from './views/index.js';
 
 export const appRoutes: Routes = {
     // Make your new page the landing page
     '/': () => new TaskCatalogView(),
+    /* ... */
 }
 ```
 
