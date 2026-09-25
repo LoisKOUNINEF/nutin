@@ -2,20 +2,19 @@
   padding: 1.5rem;
   padding-bottom: .5rem;
   line-height: 2;
-  overflow: hidden;
   background: #F1F1EF;
   border: 1px solid #D6D6D2;;
   border-radius: 8px;
+  overflow: hidden;
   h2 {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: bold;
-    text-wrap: nowrap;
+    max-height: 3rem;
+    overflow: hidden;
   }
   p {
-    font-size: 1.1rem;
+    height: 4rem;
     overflow: hidden;
-    max-height: 4rem;
-    padding-bottom: 1rem;
   }
 }
 
@@ -28,7 +27,7 @@
   }
 }
 .task-card__actions {
-  padding-top: .5rem;
+  padding-top: 1.5rem;
   display: flex;
   justify-content: flex-end;
 }

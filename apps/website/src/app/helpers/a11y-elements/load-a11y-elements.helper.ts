@@ -1,5 +1,7 @@
 // a11y-elements' zero-build option: one self-contained ESM bundle per element
 // (dist/browser/**/define.js) plus the shared stylesheet, straight from the CDN.
+// Production's CSP only allows this exact version path (tools/docker/nginx.conf
+// and its .template): bump them together.
 const A11Y_ELEMENTS_DIST = 'https://cdn.jsdelivr.net/npm/a11y-elements@0.1.0/dist';
 
 const ACCESSIBILITY_COMPONENTS = [
