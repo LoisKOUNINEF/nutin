@@ -48,3 +48,10 @@ export function loadA11yDropdown(): void {
   ensureStylesheet(STYLESHEET);
   ensureModuleScript(bundleUrl('overlays', 'dropdown'));
 }
+
+// Only <a11y-drawer>, for the resource views' mobile sidenav (ResourceNavComponent).
+// Client-only (called from ResourceView.onEnter), like loadA11yDropdown().
+export function loadA11yDrawer(): void {
+  ensureStylesheet(STYLESHEET);
+  ensureModuleScript(bundleUrl('overlays', 'drawer'));
+}

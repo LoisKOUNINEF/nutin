@@ -67,7 +67,7 @@ describe('A11yElementsView', () => {
   it('onEnter canonicalizes an unknown page to /a11y', () => {
     const view = renderWith({ page: 'bogus' });
     const calls = withReplaceStateSpy(() => view.onEnter());
-    expect(calls).toEqual(['/a11y']);
+    expect(calls).toEqual(['/a11y-elements']);
     view.destroy();
   });
 

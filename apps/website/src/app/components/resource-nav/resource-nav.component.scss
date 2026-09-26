@@ -22,10 +22,68 @@
     scrollbar-gutter: stable;
     max-height: calc(100vh - 3rem);
 
+    // The sidebar moves into the drawer below: this container only keeps the
+    // (fixed) drawer toggle, so it must stay rendered but take no space.
     @include mixins.respond-to(large) {
         position: static;
-        width: 100%;
+        width: auto;
         max-height: none;
+        margin: 0;
+        padding: 0;
+        overflow: visible;
+    }
+}
+
+.resource-nav--sidebar {
+    @include mixins.respond-to(large) {
+        display: none;
+    }
+}
+
+.resource-nav__drawer-toggle {
+    display: none;
+    position: fixed;
+    left: map.get($spacings, 'large');
+    bottom: map.get($spacings, 'large');
+    z-index: 10;
+    width: 3rem;
+    height: 3rem;
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    background-color: var(--surface);
+    color: var(--primary);
+    cursor: pointer;
+    transition: ease-in-out 0.2s;
+    &:hover {
+        background-color: var(--secondary);
+        color: var(--background);
+    }
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+    @include mixins.respond-to(large) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    @media (hover: none) {
+        &:hover {
+            background-color: var(--surface);
+            color: var(--primary);
+        }
+    }
+}
+
+// Hidden until its CDN bundle defines it, so the SSR'd copy never flashes inline.
+a11y-drawer:not(:defined) {
+    display: none;
+}
+
+.a11y-drawer-content .resource-nav {
+    padding: map.get($spacings, 'large');
+    a {
+        text-decoration: none;
     }
 }
 

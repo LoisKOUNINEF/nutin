@@ -1,6 +1,7 @@
 import { ComponentConfig, NavigationManager, View, ViewOptions } from '../../../core/index.js';
 import { IResourceSection, ResourceManifest } from '../../services/index.js';
 import { ResourceContentComponent, ResourceNavComponent } from '../../components/index.js';
+import { loadA11yDrawer } from '../../helpers/index.js';
 
 export interface IResourceViewOptions extends ViewOptions {
   manifest: ResourceManifest<any>;
@@ -52,7 +53,9 @@ export abstract class ResourceView extends View {
   // so reload/back-forward/bookmarks resolve to the page actually shown.
   // Safe to run unconditionally: onEnter() is only invoked by the client
   // router (never during SSR), always after render, with route params set.
+  // Also why the sidenav's drawer bundle is loaded here: the SSR HTML stays free of it.
   public onEnter(): void {
+    loadA11yDrawer();
     if (!this.getRouteParam('slug') && this.slug) {
       NavigationManager.replaceState(this.pageHref(this.slug));
     }
