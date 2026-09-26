@@ -5,7 +5,7 @@
   "light-dom": "Every element is Light DOM only (no Shadow DOM): it enhances real markup you author yourself, and you style it with your own CSS.",
   "cdn": "This page loads the elements through the zero-build CDN bundles, the same way you would on a plain HTML page.",
   "elements-title": "Elements demo",
-  "elements-desc": "Anchor, avatar, checkbox, focusable, picture, progress, radio group, select, skeleton, spinner, switch and visually-hidden.",
+  "elements-desc": "Anchor, avatar, checkbox, focusable, input, label, picture, progress, radio group, select, skeleton, spinner, switch, textarea and visually-hidden.",
   "overlays-title": "Overlays demo",
   "overlays-desc": "Modal, drawer, emergency dialog, blocking loader, dropdown, context menu, popover, tooltip, snackbar and notification banner.",
   "zero-build-title": "Zero-build",

@@ -3,6 +3,9 @@
 @use "mixins";
 
 .resource-nav__container {
+    a {
+        text-decoration:none;
+    }
     position: sticky;
     top: 3rem;
     // A fixed width (not min-width) keeps this footprint constant whether or

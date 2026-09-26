@@ -3,10 +3,13 @@
 @use "mixins";
 
 .footer {
-    position: sticky;
-    bottom: 0;
-    padding: map.get($spacings, 'medium') map.get($spacings, 'largest');
-    width: 100%;
+  a {
+    text-decoration:none;
+  }
+  position: sticky;
+  bottom: 0;
+  padding: map.get($spacings, 'medium') map.get($spacings, 'largest');
+  width: 100%;
   border-top: 5px solid var(--surface);
   color: var(--text-muted);
   @include mixins.rounded;

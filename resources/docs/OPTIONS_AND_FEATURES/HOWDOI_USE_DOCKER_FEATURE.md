@@ -77,6 +77,23 @@ RUN apk add --no-cache nginx nginx-mod-http-brotli
 - uses non-standard port(s), configurable via `nutin.config.js`'s top-level `dockerPorts` (see [Configure ports](#configure-ports) above).
 - does not include `add_header Strict-Transport-Security  "max-age=63072000" always;`. Add it here only if Nginx is exposed directly over HTTPS.
 
+### Adding origins in CSP map
+
+If you want to add scripts, styles or other external resources, you'll have to add the origins to `nginx.conf.template` CSP map.
+
+```text
+# multi-line for readability only - use single-line map in actual file
+
+map $uri $csp_policy {
+    default "default-src 'self'; 
+    script-src 'self' https://cdn.jsdelivr.net/npm/a11y-elements@0.2.0/; 
+    style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net/npm/a11y-elements@0.2.0/; 
+    img-src 'self' data: https:; 
+    font-src 'self'; 
+    # ...
+}
+```
+
 ### Gzip
 
 Gzip is globally enabled.

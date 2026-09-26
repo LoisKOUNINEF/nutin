@@ -1,9 +1,9 @@
-import { A11yView } from '#root/dist/src/app/views/index.js';
+import { A11yElementsView } from '#root/dist/src/app/views/index.js';
 
-const CDN = 'https://cdn.jsdelivr.net/npm/a11y-elements@0.1.0/dist';
+const CDN = 'https://cdn.jsdelivr.net/npm/a11y-elements@0.2.0/dist';
 
 function renderWith(params) {
-  const view = new A11yView();
+  const view = new A11yElementsView();
   view.setRouteParams(params);
   view.render();
   return view;
@@ -21,7 +21,7 @@ function withReplaceStateSpy(callback) {
   return calls;
 }
 
-describe('A11yView', () => {
+describe('A11yElementsView', () => {
   let warnSpy;
 
   beforeAll(() => {
@@ -88,7 +88,7 @@ describe('A11yView', () => {
     const stylesheets = document.head.querySelectorAll(`link[href="${CDN}/a11y.css"]`);
     const scripts = document.head.querySelectorAll(`script[type="module"][src^="${CDN}/browser/"]`);
     expect(stylesheets.length).toBe(1);
-    expect(scripts.length).toBe(22);
+    expect(scripts.length).toBe(25);
     expect(document.head.querySelector(`script[src="${CDN}/browser/overlays/modal/define.js"]`)).toBeTruthy();
     view.destroy();
   });

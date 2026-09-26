@@ -9,11 +9,13 @@ Add Alpine's CDN script to `src/index.html`'s `<head>`, pinned to an exact versi
 ```html
 <!-- src/index.html -->
 <head>
-  <meta charset="UTF-8">
-  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 </head>
 ```
+
+*Note:* If you're using Nutin's `docker` feature, you'll have to [add the CDN source to nginx CSP map](http://localhost:9090/docs/use-docker-feature#adding-origins-in-csp-map).
 
 ## Approach 1: Keeping Alpine separated from Nutin
 
@@ -26,24 +28,24 @@ This pattern keeps Alpine state completely isolated; it is never touched by Nuti
 import { Component } from '../../../../core/index.js';
 
 const templateFn = () => `
-  <button @click="count++">Increment</button>
-  <span x-text="count"></span>
+    <button @click="count++">Increment</button>
+    <span x-text="count"></span>
 `;
 
 export class AlpineRootComponent extends Component {
-  constructor(mountTarget: HTMLElement) {
-    super({ mountTarget, tagName: 'div' });
-  }
+    constructor(mountTarget: HTMLElement) {
+        super({ mountTarget, tagName: 'div' });
+    }
 
-  protected override onBeforeRender(): void {
-    this.element.setAttribute('x-data', '{ count: 0 }');
-  }
+    protected override onBeforeRender(): void {
+        this.element.setAttribute('x-data', '{ count: 0 }');
+    }
 }
 ```
 
 ```ts
 registerGlobals({
-  after: [{ component: AlpineRootComponent, id: 'alpine-root' }],
+    after: [{ component: AlpineRootComponent, id: 'alpine-root' }],
 });
 ```
 
@@ -52,12 +54,12 @@ registerGlobals({
 ```html
 <!-- src/index.html -->
 <body>
-  <main id="app"></main>
+    <main id="app"></main>
 
-  <div x-data="{ count: 0 }">
-    <button @click="count++">Increment</button>
-    <span x-text="count"></span>
-  </div>
+    <div x-data="{ count: 0 }">
+        <button @click="count++">Increment</button>
+        <span x-text="count"></span>
+    </div>
 </body>
 ```
 
@@ -68,7 +70,7 @@ To let `@click`/`x-text`/etc. *inside* component and view templates read and mut
 ```html
 <!-- src/index.html -->
 <body>
-  <main id="app" x-data="{ count: 0 }"></main>
+    <main id="app" x-data="{ count: 0 }"></main>
 </body>
 ```
 
@@ -92,22 +94,22 @@ Swap to Alpine's non-auto-starting ESM build to set `#app`'s `x-data` from TypeS
 ```html
 <!-- src/index.html -->
 <head>
-  <!-- ... -->
-  <!-- This replaces the `cdn.min.js` script tag from "Load Alpine" -->
-  <!-- Use one or the other, not both. -->
-  <script type="module">
-    import Alpine from 'https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/module.esm.js';
-    window.Alpine = Alpine;
-  </script>
+    <!-- ... -->
+    <!-- This replaces the `cdn.min.js` script tag from "Load Alpine" -->
+    <!-- Use one or the other, not both. -->
+    <script type="module">
+        import Alpine from 'https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/module.esm.js';
+        window.Alpine = Alpine;
+    </script>
 </head>
 ```
 
 ```ts
 // src/app/globals.d.ts
 declare interface Window {
-  Alpine: {
-    start(): void;
-  };
+    Alpine: {
+        start(): void;
+    };
 }
 ```
 
@@ -116,10 +118,10 @@ declare interface Window {
 ```ts
 // src/app/main.ts
 document.addEventListener('DOMContentLoaded', () => {
-  // ...
+    // ...
 
-  document.getElementById('app')!.setAttribute('x-data', '{ count: 0 }');
-  window.Alpine.start();
+    document.getElementById('app')!.setAttribute('x-data', '{ count: 0 }');
+    window.Alpine.start();
 });
 ```
 
@@ -134,6 +136,5 @@ This is also true when an ancestor's re-render, or a view navigation tears down 
 
 ## Notes
 
-- Pin an exact [AlpineJS](https://alpinejs.dev) version rather than `@3`/`latest` to avoid silent breakage on upstream releases.
 - This CDN approach adds zero build-tool involvement. 
 - Bundling [AlpineJS](https://alpinejs.dev) as an npm dependency instead requires several steps and is not fully functional in Nutin.

@@ -2,7 +2,7 @@
 @use "variables" as *;
 @use "mixins";
 
-.a11y {
+.a11y-elements {
     padding-top: 2rem;
     padding-bottom: 2rem;
     margin-left: clamp(1rem, 5vw, 10rem);
@@ -35,7 +35,7 @@ body {
     --a11y-skeleton-color-surface: var(--disabled-bg);
     --a11y-spinner-color: var(--primary);
 
-    @each $control in checkbox, radio-group, switch, select {
+    @each $control in checkbox, radio-group, switch, select, input, textarea {
         --a11y-#{$control}-color-background: var(--background);
         --a11y-#{$control}-color-surface: var(--surface);
         --a11y-#{$control}-color-text: var(--text);
@@ -51,6 +51,14 @@ body {
         --a11y-#{$overlay}-color-background: var(--background);
         --a11y-#{$overlay}-color-text: var(--text);
     }
+    @each $field in input, textarea {
+        --a11y-#{$field}-color-error: var(--error);
+    }
+    --a11y-field-color-error: var(--error);
+    --a11y-field-color-text-muted: var(--text-muted);
+    --a11y-label-color-text: var(--text);
+    --a11y-label-color-required: var(--error);
+
     --a11y-modal-color-overlay: var(--overlay);
     --a11y-drawer-color-overlay: var(--overlay);
     --a11y-modal-color-secondary: var(--text-muted);
@@ -105,6 +113,31 @@ body {
 .a11y-demo__stage--column {
     flex-direction: column;
     align-items: flex-start;
+}
+
+// The stage is a flex column aligned to flex-start, which would shrink each
+// field to its content: give them one shared, capped width instead.
+.a11y-demo__form {
+    a11y-input,
+    a11y-textarea {
+        width: min(100%, 28rem);
+    }
+}
+
+// The plain <input> next to the standalone <a11y-label> gets no library
+// styles: match the fields' look with the site's theme.
+.a11y-demo__native-input {
+    width: min(100%, 28rem);
+    padding: map.get($spacings, small) map.get($spacings, medium);
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    background: var(--background);
+    color: var(--text);
+    font: inherit;
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
 }
 
 .a11y-demo__skeletons {
@@ -178,7 +211,7 @@ body {
     }
 }
 
-.a11y__repo {
+.a11y-elements__repo {
     padding-top: map.get($spacings, largest);
     line-height: 2rem;
     a { 

@@ -10,9 +10,9 @@ const template = `__TEMPLATE_PLACEHOLDER__`;
 
 type A11yPage = 'index' | 'elements' | 'overlays';
 
-export class A11yView extends View {
+export class A11yElementsView extends View {
   constructor() {
-    super({ template, viewName: 'a11y' });
+    super({ template, viewName: 'a11y Elements' });
   }
 
   private get page(): A11yPage {
@@ -25,13 +25,13 @@ export class A11yView extends View {
   public onEnter(): void {
     loadA11yElements();
     if (this.hasRouteParam('page') && this.page === 'index') {
-      NavigationManager.replaceState('/a11y');
+      NavigationManager.replaceState('/a11y-elements');
     }
   }
 
   public registerChildren(): ComponentConfig[] {
     return [{
-      selector: 'a11y-page',
+      selector: 'a11y-elements-page',
       factory: (el) => {
         switch (this.page) {
           case 'elements': return new A11yDemoElementsComponent(el);

@@ -123,6 +123,9 @@
 }
 
 .resource-toc {
+    a {
+        text-decoration:none;
+    }
     flex-shrink: 0;
     width: 18vw;
     font-size: map.get($font-sizes, 'small');

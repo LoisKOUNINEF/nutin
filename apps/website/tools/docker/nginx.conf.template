@@ -24,7 +24,7 @@ map $uri $permissions_policy {
 # The cdn.jsdelivr.net source is path-scoped to the a11y-elements version the
 # /a11y demo loads (src/app/helpers/a11y-elements): bump both together.
 map $uri $csp_policy {
-    default "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net/npm/a11y-elements@0.1.0/; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net/npm/a11y-elements@0.1.0/; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';";
+    default "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net/npm/a11y-elements@0.2.0/; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net/npm/a11y-elements@0.2.0/; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';";
 }
 
 # ---------------------------

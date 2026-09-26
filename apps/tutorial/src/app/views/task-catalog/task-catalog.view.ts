@@ -7,7 +7,7 @@ const template = `__TEMPLATE_PLACEHOLDER__`;
 export class TaskCatalogView extends View {
   private _tasks: ITask[] = [];
   constructor() {
-    super({ template, viewName: 'task-catalog' });
+    super({ template, viewName: 'Task Catalog' });
         this.listenToRenderEvents(['task-event']);
   }
 
