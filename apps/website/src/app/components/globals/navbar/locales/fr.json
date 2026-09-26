@@ -1,4 +1,4 @@
-{ 
+{
 	"home": "Accueil",
 	"documentation": "Documentation",
 	"tutorial": "Tutoriel",
@@ -7,5 +7,10 @@
 	"libraries": "Bibliothèques",
 	"stylin-nutin": "StylinNutin",
 	"testin-nutin": "TestinNutin",
-	"tools": "Outils"
+	"tools": "Outils",
+	"docs": "Documentation",
+	"docs-api": "API",
+	"docs-options": "Options et fonctionnalités",
+	"docs-testing": "Outils de test",
+	"docs-tools": "Outils"
 }

@@ -23,7 +23,7 @@ import { Guards } from "./guards.js";
 
 export const appRoutes: Routes = {
   '/': () => new HomeView(),
-  '/docs/:slug?': { view: () => new DocsView(), guards: [Guards.resourcePageExists(DocsManifestService)] },
+  '/docs/:section?/:slug?': { view: () => new DocsView(), guards: [Guards.sectionPageExists(DocsManifestService, 'docs')] },
   '/guides/:slug?': { view: () => new GuidesView(), guards: [Guards.resourcePageExists(GuidesManifestService)] },
   '/tutorial/:slug?': { view: () => new TutorialView(), guards: [Guards.resourcePageExists(TutorialManifestService)] },
   '/changelog/:slug?': { view: () => new ChangelogView(), guards: [Guards.resourcePageExists(ChangelogManifestService)] },

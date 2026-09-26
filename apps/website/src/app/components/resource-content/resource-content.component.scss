@@ -20,8 +20,6 @@
     // sizing to content and getting squeezed alongside the sidebar/toc.
     flex: 1 1 auto;
     min-width: 0;
-    // The sitewide root font-size is a fixed 18px (its clamp() has no vw term),
-    // so give this prose column its own fluid size instead of touching that.
     font-size: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);
     line-height: 1.9;
 

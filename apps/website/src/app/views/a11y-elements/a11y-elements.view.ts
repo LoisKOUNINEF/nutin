@@ -12,7 +12,7 @@ type A11yPage = 'index' | 'elements' | 'overlays';
 
 export class A11yElementsView extends View {
   constructor() {
-    super({ template, viewName: 'a11y Elements' });
+    super({ template, viewName: 'A11y Elements' });
   }
 
   private get page(): A11yPage {

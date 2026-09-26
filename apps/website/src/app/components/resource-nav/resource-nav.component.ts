@@ -5,8 +5,8 @@ import { navigateToDoc } from '../../helpers/index.js';
 export interface IResourceNavConfig {
   sections: IResourceSection[];
   manifest: ResourceManifest<any>;
-  routePrefix: string;
   currentSlug: string;
+  pageHref: (slug: string) => string;
 }
 
 function renderPageLink(slug: string, config: IResourceNavConfig): string {
@@ -17,7 +17,7 @@ function renderPageLink(slug: string, config: IResourceNavConfig): string {
   return `
     <li>
       <a
-        href="/${config.routePrefix}/${slug}"
+        href="${config.pageHref(slug)}"
         class="resource-nav__link${activeClass}"
         data-event="click:_navigateTo:@attr:href"
       >${page.title}</a>

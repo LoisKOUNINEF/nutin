@@ -15,13 +15,13 @@ Add Alpine's CDN script to `src/index.html`'s `<head>`, pinned to an exact versi
 </head>
 ```
 
-*Note:* If you're using Nutin's `docker` feature, you'll have to [add the CDN source to nginx CSP map](http://localhost:9090/docs/use-docker-feature#adding-origins-in-csp-map).
+*Note:* If you're using Nutin's `docker` feature, you'll have to [add the CDN source to nginx CSP map](https://nutin.org/docs/options-and-features/use-docker-feature#adding-origins-in-csp-map).
 
 ## Approach 1: Keeping Alpine separated from Nutin
 
 This pattern keeps Alpine state completely isolated; it is never touched by Nutin, so it's safe ground for Alpine to own. 
 
-- You can mount it through Nutin's [global layout service](https://nutin.org/en/docs/mount-global-components) `registerGlobals` API. This gives the Alpine root a clear entrypoint in `main.ts` alongside the rest of the app's global components:
+- You can mount it through Nutin's [global layout service](https://nutin.org/en/docs/api/mount-global-components) `registerGlobals` API. This gives the Alpine root a clear entrypoint in `main.ts` alongside the rest of the app's global components:
 
 ```ts
 // src/app/components/globals/alpine-root/alpine-root.component.ts

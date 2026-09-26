@@ -35,6 +35,8 @@ const COLLECTIONS = [
     output: path.join(ROOT, 'apps', 'website', 'generated', 'docs.json'),
     stripH1: stripDocsHubTitle,
     prefixReplacements: DOCS_PREFIX_REPLACEMENTS,
+    // Website route is '/docs/:section?/:slug?' — internal links include the hub's section id.
+    sectionInPath: true,
   },
   {
     id: 'changelog',
@@ -177,7 +179,19 @@ function buildSlugMap(collection, hubs) {
 
 // --- Pass 2: convert each leaf page's Markdown to HTML, rewriting headings/links ---
 
-function renderPage(collection, sourcePath, slugMap) {
+// absolute source path -> the page's website URL path (e.g. "/docs/api/navigate").
+function buildHrefMap(collection, hubs, slugMap) {
+  const hrefMap = new Map();
+  for (const hub of hubs) {
+    const prefix = collection.sectionInPath ? `/${collection.id}/${hub.id}` : `/${collection.id}`;
+    for (const group of hub.groups) {
+      for (const page of group.pages) hrefMap.set(page.source, `${prefix}/${slugMap.get(page.source)}`);
+    }
+  }
+  return hrefMap;
+}
+
+function renderPage(sourcePath, hrefMap) {
   const dir = path.dirname(sourcePath);
   const markdown = fs.readFileSync(sourcePath, 'utf8');
   const headings = [];
@@ -194,27 +208,27 @@ function renderPage(collection, sourcePath, slugMap) {
       link(token) {
         const text = this.parser.parseInline(token.tokens);
         let href = token.href;
-        let internalSlug = null;
+        let isInternal = false;
 
         if (!/^[a-z]+:/i.test(href) && href.includes('.md')) {
           const [rawPath, fragment] = href.split('#');
           const resolved = path.normalize(path.join(dir, rawPath));
-          const slug = slugMap.get(resolved);
+          const pageHref = hrefMap.get(resolved);
 
-          if (!slug) {
+          if (!pageHref) {
             fail(
               `Unresolvable internal link "${href}" in "${path.relative(ROOT, sourcePath)}" ` +
               `(resolved to "${path.relative(ROOT, resolved)}", no matching doc page)`
             );
           }
-          internalSlug = slug;
-          href = fragment ? `/${collection.id}/${slug}#${fragment}` : `/${collection.id}/${slug}`;
+          isInternal = true;
+          href = fragment ? `${pageHref}#${fragment}` : pageHref;
         }
 
         const titleAttr = token.title ? ` title="${token.title}"` : '';
         // Internal links carry a data-event hook so DocContentComponent can route them
         // through the SPA router instead of triggering a full page reload.
-        const navAttrs = internalSlug
+        const navAttrs = isInternal
           ? ` data-event="click:_navigateTo:@attr:href"`
           : '';
         return `<a href="${href}"${titleAttr}${navAttrs}>${text}</a>`;
@@ -241,6 +255,7 @@ function compileCollection(collection) {
 
   const hubs = collection.hubFiles.map((hubFile) => parseHub(collection, hubFile));
   const slugMap = buildSlugMap(collection, hubs);
+  const hrefMap = buildHrefMap(collection, hubs, slugMap);
 
   const sections = [];
   const pages = {};
@@ -262,7 +277,7 @@ function compileCollection(collection) {
     for (const group of hub.groups) {
       for (const pageRef of group.pages) {
         const slug = slugMap.get(pageRef.source);
-        const rendered = renderPage(collection, pageRef.source, slugMap);
+        const rendered = renderPage(pageRef.source, hrefMap);
 
         if (rendered.title !== pageRef.title) {
           console.warn(

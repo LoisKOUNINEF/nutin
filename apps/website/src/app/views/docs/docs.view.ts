@@ -5,6 +5,6 @@ const template = `__TEMPLATE_PLACEHOLDER__`;
 
 export class DocsView extends ResourceView {
   constructor() {
-    super({ manifest: DocsManifestService, routePrefix: 'docs', template, viewName: 'docs' });
+    super({ manifest: DocsManifestService, routePrefix: 'docs', sectionScoped: true, template, viewName: 'docs' });
   }
 }

@@ -16,27 +16,35 @@ const OVERLAYS = [
 ];
 
 const bundleUrl = (group: string, name: string) => `${A11Y_ELEMENTS_DIST}/browser/${group}/${name}/define.js`;
+const STYLESHEET = `${A11Y_ELEMENTS_DIST}/a11y.css`;
 
-// Idempotent: tags are only appended once, however many times /a11y is entered.
+// Idempotent: each tag is only appended once, however many loaders request it.
+function ensureStylesheet(href: string): void {
+  if (document.head.querySelector(`link[href="${href}"]`)) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = href;
+  document.head.appendChild(link);
+}
+
+function ensureModuleScript(src: string): void {
+  if (document.head.querySelector(`script[src="${src}"]`)) return;
+  const script = document.createElement('script');
+  script.type = 'module';
+  script.src = src;
+  document.head.appendChild(script);
+}
+
+// Every element, for the /a11y-elements demo pages.
 export function loadA11yElements(): void {
-  const stylesheet = `${A11Y_ELEMENTS_DIST}/a11y.css`;
-  if (!document.head.querySelector(`link[href="${stylesheet}"]`)) {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = stylesheet;
-    document.head.appendChild(link);
-  }
+  ensureStylesheet(STYLESHEET);
+  ACCESSIBILITY_COMPONENTS.forEach((name) => ensureModuleScript(bundleUrl('components', name)));
+  OVERLAYS.forEach((name) => ensureModuleScript(bundleUrl('overlays', name)));
+}
 
-  const scripts = [
-    ...ACCESSIBILITY_COMPONENTS.map((name) => bundleUrl('components', name)),
-    ...OVERLAYS.map((name) => bundleUrl('overlays', name)),
-  ];
-
-  for (const src of scripts) {
-    if (document.head.querySelector(`script[src="${src}"]`)) continue;
-    const script = document.createElement('script');
-    script.type = 'module';
-    script.src = src;
-    document.head.appendChild(script);
-  }
+// Only <a11y-dropdown>, for the global navbar's Documentation menu. Client-only
+// (called from main.ts), so the pre-rendered HTML stays free of the CDN bundles.
+export function loadA11yDropdown(): void {
+  ensureStylesheet(STYLESHEET);
+  ensureModuleScript(bundleUrl('overlays', 'dropdown'));
 }

@@ -116,44 +116,27 @@
     }
 }
 
-.navbar__dropdown {
-    position: absolute;
-    top: 100%;
-    min-width: 11%;
-    border-radius: map.get($border-radius, 'medium');
-    background-color: var(--surface);
-    padding-left: map.get($spacings, 'smallest');
-    opacity: 0;
-    visibility: hidden;
-    & button {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-      &::after {
-        content: '';
-      }
-      
-      &:hover::after {
-        content: '>';
-      }
-        @media (hover: none) {
-        &:hover::after {
-            content: '';
-          }
-        }
-    }
-    @include mixins.respond-to(medium) {
-        width: 40%;
-        text-align: left;
-        & button {
-            text-align: left !important;
-        }
-    }
+// Documentation menu (<a11y-dropdown>, portaled to <body> once its CDN bundle
+// defines it). Hidden until then so the SSR'd markup never flashes inline.
+a11y-dropdown:not(:defined) {
+    display: none;
 }
 
-.navbar__dropdown-visible {
-    opacity: 1;
-    visibility: visible;
-    z-index: 2;
-    @include mixins.fade-in;
+// Low specificity so `.navbar .c-round-btn:hover` still wins.
+button.c-round-btn {
+    font: inherit;
+    border: none;
+    cursor: pointer;
+}
+
+.a11y-dropdown-wrapper[aria-labelledby='navbar-docs-anchor'] {
+    --a11y-dropdown-color-background: var(--surface);
+    --a11y-menu-item-color-secondary-hover: var(--secondary);
+    --a11y-menu-item-color-background: var(--background);
+    // --a11y-dropdown-content-padding: 0;
+    font-weight: bold;
+    a[role='menuitem'] {
+        display: block;
+        text-decoration: none;
+    }
 }
