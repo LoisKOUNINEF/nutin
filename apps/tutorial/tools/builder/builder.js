@@ -1,8 +1,13 @@
 #!/usr/bin/env node
 
 import path from 'path';
-import { print, runScript } from '../utils/index.js';
+import { print, runScript, acquireBuildLock } from '../utils/index.js';
 import { builderConfig } from './builder.config.js';
+
+// Must happen before copy-static.js wipes/recreates dist-build — a second build
+// starting mid-run (a manual build, another dev watcher instance, ...) would
+// otherwise race it. See tools/utils/build-lock.js.
+await acquireBuildLock();
 
 const scriptsDir = path.join(process.cwd(), 'tools', 'builder', 'core');
 
@@ -22,8 +27,9 @@ if (builderConfig.tailwind) runScript(path.join(scriptsDir, 'styles', 'tailwind.
 
 if (builderConfig.i18n) runScript(path.join(scriptsDir, 'i18n', 'build-i18n.js'), 'Combining locales...');
 
+runScript(path.join(scriptsDir, 'prod-bundle', 'esbuild.js'), 'Running esbuild...');
+
 if (builderConfig.isProd) {
-	runScript(path.join(scriptsDir, 'prod-bundle', 'esbuild.js'), 'Running esbuild...');
 	runScript(path.join(scriptsDir, 'prod-bundle', 'hash-files.js'), 'Hashing files...');
 	runScript(path.join(scriptsDir, 'prod-bundle', 'compress-files.js'), 'Compressing files...');
 	if (builderConfig.generateSEO) runScript(path.join(scriptsDir, 'seo', 'generate-seo-files.js'), 'Generating SEO Files...');
