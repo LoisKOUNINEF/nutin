@@ -1,5 +1,9 @@
 # How to use a11y-elements?
 
+This guide describes how to use [a11y-elements](https://nutin.org/en/a11y-elements) in a Nutin application - bundled from npm, or loaded from a CDN - and how to use it inside Nutin components.
+
+a11y-elements is a set of framework-agnostic accessibility Custom Elements. They are Light DOM only, and bring behavior rather than a themed UI kit: you style real markup with your own CSS.
+
 ## Install from npm
 
 *Requires Nutin 2.1.1 or later.*
@@ -61,8 +65,8 @@ So, for any content inside an overlay:
 <!-- src/app/components/menu/menu.component.html -->
 <button type="button" id="menu-anchor" aria-haspopup="menu" data-i18n="menu.open"></button>
 <a11y-dropdown id="menu-dropdown" anchor="menu-anchor">
-    <a href="/" role="menuitem">${t('home')}</a>
-    <a href="/about" role="menuitem">${t('about')}</a>
+    <a href="/" role="menuitem">${translate('home')}</a>
+    <a href="/about" role="menuitem">${translate('about')}</a>
 </a11y-dropdown>
 ```
 
@@ -70,7 +74,7 @@ So, for any content inside an overlay:
 // src/app/components/menu/menu.component.ts
 import { Component, I18nService, Navigation } from '../../../core/index.js';
 
-const t = (key: string) => I18nService.translate(`menu.${key}`);
+const translate = (key: string) => I18nService.translate(`menu.${key}`);
 
 const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
 
