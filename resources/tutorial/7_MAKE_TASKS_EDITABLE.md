@@ -17,7 +17,7 @@ export class TaskService extends Service<TaskService> {
 ## Generate the component
 
 ```bash
-npm run generate component task-inputs
+npm run generate component components/task-inputs
 # Creates src/app/components/task-inputs/task-inputs.component.ts|html|scss
 ```
 
@@ -25,7 +25,7 @@ npm run generate component task-inputs
 
 ```ts
 import { Component } from '../../../core/index.js';
-import { taskService } from '../../services/index.js';
+import { taskService } from '../../services/task/task.service.js';
 
 const templateFn = (_task: ITask) => `__TEMPLATE_PLACEHOLDER__`;
 
@@ -107,7 +107,7 @@ export const appRoutes: Routes = {
 
 ```ts
 /* ... */
-import { TaskInputsComponent } from '../../components/index.js';
+import { TaskInputsComponent } from '../../components/task-inputs/task-inputs.component.js';
 
 export class TaskCatalogView extends View {
     /* ... */

@@ -26,10 +26,7 @@ try {
 
   // features styles
   const appInput = path.join(PATHS.source, 'app');
-  const appStyles = [
-    ...getFilesRecursive(path.join(appInput, 'components'), 'scss'),
-    ...getFilesRecursive(path.join(appInput, 'views'), 'scss')
-  ];
+  const appStyles = getFilesRecursive(appInput, 'scss');
 
   for (const style of appStyles) {
     const result = await sass.compileAsync(style, {

@@ -3,7 +3,7 @@
 ## Generate component
 
 ```bash
-npm run generate component greeting # target directory: src/app/components/greeting
+npm run generate component components/greeting # target directory: src/app/components/greeting
 ```
 
 ## Modify component

@@ -42,6 +42,8 @@ src/
  |---- styles
 ```
 
+`components/`, `services/` and `views/` are Nutin's suggested layout: the generator creates each element at the path you give it under `src/app/`, so that you can structure your app however you want.
+
 ### How the pieces fit together
 
 * Views **orchestrate**

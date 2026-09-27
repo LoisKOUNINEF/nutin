@@ -31,7 +31,7 @@ class TaskService extends Service<TaskService> {
 ## Generate the component
 
 ```bash
-npm run generate component new-task
+npm run generate component components/new-task
 # Creates src/app/components/new-task/new-task.component.ts|html|scss
 ```
 
@@ -39,7 +39,7 @@ npm run generate component new-task
 
 ```ts
 import { Component } from '../../../core/index.js';
-import { taskService } from '../../services/index.js';
+import { taskService } from '../../services/task/task.service.js';
 
 const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
 
@@ -81,7 +81,7 @@ export class NewTaskComponent extends Component {
 
 ```ts
 /* ... */
-import { NewTaskComponent } from '../../components/index.js';
+import { NewTaskComponent } from '../../components/new-task/new-task.component.js';
 
 export class TaskCatalogView extends View {
     /* ... */

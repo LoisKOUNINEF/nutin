@@ -2,8 +2,15 @@
 
 ## Unreleased
 
+### Breaking Changes
+
+- `src/app` no longer has an imposed structure. The generator now creates elements in `src/app/<path>/` instead of `src/app/<type>s/<path>/` (e.g. `generate view user/user-view` → `src/app/user/user-view/`). New projects still ship `components/`, `services/` (empty) and `views/` as the suggested layout, so pass the folder explicitly to keep it (`generate component components/my-component`).
+- Removed the `src/app/{components,views,services}/index.ts` barrel files from new projects, and the generator no longer appends exports to them. Import app elements by their file path; `core/index.ts` remains the framework's barrel. Existing projects keep their barrels (`nutin update` doesn't touch `src/app`), they just stop being updated.
+
 ### Changes
 
+- Sass now compiles every `.scss` file under `src/app` instead of only `src/app/components` and `src/app/views`.
+- The generator now exits before writing anything if the target folder already exists and isn't empty, since folder names carry no type suffix (a view and a component at the same path would otherwise overwrite each other's `locales/`).
 - Dev builds (`dev`/`serve`/`build`) now bundle with esbuild too, unminified with a sourcemap and `console`/`debugger` kept, so npm runtime dependencies (e.g. `alpinejs`, `a11y-elements`) work in dev without import maps or vendoring. tsc's per-file output is still emitted for testin-nutin.
 - Sass now resolves `@use "pkg:<package>/<path>"` imports through `node_modules`.
 - The default `builder.esbuild.target` in `nutin.config.js` is now `es2020` (was `es2015`), which libraries relying on native `async` functions (e.g. Alpine) require. Existing projects keep their own `nutin.config.js` value.
@@ -14,6 +21,7 @@
 
 ### Fixes
 
+- `generate` with a missing argument now prints its usage message instead of crashing with `ReferenceError: Cannot access 'creators' before initialization`.
 - Attributes set on a `data-component` placeholder (`class`, `id`, `aria-*`, `data-*`, …) are now kept on the mounted component's element instead of being dropped. Classes are merged with the component's own; `data-component` itself is not carried over. This applies to catalog items too.
 - Builds now take a lock (`.build-lock/`, gitignored) before touching `dist-build`, so concurrent builds (a manual build during `dev`, or stray watcher processes) no longer corrupt each other's output.
 - The dev watcher no longer drops a file change made while a rebuild is running. It now rebuilds again once the current build finishes.
