@@ -1,4 +1,5 @@
 import { A11yElementsIndexComponent } from '#root/dist/src/app/components/a11y-elements/a11y-elements-index/a11y-elements-index.component.js';
+import { Navigation } from '#root/dist/src/core/index.js';
 
 function mount() {
   const target = document.createElement('div');
@@ -38,6 +39,18 @@ describe('A11yElementsIndexComponent', () => {
   it('renders the usage snippets', () => {
     const component = mount();
     expect(component.element.querySelectorAll('.snippet__code').length).toBe(3);
+    component.destroy();
+  });
+
+  it('routes each card to its demo page', () => {
+    const navigateSpy = spyOn(Navigation, 'navigateTo').andCallFake(() => {});
+    const component = mount();
+    try {
+      component.element.querySelectorAll('.card-link').forEach((card) => card.click());
+    } finally {
+      navigateSpy.restore();
+    }
+    expect(navigateSpy.calls).toEqual([['/a11y-elements/elements'], ['/a11y-elements/overlays']]);
     component.destroy();
   });
 });

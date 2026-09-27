@@ -77,4 +77,22 @@ describe('NavbarComponent', () => {
     expect(document.querySelectorAll('#navbar-docs-dropdown').length).toBe(1);
     component.destroy();
   });
+
+  it('routes its own links through the SPA router', () => {
+    const component = mount();
+    component.element.querySelector('a[href="/tutorial"]').click();
+    expect(navigateSpy.lastCall[0]).toBe('/tutorial');
+    component.destroy();
+  });
+
+  it('ignores dropdown clicks outside an item, and items without an href', () => {
+    const component = mount();
+    const dropdown = document.getElementById('navbar-docs-dropdown');
+    dropdown.click();
+    const item = dropdown.querySelector('[role="menuitem"]');
+    item.removeAttribute('href');
+    item.click();
+    expect(navigateSpy.callCount).toBe(0);
+    component.destroy();
+  });
 });

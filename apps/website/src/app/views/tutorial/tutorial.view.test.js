@@ -6,7 +6,7 @@ let view;
 describe('TutorialView', () => {
 	beforeAll(async () => {
 		setupJsdom();
-		registerPipes();
+		silenceConsole('warn', () => registerPipes());
 		view = new TutorialView();
 	});
 
@@ -17,6 +17,6 @@ describe('TutorialView', () => {
 	it('should render an empty state when the tutorial manifest has no pages', () => {
 		view.render();
 		const empty = view.element.querySelector('[data-i18n="tutorial.empty"]');
-		expect(empty).toBeDefined();
+		expect(empty).toBeTruthy();
 	});
 })

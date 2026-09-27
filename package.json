@@ -18,6 +18,7 @@
     "ws:watch": "npm run watch -w",
     "ws:testin-nutin": "npm run testin-nutin -w",
     "ws:testin-nutin:watch": "npm run testin-nutin:watch -w",
+    "ws:testin-nutin:verbose": "npm run testin-nutin:verbose -w",
     "ws:testin-nutin:coverage": "npm run testin-nutin:coverage -w",
     "nutin:release": "npm run release -w @nutin/cli"
   },

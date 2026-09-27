@@ -1,12 +1,8 @@
 # How to use a11y-elements?
 
-This guide describes how to use [a11y-elements](https://nutin.org/en/a11y-elements) in a Nutin application - bundled from npm, or loaded from a CDN - and how to use its overlays inside Nutin components.
-
-a11y-elements is a set of framework-agnostic accessibility Custom Elements. They are Light DOM only, and bring behavior rather than a themed UI kit: you style real markup with your own CSS.
-
 ## Install from npm
 
-*Requires Nutin 2.1.1 or later, where `dev`/`serve`/`build` bundle npm dependencies too.*
+*Requires Nutin 2.1.1 or later.*
 
 ```bash
 npm install a11y-elements
@@ -22,7 +18,7 @@ import 'a11y-elements/components/spinner';
 
 The package ships its own types. Importing an element's subpath also types exact-tag lookups, such as `document.querySelector('a11y-spinner')`.
 
-Keep these imports in `main.ts`, not in a component or view file: `main.ts` is never imported by testin-nutin or by SEO files generation, so the elements are only ever defined in a real browser.
+Keep these imports in `main.ts`, not in a component or view file.
 
 ## Styles
 

@@ -1,4 +1,5 @@
 import { ResourceView } from '#root/dist/src/app/views/resource/resource.view.class.js';
+import { CONFIG } from '#root/dist/src/core/config.js';
 
 class FakeManifest {
   constructor(firstSlug) {
@@ -51,6 +52,18 @@ function captureReplaceState(callback) {
 }
 
 describe('ResourceView', () => {
+  let originalI18n;
+
+  // Canonical URLs are asserted without the /<lang> prefix the site's i18n adds.
+  beforeAll(() => {
+    originalI18n = CONFIG.i18n;
+    CONFIG.i18n = false;
+  });
+
+  afterAll(() => {
+    CONFIG.i18n = originalI18n;
+  });
+
   it('onEnter replaces the URL with the first-page slug when no slug route param is present', () => {
     const view = new TestResourceView(new FakeManifest('getting-started'));
     view.setRouteParams({});
