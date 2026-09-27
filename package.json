@@ -19,7 +19,7 @@
     "ws:testin-nutin": "npm run testin-nutin -w",
     "ws:testin-nutin:watch": "npm run testin-nutin:watch -w",
     "ws:testin-nutin:coverage": "npm run testin-nutin:coverage -w",
-    "nutin:release": "npm run publish -w @nutin/cli"
+    "nutin:release": "npm run release -w @nutin/cli"
   },
   "devDependencies": {
     "chokidar": "^4.0.3",
