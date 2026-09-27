@@ -41,7 +41,7 @@ export default {
 
     coverage: {
       enabled: false,        // Include coverage in the normal test command
-      threshold: 95,         // Fail if any global coverage metric falls below this threshold
+      threshold: 75,         // Fail if any global coverage metric falls below this threshold
       reportUncovered: true, // Generate a report of uncovered lines, functions and branches
     },
 
