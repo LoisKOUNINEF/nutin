@@ -60,6 +60,21 @@ describe('Router', () => {
     ]);
   });
 
+  it('navigate() applies a view\'s onEnter() history rewrite without it being overwritten by the router\'s own history update', async () => {
+    const home = makeView('home');
+    const section = makeView('section');
+    section.onEnter = () => {
+      section.calls.push(['onEnter']);
+      window.history.replaceState({}, '', '/section/first-page');
+    };
+    router = AppRouter({ '/': () => home, '/section': () => section });
+    await flushPromises();
+
+    await router.navigate('/section');
+
+    expect(window.location.pathname).toBe('/section/first-page');
+  });
+
   it('navigate() passes matched route params to the rendered view', async () => {
     const home = makeView('home');
     const userView = makeView('user');

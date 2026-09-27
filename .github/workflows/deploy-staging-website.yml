@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -30,13 +30,16 @@ jobs:
           fi
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "npm"
 
       - name: Install all monorepo dependencies
         run: npm ci
+
+      - name: Run website tests
+        run: npm run testin-nutin -w website
 
       - name: Ensure scripts are executable
         run: chmod +x .github/workflows/scripts/jobs/*.sh
@@ -77,7 +80,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Ensure scripts are executable
         run: chmod -R +x .github/workflows/scripts/jobs/*.sh

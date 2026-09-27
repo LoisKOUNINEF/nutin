@@ -15,7 +15,7 @@
 
 ```
 src/
-  app/
+  app/    -- suggested layout: organize src/app however you like
     components/
     services/
     views/
@@ -32,11 +32,13 @@ nutin.config.js   -- features and configuration
 
 ### Imports
 
-Imports use **relative paths** and end with `.js` extension.
+- Imports use **relative paths** and end with `.js` extension.
 
 ```js
 import { Foo } from 'relative/path/to/foo.js';
 ```
+
+- Use Nutin's code barrel file (`src/core/index.js`) to import Nutin's modules.
 
 ## How do I run my app?
 
@@ -52,17 +54,18 @@ import { Foo } from 'relative/path/to/foo.js';
 
 ## How do I generate components, views and services?
 
-Generated elements are automatically exported from the corresponding barrel file:
-`src/app/<components|views|services>/index.ts`.
-
+Elements are generated in `src/app/<path>/`, so you choose the project structure. The generator stops if the target folder already exists and isn't empty.
 
 ```bash
-{{packageManager}} run generate <component|view|service> ELEMENT_NAME
+{{packageManager}} run generate <component|view|service> PATH/TO/ELEMENT_NAME
 
 # Examples
-{{packageManager}} run generate component my-component # Target dir: src/app/components/my-component/
-{{packageManager}} run generate component path/to/my-component/ # Target dir: src/app/components/path/to/my-component/
+{{packageManager}} run generate component components/my-component # Target dir: src/app/components/my-component/
+{{packageManager}} run generate view user/user-view                # Target dir: src/app/user/user-view/
+{{packageManager}} run generate service user/user-service          # Target dir: src/app/user/user-service/
 ```
+
+Import generated elements by their file path (e.g. `./views/home/home.view.js`). 
 
 ## What does a typical component look like?
 

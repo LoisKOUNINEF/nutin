@@ -1,7 +1,11 @@
-{ 
+{
 	"home": "Home",
 	"docs": "Documentation",
 	"tutorial": "Tutorial",
 	"changelog": "Changelog",
-	"guides": "Guides"
+	"guides": "Guides",
+	"docs-api": "API",
+	"docs-options": "Options and features",
+	"docs-testing": "Testing toolkit",
+	"docs-tools": "Tools"
 }

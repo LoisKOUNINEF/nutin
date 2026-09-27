@@ -42,6 +42,11 @@ server {
     __PORTS_PLACEHOLDER__
     server_name _;
 
+    # Keep nginx's own automatic redirects (e.g. the missing-trailing-slash 301 on a
+    # prerendered route directory) relative, so they never leak this container's
+    # internal port/scheme when served behind a reverse proxy or a remapped port.
+    absolute_redirect off;
+
     # ---------------------------
     # ROOT + ROUTING
     # ---------------------------
@@ -50,6 +55,10 @@ server {
 
     # Hide nginx version
     server_tokens off;
+
+    # With i18n enabled, redirects bare "/" to the default language so the served URL
+    # always matches each page's canonical/og:url (filled in by validate-docker).
+    __ROOT_REDIRECT_PLACEHOLDER__
 
     # SPA routing: serve index.html for unknown paths
     location / {
@@ -111,6 +120,12 @@ server {
     # ERROR PAGE 404 (rare but possible for SPAs)
     # --------------------------
     error_page 404 /404.html;
+
+    # A route directory that exists on disk but has no index.html of its own (e.g. a
+    # parent route whose only prerendered pages are its children) makes try_files'
+    # $uri/ candidate match the directory and stop there, returning 403 instead of
+    # falling through to the SPA shell. Serve the shell for that case too.
+    error_page 403 = /index.html;
 
     location = /404.html {
         internal;

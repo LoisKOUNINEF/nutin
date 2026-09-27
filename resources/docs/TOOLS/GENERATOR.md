@@ -3,16 +3,20 @@
 ## Usage 
 
 ```bash
-<pm> run generate TYPE NAME
 <pm> run generate TYPE PATH/TO/NAME
 ```
 
 - `type` is a string (`component` || `view` || `service`).
-- `path` is a target path where files will be created; the script normalizes / extracts the last word to derive the `name`. 
+- `path` is a target path (relative to `src/app/`) where files will be created; the script normalizes / extracts the last word to derive the `name`. 
+- You choose the structure — new projects suggest `components/`, `views/` and `services/`, but any layout works.
 
 ## Files generated
 
-**Target directory:** `<type>/<path>/<to>/<name>/` or `<type>/<name>/` if only `name` was provided.
+**Target directory:** `src/app/<path>/<to>/<name>/` or `src/app/<name>/` if only `name` was provided.
+
+The generator stops without writing anything if the target directory already exists and isn't empty (folder names carry no type suffix, so a view and a component generated at the same path would otherwise share a folder). 
+
+Generated elements are not re-exported from any barrel file: import them by their file path.
 
 - Component class: `<name>.<type>.ts`
 

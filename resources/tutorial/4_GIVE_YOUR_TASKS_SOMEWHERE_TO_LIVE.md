@@ -3,7 +3,7 @@
 ## Generate the service
 
 ```bash
-npm run generate service task
+npm run generate service services/task
 # Creates src/app/services/task/task.service.ts
 ```
 
@@ -47,7 +47,7 @@ export class TaskService extends Service<TaskService> {
 
 ```ts
 /* ... */
-import { taskService } from '../../services/index.js';
+import { taskService } from '../../services/task/task.service.js';
 
 export class TaskCatalogView extends View {
   private _tasks: ITask[] = [];

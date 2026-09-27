@@ -3,7 +3,15 @@
     <a href="/" data-event="click:_navigateTo:@attr:href"><img src="/assets/images/logo-trans.avif" alt="nutin's logo. A frame opened on the top left through which a plant grows."></a>
   </section>
   <section class="navbar__resources">
-    <div><a href="/docs" class="c-round-btn" data-i18n="navbar.docs" data-event="click:_navigateTo:@attr:href"></a></div>
+    <div>
+      <button type="button" id="navbar-docs-anchor" class="c-round-btn" aria-haspopup="menu" data-i18n="navbar.docs"></button>
+      <a11y-dropdown id="navbar-docs-dropdown" anchor="navbar-docs-anchor">
+        <a href="/docs/api" role="menuitem">${t('docs-api')}</a>
+        <a href="/docs/options-and-features" role="menuitem">${t('docs-options')}</a>
+        <a href="/docs/testing" role="menuitem">${t('docs-testing')}</a>
+        <a href="/docs/tools" role="menuitem">${t('docs-tools')}</a>
+      </a11y-dropdown>
+    </div>
     <div><a href="/guides" class="c-round-btn" data-i18n="navbar.guides" data-event="click:_navigateTo:@attr:href"></a></div>
     <div><a href="/tutorial" class="c-round-btn" data-i18n="navbar.tutorial" data-event="click:_navigateTo:@attr:href"></a></div>
   </section>

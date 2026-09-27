@@ -28,7 +28,7 @@ npx @nutin/cli
 ## Update Nutin
 
 ```bash
-# update Nutin while preserving your changes
+# update to latest version while preserving your changes
 nutin-update
 ```
 

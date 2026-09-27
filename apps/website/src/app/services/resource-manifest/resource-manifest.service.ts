@@ -70,9 +70,16 @@ export abstract class ResourceManifest<T extends ResourceManifest<T>> extends Se
     return this._manifest.pages[slug];
   }
 
+  public getSection(id: string): IResourceSection | undefined {
+    return this._manifest.sections.find((section) => section.id === id);
+  }
+
   public get firstSlug(): string | undefined {
-    const firstSection = this._manifest.sections[0];
-    const pages = firstSection?.groups?.[0]?.pages ?? firstSection?.pages;
+    return this.firstSlugOf(this._manifest.sections[0]);
+  }
+
+  public firstSlugOf(section: IResourceSection | undefined): string | undefined {
+    const pages = section?.groups?.[0]?.pages ?? section?.pages;
     return pages?.[0];
   }
 

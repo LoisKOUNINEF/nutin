@@ -15,7 +15,7 @@ export class TaskService extends Service<TaskService> {
 ## Generate the component
 
 ```bash
-npm run generate component task-action
+npm run generate component components/task-action
 # Creates src/app/components/task-action/task-action.component.ts|html|scss
 ```
 
@@ -75,8 +75,8 @@ export class TaskActionComponent extends Component {
 ```ts
 /* ... */
 import { ComponentConfig } from '../../../core/index.js';
-import { taskService } from '../../services/index.js';
-import { TaskActionComponent } from '../index.js';
+import { taskService } from '../../services/task/task.service.js';
+import { TaskActionComponent } from '../task-action/task-action.component.js';
 
 export class TaskCardComponent extends Component {
     constructor(mountTarget: HTMLElement, config: ITask) { /* ... */ }

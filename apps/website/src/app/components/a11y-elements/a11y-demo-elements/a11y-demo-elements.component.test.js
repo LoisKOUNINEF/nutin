@@ -1,8 +1,9 @@
 import { A11yDemoElementsComponent } from '#root/dist/src/app/components/a11y-elements/a11y-demo-elements/a11y-demo-elements.component.js';
 
 const ELEMENTS = [
-  'a11y-anchor', 'a11y-avatar', 'a11y-checkbox', 'a11y-focusable', 'a11y-picture', 'a11y-progress',
-  'a11y-radio-group', 'a11y-select', 'a11y-skeleton', 'a11y-spinner', 'a11y-switch', 'a11y-visually-hidden',
+  'a11y-anchor', 'a11y-avatar', 'a11y-checkbox', 'a11y-focusable', 'a11y-input', 'a11y-label', 'a11y-picture',
+  'a11y-progress', 'a11y-radio-group', 'a11y-select', 'a11y-skeleton', 'a11y-spinner', 'a11y-switch',
+  'a11y-textarea', 'a11y-visually-hidden',
 ];
 
 function mount() {
@@ -47,6 +48,43 @@ describe('A11yDemoElementsComponent', () => {
     component.element.querySelector('a11y-focusable').click();
     component.element.querySelector('a11y-focusable').click();
     expect(component.element.querySelector('#a11y-demo-focusable-count').textContent).toBe('2');
+    component.destroy();
+  });
+
+  it('keeps a valid demo form submit in the page, resets it and reports it', () => {
+    const component = mount();
+    const form = component.element.querySelector('form');
+    const email = form.querySelector('input[type="email"]');
+    email.value = 'jane@example.com';
+    form.querySelector('input[name="a11y-demo-username"]').value = 'jane';
+
+    const event = new window.Event('submit', { cancelable: true });
+    form.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(email.value).toBe('');
+    expect(component.element.querySelector('#a11y-demo-form-status').textContent).not.toBe('');
+    component.destroy();
+  });
+
+  // minlength never applies to an empty value, so without required an empty
+  // username would be valid and submit. jsdom can't check tooShort (it only
+  // fires on user edits), so this guards the markup instead.
+  it('makes the username required on top of its minlength', () => {
+    const component = mount();
+    const host = component.element.querySelector('#a11y-demo-username');
+    const input = host.querySelector('input');
+    expect(input.required).toBe(true);
+    expect(input.minLength).toBe(3);
+    expect(host.getAttribute('value-missing-message')).toBeTruthy();
+    component.destroy();
+  });
+
+  it('gives the username field a validator rejecting spaces', () => {
+    const component = mount();
+    const [noSpaces] = component.element.querySelector('#a11y-demo-username').validators;
+    expect(noSpaces('jane doe')).toBeTruthy();
+    expect(noSpaces('jane')).toBe(null);
     component.destroy();
   });
 });

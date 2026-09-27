@@ -1,6 +1,6 @@
 <div class="a11y-demo">
   <p>
-    <a href="/a11y" class="a11y-demo__back" data-event="click:_navigateTo:@attr:href" data-i18n="a11y-demo-elements.back"></a>
+    <a href="/a11y-elements" class="a11y-demo__back" data-event="click:_navigateTo:@attr:href" data-i18n="a11y-demo-elements.back"></a>
   </p>
   <h1 data-i18n="a11y-demo-elements.title"></h1>
   <p class="a11y-demo__lead" data-i18n="a11y-demo-elements.lead"></p>
@@ -46,6 +46,36 @@
     <div class="a11y-demo__stage">
       <a11y-focusable class="a11y-demo__focusable" data-event="click:countFocusable">${t('focusable-label')}</a11y-focusable>
       <span>${t('focusable-count')} <strong id="a11y-demo-focusable-count">0</strong></span>
+    </div>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-input&gt;</code></h2>
+    <p data-i18n="a11y-demo-elements.input-desc"></p>
+    <form class="a11y-demo__stage a11y-demo__stage--column a11y-demo__form" data-event="submit:submitDemoForm:@event">
+      <a11y-input value-missing-message="${t('input-email-missing')}" type-mismatch-message="${t('input-email-type-mismatch')}">
+        <a11y-label>${t('input-email-label')}</a11y-label>
+        <input type="email" name="a11y-demo-email" required>
+        <a11y-hint>${t('input-email-hint')}</a11y-hint>
+        <a11y-error></a11y-error>
+      </a11y-input>
+      <a11y-input id="a11y-demo-username" value-missing-message="${t('input-username-missing')}" too-short-message="${t('input-username-too-short')}">
+        <a11y-label>${t('input-username-label')}</a11y-label>
+        <input type="text" name="a11y-demo-username" minlength="3" autocomplete="off" required>
+        <a11y-hint>${t('input-username-hint')}</a11y-hint>
+        <a11y-error></a11y-error>
+      </a11y-input>
+      <button type="submit" class="a11y-demo__button" data-i18n="a11y-demo-elements.input-submit"></button>
+      <p id="a11y-demo-form-status" role="status"></p>
+    </form>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-label&gt;</code></h2>
+    <p data-i18n="a11y-demo-elements.label-desc"></p>
+    <div class="a11y-demo__stage a11y-demo__stage--column">
+      <a11y-label for="a11y-demo-search">${t('label-text')}</a11y-label>
+      <input id="a11y-demo-search" type="search" name="a11y-demo-search" class="a11y-demo__native-input">
     </div>
   </section>
 
@@ -132,6 +162,19 @@
       <a11y-switch label="${t('switch-reduced-motion')}">
         <input type="checkbox" name="a11y-demo-reduced-motion">
       </a11y-switch>
+    </div>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-textarea&gt;</code></h2>
+    <p data-i18n="a11y-demo-elements.textarea-desc"></p>
+    <div class="a11y-demo__stage a11y-demo__stage--column a11y-demo__form">
+      <a11y-textarea value-missing-message="${t('textarea-missing')}">
+        <a11y-label>${t('textarea-label')}</a11y-label>
+        <textarea name="a11y-demo-bio" rows="3" maxlength="120" required></textarea>
+        <a11y-counter></a11y-counter>
+        <a11y-error></a11y-error>
+      </a11y-textarea>
     </div>
   </section>
 

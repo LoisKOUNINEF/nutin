@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 import { print, LANGUAGES } from '../utils/index.js';
 import { localeTemplate } from './templates/index.js';
 
@@ -20,27 +19,6 @@ export function generateFile({
   }
 
   fs.writeFileSync(filePath, template);
-}
-
-export function appendToIndex({ name, targetPath, suffix }) {
-  const absTargetPath = path.resolve(process.cwd(), targetPath);
-
-  const parts = targetPath.split(path.sep);
-  const basePath = parts.slice(0, 3).join(path.sep);
-
-  const indexFilePath = path.join(basePath, 'index.ts');
-
-  const absFilePath = path.join(absTargetPath, `${name.kebab}.${suffix}.js`);
-  const relPath = path.relative(basePath, absFilePath).replace(/\\/g, '/');
-
-  const lineToAppend = `export * from './${relPath}';\n`;
-
-  try {
-    fs.appendFileSync(indexFilePath, lineToAppend, 'utf8');
-    print.gray(`${suffix}s/index.ts updated.`);
-  } catch (err) {
-    throw new Error(`Failed to update ${indexFilePath}: ${err.message}`, { cause: err });
-  }
 }
 
 export function generateLocalesJson({ targetPath, name, isView }) {

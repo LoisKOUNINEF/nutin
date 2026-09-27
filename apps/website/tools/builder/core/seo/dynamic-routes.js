@@ -31,19 +31,29 @@ export function expandDynamicRoutes(routes) {
     }
 
     const manifestUrl = `/generated/${route.dynamicFrom}.json`;
-    // '/articles/:slug?' -> '/articles' — strip the trailing dynamic segment so each
-    // expanded page gets a real, concrete URL instead of the literal ":slug?" pattern.
-    const basePath = route.path.replace(/\/:[^/]+\??$/, '');
 
-    return Object.values(manifest.pages).map((page) => ({
-      path: route.path,
-      outputPath: `${basePath}/${page.slug}`,
-      title: page.title,
-      description: page.description,
-      ogImage: route.ogImage,
-      mockParams: { slug: page.slug },
-      mockFetch: { ...route.mockFetch, [manifestUrl]: manifest },
-      preloadManifest: route.dynamicFrom,
-    }));
+    return Object.values(manifest.pages).map((page) => {
+      // '/articles/:slug?' -> '/articles/<slug>', '/docs/:section?/:slug?' -> '/docs/<section>/<slug>' —
+      // fill each dynamic segment so every expanded page gets a real, concrete URL.
+      const params = { section: page.section, slug: page.slug };
+      const outputPath = route.path.replace(/\/:(\w+)\??/g, (_, name) => {
+        if (!params[name]) errorExit(`Route "${route.path}" uses unknown param ":${name}"`, 'generate-seo-html');
+        return `/${params[name]}`;
+      });
+      const mockParams = Object.fromEntries(
+        [...route.path.matchAll(/:(\w+)/g)].map(([, name]) => [name, params[name]])
+      );
+
+      return {
+        path: route.path,
+        outputPath,
+        title: page.title,
+        description: page.description,
+        ogImage: route.ogImage,
+        mockParams,
+        mockFetch: { ...route.mockFetch, [manifestUrl]: manifest },
+        preloadManifest: route.dynamicFrom,
+      };
+    });
   });
 }

@@ -7,16 +7,16 @@ const SNIPPETS: Record<string, Pick<ISnippet, 'content' | 'type'>> = {
   'snippet-zero-build': {
     type: 'html',
     content: `&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/a11y-elements/dist/a11y.css"&gt;
-&lt;script type="module" src="https://cdn.jsdelivr.net/npm/a11y-elements/dist/browser/accessibility-components/spinner/define.js"&gt;&lt;/script&gt;
+&lt;script type="module" src="https://cdn.jsdelivr.net/npm/a11y-elements/dist/browser/components/spinner/define.js"&gt;&lt;/script&gt;
 
 &lt;a11y-spinner label="Saving…"&gt;&lt;/a11y-spinner&gt;`,
   },
   'snippet-bundler': {
     type: 'ts',
     content: `import 'a11y-elements/a11y.css';
-import 'a11y-elements/accessibility-components/checkbox';
+import 'a11y-elements/components/checkbox';
 import 'a11y-elements/overlays/modal';
-import type { CheckboxElement } from 'a11y-elements/accessibility-components/checkbox/element';
+import type { CheckboxElement } from 'a11y-elements/components/checkbox/element';
 
 const checkbox = document.querySelector('a11y-checkbox') as CheckboxElement;
 checkbox.onChange = (checked) =&gt; console.log('accepted:', checked);`,
@@ -48,6 +48,6 @@ export class A11yElementsIndexComponent extends Component {
   }
 
   private navigateTo(page: string) {
-    Navigation.navigateTo(`/a11y/${page}`);
+    Navigation.navigateTo(`/a11y-elements/${page}`);
   }
 }
