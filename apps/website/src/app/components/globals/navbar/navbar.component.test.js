@@ -55,7 +55,7 @@ describe('NavbarComponent', () => {
   it('lists the guides in the guides dropdown', () => {
     const component = mount();
     const hrefs = [...document.querySelectorAll('#navbar-guides-dropdown [role="menuitem"]')].map((a) => a.getAttribute('href'));
-    expect(hrefs).toEqual(['/guides/alpinejs', '/guides/a11y-elements']);
+    expect(hrefs).toEqual(['/guides/a11y-elements', '/guides/alpinejs']);
     component.destroy();
   });
 
