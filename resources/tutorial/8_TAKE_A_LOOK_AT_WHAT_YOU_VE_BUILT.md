@@ -16,4 +16,4 @@ You built the application using:
 ## Go further
 
 - See [Nutin documentation](https://nutin.org/docs/)
-- [Test your app with testin-nutin](TEST_YOUR_APP.md)
+- [Test your app](TEST_YOUR_APP.md) with testin-nutin

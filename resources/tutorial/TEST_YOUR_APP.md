@@ -1,4 +1,4 @@
-# Bonus: Test your app
+# Test your app
 
 Every Nutin application ships with **testin-nutin**, a built-in testing toolkit.
 
@@ -15,10 +15,6 @@ testinNutin: {
 ```
 
 ## Create the test files
-
-*Note:* With `includeApp` enabled, the generator creates a `*.test.js` file alongside every new component, view and service.
-
-Your tutorial files already exist, so create their test files next to them:
 
 ```bash
 touch src/app/services/task/task.service.test.js src/app/views/task-catalog/task-catalog.view.test.js src/app/components/new-task/new-task.component.test.js src/app/components/task-action/task-action.component.test.js src/app/components/task-card/task-card.component.test.js src/app/components/task-inputs/task-inputs.component.test.js
@@ -37,27 +33,19 @@ src/app/
         |---- task-catalog/task-catalog.view.test.js
 ```
 
-A generated test file looks like this:
-
-```js
-import { TaskCardComponent } from '#root/dist/src/app/components/task-card/task-card.component.js';
-
-describe('TaskCardComponent', () => {
-  it.todo('Write tests for TaskCardComponent');
-});
-```
-
 - Tests run against the **compiled** output in `dist/`, which is why test files are `.js`.
 - `#root/` points to your project root.
-- Import Nutin elements from `#root/dist/src/core/index.js`.
 - `describe`, `it`, `expect`, `spyOn`, `click`, `$`, `$$`... are globals and need no import.
+- *Note:* With `includeApp` enabled, the generator creates a `*.test.js` file alongside every new component, view and service.
+- Refer to [testin-nutin docs](https://nutin.org/docs/testing) for details.
 
 ## Run the tests
 
 ```bash
-npm run testin-nutin         # Builds, then runs the tests once
-npm run testin-nutin task    # Only runs test files whose path contains "task"
-npm run testin-nutin:watch   # Re-runs the tests on file changes
+npm run testin-nutin          # Builds, then runs the tests once
+npm run testin-nutin task     # Only runs test files whose path contains "task"
+npm run testin-nutin:watch    # Re-runs the tests on file changes
+npm run testin-nutin:verbose  # Logs test suites & individual tests
 ```
 
 ## Test the service
