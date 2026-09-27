@@ -1,6 +1,6 @@
 ARG NODE_VERSION=24.21.0
-ARG ALPINE_VERSION=3.20
-ARG PORT=9092
+ARG ALPINE_VERSION=3.24
+ARG PORT="9092"
 
 FROM node:${NODE_VERSION}-alpine AS builder
 WORKDIR /usr/src/app
@@ -25,6 +25,6 @@ COPY --from=builder /usr/src/app/apps/tutorial/dist/src /usr/share/nginx/html
 EXPOSE ${PORT}
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:__PRIMARY_PORT_PLACEHOLDER__/health || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:9092/health || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]

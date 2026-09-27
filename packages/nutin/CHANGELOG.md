@@ -17,7 +17,7 @@
 - Generated SEO HTML now includes `hreflang` alternates (one per language plus `x-default`) when i18n is enabled, `og:type` and `twitter:card` (`summary_large_image`) meta tags, and an absolute `og:image`/`twitter:image` URL (a relative `ogImage` in `config/seo.json` is now prefixed with `baseUrl`).
 - The router now supports `#hash` fragments: navigating to `path#id` keeps the hash in the URL and scrolls to the matching element, falling back to the top of the page. The hash is also kept on reload and on language change.
 - New `NavigationManager.replaceState(path)` (exported from `core/index.ts`) rewrites the current URL without adding a history entry. The router now updates history before rendering the new view, so a view's `onEnter()` can call it without the change being overwritten.
-- Docker feature: the builder image now defaults to Node 24 (`NODE_VERSION=24.21.0`, was `22.23.2`) in `tools/docker/Dockerfile.template`.
+- Docker feature: `tools/docker/Dockerfile.template` now defaults to Node 24 (`NODE_VERSION=24.21.0`, was `22.23.2`) for the builder image and Alpine 3.24 (`ALPINE_VERSION`, was `3.20`, end-of-life) for the nginx runtime image (nginx 1.26 → 1.30).
 - Docker feature: in i18n projects, nginx now redirects a bare `/` to the default language (generated into `nginx.conf` by `validate-docker` through a new `__ROOT_REDIRECT_PLACEHOLDER__` token, which a hand-edited `tools/docker/nginx.conf.template` must keep).
 
 ### Fixes
