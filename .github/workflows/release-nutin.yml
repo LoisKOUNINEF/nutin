@@ -53,4 +53,8 @@ jobs:
 
       - name: Publish to npm
         working-directory: packages/nutin
-        run: npm publish --access public
+        # verbose: npm only logs *why* the OIDC token exchange failed at this level
+        run: |
+          echo "id-token request available: ${ACTIONS_ID_TOKEN_REQUEST_URL:+yes}"
+          npm -v
+          npm publish --access public --loglevel verbose
