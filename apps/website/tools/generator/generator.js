@@ -2,22 +2,10 @@
 
 import path from "path";
 import { allFormats, getLastWord, print, promptBoolean, errorExit } from "../utils/index.js";
-import { generateFile, appendToIndex, generateLocalesJson } from "./handle-file.js";
+import fs from "fs";
+import { generateFile, generateLocalesJson } from "./handle-file.js";
 import { serviceTemplate, componentTemplate, viewTemplate, htmlTemplate, scssTemplate, testTemplate } from "./templates/index.js";
 import nutinConfig from "../../nutin.config.js";
-
-// Constants and Setup
-const [, , rawType, rawFullPath] = process.argv;
-
-if (!rawType || !rawFullPath) {
-  showUsageAndExit("Missing arguments.");
-  process.exit(1);
-}
-
-const type = allFormats(rawType);
-const fullPath = allFormats(rawFullPath);
-const name = allFormats(getLastWord(fullPath.kebab));
-const targetPath = path.join('src', 'app', `${type.kebab}s/${fullPath.kebab}`);
 
 // Creator Mapping
 const creators = {
@@ -26,7 +14,6 @@ const creators = {
     print.section(`Generating service: ${name.capitalized}`);
     try {
       generateFile({ name, targetPath, templateFn: serviceTemplate, suffix: suffix });
-      appendToIndex({ name, targetPath, suffix: suffix });
       await generateTest({ name, targetPath, suffix: suffix });
     } catch (err) {
       handleError("Failed to generate service", err);
@@ -41,7 +28,6 @@ const creators = {
       generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: suffix, extension: 'html' });
       generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
       await generateLocales({ targetPath, name, isView: false });
-      appendToIndex({ name, targetPath, suffix: suffix });
       await generateTest({ name, targetPath, suffix });
     } catch (err) {
       handleError("Failed to generate component", err);
@@ -56,7 +42,6 @@ const creators = {
       generateFile({ name, targetPath, templateFn: htmlTemplate, suffix: suffix, extension: 'html' });
       generateFile({ name, targetPath, templateFn: scssTemplate, suffix: suffix, extension: 'scss' });
       await generateLocales({ targetPath, name, isView: true });
-      appendToIndex({ name, targetPath, suffix: suffix });
       await generateTest({ name, targetPath, suffix });
     } catch (err) {
       handleError("Failed to generate view", err);
@@ -64,10 +49,30 @@ const creators = {
   },
 };
 
+// Constants and Setup
+const [, , rawType, rawFullPath] = process.argv;
+
+if (!rawType || !rawFullPath) {
+  showUsageAndExit("Missing arguments.");
+  process.exit(1);
+}
+
+const type = allFormats(rawType);
+const fullPath = allFormats(rawFullPath);
+const name = allFormats(getLastWord(fullPath.kebab));
+const targetPath = path.join('src', 'app', fullPath.kebab);
+
 // Main Execution
 const create = creators[type.kebab];
 
 if (create) {
+  // Folder names carry no type suffix, so a view and a component with the same path would
+  // share one folder (and clobber each other's locales/) — refuse before writing anything.
+  if (fs.existsSync(targetPath) && fs.readdirSync(targetPath).length > 0) {
+    print.boldError(`\nA folder with this name already exists: ${targetPath}`);
+    print.warn("Pick another path, e.g. user/user-view and user/user-card.");
+    process.exit(1);
+  }
   await create(name, targetPath);
   print.boldSuccess(`\n${type.capitalized} ${name.capitalized} generated in ${targetPath}.\n`)
 } else {

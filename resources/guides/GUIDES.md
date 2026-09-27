@@ -2,4 +2,5 @@
 
 ## Table of Contents
 
-- [How to integrate AlpineJS?](./HOW_TO_INTEGRATE_ALPINEJS.md)
+- [How to integrate AlpineJS?](./ALPINEJS.md)
+- [How to use a11y-elements?](./A11Y_ELEMENTS.md)

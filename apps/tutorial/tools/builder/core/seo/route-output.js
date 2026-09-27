@@ -29,8 +29,8 @@ export function validateMockParams(route) {
   }
 }
 
-export async function writeRouteHtml({ template, lang, title, description, pageUrl, ogImage, body, outputSegments, routePath }) {
-  let html = applySubstitutions(template, lang, title, description, pageUrl, ogImage);
+export async function writeRouteHtml({ template, lang, title, description, pageUrl, ogImage, body, outputSegments, routePath, hreflangLinks }) {
+  let html = applySubstitutions(template, lang, title, description, pageUrl, ogImage, hreflangLinks);
 
   if (html === template) {
     errorExit(`Failed to apply any changes for ${routePath} (lang "${lang}") — index.html may be missing a </head> tag`, 'generate-seo-html');

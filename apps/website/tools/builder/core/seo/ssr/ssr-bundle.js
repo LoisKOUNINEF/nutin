@@ -17,7 +17,8 @@ export {
   DocsManifestService,
   ChangelogManifestService,
   TutorialManifestService,
-  ArticlesManifestService
+  ArticlesManifestService,
+  GuidesManifestService
 } from './services/index.js';
 `;
 
