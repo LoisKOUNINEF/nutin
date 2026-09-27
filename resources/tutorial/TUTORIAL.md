@@ -10,3 +10,5 @@
 - [6. Make tasks disappear](6_MAKE_TASKS_DISAPPEAR.md)
 - [7. Make tasks editable](7_MAKE_TASKS_EDITABLE.md)
 - [8. Take a look at what you've built](8_TAKE_A_LOOK_AT_WHAT_YOU_VE_BUILT.md)
+
+- [Test your app](TEST_YOUR_APP.md)
