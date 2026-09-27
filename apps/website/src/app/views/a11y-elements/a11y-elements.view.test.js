@@ -1,4 +1,5 @@
 import { A11yElementsView } from '#root/dist/src/app/views/index.js';
+import { CONFIG } from '#root/dist/src/core/config.js';
 
 const CDN = 'https://cdn.jsdelivr.net/npm/a11y-elements@0.2.0/dist';
 
@@ -22,10 +23,18 @@ function withReplaceStateSpy(callback) {
 }
 
 describe('A11yElementsView', () => {
+  let originalI18n;
   let warnSpy;
 
   beforeAll(() => {
     setupJsdom();
+    // Canonical URLs are asserted without the /<lang> prefix the site's i18n adds.
+    originalI18n = CONFIG.i18n;
+    CONFIG.i18n = false;
+  });
+
+  afterAll(() => {
+    CONFIG.i18n = originalI18n;
   });
 
   // The index's SnippetComponents warn that PrismJS isn't loaded under jsdom.

@@ -36,12 +36,12 @@ export default {
   // `npm run testin-nutin`
   testinNutin: {
     includeFramework: true,  // Test Nutin source - src/core
-    includeTools: true,     // Test tools/ (builder, testin-nutin, etc.)
+    includeTools: false,     // Test tools/ (builder, testin-nutin, etc.)
     includeApp: true,       // Include application tests
 
     coverage: {
-      enabled: false,        // Include coverage in the normal test command
-      threshold: 75,         // Fail if any global coverage metric falls below this threshold
+      enabled: true,        // Include coverage in the normal test command
+      threshold: 85,         // Fail if any global coverage metric falls below this threshold
       reportUncovered: true, // Generate a report of uncovered lines, functions and branches
     },
 

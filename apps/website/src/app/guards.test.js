@@ -45,3 +45,32 @@ describe('Guards.sectionPageExists', () => {
     expect(emptyGuard({ section: 'nope', slug: 'nope' })).toBe(true);
   });
 });
+
+const flatManifest = {
+  hasPages: true,
+  firstSlug: 'getting-started',
+  getPage: (slug) => (['getting-started', 'next-steps'].includes(slug) ? { slug } : undefined),
+};
+
+describe('Guards.resourcePageExists', () => {
+  const guard = Guards.resourcePageExists(flatManifest);
+
+  it('allows a known page and the bare route (first page)', () => {
+    expect(guard({ slug: 'next-steps' })).toBe(true);
+    expect(guard({})).toBe(true);
+  });
+
+  it('sends an unknown page to /404', () => {
+    expect(guard({ slug: 'nope' })).toBe('/404');
+  });
+
+  it('sends the bare route to /404 when there is no first page to show', () => {
+    const noFirst = Guards.resourcePageExists({ ...flatManifest, firstSlug: undefined });
+    expect(noFirst({})).toBe('/404');
+  });
+
+  it('allows everything while the manifest has no pages', () => {
+    const emptyGuard = Guards.resourcePageExists({ ...flatManifest, hasPages: false });
+    expect(emptyGuard({ slug: 'nope' })).toBe(true);
+  });
+});

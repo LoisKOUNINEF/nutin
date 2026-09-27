@@ -1,12 +1,16 @@
 # Roadmap
 
-## JavaScript-only generated projects
+## Stable child identity and reuse
 
-Add a JavaScript option to Nutin's project generator alongside the existing TypeScript path.
+Nutin will preserve child components across parent re-renders when their identity has not changed.
 
-JavaScript projects will provide the same core Nutin architecture. 
+Today, a parent re-render destroys and recreates its tracked children, which can unnecessarily discard DOM state such as focus, scroll position, and unsaved input.
 
-**Trade-off:** TypeScript-specific compile-time guarantees, such as event name and payload checking, will not be available.
+The update will introduce stable child identity, including optional keys for components and `trackBy` support for catalogs. Unchanged catalog items will be reused rather than recreated, while changed items will continue to follow Nutin's existing destroy-and-recreate model.
+
+This changes child lifecycle semantics: a child whose identity is preserved will no longer be destroyed and recreated unconditionally on every parent re-render.
+
+Nutin will continue to render directly to the DOM. No virtual DOM or general-purpose DOM diffing will be introduced.
 
 ## Markdown feature
 
