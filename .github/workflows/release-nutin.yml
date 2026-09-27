@@ -45,8 +45,12 @@ jobs:
             exit 1
           fi
 
+      # Publish from the package dir (same shape as a11y-elements' release.yml)
+      # rather than `--workspace` from the monorepo root.
       - name: List package contents
-        run: npm pack --dry-run --workspace @nutin/cli
+        working-directory: packages/nutin
+        run: npm pack --dry-run
 
       - name: Publish to npm
-        run: npm publish --workspace @nutin/cli --access public
+        working-directory: packages/nutin
+        run: npm publish --access public
