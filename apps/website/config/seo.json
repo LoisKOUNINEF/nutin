@@ -9,7 +9,7 @@
       "ogImage": "/assets/images/og-covers/og-cover-home.jpg"
     },
     {
-      "path": "/docs/:slug?",
+      "path": "/docs/:section?/:slug?",
       "dynamicFrom": "docs",
       "ogImage": "/assets/images/og-covers/og-cover-docs.jpg"
     },
@@ -45,23 +45,23 @@
       "ogImage": "/assets/images/og-covers/og-cover-articles.jpg"
     },
     {
-      "path": "/a11y/:page?",
-      "outputPath": "/a11y",
-      "title": {"en": "a11y-elements"},
+      "path": "/a11y-elements/:page?",
+      "outputPath": "/a11y-elements",
+      "title": {"en": "A11y Elements"},
       "description": {"en": "Framework-agnostic accessibility Custom Elements: a Light DOM behavior layer, not a themed UI kit."},
       "ogImage": "/assets/images/og-covers/og-cover-home.jpg"
     },
     {
-      "path": "/a11y/:page?",
-      "outputPath": "/a11y/elements",
+      "path": "/a11y-elements/:page?",
+      "outputPath": "/a11y-elements/elements",
       "mockParams": {"page": "elements"},
       "title": {"en": "a11y-elements: elements demo"},
       "description": {"en": "Live demo of every a11y-elements accessibility component: form controls, links, images, and loading states."},
       "ogImage": "/assets/images/og-covers/og-cover-home.jpg"
     },
     {
-      "path": "/a11y/:page?",
-      "outputPath": "/a11y/overlays",
+      "path": "/a11y-elements/:page?",
+      "outputPath": "/a11y-elements/overlays",
       "mockParams": {"page": "overlays"},
       "title": {"en": "a11y-elements: overlays demo"},
       "description": {"en": "Live demo of every a11y-elements overlay: modals, drawers, menus, tooltips, and notifications."},

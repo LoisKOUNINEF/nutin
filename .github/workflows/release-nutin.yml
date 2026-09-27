@@ -1,0 +1,52 @@
+name: Publish nutin Package To NPM
+
+on:
+  push:
+    tags:
+      - "cli-v*"
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Build & Publish Nutin Package
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing (OIDC) + provenance
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Ensure tag is on main
+        run: |
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "❌ Tag $GITHUB_REF_NAME is not on main. Aborting publish to npm workflow."
+            exit 1
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org/"
+
+      - name: Ensure tag matches package.json version
+        run: |
+          PKG_VERSION="$(node -p "require('./packages/nutin/package.json').version")"
+          if [ "${GITHUB_REF_NAME#cli-v}" != "$PKG_VERSION" ]; then
+            echo "❌ Tag $GITHUB_REF_NAME does not match package.json version $PKG_VERSION."
+            exit 1
+          fi
+
+      - name: List package contents
+        run: npm pack --dry-run --workspace @nutin/cli
+
+      - name: Publish to npm
+        run: npm publish --workspace @nutin/cli --access public

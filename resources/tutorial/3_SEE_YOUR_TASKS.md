@@ -3,7 +3,7 @@
 ## Generate the view
 
 ```bash
-npm run generate view task-catalog
+npm run generate view views/task-catalog
 # Creates src/app/views/task-catalog/task-catalog.view.ts|html|scss
 ```
 
@@ -11,7 +11,7 @@ npm run generate view task-catalog
 
 ```ts
 import { ComponentConfig, View } from '../../../core/index.js';
-import { TaskCardComponent } from '../../components/index.js';
+import { TaskCardComponent } from '../../components/task-card/task-card.component.js';
 
 export class TaskCatalogView extends View {
     private _tasks: ITask[] = [
@@ -83,7 +83,7 @@ export class TaskCatalogView extends View {
 ```ts
 // src/app/routes.ts
 /* ... */
-import { TaskCatalogView } from './views/index.js';
+import { TaskCatalogView } from './views/task-catalog/task-catalog.view.js';
 
 export const appRoutes: Routes = {
     // Make your new page the landing page
@@ -98,6 +98,6 @@ export const appRoutes: Routes = {
 rm -rf src/app/views/home
 ```
 
-- Remove the export in `src/app/views/index.ts` and the import in `src/app/routes.ts`.
+- Remove its import in `src/app/routes.ts`.
 
 **[Next step →](4_GIVE_YOUR_TASKS_SOMEWHERE_TO_LIVE.md)**

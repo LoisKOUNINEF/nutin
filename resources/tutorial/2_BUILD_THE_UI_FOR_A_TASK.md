@@ -14,7 +14,7 @@ declare interface ITask {
 ## Generate the component
 
 ```bash
-npm run generate component task-card
+npm run generate component components/task-card
 # Creates src/app/components/task-card/task-card.component.ts|html|scss
 ```
 

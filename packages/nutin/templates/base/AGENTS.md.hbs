@@ -19,13 +19,14 @@ nutin.config.js   build/feature config — see below
 
 - Favor small, composable components.
 - One `View` = one route.
-- Import everything from barrel files (`core/index.js`, `components/index.js`, `views/index.js`, `services/index.js`) — do not deep-import.
+- Import framework code from the `core/index.js` barrel — do not deep-import into `core/`. App elements have no barrels: import them by file path.
+- `src/app/` layout is free; `components/`, `views/`, `services/` is the default suggestion.
 
 ## Commands
 
 - Serve: `{{packageManager}} run serve` (build + serve), `{{packageManager}} run serve:only` (no rebuild), `{{packageManager}} run dev` (watch mode).
 - Build: `{{packageManager}} run build` (dev) or `{{packageManager}} run build:prod` (production).
-- Generate: `{{packageManager}} run generate ELEMENT ELEMENT_NAME` (`ELEMENT` = `component`/`view`/`service`, supports nested paths, updates the nearest `index.ts` barrel).
+- Generate: `{{packageManager}} run generate ELEMENT ELEMENT_NAME` (`ELEMENT` = `component`/`view`/`service`; `ELEMENT_NAME` may be a nested path, generated in `src/app/<path>/`; fails if that folder already exists and isn't empty).
 - Test: `{{packageManager}} run testin-nutin` (build + run), `{{packageManager}} run testin-nutin:only` (no rebuild), `{{packageManager}} run testin-nutin:watch`.
 
 ## Base classes

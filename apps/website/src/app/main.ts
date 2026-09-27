@@ -9,6 +9,7 @@ import {
   RoadmapManifestService
 } from './services/index.js';
 import { appRoutes } from './routes.js';
+import { loadA11yDropdown } from './helpers/index.js';
 
 class App {
   constructor() {
@@ -23,6 +24,7 @@ class App {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  loadA11yDropdown();
   await I18nService.initTranslations();
   await Promise.all([
     DocsManifestService.load(),

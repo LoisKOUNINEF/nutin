@@ -3,7 +3,7 @@
 ## Generate a service
 
 ```bash
-npm run generate service example # target directory: src/app/services/example
+npm run generate service services/example # target directory: src/app/services/example
 ```
 
 ## Example service

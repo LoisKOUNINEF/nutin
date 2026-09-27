@@ -8,4 +8,4 @@ export * from './articles/articles.view.js';
 export * from './guides/guides.view.js';
 export * from './roadmap/roadmap.view.js';
 export * from './articles-index/articles-index.view.js';
-export * from './a11y/a11y.view.js';
+export * from './a11y-elements/a11y-elements.view.js';

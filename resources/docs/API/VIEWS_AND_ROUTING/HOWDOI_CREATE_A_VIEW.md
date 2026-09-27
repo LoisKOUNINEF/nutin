@@ -5,7 +5,7 @@ A view is a routed page — one per route, mounted and destroyed by the [router]
 ## Generate a view
 
 ```bash
-npm run generate view foo # target directory: src/app/views/foo
+npm run generate view views/foo # target directory: src/app/views/foo
 ```
 
 ## Register children

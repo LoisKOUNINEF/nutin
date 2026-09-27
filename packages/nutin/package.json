@@ -1,6 +1,6 @@
 {
   "name": "@nutin/cli",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "The structure of a framework. The freedom of vanilla.",
   "preferGlobal": true,
   "main": "lib/index.mjs",
@@ -17,7 +17,7 @@
     "minor": "npm version minor -m 'CI/CD: Bump version to %s'",
     "major": "npm version major -m 'CI/CD: Bump version to %s'",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "publish": "npm publish --access public"
+    "release": "npm publish --access public"
   },
   "keywords": [
     "Nutin",
@@ -42,10 +42,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/loiskouninef/nutin.git"
+    "url": "https://github.com/LoisKOUNINEF/nutin.git"
   },
   "bugs": {
-    "url": "https://github.com/loiskouninef/nutin/issues"
+    "url": "https://github.com/LoisKOUNINEF/nutin/issues"
   },
   "homepage": "www.nutin.org"
 }

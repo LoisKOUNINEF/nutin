@@ -28,7 +28,11 @@ export async function getAppRoutePaths(bundleUrl, lang, pageUrl) {
 export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFetch, lang, pageUrl, i18nEnabled }) {
   // Passing a real URL instance as `location` gives `.pathname`/`.href`
   // which is what I18n's getLocaleFromUrl() actually reads.
-  const { window } = parseHTML('<!doctype html><html><body></body></html>', { location: new URL(pageUrl) });
+  // <main id="app"> mirrors index.html's real mount target — View defaults to mounting
+  // there (view.ts), and without it the View tree is never attached to `document`, so
+  // DomHelper.cleanupOptionalContent()'s document-wide `[data-optional]` query silently
+  // misses it, leaking raw "undefined" text for any unset optional field.
+  const { window } = parseHTML('<!doctype html><html><body><main id="app"></main></body></html>', { location: new URL(pageUrl) });
   const { trackedFetches } = installGlobals(window, {
     lang,
     mockFetch: mockFetch ?? {},

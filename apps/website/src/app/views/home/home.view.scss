@@ -92,7 +92,7 @@
 .home__subcatchphrase {
     max-width: 60ch;
     font-size: map.get($font-sizes, 'largest');
-    color: var(--primary);
+    color: var(--secondary);
     @include mixins.respond-to(medium) {
     width: 100%;
     }

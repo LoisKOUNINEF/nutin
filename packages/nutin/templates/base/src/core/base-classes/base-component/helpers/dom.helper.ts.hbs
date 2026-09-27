@@ -72,10 +72,24 @@ export class DomHelper {
         config.target.appendChild(config.element);
       } else {
         // Replace placeholder mode
+        this.copyAttributes(config.target, config.element);
         config.target.replaceWith(config.element);
       }
     } else {
       return;
     }
+  }
+
+  // Carries placeholder attributes (class, id, aria-*, data-*...) onto the mounted
+  // element. data-component is skipped so an ancestor's child lookup can't re-match it.
+  private static copyAttributes(from: HTMLElement, to: HTMLElement): void {
+    Array.from(from.attributes).forEach(attr => {
+      if (attr.name === 'data-component') return;
+      if (attr.name === 'class') {
+        to.classList.add(...Array.from(from.classList));
+        return;
+      }
+      to.setAttribute(attr.name, attr.value);
+    });
   }
 }
