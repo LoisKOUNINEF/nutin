@@ -116,7 +116,7 @@
     }
 }
 
-// Documentation menu (<a11y-dropdown>, portaled to <body> once its CDN bundle
+// Documentation/guides menus (<a11y-dropdown>, portaled to <body> once its CDN bundle
 // defines it). Hidden until then so the SSR'd markup never flashes inline.
 a11y-dropdown:not(:defined) {
     display: none;
@@ -129,7 +129,7 @@ button.c-round-btn {
     cursor: pointer;
 }
 
-.a11y-dropdown-wrapper[aria-labelledby='navbar-docs-anchor'] {
+.a11y-dropdown-wrapper:is([aria-labelledby='navbar-docs-anchor'], [aria-labelledby='navbar-guides-anchor']) {
     --a11y-dropdown-color-background: var(--surface);
     --a11y-menu-item-color-secondary-hover: var(--secondary);
     --a11y-menu-item-color-background: var(--background);

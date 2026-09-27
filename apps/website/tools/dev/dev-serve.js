@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
-import { spawn } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
 import { print, runCommand } from '../utils/index.js';
+
+const isWindows = process.platform === 'win32';
 
 async function startDev() {
   console.clear();
@@ -15,20 +17,26 @@ async function startDev() {
   }
 
   // detached: true makes each child the leader of its own process group, so its
-  // descendants (watcher.js's own `exec('npm run build')` included) can be killed
-  // as a group below. Without this, a shutdown that doesn't cleanly propagate
-  // SIGINT down the shell layers (backgrounded, launched by a task runner, a
-  // closed terminal tab instead of Ctrl-C, ...) leaves them running as orphans —
-  // which is exactly how multiple stray watcher.js processes ended up racing each
-  // other's builds.
-  const serve = spawn(['npm', 'run', 'serve:only', '--silent'].join(' '), { stdio: 'inherit', shell: true, detached: true });
-  const watcher = spawn(['node', 'tools/dev/watcher.js', '--silent'].join(' '), { stdio: 'inherit', shell: true, detached: true });
+  // descendants (watcher.js's own `exec('npm run build')` included) can be
+  // killed as a group below. Without this, a shutdown that doesn't cleanly propagate
+  // SIGINT down the shell layers (backgrounded, launched by a task runner, a closed
+  // terminal tab instead of Ctrl-C, ...) leaves them running as orphans — multiple
+  // stray watcher.js processes then race each other's builds.
+  // Not on Windows: there, detached children leave the console, so Ctrl-C would no
+  // longer reach them, and negative-pid group kills aren't supported — taskkill /T
+  // walks the process tree instead.
+  const serve = spawn(['npm', 'run', 'serve:only', '--silent'].join(' '), { stdio: 'inherit', shell: true, detached: !isWindows });
+  const watcher = spawn(['node', 'tools/dev/watcher.js', '--silent'].join(' '), { stdio: 'inherit', shell: true, detached: !isWindows });
 
   const children = [serve, watcher];
   let shuttingDown = false;
 
   function killGroup(child, signal) {
     if (!child.pid) return;
+    if (isWindows) {
+      spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' });
+      return;
+    }
     try {
       process.kill(-child.pid, signal);
     } catch {
@@ -36,11 +44,11 @@ async function startDev() {
     }
   }
 
-  function shutdown(signal) {
+  function shutdown(signal, exitCode = 0) {
     if (shuttingDown) return;
     shuttingDown = true;
     children.forEach((child) => killGroup(child, signal));
-    process.exit(0);
+    process.exit(exitCode);
   }
 
   process.on('SIGINT', () => shutdown('SIGINT'));
@@ -53,7 +61,7 @@ async function startDev() {
   serve.on('close', (code) => {
     if (shuttingDown) return;
     print.error(`live-server exited with code ${code}`);
-    shutdown('SIGTERM');
+    shutdown('SIGTERM', code ?? 1);
   });
   watcher.on('error', (err) => {
     print.boldError(`watcher failed to start: ${err.message}`);

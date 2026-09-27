@@ -12,5 +12,8 @@
 	"docs-api": "API",
 	"docs-options": "Options et fonctionnalités",
 	"docs-testing": "Outils de test",
-	"docs-tools": "Outils"
+	"docs-tools": "Outils",
+	"guides": "Guides",
+	"guides-alpinejs": "AlpineJS",
+	"guides-a11y-elements": "a11y-elements"
 }
