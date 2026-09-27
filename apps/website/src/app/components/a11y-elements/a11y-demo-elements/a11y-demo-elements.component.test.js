@@ -1,4 +1,5 @@
 import { A11yDemoElementsComponent } from '#root/dist/src/app/components/a11y-elements/a11y-demo-elements/a11y-demo-elements.component.js';
+import { Navigation } from '#root/dist/src/core/index.js';
 
 const ELEMENTS = [
   'a11y-anchor', 'a11y-avatar', 'a11y-checkbox', 'a11y-focusable', 'a11y-input', 'a11y-label', 'a11y-picture',
@@ -85,6 +86,26 @@ describe('A11yDemoElementsComponent', () => {
     const [noSpaces] = component.element.querySelector('#a11y-demo-username').validators;
     expect(noSpaces('jane doe')).toBeTruthy();
     expect(noSpaces('jane')).toBe(null);
+    component.destroy();
+  });
+
+  it('routes its back link through the SPA router', () => {
+    const navigateSpy = spyOn(Navigation, 'navigateTo').andCallFake(() => {});
+    const component = mount();
+    try {
+      component.element.querySelector('.a11y-demo__back').click();
+    } finally {
+      navigateSpy.restore();
+    }
+    expect(navigateSpy.lastCall[0]).toBe('/a11y-elements');
+    component.destroy();
+  });
+
+  it('rejects usernames containing whitespace', () => {
+    const component = mount();
+    const [validator] = component.element.querySelector('#a11y-demo-username').validators;
+    expect(validator('lois')).toBe(null);
+    expect(typeof validator('lois k')).toBe('string');
     component.destroy();
   });
 });

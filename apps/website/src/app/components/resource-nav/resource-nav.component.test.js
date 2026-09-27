@@ -87,4 +87,39 @@ describe('ResourceNavComponent', () => {
     expect(document.querySelectorAll('#resource-nav-drawer').length).toBe(1);
     component.destroy();
   });
+
+  it('renders grouped sections and skips slugs missing from the manifest', () => {
+    const target = document.createElement('div');
+    document.body.appendChild(target);
+    const component = new ResourceNavComponent(target, {
+      sections: [{ id: 'api', title: 'API', groups: [{ id: 'core', title: 'Core', pages: ['use-the-cli', 'ghost-page'] }] }],
+      manifest,
+      currentSlug: 'use-the-cli',
+      pageHref: (slug) => `/docs/api/${slug}`,
+    });
+    component.render();
+
+    const sidebar = component.element.querySelector('.resource-nav--sidebar');
+    expect(sidebar.querySelector('.resource-nav__group-title').textContent).toBe('Core');
+    expect([...sidebar.querySelectorAll('.resource-nav__link')].map((a) => a.getAttribute('href'))).toEqual(['/docs/api/use-the-cli']);
+    expect(sidebar.querySelector('.resource-nav__link--active')).toBeTruthy();
+    component.destroy();
+  });
+
+  it('routes a sidebar link click through the SPA router', () => {
+    const component = mount();
+    component.element.querySelector('.resource-nav--sidebar [href="/docs/tools/run-the-builder"]').click();
+    expect(navigateSpy.lastCall[0]).toBe('/docs/tools/run-the-builder');
+    component.destroy();
+  });
+
+  it('keeps the drawer open on a click outside its links', () => {
+    const component = mount();
+    const drawer = portalDrawer();
+    drawer.setAttribute('open', '');
+    drawer.click();
+    expect(drawer.hasAttribute('open')).toBe(true);
+    expect(navigateSpy.callCount).toBe(0);
+    component.destroy();
+  });
 });
