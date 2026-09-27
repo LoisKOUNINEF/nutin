@@ -4,6 +4,9 @@
   "private": true,
   "main": "index.js",
   "type": "module",
+  "imports": {
+    "#root/*.js": "./*.js"
+  },
   "scripts": {
     "build": "node tools/builder/builder.js",
     "build:prod": "NODE_ENV=production node tools/builder/builder.js",

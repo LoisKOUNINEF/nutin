@@ -49,6 +49,7 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
       appRoutes, I18nService, RouteGuardsManager, registerPipes,
       NavbarComponent, FooterComponent,
       DocsManifestService, ChangelogManifestService, TutorialManifestService, ArticlesManifestService,
+      GuidesManifestService,
     } = bundle;
 
     const routeConfig = appRoutes[appRoutesKey];
@@ -63,7 +64,7 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
 
     if (i18nEnabled) await I18nService.setCurrentLanguage(lang);
 
-    // Manifest-driven views (docs/changelog/tutorial/articles) read their manifest service's
+    // Manifest-driven views (docs/changelog/tutorial/articles/guides) read their manifest service's
     // already-loaded data synchronously in registerChildren() — main.ts normally loads it at
     // bootstrap, which never runs here, so it must be preloaded before .render() or the view
     // finds no page and renders its empty state instead of real content.
@@ -73,6 +74,7 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
         changelog: ChangelogManifestService,
         tutorial: TutorialManifestService,
         articles: ArticlesManifestService,
+        guides: GuidesManifestService,
       };
       await manifestServices[preloadManifest]?.load();
     }

@@ -1,12 +1,9 @@
 import { writeFile } from 'fs/promises';
-import { builderConfig } from '../../builder.config.js';
 
 export async function addTags(htmlContent, filePath) {
-  const scriptSrc = builderConfig.isProd ? "bundle.js" : "app/main.js";
-  
   const tags = [
     { type: 'stylesheet', href: 'main.css', position: 'head' },
-    { type: 'script', src: scriptSrc, position: 'body' }
+    { type: 'script', src: 'bundle.js', position: 'body' }
   ];
 
   let modifiedHtml = htmlContent;

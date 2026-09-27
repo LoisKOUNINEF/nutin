@@ -7,5 +7,7 @@
 	"docs-api": "API",
 	"docs-options": "Options and features",
 	"docs-testing": "Testing toolkit",
-	"docs-tools": "Tools"
+	"docs-tools": "Tools",
+	"guides-alpinejs": "AlpineJS",
+	"guides-a11y-elements": "a11y-elements"
 }

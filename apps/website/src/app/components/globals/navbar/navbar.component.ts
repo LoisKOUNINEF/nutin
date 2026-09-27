@@ -1,49 +1,56 @@
 import { Navigation, Component, I18nService } from '../../../../core/index.js';
 
-// The docs dropdown portals itself to <body> as soon as its CDN bundle defines
-// it — possibly before data-i18n/data-event hydration runs. So its item text is
-// interpolated here, its clicks are handled by delegation (see onAfterRender),
-// and it is looked up by id in the whole document rather than in this.element.
-const t = (key: string) => I18nService.translate(`navbar.${key}`);
+// The dropdowns portal themselves to <body> as soon as their CDN bundle defines
+// them — possibly before data-i18n/data-event hydration runs. So their item text is
+// interpolated here, their clicks are handled by delegation (see onAfterRender),
+// and they are looked up by id in the whole document rather than in this.element.
+const translate = (key: string) => I18nService.translate(`navbar.${key}`);
 
 const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
 
-const DOCS_DROPDOWN_ID = 'navbar-docs-dropdown';
+const DROPDOWN_IDS = ['navbar-docs-dropdown', 'navbar-guides-dropdown'];
 
 export class NavbarComponent extends Component<HTMLHeadingElement> {
-  private docsDropdown: HTMLElement | null = null;
+  private dropdowns: HTMLElement[] = [];
 
   constructor(mountTarget: HTMLElement) {
     super({templateFn, mountTarget, tagName: 'header'});
   }
 
   protected override onAfterRender(): void {
-    // A re-render builds a fresh dropdown; drop the previously portaled one first
-    // so the id lookup below can't return the stale element.
-    this.docsDropdown?.remove();
-    this.docsDropdown = document.getElementById(DOCS_DROPDOWN_ID);
+    // A re-render builds fresh dropdowns; drop the previously portaled ones first
+    // so the id lookups below can't return stale elements.
+    this.removeDropdowns();
+    this.dropdowns = DROPDOWN_IDS
+      .map((id) => document.getElementById(id))
+      .filter((dropdown): dropdown is HTMLElement => dropdown !== null);
 
-    if (this.docsDropdown) {
-      const onClick = (event: Event) => this.onDocsItemClick(event);
-      this.docsDropdown.addEventListener('click', onClick);
-      this.eventListeners.push([this.docsDropdown, 'click', onClick]);
+    const onClick = (event: Event) => this.onDropdownItemClick(event);
+    for (const dropdown of this.dropdowns) {
+      dropdown.addEventListener('click', onClick);
+      this.eventListeners.push([dropdown, 'click', onClick]);
     }
     super.onAfterRender();
   }
 
-  // Portaled outside this.element, so destroy() wouldn't remove it.
+  // Portaled outside this.element, so destroy() wouldn't remove them.
   protected override onBeforeDestroy(): void {
-    this.docsDropdown?.remove();
-    this.docsDropdown = null;
+    this.removeDropdowns();
     super.onBeforeDestroy();
   }
 
-  // The dropdown closes itself after any item click (mouse or Enter/Space).
-  private onDocsItemClick(event: Event): void {
+  private removeDropdowns(): void {
+    this.dropdowns.forEach((dropdown) => dropdown.remove());
+    this.dropdowns = [];
+  }
+
+  // A dropdown closes itself after any item click (mouse or Enter/Space).
+  private onDropdownItemClick(event: Event): void {
     const item = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[role="menuitem"]');
     if (!item) return;
     event.preventDefault();
-    Navigation.navigateTo(item.getAttribute('href') ?? '/docs');
+    const href = item.getAttribute('href');
+    if (href) Navigation.navigateTo(href);
   }
 
   private _navigateTo(href: string): void {

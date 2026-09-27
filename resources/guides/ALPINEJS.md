@@ -1,8 +1,10 @@
 # How to integrate AlpineJS?
 
-This guide describes two ways to integrate [AlpineJS](https://alpinejs.dev) into a Nutin application manually.
+This guide describes two ways to load [AlpineJS](https://alpinejs.dev) into a Nutin application - from a CDN, with zero build-tool involvement, or from npm, bundled with the rest of your app - and two ways to use it alongside Nutin.
 
 ## Load Alpine
+
+### From a CDN
 
 Add Alpine's CDN script to `src/index.html`'s `<head>`, pinned to an exact version:
 
@@ -15,7 +17,46 @@ Add Alpine's CDN script to `src/index.html`'s `<head>`, pinned to an exact versi
 </head>
 ```
 
+`cdn.min.js` starts Alpine on its own as soon as it loads.
+
 *Note:* If you're using Nutin's `docker` feature, you'll have to [add the CDN source to nginx CSP map](https://nutin.org/docs/options-and-features/use-docker-feature#adding-origins-in-csp-map).
+
+### From npm
+
+*Requires Nutin 2.1.1 or later, where `dev`/`serve`/`build` bundle npm dependencies too.*
+
+```bash
+npm install alpinejs
+npm install --save-dev @types/alpinejs
+```
+
+Alpine ships no types of its own: without `@types/alpinejs`, TypeScript fails with `TS7016: Could not find a declaration file for module 'alpinejs'`.
+
+Alpine needs `builder.esbuild.target` set to `es2020` (or later) in `nutin.config.js`. It's the default for projects created with Nutin 2.1.1+. Projects created before keep their own value (`es2015`), which breaks every Alpine expression at runtime:
+
+```js
+// nutin.config.js
+esbuild: {
+    // ...
+    target: ['es2020'],
+},
+```
+
+Import Alpine in `src/app/main.ts` and start it yourself, as the last step of your bootstrap:
+
+```ts
+// src/app/main.ts
+import Alpine from 'alpinejs';
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // ...
+    new App();
+
+    Alpine.start();
+});
+```
+
+Alpine is then served from your own bundle: no CSP change is needed with the `docker` feature.
 
 ## Approach 1: Keeping Alpine separated from Nutin
 
@@ -65,7 +106,9 @@ registerGlobals({
 
 ## Approach 2: Using Alpine state inside Nutin
 
-To let `@click`/`x-text`/etc. *inside* component and view templates read and mutate shared Alpine state, declare `x-data` directly on `#app` itself - it is permanent for the life of the page:
+To let `@click`/`x-text`/etc. *inside* component and view templates read and mutate shared Alpine state, declare `x-data` directly on `#app` itself - it is permanent for the life of the page.
+
+- With the CDN script, declare it in `index.html`, since `cdn.min.js` starts Alpine before `main.ts` ever runs:
 
 ```html
 <!-- src/index.html -->
@@ -74,55 +117,21 @@ To let `@click`/`x-text`/etc. *inside* component and view templates read and mut
 </body>
 ```
 
+- With npm, you start Alpine yourself, so you can set it from `main.ts` instead, right before `Alpine.start()`:
+
+```ts
+// src/app/main.ts
+document.getElementById('app')!.setAttribute('x-data', '{ count: 0 }');
+Alpine.start();
+```
+
 Then, inside any component's or view's own `.html` template, use directives with **no local
-`x-data`** — they inherit the scope from `#app` by normal DOM ancestry:
+`x-data`** — they inherit the scope from `#app` by normal DOM ancestry, and the state survives navigating between views:
 
 ```html
 <!-- e.g. home.view.html -->
 <button @click="count++">Increment</button>
 <span x-text="count"></span>
-```
-
-### Advanced: declaring `x-data` in `main.ts`
-
-[Approach 2](#approach-2-sharing-alpine-state-with-nutin-s-rendered-content) above requires hand-editing `index.html` because of the auto-starting `cdn.min.js` - before `main.ts` ever runs.
-
-Swap to Alpine's non-auto-starting ESM build to set `#app`'s `x-data` from TypeScript instead.
-
-1. Replace the "Load Alpine" script tag with an inline import that doesn't call `.start()`:
-
-```html
-<!-- src/index.html -->
-<head>
-    <!-- ... -->
-    <!-- This replaces the `cdn.min.js` script tag from "Load Alpine" -->
-    <!-- Use one or the other, not both. -->
-    <script type="module">
-        import Alpine from 'https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/module.esm.js';
-        window.Alpine = Alpine;
-    </script>
-</head>
-```
-
-```ts
-// src/app/globals.d.ts
-declare interface Window {
-    Alpine: {
-        start(): void;
-    };
-}
-```
-
-2. Set `x-data` on `#app` and **call `window.Alpine.start()`** yourself as the last step of your bootstrap:
-
-```ts
-// src/app/main.ts
-document.addEventListener('DOMContentLoaded', () => {
-    // ...
-
-    document.getElementById('app')!.setAttribute('x-data', '{ count: 0 }');
-    window.Alpine.start();
-});
 ```
 
 ## Important
@@ -136,5 +145,5 @@ This is also true when an ancestor's re-render, or a view navigation tears down 
 
 ## Notes
 
-- This CDN approach adds zero build-tool involvement. 
-- Bundling [AlpineJS](https://alpinejs.dev) as an npm dependency instead requires several steps and is not fully functional in Nutin.
+- The CDN approach adds zero build-tool involvement. 
+- With npm, import Alpine in `main.ts` only, not in a component or view file: `main.ts` is never imported by testin-nutin or by SEO files generation, so Alpine never runs outside a real browser.

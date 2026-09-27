@@ -42,7 +42,7 @@ export function loadA11yElements(): void {
   OVERLAYS.forEach((name) => ensureModuleScript(bundleUrl('overlays', name)));
 }
 
-// Only <a11y-dropdown>, for the global navbar's Documentation menu. Client-only
+// Only <a11y-dropdown>, for the global navbar's Documentation and Guides menus. Client-only
 // (called from main.ts), so the pre-rendered HTML stays free of the CDN bundles.
 export function loadA11yDropdown(): void {
   ensureStylesheet(STYLESHEET);
