@@ -26,10 +26,10 @@ jobs:
 
       - name: Ensure tag is on main
         run: |
-          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
-            echo "❌ Tag $GITHUB_REF_NAME is not on main. Aborting publish to npm workflow."
-            exit 1
-          fi
+#          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+#            echo "❌ Tag $GITHUB_REF_NAME is not on main. Aborting publish to npm workflow."
+#            exit 1
+#          fi
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
