@@ -1,10 +1,18 @@
 #!/usr/bin/env node
 
 import liveServer from 'live-server';
-import { print } from '../utils/index.js';
+import { print, resolvePort } from '../utils/index.js';
+
+let port;
+try {
+  port = resolvePort();
+} catch (err) {
+  print.boldError(err.message);
+  process.exit(1);
+}
 
 const params = {
-  port: 9090,
+  port, // --port <n> or PORT env, defaults to 9090
   root: 'dist/src',
   open: false, // set to true to open a new window in browser
   logLevel: 0, // 0 = errors only, 1 = some info, 2 = verbose
@@ -21,13 +29,24 @@ const params = {
   ]
 };
 
+// Started by dev-serve.js: exit with it even if it dies without cleaning up (kill -9, crash).
+if (process.send) process.on('disconnect', () => process.exit(0));
+
 try {
-  liveServer.start(params);
+  const server = liveServer.start(params);
+  // live-server never surfaces EADDRINUSE: it falls back to a random free port
+  // instead, so report the port it actually ended up on.
+  server.on('listening', () => {
+    const actualPort = server.address().port;
+    if (actualPort !== port) {
+      print.warn(`Port ${port} is already in use — fell back to ${actualPort}. Pass another one with --port <n>.`);
+    }
+    const url = `http://127.0.0.1:${actualPort}`;
+    print.boldInfo(`Serving at ${url}`);
+    // Started by dev-serve.js: report the URL so watcher.js can reprint it after rebuilds.
+    if (process.send) process.send({ type: 'server-url', url });
+  });
 } catch (err) {
-  if (err.code === 'EADDRINUSE') {
-    print.boldError(`Port ${params.port} is already in use — stop the process using it or change the dev port.`);
-  } else {
-    print.boldError(`live-server failed to start: ${err.message}`);
-  }
+  print.boldError(`live-server failed to start: ${err.message}`);
   process.exit(1);
 }

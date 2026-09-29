@@ -12,6 +12,19 @@ let isBuilding = false;
 let pendingRebuild = false;
 let buildTimeout = null;
 let lastChangedPath = null;
+let serverUrl = null;
+
+function printWatching() {
+  if (serverUrl) print.boldInfo(`Serving at ${serverUrl}`);
+  print.boldBlue('Watching for changes...');
+}
+
+// Sent by dev-serve.js (relayed from serve.js) once the server is listening.
+process.on('message', (msg) => {
+  if (msg?.type === 'server-url') serverUrl = msg.url;
+});
+// Exit with dev-serve.js even if it dies without cleaning up (kill -9, crash).
+if (process.send) process.on('disconnect', () => process.exit(0));
 
 function runBuild() {
   isBuilding = true;
@@ -33,7 +46,7 @@ function runBuild() {
         print.boldError(`\nBuild failed: ${err.message}`);
       }
     } else {
-      print.boldBlue('Watching for changes...');
+      printWatching();
     }
     isBuilding = false;
 

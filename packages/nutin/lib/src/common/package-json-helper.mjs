@@ -84,9 +84,9 @@ export function getAllScripts(context) {
   const baseScripts = {
     "build": "node tools/builder/builder.js",
     "build:prod": "NODE_ENV=production node tools/builder/builder.js",
-    "serve": `${packageManager} run build && ${packageManager} run serve:only`,
+    "serve": `${packageManager} run build && node tools/dev/serve.js`,
     "serve:only": "node tools/dev/serve.js",
-    "serve:prod": `${packageManager} run build:prod && ${packageManager} run serve:only`,
+    "serve:prod": `${packageManager} run build:prod && node tools/dev/serve.js`,
     "dev": "node tools/dev/dev-serve.js",
     "generate": "node tools/generator/generator.js",
     "testin-nutin": `${packageManager} run build && node tools/testin-nutin/runner.js`,

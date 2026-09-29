@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.2.0
+
+### Changes
+
+- `dev`, `serve`, `serve:prod` and `serve:only` accept a port: `npm run dev -- --port 3000`, `npm run serve -- --port=3000`, or `PORT=3000 npm run dev`. Precedence is `--port` > `PORT` > `9090` (default). Invalid ports fail fast with a clear error.
+
+- The dev server now logs the URL it's serving on. If the port is busy, live-server falls back to a random free port that is now reported with a warning.
+
+- `dev` no longer leaves the server and watcher running (holding the port) when the terminal tab/window is closed or `dev-serve.js` is killed hard: it now handles `SIGHUP`, and both children exit when their IPC channel to it drops.
+
 ## 2.1.1
 
 ### Changes
