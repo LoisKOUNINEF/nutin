@@ -10,9 +10,9 @@
 
 - `dev` no longer leaves the server and watcher running (holding the port) when the terminal tab/window is closed or `dev-serve.js` is killed hard: it now handles `SIGHUP`, and both children exit when their IPC channel to it drops.
 
-- `nutin new --js-only` generates a plain JavaScript project: no `.ts`/`.d.ts` files (the framework in `src/core` included), no `typescript` dependency, no `tsconfig.json` and no `tsc` build step. TypeScript remains the default and recommended option. Route key validation uses esbuild in JS projects, and `generate` scaffolds JS files.
+- `nutin new --js-only` generates a plain JavaScript project. TypeScript remains the default and recommended option.
 
-- Prod builds no longer hash or compress the copied `src/app` and `src/core` sources (they only feed the bundles and are removed before the build is finalized).
+- Prod builds no longer hash or compress the copied `src/app` and `src/core` sources.
 
 ## 2.1.1
 
