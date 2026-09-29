@@ -98,7 +98,7 @@ map $uri $csp_policy {
 
 Gzip is globally enabled.
 
-```
+```text
 gzip on # enables gzip compression for responses
 gzip_static on # serves .gz files if present
 gzip_proxied any # makes gzip work through a proxy
@@ -110,7 +110,7 @@ gzip_proxied any # makes gzip work through a proxy
 
 Brotli is globally enabled.
 
-```
+```text
 brotli on; # compresses anything not precompressed
 brotli_static on; # serves .br files if present
 ```

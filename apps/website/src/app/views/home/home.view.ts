@@ -36,7 +36,7 @@ export class HomeView extends View {
       factory: (el) => new SnippetComponent(el, {
         id: 0,
         sectionId: 0,
-        content: 'cd my-app\nnpm run serve # app is reachable on port 9090',
+        content: 'cd my-app\nnpm run serve # port 9090',
         type: 'bash',
       })
     },{

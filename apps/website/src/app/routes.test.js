@@ -8,7 +8,6 @@ import {
   GuidesView,
   HomeView,
   NotFoundView,
-  RoadmapView,
   TutorialView,
 } from '#root/dist/src/app/views/index.js';
 
@@ -21,11 +20,10 @@ const EXPECTED = {
   '/articles/:slug?': ArticlesView,
   '/articles-index': ArticlesIndexView,
   '/a11y-elements/:page?': A11yElementsView,
-  '/roadmap/:slug?': RoadmapView,
   '/404': NotFoundView,
 };
 
-const GUARDED = ['/docs/:section?/:slug?', '/guides/:slug?', '/tutorial/:slug?', '/changelog/:slug?', '/articles/:slug?', '/roadmap/:slug?'];
+const GUARDED = ['/docs/:section?/:slug?', '/guides/:slug?', '/tutorial/:slug?', '/changelog/:slug?', '/articles/:slug?'];
 
 const viewFactory = (route) => (typeof route === 'function' ? route : route.view);
 

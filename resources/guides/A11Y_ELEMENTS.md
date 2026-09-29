@@ -191,4 +191,4 @@ Every element also ships as a standalone, self-contained browser bundle, with no
 - The package's types aren't available to your code: declare the few element APIs you call as structural types, e.g. `type Snackbar = HTMLElement & { notify(message: string): void }`.
 - Everything under [Use overlays inside components](#use-overlays-inside-components) still applies.
 
-*Note:* If you're using Nutin's `docker` feature, you'll have to [add the CDN source to nginx CSP map](https://nutin.org/docs/options-and-features/use-docker-feature#adding-origins-in-csp-map), for both `script-src` and `style-src`. Scope it to the version's path (`https://cdn.jsdelivr.net/npm/a11y-elements@0.2.0/`) rather than the whole CDN.
+*Note:* If you're using Nutin's `docker` feature, you'll have to [add the CDN source to nginx CSP map](https://nutin.org/docs/options-and-features/use-docker-feature#adding-origins-in-csp-map), for both `script-src` and `style-src`. Scope it to the version's path (`https://cdn.jsdelivr.net/npm/a11y-elements@0.2.0/`).

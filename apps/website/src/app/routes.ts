@@ -8,8 +8,7 @@ import {
   GuidesView,
   HomeView,
   NotFoundView,
-  TutorialView,
-  RoadmapView
+  TutorialView
 } from "./views/index.js";
 import {
   ArticlesManifestService,
@@ -30,6 +29,5 @@ export const appRoutes: Routes = {
   '/articles/:slug?': { view: () => new ArticlesView(), guards: [Guards.resourcePageExists(ArticlesManifestService)] },
   '/articles-index': () => new ArticlesIndexView(),
   '/a11y-elements/:page?': () => new A11yElementsView(),
-  '/roadmap/:slug?': { view: () => new RoadmapView(), guards: [Guards.resourcePageExists(RoadmapManifestService)] },
   '/404': () => new NotFoundView(),
 }

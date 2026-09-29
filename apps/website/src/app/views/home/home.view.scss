@@ -18,6 +18,9 @@
         margin-left: 0;
       margin-right: 0;
     }
+    .token.comment {
+        color: var(--disabled-text);
+    }
 
 }
 

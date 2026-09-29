@@ -4,9 +4,8 @@
 	"changelog": "Changelog",
 	"guides": "Guides",
 	"why-nutin": "Why Nutin?",
-	"roadmap": "Roadmap",
 	"articles": "Articles",
-	"a11y": "A11y Elements",
+	"a11y": "a11y-elements",
 	"repo": "Nutin on GitHub",
 	"contact": "Contact",
 	"prism": "Code snippets highlighted with PrismJS."
