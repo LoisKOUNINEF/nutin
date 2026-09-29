@@ -15,8 +15,8 @@ export class A11yDemoElementsComponent extends Component {
   }
 
   protected override onAfterRender(): void {
-    // A plain property, not an attribute: 0.2.0 keeps properties set before
-    // the CDN bundle upgrades the element, so load order doesn't matter here.
+    // A plain property, not an attribute: since 0.2.0, properties set before
+    // the CDN bundle upgrades the element are kept, so load order doesn't matter here.
     const username = this.element.querySelector('#a11y-demo-username') as (HTMLElement & { validators?: unknown }) | null;
     if (username) username.validators = [(value: string) => (/\s/.test(value) ? t('input-username-no-spaces') : null)];
     super.onAfterRender();

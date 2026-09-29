@@ -35,8 +35,37 @@
         <input type="checkbox" name="a11y-demo-all">
       </a11y-checkbox>
       <a11y-checkbox label="${t('checkbox-disabled')}">
+        <input type="checkbox" name="a11y-demo-disabled" disabled>
+      </a11y-checkbox>
+      <a11y-checkbox label="${t('checkbox-checked-disabled')}">
         <input type="checkbox" name="a11y-demo-disabled" checked disabled>
       </a11y-checkbox>
+    </div>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-checkbox-group&gt;</code></h2>
+    <p data-i18n="a11y-demo-elements.checkbox-group-desc"></p>
+    <div class="a11y-demo__stage">
+      <a11y-checkbox-group legend="${t('checkbox-group-legend')}" select-all select-all-label="${t('checkbox-group-select-all')}">
+        <label><input type="checkbox" name="a11y-demo-toppings" value="cheese"> ${t('checkbox-group-cheese')}</label>
+        <label><input type="checkbox" name="a11y-demo-toppings" value="mushrooms"> ${t('checkbox-group-mushrooms')}</label>
+        <label><input type="checkbox" name="a11y-demo-toppings" value="olives"> ${t('checkbox-group-olives')}</label>
+        <label><input type="checkbox" name="a11y-demo-toppings" value="anchovies" disabled> ${t('checkbox-group-anchovies')}</label>
+      </a11y-checkbox-group>
+    </div>
+  </section>
+
+  <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-file-input&gt;</code></h2>
+    <p data-i18n="a11y-demo-elements.file-input-desc"></p>
+    <div class="a11y-demo__stage a11y-demo__stage--column a11y-demo__form">
+      <a11y-file-input max-size="2MB" max-files="3" previews browse-label="${t('file-input-browse')}" drop-label="${t('file-input-drop')}">
+        <a11y-label>${t('file-input-label')}</a11y-label>
+        <input type="file" name="a11y-demo-attachments" multiple accept="image/*,.pdf">
+        <a11y-hint>${t('file-input-hint')}</a11y-hint>
+        <a11y-error></a11y-error>
+      </a11y-file-input>
     </div>
   </section>
 
@@ -93,6 +122,12 @@
         <picture>
           <img src="/assets/images/logo-trans.avif" alt="" loading="lazy" decoding="async">
         </picture>
+      </a11y-picture>
+      <a11y-picture
+        class="a11y-demo__picture"
+        src="/assets/images/logo-trans.avif"
+        alt="${t('picture-generated-alt')}"
+        caption="${t('picture-generated-caption')}">
       </a11y-picture>
     </div>
   </section>

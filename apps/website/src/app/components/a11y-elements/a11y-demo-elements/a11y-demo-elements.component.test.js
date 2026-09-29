@@ -2,9 +2,9 @@ import { A11yDemoElementsComponent } from '#root/dist/src/app/components/a11y-el
 import { Navigation } from '#root/dist/src/core/index.js';
 
 const ELEMENTS = [
-  'a11y-anchor', 'a11y-avatar', 'a11y-checkbox', 'a11y-focusable', 'a11y-input', 'a11y-label', 'a11y-picture',
-  'a11y-progress', 'a11y-radio-group', 'a11y-select', 'a11y-skeleton', 'a11y-spinner', 'a11y-switch',
-  'a11y-textarea', 'a11y-visually-hidden',
+  'a11y-anchor', 'a11y-avatar', 'a11y-checkbox', 'a11y-checkbox-group', 'a11y-file-input', 'a11y-focusable',
+  'a11y-input', 'a11y-label', 'a11y-picture', 'a11y-progress', 'a11y-radio-group', 'a11y-select',
+  'a11y-skeleton', 'a11y-spinner', 'a11y-switch', 'a11y-textarea', 'a11y-visually-hidden',
 ];
 
 function mount() {

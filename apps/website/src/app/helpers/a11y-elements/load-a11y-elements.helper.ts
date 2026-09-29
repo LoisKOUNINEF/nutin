@@ -2,12 +2,12 @@
 // (dist/browser/**/define.js) plus the shared stylesheet, straight from the CDN.
 // Production's CSP only allows this exact version path (tools/docker/nginx.conf
 // and its .template): bump them together.
-const A11Y_ELEMENTS_DIST = 'https://cdn.jsdelivr.net/npm/a11y-elements@0.2.0/dist';
+const A11Y_ELEMENTS_DIST = 'https://cdn.jsdelivr.net/npm/a11y-elements@0.3.0/dist';
 
 const ACCESSIBILITY_COMPONENTS = [
-  'anchor', 'avatar', 'checkbox', 'focusable', 'input', 'label', 'picture',
-  'progress', 'radio-group', 'select', 'skeleton', 'spinner', 'switch',
-  'textarea', 'visually-hidden',
+  'anchor', 'avatar', 'checkbox', 'checkbox-group', 'file-input', 'focusable',
+  'input', 'label', 'picture', 'progress', 'radio-group', 'select', 'skeleton',
+  'spinner', 'switch', 'textarea', 'visually-hidden',
 ];
 
 const OVERLAYS = [

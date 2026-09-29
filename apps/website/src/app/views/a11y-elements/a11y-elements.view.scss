@@ -26,6 +26,9 @@
 body {
     --a11y-avatar-color-surface: var(--border);
     --a11y-avatar-color-text-muted: var(--text-muted);
+    --a11y-checkbox-group-color-text-muted: var(--text-muted);
+    --a11y-checkbox-group-select-all-border: 1px solid var(--border);
+    --a11y-file-input-color-dragover-bg: var(--surface);
     --a11y-blocking-loader-color-overlay: var(--overlay);
     --a11y-blocking-loader-color-text: var(--text);
     --a11y-picture-color-text-muted: var(--text-muted);
@@ -35,7 +38,7 @@ body {
     --a11y-skeleton-color-surface: var(--disabled-bg);
     --a11y-spinner-color: var(--primary);
 
-    @each $control in checkbox, radio-group, switch, select, input, textarea {
+    @each $control in checkbox, radio-group, switch, select, input, textarea, file-input {
         --a11y-#{$control}-color-background: var(--background);
         --a11y-#{$control}-color-surface: var(--surface);
         --a11y-#{$control}-color-text: var(--text);
@@ -51,7 +54,7 @@ body {
         --a11y-#{$overlay}-color-background: var(--background);
         --a11y-#{$overlay}-color-text: var(--text);
     }
-    @each $field in input, textarea {
+    @each $field in input, textarea, file-input {
         --a11y-#{$field}-color-error: var(--error);
     }
     --a11y-field-color-error: var(--error);
