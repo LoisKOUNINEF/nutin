@@ -44,7 +44,7 @@ export class HomeView extends View {
       factory: (el) => new SnippetComponent(el, {
         id: 0,
         sectionId: 0,
-        content: 'npm run generate component hello-world',
+        content: 'npm run generate component components/hello-world',
         type: 'bash',
       })
     },{
@@ -61,6 +61,8 @@ export class HomeView extends View {
         id: 0,
         sectionId: 0,
         content: `// views/home/home.view.ts
+import { HelloWorldComponent } from '../../components/hello-world/hello-world.component.js';
+
 class HomeView extends View {
   /* ... */
 

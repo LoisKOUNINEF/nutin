@@ -1,6 +1,6 @@
 # 6. Make tasks disappear
 
-## Let the service remove tasks
+## Let the service delete tasks
 
 ```ts
 export class TaskService extends Service<TaskService> {

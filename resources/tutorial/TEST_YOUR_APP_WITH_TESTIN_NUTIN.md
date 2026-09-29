@@ -1,4 +1,4 @@
-# Test your app
+# Test your app with testin-nutin
 
 Every Nutin application ships with **testin-nutin**, a built-in testing toolkit.
 

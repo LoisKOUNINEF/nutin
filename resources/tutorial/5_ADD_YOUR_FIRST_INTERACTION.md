@@ -1,6 +1,6 @@
 # 5. Add your first interaction
 
-## Let the service add tasks
+## Let the service create tasks
 
 ```ts
 class TaskService extends Service<TaskService> {
