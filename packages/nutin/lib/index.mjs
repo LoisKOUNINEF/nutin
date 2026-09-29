@@ -16,6 +16,7 @@ export function createAppCommand(command) {
     })
     .argument('[projectName]', 'Name of the project')
     .option('-pm, --package-manager <manager>', 'Specify package manager (npm, yarn, pnpm, bun)')
+    .option('--js-only', 'Generate a plain JavaScript project (no TypeScript)')
     .action(async (projectName, cliOptions) => {
       print.boldSuccess('\n🚀 Welcome to your new nutin app!\n');
       try {

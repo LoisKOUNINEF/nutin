@@ -23,7 +23,7 @@ describe('handle-file', () => {
 
     generateFile({ name, targetPath, templateFn: (n) => `content for ${n.kebab}`, suffix: 'component' });
 
-    const filePath = path.join(targetPath, 'widget.component.ts');
+    const filePath = path.join(targetPath, 'widget.component.{{#if (eq lang "js")}}js{{else}}ts{{/if}}');
     expect(fs.existsSync(filePath)).toBeTruthy();
     expect(fs.readFileSync(filePath, 'utf8')).toBe('content for widget');
     expect(exitSpy.callCount).toBe(0);
@@ -33,9 +33,9 @@ describe('handle-file', () => {
     const targetPath = path.join(tmpDir, 'services', 'widget');
     const name = { kebab: 'widget', pascal: 'Widget', camel: 'widget', capitalized: 'Widget' };
 
-    generateFile({ name, targetPath, templateFn: () => 'x', suffix: 'service', extension: 'js' });
+    generateFile({ name, targetPath, templateFn: () => 'x', suffix: 'service', extension: 'scss' });
 
-    expect(fs.existsSync(path.join(targetPath, 'widget.service.js'))).toBeTruthy();
+    expect(fs.existsSync(path.join(targetPath, 'widget.service.scss'))).toBeTruthy();
   });
 
   it('generateFile calls process.exit(1) instead of overwriting an existing file', () => {

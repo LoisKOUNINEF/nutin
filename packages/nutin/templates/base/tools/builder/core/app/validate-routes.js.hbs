@@ -1,3 +1,45 @@
+{{#if (eq lang "js")}}
+import { readFileSync } from 'fs';
+import path from 'path';
+import esbuild from 'esbuild';
+import { errorExit } from '../../../utils/index.js';
+import { PATHS } from './paths.js';
+
+const ROUTES_FILE = path.join(PATHS.sourceApp, 'routes.js');
+
+// esbuild warns on every duplicate key of an object literal, appRoutes included.
+async function findDuplicateKeys(source) {
+  const { warnings } = await esbuild.transform(source, { loader: 'js', sourcefile: ROUTES_FILE });
+
+  const keys = warnings
+    .filter((warning) => warning.id === 'duplicate-object-key')
+    .map((warning) => warning.text.match(/^Duplicate key "(.*)" in object literal$/)?.[1] ?? warning.text);
+
+  return [...new Set(keys)];
+}
+
+async function validateRoutes() {
+  let source;
+  try {
+    source = readFileSync(ROUTES_FILE, 'utf-8');
+  } catch {
+    errorExit(`Failed to read ${ROUTES_FILE}`);
+  }
+
+  const duplicates = await findDuplicateKeys(source);
+
+  if (duplicates.length > 0) {
+    const list = duplicates.map((key) => `"${key}"`).join(', ');
+    errorExit(
+      `Duplicate route key(s) in ${ROUTES_FILE}: ${list} — an earlier route with this path is silently unreachable.`
+    );
+  }
+}
+
+validateRoutes().catch((err) => {
+  errorExit(err, 'validate-routes');
+});
+{{else}}
 import { readFileSync } from 'fs';
 import path from 'path';
 import ts from 'typescript';
@@ -75,3 +117,4 @@ try {
 } catch(err) {
   errorExit(err, 'validate-routes');
 }
+{{/if}}

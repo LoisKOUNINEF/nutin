@@ -13,7 +13,7 @@ describe('componentTemplate', () => {
 const templateFn = () => \`__TEMPLATE_PLACEHOLDER__\`;
 
 export class WidgetComponent extends Component {
-  constructor(mountTarget: HTMLElement) {
+  constructor({{#if (eq lang "js")}}mountTarget{{else}}mountTarget: HTMLElement{{/if}}) {
     super({templateFn, mountTarget});
   }
 }

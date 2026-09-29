@@ -79,7 +79,11 @@ export function toTsPath(input) {
   return input
     .split('/')
     .slice(1)
+{{#if (eq lang "js")}}
+    .join('/');
+{{else}}
     .join('/')
     .replace(/\.js$/, '.ts');
+{{/if}}
 }
 

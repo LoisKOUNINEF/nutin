@@ -7,11 +7,11 @@ const fs = fsExtra.default;
 export class JsonManager {
   async generateJsonFiles(projectPath, context) {
     await this.generatePackageJson(projectPath, context);
-    await this.generateTsconfigJson(projectPath, context);
+    if (context.lang !== 'js') await this.generateTsconfigJson(projectPath, context);
   }
 
   async generatePackageJson(projectPath, context) {
-    const { testinNutin, projectName } = context;
+    const { testinNutin, projectName, lang } = context;
 
     const devDependencies = {
       "chokidar": "^4.0.3",
@@ -21,7 +21,7 @@ export class JsonManager {
       "linkedom": "^0.18.12",
       "live-server": "^1.2.2",
       "sass": "^1.89.0",
-      "typescript": "^5.8.3"
+      ...(lang === 'js' ? {} : { "typescript": "^5.8.3" })
     };
 
     const scripts = getAllScripts(context);

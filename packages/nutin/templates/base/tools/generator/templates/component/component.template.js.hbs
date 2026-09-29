@@ -9,7 +9,7 @@ export const componentTemplate = (name, targetPath) => {
 const templateFn = () => \`${htmlTemplate}\`;
 
 export class ${name.pascal}Component extends Component {
-  constructor(mountTarget: HTMLElement) {
+  constructor({{#if (eq lang "js")}}mountTarget{{else}}mountTarget: HTMLElement{{/if}}) {
     super({templateFn, mountTarget});
   }
 }

@@ -148,5 +148,5 @@ function describeOrphanHtml(htmlPath) {
   const basename = htmlFilename.replace(/\.html$/, '');
 
   return `"${htmlFilename}" has no matching component or view (expected ${basename}.ts or ${basename}.js).
-Remove ${htmlFilename}, or add ${basename}.ts with a template placeholder to merge it into.`;
+Remove ${htmlFilename}, or add ${basename}.{{#if (eq lang "js")}}js{{else}}ts{{/if}} with a template placeholder to merge it into.`;
 }

@@ -12,7 +12,9 @@ const verboseEnabled = args.includes('--verbose');
 const fileFilters = args.filter(arg => arg !== '--coverage' && arg !== '--verbose');
 
 // Tests import and run the compiled build output (dist/src/)
+{{#unless (eq lang "js")}}
 // and has no sourcemap back to the .ts sources
+{{/unless}}
 const origins = [];
 const coverageDirs = [];
 

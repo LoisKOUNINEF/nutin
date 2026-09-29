@@ -4,6 +4,7 @@ import * as fsExtra from 'fs-extra';
 import { TemplateCompiler } from './template-compiler.mjs';
 import { print } from '../utils/print.mjs';
 import { FEATURES } from './feature-registry.mjs';
+import { toJsOutput } from './transpile-ts.mjs';
 
 const fs = fsExtra.default;
 const __filename = fileURLToPath(import.meta.url);
@@ -15,6 +16,11 @@ const BINARY_EXTENSIONS = new Set([
   '.mp4', '.webm', '.mp3', '.wav', '.ogg',
   '.pdf', '.zip', '.tar', '.gz'
 ]);
+
+// Templates that only make sense in a TypeScript project — not generated for JS-only ones.
+const TS_ONLY_TEMPLATES = [
+  path.join('tools', 'builder', 'core', 'app', 'compile-ts.js.hbs'),
+];
 
 export class FileGenerator {
   constructor() {
@@ -76,6 +82,11 @@ export class FileGenerator {
   }
 
   async isRenderTemplateFile(templatePath, fileName, context) {
+    const isJsOnly = context.lang === 'js';
+    if (isJsOnly && TS_ONLY_TEMPLATES.some((template) => templatePath.endsWith(template))) {
+      return null;
+    }
+
     const fileExt = path.extname(fileName).toLowerCase();
     const outputFileName = fileName.endsWith('.hbs') ? fileName.replace('.hbs', '') : fileName;
     const isBinary = BINARY_EXTENSIONS.has(fileExt);
@@ -87,6 +98,11 @@ export class FileGenerator {
       content = await this.compiler.compileFile(templatePath, context);
     } else {
       content = await fs.readFile(templatePath, 'utf8');
+    }
+
+    if (isJsOnly && !isBinary) {
+      const jsOutput = await toJsOutput(outputFileName, content);
+      return jsOutput && { ...jsOutput, isBinary };
     }
 
     return { outputFileName, isBinary, content };

@@ -7,7 +7,7 @@ export function generateFile({
   targetPath,
   templateFn,
   suffix,
-  extension = 'ts',
+  extension = '{{#if (eq lang "js")}}js{{else}}ts{{/if}}',
 }) {
   fs.mkdirSync(targetPath, { recursive: true });
   const template = templateFn(name, targetPath, suffix);

@@ -18,7 +18,9 @@ runScript(path.join(scriptsDir, 'app', 'copy-static.js'), 'Copying files...');
 runScript(path.join(scriptsDir, 'html-index', 'validate-html.js'), 'Processing index.html...');
 runScript(path.join(scriptsDir, 'app', 'validate-routes.js'), 'Validating app routes...');
 
+{{#unless (eq lang "js")}}
 runScript(path.join(scriptsDir, 'app', 'compile-ts.js'), 'Compiling TypeScript...');
+{{/unless}}
 
 runScript(path.join(scriptsDir, 'html-templates', 'process-html-templates.js'), 'Processing HTML templates...');
 

@@ -7,7 +7,12 @@ import { builderConfig } from '../../builder.config.js';
 
 async function copyStatic() {
   const extensions = [...BINARY_EXTENSIONS, '.html'];
+{{#if (eq lang "js")}}
+  // No compile step emits .js here, so sources are copied in dev and prod alike.
+  extensions.push('.js');
+{{else}}
   if (builderConfig.isProd) extensions.push('.ts');
+{{/if}}
 
   // Every build starts from a clean dist-build: a failed/interrupted prior
   // build never gets renamed away by finalize-build.js, so a stale sibling
@@ -23,6 +28,11 @@ async function copyStatic() {
     const files = await getFilesRecursive(PATHS.source, extension);
 
     for (const file of files) {
+{{#if (eq lang "js")}}
+      // Tests import the build output; they must not end up in it.
+      if (file.endsWith('.test.js')) continue;
+
+{{/if}}
       const relative = path.relative(PATHS.source, file);
       const dest = path.join(PATHS.tempSource, relative);
 

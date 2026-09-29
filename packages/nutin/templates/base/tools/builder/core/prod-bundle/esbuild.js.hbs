@@ -4,9 +4,14 @@ import { print, errorExit } from '../../../utils/index.js';
 import { PATHS } from '../app/paths.js';
 import { builderConfig } from '../../builder.config.js';
 
+{{#if (eq lang "js")}}
+// Bundles the copied .js sources; in dev they're also kept on disk for testin-nutin.
+const ENTRY_FILE = path.join(PATHS.tempApp, 'main.js');
+{{else}}
 // Prod bundles straight from the copied .ts sources (tsc runs --noEmit there);
 // dev bundles tsc's emitted .js, which is kept on disk for testin-nutin.
 const ENTRY_FILE = path.join(PATHS.tempApp, builderConfig.isProd ? 'main.ts' : 'main.js');
+{{/if}}
 const OUT_FILE = path.join(PATHS.tempSource, 'bundle.js');
 
 const DEV_OVERRIDES = {

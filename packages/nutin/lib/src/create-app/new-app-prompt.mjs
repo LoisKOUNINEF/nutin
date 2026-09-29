@@ -39,6 +39,7 @@ export async function newAppPrompt(initialName, cliOptions = {}) {
   return {
     projectName,
     packageManager,
+    lang: cliOptions.jsOnly ? 'js' : 'ts',
   };
 }
 

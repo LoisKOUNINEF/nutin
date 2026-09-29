@@ -8,7 +8,7 @@ describe('serviceTemplate', () => {
     expect(serviceTemplate(name, targetPath)).toBe(
       `import { Service } from '../../../core/index.js';
 
-export class WidgetService extends Service<WidgetService> {  
+export class WidgetService extends Service{{#unless (eq lang "js")}}<WidgetService>{{/unless}} {  
   constructor() {
     super();
   }

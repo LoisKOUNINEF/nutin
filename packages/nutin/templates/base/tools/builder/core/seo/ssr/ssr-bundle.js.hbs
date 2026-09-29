@@ -6,7 +6,7 @@ import { PATHS } from '../../app/paths.js';
 import { builderConfig } from '../../../builder.config.js';
 
 const SSR_DIR = path.join(PATHS.temp, '.ssr');
-const ENTRY_FILE = path.join(PATHS.tempApp, '__ssr-entry.ts');
+const ENTRY_FILE = path.join(PATHS.tempApp, '__ssr-entry.{{#if (eq lang "js")}}js{{else}}ts{{/if}}');
 const OUT_FILE = path.join(SSR_DIR, 'ssr-bundle.mjs');
 
 const ENTRY_CONTENT = `export { appRoutes } from './routes.js';
