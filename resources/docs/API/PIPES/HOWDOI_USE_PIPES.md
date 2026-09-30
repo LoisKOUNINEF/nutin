@@ -17,6 +17,6 @@
 
 See [What pipes are available?](./WHAT_PIPES_ARE_AVAILABLE.md) for the built-in list, and [How do I create pipes?](./HOWDOI_CREATE_PIPES.md) to register your own.
 
-## Gotchas
+## Important
 
 - An empty `data-pipe` attribute is a no-op.

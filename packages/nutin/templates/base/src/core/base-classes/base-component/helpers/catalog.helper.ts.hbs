@@ -1,4 +1,5 @@
 import { Component, ComponentConfig, ComponentOptions } from "../../index.js";
+import type { ReusableComponentConfig } from './children.helper.js';
 
 export interface CatalogConfig extends ComponentOptions {
   items: CatalogItemConfig[];
@@ -6,6 +7,7 @@ export interface CatalogConfig extends ComponentOptions {
   elementTag?: keyof HTMLElementTagNameMap;
   selector: string;
   component: new (el: HTMLElement, data: any, props?: any) => Component;
+  trackBy?: (item: any, index: number) => string | number;
 };
 
 export interface CatalogItemBase {
@@ -29,6 +31,7 @@ interface CatalogConfig extends ComponentOptions {
   elementTag?: keyof HTMLElementTagNameMap;
   selector: string;
   component: new (el: HTMLElement, data: any) => Component;
+  trackBy?: (item: any, index: number) => string | number;
 };
 
 type CatalogItemConfig<T = any> =
@@ -75,12 +78,19 @@ export class CatalogHelper {
     const { props, defaults, normalizeKeys } = config;
     const options = { ...props, ...defaults, ...normalizeKeys };
 
-    componentConfigs.push(
-      { 
-        selector: `${config.elementName}-${index}`,
-        factory: (el) => new config.component(el, configWithIndex, options),
-      },
-    )
+    const componentConfig: ReusableComponentConfig = {
+      selector: `${config.elementName}-${index}`,
+      factory: (el) => new config.component(el, configWithIndex, options),
+    };
+
+    if (config.trackBy) {
+      const item = config.items[index];
+      componentConfig.key = config.trackBy(item, index);
+      componentConfig.scope = `catalog:${config.selector}:${config.elementName}`;
+      componentConfig.reuseIf = { item, options, component: config.component };
+    }
+
+    componentConfigs.push(componentConfig);
   }
 
   private static getConfigWithIndex(config: CatalogConfig, index: number): CatalogItemConfig {

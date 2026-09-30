@@ -178,8 +178,12 @@ Check every folder without building the app:
 <pm> run markdown:check
 ```
 
+## Important
+
+- The page HTML is injected as trusted content: only compile Markdown you wrote.
+
 ## Limitations
 
+- Does not support i18n yet.
 - Pages are rendered client-side only: SEO file generation does not pre-render them yet.
 - Code blocks are not syntax-highlighted - add a highlighter in `MarkdownContentComponent`'s `onAfterRender()` if you need one.
-- The page HTML is injected as trusted content: only compile Markdown you wrote.

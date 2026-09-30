@@ -33,6 +33,6 @@ type Routes = Record<string, RouteConfig>;
 - A plain-function entry (`() => new View()`) has no guards. Use the `{ view, guards }` form when you need route guards — see [How do I use route guards?](./HOWDOI_USE_ROUTE_GUARDS.md).
 - `AppRouter(routes)` installs the singleton `Router` and immediately navigates to the current path — call it exactly **once**, at app startup. Calling it again elsewhere throws, since `Router` is a `Service` singleton.
 
-## Gotcha: `/404` is required
+## Important: `/404` is required
 
 A `'/404'` entry must exist in your route table. If no route matches the current path and `/404` isn't defined, the router logs `console.error('No 404 route defined')` and renders nothing — always include a not-found route.

@@ -41,12 +41,13 @@ BaseComponent<T>     — render/destroy engine, data-* parsing, children
 - `render()`: `onBeforeRender()` → sanitize + set `innerHTML` → mount children (`data-component`/`data-catalog`) → parse `data-i18n`/`data-pipe` → bind `data-event` listeners → `onAfterRender()`. Runs in full on every `render()` call — no virtual DOM/diffing.
 - `destroy()`: unbinds events, unsubscribes bus listeners, destroys children, removes the element.
 - `Service`: direct `new` throws — always use `MyService.getInstance()` (or the exported const). Auto-binds all methods to the instance. `registerCleanup(fn)` for teardown; `Service.destroyAll()` runs on `beforeunload`.
-- Overridable hooks (all no-op by default): `onBeforeRender`, `onAfterRender`, `onBeforeDestroy`, `onAfterDestroy`, `generateTemplate()`, `registerChildren()`. `View` adds router-only `onEnter()`/`onExit()`.
+- Overridable hooks (all no-op by default): `onBeforeRender`, `onAfterRender`, `onBeforeDestroy`, `onAfterDestroy`, `onReuse`, `generateTemplate()`, `registerChildren()`. `View` adds router-only `onEnter()`/`onExit()`.
 
 ## Children components
 
-- Override `registerChildren(): ComponentConfig[]` to declare children — matched against `[data-component="selector"]` elements in the rendered template. ComponentConfig: `{ selector: 'my-selector', factory: (el) => new MyComponent(el, {...} )}`.
-- For repeated lists, use the inherited `createCatalogComponents({ items, elementName, selector, component })` inside `registerChildren()` instead of hand-writing one entry per item — targets `[data-catalog="selector"]`.
+- Override `registerChildren(): ComponentConfig[]` to declare children — matched against `[data-component="selector"]` elements in the rendered template. ComponentConfig: `{ selector: 'my-selector', factory: (el) => new MyComponent(el, {...} ), key?: string | number }`.
+- Children are destroyed and recreated on every parent render unless they have a `key`: with the same key on the next render, the child is kept as-is (factory not called, not re-rendered, DOM state preserved) and only its `onReuse()` hook runs. Put in the key whatever should force a recreate.
+- For repeated lists, use the inherited `createCatalogComponents({ items, elementName, selector, component })` inside `registerChildren()` instead of hand-writing one entry per item — targets `[data-catalog="selector"]`. Add `trackBy: (item, index) => id` to keep items whose id is unchanged and whose item is shallow-equal; without it the catalog is rebuilt every render.
 
 ## `data-*` attributes
 

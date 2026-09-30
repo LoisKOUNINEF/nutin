@@ -54,7 +54,7 @@ TokenHelper.registerPrefixedToken('@style:', (prop, el) => (el.style as any)[pro
 
 A prefixed token used alone as a `data-event` arg (e.g. `data-event="click:_handler:@style:color"`) resolves correctly — the parser rejoins everything after the handler name on `:` before splitting on `,`. Only combining a prefixed token with a comma-separated sibling arg introduces ambiguity worth avoiding; if unsure, test the resolved value directly with `TokenHelper.resolve(token, el, event)`.
 
-## Gotchas
+## Important
 
 - Resolving **any** arg token calls `event.preventDefault()` unconditionally — so a `data-event` handler with at least one argument always prevents default browser behavior (form submission, link navigation, etc.). A handler with **zero** args (`data-event="click:handler"`) does **not** prevent default.
 - `@checked`, `@selected`, `@event`, `@target`, `@x`, `@y` are the only tokens that are *not* HTML-escaped — they return raw booleans/objects/numbers, not strings.

@@ -1,6 +1,6 @@
 # How to integrate AlpineJS?
 
-This guide describes two ways to load [AlpineJS](https://alpinejs.dev) into a Nutin application - bundled from npm, or loaded from a CDN - and two ways to use it alongside Nutin.
+This guide describes two ways to load [AlpineJS](https://alpinejs.dev) into a Nutin application - bundled from npm, or loaded from a CDN - and three ways to use it alongside Nutin.
 
 ## Load Alpine
 
@@ -110,12 +110,19 @@ To let `@click`/`x-text`/etc. *inside* component and view templates read and mut
 
 ### With npm
 
-You start Alpine yourself, so you can set it from `main.ts`, right before `Alpine.start()`:
+- You start Alpine yourself, so you can set it from `main.ts`, right before `Alpine.start()`:
 
 ```ts
 // src/app/main.ts
 document.getElementById('app')!.setAttribute('x-data', '{ count: 0 }');
 Alpine.start();
+```
+
+- Hand-authoring `main` directly in `index.html` still works:
+
+```html
+<!-- src/index.html -->
+<main id="app" x-data="{ count: 0 }"></main>
 ```
 
 Then, inside any component's or view's own `.html` template, use directives with **no local
@@ -138,7 +145,7 @@ Declare it in `index.html`, since `cdn.min.js` starts Alpine before `main.ts` ev
 </body>
 ```
 
-#### Advanced: declaring x-data in main.ts
+#### Advanced: Declaring x-data in main.ts
 
 Above approach requires hand-editing index.html because of the auto-starting cdn.min.js - before main.ts ever runs.
 
@@ -182,11 +189,53 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 ```
 
+## Alternative: Holding Alpine state inside a component
+
+*Requires Nutin 2.2.0 or later.*
+
+A component can hold its own `x-data` root if its parent registers it with a `key` (or, for catalog items, with `trackBy`). 
+
+When the parent re-renders, a kept child is moved into the new template as-is instead of being recreated, so its Alpine state survives.
+
+```ts
+// src/app/components/counter/counter.component.ts
+import { Component } from '../../../core/index.js';
+
+const templateFn = () => `
+    <button @click="count++">Increment</button>
+    <span x-text="count"></span>
+`;
+
+export class CounterComponent extends Component {
+    constructor(mountTarget: HTMLElement) {
+        super({ mountTarget, templateFn });
+    }
+
+    protected override onBeforeRender(): void {
+        this.element.setAttribute('x-data', '{ count: 0 }');
+    }
+}
+```
+
+```ts
+// In the parent component or view
+public registerChildren(): ComponentConfig[] {
+    return [
+        { selector: 'counter', key: 'counter', factory: (el) => new CounterComponent(el) },
+    ];
+}
+```
+
+The same holds for catalog items tracked with `trackBy`, as long as the item itself didn't change.
+
+A changed item, or a child whose `key` changed, is recreated, and its state starts over.
+
 ## Important
 
-**`x-data` roots should never live inside a component's or view's own rendered subtree.**
+**An `x-data` root inside Nutin's rendered tree only survives while the element holding it is kept.**
 
-If the component re-renders, it replaces that element's `innerHTML`, wiping out the `x-data` root 
-and its state along with it.
+It is reset when:
 
-This is also true when an ancestor's re-render, or a view navigation tears down and rebuilds the whole subtree.
+- The component holding it renders again: its own `render()`, or a `listenToRenderEvents()` event, rebuilds its content.
+- It isn't kept across an ancestor's re-render: it has no `key`/`trackBy`, or any component between it and the re-rendering ancestor has none. An unkeyed component is recreated along with everything inside it.
+- It is part of a view's own template: views are destroyed on every navigation. Never declare `x-data` in a view's template, only in keyed components or on `#app` ([Approach 2](#approach-2-using-alpine-state-inside-nutin)).

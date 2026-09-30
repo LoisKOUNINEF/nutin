@@ -42,6 +42,6 @@ See [How to integrate AlpineJS?](https://nutin.org/guides/alpinejs)
 
 ***Note:*** `Router` listens to the `reload` event to re-render the view itself - destroys and rebuilds the whole `<main>` DOM.
 
-### Gotchas
+### Important
 
 - Calling `render()` after `destroy()` still runs the full pipeline and mutates `this.element`, but that element is already detached from the document — nothing becomes visible again. Don't reuse a destroyed instance.
