@@ -5,6 +5,9 @@
 .resource-content {
     @include mixins.flex-row;
     gap: map.get($spacings, 'largest');
+    // Fills the .resource row beside the sidenav instead of sizing to its content,
+    // which otherwise shrinks the body (and its code blocks) on short-titled pages.
+    flex: 1 1 auto;
     // Without this, a flex item's default min-width:auto lets a wide, unwrapped
     // <pre> line (white-space:pre) drag this whole row wider than the viewport
     // instead of shrinking and letting the pre's own overflow-x:auto scroll it.

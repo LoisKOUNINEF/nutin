@@ -24,9 +24,8 @@
         }
     }
     // iPad/iPad mini landscape (993-1201px): row layout stays (unlike the
-    // respond-to(large) block above), but the desktop clamp() margin here
-    // combined with .resource__section's 80% width below otherwise squeezes
-    // .resource-content__body down to ~25% of the viewport.
+    // respond-to(large) block above), but the desktop clamp() margins here
+    // otherwise squeeze .resource-content__body down.
     @media (min-width: 993px) and (max-width: 1201px) {
         margin-left: 0;
         margin-right: 0;
@@ -40,7 +39,9 @@
 
 .resource__section {
     padding-top: 2rem;
-    width: 80%;
+    // auto (not a %): fills between .resource's clamp() margins, so the right
+    // gutter matches the left one instead of leaving extra space for content.
+    width: auto;
     p {
         max-width: 100ch;
     }
