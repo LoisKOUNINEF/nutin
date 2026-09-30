@@ -43,6 +43,10 @@
 
 - New apps no longer ship with a CSS reset.
 
+- `docker:build` now works with the `markdown` feature: the Dockerfile copies every `markdownSources` folder into the image build. A folder outside the project is rejected with a clear error.
+
+- testin-nutin's TODO lines now show the real `.test.js` path in TypeScript projects instead of `.test.ts`.
+
 ## 2.1.1
 
 ### Changes

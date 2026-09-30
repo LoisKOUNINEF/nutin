@@ -307,6 +307,49 @@ describe('ChildrenHelper', () => {
     expect(created.length).toBe(3);
   });
 
+  it('recreates a catalog-style child when its reuseIf item changes between null, an object and an array', () => {
+    const created = [];
+    let item = null;
+    const component = {
+      registerChildren: () => [{
+        selector: 'item-0',
+        key: 1,
+        scope: 'catalog:list:item',
+        reuseIf: { item, options: undefined, component: Widget },
+        factory: (el) => { const w = new Widget({ mountTarget: el }); created.push(w); return w; },
+      }],
+    };
+    const registry = ChildrenHelper.createRegistry();
+    const rerender = () => {
+      element.innerHTML = '<div data-component="item-0"></div>';
+      ChildrenHelper.addChildren(component, element, registry);
+    };
+
+    rerender();
+    item = { 0: 'a' };
+    rerender();
+    expect(created.length).toBe(2);
+
+    item = ['a'];
+    rerender();
+    expect(created.length).toBe(3);
+  });
+
+  it('ignores a non-HTML placeholder element', () => {
+    let calls = 0;
+    const component = {
+      registerChildren: () => [{
+        selector: 'icon',
+        factory: (el) => { calls++; return new Widget({ mountTarget: el }); },
+      }],
+    };
+    element.innerHTML = '<svg data-component="icon"></svg>';
+
+    ChildrenHelper.addChildren(component, element, ChildrenHelper.createRegistry());
+
+    expect(calls).toBe(0);
+  });
+
   it('moves a kept child with Element.moveBefore when the browser supports it', () => {
     const moved = [];
     const proto = Element.prototype;

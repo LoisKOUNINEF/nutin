@@ -83,7 +83,8 @@ export function toTsPath(input) {
     .join('/');
 {{else}}
     .join('/')
-    .replace(/\.js$/, '.ts');
+    // Test files stay .test.js in TypeScript projects too.
+    .replace(/(?<!\.test)\.js$/, '.ts');
 {{/if}}
 }
 
