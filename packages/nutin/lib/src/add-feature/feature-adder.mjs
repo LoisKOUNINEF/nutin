@@ -86,8 +86,8 @@ export class FeatureAdder {
     }
     if (feature.key === 'markdown') {
       print.info('\nNext steps:');
-      print.gray('  1. List your Markdown folders in nutin.config.js "markdownSources.sourceFolders" — each one is served at /<folder name>. (Start with the generated default root/content).');
-      print.gray(`  2. Run "${context.packageManager} run build" — you will be asked to install marked and gray-matter (pass "-- -y" to accept non-interactively).`);
+      print.gray('  1. List your Markdown folders in nutin.config.js "markdownSources.sourceFolders" — each one is served at /<folder name>. (Start with the generated default markdown-content).');
+      print.gray(`  2. Run "${context.packageManager} run build" — you will be asked to install marked and gray-matter (pass "-- -y" to accept non-interactively).`);  
     }
   }
 }
