@@ -1,0 +1,32 @@
+import { RouteGuard } from '../../core/index.js';
+import { MarkdownManifestsService } from './markdown-manifests.service.js';
+
+// Both guards load the source's manifest (once) before the page renders.
+export const MarkdownGuards = {
+  // For '/<id>/:slug?' routes. A bare '/<id>' renders the first page.
+  pageExists: (id: string): RouteGuard => {
+    return async (params) => {
+      const manifest = await MarkdownManifestsService.load(id);
+      if (!manifest.hasPages) return true;
+      const slug = params.slug || manifest.firstSlug;
+      return (!!slug && !!manifest.getPage(slug)) || '/404';
+    };
+  },
+
+  // For '/<id>/:section?/:slug?' routes ("sectionInPath: true").
+  // A bare '/<id>/<slug>' redirects to that page's section.
+  sectionPageExists: (id: string): RouteGuard => {
+    return async (params) => {
+      const manifest = await MarkdownManifestsService.load(id);
+      if (!manifest.hasPages || !params.section) return true;
+
+      if (manifest.getSection(params.section)) {
+        if (!params.slug) return true;
+        return manifest.getPage(params.slug)?.section === params.section || '/404';
+      }
+
+      const page = !params.slug ? manifest.getPage(params.section) : undefined;
+      return page ? `/${id}/${page.section}/${page.slug}` : '/404';
+    };
+  },
+};

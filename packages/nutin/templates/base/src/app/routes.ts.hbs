@@ -1,8 +1,14 @@
 import { Routes } from '../core/index.js';
 import { HomeView } from './views/home/home.view.js';
 import { NotFoundView } from './views/not-found/not-found.view.js';
+{{#if markdown}}
+import { markdownRoutes } from './markdown/markdown-routes.js';
+{{/if}}
 
 export const appRoutes: Routes = {
   '/': () => new HomeView(),
+{{#if markdown}}
+  ...markdownRoutes(),
+{{/if}}
   '/404': () => new NotFoundView(),
 }

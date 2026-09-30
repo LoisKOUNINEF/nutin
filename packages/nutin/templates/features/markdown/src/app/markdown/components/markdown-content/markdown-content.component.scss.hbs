@@ -1,0 +1,54 @@
+.markdown-content {
+  display: flex;
+  gap: 2rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.markdown-content__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 1.7;
+
+  pre {
+    overflow-x: auto;
+  }
+}
+
+.markdown-toc {
+  flex: 0 0 14rem;
+  font-size: 0.875rem;
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.markdown-toc__title {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.markdown-toc__item--depth-3 {
+  padding-left: 1rem;
+}
+
+.markdown-toc__item--depth-4,
+.markdown-toc__item--depth-5,
+.markdown-toc__item--depth-6 {
+  padding-left: 2rem;
+}
+
+@media (max-width: 900px) {
+  .markdown-content {
+    flex-direction: column;
+  }
+
+  .markdown-toc {
+    order: -1;
+    flex-basis: auto;
+  }
+}

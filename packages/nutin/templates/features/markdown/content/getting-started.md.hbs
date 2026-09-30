@@ -1,0 +1,28 @@
+---
+title: Getting started
+description: Pages in this folder are compiled to /generated/content.json at build time.
+order: 1
+---
+
+# Getting started
+
+Pages in this folder are compiled to `/generated/content.json` at build time, then served at `/content` by `MarkdownView`.
+
+## Adding a page
+
+Create a `.md` file anywhere in `content/`. Its YAML frontmatter is optional:
+
+```yaml
+---
+title: My page        # defaults to the first "# Heading"
+description: Summary  # defaults to the first paragraph
+slug: my-page         # defaults to the file name
+order: 2              # pages are sorted by order, then by path
+group: Guides         # groups pages under a heading in the navigation
+---
+```
+
+## Linking pages
+
+Link to another page with its relative path, like [writing pages](./writing-pages.md) —
+the link becomes an in-app route. A link to a missing page fails the build.

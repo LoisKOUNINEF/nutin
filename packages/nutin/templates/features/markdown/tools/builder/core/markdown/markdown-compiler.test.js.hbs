@@ -1,0 +1,139 @@
+import * as fs from 'fs';
+import os from 'os';
+import path from 'path';
+import { Marked } from 'marked';
+import matter from 'gray-matter';
+import { compileSource, normalizeSource, slugFromFilename } from './markdown-compiler.js';
+
+let root;
+
+function write(relPath, content) {
+  const fullPath = path.join(root, relPath);
+  fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+  fs.writeFileSync(fullPath, content);
+}
+
+function compile(entry) {
+  return compileSource(normalizeSource(entry, root), { Marked, matter, root });
+}
+
+describe('markdown-compiler', () => {
+  beforeEach(() => {
+    root = fs.mkdtempSync(path.join(os.tmpdir(), 'nutin-markdown-'));
+  });
+
+  afterEach(() => {
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
+  it('derives the id, route prefix and conventional hub file from the folder', () => {
+    write('articles/ARTICLES.md', '# Articles\n');
+    const source = normalizeSource('articles', root);
+    expect(source.id).toBe('articles');
+    expect(source.hubFiles).toEqual(['ARTICLES.md']);
+    expect(source.sectionInPath).toBe(false);
+  });
+
+  // Same cases as src/app/markdown/markdown-sources.test.js: the runtime derives these ids too.
+  it('derives manifest ids like the runtime does', () => {
+    const cases = [
+      ['content', 'content', false],
+      ['docs/My Guides', 'my-guides', false],
+      ['docs/guides/', 'guides', false],
+      [{ folder: 'x', routePrefix: 'api' }, 'api', false],
+      [{ folder: 'docs', sectionInPath: true }, 'docs', true],
+    ];
+    for (const [entry, id, sectionInPath] of cases) {
+      const source = normalizeSource(entry, root);
+      expect(source.id).toBe(id);
+      expect(source.sectionInPath).toBe(sectionInPath);
+    }
+  });
+
+  it('rejects invalid entries and route prefixes', () => {
+    expect(() => normalizeSource({}, root)).toThrow('expected a folder path');
+    expect(() => normalizeSource({ folder: 'docs', routePrefix: 'Docs Pages' }, root)).toThrow('"routePrefix"');
+    expect(() => normalizeSource({ folder: 'docs', hubFiles: 'API.md' }, root)).toThrow('"hubFiles"');
+  });
+
+  it('applies prefix replacements to file-name slugs', () => {
+    const replacements = [['HOWDOI_', ''], ['WHATIS_', 'what-is-']];
+    expect(slugFromFilename('HOWDOI_CREATE_A_VIEW.md', replacements)).toBe('create-a-view');
+    expect(slugFromFilename('WHATIS_A_VIEW.md', replacements)).toBe('what-is-a-view');
+    expect(slugFromFilename('Plain Name.md')).toBe('plain-name');
+  });
+
+  it('compiles a frontmatter-only folder, sorted by order and grouped', () => {
+    write('content/b.md', '---\norder: 2\ngroup: Guides\n---\n# Second\n\nSecond page.\n');
+    write('content/a.md', '---\ntitle: First page\norder: 1\n---\n# Ignored H1\n\nFirst page.\n');
+    write('content/nested/c.md', '# Third\n\nThird page.\n');
+
+    const { manifest } = compile('content');
+    const [section] = manifest.sections;
+
+    expect(section.id).toBe('index');
+    expect(section.groups).toEqual([
+      { id: null, title: null, pages: ['a', 'c'] },
+      { id: 'guides', title: 'Guides', pages: ['b'] },
+    ]);
+    expect(manifest.pages.a.title).toBe('First page');
+    expect(manifest.pages.a.description).toBe('First page.');
+    expect(manifest.pages.c.source).toBe('content/nested/c.md');
+  });
+
+  it('compiles hub files into sections, honoring their order and link titles', () => {
+    write('docs/API.md', '# API\n\nThe API.\n\n## Table of Contents\n\n### Views\n\n- [Create a view](./API/HOWDOI_CREATE_A_VIEW.md)\n');
+    write('docs/TOOLS.md', '---\ntitle: Tooling\n---\n# Nutin - Tools\n\n## Table of Contents\n\n- [Builder](./TOOLS/BUILDER.md)\n');
+    write('docs/API/HOWDOI_CREATE_A_VIEW.md', '# How do I create a view?\n\nLike this.\n\nSee the [builder](../TOOLS/BUILDER.md#usage).\n');
+    write('docs/TOOLS/BUILDER.md', '# Builder\n\n## Usage\n\n## Options\n');
+
+    const { manifest, warnings } = compile({
+      folder: 'docs',
+      hubFiles: ['API.md', 'TOOLS.md'],
+      sectionInPath: true,
+      prefixReplacements: [['HOWDOI_', '']],
+    });
+
+    expect(manifest.sections.map((s) => [s.id, s.title])).toEqual([['api', 'API'], ['tools', 'Tooling']]);
+    expect(manifest.sections[0].groups).toEqual([{ id: 'views', title: 'Views', pages: ['create-a-view'] }]);
+    expect(manifest.sections[1].pages).toEqual(['builder']);
+    expect(manifest.pages['create-a-view'].title).toBe('Create a view');
+    expect(manifest.pages['create-a-view'].html).toContain('href="/docs/tools/builder#usage" data-event="click:_navigateTo:@attr:href"');
+    expect(manifest.pages.builder.headings).toEqual([
+      { depth: 2, text: 'Usage', id: 'usage' },
+      { depth: 2, text: 'Options', id: 'options' },
+    ]);
+    expect(warnings.some((w) => w.includes('Title mismatch'))).toBe(true);
+  });
+
+  it('warns about pages no hub lists', () => {
+    write('guides/GUIDES.md', '# Guides\n\n## Table of Contents\n\n- [One](./ONE.md)\n');
+    write('guides/ONE.md', '# One\n');
+    write('guides/ORPHAN.md', '# Orphan\n');
+
+    const { manifest, warnings } = compile('guides');
+    expect(Object.keys(manifest.pages)).toEqual(['one']);
+    expect(warnings.some((w) => w.includes('guides/ORPHAN.md'))).toBe(true);
+  });
+
+  it('fails on duplicate slugs', () => {
+    write('content/a.md', '---\nslug: same\n---\n# A\n');
+    write('content/b.md', '---\nslug: same\n---\n# B\n');
+    expect(() => compile('content')).toThrow('Duplicate slug "same"');
+  });
+
+  it('fails on links to pages that are not compiled', () => {
+    write('content/a.md', '# A\n\n[Missing](./missing.md)\n');
+    expect(() => compile('content')).toThrow('Unresolvable internal link "./missing.md"');
+  });
+
+  it('fails on missing folders, hub files and listed pages', () => {
+    expect(() => compile('nope')).toThrow('Markdown folder "nope" not found');
+
+    write('docs/intro.md', '# Intro\n');
+    expect(() => compile({ folder: 'docs', hubFiles: ['API.md'] })).toThrow('Hub file "API.md" not found');
+
+    write('docs/DOCS.md', '# Docs\n\n## Table of Contents\n\n- [Gone](./GONE.md)\n');
+    expect(() => compile('docs')).toThrow('does not exist');
+  });
+});

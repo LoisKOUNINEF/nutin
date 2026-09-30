@@ -1,0 +1,337 @@
+import * as fs from 'fs';
+import path from 'path';
+
+// Compiles one `markdownSources.sourceFolders` entry into a manifest:
+//   { sections: [{ id, title, description, groups? | pages? }], pages: { [slug]: page } }
+//
+// Two layouts are supported per folder:
+// - Hub mode: one or more hub files (a Markdown TOC: H1, description, "## Table of
+//   Contents", optional "### Group" headings and "- [Title](./path.md)" bullets). Each hub
+//   is one section; only the pages it lists are compiled, in its order.
+// - Frontmatter mode (no hub file): every .md file under the folder, in a single "index"
+//   section, grouped by frontmatter `group` and sorted by frontmatter `order`, then path.
+//
+// Page metadata comes from YAML frontmatter first (title, description, slug, order, group),
+// then the hub entry, then the Markdown itself (first H1, first prose line, file name).
+//
+// `marked` (Marked class) and `gray-matter` are injected: they are installed on demand by
+// generate-markdown-pages.js, so this module must not import them.
+
+export class MarkdownCompileError extends Error {}
+
+function fail(message) {
+  throw new MarkdownCompileError(message);
+}
+
+export function slugify(text) {
+  return String(text)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+export function slugFromFilename(fileName, prefixReplacements = []) {
+  const base = fileName.replace(/\.md$/i, '');
+  const [prefix, replacement] = prefixReplacements.find(([p]) => base.startsWith(p)) ?? ['', ''];
+  const rest = base.slice(prefix.length).toLowerCase().replace(/_/g, '-');
+  return replacement ? `${replacement}${rest}` : slugify(rest);
+}
+
+const escapeAttr = (value) => String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+const toPosix = (p) => p.split(path.sep).join('/');
+
+// Accepts a `sourceFolders` entry (a folder path, or an options object) and resolves defaults.
+export function normalizeSource(entry, root) {
+  const options = typeof entry === 'string' ? { folder: entry } : entry;
+  if (!options || typeof options.folder !== 'string' || !options.folder.trim()) {
+    fail(`Invalid "markdownSources.sourceFolders" entry ${JSON.stringify(entry)}: expected a folder path or { folder, ... }`);
+  }
+
+  const dir = path.resolve(root, options.folder);
+  // The id names the manifest (/generated/<id>.json) and its routes. src/app/markdown/
+  // markdown-sources.ts derives it again at runtime from nutin.config.js: keep both rules identical.
+  const id = options.routePrefix ?? slugify(path.basename(dir));
+  if (!/^[a-z0-9-]+$/.test(id)) {
+    fail(`"routePrefix" for "${options.folder}" must only contain lowercase letters, digits and dashes (got "${id}")`);
+  }
+
+  let hubFiles = options.hubFiles;
+  if (hubFiles === undefined) {
+    // Convention: a hub named after the folder, e.g. articles/ARTICLES.md.
+    const conventional = `${path.basename(dir).toUpperCase().replace(/[^A-Z0-9]+/g, '_')}.md`;
+    hubFiles = fs.existsSync(path.join(dir, conventional)) ? [conventional] : [];
+  } else if (!Array.isArray(hubFiles)) {
+    fail(`"hubFiles" for "${options.folder}" must be an array of file names`);
+  }
+
+  const prefixReplacements = options.prefixReplacements ?? [];
+  if (!Array.isArray(prefixReplacements) || !prefixReplacements.every((pair) => Array.isArray(pair) && pair.length === 2)) {
+    fail(`"prefixReplacements" for "${options.folder}" must be an array of [prefix, replacement] pairs`);
+  }
+
+  return {
+    folder: options.folder,
+    dir,
+    id,
+    hubFiles,
+    sectionInPath: options.sectionInPath === true,
+    prefixReplacements,
+  };
+}
+
+// --- Hub parsing ---
+
+function parseHub(source, hubFile, matter) {
+  const hubPath = path.join(source.dir, hubFile);
+  if (!fs.existsSync(hubPath)) fail(`Hub file "${hubFile}" not found in "${source.folder}"`);
+
+  const { data, content } = matter(fs.readFileSync(hubPath, 'utf8'));
+  const id = data.slug ?? slugify(path.basename(hubFile, path.extname(hubFile)).replace(/_/g, ' '));
+  let title = null;
+  const descriptionLines = [];
+  const groups = [];
+  let currentGroup = null;
+  let sawToc = false;
+
+  for (const line of content.split('\n')) {
+    const h1 = line.match(/^#\s+(.+?)\s*$/);
+    const h2Toc = line.match(/^##\s+Table of Contents\s*$/i);
+    const h3 = line.match(/^###\s+(.+?)\s*$/);
+    const item = line.match(/^-\s+\[(.+?)\]\((.+?)\)\s*$/);
+
+    if (h1 && title === null) {
+      title = h1[1].trim();
+      continue;
+    }
+    if (h2Toc) {
+      sawToc = true;
+      continue;
+    }
+    if (!sawToc) {
+      if (line.trim().length) descriptionLines.push(line.trim());
+      continue;
+    }
+    if (h3) {
+      currentGroup = { id: slugify(h3[1]), title: h3[1].trim(), pages: [] };
+      groups.push(currentGroup);
+      continue;
+    }
+    if (item) {
+      const [, linkTitle, relPath] = item;
+      const target = currentGroup ?? (currentGroup = { id: null, title: null, pages: [] });
+      if (!groups.includes(target)) groups.push(target);
+      target.pages.push({ title: linkTitle.trim(), source: path.normalize(path.join(source.dir, relPath)) });
+    }
+  }
+
+  return {
+    id,
+    title: data.title ?? title ?? id,
+    description: data.description ?? descriptionLines.join(' '),
+    groups,
+  };
+}
+
+// --- Page reading & rendering ---
+
+function listMarkdownFiles(dir) {
+  const files = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) files.push(...listMarkdownFiles(fullPath));
+    else if (/\.md$/i.test(entry.name)) files.push(fullPath);
+  }
+  return files;
+}
+
+function readPage(sourcePath, source, matter) {
+  if (!fs.existsSync(sourcePath)) fail(`Page "${path.relative(source.dir, sourcePath)}" listed in "${source.folder}" does not exist`);
+  const { data, content } = matter(fs.readFileSync(sourcePath, 'utf8'));
+  return { data, body: content };
+}
+
+// Title = first H1; description = first non-empty prose line after it.
+function deriveMeta(body, sourcePath) {
+  const lines = body.split('\n');
+  const h1Index = lines.findIndex((l) => /^#\s+/.test(l));
+  const title = h1Index >= 0 ? lines[h1Index].replace(/^#\s+/, '').trim() : path.basename(sourcePath, path.extname(sourcePath));
+  const descriptionLine = lines
+    .slice(h1Index + 1)
+    .find((l) => l.trim().length && !/^#{1,6}\s/.test(l) && !l.trim().startsWith('```'));
+  return { title, description: descriptionLine ? descriptionLine.trim() : '' };
+}
+
+function renderHtml(body, sourcePath, hrefMap, context) {
+  const dir = path.dirname(sourcePath);
+  const headings = [];
+  const marked = new context.Marked({ gfm: true });
+
+  marked.use({
+    renderer: {
+      heading(token) {
+        const text = this.parser.parseInline(token.tokens);
+        const id = slugify(token.text);
+        headings.push({ depth: token.depth, text: token.text, id });
+        return `<h${token.depth} id="${id}">${text}</h${token.depth}>\n`;
+      },
+      link(token) {
+        const text = this.parser.parseInline(token.tokens);
+        let href = token.href;
+        let isInternal = false;
+
+        // Relative links to other .md pages become SPA routes.
+        if (!/^[a-z]+:/i.test(href) && href.includes('.md')) {
+          const [rawPath, fragment] = href.split('#');
+          const resolved = path.normalize(path.join(dir, rawPath));
+          const pageHref = hrefMap.get(resolved);
+
+          if (!pageHref) {
+            fail(
+              `Unresolvable internal link "${href}" in "${toPosix(path.relative(context.root, sourcePath))}" ` +
+              `(resolved to "${toPosix(path.relative(context.root, resolved))}", which is not a compiled page)`
+            );
+          }
+          isInternal = true;
+          href = fragment ? `${pageHref}#${fragment}` : pageHref;
+        }
+
+        const titleAttr = token.title ? ` title="${escapeAttr(token.title)}"` : '';
+        // Lets MarkdownContentComponent route the click through the SPA router.
+        const navAttrs = isInternal ? ' data-event="click:_navigateTo:@attr:href"' : '';
+        return `<a href="${href}"${titleAttr}${navAttrs}>${text}</a>`;
+      },
+    },
+  });
+
+  const html = marked.parse(body).trim();
+  return { html, headings: headings.filter((h) => h.depth > 1) };
+}
+
+// --- Section layout (hub mode vs frontmatter mode) ---
+
+// Returns [{ id, title, description, groups: [{ id, title, pages: [{ source, data, body, hubTitle? }] }] }]
+function collectHubSections(source, context) {
+  return source.hubFiles.map((hubFile) => {
+    const hub = parseHub(source, hubFile, context.matter);
+    return {
+      ...hub,
+      groups: hub.groups.map((group) => ({
+        ...group,
+        pages: group.pages.map((ref) => ({ source: ref.source, hubTitle: ref.title, ...readPage(ref.source, source, context.matter) })),
+      })),
+    };
+  });
+}
+
+function collectFrontmatterSection(source, context) {
+  const pages = listMarkdownFiles(source.dir)
+    .map((file) => ({ source: file, ...readPage(file, source, context.matter) }))
+    .sort((a, b) => {
+      const orderA = typeof a.data.order === 'number' ? a.data.order : Infinity;
+      const orderB = typeof b.data.order === 'number' ? b.data.order : Infinity;
+      if (orderA !== orderB) return orderA < orderB ? -1 : 1;
+      return a.source.localeCompare(b.source);
+    });
+
+  // Ungrouped pages first, then groups in order of their first page.
+  const groups = [];
+  const byId = new Map();
+  for (const page of pages) {
+    const groupTitle = page.data.group ? String(page.data.group) : null;
+    const groupId = groupTitle ? slugify(groupTitle) : null;
+    if (!byId.has(groupId)) {
+      const group = { id: groupId, title: groupTitle, pages: [] };
+      byId.set(groupId, group);
+      if (groupId === null) groups.unshift(group);
+      else groups.push(group);
+    }
+    byId.get(groupId).pages.push(page);
+  }
+
+  return [{ id: 'index', title: path.basename(source.dir), description: '', groups }];
+}
+
+// --- Entry point ---
+
+export function compileSource(source, context) {
+  if (!fs.existsSync(source.dir) || !fs.statSync(source.dir).isDirectory()) {
+    fail(`Markdown folder "${source.folder}" not found`);
+  }
+
+  const warnings = [];
+  const sections = source.hubFiles.length ? collectHubSections(source, context) : collectFrontmatterSection(source, context);
+
+  // Pass 1: slugs + hrefs for every page, so links can be resolved across sections.
+  const slugBySource = new Map();
+  const sourceBySlug = new Map();
+  const hrefMap = new Map();
+  for (const section of sections) {
+    const prefix = source.sectionInPath ? `/${source.id}/${section.id}` : `/${source.id}`;
+    for (const group of section.groups) {
+      for (const page of group.pages) {
+        const slug = page.data.slug ? String(page.data.slug) : slugFromFilename(path.basename(page.source), source.prefixReplacements);
+        const owner = sourceBySlug.get(slug);
+        if (owner && owner !== page.source) {
+          fail(`Duplicate slug "${slug}" in "${source.folder}", produced by both "${toPosix(path.relative(context.root, owner))}" and "${toPosix(path.relative(context.root, page.source))}"`);
+        }
+        sourceBySlug.set(slug, page.source);
+        slugBySource.set(page.source, slug);
+        hrefMap.set(page.source, `${prefix}/${slug}`);
+      }
+    }
+  }
+
+  // Pass 2: render.
+  const manifestSections = [];
+  const pages = {};
+  for (const section of sections) {
+    const hasNamedGroups = section.groups.some((g) => g.id);
+    manifestSections.push({
+      id: section.id,
+      title: section.title,
+      description: section.description,
+      groups: hasNamedGroups
+        ? section.groups.map((g) => ({ id: g.id, title: g.title, pages: g.pages.map((p) => slugBySource.get(p.source)) }))
+        : undefined,
+      pages: hasNamedGroups ? undefined : section.groups.flatMap((g) => g.pages.map((p) => slugBySource.get(p.source))),
+    });
+
+    let order = 0;
+    for (const group of section.groups) {
+      for (const page of group.pages) {
+        const slug = slugBySource.get(page.source);
+        const derived = deriveMeta(page.body, page.source);
+        const { html, headings } = renderHtml(page.body, page.source, hrefMap, context);
+
+        if (page.hubTitle && !page.data.title && page.hubTitle !== derived.title) {
+          warnings.push(`Title mismatch for "${source.id}/${slug}": hub says "${page.hubTitle}", H1 says "${derived.title}"`);
+        }
+
+        pages[slug] = {
+          slug,
+          title: page.data.title ?? page.hubTitle ?? derived.title,
+          description: page.data.description ?? derived.description,
+          section: section.id,
+          group: group.id,
+          order: order++,
+          source: toPosix(path.relative(context.root, page.source)),
+          headings,
+          html,
+        };
+      }
+    }
+  }
+
+  // Hub mode only compiles listed pages — flag the ones no hub links to.
+  if (source.hubFiles.length) {
+    const hubPaths = new Set(source.hubFiles.map((hub) => path.normalize(path.join(source.dir, hub))));
+    for (const file of listMarkdownFiles(source.dir)) {
+      if (!hubPaths.has(file) && !slugBySource.has(file)) {
+        warnings.push(`"${toPosix(path.relative(context.root, file))}" is not listed in any hub file of "${source.folder}" and was skipped`);
+      }
+    }
+  }
+
+  return { manifest: { sections: manifestSections, pages }, warnings };
+}

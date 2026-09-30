@@ -2,11 +2,23 @@ import chokidar from 'chokidar';
 import { exec } from 'child_process';
 import path from 'path';
 import { print } from '../utils/index.js'
+{{#if markdown}}
+import nutinConfig from '../../nutin.config.js';
+{{/if}}
 
 const watcher = chokidar.watch(['src'], {
   ignored: /(^|[/\\])\../,
   persistent: true,
 });
+{{#if markdown}}
+
+// Markdown folders live outside src/ but still feed the build.
+watcher.add(
+  (nutinConfig.markdownSources?.sourceFolders ?? [])
+    .map((entry) => (typeof entry === 'string' ? entry : entry?.folder))
+    .filter(Boolean)
+);
+{{/if}}
 
 let isBuilding = false;
 let pendingRebuild = false;

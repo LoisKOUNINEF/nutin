@@ -1,0 +1,52 @@
+import { Component, Navigation } from '../../../../core/index.js';
+import { IMarkdownHeading, IMarkdownPage } from '../../markdown-manifest.js';
+
+export interface IMarkdownContentConfig {
+  page?: IMarkdownPage;
+}
+
+function renderToc(headings: IMarkdownHeading[]): string {
+  // A single heading adds nothing next to the page title — only worth a TOC at 2+.
+  if (headings.length <= 1) return '';
+
+  const items = headings
+    .map((heading) => `
+      <li class="markdown-toc__item markdown-toc__item--depth-${heading.depth}">
+        <a href="#${heading.id}">${heading.text}</a>
+      </li>
+    `)
+    .join('');
+
+  return `
+    <nav class="markdown-toc" aria-label="On this page">
+      <span class="markdown-toc__title">On this page</span>
+      <ul>${items}</ul>
+    </nav>
+  `;
+}
+
+// page.html is compiled at build time from the project's own Markdown files (not user
+// input), hence trustLevel 'trusted'. Pages are rendered client-side only: pre-rendering
+// them for SEO would need config/seo.json routes expanded per manifest page ("dynamicFrom").
+const templateFn = (_config: IMarkdownContentConfig) => {
+  if (!_config.page) {
+    return `<p class="markdown-content__empty">Nothing here yet.</p>`;
+  }
+
+  return `
+    <article class="markdown-content__body">${_config.page.html}</article>
+    ${renderToc(_config.page.headings)}
+  `;
+};
+
+export class MarkdownContentComponent extends Component<HTMLElement, IMarkdownContentConfig> {
+  constructor(mountTarget: HTMLElement, config: IMarkdownContentConfig) {
+    // Mounting replaces the placeholder element, so its class is re-applied here.
+    super({ templateFn, mountTarget, config, trustLevel: 'trusted', props: { className: 'markdown-content' } });
+  }
+
+  // Internal links between pages carry data-event="click:_navigateTo:@attr:href".
+  private _navigateTo(href: string): void {
+    Navigation.navigateTo(href);
+  }
+}

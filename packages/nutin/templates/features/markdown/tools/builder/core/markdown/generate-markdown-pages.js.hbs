@@ -1,0 +1,116 @@
+import * as fs from 'fs';
+import path from 'path';
+import { print, runCommand, promptBoolean, errorExit } from '../../../utils/index.js';
+import { PATHS } from '../app/paths.js';
+import { builderConfig } from '../../builder.config.js';
+import nutinConfig from '../../../../nutin.config.js';
+import { compileSource, normalizeSource, MarkdownCompileError } from './markdown-compiler.js';
+
+// Compiles every `markdownSources.sourceFolders` entry of nutin.config.js into
+// dist/generated/<routePrefix>.json, fetched at runtime by a MarkdownManifest service.
+// `--check` (the "markdown:check" script) compiles everything but writes nothing.
+
+const isCheck = process.argv.includes('--check');
+const assumeYes = process.env.NUTIN_MARKDOWN_ASSUME_YES === '1' || process.argv.includes('-y') || process.argv.includes('--yes');
+
+const sourceFolders = nutinConfig.markdownSources?.sourceFolders;
+if (!Array.isArray(sourceFolders)) {
+  errorExit('nutin.config.js "markdownSources.sourceFolders" must be an array.', 'markdown');
+}
+
+const REQUIRED_DEPS = [
+  { name: 'marked', version: '^18.0.14' },
+  { name: 'gray-matter', version: '^4.0.3' },
+];
+
+const isInstalled = (depName) => fs.existsSync(path.join(process.cwd(), 'node_modules', depName, 'package.json'));
+
+const getPackageManager = () => {
+  if (fs.existsSync(path.join(process.cwd(), 'pnpm-lock.yaml'))) return 'pnpm';
+  if (fs.existsSync(path.join(process.cwd(), 'yarn.lock'))) return 'yarn';
+  if (fs.existsSync(path.join(process.cwd(), 'bun.lock')) || fs.existsSync(path.join(process.cwd(), 'bun.lockb'))) return 'bun';
+  return 'npm';
+};
+
+const getInstallCommand = (packageManager, deps) => {
+  const pkgList = deps.map(dep => `${dep.name}@${dep.version}`).join(' ');
+  switch (packageManager) {
+    case 'yarn': return `yarn add -D ${pkgList}`;
+    case 'pnpm': return `pnpm add -D ${pkgList}`;
+    case 'bun': return `bun add -D ${pkgList}`;
+    default: return `npm install -D ${pkgList}`;
+  }
+};
+
+const missingDeps = REQUIRED_DEPS.filter(dep => !isInstalled(dep.name));
+
+if (missingDeps.length) {
+  const installCommand = getInstallCommand(getPackageManager(), missingDeps);
+
+  if (builderConfig.isProd) {
+    errorExit(`Markdown is enabled (markdownSources) but its dependencies are missing.\nRun "${installCommand}" before rebuilding`, 'markdown');
+  }
+
+  print.warn('Markdown is enabled (markdownSources) but its dependencies are missing.');
+  print.gray('Required packages:');
+  missingDeps.forEach(dep => print.gray(`  - ${dep.name}@${dep.version}`));
+
+  let shouldInstall;
+  if (assumeYes) {
+    print.gray(`-y/--yes passed. Installing automatically: ${installCommand}`);
+    shouldInstall = true;
+  } else if (process.stdin.isTTY) {
+    shouldInstall = await promptBoolean('Install them now?');
+  } else {
+    // Unlike tailwind.js, never install silently from a non-interactive shell (CI, dev watcher).
+    errorExit(`Non-interactive shell detected. Run "${installCommand}", or rebuild with "-- -y" to install automatically.`, 'markdown');
+  }
+
+  if (!shouldInstall) {
+    print.boldError(`Aborting. Run manually: ${installCommand}`);
+    process.exit(1);
+  }
+
+  const [command, ...args] = installCommand.split(' ');
+  try {
+    await runCommand(command, args);
+  } catch (err) {
+    errorExit(err, 'markdown-install');
+  }
+}
+
+// Loaded only now: they may have just been installed.
+const { Marked } = await import('marked');
+const matter = (await import('gray-matter')).default;
+
+const root = process.cwd();
+const outputDir = path.join(PATHS.tempSource, 'generated');
+
+try {
+  const sources = sourceFolders.map((entry) => normalizeSource(entry, root));
+
+  const seenIds = new Map();
+  for (const source of sources) {
+    if (seenIds.has(source.id)) {
+      throw new MarkdownCompileError(`"${seenIds.get(source.id)}" and "${source.folder}" both compile to "${source.id}.json" — give one a different "routePrefix"`);
+    }
+    seenIds.set(source.id, source.folder);
+  }
+
+  for (const source of sources) {
+    const { manifest, warnings } = compileSource(source, { Marked, matter, root });
+    warnings.forEach((warning) => print.warn(`markdown: ${warning}`));
+
+    const pageCount = Object.keys(manifest.pages).length;
+    if (isCheck) {
+      print.info(`markdown: "${source.folder}" OK (${pageCount} pages)`);
+      continue;
+    }
+
+    fs.mkdirSync(outputDir, { recursive: true });
+    fs.writeFileSync(path.join(outputDir, `${source.id}.json`), JSON.stringify(manifest));
+    print.gray(`markdown: ${pageCount} pages from "${source.folder}" -> /generated/${source.id}.json`);
+  }
+} catch (err) {
+  errorExit(err instanceof MarkdownCompileError ? err.message : err, 'markdown');
+}

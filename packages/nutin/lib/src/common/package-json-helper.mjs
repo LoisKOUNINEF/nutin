@@ -78,8 +78,14 @@ export function getDockerScripts() {
   };
 }
 
+export function getMarkdownScripts() {
+  return {
+    "markdown:check": "node tools/builder/core/markdown/generate-markdown-pages.js --check"
+  };
+}
+
 export function getAllScripts(context) {
-  const { packageManager, docker } = context;
+  const { packageManager, docker, markdown } = context;
 
   const baseScripts = {
     "build": "node tools/builder/builder.js",
@@ -98,6 +104,7 @@ export function getAllScripts(context) {
   let scripts = { ...baseScripts };
 
   if (docker) scripts = { ...scripts, ...getDockerScripts() };
+  if (markdown) scripts = { ...scripts, ...getMarkdownScripts() };
 
   return scripts;
 }

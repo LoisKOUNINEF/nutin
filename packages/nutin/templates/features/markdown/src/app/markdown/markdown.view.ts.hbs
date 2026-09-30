@@ -1,0 +1,77 @@
+import { ComponentConfig, NavigationManager, View } from '../../core/index.js';
+import { IMarkdownSection, MarkdownManifest } from './markdown-manifest.js';
+import { MarkdownManifestsService } from './markdown-manifests.service.js';
+import { MarkdownContentComponent } from './components/markdown-content/markdown-content.component.js';
+import { MarkdownNavComponent } from './components/markdown-nav/markdown-nav.component.js';
+
+const defaultTemplate = `__TEMPLATE_PLACEHOLDER__`;
+
+export interface IMarkdownViewOptions {
+  // The source's id: its "routePrefix" in nutin.config.js, defaulting to the folder name.
+  id: string;
+  // A custom layout needs data-component="markdown-nav" and data-component="markdown-content".
+  template?: string;
+  viewName?: string;
+}
+
+// Renders one page of a "markdownSources" folder. markdownRoutes() registers one per folder;
+// with "sectionInPath: true" the route carries ':section?' before ':slug?' (e.g.
+// '/docs/api/navigate'), the nav only lists that section and every URL includes it.
+export class MarkdownView extends View {
+  private readonly manifest: MarkdownManifest;
+
+  constructor({ id, template = defaultTemplate, viewName = id }: IMarkdownViewOptions) {
+    super({ template, viewName });
+    this.manifest = MarkdownManifestsService.get(id);
+  }
+
+  private get section(): IMarkdownSection | undefined {
+    if (!this.manifest.sectionInPath) return undefined;
+    return this.manifest.getSection(this.getRouteParam('section') ?? '') ?? this.manifest.sections[0];
+  }
+
+  // MarkdownGuards already loaded the manifest and checked this slug resolves to a real
+  // page (or that the folder has no pages yet) before the view is constructed.
+  private get slug(): string {
+    const fallback = this.manifest.sectionInPath ? this.manifest.firstSlugOf(this.section) : this.manifest.firstSlug;
+    return this.getRouteParam('slug') || fallback || '';
+  }
+
+  private get navSections(): IMarkdownSection[] {
+    if (!this.manifest.sectionInPath) return this.manifest.sections;
+    return this.section ? [this.section] : [];
+  }
+
+  private pageHref(slug: string): string {
+    const section = this.manifest.sectionInPath ? this.manifest.getPage(slug)?.section : undefined;
+    return section ? `/${this.manifest.id}/${section}/${slug}` : `/${this.manifest.id}/${slug}`;
+  }
+
+  // The bare route (e.g. /content) renders the first page through the fallback above;
+  // point the URL at that page so reloads and bookmarks match what is shown.
+  public onEnter(): void {
+    if (!this.getRouteParam('slug') && this.slug) {
+      NavigationManager.replaceState(this.pageHref(this.slug));
+    }
+  }
+
+  public registerChildren(): ComponentConfig[] {
+    const page = this.manifest.getPage(this.slug);
+
+    return [
+      {
+        selector: 'markdown-nav',
+        factory: (el) => new MarkdownNavComponent(el, {
+          sections: this.navSections,
+          manifest: this.manifest,
+          currentSlug: this.slug,
+          pageHref: (slug) => this.pageHref(slug),
+        }),
+      },
+      {
+        selector: 'markdown-content',
+        factory: (el) => new MarkdownContentComponent(el, { page }),
+      },
+    ];
+  }
+}

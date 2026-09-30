@@ -10,6 +10,7 @@ import { readProjectMeta, updateProjectMeta } from '../common/project-meta.mjs';
 import { FeatureContextBuilder } from './feature-context-builder.mjs';
 import { updatePackageJson } from './package-json-updater.mjs';
 import { updateNutinConfig } from './nutin-config-updater.mjs';
+import { patchBaseTemplates } from './base-template-patcher.mjs';
 
 const fs = fsExtra.default;
 const __filename = fileURLToPath(import.meta.url);
@@ -44,6 +45,7 @@ export class FeatureAdder {
     await this.runPostAddTasks(projectPath, feature, context);
 
     print.boldInfo(`${feature.key} added.`);
+    this.printNextSteps(feature, context);
   }
 
   async validateProject(projectPath, feature) {
@@ -63,6 +65,7 @@ export class FeatureAdder {
 
     await updatePackageJson(projectPath, feature);
     await updateNutinConfig(projectPath, feature);
+    await patchBaseTemplates(projectPath, feature, context, this.fileGenerator);
   }
 
   async runPostAddTasks(projectPath, feature, context) {
@@ -71,8 +74,21 @@ export class FeatureAdder {
       packageManager: context.packageManager,
       features: { [feature.key]: true },
     });
-    if (feature.key === 'docker') return;
+    // Return if feature doesn't add dependencies
+    if (feature.key === 'docker' || feature.key === 'markdown') return;
     await installDependencies(projectPath, context.packageManager);
+  }
+
+  printNextSteps(feature, context) {
+    if (feature.key === 'docker') {
+      print.info('\nNext steps:');
+      print.gray('  Edit dockerPorts in nutin.config.js.');
+    }
+    if (feature.key === 'markdown') {
+      print.info('\nNext steps:');
+      print.gray('  1. List your Markdown folders in nutin.config.js "markdownSources.sourceFolders" — each one is served at /<folder name>. (Start with the generated default root/content).');
+      print.gray(`  2. Run "${context.packageManager} run build" — you will be asked to install marked and gray-matter (pass "-- -y" to accept non-interactively).`);
+    }
   }
 }
 

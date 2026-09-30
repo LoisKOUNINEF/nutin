@@ -1,0 +1,111 @@
+export interface IMarkdownHeading {
+  depth: number;
+  text: string;
+  id: string;
+}
+
+export interface IMarkdownPage {
+  slug: string;
+  title: string;
+  description: string;
+  section: string;
+  group: string | null;
+  order: number;
+  source: string;
+  headings: IMarkdownHeading[];
+  html: string;
+}
+
+export interface IMarkdownGroup {
+  id: string | null;
+  title: string | null;
+  pages: string[];
+}
+
+export interface IMarkdownSection {
+  id: string;
+  title: string;
+  description: string;
+  groups?: IMarkdownGroup[];
+  pages?: string[];
+}
+
+export interface IMarkdownSource {
+  id: string;
+  sectionInPath: boolean;
+}
+
+interface IMarkdownManifestData {
+  sections: IMarkdownSection[];
+  pages: Record<string, IMarkdownPage>;
+}
+
+const EMPTY_MANIFEST: IMarkdownManifestData = { sections: [], pages: {} };
+
+// One compiled "markdownSources" folder (/generated/<id>.json, written at build time by
+// tools/builder/core/markdown). Instances are owned by MarkdownManifestsService.
+export class MarkdownManifest {
+  public readonly id: string;
+  public readonly sectionInPath: boolean;
+  private _manifest: IMarkdownManifestData = EMPTY_MANIFEST;
+  private _loading: Promise<void> | null = null;
+  private _loaded = false;
+
+  constructor({ id, sectionInPath }: IMarkdownSource) {
+    this.id = id;
+    this.sectionInPath = sectionInPath;
+  }
+
+  public get url(): string {
+    return `/generated/${this.id}.json`;
+  }
+
+  public get loaded(): boolean {
+    return this._loaded;
+  }
+
+  // Fetched once. A failed load keeps the manifest empty and is retried on the next call.
+  public load(): Promise<void> {
+    this._loading ??= this.fetchManifest();
+    return this._loading;
+  }
+
+  private async fetchManifest(): Promise<void> {
+    try {
+      const response = await fetch(this.url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      this._manifest = await response.json();
+      this._loaded = true;
+    } catch (error) {
+      this._loading = null;
+      console.error(`Markdown manifest load error (${this.url}):`, error);
+    }
+  }
+
+  public get sections(): IMarkdownSection[] {
+    return this._manifest.sections;
+  }
+
+  public getPage(slug: string): IMarkdownPage | undefined {
+    return this._manifest.pages[slug];
+  }
+
+  public getSection(id: string): IMarkdownSection | undefined {
+    return this._manifest.sections.find((section) => section.id === id);
+  }
+
+  public get firstSlug(): string | undefined {
+    return this.firstSlugOf(this._manifest.sections[0]);
+  }
+
+  public firstSlugOf(section: IMarkdownSection | undefined): string | undefined {
+    const pages = section?.groups?.[0]?.pages ?? section?.pages;
+    return pages?.[0];
+  }
+
+  public get hasPages(): boolean {
+    return this._manifest.sections.some((section) =>
+      section.groups ? section.groups.some((group) => group.pages.length > 0) : (section.pages?.length ?? 0) > 0
+    );
+  }
+}

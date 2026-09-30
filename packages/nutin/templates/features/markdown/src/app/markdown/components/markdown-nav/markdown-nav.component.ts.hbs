@@ -1,0 +1,68 @@
+import { Component, Navigation } from '../../../../core/index.js';
+import { IMarkdownGroup, IMarkdownSection, MarkdownManifest } from '../../markdown-manifest.js';
+
+export interface IMarkdownNavConfig {
+  sections: IMarkdownSection[];
+  manifest: MarkdownManifest;
+  currentSlug: string;
+  pageHref: (slug: string) => string;
+}
+
+function renderPageLink(slug: string, config: IMarkdownNavConfig): string {
+  const page = config.manifest.getPage(slug);
+  if (!page) return '';
+
+  const current = slug === config.currentSlug;
+  return `
+    <li>
+      <a
+        href="${config.pageHref(slug)}"
+        class="markdown-nav__link${current ? ' markdown-nav__link--active' : ''}"
+        ${current ? 'aria-current="page"' : ''}
+        data-event="click:_navigateTo:@attr:href"
+      >${page.title}</a>
+    </li>
+  `;
+}
+
+function renderGroup(group: IMarkdownGroup, config: IMarkdownNavConfig): string {
+  const title = group.title ? `<span class="markdown-nav__group-title">${group.title}</span>` : '';
+  return `
+    <li class="markdown-nav__group">
+      ${title}
+      <ul class="markdown-nav__pages">${group.pages.map((slug) => renderPageLink(slug, config)).join('')}</ul>
+    </li>
+  `;
+}
+
+function renderSection(section: IMarkdownSection, config: IMarkdownNavConfig): string {
+  const items = section.groups
+    ? section.groups.map((group) => renderGroup(group, config)).join('')
+    : (section.pages ?? []).map((slug) => renderPageLink(slug, config)).join('');
+
+  return `
+    <li class="markdown-nav__section">
+      <span class="markdown-nav__section-title">${section.title}</span>
+      <ul class="markdown-nav__groups">${items}</ul>
+    </li>
+  `;
+}
+
+const templateFn = (_config: IMarkdownNavConfig) => `
+  <nav class="markdown-nav" aria-label="Pages">
+    <ul class="markdown-nav__sections">
+      ${_config.sections.map((section) => renderSection(section, _config)).join('')}
+    </ul>
+  </nav>
+`;
+
+export class MarkdownNavComponent extends Component<HTMLElement, IMarkdownNavConfig> {
+  constructor(mountTarget: HTMLElement, config: IMarkdownNavConfig) {
+    // Mounting replaces the placeholder element, so its class is re-applied here.
+    super({ templateFn, mountTarget, config, props: { className: 'markdown-nav__container' } });
+  }
+
+  private _navigateTo(href: string): void {
+    Navigation.navigateTo(href);
+  }
+}

@@ -1,0 +1,75 @@
+import { MarkdownManifest } from '#root/dist/src/app/markdown/markdown-manifest.js';
+
+const MANIFEST = {
+  sections: [
+    { id: 'api', title: 'API', description: '', groups: [{ id: 'views', title: 'Views', pages: ['create-a-view'] }] },
+    { id: 'tools', title: 'Tools', description: '', pages: ['builder'] },
+  ],
+  pages: {
+    'create-a-view': { slug: 'create-a-view', title: 'Create a view', section: 'api' },
+    builder: { slug: 'builder', title: 'Builder', section: 'tools' },
+  },
+};
+
+let originalFetch;
+let calls;
+
+function mockFetch(...responses) {
+  calls = [];
+  global.fetch = (url) => {
+    calls.push(url);
+    const response = responses.shift();
+    return Promise.resolve(response);
+  };
+}
+
+const ok = (data) => ({ ok: true, status: 200, json: () => Promise.resolve(data) });
+const notFound = () => ({ ok: false, status: 404, json: () => Promise.reject(new Error('HTTP 404')) });
+
+describe('MarkdownManifest', () => {
+  beforeEach(() => {
+    originalFetch = global.fetch;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  it('fetches /generated/<id>.json once, even with concurrent loads', async () => {
+    mockFetch(ok(MANIFEST));
+    const manifest = new MarkdownManifest({ id: 'docs', sectionInPath: true });
+
+    await Promise.all([manifest.load(), manifest.load()]);
+    await manifest.load();
+
+    expect(calls).toEqual(['/generated/docs.json']);
+    expect(manifest.loaded).toBe(true);
+    expect(manifest.sectionInPath).toBe(true);
+  });
+
+  it('exposes pages and sections', async () => {
+    mockFetch(ok(MANIFEST));
+    const manifest = new MarkdownManifest({ id: 'docs', sectionInPath: true });
+    await manifest.load();
+
+    expect(manifest.hasPages).toBe(true);
+    expect(manifest.firstSlug).toBe('create-a-view');
+    expect(manifest.firstSlugOf(manifest.getSection('tools'))).toBe('builder');
+    expect(manifest.getPage('builder').title).toBe('Builder');
+    expect(manifest.getPage('nope')).toBeUndefined();
+  });
+
+  it('stays empty after a failed load and retries on the next one', async () => {
+    mockFetch(notFound(), ok(MANIFEST));
+    const manifest = new MarkdownManifest({ id: 'docs', sectionInPath: false });
+
+    await silenceConsole('error', () => manifest.load());
+    expect(manifest.loaded).toBe(false);
+    expect(manifest.hasPages).toBe(false);
+    expect(manifest.firstSlug).toBeUndefined();
+
+    await manifest.load();
+    expect(calls.length).toBe(2);
+    expect(manifest.loaded).toBe(true);
+  });
+});

@@ -1,0 +1,19 @@
+---
+order: 2
+group: Guides
+---
+
+# Writing pages
+
+Markdown is compiled with [marked](https://marked.js.org/) (GitHub-flavored), so tables,
+fenced code blocks and task lists all work.
+
+## Headings
+
+Every `##` to `######` heading gets an `id`, and pages with two or more of them show an
+"On this page" table of contents.
+
+## Checking your content
+
+Run the `markdown:check` script to compile every folder without building the app: it fails
+on duplicate slugs and broken links between pages.

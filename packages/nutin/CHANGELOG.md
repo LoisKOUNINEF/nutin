@@ -2,6 +2,20 @@
 
 ## 2.2.0
 
+
+### Features
+
+#### New `markdown` feature (`nutin-add markdown`)
+
+- Compiles Markdown folders listed in `nutin.config.js`'s `markdownSources.sourceFolders` into `/generated/<name>.json` manifests at build time
+- Rendered by a `MarkdownView` with navigation and a table of contents. Each folder gets a route from `markdownRoutes()` (spread into `appRoutes`), and its manifest is loaded by that route's guard on first visit, through `MarkdownManifestsService` (`loadAll()` preloads every manifest). 
+- Adding a folder only takes a config change. Supports YAML frontmatter, hub (table of contents) files, sections in routes (`/docs/:section?/:slug?`) and internal links between pages. 
+- Duplicate slugs and broken links fail the build; content is validated before building.
+
+#### JS-only projects
+
+- `nutin-new --js-only` generates a plain JavaScript project. TypeScript remains the default and recommended option.
+
 ### Changes
 
 - `dev`, `serve`, `serve:prod` and `serve:only` accept a port: `npm run dev -- --port 3000`, `npm run serve -- --port=3000`, or `PORT=3000 npm run dev`. Precedence is `--port` > `PORT` > `9090` (default). Invalid ports fail fast with a clear error.
@@ -10,9 +24,11 @@
 
 - `dev` no longer leaves the server and watcher running (holding the port) when the terminal tab/window is closed or `dev-serve.js` is killed hard: it now handles `SIGHUP`, and both children exit when their IPC channel to it drops.
 
-- `nutin new --js-only` generates a plain JavaScript project. TypeScript remains the default and recommended option.
-
 - Prod builds no longer hash or compress the copied `src/app` and `src/core` sources.
+
+- `nutin-add` now also updates base files that depend on the added feature. The change is applied as a patch, so your own edits to those files are kept. When you edited right around it (e.g. added routes), each inserted block is placed next to the unchanged lines it belongs with instead. If those lines are gone too, the file is left untouched and the patch is printed to apply by hand.
+
+- `nutin-add` features share a single `// Nutin features` block in `nutin.config.js`.
 
 ## 2.1.1
 

@@ -1,0 +1,47 @@
+import nutinConfig from '../../../nutin.config.js';
+import { Service } from '../../core/index.js';
+import { MarkdownManifest } from './markdown-manifest.js';
+import { IMarkdownSourcesConfig, resolveMarkdownSources } from './markdown-sources.js';
+
+// Every folder listed in nutin.config.js "markdownSources", by id (its routePrefix,
+// defaulting to the folder name). Manifests load on demand: MarkdownGuards load theirs
+// before a page renders; call loadAll() at startup to have them all available upfront.
+export class MarkdownManifests extends Service<MarkdownManifests> {
+  private readonly manifests = new Map<string, MarkdownManifest>();
+
+  constructor() {
+    super();
+    const config = nutinConfig.markdownSources as IMarkdownSourcesConfig | undefined;
+    for (const source of resolveMarkdownSources(config)) {
+      this.manifests.set(source.id, new MarkdownManifest(source));
+    }
+  }
+
+  public get ids(): string[] {
+    return [...this.manifests.keys()];
+  }
+
+  public get all(): MarkdownManifest[] {
+    return [...this.manifests.values()];
+  }
+
+  public get(id: string): MarkdownManifest {
+    const manifest = this.manifests.get(id);
+    if (!manifest) {
+      throw new Error(`Unknown Markdown source "${id}" — known: ${this.ids.join(', ') || 'none'} (nutin.config.js "markdownSources")`);
+    }
+    return manifest;
+  }
+
+  public async load(id: string): Promise<MarkdownManifest> {
+    const manifest = this.get(id);
+    await manifest.load();
+    return manifest;
+  }
+
+  public async loadAll(): Promise<void> {
+    await Promise.all(this.all.map((manifest) => manifest.load()));
+  }
+}
+
+export const MarkdownManifestsService = MarkdownManifests.getInstance();

@@ -4,6 +4,10 @@ export const FEATURES = [
     key: 'docker',
     cli: 'docker',
   },
+  {
+    key: 'markdown',
+    cli: 'markdown',
+  },
 ];
 
 export function findFeatureByCli(cliName) {
