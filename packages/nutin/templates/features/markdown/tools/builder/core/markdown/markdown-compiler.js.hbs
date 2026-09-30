@@ -165,6 +165,9 @@ function deriveMeta(body, sourcePath) {
 function renderHtml(body, sourcePath, hrefMap, context) {
   const dir = path.dirname(sourcePath);
   const headings = [];
+  // Reported after parsing: marked appends "Please report this to marked" to errors
+  // thrown from a renderer, and one pass can list every broken link of the page.
+  const unresolvedLinks = [];
   const marked = new context.Marked({ gfm: true });
 
   marked.use({
@@ -186,14 +189,12 @@ function renderHtml(body, sourcePath, hrefMap, context) {
           const resolved = path.normalize(path.join(dir, rawPath));
           const pageHref = hrefMap.get(resolved);
 
-          if (!pageHref) {
-            fail(
-              `Unresolvable internal link "${href}" in "${toPosix(path.relative(context.root, sourcePath))}" ` +
-              `(resolved to "${toPosix(path.relative(context.root, resolved))}", which is not a compiled page)`
-            );
+          if (pageHref) {
+            isInternal = true;
+            href = fragment ? `${pageHref}#${fragment}` : pageHref;
+          } else {
+            unresolvedLinks.push(`"${href}" (resolved to "${toPosix(path.relative(context.root, resolved))}")`);
           }
-          isInternal = true;
-          href = fragment ? `${pageHref}#${fragment}` : pageHref;
         }
 
         const titleAttr = token.title ? ` title="${escapeAttr(token.title)}"` : '';
@@ -205,6 +206,12 @@ function renderHtml(body, sourcePath, hrefMap, context) {
   });
 
   const html = marked.parse(body).trim();
+  if (unresolvedLinks.length) {
+    fail(
+      `Unresolvable internal link ${unresolvedLinks.join(', ')} in "${toPosix(path.relative(context.root, sourcePath))}" ` +
+      `— ${unresolvedLinks.length > 1 ? 'these are not compiled pages' : 'not a compiled page'}`
+    );
+  }
   return { html, headings: headings.filter((h) => h.depth > 1) };
 }
 

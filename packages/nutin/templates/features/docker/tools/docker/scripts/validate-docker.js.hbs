@@ -4,6 +4,7 @@ import { errorExit } from '../../utils/index.js';
 import nutinConfig from '../../../nutin.config.js';
 import { validateDockerPorts } from './docker-ports.js';
 import { renderFromTemplate } from './render-docker-template.js';
+import { markdownSourcesCopy } from './markdown-sources-copy.js';
 
 const DOCKER_DIR = path.join(process.cwd(), 'tools', 'docker');
 const PLACEHOLDER = '__PORTS_PLACEHOLDER__';
@@ -19,24 +20,6 @@ function rootRedirect() {
   return `location = / {\n        return 301 /${defaultLanguage}/$is_args$args;\n    }`;
 }
 
-// Markdown folders live outside src/ but build:prod compiles them, so the builder stage needs them too.
-function markdownSourcesCopy() {
-  const folders = (nutinConfig.markdownSources?.sourceFolders ?? [])
-    .map((entry) => (typeof entry === 'string' ? entry : entry?.folder))
-    .filter(Boolean);
-
-  return [...new Set(folders)]
-    .map((folder) => {
-      const relative = path.relative(process.cwd(), path.resolve(folder));
-      if (relative.startsWith('..') || path.isAbsolute(relative)) {
-        errorExit(`Markdown folder "${folder}" is outside the project, so it can't be copied into the Docker image — move it inside the project.`);
-      }
-      const posixPath = relative.split(path.sep).join('/');
-      return `COPY ./${posixPath} ./${posixPath}`;
-    })
-    .join('\n');
-}
-
 async function validateDocker() {
   let ports;
   try {
@@ -45,10 +28,17 @@ async function validateDocker() {
     errorExit(err.message);
   }
 
+  let markdownCopy;
+  try {
+    markdownCopy = markdownSourcesCopy(nutinConfig.markdownSources?.sourceFolders);
+  } catch (err) {
+    errorExit(err.message);
+  }
+
   await renderFromTemplate(DOCKER_DIR, 'Dockerfile.template', 'Dockerfile', [
     [PLACEHOLDER, ports.join(' ')],
     ['__PRIMARY_PORT_PLACEHOLDER__', String(ports[0])],
-    [MARKDOWN_SOURCES_PLACEHOLDER, markdownSourcesCopy()],
+    [MARKDOWN_SOURCES_PLACEHOLDER, markdownCopy],
   ]).catch((err) => errorExit(err.message));
 
   await renderFromTemplate(DOCKER_DIR, 'nginx.conf.template', 'nginx.conf', [

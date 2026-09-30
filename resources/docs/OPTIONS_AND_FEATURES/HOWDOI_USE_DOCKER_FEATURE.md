@@ -29,9 +29,9 @@ Container port(s) are configured via `nutin.config.js`'s `dockerPorts` (`number[
 export default {
   tailwind: false,
   i18n: false,
-  inlineTemplates: false,
-
   generateSEOFiles: false,
+
+  // Nutin features
   dockerPorts: [9090],
 }
 ```
@@ -70,6 +70,8 @@ RUN apk add --no-cache nginx nginx-mod-http-brotli
 - Serves the final assets
 - Includes an optional container healthcheck
 - Exposes ports for reverse proxies
+
+If the [Markdown feature](./HOWDOI_USE_MARKDOWN_FEATURE.md) is added, every folder listed in `markdownSources.sourceFolders` is copied into the build stage. These folders must be inside the project: `docker:build` fails with a clear error otherwise.
 
 ## Nginx config
 

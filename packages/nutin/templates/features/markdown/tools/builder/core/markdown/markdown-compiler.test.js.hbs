@@ -127,6 +127,19 @@ describe('markdown-compiler', () => {
     expect(() => compile('content')).toThrow('Unresolvable internal link "./missing.md"');
   });
 
+  it('reports every broken link of a page in one error, without marked\'s bug-report suffix', () => {
+    write('content/a.md', '# A\n\n[One](./one.md) and [Two](./two.md#part)\n');
+    let message = '';
+    try {
+      compile('content');
+    } catch (err) {
+      message = err.message;
+    }
+    expect(message).toContain('"./one.md"');
+    expect(message).toContain('"./two.md#part"');
+    expect(message).not.toContain('Please report');
+  });
+
   it('fails on missing folders, hub files and listed pages', () => {
     expect(() => compile('nope')).toThrow('Markdown folder "nope" not found');
 

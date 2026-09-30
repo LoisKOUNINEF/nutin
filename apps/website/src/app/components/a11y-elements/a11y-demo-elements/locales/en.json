@@ -1,7 +1,7 @@
 {
   "back": "← a11y-elements",
   "title": "Elements",
-  "lead": "Every accessibility component, live. Each one enhances real markup authored in this page's template; use the keyboard and a screen reader to see what they add.",
+  "lead": "Every accessibility component, live. Each one enhances real markup authored in this page's template.",
   "anchor-desc": "Enhances a real <a href>. New-tab links get rel=\"noopener noreferrer\" and \"(opens in new tab)\" in their accessible name. Same-page links smooth-scroll, move focus to the target, and announce the jump.",
   "anchor-internal": "Jump to visually-hidden",
   "anchor-external": "WAI-ARIA Authoring Practices",

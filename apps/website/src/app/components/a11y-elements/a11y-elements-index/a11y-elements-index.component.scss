@@ -4,6 +4,9 @@
 
 .a11y-index {
     max-width: 150ch;
+    h1 {
+        font-size: 3rem;
+    }
     p {
         line-height: 1.6;
         margin-top: map.get($spacings, small);
