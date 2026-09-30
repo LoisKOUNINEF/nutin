@@ -30,6 +30,10 @@
 
 - `nutin-add` features share a single `// Nutin features` block in `nutin.config.js`.
 
+### Fixes
+
+- When a route guard redirects during back/forward navigation, a `reload()` or the first page load, the address bar now shows the redirect target. The guarded URL is replaced in history instead of being left in place, so Back no longer lands on it again. Redirects from in-app navigation still add a new history entry.
+
 ## 2.1.1
 
 ### Changes

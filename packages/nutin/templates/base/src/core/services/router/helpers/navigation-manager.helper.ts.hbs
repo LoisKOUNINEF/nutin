@@ -2,6 +2,11 @@ import { I18nService, View } from "../../../index.js";
 import { Language } from "../../i18n/languages.js";
 import { CONFIG } from "../../../config.js";
 
+// How a navigation affects the history stack: add an entry, rewrite the current
+// one (e.g. a guard redirecting away from the URL already in the address bar),
+// or leave it untouched (back/forward, reload).
+export type HistoryMode = 'push' | 'replace' | 'none';
+
 /**
  * Navigation - handles path normalization and history management
  */
@@ -48,13 +53,17 @@ export class NavigationManager {
   public static updateHistory(
     normalizedPath: string,
     currentPath: string,
-    pushState: boolean,
+    mode: HistoryMode,
     hash?: string
   ): void {
+    if (mode === 'none') return;
     const localizedPath = this.addLocalePrefix(normalizedPath) + (hash ? `#${hash}` : '');
     const currentUrl = window.location.pathname + window.location.hash;
-    if (pushState && currentUrl !== localizedPath) {
+    if (currentUrl === localizedPath) return;
+    if (mode === 'push') {
       window.history.pushState({}, '', localizedPath);
+    } else {
+      window.history.replaceState({}, '', localizedPath);
     }
   }
 

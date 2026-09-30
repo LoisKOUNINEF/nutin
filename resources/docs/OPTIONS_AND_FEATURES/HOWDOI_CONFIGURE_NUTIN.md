@@ -7,6 +7,7 @@
 - `i18n`, `tailwind`, `generateSEO` — top-level option toggles.
 - `builder.{sass.paths, esbuild}` — build pipeline behavior.
 - `testinNutin.{includeFramework, includeTools, includeApp, coverage, jsdomOptions}` — built-in testing toolkit.
+- `dockerPorts`, `markdownSources` - Nutin features configuration (*only when related feature is present*). See [How do I use the Docker feature?](HOWDOI_USE_DOCKER_FEATURE.md) and [How do I use the Markdown feature?](HOWDOI_USE_MARKDOWN_FEATURE.md)
 
 ## Specialized configuration files
 

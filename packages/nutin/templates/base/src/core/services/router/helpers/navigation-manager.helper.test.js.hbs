@@ -19,13 +19,13 @@ describe('NavigationManager', () => {
       expect(url).toBe('/about');
     };
 
-    NavigationManager.updateHistory('/about', '/home', true);
+    NavigationManager.updateHistory('/about', '/home', 'push');
     expect(called).toBe(true);
 
     window.history.pushState = originalPushState;
   });
 
-  it('should not call pushState if shouldPushState returns false', () => {
+  it("should not touch history in 'none' mode", () => {
     const originalPushState = window.history.pushState;
     let called = false;
 
@@ -33,10 +33,31 @@ describe('NavigationManager', () => {
       called = true;
     };
 
-    NavigationManager.updateHistory('/about', '/home', false);
+    NavigationManager.updateHistory('/about', '/home', 'none');
 
     expect(called).toBe(false);
     window.history.pushState = originalPushState;
+  });
+
+  it("updateHistory in 'replace' mode rewrites the current entry instead of pushing", () => {
+    const originalReplaceState = window.history.replaceState;
+    const originalPushState = window.history.pushState;
+    let pushCalled = false;
+    let replacedUrl = null;
+
+    window.history.pushState = function () {
+      pushCalled = true;
+    };
+    window.history.replaceState = function (state, title, url) {
+      replacedUrl = url;
+    };
+
+    NavigationManager.updateHistory('/about', '/home', 'replace', 'team');
+
+    window.history.pushState = originalPushState;
+    window.history.replaceState = originalReplaceState;
+    expect(pushCalled).toBe(false);
+    expect(replacedUrl).toBe('/about#team');
   });
 
   it('replaceState calls history.replaceState (not pushState) with the locale-prefixed path', () => {
