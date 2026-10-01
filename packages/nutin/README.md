@@ -4,9 +4,9 @@
 
 Nutin provides the structure and tooling you'd expect from a framework, while keeping the underlying web platform visible and giving you code ownership.
 
-**Your app owns Nutin — not the other way around.** The source code lives alongside your application, so you can read it, modify it, and make it yours. Nutin's update system is designed to preserve those changes.
+**Your app owns Nutin — not the other way around.** The source code lives alongside your application, so you can read it, modify it, and make it yours. `nutin-update` never overwrites your edits: when an update touches a file you changed, you get a diff to merge instead.
 
-Nutin is deliberately pragmatic, lightweight, and dependency-free on runtime.
+Nutin is deliberately pragmatic and lightweight, with no runtime dependencies.
 
 ## Install
 

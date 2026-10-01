@@ -5,7 +5,7 @@ import { Component, I18nService, Navigation } from '../../../../core/index.js';
 // hydration runs. So text inside an overlay is interpolated here, clicks
 // inside one are handled by delegation (see onAfterRender), and overlays are
 // looked up by id in the whole document rather than in this.element.
-const t = (key: string) => I18nService.translate(`a11y-demo-overlays.${key}`);
+const translate = (key: string) => I18nService.translate(`a11y-demo-overlays.${key}`);
 
 const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
 
@@ -83,7 +83,7 @@ export class A11yDemoOverlaysComponent extends Component {
     }
 
     const item = target.closest('[role="menuitem"]');
-    if (item && item.getAttribute('aria-disabled') !== 'true') this.notify(`${t('menu-selected')} ${item.textContent?.trim() ?? ''}`);
+    if (item && item.getAttribute('aria-disabled') !== 'true') this.notify(`${translate('menu-selected')} ${item.textContent?.trim() ?? ''}`);
   }
 
   private _navigateTo(href: string): void {
@@ -112,17 +112,17 @@ export class A11yDemoOverlaysComponent extends Component {
   }
 
   private showSnackbar(type: string): void {
-    this.notify(t(`snackbar-${type}`), { type });
+    this.notify(translate(`snackbar-${type}`), { type });
   }
 
   private showSnackbarWithAction(): void {
-    this.notify(t('snackbar-deleted'), {
-      actionText: t('snackbar-undo'),
-      onAction: () => this.notify(t('snackbar-restored'), { type: 'success' }),
+    this.notify(translate('snackbar-deleted'), {
+      actionText: translate('snackbar-undo'),
+      onAction: () => this.notify(translate('snackbar-restored'), { type: 'success' }),
     });
   }
 
   private showBanner(type: string): void {
-    (this.overlay('a11y-demo-banner') as NotificationBanner | null)?.show?.(t(`banner-${type}`), { type });
+    (this.overlay('a11y-demo-banner') as NotificationBanner | null)?.show?.(translate(`banner-${type}`), { type });
   }
 }

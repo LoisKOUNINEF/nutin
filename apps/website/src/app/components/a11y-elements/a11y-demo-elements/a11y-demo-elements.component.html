@@ -9,8 +9,8 @@
     <h2><code>&lt;a11y-anchor&gt;</code></h2>
     <p data-i18n="a11y-demo-elements.anchor-desc"></p>
     <div class="a11y-demo__stage">
-      <a11y-anchor><a href="#a11y-demo-visually-hidden">${t('anchor-internal')}</a></a11y-anchor>
-      <a11y-anchor><a href="https://www.w3.org/WAI/ARIA/apg/" target="_blank">${t('anchor-external')}</a></a11y-anchor>
+      <a11y-anchor><a href="#a11y-demo-visually-hidden">${translate('anchor-internal')}</a></a11y-anchor>
+      <a11y-anchor><a href="https://www.w3.org/WAI/ARIA/apg/" target="_blank">${translate('anchor-external')}</a></a11y-anchor>
     </div>
   </section>
 
@@ -28,16 +28,16 @@
     <h2><code>&lt;a11y-checkbox&gt;</code></h2>
     <p data-i18n="a11y-demo-elements.checkbox-desc"></p>
     <div class="a11y-demo__stage a11y-demo__stage--column">
-      <a11y-checkbox label="${t('checkbox-terms')}">
+      <a11y-checkbox label="${translate('checkbox-terms')}">
         <input type="checkbox" name="a11y-demo-terms">
       </a11y-checkbox>
-      <a11y-checkbox label="${t('checkbox-indeterminate')}" indeterminate>
+      <a11y-checkbox label="${translate('checkbox-indeterminate')}" indeterminate>
         <input type="checkbox" name="a11y-demo-all">
       </a11y-checkbox>
-      <a11y-checkbox label="${t('checkbox-disabled')}">
+      <a11y-checkbox label="${translate('checkbox-disabled')}">
         <input type="checkbox" name="a11y-demo-disabled" disabled>
       </a11y-checkbox>
-      <a11y-checkbox label="${t('checkbox-checked-disabled')}">
+      <a11y-checkbox label="${translate('checkbox-checked-disabled')}">
         <input type="checkbox" name="a11y-demo-disabled" checked disabled>
       </a11y-checkbox>
     </div>
@@ -47,11 +47,11 @@
     <h2><code>&lt;a11y-checkbox-group&gt;</code></h2>
     <p data-i18n="a11y-demo-elements.checkbox-group-desc"></p>
     <div class="a11y-demo__stage">
-      <a11y-checkbox-group legend="${t('checkbox-group-legend')}" select-all select-all-label="${t('checkbox-group-select-all')}">
-        <label><input type="checkbox" name="a11y-demo-toppings" value="cheese"> ${t('checkbox-group-cheese')}</label>
-        <label><input type="checkbox" name="a11y-demo-toppings" value="mushrooms"> ${t('checkbox-group-mushrooms')}</label>
-        <label><input type="checkbox" name="a11y-demo-toppings" value="olives"> ${t('checkbox-group-olives')}</label>
-        <label><input type="checkbox" name="a11y-demo-toppings" value="anchovies" disabled> ${t('checkbox-group-anchovies')}</label>
+      <a11y-checkbox-group legend="${translate('checkbox-group-legend')}" select-all select-all-label="${translate('checkbox-group-select-all')}">
+        <label><input type="checkbox" name="a11y-demo-toppings" value="cheese"> ${translate('checkbox-group-cheese')}</label>
+        <label><input type="checkbox" name="a11y-demo-toppings" value="mushrooms"> ${translate('checkbox-group-mushrooms')}</label>
+        <label><input type="checkbox" name="a11y-demo-toppings" value="olives"> ${translate('checkbox-group-olives')}</label>
+        <label><input type="checkbox" name="a11y-demo-toppings" value="anchovies" disabled> ${translate('checkbox-group-anchovies')}</label>
       </a11y-checkbox-group>
     </div>
   </section>
@@ -60,10 +60,10 @@
     <h2><code>&lt;a11y-file-input&gt;</code></h2>
     <p data-i18n="a11y-demo-elements.file-input-desc"></p>
     <div class="a11y-demo__stage a11y-demo__stage--column a11y-demo__form">
-      <a11y-file-input max-size="2MB" max-files="3" previews browse-label="${t('file-input-browse')}" drop-label="${t('file-input-drop')}">
-        <a11y-label>${t('file-input-label')}</a11y-label>
+      <a11y-file-input max-size="2MB" max-files="3" previews browse-label="${translate('file-input-browse')}" drop-label="${translate('file-input-drop')}">
+        <a11y-label>${translate('file-input-label')}</a11y-label>
         <input type="file" name="a11y-demo-attachments" multiple accept="image/*,.pdf">
-        <a11y-hint>${t('file-input-hint')}</a11y-hint>
+        <a11y-hint>${translate('file-input-hint')}</a11y-hint>
         <a11y-error></a11y-error>
       </a11y-file-input>
     </div>
@@ -73,8 +73,8 @@
     <h2><code>&lt;a11y-focusable&gt;</code></h2>
     <p data-i18n="a11y-demo-elements.focusable-desc"></p>
     <div class="a11y-demo__stage">
-      <a11y-focusable class="a11y-demo__focusable" data-event="click:countFocusable">${t('focusable-label')}</a11y-focusable>
-      <span>${t('focusable-count')} <strong id="a11y-demo-focusable-count">0</strong></span>
+      <a11y-focusable class="a11y-demo__focusable" data-event="click:countFocusable">${translate('focusable-label')}</a11y-focusable>
+      <span>${translate('focusable-count')} <strong id="a11y-demo-focusable-count">0</strong></span>
     </div>
   </section>
 
@@ -82,16 +82,16 @@
     <h2><code>&lt;a11y-input&gt;</code></h2>
     <p data-i18n="a11y-demo-elements.input-desc"></p>
     <form class="a11y-demo__stage a11y-demo__stage--column a11y-demo__form" data-event="submit:submitDemoForm:@event">
-      <a11y-input value-missing-message="${t('input-email-missing')}" type-mismatch-message="${t('input-email-type-mismatch')}">
-        <a11y-label>${t('input-email-label')}</a11y-label>
+      <a11y-input value-missing-message="${translate('input-email-missing')}" type-mismatch-message="${translate('input-email-type-mismatch')}">
+        <a11y-label>${translate('input-email-label')}</a11y-label>
         <input type="email" name="a11y-demo-email" required>
-        <a11y-hint>${t('input-email-hint')}</a11y-hint>
+        <a11y-hint>${translate('input-email-hint')}</a11y-hint>
         <a11y-error></a11y-error>
       </a11y-input>
-      <a11y-input id="a11y-demo-username" value-missing-message="${t('input-username-missing')}" too-short-message="${t('input-username-too-short')}">
-        <a11y-label>${t('input-username-label')}</a11y-label>
+      <a11y-input id="a11y-demo-username" value-missing-message="${translate('input-username-missing')}" too-short-message="${translate('input-username-too-short')}">
+        <a11y-label>${translate('input-username-label')}</a11y-label>
         <input type="text" name="a11y-demo-username" minlength="3" autocomplete="off" required>
-        <a11y-hint>${t('input-username-hint')}</a11y-hint>
+        <a11y-hint>${translate('input-username-hint')}</a11y-hint>
         <a11y-error></a11y-error>
       </a11y-input>
       <button type="submit" class="a11y-demo__button" data-i18n="a11y-demo-elements.input-submit"></button>
@@ -103,7 +103,7 @@
     <h2><code>&lt;a11y-label&gt;</code></h2>
     <p data-i18n="a11y-demo-elements.label-desc"></p>
     <div class="a11y-demo__stage a11y-demo__stage--column">
-      <a11y-label for="a11y-demo-search">${t('label-text')}</a11y-label>
+      <a11y-label for="a11y-demo-search">${translate('label-text')}</a11y-label>
       <input id="a11y-demo-search" type="search" name="a11y-demo-search" class="a11y-demo__native-input">
     </div>
   </section>
@@ -114,9 +114,9 @@
     <div class="a11y-demo__stage">
       <a11y-picture class="a11y-demo__picture">
         <picture>
-          <img src="/assets/images/logo-trans.avif" alt="${t('picture-alt')}" loading="lazy" decoding="async">
+          <img src="/assets/images/logo-trans.avif" alt="${translate('picture-alt')}" loading="lazy" decoding="async">
         </picture>
-        <figcaption>${t('picture-caption')}</figcaption>
+        <figcaption>${translate('picture-caption')}</figcaption>
       </a11y-picture>
       <a11y-picture class="a11y-demo__picture">
         <picture>
@@ -126,8 +126,8 @@
       <a11y-picture
         class="a11y-demo__picture"
         src="/assets/images/logo-trans.avif"
-        alt="${t('picture-generated-alt')}"
-        caption="${t('picture-generated-caption')}">
+        alt="${translate('picture-generated-alt')}"
+        caption="${translate('picture-generated-caption')}">
       </a11y-picture>
     </div>
   </section>
@@ -136,7 +136,7 @@
     <h2><code>&lt;a11y-progress&gt;</code></h2>
     <p data-i18n="a11y-demo-elements.progress-desc"></p>
     <div class="a11y-demo__stage a11y-demo__stage--column">
-      <a11y-progress id="a11y-demo-progress" value="40" max="100" label="${t('progress-label')}"></a11y-progress>
+      <a11y-progress id="a11y-demo-progress" value="40" max="100" label="${translate('progress-label')}"></a11y-progress>
       <button type="button" class="a11y-demo__button" data-event="click:stepProgress" data-i18n="a11y-demo-elements.progress-step"></button>
     </div>
   </section>
@@ -145,10 +145,10 @@
     <h2><code>&lt;a11y-radio-group&gt;</code></h2>
     <p data-i18n="a11y-demo-elements.radio-group-desc"></p>
     <div class="a11y-demo__stage">
-      <a11y-radio-group legend="${t('radio-group-legend')}">
-        <label><input type="radio" name="a11y-demo-plan" value="basic" checked> ${t('radio-group-basic')}</label>
-        <label><input type="radio" name="a11y-demo-plan" value="pro"> ${t('radio-group-pro')}</label>
-        <label><input type="radio" name="a11y-demo-plan" value="team" disabled> ${t('radio-group-team')}</label>
+      <a11y-radio-group legend="${translate('radio-group-legend')}">
+        <label><input type="radio" name="a11y-demo-plan" value="basic" checked> ${translate('radio-group-basic')}</label>
+        <label><input type="radio" name="a11y-demo-plan" value="pro"> ${translate('radio-group-pro')}</label>
+        <label><input type="radio" name="a11y-demo-plan" value="team" disabled> ${translate('radio-group-team')}</label>
       </a11y-radio-group>
     </div>
   </section>
@@ -157,11 +157,11 @@
     <h2><code>&lt;a11y-select&gt;</code></h2>
     <p data-i18n="a11y-demo-elements.select-desc"></p>
     <div class="a11y-demo__stage">
-      <a11y-select label="${t('select-label')}">
+      <a11y-select label="${translate('select-label')}">
         <select name="a11y-demo-framework">
           <option value="nutin">Nutin</option>
-          <option value="vanilla">${t('select-vanilla')}</option>
-          <option value="other">${t('select-other')}</option>
+          <option value="vanilla">${translate('select-vanilla')}</option>
+          <option value="other">${translate('select-other')}</option>
         </select>
       </a11y-select>
     </div>
@@ -181,9 +181,9 @@
     <h2><code>&lt;a11y-spinner&gt;</code></h2>
     <p data-i18n="a11y-demo-elements.spinner-desc"></p>
     <div class="a11y-demo__stage">
-      <a11y-spinner label="${t('spinner-label')}"></a11y-spinner>
-      <a11y-spinner label="${t('spinner-label')}" size="3rem"></a11y-spinner>
-      <a11y-spinner label="${t('spinner-label')}" size="3rem" style="--a11y-spinner-color: var(--warning);"></a11y-spinner>
+      <a11y-spinner label="${translate('spinner-label')}"></a11y-spinner>
+      <a11y-spinner label="${translate('spinner-label')}" size="3rem"></a11y-spinner>
+      <a11y-spinner label="${translate('spinner-label')}" size="3rem" style="--a11y-spinner-color: var(--warning);"></a11y-spinner>
     </div>
   </section>
 
@@ -191,10 +191,10 @@
     <h2><code>&lt;a11y-switch&gt;</code></h2>
     <p data-i18n="a11y-demo-elements.switch-desc"></p>
     <div class="a11y-demo__stage a11y-demo__stage--column">
-      <a11y-switch label="${t('switch-notifications')}">
+      <a11y-switch label="${translate('switch-notifications')}">
         <input type="checkbox" name="a11y-demo-notifications" checked>
       </a11y-switch>
-      <a11y-switch label="${t('switch-reduced-motion')}">
+      <a11y-switch label="${translate('switch-reduced-motion')}">
         <input type="checkbox" name="a11y-demo-reduced-motion">
       </a11y-switch>
     </div>
@@ -204,8 +204,8 @@
     <h2><code>&lt;a11y-textarea&gt;</code></h2>
     <p data-i18n="a11y-demo-elements.textarea-desc"></p>
     <div class="a11y-demo__stage a11y-demo__stage--column a11y-demo__form">
-      <a11y-textarea value-missing-message="${t('textarea-missing')}">
-        <a11y-label>${t('textarea-label')}</a11y-label>
+      <a11y-textarea value-missing-message="${translate('textarea-missing')}">
+        <a11y-label>${translate('textarea-label')}</a11y-label>
         <textarea name="a11y-demo-bio" rows="3" maxlength="120" required></textarea>
         <a11y-counter></a11y-counter>
         <a11y-error></a11y-error>
@@ -219,7 +219,7 @@
     <div class="a11y-demo__stage">
       <button type="button" class="a11y-demo__button">
         <span aria-hidden="true">✕</span>
-        <a11y-visually-hidden>${t('visually-hidden-text')}</a11y-visually-hidden>
+        <a11y-visually-hidden>${translate('visually-hidden-text')}</a11y-visually-hidden>
       </button>
     </div>
   </section>

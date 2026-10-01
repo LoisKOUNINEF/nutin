@@ -14,3 +14,4 @@ Switching package manager in an existing Nutin app requires adapting:
 - [Development environment](./TOOLS/DEVELOPMENT_ENVIRONMENT.md)
 - [Generator](./TOOLS/GENERATOR.md)
 - [Builder](./TOOLS/BUILDER.md)
+- [Updater](./TOOLS/UPDATER.md)

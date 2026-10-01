@@ -29,11 +29,6 @@
       "ogImage": "/assets/images/og-covers/og-cover-changelog.jpg"
     },
     {
-      "path": "/roadmap/:slug?",
-      "dynamicFrom": "roadmap",
-      "ogImage": "/assets/images/og-covers/og-cover-roadmap.jpg"
-    },
-    {
       "path": "/articles/:slug?",
       "dynamicFrom": "articles",
       "ogImage": "/assets/images/og-covers/og-cover-articles.jpg"

@@ -12,9 +12,9 @@
       <button type="button" class="a11y-demo__button" data-event="click:openOverlay:a11y-demo-modal" data-i18n="a11y-demo-overlays.modal-open"></button>
     </div>
     <a11y-modal id="a11y-demo-modal">
-      <h2>${t('modal-title')}</h2>
-      <p>${t('modal-body')}</p>
-      <a11y-switch label="${t('modal-switch')}">
+      <h2>${translate('modal-title')}</h2>
+      <p>${translate('modal-body')}</p>
+      <a11y-switch label="${translate('modal-switch')}">
         <input type="checkbox" name="a11y-demo-modal-switch">
       </a11y-switch>
     </a11y-modal>
@@ -28,21 +28,21 @@
       <button type="button" class="a11y-demo__button" data-event="click:openOverlay:a11y-demo-drawer-right" data-i18n="a11y-demo-overlays.drawer-open-right"></button>
     </div>
     <a11y-drawer id="a11y-demo-drawer-left" edge="left">
-      <h2>${t('drawer-nav-title')}</h2>
+      <h2>${translate('drawer-nav-title')}</h2>
       <ul class="a11y-demo__drawer-list">
-        <li><button type="button" class="a11y-demo__link-button" data-a11y-demo-close>${t('drawer-nav-home')}</button></li>
-        <li><button type="button" class="a11y-demo__link-button" data-a11y-demo-close>${t('drawer-nav-docs')}</button></li>
+        <li><button type="button" class="a11y-demo__link-button" data-a11y-demo-close>${translate('drawer-nav-home')}</button></li>
+        <li><button type="button" class="a11y-demo__link-button" data-a11y-demo-close>${translate('drawer-nav-docs')}</button></li>
       </ul>
     </a11y-drawer>
     <a11y-drawer id="a11y-demo-drawer-right" edge="right">
-      <h2>${t('drawer-filters-title')}</h2>
-      <a11y-checkbox label="${t('drawer-filters-open')}">
+      <h2>${translate('drawer-filters-title')}</h2>
+      <a11y-checkbox label="${translate('drawer-filters-open')}">
         <input type="checkbox" name="a11y-demo-filter-open" checked>
       </a11y-checkbox>
-      <a11y-checkbox label="${t('drawer-filters-closed')}">
+      <a11y-checkbox label="${translate('drawer-filters-closed')}">
         <input type="checkbox" name="a11y-demo-filter-closed">
       </a11y-checkbox>
-      <button type="button" class="a11y-demo__button" data-a11y-demo-close>${t('drawer-filters-apply')}</button>
+      <button type="button" class="a11y-demo__button" data-a11y-demo-close>${translate('drawer-filters-apply')}</button>
     </a11y-drawer>
   </section>
 
@@ -53,9 +53,9 @@
       <button type="button" class="a11y-demo__button" data-event="click:openOverlay:a11y-demo-emergency" data-i18n="a11y-demo-overlays.emergency-open"></button>
     </div>
     <a11y-emergency-dialog id="a11y-demo-emergency">
-      <h2>${t('emergency-title')}</h2>
-      <p>${t('emergency-body')}</p>
-      <button type="button" class="a11y-demo__button" data-a11y-demo-close>${t('emergency-resolve')}</button>
+      <h2>${translate('emergency-title')}</h2>
+      <p>${translate('emergency-body')}</p>
+      <button type="button" class="a11y-demo__button" data-a11y-demo-close>${translate('emergency-resolve')}</button>
     </a11y-emergency-dialog>
   </section>
 
@@ -65,7 +65,7 @@
     <div class="a11y-demo__stage">
       <button type="button" class="a11y-demo__button" data-event="click:openBlockingLoader" data-i18n="a11y-demo-overlays.blocking-loader-open"></button>
     </div>
-    <a11y-blocking-loader id="a11y-demo-blocking-loader" message="${t('blocking-loader-message')}"></a11y-blocking-loader>
+    <a11y-blocking-loader id="a11y-demo-blocking-loader" message="${translate('blocking-loader-message')}"></a11y-blocking-loader>
   </section>
 
   <section class="a11y-demo__section">
@@ -75,10 +75,10 @@
       <button type="button" class="a11y-demo__button" id="a11y-demo-dropdown-anchor" data-i18n="a11y-demo-overlays.dropdown-open"></button>
     </div>
     <a11y-dropdown id="a11y-demo-dropdown" anchor="a11y-demo-dropdown-anchor">
-      <div role="menuitem">${t('menu-edit')}</div>
-      <div role="menuitem">${t('menu-duplicate')}</div>
-      <div role="menuitem" aria-disabled="true">${t('menu-archive')}</div>
-      <div role="menuitem">${t('menu-delete')}</div>
+      <div role="menuitem">${translate('menu-edit')}</div>
+      <div role="menuitem">${translate('menu-duplicate')}</div>
+      <div role="menuitem" aria-disabled="true">${translate('menu-archive')}</div>
+      <div role="menuitem">${translate('menu-delete')}</div>
     </a11y-dropdown>
   </section>
 
@@ -89,9 +89,9 @@
       <div id="a11y-demo-context-target" class="a11y-demo__context-target" tabindex="0" data-i18n="a11y-demo-overlays.context-menu-target"></div>
     </div>
     <a11y-context-menu id="a11y-demo-context-menu" trigger="a11y-demo-context-target">
-      <div role="menuitem">${t('menu-copy')}</div>
-      <div role="menuitem">${t('menu-paste')}</div>
-      <div role="menuitem">${t('menu-delete')}</div>
+      <div role="menuitem">${translate('menu-copy')}</div>
+      <div role="menuitem">${translate('menu-paste')}</div>
+      <div role="menuitem">${translate('menu-delete')}</div>
     </a11y-context-menu>
   </section>
 
@@ -102,8 +102,8 @@
       <button type="button" class="a11y-demo__button" id="a11y-demo-popover-anchor" data-event="click:toggleOverlay:a11y-demo-popover" data-i18n="a11y-demo-overlays.popover-open"></button>
     </div>
     <a11y-popover id="a11y-demo-popover" anchor="a11y-demo-popover-anchor" interactive>
-      <p>${t('popover-body')}</p>
-      <button type="button" class="a11y-demo__button" data-a11y-demo-close>${t('popover-close')}</button>
+      <p>${translate('popover-body')}</p>
+      <button type="button" class="a11y-demo__button" data-a11y-demo-close>${translate('popover-close')}</button>
     </a11y-popover>
   </section>
 
@@ -113,7 +113,7 @@
     <div class="a11y-demo__stage">
       <button type="button" class="a11y-demo__button" id="a11y-demo-tooltip-anchor" data-i18n="a11y-demo-overlays.tooltip-anchor"></button>
     </div>
-    <a11y-tooltip id="a11y-demo-tooltip" anchor="a11y-demo-tooltip-anchor">${t('tooltip-text')}</a11y-tooltip>
+    <a11y-tooltip id="a11y-demo-tooltip" anchor="a11y-demo-tooltip-anchor">${translate('tooltip-text')}</a11y-tooltip>
   </section>
 
   <section class="a11y-demo__section">

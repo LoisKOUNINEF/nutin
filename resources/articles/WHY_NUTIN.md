@@ -8,7 +8,7 @@ It provides the structure you need as an application grows — components, views
 
 Nutin doesn't try to replace the web platform with its own abstractions; it gives a structured way to use native APIs. 
 
-**Your application owns the framework, not the other way around**: rather than treating the framework as an opaque dependency, Nutin lives alongside your application. Nutin's update system is designed to preserve the changes you made.
+**Your application owns the framework, not the other way around**: rather than treating the framework as an opaque dependency, Nutin lives alongside your application. Nutin's update system never overwrites your edits: when an update touches a file you changed, you get a diff to merge instead. See [Updater](https://nutin.org/docs/tools/updater).
 
 ## What problems does Nutin solve?
 
@@ -42,4 +42,8 @@ Nutin may not be the right fit if your project depends heavily on:
 ## Behind Nutin
 
 If you're interested in how Nutin evolved and the thinking behind its design, read [The Story Behind Nutin](https://nutin.org/articles/the-story-behind-nutin).
+
+## FAQ
+
+- [123](FAQ.md#how-is-nutin-different-from-htmx)
 

@@ -20,3 +20,13 @@ Constructing a component creates and mounts its root element immediately (at `mo
 A component is small, reusable, and embeddable anywhere a parent component or view mounts it; it isn't tied to a route, and application code constructs it directly (`new SomeComponent(el, config)`). 
 
 Nutin favors composing many small, focused components rather than a few large ones, orchestrated by parent components and, ultimately, a view.
+
+## Why aren't components Web Components?
+
+Web Components come with their own model: elements registered globally by tag name, shadow DOM, data passed through attributes and properties, and a lifecycle driven by the browser connecting and disconnecting the element.
+
+A Nutin component is a plain class that renders into an element of the page, in the light DOM. 
+
+Nutin doesn't need Web Components to provide structure, so it doesn't make you adopt it. Your markup stays plain HTML, styled by your stylesheets, and data is passed as constructor arguments.
+
+Custom elements still work inside Nutin templates. See [How to use a11y-elements?](https://nutin.org/guides/a11y-elements) and [How to integrate AlpineJS?](https://nutin.org/guides/alpinejs) for an example.
