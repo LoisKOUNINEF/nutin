@@ -29,4 +29,4 @@ A Nutin component is a plain class that renders into an element of the page, in 
 
 Nutin doesn't need Web Components to provide structure, so it doesn't make you adopt it. Your markup stays plain HTML, styled by your stylesheets, and data is passed as constructor arguments.
 
-Custom elements still work inside Nutin templates. See [How to use a11y-elements?](https://nutin.org/guides/a11y-elements) and [How to integrate AlpineJS?](https://nutin.org/guides/alpinejs) for an example.
+Custom elements still work inside Nutin templates. See [How to use a11y-elements?](https://nutin.org/guides/a11y-elements) for an example.
