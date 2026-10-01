@@ -50,6 +50,6 @@
 <div style="padding-left:1rem;">
 <p>shadcn/ui is a collection of React components. Its CLI copies their source code into your project, so you can read and change your buttons and dialogs. React itself remains a regular dependency.</p>
 
-<p>Nutin applies the same idea to the framework layer itself.<br/>Its core, its build tools and its development tools are generated into your project. When a new version comes out, <a href="https://nutin.org/docs/tools/updater"><code>nutin-update</code></a> updates the files you haven't changed, and gives you a diff to merge for the ones you did.</p>
+<p>Nutin applies the same idea to the framework layer itself.<br/>Its source code and its tools are generated into your project. When a new version comes out, <a href="https://nutin.org/docs/tools/updater"><code>nutin-update</code></a> updates the files you haven't changed, and gives you a diff to merge for the ones you did.</p>
 </div>
 </details>
