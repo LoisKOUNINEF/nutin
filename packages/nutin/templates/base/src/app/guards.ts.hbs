@@ -1,5 +1,3 @@
-import { RouteGuard } from "../core/index.js";
-
 export const Guards = {
   /**
    * Basic example

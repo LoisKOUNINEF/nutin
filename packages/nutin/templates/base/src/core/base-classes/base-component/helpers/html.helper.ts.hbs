@@ -30,7 +30,6 @@ class RawHtml extends SafeHtml {
   }
 }
 
-export type Template = string | SafeHtml;
 type Context = 'text' | 'tag' | 'attr-dq' | 'attr-sq' | 'attr-unq-start' | 'attr-unq';
 
 let rawCounter = 0;

@@ -1,8 +1,4 @@
-import { BaseComponent, BaseComponentOptions, type Template } from '../../index.js';
-
-export interface ViewOptions extends BaseComponentOptions {
-  viewName: string;
-}
+import { BaseComponent } from '../../index.js';
 
 export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComponent<T> {
   private _viewName: string;

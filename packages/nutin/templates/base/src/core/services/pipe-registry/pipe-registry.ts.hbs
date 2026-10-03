@@ -1,7 +1,5 @@
 import { Service } from "../../base-classes/index.js";
 
-export type PipeFunction = (value: any, ...args: any[]) => string;
-
 class PipeRegistry extends Service<PipeRegistry> {
   private _pipes: Record<string, PipeFunction> = {};
 

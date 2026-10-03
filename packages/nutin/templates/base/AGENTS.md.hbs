@@ -20,6 +20,9 @@ nutin.config.js   build/feature config — see below
 - Favor small, composable components.
 - One `View` = one route.
 - Import framework code from the `core/index.js` barrel — do not deep-import into `core/`. App elements have no barrels: import them by file path.
+{{#if (eq lang "ts")}}
+- Framework types (`ComponentConfig`, `ComponentOptions`, `CatalogConfig`, `Template`, `Routes`, `RouteGuard`, `IRequestConfig`, …) are globals declared in `core/internals.d.ts` — use them without importing.
+{{/if}}
 - `src/app/` layout is free; `components/`, `views/`, `services/` is the default suggestion.
 
 ## Commands

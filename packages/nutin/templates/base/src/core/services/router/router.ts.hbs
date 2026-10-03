@@ -1,24 +1,11 @@
 import { View, Navigation, Service, I18nService, AppEventBus } from '../../index.js';
-import { Language } from '../i18n/languages.js';
-import { Routes, RouteConfig, RouteGuardsManager, GuardResult } from './helpers/route-guard-manager.helper.js';
+import { RouteGuardsManager, type GuardResult } from './helpers/route-guard-manager.helper.js';
 import { ViewRenderManager } from './helpers/view-render-manager.helper.js';
 import { NavigationManager, HistoryMode } from './helpers/navigation-manager.helper.js';
 import { CONFIG } from '../../config.js';
 
 // centralized export
-export type { Routes, RouteGuard } from './helpers/route-guard-manager.helper.js';
 export { NavigationManager } from './helpers/navigation-manager.helper.js';
-
-/**
- * IRouter is a type alias for the instance of Router, not a true interface 
- */
-export type IRouter = InstanceType<typeof Router>;
-
-export interface RouteMatch {
-  route: RouteConfig;
-  params: Record<string, string>;
-  pattern: string;
-}
 
 class Router extends Service<Router> {
   private _currentView: View | null = null;

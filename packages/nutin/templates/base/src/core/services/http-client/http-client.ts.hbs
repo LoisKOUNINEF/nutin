@@ -1,10 +1,8 @@
 import { Service } from "../../index.js";
-import { HttpBuilder, HttpMethod, IHttpClientOptions, IRequestConfig } from "./helpers/http-builder.helper.js";
+import { HttpBuilder } from "./helpers/http-builder.helper.js";
 import { HttpManager } from "./helpers/http-manager.helper.js";
 
-export type IHttpClient = InstanceType<typeof HttpClient>;
 export { path } from "./helpers/http-builder.helper.js";
-export type { IHttpClientOptions, IRequestConfig, QueryValue } from "./helpers/http-builder.helper.js";
 export { HttpError } from "./helpers/http-manager.helper.js";
 
 export class HttpClient extends Service<HttpClient> {

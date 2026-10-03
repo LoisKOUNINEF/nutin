@@ -1,24 +1,5 @@
 import { Service } from '../../base-classes/index.js';
 
-export interface GlobalMountable {
-  render(): HTMLElement;
-  destroy?(): void;
-}
-
-export interface GlobalConfig<T extends GlobalMountable = GlobalMountable> {
-  /** The component's own class — constructed internally as `new component(mountTarget)`. */
-  component: new (mountTarget: HTMLElement) => T;
-  /** Stamped onto the mounted root element; pass this same id to `hideGlobals`/`revealGlobals`. */
-  id: string;
-}
-
-export interface RegisterGlobalsOptions {
-  /** Rendered and prepended to `<body>`, in the given order (e.g. a header). */
-  before?: GlobalConfig[];
-  /** Rendered and appended to `<body>`, in the given order (e.g. a footer). */
-  after?: GlobalConfig[];
-}
-
 export class Globals extends Service<Globals> {
   private _mounted: Record<string, GlobalMountable> = {};
   private _originalDisplay: Record<string, string> = {};

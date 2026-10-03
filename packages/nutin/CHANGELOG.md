@@ -24,6 +24,11 @@
     - Rendering inserts the sanitized nodes directly instead of assigning the sanitized string to `innerHTML`. The second parse let mutation-XSS markup (`<math>`/`<form>` nesting tricks) turn back into a live `<img onerror>` at `normal` and `strict`. New `SecurityHelper.sanitizeToFragment()`; `sanitizeTemplate()` still returns a string.
     - Migration: tag each `template`/`templateFn` with `html` (`import { html } from core`), drop `.join('')` on mapped `html` results, and wrap markup you trust in `raw()`. The build warns about every untagged template that contains `${}`, since its values are no longer escaped anywhere.
 
+- **Framework types are globals**
+
+    - The public types are now declared in `src/core/internals.d.ts`, next to the event maps, and no longer exported from `core/index`: `ComponentConfig`, `BaseComponentOptions`, `ComponentOptions`, `ComponentProps`, `ViewOptions`, `CatalogConfig`, `CatalogItemConfig`, `CatalogItemObject`, `CatalogItemPrimitive`, `Template`, `TrustLevel`, `Routes`, `RouteGuard`, `RouteConfig`, `RouteMatch`, `IRouter`, `IEventBus`, `IHttpClient`, `IHttpClientOptions`, `IRequestConfig`, `QueryValue`, `HttpMethod`, `Language`, `Translations`, `PipeFunction`, `GlobalMountable`, `GlobalConfig`, `RegisterGlobalsOptions`, `Subscription`.
+    - Migration: remove these names from your `import { … } from '…/core/index.js'` lines (`nutin-update` doesn't touch `src/app`). Classes and functions (`Component`, `View`, `html`, `AppRouter`, …) are still imported as before.
+
 ### Features
 
 - **New `markdown` feature (`nutin-add markdown`)**
