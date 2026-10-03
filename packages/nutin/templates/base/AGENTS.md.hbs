@@ -73,7 +73,7 @@ Handlers are (re-)bound on every `render()`, not at build time. Always use priva
 private _myFunction(value: string, id: string) { doStuff() }
 ```
 
-Tokens: `@value`, `@id`, `@class`, `@textContent`, `@event`, `@target`, `@attr:name`, `@dataset:key`, plus string/number literals.
+Tokens: `@value`, `@id`, `@class`, `@textContent`, `@event`, `@target`, `@attr:name`, `@dataset:key`, plus string/number literals. Token values are raw (not HTML-escaped): escaping happens when they are rendered through an `html` template.
 
 ## Core services
 
@@ -82,8 +82,8 @@ Tokens: `@value`, `@id`, `@class`, `@textContent`, `@event`, `@target`, `@attr:n
   - `Lifecycle` — `viewMount(viewName)`/`onViewMount`, `viewUnmount(viewName)`/`onViewUnmount`, plus generic `beforeRender`/`afterRender`/`beforeDestroy`/`afterDestroy`.
 - `AppRouter(routes)` — call once in `main.ts`; routes support `:param`/`:param?` and per-route guards.
 - `registerGlobals({ before?, after? })` — each entry is `{ component, id }` (a bare class, constructed internally); mounts them outside `<main id="app">` (`before`/`after` control placement relative to it), stamping each root element with `id`. `hideGlobals(ids)`/`revealGlobals(ids)` (same module) toggle visibility by those ids from any component or view. Call once in `main.ts`.
-- `AppHttpClient` — `get/post/put/patch/delete<T>(endpoint, data?, config?)`; non-OK responses throw `HttpError`.
-- `I18nService` — `translate(key, fallback?)`, `setCurrentLanguage(lang)`; language list comes from `config/languages.json`.
+- `AppHttpClient` — `get/post/put/patch/delete<T>(endpoint, data?, config?)`; non-OK responses throw `HttpError`. Relative endpoints resolve against the page origin; a subclass with a base URL rejects endpoints leaving it. Build paths from values with ``path`/users/${id}` `` (encoded `/` and `\` in paths are rejected unless the API is in the `trustedAPIs` option). FormData/Blob bodies are sent as-is; 204 → `undefined`.
+- `I18nService` — `translate(key, fallback?)`, `setCurrentLanguage(lang)`; language list comes from `config/languages.json`. `initI18n()` (same module) loads the translations when `i18n` is enabled and does nothing otherwise; `main.ts` awaits it before starting the app. With `i18n: false`, prod builds drop the i18n code unless app code references `I18nService`.
 - `AppPipeRegistry` — `register(name, fn)` / `apply(name, value, args)`; backs `data-pipe`.
 
 ## Styling
@@ -134,7 +134,9 @@ Consumed by i18nService and builder. Unused if i18n is disabled.
 
 ## Security
 
-`SecurityHelper.sanitizeTemplate()` runs on every `render()` before `innerHTML` is set — `trustLevel` (`'strict' | 'normal' | 'trusted'`, default `'normal'`) controls how much is stripped (`<script>`/inline handlers always; `<iframe>`/`javascript:`/`data:` under `strict` only). Use `SecurityHelper.escapeHtml()` when manually interpolating strings into templates.
+Write every template with the `html` tag (`import { html, raw } from` core): `templateFn = (task) => html\`<li>${task.name}</li>\``. Every `${}` is HTML-escaped, whatever the data's source (input, HTTP, localStorage). Nested `html` results are inserted as-is, and arrays are inserted item by item (`${items.map((i) => html\`<li>${i}</li>\`)}`, no `.join('')`). Unquoted attribute values (`title=${x}`) are quoted automatically. Wrap HTML you want rendered in `raw()`: it's parsed in place at render (works inside `<svg>`/`<table>`) and loses Nutin's binding attributes (`data-event`, `data-component`, `data-catalog`, `data-bind`, `data-i18n`, `data-pipe*`). `trustedRaw()` keeps them, for markup you wrote yourself (e.g. compiled Markdown). An untagged template literal escapes nothing, and the build warns about each one containing `${}`.
+
+Every `render()` also sanitizes the template (`SecurityHelper.sanitizeToFragment()`) and inserts the resulting nodes directly — never re-parsed from a string. `trustLevel` (`'strict' | 'normal' | 'trusted'`, default `'normal'`) controls how much is stripped (`<script>`/`<style>`/`<link>`/`<base>`/`<meta>`, inline handlers, `srcdoc`, `javascript:` URLs, `data:` frames and SVG `<animate>`/`<set>` targeting URL attributes from `normal` up; `<iframe>`/`<object>`/`<embed>` and all `data:` URLs under `strict` only). Don't interpolate data into `data-event` args or `style`: use `data-x="${v}"` + `@dataset:x`. It is a second layer for `raw()` content, not a substitute for `html`.
 
 ## Testing (testin-nutin)
 

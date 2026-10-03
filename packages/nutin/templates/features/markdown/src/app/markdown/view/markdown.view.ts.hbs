@@ -1,16 +1,16 @@
-import { ComponentConfig, NavigationManager, View } from '../../../core/index.js';
+import { ComponentConfig, NavigationManager, View, html, type Template } from '../../../core/index.js';
 import { IMarkdownSection, MarkdownManifest } from '../markdown-manifest.js';
 import { MarkdownManifestsService } from '../markdown-manifests.service.js';
 import { MarkdownContentComponent } from '../components/markdown-content/markdown-content.component.js';
 import { MarkdownNavComponent } from '../components/markdown-nav/markdown-nav.component.js';
 
-const defaultTemplate = `__TEMPLATE_PLACEHOLDER__`;
+const defaultTemplate = html`__TEMPLATE_PLACEHOLDER__`;
 
 export interface IMarkdownViewOptions {
   // The source's id: its "routePrefix" in nutin.config.js, defaulting to the folder name.
   id: string;
   // A custom layout needs data-component="markdown-nav" and data-component="markdown-content".
-  template?: string;
+  template?: Template;
   viewName?: string;
 }
 

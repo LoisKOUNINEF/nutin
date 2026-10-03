@@ -2,6 +2,28 @@
 
 ## 2.2.0
 
+### Breaking Changes
+
+- **`HttpClient` URLs, bodies and responses**
+
+    - URLs: endpoints are joined onto the base URL as URLs (not strings) and rejected before `fetch` when they leave its origin or path. Before, `${baseUrl}${endpoint}` let an endpoint like `@other.host/x` send the request and its default headers (e.g. `Authorization`) to another host. The base URL's own query is kept. Without a base URL, a relative endpoint now resolves against the page's origin (`AppHttpClient.get('/api/users')` used to throw `Invalid URL`), and default headers only go to that origin. Only `http:`/`https:` URLs are accepted. Error messages leave out query strings.
+    - Encoded `/` and `\` (`%2F`, `%5C`) in a path are rejected, since servers often decode them into separators; list APIs that expect them in the new `trustedAPIs` option (`new HttpClient(baseUrl, headers, { trustedAPIs: [...] })`). New `path` tag (exported from `core/index`) encodes each value as one path segment and rejects `.`/`..`.
+    - Bodies: `FormData`, `Blob`, `URLSearchParams`, binary data and streams are sent as they are (they used to be sent as `{}`); `0`/`false`/`''` are sent (they were dropped). `Content-Type: application/json` is only set for JSON bodies, so GET/DELETE no longer trigger a CORS preflight. Headers merge case-insensitively, and request interceptors get a `Headers` object.
+    - Responses: 204/205 and empty bodies resolve to `undefined` (they threw); `+json` types are parsed (they were returned as text). Response interceptors get a clone, so reading its body no longer breaks the request.
+    - Redirects: a followed redirect that ends outside the base URL (or, without one, on another origin than requested) now throws instead of returning that origin's response, and response interceptors don't see it. Checked in Chrome, Firefox and Safari: they strip `Authorization` on cross-origin redirects but forward custom headers (e.g. `X-Api-Key`), so APIs using those should pass `redirect: 'error'`.
+    - Options: `signal` (your cancellation, rethrown as an `AbortError`; "Request timed out" now only means the timeout), `credentials`, `cache`, `referrerPolicy`, `redirect`. `timeout` must be a positive number. `queryParams` take numbers/booleans, skip `null`/`undefined`, and repeat array values. `HttpError` is exported from `core/index`.
+
+- **Templates are escaped at output, not at input**
+
+    - New `html` tag, `raw()` and `trustedRaw()`, exported from `core/index`. In an `html\`...\`` template, every `${}` is HTML-escaped, so data from any source (inputs, HTTP responses, localStorage, the server) renders as text and can't inject markup or `data-event`/`data-component` attributes. Nested `html` results are inserted as-is. Unquoted attribute values (`title=${x}`) are quoted automatically, so a value with spaces can't add attributes. `raw()` inserts HTML unescaped: at render it's parsed where it sits (inside `<svg>`/`<table>` too), stripped of Nutin's binding attributes (`data-event`, `data-component`, `data-catalog`, `data-bind`, `data-i18n`, `data-pipe`, `data-pipe-source`) and sanitized as nodes, so injected markup can't call component methods or mount children; in tag position (`<input ${raw('checked')}>`) it keeps only safe attributes; `trustedRaw()` keeps them, for markup you wrote yourself (the `markdown` feature uses it). Arrays are inserted item by item, so `items.map(...).join('')` becomes `items.map((item) => html\`...\`)`.
+    - `data-event` tokens (`@value`, `@textContent`, `@innerText`, `@html`, `@attr:`, `@dataset:`, `@id`, `@class`, `@name`, `@tag`, `@key`, `@code`) now pass raw values instead of HTML-escaped ones: typing `a & b` gives `a & b`, not `a &amp; b`. `getValues()` is unchanged (it was already raw).
+    - Removed `SecurityHelper.sanitizeInputElement()`.
+    - Generated components and views, the base views and the `markdown` feature use `html`. `trustLevel` sanitization still applies on top, e.g. to `raw()` content.
+    - The default `normal` trust level now also strips `srcdoc` attributes, SVG `<animate>`/`<set>` elements that rewrite a URL attribute (a sanitized `<set attributeName="href" to="javascript:…">` ran its script on click in Chrome), and `javascript:` URLs (`href`, `src`, `action`, `formaction`, `poster`, `background`, and the new `xlink:href`). Escaping can't catch these: a `javascript:` URL has nothing to escape, and a browser decodes `srcdoc`'s entities before running it. `data:` URLs are still stripped under `strict` only.
+    - `normal` also strips `<style>`, `<link>`, `<base>` and `<meta>` elements (page-wide CSS, moved relative URLs, forced navigation), SVG `<script>`, and `data:`/`javascript:` documents in `<iframe>`/`<object>`/`<embed>`. Move styles a template carried inline into the component's `.scss`.
+    - Rendering inserts the sanitized nodes directly instead of assigning the sanitized string to `innerHTML`. The second parse let mutation-XSS markup (`<math>`/`<form>` nesting tricks) turn back into a live `<img onerror>` at `normal` and `strict`. New `SecurityHelper.sanitizeToFragment()`; `sanitizeTemplate()` still returns a string.
+    - Migration: tag each `template`/`templateFn` with `html` (`import { html } from core`), drop `.join('')` on mapped `html` results, and wrap markup you trust in `raw()`. The build warns about every untagged template that contains `${}`, since its values are no longer escaped anywhere.
+
 ### Features
 
 - **New `markdown` feature (`nutin-add markdown`)**
@@ -35,7 +57,22 @@
 
 - `nutin-add` features share a single `// Nutin features` block in `nutin.config.js`.
 
+- New apps still get empty `src/app/components/` and `src/app/services/` folders, but no longer get a `.gitkeep` inside them.
+
+- **Smaller prod bundle**: a new app's `bundle.js` goes from ~39 KB to 29.5 KB minified (9.6 KB gzipped, 8.6 KB brotlied).
+
+    - Core services you don't use are left out of the bundle. `AppHttpClient` and the other singletons are now marked pure, so esbuild drops them when nothing imports them. An app that never imports `AppHttpClient` therefore no longer creates a default instance at load. Subclasses of `HttpClient` aren't affected.
+    - With `i18n: false`, the i18n code (`I18nService`, `languages.json`, locale routing) is left out of the bundle unless app code references `I18nService`. New `initI18n()` (exported from `core/index`) loads the translations when `i18n` is enabled and does nothing otherwise. `main.ts` now calls `await initI18n()` instead of checking `nutinConfig.i18n` itself. `I18nService.initTranslations()` is unchanged.
+    - With i18n disabled, a per-language `title` in `config/seo.json` resolves to its first value. It used to depend on the browser's language.
+    - The browser bundle no longer includes the tooling-only parts of `nutin.config.js` (`builder`, `testinNutin`, `dockerPorts`) or the `config/seo.json` fields it doesn't read: it keeps each route's `path` and `title`, and drops `baseUrl`, descriptions, `ogImage` and `disallowBots`. Any other config key stays readable from app code.
+
 ### Fixes
+
+- SEO page generation no longer expands `$&`, `` $` ``, `$'` in `config/seo.json` titles/descriptions (they copied raw page HTML into `<title>`/meta tags). The page URL and `hreflang` links are now HTML-escaped too.
+
+- i18n lookups only follow a translation file's own keys: `translate('constructor')` returned `Object`'s source text.
+
+- The `docker` feature's nginx config sends `X-XSS-Protection: 0` (the old `1; mode=block` is deprecated and can itself be abused in older browsers).
 
 - A parent's render no longer applies `data-pipe` a second time to content inside its child components (e.g. a pipe appending `!` rendered `hi!!`).
 

@@ -10,7 +10,7 @@ protected onAfterRender(): void {}
 protected onBeforeDestroy(): void {}
 protected onAfterDestroy(): void {}
 protected onReuse(): void {}
-protected generateTemplate(): string { return ''; }      // Component/View override this
+protected generateTemplate(): Template { return ''; }    // Component/View override this
 public registerChildren(): ComponentConfig[] { return []; }
 ```
 

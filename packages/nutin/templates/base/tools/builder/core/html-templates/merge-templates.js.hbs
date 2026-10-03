@@ -6,7 +6,7 @@ import { minifyHTML } from './minify-html.js';
 
 const PLACEHOLDER = '__TEMPLATE_PLACEHOLDER__';
 const TARGET_EXTENSIONS = ['.ts', '.js'];
-const TEMPLATE_REGEX = /const\s+(?:template|templateFn)\s*=?\s*(?:\(.*?\)\s*=>\s*)?`([\s\S]*?)`/;
+const TEMPLATE_REGEX = /const\s+(?:template|templateFn)\s*=?\s*(?:\(.*?\)\s*=>\s*)?(html\s*)?`([\s\S]*?)`/;
 
 // A component/view's template can live inline in its .ts/.js file or in a
 // colocated .html sibling merged in via `__TEMPLATE_PLACEHOLDER__` — resolved
@@ -66,6 +66,7 @@ async function resolveExternalTemplate(htmlPath, resolvedPaths, failures) {
     }
 
     resolvedPaths.add(codePath);
+    warnIfUntagged(codePath, content, htmlContent);
 
     if (content.includes(PLACEHOLDER)) {
       await fs.writeFile(codePath, content.replace(PLACEHOLDER, minifiedHtml));
@@ -96,7 +97,8 @@ async function resolveRemainingTemplates(resolvedPaths, failures) {
     const match = content.match(TEMPLATE_REGEX);
     if (!match) continue;
 
-    const [full, body] = match;
+    const [full, , body] = match;
+    warnIfUntagged(codePath, content, body);
 
     if (body === PLACEHOLDER) {
       print.warn(describeMissingTemplate(codePath));
@@ -107,6 +109,12 @@ async function resolveRemainingTemplates(resolvedPaths, failures) {
     const minified = await minifyHTML(body);
     await fs.writeFile(codePath, content.replace(full, full.replace(body, minified)));
   }
+}
+
+// Templates are escaped by the html`` tag; an untagged literal with ${} interpolates raw.
+function warnIfUntagged(codePath, content, markup) {
+  const match = content.match(TEMPLATE_REGEX);
+  if (match && !match[1] && markup.includes('${')) print.warn(describeUntagged(codePath));
 }
 
 function describeCodeFile(codePath) {
@@ -141,6 +149,13 @@ function describeMissingTemplate(codePath) {
 Expected:
   ${filename} (template placeholder) + ${basename}.html
 Add ${basename}.html, or replace the placeholder in ${filename} with inline markup.`;
+}
+
+function describeUntagged(codePath) {
+  const { filename, kind, className } = describeCodeFile(codePath);
+
+  return `${kind} "${className}" has an untagged template: its \${} values are inserted unescaped.
+Tag it in ${filename}: html\`...\` (import html from core), and wrap trusted markup in raw().`;
 }
 
 function describeOrphanHtml(htmlPath) {

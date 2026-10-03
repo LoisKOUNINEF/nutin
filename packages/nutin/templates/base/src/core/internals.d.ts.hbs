@@ -25,3 +25,7 @@ declare interface AppEventMap {}
 declare interface EventMap extends FrameworkEventMap, AppEventMap {}
 
 declare type EventKey = keyof EventMap;
+
+// Set by the builder's esbuild `define` so prod bundles can drop i18n code when it's
+// disabled; undefined in tests and tsc output, which fall back to CONFIG.i18n.
+declare var __NUTIN_I18N__: boolean | undefined;

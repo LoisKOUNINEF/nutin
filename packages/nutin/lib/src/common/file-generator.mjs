@@ -17,6 +17,10 @@ const BINARY_EXTENSIONS = new Set([
   '.pdf', '.zip', '.tar', '.gz'
 ]);
 
+// Template-repo housekeeping, never generated. .gitkeep only keeps otherwise-empty
+// template folders in git/npm; the folder itself is still created (ensureDir).
+const IGNORED_TEMPLATE_FILES = new Set(['.DS_Store', '.gitkeep']);
+
 // Templates that only make sense in a TypeScript project — not generated for JS-only ones.
 const TS_ONLY_TEMPLATES = [
   path.join('tools', 'builder', 'core', 'app', 'compile-ts.js.hbs'),
@@ -48,7 +52,7 @@ export class FileGenerator {
     const entries = await fs.readdir(templateDir, { withFileTypes: true });
 
     for (const entry of entries) {
-      if (entry.name === '.DS_Store') continue;
+      if (IGNORED_TEMPLATE_FILES.has(entry.name)) continue;
 
       const templatePath = path.join(templateDir, entry.name);
 
@@ -156,7 +160,7 @@ export class FileGenerator {
     const entries = await fs.readdir(dir, { withFileTypes: true });
 
     for (const entry of entries) {
-      if (entry.name === '.DS_Store') continue;
+      if (IGNORED_TEMPLATE_FILES.has(entry.name)) continue;
 
       const entryPath = path.join(dir, entry.name);
 

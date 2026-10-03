@@ -11,23 +11,27 @@ export type HistoryMode = 'push' | 'replace' | 'none';
  * Navigation - handles path normalization and history management
  */
 export class NavigationManager {
+  // The i18n guards wrap their branch rather than returning early: esbuild only drops
+  // a constant-false block, not code after a constant early return, and I18nService
+  // must go unreferenced for prod builds to drop it when i18n is off.
   public static extractLocale(path: string): { locale: Language | null; strippedPath: string } {
-    if (!CONFIG.i18n) return { locale: null, strippedPath: path };
-
-    const segments = path.split('/').filter(Boolean);
-    const first = segments[0] as Language;
-    if (first && I18nService.languages.includes(first)) {
-      const rest = segments.slice(1).join('/');
-      return { locale: first, strippedPath: rest ? `/${rest}` : '/' };
+    if (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n) {
+      const segments = path.split('/').filter(Boolean);
+      const first = segments[0] as Language;
+      if (first && I18nService.languages.includes(first)) {
+        const rest = segments.slice(1).join('/');
+        return { locale: first, strippedPath: rest ? `/${rest}` : '/' };
+      }
     }
     return { locale: null, strippedPath: path };
   }
 
   public static addLocalePrefix(strippedPath: string): string {
-    if (!CONFIG.i18n) return strippedPath;
-
-    const lang = I18nService.currentLanguage;
-    return strippedPath === '/' ? `/${lang}` : `/${lang}${strippedPath}`;
+    if (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n) {
+      const lang = I18nService.currentLanguage;
+      return strippedPath === '/' ? `/${lang}` : `/${lang}${strippedPath}`;
+    }
+    return strippedPath;
   }
 
   public static getCurrentLocale(): Language | null {
@@ -96,15 +100,18 @@ export class NavigationManager {
       ? CONFIG.seo?.routes?.find((r) => r.path === pattern)
       : undefined;
     const seoTitle = route?.title ? this.resolveSeoTitle(route.title) : undefined;
-    const localeTitle = CONFIG.i18n ? I18nService.getTranslationObject<string>(`${view.viewName}.title`) : null;
+    const localeTitle = (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n) ? I18nService.getTranslationObject<string>(`${view.viewName}.title`) : null;
     document.title = seoTitle || localeTitle || view.viewName;
   }
 
   private static resolveSeoTitle(title: string | Record<string, string>): string | undefined {
     if (typeof title !== 'object') return title;
-    const lang = I18nService.currentLanguage;
-    const defaultLang = I18nService.defaultLanguage;
-    return title[lang] ?? title[defaultLang] ?? Object.values(title)[0];
+    if (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n) {
+      const lang = I18nService.currentLanguage;
+      const defaultLang = I18nService.defaultLanguage;
+      return title[lang] ?? title[defaultLang] ?? Object.values(title)[0];
+    }
+    return Object.values(title)[0];
   }
 
   public static matchPattern(pattern: string, path: string): Record<string, string> | null {

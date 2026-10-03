@@ -14,9 +14,9 @@ See [How do I register child components](../COMPONENTS/HOWDOI_REGISTER_CHILD_COM
 
 ```ts
 // foo.view.ts
-import { View, ComponentConfig } from '../../../core/index.js';
+import { View, ComponentConfig, html } from '../../../core/index.js';
 
-const template = `<h1>Title</h1>`;
+const template = html`<h1>Title</h1>`;
 
 export class FooView extends View {
   constructor() {
@@ -39,7 +39,7 @@ export const appRoutes: Routes = {
 
 `View` is for full-page routes; [`Component`](../COMPONENTS/HOWDOI_CREATE_A_COMPONENT.md) is for reusable, non-routed UI. The key differences:
 
-- `View` takes a plain `template: string` — no `templateFn`/`config` normalization layer.
+- `View` takes a static `template` (`html` or a string) — no `templateFn`/`config` normalization layer.
 - Defaults differ: `tagName: 'section'`, `mountTarget: '#app'` (vs. `Component`'s `tagName: 'div'`).
 - `View` tracks route params and adds router-only hooks `onEnter()`/`onExit()` — see [How do I access route parameters?](./HOWDOI_ACCESS_ROUTE_PARAMS.md) and [What lifecycle hooks are available?](../LIFECYCLE_HOOKS/WHAT_LIFECYCLE_HOOKS_ARE_AVAILABLE.md).
 - Views are constructed via a factory function referenced from the route table, not instantiated directly by application code the way components are.

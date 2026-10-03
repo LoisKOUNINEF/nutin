@@ -1,6 +1,6 @@
 # How do I generate a template?
 
-Every component inherits `generateTemplate(): string` from `BaseComponent`. `render()` calls it and assigns the (sanitized) result to the component's `innerHTML`. 
+Every component inherits `generateTemplate(): Template` (a string or an `html` result) from `BaseComponent`. `render()` calls it and assigns the (sanitized) result to the component's `innerHTML`. 
 
 You can override it when a template needs more than a single expression.
 
@@ -16,7 +16,7 @@ You can override it when a template needs more than a single expression.
 
 ```ts
 // avatar.component.ts
-import { Component, ComponentProps } from '../../../core/index.js';
+import { Component, ComponentProps, html, raw, type Template } from '../../../core/index.js';
 
 interface AvatarConfig {
   alt: string;
@@ -35,40 +35,38 @@ export class AvatarComponent extends Component<HTMLDivElement, AvatarConfig> {
     this.element.classList.add('app-avatar', `avatar--${this.config.shape || 'circle'}`);
   }
 
-  protected override generateTemplate(): string {
+  protected override generateTemplate(): Template {
     const { src, alt, initials } = this.config;
 
     if (src) {
-      return `<img class="avatar__img" src="${src}" alt="${alt}" loading="lazy">`;
+      return html`<img class="avatar__img" src="${src}" alt="${alt}" loading="lazy">`;
     }
 
-    return `<span class="avatar__initials" aria-hidden="true">${initials}</span>`;
+    return html`<span class="avatar__initials" aria-hidden="true">${initials}</span>`;
   }
 }
 ```
 
-- Attributes that depend on optional flags can be built as a list:
+- Attributes that depend on optional flags can be nested `html` fragments. `false` renders nothing, and `raw()` marks a fixed attribute as markup:
 
 ```ts
-protected override generateTemplate(): string {
+protected override generateTemplate(): Template {
   const { id, name, checked, disabled } = this.config;
 
-  const attrs = [
-    'type="checkbox"',
-    id       ? `id="${id}"`     : '',
-    name     ? `name="${name}"` : '',
-    checked  ? 'checked'        : '',
-    disabled ? 'disabled'       : '',
-  ].filter(Boolean).join(' ');
-
-  return `<input ${attrs}>`;
+  return html`<input
+    type="checkbox"
+    ${id && html`id="${id}"`}
+    ${name && html`name="${name}"`}
+    ${checked && raw('checked')}
+    ${disabled && raw('disabled')}
+  >`;
 }
 ```
 
 ## Notes
 
 - The string you return still goes through the full pipeline: sanitized according to `trustLevel`, then children are mounted, `data-i18n`/`data-pipe` are hydrated, empty `data-optional` elements are removed and `data-event` listeners are bound. 
-- Interpolated user data isn't escaped for you. Use `SecurityHelper.escapeHtml()`, see [How do I control HTML sanitization?](./HOWDOI_CONTROL_HTML_SANITIZATION.md).
+- Return an `html` template so interpolated data is escaped. A plain template literal escapes nothing, see [How do I control HTML sanitization?](./HOWDOI_CONTROL_HTML_SANITIZATION.md).
 - Work on the rendered children (e.g. `querySelector`) belongs in `onAfterRender()`. **In a `Component`, call `super.onBeforeRender()`/`super.onAfterRender()`**.
 
 ## See also

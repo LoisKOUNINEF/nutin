@@ -123,7 +123,7 @@ export class I18n extends Service<I18n> {
   }
 
   private getLocaleFromUrl(): Language | null {
-    if (!CONFIG.i18n) return null;
+    if (!(globalThis.__NUTIN_I18N__ ?? CONFIG.i18n)) return null;
 
     const first = window.location.pathname.split('/').filter(Boolean)[0] as Language;
     return first && this._LANGUAGES.includes(first) ? first : null;
@@ -143,8 +143,11 @@ export class I18n extends Service<I18n> {
 
   private getNestedValue(obj: any, keys: string[]): any {
     let value = obj;
+    // Own keys only: "constructor" or "__proto__" must not resolve to Object.prototype members.
     for (const key of keys) {
-      value = value?.[key];
+      value = value !== null && typeof value === 'object' && Object.prototype.hasOwnProperty.call(value, key)
+        ? value[key]
+        : undefined;
       if (!value) break;
     }
     return value;
@@ -159,4 +162,11 @@ export class I18n extends Service<I18n> {
   }
 }
 
-export const I18nService = I18n.getInstance();
+export const I18nService = /* @__PURE__ */ I18n.getInstance();
+
+/**
+ * Loads the translations when i18n is enabled in nutin.config.js; a no-op otherwise.
+ */
+export async function initI18n(): Promise<void> {
+  if (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n) await I18nService.initTranslations();
+}

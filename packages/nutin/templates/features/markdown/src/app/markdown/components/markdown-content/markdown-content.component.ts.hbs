@@ -1,23 +1,22 @@
-import { Component, Navigation } from '../../../../core/index.js';
+import { Component, Navigation, html, trustedRaw, SafeHtml } from '../../../../core/index.js';
 import { IMarkdownHeading, IMarkdownPage } from '../../markdown-manifest.js';
 
 export interface IMarkdownContentConfig {
   page?: IMarkdownPage;
 }
 
-function renderToc(headings: IMarkdownHeading[]): string {
+function renderToc(headings: IMarkdownHeading[]): SafeHtml | string {
   // A single heading adds nothing next to the page title — only worth a TOC at 2+.
   if (headings.length <= 1) return '';
 
   const items = headings
-    .map((heading) => `
+    .map((heading) => html`
       <li class="markdown-toc__item markdown-toc__item--depth-${heading.depth}">
         <a href="#${heading.id}">${heading.text}</a>
       </li>
-    `)
-    .join('');
+    `);
 
-  return `
+  return html`
     <nav class="markdown-toc" aria-label="On this page">
       <span class="markdown-toc__title">On this page</span>
       <ul>${items}</ul>
@@ -30,11 +29,11 @@ function renderToc(headings: IMarkdownHeading[]): string {
 // them for SEO would need config/seo.json routes expanded per manifest page ("dynamicFrom").
 const templateFn = (_config: IMarkdownContentConfig) => {
   if (!_config.page) {
-    return `<p class="markdown-content__empty">Nothing here yet.</p>`;
+    return html`<p class="markdown-content__empty">Nothing here yet.</p>`;
   }
 
-  return `
-    <article class="markdown-content__body">${_config.page.html}</article>
+  return html`
+    <article class="markdown-content__body">${trustedRaw(_config.page.html)}</article>
     ${renderToc(_config.page.headings)}
   `;
 };

@@ -66,9 +66,9 @@ This pattern keeps Alpine state completely isolated; it is never touched by Nuti
 
 ```ts
 // src/app/components/globals/alpine-root/alpine-root.component.ts
-import { Component } from '../../../../core/index.js';
+import { Component, html } from '../../../../core/index.js';
 
-const templateFn = () => `
+const templateFn = () => html`
     <button @click="count++">Increment</button>
     <span x-text="count"></span>
 `;
@@ -199,9 +199,9 @@ When the parent re-renders, a kept child is moved into the new template as-is in
 
 ```ts
 // src/app/components/counter/counter.component.ts
-import { Component } from '../../../core/index.js';
+import { Component, html } from '../../../core/index.js';
 
-const templateFn = () => `
+const templateFn = () => html`
     <button @click="count++">Increment</button>
     <span x-text="count"></span>
 `;

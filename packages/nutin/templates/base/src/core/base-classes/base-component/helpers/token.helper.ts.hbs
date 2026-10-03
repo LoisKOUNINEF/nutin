@@ -1,19 +1,24 @@
-import { SecurityHelper } from './security.helper.js';
+// Tokens resolve to raw values: escaping happens at output, in html`` templates.
+function readInputValue(el: HTMLElement): string {
+  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return el.value;
+  if (el.hasAttribute('contenteditable')) return el.innerText;
+  return '';
+}
 
 // Exact token resolvers
 const EXACT_TOKEN_RESOLVERS: Record<string, (el: HTMLElement, ev: Event) => any> = {
-  '@id': (el) => SecurityHelper.escapeHtml(el.id),
-  '@class': (el) => SecurityHelper.escapeHtml(el.className),
-  '@name': (el) => SecurityHelper.escapeHtml((el as any).name ?? ''),
-  '@tag': (el) => SecurityHelper.escapeHtml(el.tagName),
+  '@id': (el) => el.id,
+  '@class': (el) => el.className,
+  '@name': (el) => (el as any).name ?? '',
+  '@tag': (el) => el.tagName,
 
-  '@value': (el) => SecurityHelper.sanitizeInputElement(el as any),
+  '@value': (el) => readInputValue(el),
   '@checked': (el) => (el as HTMLInputElement).checked,
   '@selected': (el) => (el as HTMLOptionElement).selected,
 
-  '@textContent': (el) => SecurityHelper.escapeHtml(el.textContent ?? ''),
-  '@innerText': (el) => SecurityHelper.escapeHtml(el.innerText ?? ''),
-  '@html': (el) => SecurityHelper.escapeHtml(el.innerHTML ?? ''),
+  '@textContent': (el) => el.textContent ?? '',
+  '@innerText': (el) => el.innerText ?? '',
+  '@html': (el) => el.innerHTML ?? '',
 
   '@event': (_el, ev) => ev,
   '@target': (_el, ev) => ev.target,
@@ -21,14 +26,14 @@ const EXACT_TOKEN_RESOLVERS: Record<string, (el: HTMLElement, ev: Event) => any>
   '@x': (_el, ev) => (ev as MouseEvent).clientX ?? 0,
   '@y': (_el, ev) => (ev as MouseEvent).clientY ?? 0,
 
-  '@key': (_el, ev) => SecurityHelper.escapeHtml((ev as KeyboardEvent).key ?? ''),
-  '@code': (_el, ev) => SecurityHelper.escapeHtml((ev as KeyboardEvent).code ?? ''),
+  '@key': (_el, ev) => (ev as KeyboardEvent).key ?? '',
+  '@code': (_el, ev) => (ev as KeyboardEvent).code ?? '',
 };
 
 // Prefix-based token resolvers
 const PREFIXED_TOKEN_RESOLVERS: Record<string, (suffix: string, el: HTMLElement) => any> = {
-  '@attr:': (suffix, el) => SecurityHelper.escapeHtml(el.getAttribute(suffix) ?? ''),
-  '@dataset:': (suffix, el) => SecurityHelper.escapeHtml((el.dataset as any)[suffix] ?? ''),
+  '@attr:': (suffix, el) => el.getAttribute(suffix) ?? '',
+  '@dataset:': (suffix, el) => (el.dataset as any)[suffix] ?? '',
 };
 
 export class TokenHelper {

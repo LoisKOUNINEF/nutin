@@ -10,13 +10,13 @@ npm run generate component components/greeting # target directory: src/app/compo
 
 ```ts
 // greeting.component.ts
-import { Component, ComponentConfig } from '../../../core/index.js';
+import { Component, ComponentConfig, html } from '../../../core/index.js';
 
 interface GreetingConfig {
   name?: string;
 }
 
-const templateFn = (config?: GreetingConfig) => `
+const templateFn = (config?: GreetingConfig) => html`
 <div>
   <span data-bind="name">${config?.name}</span>
   <button data-event="click:_sayHi">Say hi</button>
@@ -64,7 +64,7 @@ Constructing a component mounts its root element immediately, but does **not** r
 
 ```ts
 interface ComponentOptions<K = any> {
-  templateFn?: (config?: K) => string;   // default: () => ''
+  templateFn?: (config?: K) => Template; // string or html`` result; default: () => ''
   mountTarget?: string | HTMLElement;    // default: '#app'
   tagName?: keyof HTMLElementTagNameMap; // default: 'div'
   props?: ComponentProps;                // default: {}

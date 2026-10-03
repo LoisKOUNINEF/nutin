@@ -27,6 +27,6 @@ Web Components come with their own model: elements registered globally by tag na
 
 A Nutin component is a plain class that renders into an element of the page, in the light DOM. 
 
-Nutin doesn't need Web Components to provide structure, so it doesn't make you adopt it. Your markup stays plain HTML, styled by your stylesheets, and data is passed as constructor arguments.
+Web Components still work inside Nutin templates, but Nutin doesn't force you to adopt them. Your markup stays plain HTML, styled by your stylesheets, and data is passed as constructor arguments.
 
-Custom elements still work inside Nutin templates. See [How to use a11y-elements?](https://nutin.org/guides/a11y-elements) for an example.
+See [How to use a11y-elements?](https://nutin.org/guides/a11y-elements) for an usage example of custom elements inside Nutin.

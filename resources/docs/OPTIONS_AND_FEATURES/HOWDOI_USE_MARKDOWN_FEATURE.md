@@ -32,6 +32,13 @@ The compiler's dependencies (`marked`, `gray-matter`) are installed on your firs
 
 In a non-interactive shell (CI, ...), the build stops instead of installing them, unless `-y` is passed. A production build never installs them: install them beforehand.
 
+Or you can install them manually as devDependencies
+
+```bash
+{ name: 'marked', version: '^18.0.14' },
+{ name: 'gray-matter', version: '^4.0.3' }
+```
+
 `/content` now shows the sample folder's first page, and `/content/<slug>` each page.
 
 ## Configure folders

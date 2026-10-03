@@ -2,7 +2,7 @@
 
 A view is the **top-level orchestrator for a single route**. `Component` and `View` are siblings - both extend `BaseComponent`.
 
-A view takes a raw `template: string` instead of `Component`'s `templateFn`, since a view doesn't get construction-time data from a parent the way a component does.
+A view takes a static `template` (an `html` template or a string) instead of `Component`'s `templateFn`, since a view doesn't get construction-time data from a parent the way a component does.
 
 A view is meant to contain the least amount of logic possible, if any, and to organize its children. The actual UI and behavior should live in the components it mounts via `registerChildren()`. 
 

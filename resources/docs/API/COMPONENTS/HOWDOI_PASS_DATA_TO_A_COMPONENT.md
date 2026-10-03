@@ -5,7 +5,7 @@
 ## `config` — data for `templateFn`
 
 ```ts
-const templateFn = (config?: { name?: string }) => `<span>${config?.name}</span>`;
+const templateFn = (config?: { name?: string }) => html`<span>${config?.name}</span>`;
 
 export class GreetingComponent extends Component {
   constructor(mountTarget: HTMLElement, config: { name?: string }) {

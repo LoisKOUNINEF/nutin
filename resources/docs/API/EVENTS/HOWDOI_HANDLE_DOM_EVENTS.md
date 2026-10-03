@@ -19,16 +19,16 @@ Each `:`-separated arg after the handler name is resolved per-token:
 
 | Token | Resolves to |
 |---|---|
-| `@id` / `@class` / `@name` / `@tag` | the matching element property, HTML-escaped |
-| `@value` | the input/textarea `.value`, or a `contenteditable` element's `.innerText`, escaped |
-| `@checked` / `@selected` | raw boolean, unescaped |
-| `@textContent` / `@innerText` / `@html` | the matching element property, escaped |
+| `@id` / `@class` / `@name` / `@tag` | the matching element property |
+| `@value` | the input/textarea `.value`, or a `contenteditable` element's `.innerText` |
+| `@checked` / `@selected` | boolean |
+| `@textContent` / `@innerText` / `@html` | the matching element property |
 | `@event` | the raw `Event` object |
 | `@target` | `event.target` |
 | `@x` / `@y` | `event.clientX` / `event.clientY` (defaulting to `0`) |
-| `@key` / `@code` | `event.key` / `event.code`, escaped |
-| `@attr:name` | `element.getAttribute('name')`, escaped |
-| `@dataset:key` | `element.dataset['key']`, escaped |
+| `@key` / `@code` | `event.key` / `event.code` |
+| `@attr:name` | `element.getAttribute('name')` |
+| `@dataset:key` | `element.dataset['key']` |
 | `"literal"` / `'literal'` | the literal string, unquoted |
 | `42` | the literal number |
 
@@ -57,4 +57,4 @@ A prefixed token used alone as a `data-event` arg (e.g. `data-event="click:_hand
 ## Important
 
 - Resolving **any** arg token calls `event.preventDefault()` unconditionally — so a `data-event` handler with at least one argument always prevents default browser behavior (form submission, link navigation, etc.). A handler with **zero** args (`data-event="click:handler"`) does **not** prevent default.
-- `@checked`, `@selected`, `@event`, `@target`, `@x`, `@y` are the only tokens that are *not* HTML-escaped — they return raw booleans/objects/numbers, not strings.
+- Token values are raw, not HTML-escaped (`a & b` stays `a & b`). They're escaped when rendered through an [`html` template](../COMPONENTS/HOWDOI_CONTROL_HTML_SANITIZATION.md). `@checked`, `@selected`, `@event`, `@target`, `@x`, `@y` return booleans/objects/numbers, not strings.

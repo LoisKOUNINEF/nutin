@@ -72,11 +72,11 @@ So, for any content inside an overlay:
 
 ```ts
 // src/app/components/menu/menu.component.ts
-import { Component, I18nService, Navigation } from '../../../core/index.js';
+import { Component, I18nService, Navigation, html } from '../../../core/index.js';
 
 const translate = (key: string) => I18nService.translate(`menu.${key}`);
 
-const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
+const templateFn = () => html`__TEMPLATE_PLACEHOLDER__`;
 
 const DROPDOWN_ID = 'menu-dropdown';
 

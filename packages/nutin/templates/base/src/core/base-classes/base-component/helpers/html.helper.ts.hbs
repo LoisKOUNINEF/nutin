@@ -1,0 +1,132 @@
+import { SecurityHelper } from './security.helper.js';
+
+// Markup from html``: `value` is safe markup; `raws` maps a placeholder token to the
+// unescaped source of a raw() that sits in element position, resolved as DOM nodes at render.
+export class SafeHtml {
+  constructor(
+    public readonly value: string,
+    public readonly raws: ReadonlyMap<string, string> = new Map()
+  ) {}
+
+  public toString(): string {
+    // Fallback for String(): inline each raw with its bindings stripped.
+    // The render path (sanitizeToFragment) resolves placeholders as nodes instead.
+    let out = this.value;
+    this.raws.forEach((source, token) => {
+      out = out.replace(SafeHtml.placeholder(token), SecurityHelper.stripBindings(source));
+    });
+    return out;
+  }
+
+  public static placeholder(token: string): string {
+    return `<template data-nutin-raw="${token}"></template>`;
+  }
+}
+
+// raw()'s return value: carries the unescaped source so html() can place it as a node.
+class RawHtml extends SafeHtml {
+  constructor(public readonly source: string) {
+    super('');
+  }
+}
+
+export type Template = string | SafeHtml;
+type Context = 'text' | 'tag' | 'attr-dq' | 'attr-sq' | 'attr-unq-start' | 'attr-unq';
+
+let rawCounter = 0;
+
+// Tagged template: every ${} is HTML-escaped unless it is a SafeHtml (nested html``/raw()).
+// Arrays are interpolated item by item, so `${items.map((i) => html`<li>${i}</li>`)}` needs no join.
+// The parse context is tracked over the STATIC parts only, so interpolated data can't change it.
+export function html(strings: TemplateStringsArray, ...values: unknown[]): SafeHtml {
+  const raws = new Map<string, string>();
+  let out = strings[0] as string;
+  let ctx: Context = scan('text', out);
+  for (let i = 0; i < values.length; i++) {
+    const piece = interpolate(values[i], ctx, raws);
+    if (ctx === 'attr-unq-start') {
+      // Unquoted attribute (`title=${x}`): quote the whole value so data can't add attributes.
+      out += `"${piece.replace(/"/g, '&quot;')}"`;
+      ctx = 'tag';
+    } else if (ctx === 'attr-unq') {
+      // Inside an unquoted value already started (`class=a${x}`): encode anything that would end it.
+      out += piece.replace(/[\s"'`=<>]/g, (c) => `&#${c.charCodeAt(0)};`);
+    } else {
+      out += piece;
+    }
+    const next = strings[i + 1] as string;
+    out += next;
+    ctx = scan(ctx, next);
+  }
+  return new SafeHtml(out, raws);
+}
+
+// Inserts markup unescaped, minus Nutin's binding attributes (data-event, data-component, ...),
+// so it can't call the component's methods or mount children. Sanitized at the component's trustLevel.
+export function raw(value: unknown): SafeHtml {
+  return new RawHtml(toMarkup(value));
+}
+
+// Like raw(), but keeps binding attributes: only for markup you wrote or compiled yourself
+// (e.g. Markdown pages whose links use data-event).
+export function trustedRaw(value: unknown): SafeHtml {
+  return new SafeHtml(toMarkup(value));
+}
+
+function toMarkup(value: unknown): string {
+  return value === null || value === undefined ? '' : String(value);
+}
+
+function interpolate(value: unknown, ctx: Context, raws: Map<string, string>): string {
+  if (value instanceof RawHtml) return interpolateRaw(value.source, ctx, raws);
+  if (value instanceof SafeHtml) {
+    value.raws.forEach((source, token) => raws.set(token, source));
+    return value.value;
+  }
+  if (Array.isArray(value)) return value.map((item) => interpolate(item, ctx, raws)).join('');
+  if (value === null || value === undefined || value === false) return '';
+  return SecurityHelper.escapeHtml(value);
+}
+
+function interpolateRaw(source: string, ctx: Context, raws: Map<string, string>): string {
+  // In element position raw() is resolved as nodes at render; elsewhere it is inlined safely now.
+  if (ctx === 'text') {
+    const token = `r${++rawCounter}`;
+    raws.set(token, source);
+    return SafeHtml.placeholder(token);
+  }
+  if (ctx === 'tag') return SecurityHelper.sanitizeAttributes(source);
+  return SecurityHelper.escapeHtml(source);
+}
+
+function scan(ctx: Context, chunk: string): Context {
+  let state: Context = ctx;
+  for (const ch of chunk) {
+    switch (state) {
+      case 'text':
+        if (ch === '<') state = 'tag';
+        break;
+      case 'tag':
+        if (ch === '>') state = 'text';
+        else if (ch === '=') state = 'attr-unq-start';
+        break;
+      case 'attr-unq-start':
+        if (ch === '"') state = 'attr-dq';
+        else if (ch === "'") state = 'attr-sq';
+        else if (ch === '>') state = 'text';
+        else if (!/\s/.test(ch)) state = 'attr-unq';
+        break;
+      case 'attr-unq':
+        if (ch === '>') state = 'text';
+        else if (/\s/.test(ch)) state = 'tag';
+        break;
+      case 'attr-dq':
+        if (ch === '"') state = 'tag';
+        break;
+      case 'attr-sq':
+        if (ch === "'") state = 'tag';
+        break;
+    }
+  }
+  return state;
+}

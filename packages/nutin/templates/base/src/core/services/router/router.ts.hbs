@@ -3,6 +3,7 @@ import { Language } from '../i18n/languages.js';
 import { Routes, RouteConfig, RouteGuardsManager, GuardResult } from './helpers/route-guard-manager.helper.js';
 import { ViewRenderManager } from './helpers/view-render-manager.helper.js';
 import { NavigationManager, HistoryMode } from './helpers/navigation-manager.helper.js';
+import { CONFIG } from '../../config.js';
 
 // centralized export
 export type { Routes, RouteGuard } from './helpers/route-guard-manager.helper.js';
@@ -120,9 +121,11 @@ class Router extends Service<Router> {
   }
 
   private async handlePopState(): Promise<void> {
-    const newLocale = NavigationManager.getCurrentLocale();
-    if (newLocale && newLocale !== I18nService.currentLanguage) {
-      await I18nService.setCurrentLanguage(newLocale as Language);
+    if (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n) {
+      const newLocale = NavigationManager.getCurrentLocale();
+      if (newLocale && newLocale !== I18nService.currentLanguage) {
+        await I18nService.setCurrentLanguage(newLocale as Language);
+      }
     }
     this.navigate(NavigationManager.getCurrentPath() + window.location.hash, false);
   }

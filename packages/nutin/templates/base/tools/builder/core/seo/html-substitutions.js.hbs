@@ -7,11 +7,18 @@ export function escape(str) {
     .replace(/'/g, '&#39;');
 }
 
+// Replacements go through functions: a replacement *string* would expand `$&`, `$'`
+// etc. found in a title/description, copying raw page HTML into the tag.
+// `replacement` receives the match's capture groups.
 export function upsertInHead(html, pattern, replacement, fullTag) {
   if (pattern.test(html)) {
-    return html.replace(pattern, replacement);
+    return html.replace(pattern, (_match, ...groups) => replacement(...groups));
   }
-  return html.replace('</head>', `\n    ${fullTag}\n  </head>`);
+  return insertBeforeHeadEnd(html, fullTag);
+}
+
+function insertBeforeHeadEnd(html, tag) {
+  return html.replace('</head>', () => `\n    ${tag}\n  </head>`);
 }
 
 export function applySubstitutions(template, lang, title, description, pageUrl, ogImage, hreflangLinks = []) {
@@ -19,88 +26,88 @@ export function applySubstitutions(template, lang, title, description, pageUrl, 
 
   // lang attribute on <html>
   if (/(<html[^>]*\slang=)["'][^"']*["']/.test(html)) {
-    html = html.replace(/(<html[^>]*\slang=)["'][^"']*["']/, `$1"${lang}"`);
+    html = html.replace(/(<html[^>]*\slang=)["'][^"']*["']/, (_m, start) => `${start}"${escape(lang)}"`);
   } else {
-    html = html.replace(/<html/, `<html lang="${lang}"`);
+    html = html.replace(/<html/, () => `<html lang="${escape(lang)}"`);
   }
 
   // <title>
   html = upsertInHead(html,
     /(<title>)[^<]*(<\/title>)/,
-    `$1${escape(title)}$2`,
+    (start, end) => `${start}${escape(title)}${end}`,
     `<title>${escape(title)}</title>`
   );
 
   // <meta name="description"> — replace all occurrences, or insert one
   const descPattern = /(<meta\s+name=["']description["']\s+content=)["'][^"']*["']/;
   if (descPattern.test(html)) {
-    html = html.replace(/(<meta\s+name=["']description["']\s+content=)["'][^"']*["']/g, `$1"${escape(description)}"`);
+    html = html.replace(/(<meta\s+name=["']description["']\s+content=)["'][^"']*["']/g, (_m, start) => `${start}"${escape(description)}"`);
   } else {
-    html = html.replace('</head>', `\n    <meta name="description" content="${escape(description)}" />\n  </head>`);
+    html = insertBeforeHeadEnd(html, `<meta name="description" content="${escape(description)}" />`);
   }
 
   // <link rel="canonical">
   html = upsertInHead(html,
     /(<link\s+rel=["']canonical["']\s+href=)["'][^"']*["']/,
-    `$1"${pageUrl}/"`,
-    `<link rel="canonical" href="${pageUrl}/" />`
+    (start) => `${start}"${escape(pageUrl)}/"`,
+    `<link rel="canonical" href="${escape(pageUrl)}/" />`
   );
 
   // og:url
   html = upsertInHead(html,
     /(<meta\s+property=["']og:url["']\s+content=)["'][^"']*["']/,
-    `$1"${pageUrl}/"`,
-    `<meta property="og:url" content="${pageUrl}/" />`
+    (start) => `${start}"${escape(pageUrl)}/"`,
+    `<meta property="og:url" content="${escape(pageUrl)}/" />`
   );
 
   // hreflang alternates — one per active language plus x-default, so crawlers see
   // these URLs as language variants of the same page rather than duplicate content
   if (hreflangLinks.length > 0) {
     const altTags = hreflangLinks
-      .map(({ hreflang, href }) => `<link rel="alternate" hreflang="${hreflang}" href="${href}" />`)
+      .map(({ hreflang, href }) => `<link rel="alternate" hreflang="${escape(hreflang)}" href="${escape(href)}" />`)
       .join('\n    ');
-    html = html.replace('</head>', `\n    ${altTags}\n  </head>`);
+    html = insertBeforeHeadEnd(html, altTags);
   }
 
   // og:title
   html = upsertInHead(html,
     /(<meta\s+property=["']og:title["']\s+content=)["'][^"']*["']/,
-    `$1"${escape(title)}"`,
+    (start) => `${start}"${escape(title)}"`,
     `<meta property="og:title" content="${escape(title)}" />`
   );
 
   // og:description
   html = upsertInHead(html,
     /(<meta\s+property=["']og:description["']\s+content=)["'][^"']*["']/,
-    `$1"${escape(description)}"`,
+    (start) => `${start}"${escape(description)}"`,
     `<meta property="og:description" content="${escape(description)}" />`
   );
 
   // twitter:title
   html = upsertInHead(html,
     /(<meta\s+name=["']twitter:title["']\s+content=)["'][^"']*["']/,
-    `$1"${escape(title)}"`,
+    (start) => `${start}"${escape(title)}"`,
     `<meta name="twitter:title" content="${escape(title)}" />`
   );
 
   // twitter:description
   html = upsertInHead(html,
     /(<meta\s+name=["']twitter:description["']\s+content=)["'][^"']*["']/,
-    `$1"${escape(description)}"`,
+    (start) => `${start}"${escape(description)}"`,
     `<meta name="twitter:description" content="${escape(description)}" />`
   );
 
   // og:type
   html = upsertInHead(html,
     /(<meta\s+property=["']og:type["']\s+content=)["'][^"']*["']/,
-    `$1"website"`,
+    (start) => `${start}"website"`,
     `<meta property="og:type" content="website" />`
   );
 
   // twitter:card — required for Twitter/X to render an image card at all
   html = upsertInHead(html,
     /(<meta\s+name=["']twitter:card["']\s+content=)["'][^"']*["']/,
-    `$1"summary_large_image"`,
+    (start) => `${start}"summary_large_image"`,
     `<meta name="twitter:card" content="summary_large_image" />`
   );
 
@@ -108,12 +115,12 @@ export function applySubstitutions(template, lang, title, description, pageUrl, 
   if (ogImage) {
     html = upsertInHead(html,
       /(<meta\s+property=["']og:image["']\s+content=)["'][^"']*["']/,
-      `$1"${escape(ogImage)}"`,
+      (start) => `${start}"${escape(ogImage)}"`,
       `<meta property="og:image" content="${escape(ogImage)}" />`
     );
     html = upsertInHead(html,
       /(<meta\s+name=["']twitter:image["']\s+content=)["'][^"']*["']/,
-      `$1"${escape(ogImage)}"`,
+      (start) => `${start}"${escape(ogImage)}"`,
       `<meta name="twitter:image" content="${escape(ogImage)}" />`
     );
   }

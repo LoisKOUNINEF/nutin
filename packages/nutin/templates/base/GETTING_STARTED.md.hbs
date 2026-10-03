@@ -80,7 +80,8 @@ components/
 
 ```ts
 // The builder injects the component's .html template here.
-const templateFn = (product: Product) => `__TEMPLATE_PLACEHOLDER__`;
+// html`` escapes every ${} in it (wrap trusted markup in raw()).
+const templateFn = (product: Product) => html`__TEMPLATE_PLACEHOLDER__`;
 
 export class ProductCardComponent extends Component {
   private _product: Product;

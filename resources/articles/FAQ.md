@@ -3,7 +3,7 @@
 <details>
 <summary style="color:var(--primary);font-size:1.2rem;padding:.5rem;">How big is a Nutin application?</summary>
 <div style="padding-left:1rem;">
-<p>A freshly generated application, built for production with the default options, ships about <strong>31 KB of minified JavaScript, about 10 KB gzipped</strong>.</p>
+<p>A freshly generated application, built for production with the default options, ships about <strong>30 KB of minified JavaScript, about 10 KB gzipped</strong>.</p>
 
 <p>Nutin has no runtime dependencies, so the only third-party code you ship is the one you add.</p>
 </div>

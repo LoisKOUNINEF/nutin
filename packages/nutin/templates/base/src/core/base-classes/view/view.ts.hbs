@@ -1,4 +1,4 @@
-import { BaseComponent, BaseComponentOptions } from '../../index.js';
+import { BaseComponent, BaseComponentOptions, type Template } from '../../index.js';
 
 export interface ViewOptions extends BaseComponentOptions {
   viewName: string;
@@ -7,7 +7,7 @@ export interface ViewOptions extends BaseComponentOptions {
 export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComponent<T> {
   private _viewName: string;
   protected routeParams: Record<string, string> = {};
-  private _template: string;
+  private _template: Template;
 
   constructor({
     template,
@@ -26,7 +26,7 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
     return this._viewName;
   }
 
-  protected override generateTemplate(): string {
+  protected override generateTemplate(): Template {
     return this._template;
   }
 

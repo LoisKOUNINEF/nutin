@@ -75,7 +75,7 @@ export class DomHelper {
     trustLevel?: TrustLevel
   ): T {
     const element = document.createElement(tagName) as T;
-    element.innerHTML = SecurityHelper.sanitizeTemplate(template, trustLevel);
+    element.replaceChildren(SecurityHelper.sanitizeToFragment(template, trustLevel));
     return element;
   }
   

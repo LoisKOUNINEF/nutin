@@ -1,4 +1,4 @@
-import { I18nService, AppEventBus } from '#root/dist/src/core/services/index.js';
+import { I18nService, AppEventBus, initI18n } from '#root/dist/src/core/services/index.js';
 import { CONFIG } from '#root/dist/src/core/config.js';
 
 class FetchMock {
@@ -123,6 +123,13 @@ describe('i18n module', async () => {
 
   it('should return key when translation is missing', () => {
     expect(I18nService.translate('non.existent.key')).toBe('non.existent.key');
+  });
+
+  it('translate and getTranslationObject ignore inherited Object.prototype members', () => {
+    expect(I18nService.translate('constructor')).toBe('constructor');
+    expect(I18nService.translate('__proto__')).toBe('__proto__');
+    expect(I18nService.translate('home.toString')).toBe('home.toString');
+    expect(I18nService.getTranslationObject('constructor')).toBe(null);
   });
 
   it('setCurrentLanguage updates the language, persists it and loads its translations', async () => {
@@ -266,5 +273,31 @@ describe('i18n module', async () => {
 
     expect(I18nService.translate('home.title')).toBe('home.title');
     expect(localStorage.getItem(I18nService.localStorageKey)).toBe(null);
+  });
+
+  it('initI18n loads the translations when CONFIG.i18n is enabled', async () => {
+    const original = I18nService.initTranslations;
+    let calls = 0;
+    I18nService.initTranslations = async () => { calls++; };
+    CONFIG.i18n = true;
+    try {
+      await initI18n();
+      expect(calls).toBe(1);
+    } finally {
+      CONFIG.i18n = false;
+      I18nService.initTranslations = original;
+    }
+  });
+
+  it('initI18n does nothing when CONFIG.i18n is disabled (default)', async () => {
+    const original = I18nService.initTranslations;
+    let calls = 0;
+    I18nService.initTranslations = async () => { calls++; };
+    try {
+      await initI18n();
+      expect(calls).toBe(0);
+    } finally {
+      I18nService.initTranslations = original;
+    }
   });
 });

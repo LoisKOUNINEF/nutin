@@ -281,6 +281,7 @@ describe('NavigationManager', () => {
   });
 
   it('updateDocumentTitle resolves a per-language seo.json title to the current language', () => {
+    CONFIG.i18n = true;
     CONFIG.generateSEOFiles = true;
     CONFIG.seo = { routes: [{ path: '/', title: { en: 'Home', fr: 'Accueil' } }] };
     I18nService['_LANGUAGES'] = ['en', 'fr'];
@@ -289,12 +290,26 @@ describe('NavigationManager', () => {
       NavigationManager.updateDocumentTitle({ viewName: 'home' }, '/');
       expect(document.title).toBe('Accueil');
     } finally {
+      CONFIG.i18n = false;
       CONFIG.generateSEOFiles = false;
       I18nService['_currentLanguage'] = 'en';
     }
   });
 
+  it('updateDocumentTitle uses the first value of a per-language seo.json title when i18n is disabled', () => {
+    CONFIG.generateSEOFiles = true;
+    CONFIG.seo = { routes: [{ path: '/', title: { fr: 'Accueil', en: 'Home' } }] };
+    I18nService['_currentLanguage'] = 'en';
+    try {
+      NavigationManager.updateDocumentTitle({ viewName: 'home' }, '/');
+      expect(document.title).toBe('Accueil');
+    } finally {
+      CONFIG.generateSEOFiles = false;
+    }
+  });
+
   it('updateDocumentTitle falls back to the default language, then any available language, then viewName', () => {
+    CONFIG.i18n = true;
     CONFIG.generateSEOFiles = true;
     I18nService['_LANGUAGES'] = ['en', 'fr'];
 
@@ -310,6 +325,7 @@ describe('NavigationManager', () => {
       NavigationManager.updateDocumentTitle({ viewName: 'home' }, '/');
       expect(document.title).toBe('home');
     } finally {
+      CONFIG.i18n = false;
       CONFIG.generateSEOFiles = false;
       I18nService['_currentLanguage'] = 'en';
     }
