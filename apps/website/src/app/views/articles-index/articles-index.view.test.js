@@ -11,6 +11,16 @@ describe('ArticlesIndexView', () => {
     const view = new ArticlesIndexView();
     view.render();
     expect(view.element.querySelector('[data-component="read-more"]')).toBe(null);
-    expect(view.element.querySelectorAll('.card-link').length).toBe(4);
+    const cards = view.element.querySelectorAll('.card-link');
+    expect(cards.length).toBe(4);
+    expect([...cards].every((card) => card.tagName === 'A11Y-FOCUSABLE')).toBe(true);
+  });
+
+  it('onEnter loads the a11y-focusable bundle once, however often it runs', () => {
+    const view = new ArticlesIndexView();
+    view.render();
+    view.onEnter();
+    view.onEnter();
+    expect(document.head.querySelectorAll('script[src="https://cdn.jsdelivr.net/npm/a11y-elements@0.3.0/dist/browser/components/focusable/define.js"]').length).toBe(1);
   });
 });

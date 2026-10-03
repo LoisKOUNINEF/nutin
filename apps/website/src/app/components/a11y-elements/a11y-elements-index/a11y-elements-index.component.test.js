@@ -10,20 +10,8 @@ function mount() {
 }
 
 describe('A11yElementsIndexComponent', () => {
-  let warnSpy;
-
   beforeAll(() => {
     setupJsdom();
-  });
-
-  // The index's SnippetComponents warn that PrismJS isn't loaded under jsdom.
-  beforeEach(() => {
-    warnSpy = spyOn(console, 'warn');
-    warnSpy.andCallFake(() => {});
-  });
-
-  afterEach(() => {
-    warnSpy.restore();
   });
 
   it('renders one link card per demo page', () => {
@@ -33,12 +21,7 @@ describe('A11yElementsIndexComponent', () => {
       'click:navigateTo:elements',
       'click:navigateTo:overlays',
     ]);
-    component.destroy();
-  });
-
-  it('renders the usage snippets', () => {
-    const component = mount();
-    expect(component.element.querySelectorAll('.snippet__code').length).toBe(3);
+    expect(cards.every((card) => card.tagName === 'A11Y-FOCUSABLE')).toBe(true);
     component.destroy();
   });
 

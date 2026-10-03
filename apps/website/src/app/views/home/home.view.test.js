@@ -34,4 +34,14 @@ describe('HomeView', () => {
     view.element.querySelector('[data-event="click:navigateTo:changelog"]').click();
     expect(navigateSpy.lastCall[0]).toBe('/changelog');
   });
+
+  it('renders the extras as keyboard-activatable cards and onEnter loads their bundle once', () => {
+    const cards = view.element.querySelectorAll('.home__cta-row .card');
+    expect(cards.length).toBe(3);
+    expect([...cards].every((card) => card.tagName === 'A11Y-FOCUSABLE')).toBe(true);
+
+    view.onEnter();
+    view.onEnter();
+    expect(document.head.querySelectorAll('script[src="https://cdn.jsdelivr.net/npm/a11y-elements@0.3.0/dist/browser/components/focusable/define.js"]').length).toBe(1);
+  });
 });

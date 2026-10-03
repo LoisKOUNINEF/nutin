@@ -1,11 +1,17 @@
 import { Navigation, ComponentConfig, View } from '../../../core/index.js';
 import { SnippetComponent, HomeExtrasComponent } from '../../components/index.js';
+import { loadA11yFocusable } from '../../helpers/index.js';
 
 const template = `__TEMPLATE_PLACEHOLDER__`;
 
 export class HomeView extends View {
   constructor() {
     super({template, viewName: 'home'});
+  }
+
+  // Client-only (never during SSR): the extras cards are <a11y-focusable>.
+  public onEnter(): void {
+    loadA11yFocusable();
   }
 
   public registerChildren(): ComponentConfig[] {

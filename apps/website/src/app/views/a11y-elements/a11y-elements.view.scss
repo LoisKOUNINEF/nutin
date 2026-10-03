@@ -9,7 +9,7 @@
     margin-right: clamp(1rem, 5vw, 10rem);
     h1 {
         font-weight: 700;
-        color: var(--primary);
+        color: var(--secondary);
     }
     @include mixins.respond-to(medium) {
         margin-left: 1rem;

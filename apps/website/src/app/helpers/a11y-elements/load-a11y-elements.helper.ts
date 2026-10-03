@@ -55,3 +55,10 @@ export function loadA11yDrawer(): void {
   ensureStylesheet(STYLESHEET);
   ensureModuleScript(bundleUrl('overlays', 'drawer'));
 }
+
+// Only <a11y-focusable>, for the home and articles-index link cards (keyboard
+// activation). Client-only (called from the views' onEnter), like loadA11yDrawer().
+export function loadA11yFocusable(): void {
+  ensureStylesheet(STYLESHEET);
+  ensureModuleScript(bundleUrl('components', 'focusable'));
+}
