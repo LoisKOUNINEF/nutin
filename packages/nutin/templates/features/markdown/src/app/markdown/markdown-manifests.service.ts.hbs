@@ -1,7 +1,7 @@
 import nutinConfig from '../../../nutin.config.js';
 import { Service } from '../../core/index.js';
 import { MarkdownManifest } from './markdown-manifest.js';
-import { IMarkdownSourcesConfig, resolveMarkdownSources } from './markdown-sources.js';
+import { IMarkdownSourcesConfig, MarkdownSourceEntry, resolveMarkdownSources } from './markdown-sources.js';
 
 // Every folder listed in nutin.config.js "markdownSources", by id (its routePrefix,
 // defaulting to the folder name). Manifests load on demand: MarkdownGuards load theirs
@@ -11,8 +11,12 @@ export class MarkdownManifests extends Service<MarkdownManifests> {
 
   constructor() {
     super();
-    const config = nutinConfig.markdownSources as IMarkdownSourcesConfig | undefined;
-    for (const source of resolveMarkdownSources(config)) {
+    // Bundled builds get the folders from the builder's define (nutin.config.js's
+    // markdownSources isn't bundled); test runs on tsc output read the config itself.
+    // Used directly in `??` so esbuild folds the fallback away.
+    const sourceFolders: MarkdownSourceEntry[] = JSON.parse(globalThis.__NUTIN_MARKDOWN_SOURCES__
+      ?? JSON.stringify((nutinConfig.markdownSources as IMarkdownSourcesConfig | undefined)?.sourceFolders ?? []));
+    for (const source of resolveMarkdownSources({ sourceFolders })) {
       this.manifests.set(source.id, new MarkdownManifest(source));
     }
   }

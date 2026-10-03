@@ -11,7 +11,7 @@ import path from 'path';
 // - Frontmatter mode (no hub file): every .md file under the folder, in a single "index"
 //   section, grouped by frontmatter `group` and sorted by frontmatter `order`, then path.
 //
-// Page metadata comes from YAML frontmatter first (title, description, slug, order, group),
+// Page metadata comes from YAML frontmatter first (title, description, slug, order, group, ogImage),
 // then the hub entry, then the Markdown itself (first H1, first prose line, file name).
 //
 // `marked` (Marked class) and `gray-matter` are injected: they are installed on demand by
@@ -55,11 +55,11 @@ export function normalizeSource(entry, root) {
     fail(`"routePrefix" for "${options.folder}" must only contain lowercase letters, digits and dashes (got "${id}")`);
   }
 
+  // Convention: a hub named after the folder, e.g. articles/ARTICLES.md.
+  const conventionalHub = `${path.basename(dir).toUpperCase().replace(/[^A-Z0-9]+/g, '_')}.md`;
   let hubFiles = options.hubFiles;
   if (hubFiles === undefined) {
-    // Convention: a hub named after the folder, e.g. articles/ARTICLES.md.
-    const conventional = `${path.basename(dir).toUpperCase().replace(/[^A-Z0-9]+/g, '_')}.md`;
-    hubFiles = fs.existsSync(path.join(dir, conventional)) ? [conventional] : [];
+    hubFiles = fs.existsSync(path.join(dir, conventionalHub)) ? [conventionalHub] : [];
   } else if (!Array.isArray(hubFiles)) {
     fail(`"hubFiles" for "${options.folder}" must be an array of file names`);
   }
@@ -69,6 +69,10 @@ export function normalizeSource(entry, root) {
     fail(`"prefixReplacements" for "${options.folder}" must be an array of [prefix, replacement] pairs`);
   }
 
+  if (options.seo !== undefined && typeof options.seo !== 'boolean') {
+    fail(`"seo" for "${options.folder}" must be true or false`);
+  }
+
   return {
     folder: options.folder,
     dir,
@@ -76,6 +80,11 @@ export function normalizeSource(entry, root) {
     hubFiles,
     sectionInPath: options.sectionInPath === true,
     prefixReplacements,
+    // With generateSEOFiles, every page gets prerendered HTML and a sitemap entry unless false.
+    seo: options.seo !== false,
+    // Kept to resolve hub files again inside each language subfolder (see languageSource()).
+    hubFilesOption: options.hubFiles,
+    conventionalHub,
   };
 }
 
@@ -151,6 +160,21 @@ function readPage(sourcePath, source, matter) {
   return { data, body: content };
 }
 
+// Plain text of one line of inline Markdown: link/image text, no emphasis or code marks.
+// Derived descriptions end up in <meta name="description"> and nav text.
+export function stripInlineMarkdown(text) {
+  return text
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    // Underscores only emphasize at word boundaries: snake_case_names stay intact.
+    .replace(/(^|\W)__(.+?)__(?=\W|$)/g, '$1$2')
+    .replace(/(^|\W)_(.+?)_(?=\W|$)/g, '$1$2')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 // Title = first H1; description = first non-empty prose line after it.
 function deriveMeta(body, sourcePath) {
   const lines = body.split('\n');
@@ -159,7 +183,7 @@ function deriveMeta(body, sourcePath) {
   const descriptionLine = lines
     .slice(h1Index + 1)
     .find((l) => l.trim().length && !/^#{1,6}\s/.test(l) && !l.trim().startsWith('```'));
-  return { title, description: descriptionLine ? descriptionLine.trim() : '' };
+  return { title, description: descriptionLine ? stripInlineMarkdown(descriptionLine) : '' };
 }
 
 function renderHtml(body, sourcePath, hrefMap, context) {
@@ -187,7 +211,9 @@ function renderHtml(body, sourcePath, hrefMap, context) {
         if (!/^[a-z]+:/i.test(href) && href.includes('.md')) {
           const [rawPath, fragment] = href.split('#');
           const resolved = path.normalize(path.join(dir, rawPath));
-          const pageHref = hrefMap.get(resolved);
+          // fallbackHref: a translation linking to a page it doesn't have points at the
+          // default-language page instead (see compileLanguages()).
+          const pageHref = hrefMap.get(resolved) ?? context.fallbackHref?.(resolved);
 
           if (pageHref) {
             isInternal = true;
@@ -256,7 +282,7 @@ function collectFrontmatterSection(source, context) {
     byId.get(groupId).pages.push(page);
   }
 
-  return [{ id: 'index', title: path.basename(source.dir), description: '', groups }];
+  return [{ id: 'index', title: source.sectionTitle ?? path.basename(source.dir), description: '', groups }];
 }
 
 // --- Entry point ---
@@ -274,7 +300,9 @@ export function compileSource(source, context) {
   const sourceBySlug = new Map();
   const hrefMap = new Map();
   for (const section of sections) {
-    const prefix = source.sectionInPath ? `/${source.id}/${section.id}` : `/${source.id}`;
+    // linkPrefix: '/<lang>' with i18n, so compiled links (and prerendered HTML) carry the locale.
+    const base = `${context.linkPrefix ?? ''}/${source.id}`;
+    const prefix = source.sectionInPath ? `${base}/${section.id}` : base;
     for (const group of section.groups) {
       for (const page of group.pages) {
         const slug = page.data.slug ? String(page.data.slug) : slugFromFilename(path.basename(page.source), source.prefixReplacements);
@@ -325,6 +353,7 @@ export function compileSource(source, context) {
           source: toPosix(path.relative(context.root, page.source)),
           headings,
           html,
+          ...(page.data.ogImage ? { ogImage: String(page.data.ogImage) } : {}),
         };
       }
     }
@@ -340,5 +369,120 @@ export function compileSource(source, context) {
     }
   }
 
-  return { manifest: { sections: manifestSections, pages }, warnings };
+  return { manifest: { sections: manifestSections, pages }, warnings, hrefBySource: hrefMap };
 }
+
+// --- Languages (i18n) ---
+
+const isDirectory = (dir) => fs.existsSync(dir) && fs.statSync(dir).isDirectory();
+
+// A source is localized when it has a subfolder named after the default language,
+// e.g. content/en/ (+ content/fr/, ...).
+export function isLocalized(source, defaultLanguage) {
+  return isDirectory(path.join(source.dir, defaultLanguage));
+}
+
+// The source restricted to one language subfolder. Hub files are resolved again inside it,
+// and a frontmatter-mode section keeps the source folder's name as its title.
+function languageSource(source, lang) {
+  const dir = path.join(source.dir, lang);
+  const hubFiles = source.hubFilesOption ?? (fs.existsSync(path.join(dir, source.conventionalHub)) ? [source.conventionalHub] : []);
+  return { ...source, dir, folder: `${source.folder}/${lang}`, hubFiles, sectionTitle: path.basename(source.dir) };
+}
+
+// One translation laid over the default-language manifest. The default language defines the
+// pages, their order and sections; a translation may only translate them. Missing pages keep
+// the default-language page, flagged `fallback: true`.
+function mergeTranslation(base, own, { source, lang, defaultLanguage }) {
+  const baseSectionIds = new Set(base.sections.map((section) => section.id));
+  const extraSection = own.sections.find((section) => !baseSectionIds.has(section.id));
+  if (extraSection) {
+    fail(`Section "${extraSection.id}" exists in "${source.folder}/${lang}" but not in "${source.folder}/${defaultLanguage}" — the default language defines the sections`);
+  }
+  const extraPage = Object.values(own.pages).find((page) => !base.pages[page.slug]);
+  if (extraPage) {
+    fail(`"${extraPage.source}" has no "${defaultLanguage}" counterpart (slug "${extraPage.slug}") — add it to "${source.folder}/${defaultLanguage}" too`);
+  }
+
+  // Translated groups are matched by the pages they hold, since their ids come from
+  // their (translated) titles.
+  const translatedGroupTitle = (ownSection, group) =>
+    ownSection?.groups?.find((ownGroup) => ownGroup.pages.some((slug) => group.pages.includes(slug)))?.title ?? group.title;
+
+  const sections = base.sections.map((section) => {
+    const ownSection = own.sections.find((candidate) => candidate.id === section.id);
+    return {
+      ...section,
+      title: ownSection?.title ?? section.title,
+      description: ownSection?.description || section.description,
+      groups: section.groups?.map((group) => ({ ...group, title: translatedGroupTitle(ownSection, group) })),
+    };
+  });
+
+  const pages = {};
+  const missing = [];
+  for (const [slug, basePage] of Object.entries(base.pages)) {
+    const ownPage = own.pages[slug];
+    if (ownPage) {
+      pages[slug] = { ...ownPage, section: basePage.section, group: basePage.group, order: basePage.order };
+    } else {
+      pages[slug] = { ...basePage, fallback: true };
+      missing.push(slug);
+    }
+  }
+
+  return { manifest: { sections, pages }, missing };
+}
+
+/**
+ * Compiles a source for the build. Without i18n: one manifest (a localized folder then
+ * only compiles its default language). With i18n: one manifest per language, each with
+ * '/<lang>'-prefixed links; a localized folder translates the default language's pages
+ * (see mergeTranslation), any other folder serves the same pages to every language.
+ * Returns { manifests: { [lang | '']: manifest }, warnings }.
+ */
+export function compileLanguages(source, context, { i18n, languages, defaultLanguage }) {
+  const localized = isLocalized(source, defaultLanguage);
+  const warnings = [];
+  const keep = (result, report) => {
+    if (report) warnings.push(...result.warnings);
+    return result;
+  };
+
+  if (!i18n) {
+    const result = keep(compileSource(localized ? languageSource(source, defaultLanguage) : source, context), true);
+    return { manifests: { '': result.manifest }, warnings };
+  }
+
+  const manifests = {};
+  for (const lang of languages) {
+    const langContext = { ...context, linkPrefix: `/${lang}` };
+    // The same content is compiled once per language: only the link prefix differs, so its
+    // warnings are reported once.
+    const base = keep(compileSource(localized ? languageSource(source, defaultLanguage) : source, langContext), lang === languages[0]);
+
+    if (!localized || lang === defaultLanguage) {
+      manifests[lang] = base.manifest;
+      continue;
+    }
+
+    const langDir = path.join(source.dir, lang);
+    if (!isDirectory(langDir)) {
+      manifests[lang] = mergeTranslation(base.manifest, { sections: [], pages: {} }, { source, lang, defaultLanguage }).manifest;
+      warnings.push(`"${source.folder}" has no "${lang}" folder — every page shows its "${defaultLanguage}" version`);
+      continue;
+    }
+
+    const defaultDir = path.join(source.dir, defaultLanguage);
+    const fallbackHref = (resolved) => base.hrefBySource.get(path.join(defaultDir, path.relative(langDir, resolved)));
+    const own = keep(compileSource(languageSource(source, lang), { ...langContext, fallbackHref }), true);
+    const { manifest, missing } = mergeTranslation(base.manifest, own.manifest, { source, lang, defaultLanguage });
+    if (missing.length) {
+      warnings.push(`"${source.folder}/${lang}" has no translation for: ${missing.join(', ')} — showing their "${defaultLanguage}" version`);
+    }
+    manifests[lang] = manifest;
+  }
+
+  return { manifests, warnings };
+}
+

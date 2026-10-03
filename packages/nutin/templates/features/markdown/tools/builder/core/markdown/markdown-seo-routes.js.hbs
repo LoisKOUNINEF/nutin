@@ -1,0 +1,114 @@
+import * as fs from 'fs';
+import path from 'path';
+import { print, errorExit } from '../../../utils/index.js';
+import { PATHS } from '../app/paths.js';
+import nutinConfig from '../../../../nutin.config.js';
+import { LANGUAGES, DEFAULT_LANGUAGE } from '../../../utils/languages.js';
+import { normalizeSource } from './markdown-compiler.js';
+
+// The app route each source is served on — keep in sync with src/app/markdown/markdown-routes.ts.
+function routePattern(source) {
+  return source.sectionInPath ? `/${source.id}/:section?/:slug?` : `/${source.id}/:slug?`;
+}
+
+// Page slugs in nav order (sections, then their groups or pages).
+function orderedSlugs(manifest) {
+  return manifest.sections.flatMap((section) => section.groups ? section.groups.flatMap((group) => group.pages) : (section.pages ?? []));
+}
+
+function describe(manifest, page) {
+  if (page.description) return { description: page.description, fallback: null };
+  const section = manifest.sections.find((s) => s.id === page.section);
+  return section?.description
+    ? { description: section.description, fallback: 'its section\'s' }
+    : { description: page.title, fallback: 'its title' };
+}
+
+/**
+ * One SEO route per compiled Markdown page, in the shape config/seo.json routes use, so
+ * generate-seo-html.js prerenders it at its real URL (`mockParams` fill the route's params)
+ * and generate-sitemap-xml.js lists it. The bare /<id> URL gets no page of its own: the SPA
+ * replaces it with its first page's URL.
+ *
+ * `manifestsById[id]` is the source's manifest, or with `languages` (i18n) a
+ * { [lang]: manifest } map: titles and descriptions then become per-language objects, and
+ * the default language's manifest defines the pages.
+ */
+export function buildMarkdownSeoRoutes(sources, manifestsById, { languages = null, defaultLanguage = null } = {}) {
+  const routes = [];
+  const warnings = [];
+
+  for (const source of sources) {
+    if (!source.seo) continue;
+    const byLang = languages ? manifestsById[source.id] : { '': manifestsById[source.id] };
+    const reference = byLang?.[languages ? defaultLanguage : ''];
+    if (!reference) continue;
+
+    for (const slug of orderedSlugs(reference)) {
+      const page = reference.pages[slug];
+      if (!page) continue;
+
+      const title = {};
+      const description = {};
+      for (const [lang, manifest] of Object.entries(byLang)) {
+        const localized = manifest.pages[slug] ?? page;
+        const described = describe(manifest, localized);
+        title[lang] = localized.title;
+        description[lang] = described.description;
+        if (described.fallback && !localized.fallback) {
+          warnings.push(`"${source.id}/${slug}"${lang ? ` (${lang})` : ''} has no description for its SEO page — using ${described.fallback}. Add a frontmatter "description".`);
+        }
+      }
+
+      routes.push({
+        path: routePattern(source),
+        mockParams: source.sectionInPath ? { section: page.section, slug } : { slug },
+        title: languages ? title : title[''],
+        description: languages ? description : description[''],
+        ...(page.ogImage ? { ogImage: page.ogImage } : {}),
+      });
+    }
+  }
+
+  return { routes, warnings };
+}
+
+function readSources() {
+  return (nutinConfig.markdownSources?.sourceFolders ?? []).map((entry) => normalizeSource(entry, process.cwd()));
+}
+
+// Route patterns of sources with "seo: false".
+export function markdownSeoOptOutPaths() {
+  return readSources().filter((source) => !source.seo).map(routePattern);
+}
+
+let cached;
+
+// Reads nutin.config.js "markdownSources" and the manifest(s) the markdown build step wrote
+// to dist-build earlier in the pipeline. Memoized: the SEO HTML and sitemap steps both ask.
+export function markdownSeoRoutes() {
+  if (cached) return cached;
+
+  const sources = readSources();
+  const languages = nutinConfig.i18n ? LANGUAGES : null;
+  const readManifest = (fileName) => {
+    const manifestPath = path.join(PATHS.tempSource, 'generated', fileName);
+    try {
+      return JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+    } catch (err) {
+      errorExit(`Cannot read the Markdown manifest ${manifestPath} for SEO pages: ${err.message}`, 'markdown-seo');
+    }
+  };
+
+  const manifestsById = {};
+  for (const source of sources.filter((s) => s.seo)) {
+    manifestsById[source.id] = languages
+      ? Object.fromEntries(languages.map((lang) => [lang, readManifest(`${source.id}.${lang}.json`)]))
+      : readManifest(`${source.id}.json`);
+  }
+
+  const { routes, warnings } = buildMarkdownSeoRoutes(sources, manifestsById, { languages, defaultLanguage: DEFAULT_LANGUAGE });
+  warnings.forEach((warning) => print.warn(`markdown: ${warning}`));
+  cached = routes;
+  return routes;
+}

@@ -11,6 +11,9 @@ const MANIFEST = {
   },
 };
 
+// Single-language behavior, whatever the project's i18n setting.
+const noLanguage = () => null;
+
 let originalFetch;
 let calls;
 
@@ -37,7 +40,7 @@ describe('MarkdownManifest', () => {
 
   it('fetches /generated/<id>.json once, even with concurrent loads', async () => {
     mockFetch(ok(MANIFEST));
-    const manifest = new MarkdownManifest({ id: 'docs', sectionInPath: true });
+    const manifest = new MarkdownManifest({ id: 'docs', sectionInPath: true }, noLanguage);
 
     await Promise.all([manifest.load(), manifest.load()]);
     await manifest.load();
@@ -49,7 +52,7 @@ describe('MarkdownManifest', () => {
 
   it('exposes pages and sections', async () => {
     mockFetch(ok(MANIFEST));
-    const manifest = new MarkdownManifest({ id: 'docs', sectionInPath: true });
+    const manifest = new MarkdownManifest({ id: 'docs', sectionInPath: true }, noLanguage);
     await manifest.load();
 
     expect(manifest.hasPages).toBe(true);
@@ -61,7 +64,7 @@ describe('MarkdownManifest', () => {
 
   it('stays empty after a failed load and retries on the next one', async () => {
     mockFetch(notFound(), ok(MANIFEST));
-    const manifest = new MarkdownManifest({ id: 'docs', sectionInPath: false });
+    const manifest = new MarkdownManifest({ id: 'docs', sectionInPath: false }, noLanguage);
 
     await silenceConsole('error', () => manifest.load());
     expect(manifest.loaded).toBe(false);
@@ -71,5 +74,23 @@ describe('MarkdownManifest', () => {
     await manifest.load();
     expect(calls.length).toBe(2);
     expect(manifest.loaded).toBe(true);
+  });
+
+  it('with a language, fetches /generated/<id>.<lang>.json and reads the current language', async () => {
+    const page = (title) => ({ sections: [{ id: 'index', title: 'x', description: '', pages: ['a'] }], pages: { a: { slug: 'a', title, section: 'index' } } });
+    mockFetch(ok(page('Hello')), ok(page('Bonjour')));
+    let lang = 'en';
+    const manifest = new MarkdownManifest({ id: 'docs', sectionInPath: false }, () => lang);
+
+    await manifest.load();
+    lang = 'fr';
+    expect(manifest.loaded).toBe(false);
+    await manifest.load();
+
+    expect(manifest.getPage('a').title).toBe('Bonjour');
+    lang = 'en';
+    expect(manifest.getPage('a').title).toBe('Hello');
+    await manifest.load();
+    expect(calls).toEqual(['/generated/docs.en.json', '/generated/docs.fr.json']);
   });
 });

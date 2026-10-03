@@ -1,5 +1,6 @@
 import { Component, Navigation, html, trustedRaw, SafeHtml } from '../../../../core/index.js';
 import { IMarkdownHeading, IMarkdownPage } from '../../markdown-manifest.js';
+import { markdownText } from '../../markdown-i18n.js';
 
 export interface IMarkdownContentConfig {
   page?: IMarkdownPage;
@@ -17,19 +18,19 @@ function renderToc(headings: IMarkdownHeading[]): SafeHtml | string {
     `);
 
   return html`
-    <nav class="markdown-toc" aria-label="On this page">
-      <span class="markdown-toc__title">On this page</span>
+    <nav class="markdown-toc" aria-label="${markdownText('onThisPage', 'On this page')}">
+      <span class="markdown-toc__title">${markdownText('onThisPage', 'On this page')}</span>
       <ul>${items}</ul>
     </nav>
   `;
 }
 
 // page.html is compiled at build time from the project's own Markdown files (not user
-// input), hence trustLevel 'trusted'. Pages are rendered client-side only: pre-rendering
-// them for SEO would need config/seo.json routes expanded per manifest page ("dynamicFrom").
+// input), hence trustLevel 'trusted'. With generateSEOFiles, every page is also prerendered
+// (tools/builder/core/markdown/markdown-seo-routes.js).
 const templateFn = (_config: IMarkdownContentConfig) => {
   if (!_config.page) {
-    return html`<p class="markdown-content__empty">Nothing here yet.</p>`;
+    return html`<p class="markdown-content__empty">${markdownText('empty', 'Nothing here yet.')}</p>`;
   }
 
   return html`

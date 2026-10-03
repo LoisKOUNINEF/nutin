@@ -3,7 +3,7 @@ import os from 'os';
 import path from 'path';
 import { Marked } from 'marked';
 import matter from 'gray-matter';
-import { compileSource, normalizeSource, slugFromFilename } from './markdown-compiler.js';
+import { compileLanguages, compileSource, normalizeSource, slugFromFilename, stripInlineMarkdown } from './markdown-compiler.js';
 
 let root;
 
@@ -15,6 +15,12 @@ function write(relPath, content) {
 
 function compile(entry) {
   return compileSource(normalizeSource(entry, root), { Marked, matter, root });
+}
+
+const I18N = { i18n: true, languages: ['en', 'fr'], defaultLanguage: 'en' };
+
+function compileAll(entry, options = I18N) {
+  return compileLanguages(normalizeSource(entry, root), { Marked, matter, root }, options);
 }
 
 describe('markdown-compiler', () => {
@@ -54,6 +60,27 @@ describe('markdown-compiler', () => {
     expect(() => normalizeSource({}, root)).toThrow('expected a folder path');
     expect(() => normalizeSource({ folder: 'docs', routePrefix: 'Docs Pages' }, root)).toThrow('"routePrefix"');
     expect(() => normalizeSource({ folder: 'docs', hubFiles: 'API.md' }, root)).toThrow('"hubFiles"');
+  });
+
+  it('enables SEO pages by default, and validates the "seo" option', () => {
+    expect(normalizeSource('content', root).seo).toBe(true);
+    expect(normalizeSource({ folder: 'content', seo: false }, root).seo).toBe(false);
+    expect(() => normalizeSource({ folder: 'content', seo: 'no' }, root)).toThrow('"seo"');
+  });
+
+  it('passes a frontmatter ogImage through to the page', () => {
+    write('content/a.md', '---\nogImage: /og/a.jpg\n---\n# A\n\nText.\n');
+    write('content/b.md', '# B\n\nText.\n');
+
+    const { manifest } = compile('content');
+
+    expect(manifest.pages.a.ogImage).toBe('/og/a.jpg');
+    expect('ogImage' in manifest.pages.b).toBeFalsy();
+  });
+
+  it('derives plain-text descriptions from inline Markdown', () => {
+    expect(stripInlineMarkdown('Built with [marked](https://marked.js.org/), **fast** and `small`.')).toBe('Built with marked, fast and small.');
+    expect(stripInlineMarkdown('An ![logo](/l.png) _here_ and snake_case_name')).toBe('An logo here and snake_case_name');
   });
 
   it('applies prefix replacements to file-name slugs', () => {
@@ -149,4 +176,72 @@ describe('markdown-compiler', () => {
     write('docs/DOCS.md', '# Docs\n\n## Table of Contents\n\n- [Gone](./GONE.md)\n');
     expect(() => compile('docs')).toThrow('does not exist');
   });
+
+  it('compiles one manifest per language with "/<lang>" links when i18n is on', () => {
+    write('content/a.md', '# A\n\nSee [B](./b.md).\n');
+    write('content/b.md', '# B\n\nText.\n');
+
+    const { manifests } = compileAll('content');
+
+    expect(Object.keys(manifests)).toEqual(['en', 'fr']);
+    expect(manifests.en.pages.a.html).toContain('href="/en/content/b"');
+    expect(manifests.fr.pages.a.html).toContain('href="/fr/content/b"');
+  });
+
+  it('translates a localized folder over its default language, falling back for missing pages', () => {
+    write('content/en/a.md', '---\norder: 1\n---\n# A\n\nSee [B](./b.md).\n');
+    write('content/en/b.md', '---\norder: 2\n---\n# B\n\nText.\n');
+    write('content/fr/a.md', '# A fr\n\nVoir [B](./b.md).\n');
+
+    const { manifests, warnings } = compileAll('content');
+
+    expect(manifests.fr.pages.a.title).toBe('A fr');
+    expect(manifests.fr.pages.a.html).toContain('href="/fr/content/b"');
+    expect(manifests.fr.pages.b.title).toBe('B');
+    expect(manifests.fr.pages.b.fallback).toBe(true);
+    expect(manifests.fr.pages.b.html).toBe(manifests.en.pages.b.html);
+    expect(manifests.fr.sections[0].title).toBe('content');
+    expect(warnings.some((w) => w.includes('content/fr') && w.includes('b'))).toBeTruthy();
+  });
+
+  it('uses the default language for a language with no folder at all', () => {
+    write('content/en/a.md', '# A\n\nText.\n');
+
+    const { manifests, warnings } = compileAll('content');
+
+    expect(manifests.fr.pages.a.fallback).toBe(true);
+    expect(warnings.some((w) => w.includes('no "fr" folder'))).toBeTruthy();
+  });
+
+  it('fails on a page that only exists in a translation', () => {
+    write('content/en/a.md', '# A\n\nText.\n');
+    write('content/fr/extra.md', '# Extra\n\nTexte.\n');
+
+    expect(() => compileAll('content')).toThrow('has no "en" counterpart');
+  });
+
+  it('compiles only the default language of a localized folder when i18n is off', () => {
+    write('content/en/a.md', '# A\n\nText.\n');
+    write('content/fr/a.md', '# A fr\n\nTexte.\n');
+
+    const { manifests } = compileAll('content', { i18n: false, languages: ['en', 'fr'], defaultLanguage: 'en' });
+
+    expect(Object.keys(manifests)).toEqual(['']);
+    expect(manifests[''].pages.a.title).toBe('A');
+  });
+
+  it('translates hub section and group titles', () => {
+    write('docs/en/GUIDES.md', '# Guides\n\nLearn.\n\n## Table of Contents\n\n### Start\n\n- [Install](./install.md)\n');
+    write('docs/en/install.md', '# Install\n\nRun it.\n');
+    write('docs/fr/GUIDES.md', '# Guides fr\n\nApprendre.\n\n## Table of Contents\n\n### Débuter\n\n- [Installer](./install.md)\n');
+    write('docs/fr/install.md', '# Installer\n\nLancez-le.\n');
+
+    const { manifests } = compileAll({ folder: 'docs', sectionInPath: true, hubFiles: ['GUIDES.md'] });
+
+    expect(manifests.fr.sections[0].title).toBe('Guides fr');
+    expect(manifests.fr.sections[0].groups[0].title).toBe('Débuter');
+    expect(manifests.fr.sections[0].groups[0].id).toBe(manifests.en.sections[0].groups[0].id);
+    expect(manifests.fr.pages.install.title).toBe('Installer');
+  });
 });
+

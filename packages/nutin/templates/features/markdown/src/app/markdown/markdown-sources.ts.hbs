@@ -1,6 +1,12 @@
 import { IMarkdownSource } from './markdown-manifest.js';
 
-type MarkdownSourceEntry = string | { folder: string; routePrefix?: string; sectionInPath?: boolean };
+export type MarkdownSourceEntry = string | { folder: string; routePrefix?: string; sectionInPath?: boolean; seo?: boolean };
+
+declare global {
+  // Set by the builder's esbuild define (tools/builder/core/prod-bundle/bundle-options.js):
+  // nutin.config.js's markdownSources.sourceFolders, as JSON. Undefined in tsc output (tests).
+  var __NUTIN_MARKDOWN_SOURCES__: string | undefined;
+}
 
 export interface IMarkdownSourcesConfig {
   sourceFolders?: MarkdownSourceEntry[];

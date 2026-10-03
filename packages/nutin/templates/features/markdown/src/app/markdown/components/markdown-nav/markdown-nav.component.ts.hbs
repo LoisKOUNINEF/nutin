@@ -1,5 +1,6 @@
 import { Component, Navigation, html, raw, SafeHtml } from '../../../../core/index.js';
 import { IMarkdownGroup, IMarkdownSection, MarkdownManifest } from '../../markdown-manifest.js';
+import { markdownText } from '../../markdown-i18n.js';
 
 export interface IMarkdownNavConfig {
   sections: IMarkdownSection[];
@@ -49,7 +50,7 @@ function renderSection(section: IMarkdownSection, config: IMarkdownNavConfig): S
 }
 
 const templateFn = (_config: IMarkdownNavConfig) => html`
-  <nav class="markdown-nav" aria-label="Pages">
+  <nav class="markdown-nav" aria-label="${markdownText('pages', 'Pages')}">
     <ul class="markdown-nav__sections">
       ${_config.sections.map((section) => renderSection(section, _config))}
     </ul>

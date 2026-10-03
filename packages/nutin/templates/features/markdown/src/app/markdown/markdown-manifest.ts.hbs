@@ -1,3 +1,5 @@
+import { markdownLanguage } from './markdown-i18n.js';
+
 export interface IMarkdownHeading {
   depth: number;
   text: string;
@@ -14,6 +16,9 @@ export interface IMarkdownPage {
   source: string;
   headings: IMarkdownHeading[];
   html: string;
+  ogImage?: string;
+  // With i18n: no translation exists, this is the default language's page.
+  fallback?: boolean;
 }
 
 export interface IMarkdownGroup {
@@ -43,59 +48,79 @@ interface IMarkdownManifestData {
 const EMPTY_MANIFEST: IMarkdownManifestData = { sections: [], pages: {} };
 
 // One compiled "markdownSources" folder (/generated/<id>.json, written at build time by
-// tools/builder/core/markdown). Instances are owned by MarkdownManifestsService.
+// tools/builder/core/markdown — or /generated/<id>.<lang>.json per language with i18n, where
+// every getter reads the current language's data). Instances are owned by MarkdownManifestsService.
 export class MarkdownManifest {
   public readonly id: string;
   public readonly sectionInPath: boolean;
-  private _manifest: IMarkdownManifestData = EMPTY_MANIFEST;
-  private _loading: Promise<void> | null = null;
-  private _loaded = false;
+  private readonly getLanguage: () => string | null;
+  private readonly _data = new Map<string, IMarkdownManifestData>();
+  private readonly _loading = new Map<string, Promise<void>>();
 
-  constructor({ id, sectionInPath }: IMarkdownSource) {
+  // getLanguage: the current language, or null without i18n (overridable for tests).
+  constructor({ id, sectionInPath }: IMarkdownSource, getLanguage: () => string | null = markdownLanguage) {
     this.id = id;
     this.sectionInPath = sectionInPath;
+    this.getLanguage = getLanguage;
+  }
+
+  private get lang(): string {
+    return this.getLanguage() ?? '';
+  }
+
+  private urlFor(lang: string): string {
+    return lang ? `/generated/${this.id}.${lang}.json` : `/generated/${this.id}.json`;
   }
 
   public get url(): string {
-    return `/generated/${this.id}.json`;
+    return this.urlFor(this.lang);
   }
 
   public get loaded(): boolean {
-    return this._loaded;
+    return this._data.has(this.lang);
   }
 
-  // Fetched once. A failed load keeps the manifest empty and is retried on the next call.
+  // Fetched once per language. A failed load keeps it empty and is retried on the next call.
   public load(): Promise<void> {
-    this._loading ??= this.fetchManifest();
-    return this._loading;
+    const lang = this.lang;
+    let loading = this._loading.get(lang);
+    if (!loading) {
+      loading = this.fetchManifest(lang);
+      this._loading.set(lang, loading);
+    }
+    return loading;
   }
 
-  private async fetchManifest(): Promise<void> {
+  private async fetchManifest(lang: string): Promise<void> {
+    const url = this.urlFor(lang);
     try {
-      const response = await fetch(this.url);
+      const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      this._manifest = await response.json();
-      this._loaded = true;
+      this._data.set(lang, await response.json());
     } catch (error) {
-      this._loading = null;
-      console.error(`Markdown manifest load error (${this.url}):`, error);
+      this._loading.delete(lang);
+      console.error(`Markdown manifest load error (${url}):`, error);
     }
   }
 
+  private get data(): IMarkdownManifestData {
+    return this._data.get(this.lang) ?? EMPTY_MANIFEST;
+  }
+
   public get sections(): IMarkdownSection[] {
-    return this._manifest.sections;
+    return this.data.sections;
   }
 
   public getPage(slug: string): IMarkdownPage | undefined {
-    return this._manifest.pages[slug];
+    return this.data.pages[slug];
   }
 
   public getSection(id: string): IMarkdownSection | undefined {
-    return this._manifest.sections.find((section) => section.id === id);
+    return this.data.sections.find((section) => section.id === id);
   }
 
   public get firstSlug(): string | undefined {
-    return this.firstSlugOf(this._manifest.sections[0]);
+    return this.firstSlugOf(this.data.sections[0]);
   }
 
   public firstSlugOf(section: IMarkdownSection | undefined): string | undefined {
@@ -104,7 +129,7 @@ export class MarkdownManifest {
   }
 
   public get hasPages(): boolean {
-    return this._manifest.sections.some((section) =>
+    return this.data.sections.some((section) =>
       section.groups ? section.groups.some((group) => group.pages.length > 0) : (section.pages?.length ?? 0) > 0
     );
   }

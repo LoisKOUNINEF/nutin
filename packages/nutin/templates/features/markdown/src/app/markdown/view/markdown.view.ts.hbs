@@ -1,8 +1,9 @@
-import { ComponentConfig, NavigationManager, View, html, type Template } from '../../../core/index.js';
+import { ComponentConfig, Navigation, NavigationManager, View, html, type Template } from '../../../core/index.js';
 import { IMarkdownSection, MarkdownManifest } from '../markdown-manifest.js';
 import { MarkdownManifestsService } from '../markdown-manifests.service.js';
 import { MarkdownContentComponent } from '../components/markdown-content/markdown-content.component.js';
 import { MarkdownNavComponent } from '../components/markdown-nav/markdown-nav.component.js';
+import { onMarkdownLanguageChange } from '../markdown-i18n.js';
 
 const defaultTemplate = html`__TEMPLATE_PLACEHOLDER__`;
 
@@ -19,6 +20,7 @@ export interface IMarkdownViewOptions {
 // '/docs/api/navigate'), the nav only lists that section and every URL includes it.
 export class MarkdownView extends View {
   private readonly manifest: MarkdownManifest;
+  private stopLanguageSync: () => void = () => {};
 
   constructor({ id, template = defaultTemplate, viewName = id }: IMarkdownViewOptions) {
     super({ template, viewName });
@@ -53,6 +55,13 @@ export class MarkdownView extends View {
     if (!this.getRouteParam('slug') && this.slug) {
       NavigationManager.replaceState(this.pageHref(this.slug));
     }
+    // With i18n, a language change reloads the route: MarkdownGuards load the new
+    // language's manifest, and the same page renders in that language.
+    this.stopLanguageSync = onMarkdownLanguageChange(() => Navigation.reload());
+  }
+
+  public onExit(): void {
+    this.stopLanguageSync();
   }
 
   public registerChildren(): ComponentConfig[] {
@@ -65,7 +74,8 @@ export class MarkdownView extends View {
           sections: this.navSections,
           manifest: this.manifest,
           currentSlug: this.slug,
-          pageHref: (slug) => this.pageHref(slug),
+          // The links' hrefs carry the locale prefix with i18n (replaceState adds it itself).
+          pageHref: (slug) => NavigationManager.addLocalePrefix(this.pageHref(slug)),
         }),
       },
       {
