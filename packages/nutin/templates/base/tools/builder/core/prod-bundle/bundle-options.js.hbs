@@ -3,7 +3,9 @@ import path from 'path';
 import { pathToFileURL } from 'url';
 
 // nutin.config.js keys only the tooling reads — never worth shipping to the browser.
-const TOOLING_ONLY_KEYS = ['builder', 'testinNutin', 'dockerPorts'];
+// markdownSources reaches the markdown feature's runtime through a define instead (see
+// sharedDefine), so it's only bundled where that code is.
+const TOOLING_ONLY_KEYS = ['builder', 'testinNutin', 'dockerPorts', 'markdownSources'];
 
 const NUTIN_CONFIG_FILTER = /[\\/]nutin\.config\.js$/;
 const SEO_JSON_FILTER = /[\\/]seo\.json$/;
@@ -13,11 +15,16 @@ const SLIM_SEO_NAMESPACE = 'nutin-slim-seo';
 /**
  * esbuild `define`s shared by the client and SSR bundles. `globalThis.__NUTIN_I18N__`
  * lets esbuild fold core's i18n guards to a constant and drop the i18n code when it's off.
+ * `globalThis.__NUTIN_MARKDOWN_SOURCES__` (the markdown feature's source folders) is only
+ * emitted where code reads it, so an app without that code ships none of it.
  */
-export function sharedDefine({ isProd, i18n }) {
+export function sharedDefine({ isProd, i18n, markdownSources }) {
   return {
     'process.env.NODE_ENV': isProd ? '"production"' : '"development"',
     'globalThis.__NUTIN_I18N__': JSON.stringify(Boolean(i18n)),
+    // A JSON *string* literal: esbuild inlines and folds it (`define ?? fallback`), while
+    // an array define is hoisted into a variable and keeps the fallback code around.
+    'globalThis.__NUTIN_MARKDOWN_SOURCES__': JSON.stringify(JSON.stringify(markdownSources?.sourceFolders ?? [])),
   };
 }
 

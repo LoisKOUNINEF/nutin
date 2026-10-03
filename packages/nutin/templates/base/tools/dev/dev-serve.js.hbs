@@ -37,15 +37,18 @@ async function startDev() {
   // can't take precedence over it in the child.
   const { npm_config_port, ...serveEnv } = process.env;
   serveEnv.PORT = String(port);
-  // Both run node directly (no shell/npm layer) with an IPC channel: serve.js reports
-  // the URL it actually listens on (live-server may fall back to another port), and
-  // it's relayed to watcher.js so it can reprint it after every rebuild.
+  // Both run node directly (no shell/npm layer) with an IPC channel, used as a relay:
+  // serve.js reports the URL it listens on (watcher.js reprints it after every rebuild),
+  // and watcher.js reports each successful rebuild (serve.js reloads open pages).
   const stdio = ['inherit', 'inherit', 'inherit', 'ipc'];
   const serve = spawn(process.execPath, ['tools/dev/serve.js'], { stdio, detached: !isWindows, env: serveEnv });
   const watcher = spawn(process.execPath, ['tools/dev/watcher.js'], { stdio, detached: !isWindows });
 
   serve.on('message', (msg) => {
     if (msg?.type === 'server-url' && watcher.connected) watcher.send(msg);
+  });
+  watcher.on('message', (msg) => {
+    if (msg?.type === 'reload' && serve.connected) serve.send(msg);
   });
 
   const children = [serve, watcher];
@@ -77,12 +80,12 @@ async function startDev() {
   process.on('SIGHUP', () => shutdown('SIGTERM'));
 
   serve.on('error', (err) => {
-    print.boldError(`live-server failed to start: ${err.message}`);
+    print.boldError(`dev server failed to start: ${err.message}`);
     process.exit(1);
   });
   serve.on('close', (code) => {
     if (shuttingDown) return;
-    print.error(`live-server exited with code ${code}`);
+    print.error(`dev server exited with code ${code}`);
     shutdown('SIGTERM', code ?? 1);
   });
   watcher.on('error', (err) => {

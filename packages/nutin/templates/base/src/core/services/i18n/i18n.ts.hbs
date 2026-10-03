@@ -39,8 +39,10 @@ export class I18n extends Service<I18n> {
     AppEventBus.emit('language-changed', { lang });
   }
 
-  public onLanguageChange(callback: (payload: { lang: string }) => void) {
+  // Returns the unsubscribe function, like Navigation.onNavigate().
+  public onLanguageChange(callback: (payload: { lang: string }) => void): () => void {
     AppEventBus.subscribe('language-changed', callback);
+    return () => AppEventBus.off('language-changed', callback);
   }
 
   public async loadTranslations(lang: Language): Promise<void> {

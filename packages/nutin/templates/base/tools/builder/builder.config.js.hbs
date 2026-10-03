@@ -34,6 +34,7 @@ export const builderConfig = {
   ...nutinConfig.builder,
   isProd: process.env.NODE_ENV === 'production',
   i18n: nutinConfig.i18n,
+  markdownSources: nutinConfig.markdownSources,
   tailwind: nutinConfig.tailwind,
   generateSEO: nutinConfig.generateSEOFiles,
   WELL_KNOWN_NON_SEO_ROUTES: wellKnownNonSEORoutes,

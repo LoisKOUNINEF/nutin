@@ -2,6 +2,7 @@
 // transpiled here at generation time. typescript is imported lazily so TS projects never load it.
 // Its version is pinned in package.json: nutin-update re-transpiles the old baseline and compares
 // it to the user's files, so any output change between versions would read as a user edit.
+// This pin is the CLI's own: generated apps install their own TypeScript (7.x) for tsc.
 let tsModule;
 
 async function loadTypeScript() {

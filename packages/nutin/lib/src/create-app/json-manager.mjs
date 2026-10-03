@@ -14,14 +14,13 @@ export class JsonManager {
     const { testinNutin, projectName, lang } = context;
 
     const devDependencies = {
-      "chokidar": "^4.0.3",
-      "esbuild": "^0.25.12",
+      "chokidar": "^5.0.0",
+      "esbuild": "^0.28.2",
       "html-minifier-terser": "^7.2.0",
-      "jsdom": "^26.1.0",
-      "linkedom": "^0.18.12",
-      "live-server": "^1.2.2",
+      "jsdom": "^30.1.1",
+      "linkedom": "^0.18.13",
       "sass": "^1.89.0",
-      ...(lang === 'js' ? {} : { "typescript": "^5.8.3" })
+      ...(lang === 'js' ? {} : { "typescript": "^7.0.2" })
     };
 
     const scripts = getAllScripts(context);
@@ -46,8 +45,6 @@ export class JsonManager {
   async generateTsconfigJson(projectPath) {
     const tsconfig = {
       "compilerOptions": {
-        "baseUrl": "./",
-        "paths": {},
         "target": "ESNext",
         "module": "NodeNext",
         "moduleResolution": "NodeNext",

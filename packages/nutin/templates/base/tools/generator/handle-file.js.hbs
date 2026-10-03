@@ -1,5 +1,7 @@
 import fs from 'fs';
-import { print, LANGUAGES } from '../utils/index.js';
+import { print } from '../utils/index.js';
+// Imported directly, not via the utils barrel: it reads config/languages.json on load.
+import { LANGUAGES } from '../utils/languages.js';
 import { localeTemplate } from './templates/index.js';
 
 export function generateFile({

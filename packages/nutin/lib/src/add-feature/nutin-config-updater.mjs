@@ -19,7 +19,7 @@ const FEATURE_CONFIGS = {
     key: 'markdownSources',
     lines:
       '  markdownSources: {       // Markdown folders compiled to /generated/<name>.json at build time\n' +
-      "    sourceFolders: ['markdown-content'], // folder paths, or { folder, hubFiles, routePrefix, sectionInPath, prefixReplacements }\n" +
+      "    sourceFolders: ['markdown-content'], // folder paths, or { folder, hubFiles, routePrefix, sectionInPath, prefixReplacements, seo }\n" +
       '  },\n',
     added: 'Added "markdownSources" to nutin.config.js — add your own folders to "sourceFolders".',
     manual: 'add "markdownSources: { sourceFolders: [\'markdown-content\'] }" to it manually.',

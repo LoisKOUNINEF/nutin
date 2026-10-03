@@ -1,4 +1,6 @@
-declare interface NavigationEventMap {
+// Not "NavigationEventMap": that global already exists in lib.dom (Navigation API) and
+// would merge with this one, giving 'navigate' two conflicting payload types.
+declare interface RouterEventMap {
   'navigate': { path: string };
   'reload': {};
 }
@@ -18,7 +20,7 @@ declare interface I18nEventMap {
   };
 }
 
-declare interface FrameworkEventMap extends NavigationEventMap, LifecycleEventMap, I18nEventMap {}
+declare interface FrameworkEventMap extends RouterEventMap, LifecycleEventMap, I18nEventMap {}
 
 declare interface AppEventMap {}
 

@@ -16,4 +16,8 @@ describe('runCommand', () => {
     expect(error).toBeDefined();
     expect(error.message).toContain('7');
   });
+
+  it('passes arguments containing spaces through unsplit', async () => {
+    await runCommand('node', ['-e', 'if (process.argv[1] !== "a b") process.exitCode = 1', 'a b']);
+  });
 });

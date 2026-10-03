@@ -52,7 +52,7 @@ function createMemoryStorage() {
   };
 }
 
-export function installGlobals(window, { lang, mockFetch = {}, localesDir } = {}) {
+export function installGlobals(window, { lang, mockFetch = {}, localesDir, staticDir } = {}) {
   for (const key of Object.getOwnPropertyNames(window)) {
     setGlobal(globalThis, key, window[key]);
   }
@@ -90,7 +90,7 @@ export function installGlobals(window, { lang, mockFetch = {}, localesDir } = {}
 
   const fetchShim = (input) => {
     const url = typeof input === 'string' ? input : input?.url;
-    const promise = resolveFetch(url, { mockFetch, localesDir });
+    const promise = resolveFetch(url, { mockFetch, localesDir, staticDir });
     trackedFetches.push(promise);
     return promise;
   };
@@ -100,7 +100,7 @@ export function installGlobals(window, { lang, mockFetch = {}, localesDir } = {}
   return { trackedFetches };
 }
 
-async function resolveFetch(url, { mockFetch, localesDir }) {
+export async function resolveFetch(url, { mockFetch = {}, localesDir, staticDir } = {}) {
   if (Object.prototype.hasOwnProperty.call(mockFetch, url)) {
     return jsonResponse(mockFetch[url]);
   }
@@ -116,10 +116,39 @@ async function resolveFetch(url, { mockFetch, localesDir }) {
     return jsonResponse({});
   }
 
+  const staticFile = resolveStaticFile(url, staticDir);
+  if (staticFile) {
+    const text = fs.readFileSync(staticFile, 'utf-8');
+    return staticFile.endsWith('.json') ? jsonResponse(JSON.parse(text)) : textResponse(text);
+  }
+
   throw new Error(
     `Unexpected fetch("${url}") during SSR — no "mockFetch" entry for this endpoint and it isn't a ` +
-    `/locales/*.json request. Add a "mockFetch" entry for this route in config/seo.json if this is intentional.`
+    `/locales/*.json request or a file built into dist. Add a "mockFetch" entry for this route in config/seo.json if this is intentional.`
   );
+}
+
+// A root-relative URL naming a file the build already wrote (e.g. /generated/<id>.json,
+// fetched by the markdown feature's route guards). Paths escaping staticDir don't count.
+function resolveStaticFile(url, staticDir) {
+  if (!staticDir || typeof url !== 'string' || !url.startsWith('/')) return null;
+  const root = path.resolve(staticDir);
+  try {
+    const filePath = path.resolve(root, '.' + decodeURIComponent(url.split(/[?#]/)[0]));
+    if (!filePath.startsWith(root + path.sep)) return null;
+    return fs.statSync(filePath).isFile() ? filePath : null;
+  } catch {
+    return null;
+  }
+}
+
+function textResponse(body) {
+  return {
+    ok: true,
+    status: 200,
+    json: async () => JSON.parse(body),
+    text: async () => body,
+  };
 }
 
 function jsonResponse(body) {

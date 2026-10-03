@@ -70,6 +70,7 @@ export default {
 | `hubFiles` | `<FOLDER_NAME>.md` if it exists | Table of contents files, see [Hub files](#hub-files) |
 | `sectionInPath` | `false` | Include each hub's section in the page links: `/docs/<section>/<slug>` |
 | `prefixReplacements` | `[]` | `[prefix, replacement]` pairs applied to file names to build slugs, e.g. `HOWDOI_CREATE_A_VIEW.md` -> `create-a-view` |
+| `seo` | `true` | With `generateSEOFiles`, prerender every page and list it in `sitemap.xml`. Set `false` to keep this folder's pages client-side only |
 
 Adding a folder is all it takes: `markdownRoutes()` creates its route (`/<routePrefix>/:slug?`, or `/<routePrefix>/:section?/:slug?` with `sectionInPath`), and every folder is watched by the dev server.
 
@@ -128,10 +129,11 @@ Metadata is read from an optional YAML frontmatter, and falls back to the Markdo
 ```md
 ---
 title: My page        # defaults to the first "# Heading"
-description: Summary  # defaults to the first paragraph
+description: Summary  # defaults to the first paragraph, as plain text
 slug: my-page         # defaults to the file name
 order: 2              # pages are sorted by order, then by path
 group: Guides         # groups pages under a heading in the navigation
+ogImage: /og/page.jpg # social preview image of the page's SEO HTML
 ---
 
 # My page
@@ -185,12 +187,43 @@ Check every folder without building the app:
 <pm> run markdown:check
 ```
 
+## Translate pages (i18n)
+
+With `i18n: true` (see [How do I use i18n?](HOWDOI_USE_I18N.md)), put each language's pages in a subfolder named after it, with the same file names (or frontmatter `slug`) in every language:
+
+```
+content/
+  en/
+    getting-started.md
+    writing-pages.md
+  fr/
+    getting-started.md
+```
+
+- The default language (`config/languages.json`) defines the pages, their order and sections: a translation only translates them. A page or section that exists only in a translation fails the build.
+- A page without a translation shows its default-language version, and the build lists those pages in a warning. Links from a translation to an untranslated page work the same way.
+- Hub files go in each language folder, with the same file names. Their titles, descriptions and `### Group` headings are translated by position.
+- Pages are served at `/<lang>/<routePrefix>/<slug>`, and links in compiled pages and the navigation carry the language. Switching language reloads the current page in the new one.
+- A folder without language subfolders serves the same pages in every language. With `i18n: false`, a localized folder only compiles its default language.
+
+The feature's own texts ("On this page", "Nothing here yet.", the navigation's label) are translated from `src/app/markdown/locales/<lang>.json` (keys `onThisPage`, `empty`, `pages`). Only `en.json` ships; add a file per language, otherwise the English text is shown.
+
+## SEO file generation
+
+With `generateSEOFiles: true`, every page is prerendered at its own URL (`/<routePrefix>/<slug>/`, or `/<routePrefix>/<section>/<slug>/` with `sectionInPath`) and listed in `sitemap.xml`. With i18n, every language gets its page (`/<lang>/<routePrefix>/<slug>/`) with its translated title and description, and `hreflang` links between them; an untranslated page is published in the default language. Its `<title>`, description and `og:image` come from the page's metadata, so no `config/seo.json` entry is needed. A page without a description uses its section's, then its title, and the build warns about it.
+
+To customize one page, add a `config/seo.json` route for its URL: it replaces the generated one.
+
+```json
+{ "path": "/docs/:section?/:slug?", "mockParams": { "section": "api", "slug": "navigate" }, "title": "Navigate API" }
+```
+
+Set `seo: false` on a folder to skip its pages. See [How do I use SEO file generation?](HOWDOI_USE_SEO_FILE_GENERATION.md).
+
 ## Important
 
 - The page HTML is injected as trusted content: only compile Markdown you wrote.
 
 ## Limitations
 
-- Does not support i18n yet.
-- Pages are rendered client-side only: SEO file generation does not pre-render them yet.
 - Code blocks are not syntax-highlighted - add a highlighter in `MarkdownContentComponent`'s `onAfterRender()` if you need one.

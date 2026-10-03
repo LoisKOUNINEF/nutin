@@ -15,14 +15,15 @@ export async function getAppRoutePaths(bundleUrl, lang, pageUrl) {
   // window.location.pathname, so a location-less window crashes as soon as the
   // bundle's module-load side effects instantiate I18n.getInstance().
   const { window } = parseHTML('<!doctype html><html><body></body></html>', { location: new URL(pageUrl) });
-  installGlobals(window, { lang });
+  installGlobals(window, { lang, localesDir: path.join(PATHS.tempSource, 'locales') });
   const bundle = await import(`${bundleUrl}?ssr=routes-check`);
   return Object.keys(bundle.appRoutes);
 }
 
 /**
- * Renders one (route, lang) pair by instantiating the real View via appRoutes and calling
- * .render(), returning the resulting real markup. Fresh linkedom window + cache-busted
+ * Renders one (route, lang) pair by running the route's guards, then instantiating the real
+ * View via appRoutes and calling .render(). Returns `{ html }`, or `{ blocked, redirectTo }`
+ * when a guard refuses the route. Fresh linkedom window + cache-busted
  * dynamic import per call, so no singleton state (I18nService, etc.) leaks between renders.
  */
 export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFetch, lang, pageUrl, i18nEnabled }) {
@@ -37,6 +38,7 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
     lang,
     mockFetch: mockFetch ?? {},
     localesDir: path.join(PATHS.tempSource, 'locales'),
+    staticDir: PATHS.tempSource,
   });
 
   let Service;
@@ -59,8 +61,16 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
 
     if (i18nEnabled) await I18nService.setCurrentLanguage(lang);
 
-    const viewConstructor = RouteGuardsManager.getViewConstructor(routeConfig);
-    const view = viewConstructor();
+    // The route's guards run as they would for an anonymous first visit (empty storage,
+    // no session): a blocked or redirected route must not ship as public static HTML.
+    // Running them in this bundle instance also keeps what loader guards fetched (e.g.
+    // a Markdown manifest) available to the view rendered below.
+    const guardResult = await RouteGuardsManager.processRouteGuards(routeConfig, pageUrl, mockParams ?? {});
+    if (!guardResult.allowed) {
+      return { blocked: true, redirectTo: guardResult.redirectTo };
+    }
+
+    const view = guardResult.viewConstructor();
     constructorName = view.constructor.name;
 
     if (mockParams) view.setRouteParams(mockParams);
@@ -70,7 +80,7 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
     await Promise.all(trackedFetches);
     await Promise.resolve();
 
-    return element.outerHTML;
+    return { html: element.outerHTML };
   } catch (err) {
     throw new Error(
       `[ssr] Failed to render route "${appRoutesKey}" (lang "${lang}", view "${constructorName}"): ${err.message}${hintForError(err)}`,
@@ -92,7 +102,7 @@ function hintForError(err) {
     return (
       `\n  Hint: this usually means the component tree touches an unguarded browser global ` +
       `(e.g. "window", "navigator", "matchMedia") that isn't polyfilled for SSR — see ` +
-      `tools/builder/core/ssr/ssr-polyfills.js.`
+      `tools/builder/core/seo/ssr/ssr-polyfills.js.`
     );
   }
   return '';

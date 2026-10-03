@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import path from "path";
-import { allFormats, getLastWord, print, promptBoolean, errorExit } from "../utils/index.js";
+import { allFormats, getLastWord, print, errorExit } from "../utils/index.js";
 import fs from "fs";
 import { generateFile, generateLocalesJson } from "./handle-file.js";
 import { serviceTemplate, componentTemplate, viewTemplate, htmlTemplate, scssTemplate, testTemplate } from "./templates/index.js";

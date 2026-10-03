@@ -25,11 +25,31 @@ function tryAcquire() {
 }
 
 function isStale() {
+  let mtimeMs;
   try {
-    const { mtimeMs } = fs.statSync(LOCK_DIR);
-    return Date.now() - mtimeMs > STALE_MS;
+    ({ mtimeMs } = fs.statSync(LOCK_DIR));
   } catch {
     return true; // lock vanished mid-check (released concurrently) — treat as free
+  }
+  if (Date.now() - mtimeMs > STALE_MS) return true;
+  return isHolderDead();
+}
+
+// A build killed hard (kill -9, a crash) never releases — free the lock right away
+// when the pid that wrote it is gone instead of waiting out STALE_MS.
+function isHolderDead() {
+  let pid;
+  try {
+    pid = Number(fs.readFileSync(path.join(LOCK_DIR, 'pid'), 'utf-8'));
+  } catch {
+    return false; // pid not written yet (holder is mid-acquire) — not provably dead
+  }
+  if (!Number.isInteger(pid) || pid <= 0) return false;
+  try {
+    process.kill(pid, 0);
+    return false;
+  } catch (err) {
+    return err.code === 'ESRCH';
   }
 }
 
@@ -66,4 +86,12 @@ export async function acquireBuildLock() {
   }
 
   process.on('exit', release);
+  // 'exit' doesn't fire when a signal terminates the process (Ctrl-C, dev-serve's
+  // group kill), so release explicitly there too, then exit the way the signal would have.
+  for (const [signal, code] of [['SIGINT', 130], ['SIGTERM', 143], ['SIGHUP', 129]]) {
+    process.once(signal, () => {
+      release();
+      process.exit(code);
+    });
+  }
 }

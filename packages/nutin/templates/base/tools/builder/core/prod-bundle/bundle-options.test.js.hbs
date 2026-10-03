@@ -1,14 +1,16 @@
 import { sharedDefine, slimNutinConfig, slimSeoConfig, isPlainData } from './bundle-options.js';
 
 describe('bundle-options', () => {
-  it('sharedDefine sets NODE_ENV and the i18n flag from the build config', () => {
+  it('sharedDefine sets NODE_ENV, the i18n flag and the markdown sources from the build config', () => {
     expect(sharedDefine({ isProd: true, i18n: false })).toEqual({
       'process.env.NODE_ENV': '"production"',
       'globalThis.__NUTIN_I18N__': 'false',
+      'globalThis.__NUTIN_MARKDOWN_SOURCES__': JSON.stringify('[]'),
     });
-    expect(sharedDefine({ isProd: false, i18n: true })).toEqual({
+    expect(sharedDefine({ isProd: false, i18n: true, markdownSources: { sourceFolders: ['docs', { folder: 'x', seo: false }] } })).toEqual({
       'process.env.NODE_ENV': '"development"',
       'globalThis.__NUTIN_I18N__': 'true',
+      'globalThis.__NUTIN_MARKDOWN_SOURCES__': JSON.stringify('["docs",{"folder":"x","seo":false}]'),
     });
   });
 
@@ -26,7 +28,6 @@ describe('bundle-options', () => {
     expect(slim).toEqual({
       i18n: true,
       generateSEOFiles: false,
-      markdownSources: { sourceFolders: ['docs'] },
       myAppKey: 'kept',
     });
   });

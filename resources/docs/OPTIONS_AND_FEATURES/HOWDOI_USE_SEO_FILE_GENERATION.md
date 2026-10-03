@@ -83,6 +83,17 @@ export default {
 | `title` | yes | `string \| { [lang]: string }` | A flat string applies to every language uniformly; use a per-language object to localize. |
 | `description` | yes | `string \| { [lang]: string }` | Same rules as `title`. |
 | `ogImage` | no | `string \| { [lang]: string }` | Only written into `og:image`/`twitter:image` when present — omit to leave those tags out entirely. |
-| `mockParams` | required if `path` has dynamic segments | `{ [param]: string }` | One representative value per dynamic segment, used to SSR-render that route at build time; missing one is a build-time `exit(1)`. |
+| `mockParams` | required if `path` has dynamic segments | `{ [param]: string }` | One representative value per dynamic segment, used to SSR-render that route at build time; missing one is a build-time `exit(1)`. The page is written to `path` with those values filled in (`/blog/:slug` + `{ "slug": "hello-world" }` → `/blog/hello-world/`), which is also the URL listed in `sitemap.xml`. |
+| `outputPath` | no | `string` | Overrides the URL path the page is written to and listed under in `sitemap.xml`, e.g. to prerender several pages of one dynamic route as separate entries. |
 | `mockFetch` | no | `{ [url]: jsonBody }` | Exact-URL-keyed map — any `fetch(url)` call made while SSR-rendering this route that matches a key resolves to `jsonBody` instead of hitting the network. For views that fetch data on mount. |
-| `disallow` | no | `true \| string[]` | `true` blocks this path for every bot in `robots.txt`; an array of bot names blocks it only for those bots. |
+| `disallow` | no | `true \| string[]` | `true` blocks this path for every bot in `robots.txt` (and leaves it out of `sitemap.xml`); an array of bot names blocks it only for those bots. Dynamic segments become `*` wildcards, and with i18n each language prefix is covered. A bot listed in `disallowBots` stays fully blocked. |
+
+## Guarded routes
+
+A route's guards run at build time before its page is prerendered, as they would for a first-time anonymous visitor: storage is empty and there's no session. If a guard blocks the route or redirects it (e.g. an auth guard sending logged-out visitors to `/`), no HTML is written for it, it's left out of `sitemap.xml`, and the build prints a warning. Private pages therefore never ship as public static files.
+
+Guards that load data and allow the route still work, like the `markdown` feature's guards: during the build, `fetch()` can read files the build already wrote (e.g. `/generated/<name>.json`), plus any `mockFetch` entry.
+
+## Markdown pages
+
+With the [Markdown feature](HOWDOI_USE_MARKDOWN_FEATURE.md#seo-file-generation), every compiled page gets its SEO HTML and sitemap entry automatically, without `config/seo.json` routes. A `config/seo.json` route producing the same URL replaces the generated one.

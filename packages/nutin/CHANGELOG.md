@@ -32,6 +32,8 @@
     - Rendered by a `MarkdownView` with navigation and a table of contents. Each folder gets a route from `markdownRoutes()` (spread into `appRoutes`), and its manifest is loaded by that route's guard on first visit, through `MarkdownManifestsService` (`loadAll()` preloads every manifest). 
     - Adding a folder only takes a config change. Supports YAML frontmatter, hub (table of contents) files, sections in routes (`/docs/:section?/:slug?`) and internal links between pages. 
     - Duplicate slugs and broken links fail the build; content is validated before building.
+    - With `generateSEOFiles: true`, every page is prerendered at its own URL with its title, description and `og:image` (new frontmatter `ogImage`), and listed in `sitemap.xml`, with no `config/seo.json` entries needed. A `seo.json` route for the same URL overrides the generated one; `seo: false` on a folder opts it out. Descriptions taken from a page's first paragraph are plain text (no `[link](url)` or `**` marks).
+    - i18n: with `i18n: true`, a folder with one subfolder per language (`content/en/`, `content/fr/`) is compiled to one manifest per language (`/generated/<name>.<lang>.json`). The default language defines the pages; a missing translation shows the default-language page and is listed in a build warning, and a page that only exists in a translation fails the build. Links carry the `/<lang>` prefix, a language change reloads the current page in the new language, and with `generateSEOFiles` every language gets its own SEO page with `hreflang` alternates. The feature's UI texts are translatable through `src/app/markdown/locales/<lang>.json`. Without i18n, nothing changes and no i18n code is bundled.
 
 - **Stable child identity and reuse**
 
@@ -47,7 +49,34 @@
 
 - `dev`, `serve`, `serve:prod` and `serve:only` accept a port: `npm run dev -- --port 3000`, `npm run serve -- --port=3000`, or `PORT=3000 npm run dev`. Precedence is `--port` > `PORT` > `9090` (default). Invalid ports fail fast with a clear error.
 
-- The dev server now logs the URL it's serving on. If the port is busy, live-server falls back to a random free port that is now reported with a warning.
+- **live-server is replaced by a built-in dev server** (`tools/dev/serve.js`, `node:http`, no dependency). live-server hasn't been released since 2019 and pulled in outdated dependencies. The new server logs its URL and fails with a `--port` hint when the port is busy (live-server silently moved to a random port). Prerendered SEO pages are served from their folder's `index.html`. Page navigations without a matching file get the SPA shell, even when the URL contains a dot (`/users/john.doe` used to 404); a missing asset gets a 404. `dev` reloads open pages after each successful rebuild (Server-Sent Events, via an external script so a CSP without `'unsafe-inline'` still allows it). `serve`/`serve:prod` no longer live-reload. Existing apps can remove `live-server` from their `devDependencies`.
+
+- New apps get `esbuild` 0.28, `jsdom` 30 and `chokidar` 5 (they were on 0.25, 26 and 4). Existing apps keep their versions, and the updated tools work with both.
+
+- **New TypeScript apps use TypeScript 7** (`^7.0.2`, the native compiler).
+
+    - The build's route check (`validate-routes.js`) no longer imports `typescript`, since TypeScript 7 has no JavaScript API. It now uses esbuild for both TS and JS apps and reports the line of each duplicate route. A duplicate key anywhere in `routes.ts` is now reported, not only inside `appRoutes`. The CLI keeps its own pinned TypeScript 5.9.3 for `--js-only` generation; that version is separate from your app's.
+    - The generated `tsconfig.json` no longer sets `baseUrl` (removed in TypeScript 7) or the empty `paths`.
+    - The global `NavigationEventMap` declaration in `core/internals.d.ts` is renamed `RouterEventMap`. lib.dom now has its own `NavigationEventMap` (the Navigation API), and the two merged into conflicting `navigate` types.
+    - To upgrade an existing app: run `nutin-update`, set `"typescript": "^7.0.2"` in `devDependencies`, and remove `baseUrl` and the empty `paths` from `tsconfig.json`. The updated tools also still work on TypeScript 5.
+
+- The `dev` watcher now also rebuilds when files are added or deleted (e.g. by `npm run generate`), and when `config/`, `public/` or `nutin.config.js` change. It used to react to edits of existing `src/` files only.
+
+- Opt-in dependencies (Tailwind, `markdown`) are installed by one shared helper, `tools/utils/ensure-deps.js`. Tailwind now behaves like `markdown`: outside an interactive terminal (CI, the dev watcher) it no longer installs packages on its own; pass `-- -y` to allow it. Its prod-build error shows the install command for your package manager instead of always `npm install`. The `-y` env variable is now `NUTIN_ASSUME_YES` (was `NUTIN_MARKDOWN_ASSUME_YES`). The Tailwind CLI is started through `node`, so it also works on Windows.
+
+- Dynamic SEO routes are written to their real URL: `/blog/:slug` with `mockParams: { "slug": "hello-world" }` goes to `/blog/hello-world/` and is listed in `sitemap.xml` under that URL. Before, it went to a literal `:slug/` folder that no URL reached. New optional `outputPath` route field overrides that path.
+
+- Prod builds compress files last, so prerendered SEO pages, `index.html`, `sitemap.xml` and `robots.txt` also get `.gz`/`.br` versions for nginx's `gzip_static`/`brotli_static`.
+
+- testin-nutin mocks match the real services' public APIs. `MockEventBus` gets `subscribe`/`once`/`emit`/`off` with real dispatch (`subscribe`d callbacks used to never run, and `on()`, which `EventBus` doesn't have, is gone). `MockI18n` gets `setCurrentLanguage`, `onLanguageChange`, `getTranslationObject`, the `defaultLanguage`/`languages`/`localStorageKey` getters, and the real `translate(key, textContent)` lookup with nested keys and default-language fallback (the private-method mocks are gone). `MockRouter` gets `reload`, `getCurrentParams`, `getParam`, `removeEventListeners` and a `setParams()` helper. `MockHttpClient` gets `addRequestInterceptor`/`addResponseInterceptor`.
+
+- `I18nService.onLanguageChange(callback)` now returns a function that unsubscribes the callback, like `Navigation.onNavigate()`. `MockI18n` does the same.
+
+- New `testin-nutin:only` script runs the tests without rebuilding (it was already referenced in `AGENTS.md`).
+
+- Two folders with the same name in different places (e.g. `admin/user/` and `public/user/`) used to overwrite each other's translations silently, since locales are keyed by folder name. That now fails the build and names both folders.
+
+- `runCommand` no longer goes through a shell outside Windows, so arguments with spaces are passed unsplit.
 
 - `dev` no longer leaves the server and watcher running (holding the port) when the terminal tab/window is closed or `dev-serve.js` is killed hard: it now handles `SIGHUP`, and both children exit when their IPC channel to it drops.
 
@@ -64,7 +93,7 @@
     - Core services you don't use are left out of the bundle. `AppHttpClient` and the other singletons are now marked pure, so esbuild drops them when nothing imports them. An app that never imports `AppHttpClient` therefore no longer creates a default instance at load. Subclasses of `HttpClient` aren't affected.
     - With `i18n: false`, the i18n code (`I18nService`, `languages.json`, locale routing) is left out of the bundle unless app code references `I18nService`. New `initI18n()` (exported from `core/index`) loads the translations when `i18n` is enabled and does nothing otherwise. `main.ts` now calls `await initI18n()` instead of checking `nutinConfig.i18n` itself. `I18nService.initTranslations()` is unchanged.
     - With i18n disabled, a per-language `title` in `config/seo.json` resolves to its first value. It used to depend on the browser's language.
-    - The browser bundle no longer includes the tooling-only parts of `nutin.config.js` (`builder`, `testinNutin`, `dockerPorts`) or the `config/seo.json` fields it doesn't read: it keeps each route's `path` and `title`, and drops `baseUrl`, descriptions, `ogImage` and `disallowBots`. Any other config key stays readable from app code.
+    - The browser bundle no longer includes the tooling-only parts of `nutin.config.js` (`builder`, `testinNutin`, `dockerPorts`, `markdownSources`; the markdown feature's code gets its folder list at build time instead, so an app that doesn't use it ships none of it) or the `config/seo.json` fields it doesn't read: it keeps each route's `path` and `title`, and drops `baseUrl`, descriptions, `ogImage` and `disallowBots`. Any other config key stays readable from app code.
 
 ### Fixes
 
@@ -85,6 +114,34 @@
 - Broken internal Markdown links are all reported at once per page, without marked's misleading "Please report this to marked" suffix.
 
 - testin-nutin's TODO lines now show the real `.test.js` path in TypeScript projects instead of `.test.ts`.
+
+- `testin-nutin:watch` works: it ran a nonexistent `testin-nutin/runner.js`. It also rebuilds before each run (tests import `dist/`), watches `src/` (plus `tools/` with `includeTools`), and reacts to added and deleted files. A change made while tests are running now triggers another run instead of being dropped.
+
+- A test file that fails to import (syntax error, bad import) now fails the run with exit code 1. It used to be printed and skipped, so CI passed.
+
+- A build killed by Ctrl-C, `kill` or a crash no longer leaves `.build-lock` behind. The next build used to wait 2 minutes and then fail. The lock is released on `SIGINT`/`SIGTERM`/`SIGHUP`, and a lock whose process is gone is freed right away.
+
+- `$$`, `$&`, `` $` `` and `$'` in component/view templates are kept literally when merged. `Cost: $$5` used to become `Cost: $5`, and `$&` pasted the placeholder back in. The same applies to prerendered SEO pages (`$&` in rendered content duplicated the `#app` element).
+
+- `robots.txt`: a bot listed in `disallowBots` stays fully blocked even when a route also names it in `disallow`. A bot with its own group now repeats the global `disallow: true` paths, since robots.txt groups don't inherit `*`. With i18n, disallowed paths cover each `/<lang>/` prefix, and dynamic segments become `*`.
+
+- `sitemap.xml` leaves out routes disallowed for every bot, and its URLs are XML-escaped.
+
+- SEO prerendering runs each route's guards first, as an anonymous visitor. A route a guard blocks or redirects (e.g. a logged-out `/admin` sent to `/`) is no longer written as public static HTML. It's also left out of `sitemap.xml`, with a build warning naming it. Guards that allow the route still run, so loader guards (the `markdown` feature's) have their data when the page renders. During SSR, `fetch()` can also read files the build already wrote (e.g. `/generated/<name>.json`); paths outside the build folder are refused.
+
+- SEO prerendering fills any element with `id="app"`, not only `<main id="app">`, and keeps its attributes (other elements used to get empty pages). It fails the build when index.html has no closed `#app` element.
+
+- SSR's route check passes the locales folder, so a locale fetch during module load no longer throws an unhandled rejection.
+
+- Sass partials (`_name.scss`) under `src/app` are no longer compiled on their own, which duplicated their CSS in `main.css`.
+
+- `toBeLessThan`/`toBeGreaterThan` no longer pass when both values are equal.
+
+- In testin-nutin, a `beforeEach`/`afterEach`/`beforeAll`/`afterAll` declared after some `it()` calls now applies to them too.
+
+- A coverage run that covers no file now reports 0% instead of 100%, so it fails a threshold instead of passing it.
+
+- The SSR "unguarded browser global" hint points to the real `tools/builder/core/seo/ssr/ssr-polyfills.js` path.
 
 ## 2.1.1
 

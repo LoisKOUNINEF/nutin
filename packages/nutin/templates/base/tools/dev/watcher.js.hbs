@@ -6,9 +6,11 @@ import { print } from '../utils/index.js'
 import nutinConfig from '../../nutin.config.js';
 {{/if}}
 
-const watcher = chokidar.watch(['src'], {
+// config/, nutin.config.js and public/ are copied into the build too.
+const watcher = chokidar.watch(['src', 'config', 'public', 'nutin.config.js'], {
   ignored: /(^|[/\\])\../,
   persistent: true,
+  ignoreInitial: true,
 });
 {{#if markdown}}
 
@@ -59,6 +61,8 @@ function runBuild() {
       }
     } else {
       printWatching();
+      // Relayed by dev-serve.js to serve.js, which tells open pages to reload.
+      if (process.send && process.connected) process.send({ type: 'reload' });
     }
     isBuilding = false;
 
@@ -73,7 +77,9 @@ watcher.on('error', (err) => {
   print.boldError(`\nWatcher error: ${err.message}`);
 });
 
-watcher.on('change', (filePath) => {
+// New files (e.g. from `{{packageManager}} run generate`) and deletions need a rebuild too.
+watcher.on('all', (event, filePath) => {
+  if (!['add', 'change', 'unlink'].includes(event)) return;
   lastChangedPath = filePath;
 
   if (isBuilding) {

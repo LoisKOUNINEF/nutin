@@ -69,7 +69,9 @@ async function resolveExternalTemplate(htmlPath, resolvedPaths, failures) {
     warnIfUntagged(codePath, content, htmlContent);
 
     if (content.includes(PLACEHOLDER)) {
-      await fs.writeFile(codePath, content.replace(PLACEHOLDER, minifiedHtml));
+      // Replacements go through functions: a replacement *string* expands `$$`, `$&`,
+      // `$'`… found in the markup (e.g. `$${price}` would lose its `$`).
+      await fs.writeFile(codePath, content.replace(PLACEHOLDER, () => minifiedHtml));
       mergedCount++;
       continue;
     }
@@ -107,7 +109,7 @@ async function resolveRemainingTemplates(resolvedPaths, failures) {
     }
 
     const minified = await minifyHTML(body);
-    await fs.writeFile(codePath, content.replace(full, full.replace(body, minified)));
+    await fs.writeFile(codePath, content.replace(full, () => full.replace(body, () => minified)));
   }
 }
 
