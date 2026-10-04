@@ -35,6 +35,12 @@ export interface IMarkdownSection {
   pages?: string[];
 }
 
+// Compiled from a folder's "landing" option: the index shown on its bare route.
+export interface IMarkdownLanding {
+  title: string;
+  description: string;
+}
+
 export interface IMarkdownSource {
   id: string;
   sectionInPath: boolean;
@@ -43,6 +49,7 @@ export interface IMarkdownSource {
 interface IMarkdownManifestData {
   sections: IMarkdownSection[];
   pages: Record<string, IMarkdownPage>;
+  landing?: IMarkdownLanding;
 }
 
 const EMPTY_MANIFEST: IMarkdownManifestData = { sections: [], pages: {} };
@@ -56,6 +63,7 @@ export class MarkdownManifest {
   private readonly getLanguage: () => string | null;
   private readonly _data = new Map<string, IMarkdownManifestData>();
   private readonly _loading = new Map<string, Promise<void>>();
+  private readonly _failed = new Set<string>();
 
   // getLanguage: the current language, or null without i18n (overridable for tests).
   constructor({ id, sectionInPath }: IMarkdownSource, getLanguage: () => string | null = markdownLanguage) {
@@ -80,7 +88,13 @@ export class MarkdownManifest {
     return this._data.has(this.lang);
   }
 
-  // Fetched once per language. A failed load keeps it empty and is retried on the next call.
+  // True when the last load for the current language failed: the manifest is empty because of
+  // an error, not because the folder has no pages.
+  public get loadFailed(): boolean {
+    return this._failed.has(this.lang);
+  }
+
+  // Fetched once per language. A failed load keeps it empty, sets loadFailed, and is retried on the next call.
   public load(): Promise<void> {
     const lang = this.lang;
     let loading = this._loading.get(lang);
@@ -97,14 +111,21 @@ export class MarkdownManifest {
       const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       this._data.set(lang, await response.json());
+      this._failed.delete(lang);
     } catch (error) {
       this._loading.delete(lang);
+      this._failed.add(lang);
       console.error(`Markdown manifest load error (${url}):`, error);
     }
   }
 
   private get data(): IMarkdownManifestData {
     return this._data.get(this.lang) ?? EMPTY_MANIFEST;
+  }
+
+  // Set when the folder has a "landing": its bare route shows an index instead of the first page.
+  public get landing(): IMarkdownLanding | undefined {
+    return this.data.landing;
   }
 
   public get sections(): IMarkdownSection[] {

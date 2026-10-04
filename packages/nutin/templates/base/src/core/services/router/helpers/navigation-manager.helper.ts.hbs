@@ -101,7 +101,7 @@ export class NavigationManager {
       : undefined;
     const seoTitle = route?.title ? this.resolveSeoTitle(route.title) : undefined;
     const localeTitle = (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n) ? I18nService.getTranslationObject<string>(`${view.viewName}.title`) : null;
-    document.title = seoTitle || localeTitle || view.viewName;
+    document.title = view.documentTitle?.() || seoTitle || localeTitle || view.viewName;
   }
 
   private static resolveSeoTitle(title: string | Record<string, string>): string | undefined {

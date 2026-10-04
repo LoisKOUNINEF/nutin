@@ -1,6 +1,15 @@
 import { IMarkdownSource } from './markdown-manifest.js';
 
-export type MarkdownSourceEntry = string | { folder: string; routePrefix?: string; sectionInPath?: boolean; seo?: boolean };
+export type MarkdownSourceEntry = string | {
+  folder: string;
+  routePrefix?: string;
+  hubFiles?: string[];
+  sectionInPath?: boolean;
+  prefixReplacements?: [string, string][];
+  seo?: boolean;
+  ogImage?: string;
+  landing?: boolean | { title?: string; description?: string };
+};
 
 declare global {
   // Set by the builder's esbuild define (tools/builder/core/prod-bundle/bundle-options.js):

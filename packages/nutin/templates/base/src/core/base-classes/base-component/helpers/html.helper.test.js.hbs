@@ -49,6 +49,25 @@ describe('html', () => {
     expect(String(html`${1}|${true}|${null}|${undefined}|${false}|${0}`)).toBe('1|true||||0');
   });
 
+  it('html keeps null and undefined as literal strings in a data-optional value only', () => {
+    expect(String(html`<p data-optional="${undefined}">a</p>`)).toBe('<p data-optional="undefined">a</p>');
+    expect(String(html`<p data-optional='${null}'>a</p>`)).toBe(`<p data-optional='null'>a</p>`);
+    expect(String(html`<p data-optional=${undefined}>a</p>`)).toBe('<p data-optional="undefined">a</p>');
+    expect(String(html`<p data-optional="${'x'}" title="${undefined}">${undefined}</p>`)).toBe('<p data-optional="x" title=""></p>');
+  });
+
+  it('data-optional="${value}" removes the element when value is undefined, even with other content', () => {
+    const component = new TestComponent({
+      config: {},
+      templateFn: (cfg) => html`<div><h3 data-optional="${cfg.title}">• ${cfg.title}</h3><p data-optional="${'kept'}">• kept</p></div>`,
+    });
+
+    component.render();
+
+    expect(component.getElement().querySelector('h3')).toBe(null);
+    expect(component.getElement().querySelector('p').textContent).toBe('• kept');
+  });
+
   it('html inserts nested html results without escaping them again', () => {
     const inner = html`<b>${'<i>'}</b>`;
     expect(String(html`<p>${inner}</p>`)).toBe('<p><b>&lt;i&gt;</b></p>');

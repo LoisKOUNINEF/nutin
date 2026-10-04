@@ -15,6 +15,7 @@
 - **Templates are escaped at output**
 
     - New `html` tag, `raw()` and `trustedRaw()`. In an `html`... template, every `${}` is HTML-escaped, so data from any source renders as text and can't inject markup or `data-event`/`data-component` attributes. Nested `html` results are inserted as-is. Unquoted attribute values (`title=${x}`) are quoted automatically, so a value with spaces can't add attributes. `raw()` inserts HTML unescaped: at render it's parsed, stripped of Nutin's binding attributes and sanitized as nodes, so injected markup can't call component methods or mount children; in tag position (`<input ${raw('checked')}>`) it keeps only safe attributes; `trustedRaw()` keeps them, for markup you wrote yourself (the `markdown` feature uses it).
+    - `data-optional="${value}"` still removes its element when `value` is `null`/`undefined`: in that attribute, `html` writes them as the literal strings the check looks for. Everywhere else they render as empty.
     - `data-event` tokens now pass raw values instead of HTML-escaped ones.
     - Removed `SecurityHelper.sanitizeInputElement()`.
     - The default `normal` trust level now also strips `srcdoc` attributes, SVG `<animate>`/`<set>` elements that rewrite a URL attribute and `javascript:` URLs. `data:` URLs are still stripped under `strict` only.
@@ -53,9 +54,16 @@
     - Compiles Markdown folders listed in `nutin.config.js`'s `markdownSources.sourceFolders` into `/generated/<name>.json` manifests at build time
     - Rendered by a `MarkdownView` with navigation and a table of contents. Each folder gets a route from `markdownRoutes()` (spread into `appRoutes`), and its manifest is loaded by that route's guard on first visit, through `MarkdownManifestsService` (`loadAll()` preloads every manifest). 
     - Adding a folder only takes a config change. Supports YAML frontmatter, hub (table of contents) files, sections in routes (`/docs/:section?/:slug?`) and internal links between pages. 
-    - Duplicate slugs and broken links fail the build; content is validated before building.
+    - Duplicate slugs and broken links fail the build; content is validated before building. A page listed more than once in a folder's hub files (twice, or in two hubs) fails the build too. Hub entries may use `-`, `*` or `+` bullets; any other list item under `## Table of Contents` is ignored with a warning giving its line.
+    - Heading ids turn accents into plain letters (`Été` → `ete`) and give a heading repeated on a page a `-1`, `-2`, ... suffix. Table of contents entries, page descriptions and hub descriptions are plain text: a description is the first paragraph or list item, without Markdown marks or HTML tags.
+    - A folder whose manifest can't be loaded shows "This page couldn't be loaded." (new `loadError` locale key) instead of its empty state, and is tried again on the next visit.
+    - Customizable from your own files: `markdownRoutes({ view })` builds each folder's view; `MarkdownView` takes `navComponent`, `contentComponent`, `landingComponent` (your own classes) and `onContentRendered(element, page)` (e.g. syntax highlighting), and its getters are protected. The nav, content and landing components take their template as an optional third constructor argument, and their render helpers are exported.
+    - Easy to restyle: the feature's styles have no specificity (`:where()`), so any app rule wins, and sizes are custom properties on `.markdown-view` (`--markdown-gap`, `--markdown-nav-width`, `--markdown-toc-width`, `--markdown-line-height`). The nav no longer takes a fixed 16rem height when stacked on narrow screens.
+    - `landing` folder option: the bare route shows an index of the folder (hub title, description, groups and pages; with `sectionInPath`, a landing per section) instead of its first page, prerendered and in the sitemap with `generateSEOFiles`.
+    - `ogImage` folder option: the default `og:image` of the folder's SEO pages.
+    - In-app navigation sets `document.title` to the page's title, like its prerendered SEO page.
     - With `generateSEOFiles: true`, every page is prerendered at its own URL with its title, description and `og:image` (new frontmatter `ogImage`), and listed in `sitemap.xml`, with no `config/seo.json` entries needed. A `seo.json` route for the same URL overrides the generated one; `seo: false` on a folder opts it out. Descriptions taken from a page's first paragraph are plain text (no `[link](url)` or `**` marks).
-    - i18n: with `i18n: true`, a folder with one subfolder per language (`content/en/`, `content/fr/`) is compiled to one manifest per language (`/generated/<name>.<lang>.json`). The default language defines the pages; a missing translation shows the default-language page and is listed in a build warning, and a page that only exists in a translation fails the build. Links carry the `/<lang>` prefix, a language change reloads the current page in the new language, and with `generateSEOFiles` every language gets its own SEO page with `hreflang` alternates. The feature's UI texts are translatable through `src/app/markdown/locales/<lang>.json`. Without i18n, nothing changes and no i18n code is bundled.
+    - i18n: with `i18n: true`, a folder with one subfolder per language (`markdown-content/en/`, `markdown-content/fr/`) is compiled to one manifest per language (`/generated/<name>.<lang>.json`). The default language defines the pages; a missing translation shows the default-language page and is listed in a build warning, and a page that only exists in a translation fails the build. Links carry the `/<lang>` prefix, a language change reloads the current page in the new language, and with `generateSEOFiles` every language gets its own SEO page with `hreflang` alternates. The feature's UI texts are translatable through `src/app/markdown/locales/<lang>.json`. Without i18n, nothing changes and no i18n code is bundled.
 
 - **Stable child identity and reuse**
 
@@ -63,11 +71,19 @@
     - A kept child is moved into its new placeholder with `Element.moveBefore()`, so it never leaves the document: iframes don't reload, CSS animations keep running and custom elements don't get `disconnectedCallback`. Where `moveBefore()` isn't supported (Safari), it is re-inserted, and focus, caret and scroll are restored.
     - New `onReuse()` lifecycle hook, called on a kept child instead of a render.
 
+- **Views can set their document title**
+
+    - New `View.documentTitle()`: return a title (e.g. the article shown) and the router uses it for `document.title` after each navigation, before `config/seo.json`'s title, the `<viewName>.title` translation and `viewName`.
+
 - **JS-only projects**
 
     - `nutin-new --js-only` generates a plain JavaScript project. TypeScript remains the default and recommended option.
 
 ### Changes
+
+- The [a11y-elements guide](https://nutin.org/guides/a11y-elements) now uses a11y-elements' `removeOverlaysWithin()`: components and views remove their overlays with it before re-rendering and when destroyed, and with `generateSEOFiles`, `main.ts` removes the pre-rendered overlays once the first view is mounted. An overlay moves itself to `<body>`, so these used to stay next to the new one (two overlays with the same `id`). From a CDN, overlays are loaded after the first view is mounted instead.
+
+- New [Upgrading from 2.x to 3.0](https://nutin.org/docs/tools/upgrading-to-v3) guide: how to replace the generated files and migrate `src/app`, since `nutin-update` doesn't handle major versions. It also covers data a 2.x app saved with HTML-escaped `data-event` values (`a &amp; b`), which 3.0 displays as typed.
 
 - `build:prod` runs `node tools/builder/builder.js --prod` instead of `NODE_ENV=production node …`, which Windows shells don't understand. `NODE_ENV=production` still works, so existing `package.json` scripts keep working.
 

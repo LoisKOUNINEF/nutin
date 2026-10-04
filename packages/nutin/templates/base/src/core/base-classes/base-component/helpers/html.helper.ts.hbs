@@ -37,12 +37,18 @@ let rawCounter = 0;
 // Tagged template: every ${} is HTML-escaped unless it is a SafeHtml (nested html``/raw()).
 // Arrays are interpolated item by item, so `${items.map((i) => html`<li>${i}</li>`)}` needs no join.
 // The parse context is tracked over the STATIC parts only, so interpolated data can't change it.
+// `data-optional="${x}"` removes its element when x is null/undefined: DomHelper.cleanupOptionalContent
+// looks for the literal strings, so they are kept there instead of rendering as ''.
+const OPTIONAL_VALUE = /\sdata-optional=["']?$/;
+
 export function html(strings: TemplateStringsArray, ...values: unknown[]): SafeHtml {
   const raws = new Map<string, string>();
   let out = strings[0] as string;
   let ctx: Context = scan('text', out);
   for (let i = 0; i < values.length; i++) {
-    const piece = interpolate(values[i], ctx, raws);
+    const value = values[i];
+    const fillsOptional = (value === null || value === undefined) && ctx !== 'text' && ctx !== 'tag' && OPTIONAL_VALUE.test(out);
+    const piece = fillsOptional ? String(value) : interpolate(value, ctx, raws);
     if (ctx === 'attr-unq-start') {
       // Unquoted attribute (`title=${x}`): quote the whole value so data can't add attributes.
       out += `"${piece.replace(/"/g, '&quot;')}"`;

@@ -3,7 +3,7 @@ import os from 'os';
 import path from 'path';
 import { Marked } from 'marked';
 import matter from 'gray-matter';
-import { compileLanguages, compileSource, normalizeSource, slugFromFilename, stripInlineMarkdown } from './markdown-compiler.js';
+import { compileLanguages, compileSource, firstProse, headingId, normalizeSource, slugFromFilename, stripInlineMarkdown } from './markdown-compiler.js';
 
 let root;
 
@@ -165,6 +165,108 @@ describe('markdown-compiler', () => {
     expect(message).toContain('"./one.md"');
     expect(message).toContain('"./two.md#part"');
     expect(message).not.toContain('Please report');
+  });
+
+  it('gives repeated headings unique ids and keeps accented letters as their base letter', () => {
+    const seen = new Map();
+    expect(['Usage', 'Usage', 'Usage'].map((text) => headingId(text, seen))).toEqual(['usage', 'usage-1', 'usage-2']);
+    expect(headingId('Résumé à côté', new Map())).toBe('resume-a-cote');
+
+    write('notes/a.md', '# A\n\n## Usage\n\n## Options\n\n## Usage\n\n## Été `chaud`\n');
+    const { manifest } = compile({ folder: 'notes', hubFiles: [] });
+    expect(manifest.pages.a.headings).toEqual([
+      { depth: 2, text: 'Usage', id: 'usage' },
+      { depth: 2, text: 'Options', id: 'options' },
+      { depth: 2, text: 'Usage', id: 'usage-1' },
+      { depth: 2, text: 'Été chaud', id: 'ete-chaud' },
+    ]);
+    expect(manifest.pages.a.html).toContain('<h2 id="usage-1">Usage</h2>');
+  });
+
+  it('keeps page slugs as they were: accents only change heading ids', () => {
+    write('notes/café.md', '# Café\n');
+    const { manifest } = compile({ folder: 'notes', hubFiles: [] });
+    expect(Object.keys(manifest.pages)).toEqual(['caf']);
+  });
+
+  it('derives descriptions from the first paragraph or list item, as plain text', () => {
+    expect(firstProse('<details>\n<summary>Q</summary>\n</details>\n\nA **real** `paragraph`\nover two lines.\n', Marked)).toBe('A real paragraph over two lines.');
+    expect(firstProse('## Fixes\n\n- Fixed `npm run dev` for **nested** templates.\n- Other fix.\n', Marked)).toBe('Fixed npm run dev for nested templates.');
+    expect(firstProse('```ts\nconst a = 1;\n```\n', Marked)).toBe('');
+    // Whichever comes first: a list before a later paragraph wins.
+    expect(firstProse('- Added `x`.\n\nNotes: about x.\n', Marked)).toBe('Added x.');
+    // HTML tags are dropped, but not inside code spans, where they are text.
+    expect(firstProse('A <em>tag</em> and `<b>code</b>`.\n', Marked)).toBe('A tag and <b>code</b>.');
+
+    write('log/1-0-0.md', '# 1.0.0\n\n## Fixes\n\n- Fixed `npm run dev`.\n');
+    const { manifest } = compile({ folder: 'log', hubFiles: [] });
+    expect(manifest.pages['1-0-0'].description).toBe('Fixed npm run dev.');
+  });
+
+  it('strips Markdown from hub descriptions', () => {
+    write('docs/TOOLS.md', '# Tools\n\n***Important:*** switching **package manager**\nneeds `care`.\n\n- a list after it\n\n## Table of Contents\n\n- [Builder](./BUILDER.md)\n');
+    write('docs/BUILDER.md', '# Builder\n');
+    const { manifest } = compile({ folder: 'docs', hubFiles: ['TOOLS.md'] });
+    expect(manifest.sections[0].description).toBe('Important: switching package manager needs care.');
+  });
+
+  it('fails on a page listed in two hub files, or twice in one', () => {
+    write('docs/API.md', '# API\n\n## Table of Contents\n\n- [Intro](./INTRO.md)\n');
+    write('docs/TOOLS.md', '# Tools\n\n## Table of Contents\n\n- [Intro again](./INTRO.md)\n');
+    write('docs/INTRO.md', '# Intro\n');
+    expect(() => compile({ folder: 'docs', hubFiles: ['API.md', 'TOOLS.md'] }))
+      .toThrow('"docs/INTRO.md" is listed in both "API.md" and "TOOLS.md"');
+
+    write('docs/API.md', '# API\n\n## Table of Contents\n\n- [Intro](./INTRO.md)\n- [Intro](./INTRO.md)\n');
+    expect(() => compile({ folder: 'docs', hubFiles: ['API.md'] })).toThrow('is listed in "API.md" twice');
+  });
+
+  it('accepts "*" and "+" page bullets in hub files, and warns about list items that are not pages', () => {
+    write('docs/DOCS.md', '---\ntitle: Docs\n---\n# Docs\n\n## Table of Contents\n\n* [A](./A.md)\n+ [B](./B.md)\n- [C](./C.md) — the third\n  - [D](./D.md)\n1. [E](./E.md)\n');
+    ['A', 'B', 'C', 'D', 'E'].forEach((name) => write(`docs/${name}.md`, `# ${name}\n`));
+    const { manifest, warnings } = compile('docs');
+
+    expect(manifest.sections[0].pages).toEqual(['a', 'b']);
+    const ignored = warnings.filter((w) => w.includes('is not a page entry'));
+    expect(ignored.length).toBe(3);
+    expect(ignored[0]).toContain('"DOCS.md" line 10');
+    expect(ignored[0]).toContain('- [C](./C.md) — the third');
+  });
+
+  it('validates the "ogImage" and "landing" options', () => {
+    expect(normalizeSource({ folder: 'docs', ogImage: '/og/docs.jpg' }, root).ogImage).toBe('/og/docs.jpg');
+    expect(() => normalizeSource({ folder: 'docs', ogImage: 3 }, root)).toThrow('"ogImage"');
+    expect(normalizeSource('docs', root).landing).toBe(null);
+    expect(normalizeSource({ folder: 'docs', landing: true }, root).landing).toEqual({});
+    expect(normalizeSource({ folder: 'docs', landing: { title: 'Docs' } }, root).landing).toEqual({ title: 'Docs', description: undefined });
+    expect(() => normalizeSource({ folder: 'docs', landing: 'yes' }, root)).toThrow('"landing"');
+    expect(() => normalizeSource({ folder: 'docs', landing: { title: 1 } }, root)).toThrow('"landing"');
+  });
+
+  it('adds a landing to the manifest: the single hub\'s title and description, or the folder\'s', () => {
+    write('guides/GUIDES.md', '# Guides\n\nHow-tos for **common** tasks.\n\n## Table of Contents\n\n- [A](./A.md)\n');
+    write('guides/A.md', '# A\n');
+    expect(compile('guides').manifest.landing).toBe(undefined);
+    expect(compile({ folder: 'guides', landing: true }).manifest.landing).toEqual({ title: 'Guides', description: 'How-tos for common tasks.' });
+
+    write('docs/API.md', '# API\n\nThe API.\n\n## Table of Contents\n\n- [A](./A.md)\n');
+    write('docs/TOOLS.md', '# Tools\n\n## Table of Contents\n\n- [B](./B.md)\n');
+    write('docs/A.md', '# A\n');
+    write('docs/B.md', '# B\n');
+    const hubs = { folder: 'docs', hubFiles: ['API.md', 'TOOLS.md'], sectionInPath: true };
+    expect(compile({ ...hubs, landing: true }).manifest.landing).toEqual({ title: 'docs', description: '' });
+    expect(compile({ ...hubs, landing: { title: 'Documentation', description: 'Everything.' } }).manifest.landing)
+      .toEqual({ title: 'Documentation', description: 'Everything.' });
+  });
+
+  it('translates a single-hub landing with its hub', () => {
+    write('guides/en/GUIDES.md', '# Guides\n\nHow-tos.\n\n## Table of Contents\n\n- [A](./A.md)\n');
+    write('guides/en/A.md', '# A\n');
+    write('guides/fr/GUIDES.md', '# Guides FR\n\nTutoriels.\n\n## Table of Contents\n\n- [A](./A.md)\n');
+    write('guides/fr/A.md', '# A FR\n');
+    const { manifests } = compileAll({ folder: 'guides', landing: true });
+    expect(manifests.en.landing).toEqual({ title: 'Guides', description: 'How-tos.' });
+    expect(manifests.fr.landing).toEqual({ title: 'Guides FR', description: 'Tutoriels.' });
   });
 
   it('fails on missing folders, hub files and listed pages', () => {

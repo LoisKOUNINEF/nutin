@@ -62,18 +62,20 @@ describe('MarkdownManifest', () => {
     expect(manifest.getPage('nope')).toBeUndefined();
   });
 
-  it('stays empty after a failed load and retries on the next one', async () => {
+  it('stays empty and flags loadFailed after a failed load, and retries on the next one', async () => {
     mockFetch(notFound(), ok(MANIFEST));
     const manifest = new MarkdownManifest({ id: 'docs', sectionInPath: false }, noLanguage);
 
     await silenceConsole('error', () => manifest.load());
     expect(manifest.loaded).toBe(false);
+    expect(manifest.loadFailed).toBe(true);
     expect(manifest.hasPages).toBe(false);
     expect(manifest.firstSlug).toBeUndefined();
 
     await manifest.load();
     expect(calls.length).toBe(2);
     expect(manifest.loaded).toBe(true);
+    expect(manifest.loadFailed).toBe(false);
   });
 
   it('with a language, fetches /generated/<id>.<lang>.json and reads the current language', async () => {

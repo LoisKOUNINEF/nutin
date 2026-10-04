@@ -42,6 +42,13 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
     return key in this.routeParams && this.routeParams[key] !== undefined;
   }
 
+  // The page's title, read by the router after each navigation (document.title). Override it
+  // for a title that depends on the route, e.g. the page being shown. Undefined: the router
+  // uses config/seo.json's title, then the "<viewName>.title" translation, then viewName.
+  public documentTitle(): string | undefined {
+    return undefined;
+  }
+
   // Navigation hooks — called by router only, never by render lifecycle
   public onEnter(): void {}
   public onExit(): void {}

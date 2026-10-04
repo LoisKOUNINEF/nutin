@@ -37,6 +37,15 @@ export function slugFromFilename(fileName, prefixReplacements = []) {
   return replacement ? `${replacement}${rest}` : slugify(rest);
 }
 
+// Heading ids: accents become their base letter (é → e) instead of being dropped, and a
+// repeated heading gets a -1, -2, ... suffix (GitHub style). `seen` is scoped to one page.
+export function headingId(text, seen) {
+  const base = slugify(String(text).normalize('NFKD').replace(/[\u0300-\u036f]/g, ''));
+  const count = seen.get(base) ?? 0;
+  seen.set(base, count + 1);
+  return count ? `${base}-${count}` : base;
+}
+
 const escapeAttr = (value) => String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 const toPosix = (p) => p.split(path.sep).join('/');
 
@@ -73,6 +82,20 @@ export function normalizeSource(entry, root) {
     fail(`"seo" for "${options.folder}" must be true or false`);
   }
 
+  if (options.ogImage !== undefined && (typeof options.ogImage !== 'string' || !options.ogImage.trim())) {
+    fail(`"ogImage" for "${options.folder}" must be an image path, e.g. "/assets/images/og.jpg"`);
+  }
+
+  let landing = null;
+  if (options.landing === true) {
+    landing = {};
+  } else if (options.landing !== undefined && options.landing !== false) {
+    const valid = typeof options.landing === 'object'
+      && ['title', 'description'].every((key) => options.landing[key] === undefined || typeof options.landing[key] === 'string');
+    if (!valid) fail(`"landing" for "${options.folder}" must be true, false or { title?, description? }`);
+    landing = { title: options.landing.title, description: options.landing.description };
+  }
+
   return {
     folder: options.folder,
     dir,
@@ -82,6 +105,10 @@ export function normalizeSource(entry, root) {
     prefixReplacements,
     // With generateSEOFiles, every page gets prerendered HTML and a sitemap entry unless false.
     seo: options.seo !== false,
+    // Default og:image of the folder's SEO pages; a page's frontmatter "ogImage" wins.
+    ogImage: options.ogImage,
+    // Opt-in: the bare route shows an index of the hub(s) instead of the first page.
+    landing,
     // Kept to resolve hub files again inside each language subfolder (see languageSource()).
     hubFilesOption: options.hubFiles,
     conventionalHub,
@@ -90,11 +117,15 @@ export function normalizeSource(entry, root) {
 
 // --- Hub parsing ---
 
-function parseHub(source, hubFile, matter) {
+function parseHub(source, hubFile, context) {
   const hubPath = path.join(source.dir, hubFile);
   if (!fs.existsSync(hubPath)) fail(`Hub file "${hubFile}" not found in "${source.folder}"`);
 
-  const { data, content } = matter(fs.readFileSync(hubPath, 'utf8'));
+  const raw = fs.readFileSync(hubPath, 'utf8');
+  const { data, content } = context.matter(raw);
+  // Line numbers in warnings count from the top of the file, frontmatter included.
+  const lineOffset = raw.split('\n').length - content.split('\n').length;
+  const warnings = [];
   const id = data.slug ?? slugify(path.basename(hubFile, path.extname(hubFile)).replace(/_/g, ' '));
   let title = null;
   const descriptionLines = [];
@@ -102,42 +133,48 @@ function parseHub(source, hubFile, matter) {
   let currentGroup = null;
   let sawToc = false;
 
-  for (const line of content.split('\n')) {
+  content.split('\n').forEach((line, index) => {
     const h1 = line.match(/^#\s+(.+?)\s*$/);
     const h2Toc = line.match(/^##\s+Table of Contents\s*$/i);
     const h3 = line.match(/^###\s+(.+?)\s*$/);
-    const item = line.match(/^-\s+\[(.+?)\]\((.+?)\)\s*$/);
+    const item = line.match(/^[-*+]\s+\[(.+?)\]\((.+?)\)\s*$/);
 
     if (h1 && title === null) {
       title = h1[1].trim();
-      continue;
+      return;
     }
     if (h2Toc) {
       sawToc = true;
-      continue;
+      return;
     }
     if (!sawToc) {
-      if (line.trim().length) descriptionLines.push(line.trim());
-      continue;
+      descriptionLines.push(line);
+      return;
     }
     if (h3) {
       currentGroup = { id: slugify(h3[1]), title: h3[1].trim(), pages: [] };
       groups.push(currentGroup);
-      continue;
+      return;
     }
     if (item) {
       const [, linkTitle, relPath] = item;
       const target = currentGroup ?? (currentGroup = { id: null, title: null, pages: [] });
       if (!groups.includes(target)) groups.push(target);
       target.pages.push({ title: linkTitle.trim(), source: path.normalize(path.join(source.dir, relPath)) });
+      return;
     }
-  }
+    // Anything else that looks like a list item under the TOC isn't a page: say so.
+    if (/^\s*(?:[-*+]|\d+[.)])\s+\S/.test(line)) {
+      warnings.push(`"${hubFile}" line ${lineOffset + index + 1} is not a page entry ("- [Title](./page.md)") and was ignored: ${line.trim()}`);
+    }
+  });
 
   return {
     id,
     title: data.title ?? title ?? id,
-    description: data.description ?? descriptionLines.join(' '),
+    description: data.description ?? firstProse(descriptionLines.join('\n'), context.Marked),
     groups,
+    warnings,
   };
 }
 
@@ -175,20 +212,36 @@ export function stripInlineMarkdown(text) {
     .trim();
 }
 
-// Title = first H1; description = first non-empty prose line after it.
-function deriveMeta(body, sourcePath) {
+// Plain text of inline Markdown that may also contain HTML tags. Tags inside `code spans`
+// are text, not markup: they are kept.
+export function plainText(text) {
+  const withoutTags = String(text)
+    .split(/(`[^`]*`)/)
+    .map((part, index) => (index % 2 ? part : part.replace(/<[^>]*>/g, ' ')))
+    .join('');
+  return stripInlineMarkdown(withoutTags);
+}
+
+// Plain text of the first prose block of some Markdown: a paragraph, or a list's first item,
+// whichever comes first. Headings, code, tables and HTML blocks are skipped.
+export function firstProse(markdown, Marked) {
+  const block = new Marked({ gfm: true }).lexer(markdown).find((token) => token.type === 'paragraph' || token.type === 'list');
+  if (!block) return '';
+  return plainText(block.type === 'list' ? block.items[0]?.text ?? '' : block.text);
+}
+
+// Title = first H1; description = the first paragraph or list item after it.
+function deriveMeta(body, sourcePath, Marked) {
   const lines = body.split('\n');
   const h1Index = lines.findIndex((l) => /^#\s+/.test(l));
   const title = h1Index >= 0 ? lines[h1Index].replace(/^#\s+/, '').trim() : path.basename(sourcePath, path.extname(sourcePath));
-  const descriptionLine = lines
-    .slice(h1Index + 1)
-    .find((l) => l.trim().length && !/^#{1,6}\s/.test(l) && !l.trim().startsWith('```'));
-  return { title, description: descriptionLine ? stripInlineMarkdown(descriptionLine) : '' };
+  return { title, description: firstProse(lines.slice(h1Index + 1).join('\n'), Marked) };
 }
 
 function renderHtml(body, sourcePath, hrefMap, context) {
   const dir = path.dirname(sourcePath);
   const headings = [];
+  const seenIds = new Map();
   // Reported after parsing: marked appends "Please report this to marked" to errors
   // thrown from a renderer, and one pass can list every broken link of the page.
   const unresolvedLinks = [];
@@ -198,8 +251,8 @@ function renderHtml(body, sourcePath, hrefMap, context) {
     renderer: {
       heading(token) {
         const text = this.parser.parseInline(token.tokens);
-        const id = slugify(token.text);
-        headings.push({ depth: token.depth, text: token.text, id });
+        const id = headingId(plainText(token.text), seenIds);
+        headings.push({ depth: token.depth, text: plainText(token.text), id });
         return `<h${token.depth} id="${id}">${text}</h${token.depth}>\n`;
       },
       link(token) {
@@ -245,8 +298,17 @@ function renderHtml(body, sourcePath, hrefMap, context) {
 
 // Returns [{ id, title, description, groups: [{ id, title, pages: [{ source, data, body, hubTitle? }] }] }]
 function collectHubSections(source, context) {
+  const hubBySource = new Map();
   return source.hubFiles.map((hubFile) => {
-    const hub = parseHub(source, hubFile, context.matter);
+    const hub = parseHub(source, hubFile, context);
+    for (const ref of hub.groups.flatMap((group) => group.pages)) {
+      const other = hubBySource.get(ref.source);
+      if (other) {
+        const page = toPosix(path.relative(context.root, ref.source));
+        fail(`"${page}" is listed in ${other === hubFile ? `"${hubFile}" twice` : `both "${other}" and "${hubFile}"`} in "${source.folder}" — a page belongs to one place`);
+      }
+      hubBySource.set(ref.source, hubFile);
+    }
     return {
       ...hub,
       groups: hub.groups.map((group) => ({
@@ -285,6 +347,20 @@ function collectFrontmatterSection(source, context) {
   return [{ id: 'index', title: source.sectionTitle ?? path.basename(source.dir), description: '', groups }];
 }
 
+// --- Landing ---
+
+// The landing's title and description, written into the manifest of a source with "landing".
+// A single section (one hub, or frontmatter mode) provides both; with several sections, the
+// folder's id and an empty description, unless the "landing" option sets them.
+export function landingFor(source, sections) {
+  if (!source.landing) return undefined;
+  const single = sections.length === 1 ? sections[0] : null;
+  return {
+    title: source.landing.title ?? single?.title ?? source.id,
+    description: source.landing.description ?? single?.description ?? '',
+  };
+}
+
 // --- Entry point ---
 
 export function compileSource(source, context) {
@@ -292,8 +368,8 @@ export function compileSource(source, context) {
     fail(`Markdown folder "${source.folder}" not found`);
   }
 
-  const warnings = [];
   const sections = source.hubFiles.length ? collectHubSections(source, context) : collectFrontmatterSection(source, context);
+  const warnings = sections.flatMap((section) => section.warnings ?? []);
 
   // Pass 1: slugs + hrefs for every page, so links can be resolved across sections.
   const slugBySource = new Map();
@@ -336,7 +412,7 @@ export function compileSource(source, context) {
     for (const group of section.groups) {
       for (const page of group.pages) {
         const slug = slugBySource.get(page.source);
-        const derived = deriveMeta(page.body, page.source);
+        const derived = deriveMeta(page.body, page.source, context.Marked);
         const { html, headings } = renderHtml(page.body, page.source, hrefMap, context);
 
         if (page.hubTitle && !page.data.title && page.hubTitle !== derived.title) {
@@ -369,7 +445,8 @@ export function compileSource(source, context) {
     }
   }
 
-  return { manifest: { sections: manifestSections, pages }, warnings, hrefBySource: hrefMap };
+  const landing = landingFor(source, manifestSections);
+  return { manifest: { sections: manifestSections, pages, ...(landing ? { landing } : {}) }, warnings, hrefBySource: hrefMap };
 }
 
 // --- Languages (i18n) ---
@@ -377,7 +454,7 @@ export function compileSource(source, context) {
 const isDirectory = (dir) => fs.existsSync(dir) && fs.statSync(dir).isDirectory();
 
 // A source is localized when it has a subfolder named after the default language,
-// e.g. content/en/ (+ content/fr/, ...).
+// e.g. markdown-content/en/ (+ markdown-content/fr/, ...).
 export function isLocalized(source, defaultLanguage) {
   return isDirectory(path.join(source.dir, defaultLanguage));
 }
@@ -431,7 +508,8 @@ function mergeTranslation(base, own, { source, lang, defaultLanguage }) {
     }
   }
 
-  return { manifest: { sections, pages }, missing };
+  const landing = landingFor(source, sections);
+  return { manifest: { sections, pages, ...(landing ? { landing } : {}) }, missing };
 }
 
 /**
