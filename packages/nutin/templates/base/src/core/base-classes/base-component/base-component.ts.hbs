@@ -90,7 +90,7 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
 
   protected hydrate(): void {
     this.parseDataAttributes();
-    DomHelper.cleanupOptionalContent();
+    DomHelper.cleanupOptionalContent(this.element);
   }
 
   protected compose(): void {

@@ -1,10 +1,9 @@
 import path from 'path';
 import * as fsExtra from 'fs-extra';
 import { FEATURES } from './feature-registry.mjs';
+import { META_FILE_NAME } from './package-data.mjs';
 
 const fs = fsExtra.default;
-
-const META_FILE_NAME = '.nutin-meta.json';
 
 function metaPath(projectPath) {
   return path.join(projectPath, META_FILE_NAME);

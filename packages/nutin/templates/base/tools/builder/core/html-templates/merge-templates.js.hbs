@@ -1,12 +1,14 @@
 import fs from 'fs/promises';
 import path from 'path';
+import esbuild from 'esbuild';
 import { getFilesRecursive, print, pascalCased, capitalized } from '../../../utils/index.js';
 import { PATHS } from '../app/paths.js';
-import { minifyHTML } from './minify-html.js';
+import { scanTemplate, minifyTemplateBody } from './template-literal.js';
 
 const PLACEHOLDER = '__TEMPLATE_PLACEHOLDER__';
 const TARGET_EXTENSIONS = ['.ts', '.js'];
-const TEMPLATE_REGEX = /const\s+(?:template|templateFn)\s*=?\s*(?:\(.*?\)\s*=>\s*)?(html\s*)?`([\s\S]*?)`/;
+// Up to the opening backtick; scanTemplate() finds the closing one, past any nested html``.
+const TEMPLATE_START = /const\s+(?:template|templateFn)\s*=?\s*(?:\(.*?\)\s*=>\s*)?(html\s*)?`/;
 
 // A component/view's template can live inline in its .ts/.js file or in a
 // colocated .html sibling merged in via `__TEMPLATE_PLACEHOLDER__` — resolved
@@ -47,7 +49,8 @@ async function resolveExternalTemplate(htmlPath, resolvedPaths, failures) {
     return;
   }
 
-  const minifiedHtml = await minifyHTML(htmlContent);
+  const minifiedHtml = await minifyTemplateBody(htmlContent);
+  if (minifiedHtml === null) print.gray(describeUnminified(htmlPath));
   let mergedCount = 0;
   let conflictCount = 0;
 
@@ -71,7 +74,9 @@ async function resolveExternalTemplate(htmlPath, resolvedPaths, failures) {
     if (content.includes(PLACEHOLDER)) {
       // Replacements go through functions: a replacement *string* expands `$$`, `$&`,
       // `$'`… found in the markup (e.g. `$${price}` would lose its `$`).
-      await fs.writeFile(codePath, content.replace(PLACEHOLDER, () => minifiedHtml));
+      const asWritten = content.replace(PLACEHOLDER, () => htmlContent);
+      const minified = minifiedHtml === null ? asWritten : content.replace(PLACEHOLDER, () => minifiedHtml);
+      await fs.writeFile(codePath, await keepIfValid(codePath, minified, asWritten));
       mergedCount++;
       continue;
     }
@@ -96,27 +101,63 @@ async function resolveRemainingTemplates(resolvedPaths, failures) {
     if (resolvedPaths.has(codePath)) continue;
 
     const content = await fs.readFile(codePath, 'utf-8');
-    const match = content.match(TEMPLATE_REGEX);
-    if (!match) continue;
+    const template = findInlineTemplate(content);
+    if (!template) continue;
 
-    const [full, , body] = match;
-    warnIfUntagged(codePath, content, body);
+    if (template.body === null) {
+      print.gray(describeUnminified(codePath));
+      continue;
+    }
+    warnIfUntagged(codePath, content, template.body);
 
-    if (body === PLACEHOLDER) {
+    if (template.body === PLACEHOLDER) {
       print.warn(describeMissingTemplate(codePath));
       failures.push(path.basename(codePath));
       continue;
     }
 
-    const minified = await minifyHTML(body);
-    await fs.writeFile(codePath, content.replace(full, () => full.replace(body, () => minified)));
+    const minified = await minifyTemplateBody(template.body);
+    if (minified === null) {
+      print.gray(describeUnminified(codePath));
+      continue;
+    }
+    const updated = content.slice(0, template.open) + minified + content.slice(template.end);
+    await fs.writeFile(codePath, await keepIfValid(codePath, updated, content));
+  }
+}
+
+// The first `const template`/`templateFn` literal: whether it is html``-tagged, where its
+// body starts and ends, and the body (null when its closing backtick can't be found).
+function findInlineTemplate(content) {
+  const match = TEMPLATE_START.exec(content);
+  if (!match) return null;
+
+  const open = match.index + match[0].length;
+  const scan = scanTemplate(content, open);
+  return {
+    tagged: Boolean(match[1]),
+    open,
+    end: scan?.end ?? null,
+    body: scan ? content.slice(open, scan.end) : null,
+  };
+}
+
+// Last safety net: minified code that no longer parses is replaced by the code as written.
+async function keepIfValid(codePath, minified, asWritten) {
+  if (minified === asWritten) return minified;
+  try {
+    await esbuild.transform(minified, { loader: codePath.endsWith('.ts') ? 'ts' : 'js' });
+    return minified;
+  } catch {
+    print.gray(describeUnminified(codePath));
+    return asWritten;
   }
 }
 
 // Templates are escaped by the html`` tag; an untagged literal with ${} interpolates raw.
 function warnIfUntagged(codePath, content, markup) {
-  const match = content.match(TEMPLATE_REGEX);
-  if (match && !match[1] && markup.includes('${')) print.warn(describeUntagged(codePath));
+  const template = findInlineTemplate(content);
+  if (template && !template.tagged && markup.includes('${')) print.warn(describeUntagged(codePath));
 }
 
 function describeCodeFile(codePath) {
@@ -151,6 +192,10 @@ function describeMissingTemplate(codePath) {
 Expected:
   ${filename} (template placeholder) + ${basename}.html
 Add ${basename}.html, or replace the placeholder in ${filename} with inline markup.`;
+}
+
+function describeUnminified(filePath) {
+  return `Kept the template of ${path.basename(filePath)} unminified: its markup couldn't be minified safely.`;
 }
 
 function describeUntagged(codePath) {

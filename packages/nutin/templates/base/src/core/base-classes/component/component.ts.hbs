@@ -51,7 +51,7 @@ export abstract class Component<T extends HTMLElement = HTMLElement, K = any> ex
 
   private applyProps(): void {
     if (this.props.className) {
-      this.element.classList.add(this.props.className);
+      this.element.classList.add(...this.props.className.split(/\s+/).filter(Boolean));
     }
     if (this.props.style) {
       this.element.style.cssText = this.props.style;

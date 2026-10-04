@@ -31,7 +31,13 @@ export class EventBus extends Service<EventBus> {
     if (!callbacks) return;
 
     callbacks.slice().forEach(callback => {
-      callback(data!);
+      // A failing listener is reported but doesn't keep the others (the router's
+      // included) from receiving the event.
+      try {
+        callback(data!);
+      } catch (error) {
+        console.error(`Error in a "${event}" listener:`, error);
+      }
 
       const subIndex = this._subscriptions.findIndex(
         sub => sub.event === event && sub.callback === callback && sub.once

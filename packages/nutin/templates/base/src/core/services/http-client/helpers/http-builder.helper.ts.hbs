@@ -114,11 +114,9 @@ export class HttpBuilder {
     return url;
   }
 
+  // Same segment boundary as the base URL: a trusted ".../v1" doesn't cover ".../v10".
   private static isTrusted(url: URL, trustedAPIs: string[]): boolean {
-    return trustedAPIs.some((entry) => {
-      const trusted = new URL(entry);
-      return url.origin === trusted.origin && url.pathname.startsWith(trusted.pathname);
-    });
+    return trustedAPIs.some((entry) => this.isUnderBase(url, entry));
   }
 
   // Only null/undefined mean "no body"; fetch's own body types are sent as they are.

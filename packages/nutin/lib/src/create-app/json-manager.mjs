@@ -7,11 +7,20 @@ const fs = fsExtra.default;
 export class JsonManager {
   async generateJsonFiles(projectPath, context) {
     await this.generatePackageJson(projectPath, context);
-    if (context.lang !== 'js') await this.generateTsconfigJson(projectPath, context);
+    if (context.lang !== 'js') await this.generateTsconfigJson(projectPath);
   }
 
   async generatePackageJson(projectPath, context) {
-    const { testinNutin, projectName, lang } = context;
+    await fs.writeJSON(path.join(projectPath, 'package.json'), this.buildPackageJson(context), { spaces: 2 });
+  }
+
+  async generateTsconfigJson(projectPath) {
+    await fs.writeJSON(path.join(projectPath, 'tsconfig.json'), this.buildTsconfigJson(), { spaces: 2 });
+  }
+
+  // Also used by nutin-update to compare an existing project's files with the current defaults.
+  buildPackageJson(context) {
+    const { projectName, lang } = context;
 
     const devDependencies = {
       "chokidar": "^5.0.0",
@@ -25,7 +34,7 @@ export class JsonManager {
 
     const scripts = getAllScripts(context);
 
-    const packageJson = {
+    return {
       "name": projectName,
       "version": "0.1.0",
       "type": "module",
@@ -38,12 +47,10 @@ export class JsonManager {
         "node": ">=22"
       }
     };
-    
-    await fs.writeJSON(path.join(projectPath, 'package.json'), packageJson, { spaces: 2 });
   }
 
-  async generateTsconfigJson(projectPath) {
-    const tsconfig = {
+  buildTsconfigJson() {
+    return {
       "compilerOptions": {
         "target": "ESNext",
         "module": "NodeNext",
@@ -64,7 +71,5 @@ export class JsonManager {
       "include": ["src/app", "src/core"],
       "exclude": ["node_modules"]
     };
-    
-    await fs.writeJSON(path.join(projectPath, 'tsconfig.json'), tsconfig, { spaces: 2 });
   }
 }

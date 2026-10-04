@@ -19,6 +19,11 @@ function validateConfig(config) {
 
 validateConfig(nutinConfig);
 
+// `build:prod` passes --prod rather than a NODE_ENV=production prefix, which Windows shells
+// don't understand. Every build step is a separate process that only inherits the env (see
+// runScript), so the flag is turned into NODE_ENV here, for them and for this process.
+if (process.argv.includes('--prod')) process.env.NODE_ENV = 'production';
+
 const wellKnownNonSEORoutes = [
   '/400',
   '/401',

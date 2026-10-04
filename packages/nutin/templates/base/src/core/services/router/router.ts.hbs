@@ -14,11 +14,14 @@ class Router extends Service<Router> {
   private onNavigate = (data: { path: string }) => this.navigate(data.path);
   private onReload = () => this.reload();
   private _busSubscriptions: Array<() => void> = [];
+  // Bumped by every navigation: one whose guards resolve after a newer navigation started
+  // is dropped instead of rendering over it.
+  private _navId = 0;
 
   constructor(private routes: Routes) {
     super();
     this.initializeEventListeners();
-    this.navigate(NavigationManager.getCurrentPath() + window.location.hash);
+    this.navigate(this.currentLocation());
     this.registerCleanup(this.removeEventListeners);
   }
 
@@ -31,8 +34,7 @@ class Router extends Service<Router> {
   }
 
   public async reload(): Promise<void> {
-    const currentRoute = NavigationManager.getCurrentPath();
-    await this.navigate(currentRoute + window.location.hash, false);
+    await this.navigate(this.currentLocation(), false);
   }
 
   public async navigate(path: string | '', pushState: boolean = true): Promise<void> {
@@ -47,8 +49,17 @@ class Router extends Service<Router> {
     return this._currentParams[key];
   }
 
+  // Path, query and hash of the current URL, as navigate() takes them.
+  private currentLocation(): string {
+    return NavigationManager.getCurrentPath() + window.location.search + window.location.hash;
+  }
+
   private async navigateWithMode(path: string, mode: HistoryMode): Promise<void> {
-    const [rawPath = '', hash] = path.split('#');
+    const navId = ++this._navId;
+    const isStale = () => navId !== this._navId;
+    const [pathAndQuery = '', hash] = path.split('#');
+    const [rawPath = '', query] = pathAndQuery.split('?');
+    const search = query ? `?${query}` : '';
     const normalizedPath = NavigationManager.normalizePath(rawPath);
     const currentPath = NavigationManager.getCurrentPath();
 
@@ -56,7 +67,7 @@ class Router extends Service<Router> {
     const routeMatch = this.matchRoute(normalizedPath);
 
     if (!routeMatch) {
-      await this.handleNotFound(normalizedPath, currentPath, mode);
+      await this.handleNotFound(normalizedPath, currentPath, mode, isStale);
       return;
     }
 
@@ -68,7 +79,7 @@ class Router extends Service<Router> {
       mode
     );
 
-    if (!guardResult) return;
+    if (!guardResult || isStale()) return;
 
     this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
     this._currentParams = routeMatch.params;
@@ -77,7 +88,7 @@ class Router extends Service<Router> {
     // NavigationManager.replaceState (e.g. canonicalizing a bare route to a default
     // sub-page), which acts on whatever history entry is current — so that entry needs
     // to already be this route's, not the previous view's, before onEnter() fires.
-    NavigationManager.updateHistory(normalizedPath, currentPath, mode, hash);
+    NavigationManager.updateHistory(normalizedPath, currentPath, mode, hash, search);
 
     this._currentView = ViewRenderManager.renderNewView(
       guardResult.viewConstructor!,
@@ -114,7 +125,7 @@ class Router extends Service<Router> {
         await I18nService.setCurrentLanguage(newLocale as Language);
       }
     }
-    this.navigate(NavigationManager.getCurrentPath() + window.location.hash, false);
+    this.navigate(this.currentLocation(), false);
   }
 
   /**
@@ -136,7 +147,8 @@ class Router extends Service<Router> {
   private async handleNotFound(
     normalizedPath: string, 
     currentPath: string, 
-    mode: HistoryMode
+    mode: HistoryMode,
+    isStale: () => boolean
   ): Promise<void> {
     const notFoundRoute = this.routes['/404'];
 
@@ -147,6 +159,7 @@ class Router extends Service<Router> {
 
     const notFoundConstructor = RouteGuardsManager.getViewConstructor(notFoundRoute);
     
+    if (isStale()) return;
     this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
     this._currentParams = {};
     this._currentView = ViewRenderManager.renderNewView(notFoundConstructor, {});

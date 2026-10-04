@@ -211,6 +211,29 @@ describe('html', () => {
     expect(String(html`<a class=x title=${'v w'}>t</a>`)).toBe('<a class=x title="v w">t</a>');
   });
 
+  it('html keeps plain attributes interpolated in tag position', () => {
+    expect(String(html`<input ${true ? 'disabled' : ''}>`)).toBe('<input disabled="">');
+    expect(String(html`<input ${'aria-label="ok"'}>`)).toBe('<input aria-label="ok">');
+    expect(String(html`<input ${''}>`)).toBe('<input >');
+  });
+
+  it('html drops handlers, bindings and script URLs interpolated as a plain string in tag position', () => {
+    expect(String(html`<div ${'data-event=click:_remove'}>x</div>`)).toBe('<div >x</div>');
+    expect(String(html`<a ${'href=javascript:x() onclick=x()'}>x</a>`)).toBe('<a >x</a>');
+  });
+
+  it('a binding attribute injected in tag position cannot call a component method', () => {
+    const component = new TestComponent({
+      config: { attrs: 'data-event=click:_remove' },
+      templateFn: (cfg) => html`<button ${cfg.attrs}>x</button>`,
+    });
+
+    component.render();
+    component.getElement().querySelector('button').click();
+
+    expect(component.removed).toBe(undefined);
+  });
+
   it('raw in an attribute value position is escaped as text', () => {
     expect(String(html`<a title="${raw('<b>"q"</b>')}">t</a>`)).toBe('<a title="&lt;b&gt;&quot;q&quot;&lt;/b&gt;">t</a>');
   });

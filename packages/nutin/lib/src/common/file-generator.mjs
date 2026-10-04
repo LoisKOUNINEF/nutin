@@ -92,7 +92,7 @@ export class FileGenerator {
     }
 
     const fileExt = path.extname(fileName).toLowerCase();
-    const outputFileName = fileName.endsWith('.hbs') ? fileName.replace('.hbs', '') : fileName;
+    const outputFileName = fileName.replace(/\.hbs$/, '');
     const isBinary = BINARY_EXTENSIONS.has(fileExt);
 
     let content;

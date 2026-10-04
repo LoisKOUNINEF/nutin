@@ -37,8 +37,8 @@ export class CatalogHelper {
   private static pushConfig(index: number, componentConfigs: ComponentConfig[], config: CatalogConfig): void {
     const configWithIndex = this.getConfigWithIndex(config, index)
 
-    const { props, defaults, normalizeKeys } = config;
-    const options = { ...props, ...defaults, ...normalizeKeys };
+    const { props, defaults } = config;
+    const options = { ...props, ...defaults };
 
     const componentConfig: ReusableComponentConfig = {
       selector: `${config.elementName}-${index}`,

@@ -11,6 +11,7 @@ import { printUpdateSummary } from './update-summary-printer.mjs';
 import { writeConflictReport } from './conflict-report-writer.mjs';
 import { UpdateContextBuilder } from './update-context-builder.mjs';
 import { TemplateDiffer } from './template-differ.mjs';
+import { findJsonDrift } from './json-drift.mjs';
 
 const fs = fsExtra.default;
 const REPORT_FILE_NAME = 'NUTIN-UPDATE-REPORT.md';
@@ -84,12 +85,13 @@ export class ProjectUpdater {
 
   async computeChangeSet(projectPath, meta, oldTemplatesRoot) {
     const { oldContext, newContext } = await this.contextBuilder.buildContexts(projectPath, meta);
-    return this.differ.diff(projectPath, oldTemplatesRoot, oldContext, newContext);
+    const changeSet = await this.differ.diff(projectPath, oldTemplatesRoot, oldContext, newContext);
+    return { ...changeSet, jsonDrift: await findJsonDrift(projectPath, newContext) };
   }
 
   async applyChangeSet(projectPath, meta, changeSet, { yes }) {
-    const { toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated } = changeSet;
-    printUpdateSummary({ toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated });
+    const { toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated, jsonDrift } = changeSet;
+    printUpdateSummary({ toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated, jsonDrift });
 
     if (toUpdate.length === 0 && toAdd.length === 0 && conflicts.length === 0) {
       print.boldSuccess('\n✅ Nothing to update.');

@@ -5,6 +5,8 @@ import * as path from 'path';
 
 const fs = fsExtra.default;
 
+export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm', 'bun'];
+
 export async function detectPackageManager(projectPath) {
   if (await fs.pathExists(path.join(projectPath, 'pnpm-lock.yaml'))) return 'pnpm';
   if (await fs.pathExists(path.join(projectPath, 'yarn.lock'))) return 'yarn';
@@ -89,7 +91,7 @@ export function getAllScripts(context) {
 
   const baseScripts = {
     "build": "node tools/builder/builder.js",
-    "build:prod": "NODE_ENV=production node tools/builder/builder.js",
+    "build:prod": "node tools/builder/builder.js --prod",
     "serve": `${packageManager} run build && node tools/dev/serve.js`,
     "serve:only": "node tools/dev/serve.js",
     "serve:prod": `${packageManager} run build:prod && node tools/dev/serve.js`,

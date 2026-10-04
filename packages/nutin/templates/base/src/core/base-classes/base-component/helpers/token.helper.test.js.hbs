@@ -11,11 +11,11 @@ describe('TokenHelper', () => {
     ...overrides,
   });
 
-  it('resolve always calls event.preventDefault()', () => {
+  it('resolve leaves the event default alone', () => {
     let called = false;
     const ev = makeEvent({ preventDefault: () => { called = true; } });
     TokenHelper.resolve('@id', document.createElement('div'), ev);
-    expect(called).toBe(true);
+    expect(called).toBe(false);
   });
 
   it('@id resolves the raw element id', () => {

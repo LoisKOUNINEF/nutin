@@ -108,6 +108,52 @@ describe('Router', () => {
     expect(router.getParam('id')).toBe('42');
   });
 
+  it('navigate() keeps the query string and decodes route params', async () => {
+    const home = makeView('home');
+    const userView = makeView('user');
+    router = AppRouter({ '/': () => home, '/users/:name': () => userView });
+    await flushPromises();
+
+    await router.navigate('/users/J%C3%B6rg?tab=posts#top');
+
+    expect(router.getParam('name')).toBe('Jörg');
+    expect(window.location.pathname + window.location.search + window.location.hash).toBe('/users/J%C3%B6rg?tab=posts#top');
+  });
+
+  it('reload() keeps the current query string', async () => {
+    const home = makeView('home');
+    const list = makeView('list');
+    router = AppRouter({ '/': () => home, '/list': () => list });
+    await flushPromises();
+    await router.navigate('/list?page=2');
+
+    await router.reload();
+
+    expect(window.location.search).toBe('?page=2');
+  });
+
+  it('drops a navigation whose guard resolves after a newer navigation started', async () => {
+    const home = makeView('home');
+    const slow = makeView('slow');
+    const fast = makeView('fast');
+    let releaseGuard;
+    router = AppRouter({
+      '/': () => home,
+      '/slow': { view: () => slow, guards: [() => new Promise((resolve) => { releaseGuard = resolve; })] },
+      '/fast': () => fast,
+    });
+    await flushPromises();
+
+    const slowNav = router.navigate('/slow');
+    await router.navigate('/fast');
+    releaseGuard(true);
+    await slowNav;
+
+    expect(slow.calls.length).toBe(0);
+    expect(fast.calls.some(c => c[0] === 'render')).toBe(true);
+    expect(window.location.pathname).toBe('/fast');
+  });
+
   it('navigate() renders the /404 route when no pattern matches', async () => {
     const home = makeView('home');
     const notFound = makeView('not-found');

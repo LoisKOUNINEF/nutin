@@ -117,6 +117,12 @@ describe('HttpBuilder', () => {
     expect(() => HttpBuilder.resolveUrl('', 'https://cdn.example.com/files/a%2Fb', trusted)).toThrow('trustedAPIs');
   });
 
+  it('resolveUrl matches trusted APIs on whole path segments', () => {
+    const trusted = ['https://api.example.com/v1'];
+    expect(HttpBuilder.resolveUrl('', 'https://api.example.com/v1/a%2Fb', trusted).pathname).toBe('/v1/a%2Fb');
+    expect(() => HttpBuilder.resolveUrl('', 'https://api.example.com/v10/a%2Fb', trusted)).toThrow('trustedAPIs');
+  });
+
   it('describe shows origin and path only', () => {
     expect(HttpBuilder.describe(new URL('https://api.example.com/a?key=secret#h'))).toBe('https://api.example.com/a');
   });

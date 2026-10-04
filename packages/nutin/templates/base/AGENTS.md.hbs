@@ -43,7 +43,7 @@ BaseComponent<T>     — render/destroy engine, data-* parsing, children
 
 - `render()`: `onBeforeRender()` → sanitize + set `innerHTML` → mount children (`data-component`/`data-catalog`) → parse `data-i18n`/`data-pipe` → bind `data-event` listeners → `onAfterRender()`. Runs in full on every `render()` call — no virtual DOM/diffing.
 - `destroy()`: unbinds events, unsubscribes bus listeners, destroys children, removes the element.
-- `Service`: direct `new` throws — always use `MyService.getInstance()` (or the exported const). Auto-binds all methods to the instance. `registerCleanup(fn)` for teardown; `Service.destroyAll()` runs on `beforeunload`.
+- `Service`: direct `new` throws — always use `MyService.getInstance()` (or the exported const). Auto-binds all methods to the instance. `registerCleanup(fn)` callbacks run on `dispose()`, `MyService.destroy()` and `Service.destroyAll()` (tests, SSR) — nothing is torn down on page unload.
 - Overridable hooks (all no-op by default): `onBeforeRender`, `onAfterRender`, `onBeforeDestroy`, `onAfterDestroy`, `onReuse`, `generateTemplate()`, `registerChildren()`. `View` adds router-only `onEnter()`/`onExit()`.
 
 ## Children components
@@ -77,6 +77,8 @@ private _myFunction(value: string, id: string) { doStuff() }
 ```
 
 Tokens: `@value`, `@id`, `@class`, `@textContent`, `@event`, `@target`, `@attr:name`, `@dataset:key`, plus string/number literals. Token values are raw (not HTML-escaped): escaping happens when they are rendered through an `html` template.
+
+Only defaults that leave the page are cancelled: link clicks (`<a href>`, unless modified, e.g. ctrl+click), form `submit` and submit-button clicks inside a form. Other events keep their default (typing, checking a box); take `@event` and call `preventDefault()` yourself if needed. A component only binds its own `data-event`/`data-bind`/`data-i18n` elements, not those inside nested child components.
 
 ## Core services
 
@@ -137,7 +139,7 @@ Consumed by i18nService and builder. Unused if i18n is disabled.
 
 ## Security
 
-Write every template with the `html` tag (`import { html, raw } from` core): `templateFn = (task) => html\`<li>${task.name}</li>\``. Every `${}` is HTML-escaped, whatever the data's source (input, HTTP, localStorage). Nested `html` results are inserted as-is, and arrays are inserted item by item (`${items.map((i) => html\`<li>${i}</li>\`)}`, no `.join('')`). Unquoted attribute values (`title=${x}`) are quoted automatically. Wrap HTML you want rendered in `raw()`: it's parsed in place at render (works inside `<svg>`/`<table>`) and loses Nutin's binding attributes (`data-event`, `data-component`, `data-catalog`, `data-bind`, `data-i18n`, `data-pipe*`). `trustedRaw()` keeps them, for markup you wrote yourself (e.g. compiled Markdown). An untagged template literal escapes nothing, and the build warns about each one containing `${}`.
+Write every template with the `html` tag (`import { html, raw } from` core): `templateFn = (task) => html\`<li>${task.name}</li>\``. Every `${}` is HTML-escaped, whatever the data's source (input, HTTP, localStorage). Nested `html` results are inserted as-is, and arrays are inserted item by item (no `.join('')`). For lists, use `createCatalogComponents()` (see "Children components") rather than mapping items to markup in the template: each item becomes a child component with its own events and state, kept across renders with `trackBy`. Unquoted attribute values (`title=${x}`) are quoted automatically. A plain value in tag position (`<input ${x}>`) is filtered like `raw()` there: plain attributes stay, handlers, bindings and script URLs are dropped. Wrap HTML you want rendered in `raw()`: it's parsed in place at render (works inside `<svg>`/`<table>`) and loses Nutin's binding attributes (`data-event`, `data-component`, `data-catalog`, `data-bind`, `data-i18n`, `data-pipe*`). `trustedRaw()` keeps them, for markup you wrote yourself (e.g. compiled Markdown). An untagged template literal escapes nothing, and the build warns about each one containing `${}`.
 
 Every `render()` also sanitizes the template (`SecurityHelper.sanitizeToFragment()`) and inserts the resulting nodes directly — never re-parsed from a string. `trustLevel` (`'strict' | 'normal' | 'trusted'`, default `'normal'`) controls how much is stripped (`<script>`/`<style>`/`<link>`/`<base>`/`<meta>`, inline handlers, `srcdoc`, `javascript:` URLs, `data:` frames and SVG `<animate>`/`<set>` targeting URL attributes from `normal` up; `<iframe>`/`<object>`/`<embed>` and all `data:` URLs under `strict` only). Don't interpolate data into `data-event` args or `style`: use `data-x="${v}"` + `@dataset:x`. It is a second layer for `raw()` content, not a substitute for `html`.
 

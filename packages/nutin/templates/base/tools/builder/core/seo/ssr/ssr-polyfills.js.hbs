@@ -3,7 +3,7 @@ import path from 'path';
 
 /**
  * Installs the minimum browser globals the framework's own base classes touch
- * unconditionally (Service's `beforeunload` listener, I18n's `navigator`/`window.location`
+ * unconditionally (the Router's `popstate` listener, I18n's `navigator`/`window.location`
  * reads), plus a couple of cheap defensive stubs (matchMedia) for common patterns
  * downstream projects add (e.g. dark-mode toggles).
  *

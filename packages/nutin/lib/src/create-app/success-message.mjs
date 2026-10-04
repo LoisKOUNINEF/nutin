@@ -2,7 +2,7 @@ import { print } from '../utils/print.mjs';
 import { PACKAGE_HOMEPAGE } from '../common/package-data.mjs';
 
 export function displaySuccessMessage(answers) {
-  const { projectName, packageManager, deployHelper } = answers;
+  const { projectName, packageManager } = answers;
   print.info(`Visit https://${PACKAGE_HOMEPAGE}`);
 
   print.boldSuccess('\n🎉 Your project is ready!\n');

@@ -181,6 +181,17 @@ describe('DomHelper', () => {
     expect(container.querySelectorAll('span').length).toBe(0);
   });
 
+  it('cleanupOptionalContent only touches the given root, attached or not', () => {
+    container.innerHTML = '<p class="outside" data-optional></p>';
+    const detached = document.createElement('div');
+    detached.innerHTML = '<p class="inside" data-optional></p>';
+
+    DomHelper.cleanupOptionalContent(detached);
+
+    expect(detached.querySelector('.inside')).toBe(null);
+    expect(container.querySelector('.outside')).not.toBe(null);
+  });
+
   it('cleanupOptionalContent always strips the data-optional attribute from surviving elements', () => {
     container.innerHTML = '<span data-optional>hello</span>';
     DomHelper.cleanupOptionalContent();

@@ -1,11 +1,9 @@
 import path from 'path';
-import { fileURLToPath } from 'url';
 import * as fsExtra from 'fs-extra';
 import { print } from '../utils/print.mjs';
 import { FileGenerator } from '../common/file-generator.mjs';
 import { FEATURES } from '../common/feature-registry.mjs';
 import { PACKAGE_VERSION } from '../common/package-data.mjs';
-import { installDependencies } from '../common/package-json-helper.mjs';
 import { readProjectMeta, updateProjectMeta } from '../common/project-meta.mjs';
 import { FeatureContextBuilder } from './feature-context-builder.mjs';
 import { updatePackageJson } from './package-json-updater.mjs';
@@ -13,8 +11,6 @@ import { updateNutinConfig } from './nutin-config-updater.mjs';
 import { patchBaseTemplates } from './base-template-patcher.mjs';
 
 const fs = fsExtra.default;
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export class FeatureAdder {
   constructor() {
@@ -29,7 +25,7 @@ export class FeatureAdder {
     }
 
     const projectPath = process.cwd();
-    await this.validateProject(projectPath, feature);
+    await this.validateProject(projectPath);
 
     const meta = await readProjectMeta(projectPath);
     if (meta?.features?.[feature.key]) {
@@ -48,7 +44,7 @@ export class FeatureAdder {
     this.printNextSteps(feature, context);
   }
 
-  async validateProject(projectPath, feature) {
+  async validateProject(projectPath) {
     const packageJsonPath = path.join(projectPath, 'package.json');
     if (!(await fs.pathExists(packageJsonPath))) {
       throw new Error(`No package.json found in ${projectPath} — run this from a nutin project's root.`);
@@ -59,7 +55,7 @@ export class FeatureAdder {
   }
 
   async applyFeatureTemplate(projectPath, feature, context) {
-    const featureTemplateDir = path.join(__dirname, '..', '..', '..', 'templates', 'features', feature.key);
+    const featureTemplateDir = path.join(this.fileGenerator.getTemplatesRoot(), 'features', feature.key);
 
     await this.fileGenerator.processTemplateDirectory(featureTemplateDir, projectPath, context, { skipExisting: true });
 
@@ -74,9 +70,8 @@ export class FeatureAdder {
       packageManager: context.packageManager,
       features: { [feature.key]: true },
     });
-    // Return if feature doesn't add dependencies
-    if (feature.key === 'docker' || feature.key === 'markdown') return;
-    await installDependencies(projectPath, context.packageManager);
+    // No feature adds dependencies here: markdown's are installed by its first build
+    // (tools/utils/ensure-deps.js), docker has none.
   }
 
   printNextSteps(feature, context) {

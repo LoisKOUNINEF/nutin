@@ -1,6 +1,7 @@
 import { I18nHelper } from '#root/dist/src/core/base-classes/base-component/helpers/i18n.helper.js';
 import { I18nService } from '#root/dist/src/core/services/index.js';
 import { CONFIG } from '#root/dist/src/core/config.js';
+import { DomHelper } from '#root/dist/src/core/base-classes/base-component/helpers/dom.helper.js';
 
 describe('I18nHelper', () => {
   let container;
@@ -76,5 +77,16 @@ describe('I18nHelper', () => {
     expect(spans[0].textContent).toBe('kept');
     expect(spans[1].textContent).toBe('b');
     expect(container.querySelector('input').placeholder).toBe('c');
+  });
+
+  it('skips elements inside a nested component root, which translates its own content', () => {
+    I18nService.translate = (key) => `[${key}]`;
+    container.innerHTML = '<span class="own" data-i18n="a"></span><div class="child"><span class="nested" data-i18n="b">b</span></div>';
+    DomHelper.markComponentRoot(container.querySelector('.child'));
+
+    I18nHelper.parseI18nAttributes(container);
+
+    expect(container.querySelector('.own').textContent).toBe('[a]');
+    expect(container.querySelector('.nested').textContent).toBe('b');
   });
 });

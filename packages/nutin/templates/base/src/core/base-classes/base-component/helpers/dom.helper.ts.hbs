@@ -79,7 +79,9 @@ export class DomHelper {
     return element;
   }
   
-  public static cleanupOptionalContent(): void {
+  // Scoped to the rendering component (a detached one included); the document-wide
+  // default only serves direct callers.
+  public static cleanupOptionalContent(root: ParentNode = document): void {
     const isEmpty = (el: HTMLElement): boolean => {
       if (el instanceof HTMLImageElement) {
         return !el.src || el.src.trim() === "";
@@ -113,7 +115,7 @@ export class DomHelper {
       );
     }
 
-    document.querySelectorAll<HTMLElement>("[data-optional]").forEach(el => {
+    root.querySelectorAll<HTMLElement>("[data-optional]").forEach(el => {
       if (isValueUndefined(el) || isEmpty(el)) el.remove();
       el.removeAttribute("data-optional");
     });

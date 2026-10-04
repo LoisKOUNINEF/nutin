@@ -243,6 +243,30 @@ describe('NavigationManager', () => {
       .toEqual({ postId: '1', commentId: '2' });
   });
 
+  it('matchPattern decodes params and keeps a malformed escape as-is', () => {
+    expect(NavigationManager.matchPattern('/users/:name', '/users/J%C3%B6rg')).toEqual({ name: 'Jörg' });
+    expect(NavigationManager.matchPattern('/users/:name', '/users/100%')).toEqual({ name: '100%' });
+  });
+
+  it('matchPattern matches static segments literally', () => {
+    expect(NavigationManager.matchPattern('/files/report.pdf', '/files/report.pdf')).toEqual({});
+    expect(NavigationManager.matchPattern('/files/report.pdf', '/files/reportXpdf')).toBe(null);
+    expect(NavigationManager.matchPattern('/v1.0/:id', '/v1.0/7')).toEqual({ id: '7' });
+  });
+
+  it('updateHistory keeps the query string', () => {
+    const originalPushState = window.history.pushState;
+    let pushedUrl = null;
+    window.history.pushState = function (state, title, url) {
+      pushedUrl = url;
+    };
+
+    NavigationManager.updateHistory('/list', '/home', 'push', 'top', '?page=2');
+
+    window.history.pushState = originalPushState;
+    expect(pushedUrl).toBe('/list?page=2#top');
+  });
+
   it('matchPattern returns null when the path does not match the pattern at all', () => {
     expect(NavigationManager.matchPattern('/posts/:id', '/other/123')).toBe(null);
   });

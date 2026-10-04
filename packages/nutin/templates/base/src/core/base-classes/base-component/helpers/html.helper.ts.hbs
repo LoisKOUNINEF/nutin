@@ -84,6 +84,9 @@ function interpolate(value: unknown, ctx: Context, raws: Map<string, string>): s
   }
   if (Array.isArray(value)) return value.map((item) => interpolate(item, ctx, raws)).join('');
   if (value === null || value === undefined || value === false) return '';
+  // In tag position (`<input ${x}>`) escaping alone leaves `name=value` intact, so data could
+  // add attributes: it is filtered like raw() there (no handlers, bindings or script URLs).
+  if (ctx === 'tag') return SecurityHelper.sanitizeAttributes(String(value));
   return SecurityHelper.escapeHtml(value);
 }
 

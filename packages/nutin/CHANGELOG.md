@@ -1,35 +1,52 @@
 # Changelog
 
-## 2.2.0
+## 3.0.0
 
 ### Breaking Changes
 
 - **`HttpClient` URLs, bodies and responses**
 
-    - URLs: endpoints are joined onto the base URL as URLs (not strings) and rejected before `fetch` when they leave its origin or path. Before, `${baseUrl}${endpoint}` let an endpoint like `@other.host/x` send the request and its default headers (e.g. `Authorization`) to another host. The base URL's own query is kept. Without a base URL, a relative endpoint now resolves against the page's origin (`AppHttpClient.get('/api/users')` used to throw `Invalid URL`), and default headers only go to that origin. Only `http:`/`https:` URLs are accepted. Error messages leave out query strings.
-    - Encoded `/` and `\` (`%2F`, `%5C`) in a path are rejected, since servers often decode them into separators; list APIs that expect them in the new `trustedAPIs` option (`new HttpClient(baseUrl, headers, { trustedAPIs: [...] })`). New `path` tag (exported from `core/index`) encodes each value as one path segment and rejects `.`/`..`.
+    - URLs: endpoints are joined onto the base URL as URLs (not strings) and rejected before `fetch` when they leave its origin or path. Before, `${baseUrl}${endpoint}` let an endpoint like `@other.host/x` send the request and its default headers (e.g. `Authorization`) to another host. The base URL's own query is kept. Without a base URL, a relative endpoint now resolves against the page's origin, and default headers only go to that origin. Only `http:`/`https:` URLs are accepted. Error messages leave out query strings.
+    - Encoded `/` and `\` (`%2F`, `%5C`) in a path are rejected, since servers often decode them into separators; list APIs that expect them in the new `trustedAPIs` option.
     - Bodies: `FormData`, `Blob`, `URLSearchParams`, binary data and streams are sent as they are (they used to be sent as `{}`); `0`/`false`/`''` are sent (they were dropped). `Content-Type: application/json` is only set for JSON bodies, so GET/DELETE no longer trigger a CORS preflight. Headers merge case-insensitively, and request interceptors get a `Headers` object.
     - Responses: 204/205 and empty bodies resolve to `undefined` (they threw); `+json` types are parsed (they were returned as text). Response interceptors get a clone, so reading its body no longer breaks the request.
-    - Redirects: a followed redirect that ends outside the base URL (or, without one, on another origin than requested) now throws instead of returning that origin's response, and response interceptors don't see it. Checked in Chrome, Firefox and Safari: they strip `Authorization` on cross-origin redirects but forward custom headers (e.g. `X-Api-Key`), so APIs using those should pass `redirect: 'error'`.
-    - Options: `signal` (your cancellation, rethrown as an `AbortError`; "Request timed out" now only means the timeout), `credentials`, `cache`, `referrerPolicy`, `redirect`. `timeout` must be a positive number. `queryParams` take numbers/booleans, skip `null`/`undefined`, and repeat array values. `HttpError` is exported from `core/index`.
+    - Redirects: a followed redirect that ends outside the base URL (or, without one, on another origin than requested) now throws instead of returning that origin's response, and response interceptors don't see it. Browsers strip `Authorization` on cross-origin redirects but forward custom headers (e.g. `X-Api-Key`), so APIs using those should pass `redirect: 'error'`.
 
-- **Templates are escaped at output, not at input**
+- **Templates are escaped at output**
 
-    - New `html` tag, `raw()` and `trustedRaw()`, exported from `core/index`. In an `html\`...\`` template, every `${}` is HTML-escaped, so data from any source (inputs, HTTP responses, localStorage, the server) renders as text and can't inject markup or `data-event`/`data-component` attributes. Nested `html` results are inserted as-is. Unquoted attribute values (`title=${x}`) are quoted automatically, so a value with spaces can't add attributes. `raw()` inserts HTML unescaped: at render it's parsed where it sits (inside `<svg>`/`<table>` too), stripped of Nutin's binding attributes (`data-event`, `data-component`, `data-catalog`, `data-bind`, `data-i18n`, `data-pipe`, `data-pipe-source`) and sanitized as nodes, so injected markup can't call component methods or mount children; in tag position (`<input ${raw('checked')}>`) it keeps only safe attributes; `trustedRaw()` keeps them, for markup you wrote yourself (the `markdown` feature uses it). Arrays are inserted item by item, so `items.map(...).join('')` becomes `items.map((item) => html\`...\`)`.
-    - `data-event` tokens (`@value`, `@textContent`, `@innerText`, `@html`, `@attr:`, `@dataset:`, `@id`, `@class`, `@name`, `@tag`, `@key`, `@code`) now pass raw values instead of HTML-escaped ones: typing `a & b` gives `a & b`, not `a &amp; b`. `getValues()` is unchanged (it was already raw).
+    - New `html` tag, `raw()` and `trustedRaw()`. In an `html`... template, every `${}` is HTML-escaped, so data from any source renders as text and can't inject markup or `data-event`/`data-component` attributes. Nested `html` results are inserted as-is. Unquoted attribute values (`title=${x}`) are quoted automatically, so a value with spaces can't add attributes. `raw()` inserts HTML unescaped: at render it's parsed, stripped of Nutin's binding attributes and sanitized as nodes, so injected markup can't call component methods or mount children; in tag position (`<input ${raw('checked')}>`) it keeps only safe attributes; `trustedRaw()` keeps them, for markup you wrote yourself (the `markdown` feature uses it).
+    - `data-event` tokens now pass raw values instead of HTML-escaped ones.
     - Removed `SecurityHelper.sanitizeInputElement()`.
-    - Generated components and views, the base views and the `markdown` feature use `html`. `trustLevel` sanitization still applies on top, e.g. to `raw()` content.
-    - The default `normal` trust level now also strips `srcdoc` attributes, SVG `<animate>`/`<set>` elements that rewrite a URL attribute (a sanitized `<set attributeName="href" to="javascript:…">` ran its script on click in Chrome), and `javascript:` URLs (`href`, `src`, `action`, `formaction`, `poster`, `background`, and the new `xlink:href`). Escaping can't catch these: a `javascript:` URL has nothing to escape, and a browser decodes `srcdoc`'s entities before running it. `data:` URLs are still stripped under `strict` only.
-    - `normal` also strips `<style>`, `<link>`, `<base>` and `<meta>` elements (page-wide CSS, moved relative URLs, forced navigation), SVG `<script>`, and `data:`/`javascript:` documents in `<iframe>`/`<object>`/`<embed>`. Move styles a template carried inline into the component's `.scss`.
-    - Rendering inserts the sanitized nodes directly instead of assigning the sanitized string to `innerHTML`. The second parse let mutation-XSS markup (`<math>`/`<form>` nesting tricks) turn back into a live `<img onerror>` at `normal` and `strict`. New `SecurityHelper.sanitizeToFragment()`; `sanitizeTemplate()` still returns a string.
+    - The default `normal` trust level now also strips `srcdoc` attributes, SVG `<animate>`/`<set>` elements that rewrite a URL attribute and `javascript:` URLs. `data:` URLs are still stripped under `strict` only.
+    - `normal` also strips `<style>`, `<link>`, `<base>` and `<meta>` elements, SVG `<script>`, and `data:`/`javascript:` documents in `<iframe>`/`<object>`/`<embed>`. Move styles a template carried inline into the component's `.scss`.
+    - Rendering inserts the sanitized nodes directly instead of assigning the sanitized string to `innerHTML`. New `SecurityHelper.sanitizeToFragment()`; `sanitizeTemplate()` still returns a string.
     - Migration: tag each `template`/`templateFn` with `html` (`import { html } from core`), drop `.join('')` on mapped `html` results, and wrap markup you trust in `raw()`. The build warns about every untagged template that contains `${}`, since its values are no longer escaped anywhere.
 
 - **Framework types are globals**
 
     - The public types are now declared in `src/core/internals.d.ts`, next to the event maps, and no longer exported from `core/index`: `ComponentConfig`, `BaseComponentOptions`, `ComponentOptions`, `ComponentProps`, `ViewOptions`, `CatalogConfig`, `CatalogItemConfig`, `CatalogItemObject`, `CatalogItemPrimitive`, `Template`, `TrustLevel`, `Routes`, `RouteGuard`, `RouteConfig`, `RouteMatch`, `IRouter`, `IEventBus`, `IHttpClient`, `IHttpClientOptions`, `IRequestConfig`, `QueryValue`, `HttpMethod`, `Language`, `Translations`, `PipeFunction`, `GlobalMountable`, `GlobalConfig`, `RegisterGlobalsOptions`, `Subscription`.
-    - Migration: remove these names from your `import { … } from '…/core/index.js'` lines (`nutin-update` doesn't touch `src/app`). Classes and functions (`Component`, `View`, `html`, `AppRouter`, …) are still imported as before.
+    - Migration: remove these names from your `import { … } from '…/core/index.js'` lines. Classes and functions (`Component`, `View`, `html`, `AppRouter`, …) are still imported as before.
+
+- **No teardown on page unload**
+
+    - Services no longer register a `beforeunload` listener, and the generated `main.ts` no longer calls `Service.destroyAll()` there. That teardown ran before the page was actually left: a page restored by Back from the back/forward cache, or kept after a cancelled "Leave site?" prompt, came back with every service disposed (no navigation, no translations, no HTTP interceptors). It also erased the saved language preference on every reload.
+    - `dispose()`, `MyService.destroy()` and `Service.destroyAll()` now all run `registerCleanup` callbacks; before, only `dispose()` did.
+    - Migration: delete the `window.addEventListener('beforeunload', …Service.destroyAll()…)` block from `src/app/main.ts`, along with its `Service` import if nothing else uses it (`nutin-update` doesn't touch `src/app`).
+
+- **`data-event` only cancels navigation defaults**
+
+    - A `data-event` handler now calls `preventDefault()` for link clicks (`<a href>`), form `submit` events and submit-button clicks inside a form, whether or not it takes arguments. Before, it was called once for each token argument, so it depended on the arguments: `keydown:_onKey:@key` blocked typing, `click:_toggle:@checked` unchecked the box again, and an argument-less `click:_go` on a link loaded the page. Call `@event`'s `preventDefault()` in your handler for any other default you relied on.
+    - `TokenHelper.resolve()` no longer calls `preventDefault()`.
+
+- **`nutin new`: `-p` replaces `-pm`**
+
+    - The package manager flag is now `-p, --package-manager`, and only accepts `npm`, `yarn`, `pnpm` or `bun`. Any other value used to end up in the install command and in the generated scripts. `-pm` was a multi-letter short flag that newer Commander versions reject.
 
 ### Features
+
+- **`nutin-update` reports `package.json`/`tsconfig.json` drift**
+
+    - These files are written once at creation, so the template diff never covered them, and dependency bumps or new scripts never reached existing projects. The update summary now lists each generated `scripts`/`devDependencies` entry and `tsconfig.json` option that differs from what the installed nutin generates. They are listed only: nothing is written.
 
 - **New `markdown` feature (`nutin-add markdown`)**
 
@@ -51,6 +68,10 @@
     - `nutin-new --js-only` generates a plain JavaScript project. TypeScript remains the default and recommended option.
 
 ### Changes
+
+- `build:prod` runs `node tools/builder/builder.js --prod` instead of `NODE_ENV=production node …`, which Windows shells don't understand. `NODE_ENV=production` still works, so existing `package.json` scripts keep working.
+
+- The dev server (`serve`, `dev`) listens on `127.0.0.1` only, the address it prints, instead of every network interface.
 
 - `dev`, `serve`, `serve:prod` and `serve:only` accept a port: `npm run dev -- --port 3000`, `npm run serve -- --port=3000`, or `PORT=3000 npm run dev`. Precedence is `--port` > `PORT` > `9090` (default). Invalid ports fail fast with a clear error.
 
@@ -147,6 +168,34 @@
 - A coverage run that covers no file now reports 0% instead of 100%, so it fails a threshold instead of passing it.
 
 - The SSR "unguarded browser global" hint points to the real `tools/builder/core/seo/ssr/ssr-polyfills.js` path.
+
+- `html`: a plain value interpolated in tag position (`<button ${attrs}>`) is filtered like `raw()` there. Escaping left `name=value` intact, so data such as `data-event=click:_remove` added a binding that called the component's method. Plain attributes (`${disabled ? 'disabled' : ''}`) still work.
+
+- A component no longer binds, fills or reads the `data-event`, `data-bind` and `data-i18n` elements of nested child components. A child `data-event="click:toggle"` used to fire the parent's `toggle()` too, the parent's `props` overwrote the child's `data-bind` fields, and `getValues()` returned them.
+
+- `data-optional` cleanup only looks inside the rendering component. It used to scan the whole document on every render, and it missed components rendered while detached.
+
+- `props.className` accepts several space-separated classes; it threw `InvalidCharacterError`.
+
+- The `date` pipe's time flag reads `"true"`/`"false"` from templates: `date:en-US,long,false` showed the time.
+
+- Router:
+    - A navigation whose guards resolve after a newer navigation has started is dropped; it used to render over the newer one.
+    - The query string is kept by `navigate()`, `reload()`, back/forward and language switches.
+    - Route params are URL-decoded (`/users/J%C3%B6rg` → `Jörg`).
+    - Static route segments match literally (`.` in a pattern matched any character).
+
+- `EventBus.emit()`: a listener that throws is reported with `console.error` and no longer keeps the other listeners from running.
+
+- i18n no longer crashes the app at load when the browser blocks site storage (`localStorage` throws a `SecurityError`). Teardown keeps the saved language preference; `resetTranslations()` still forgets it.
+
+- `trustedAPIs` match on whole path segments: a trusted `https://api.example.com/v1` no longer trusts `/v10`.
+
+- Catalog items no longer get the `normalizeKeys` array spread into their props as `0`, `1`, … keys.
+
+- Template minification no longer breaks a template that contains a nested `html```, such as `${items.map((i) => html`<li>${i}</li>`)}`. An inline template was cut at the inner backtick, and the minifier closed the "unclosed" markup, turning the code into a syntax error. The build now finds the real end of each template. Each `${…}` is swapped for a placeholder while the markup is minified, then put back exactly as written, so the minifier never sees JavaScript (it used to collapse spaces inside `${'a   b'}` in external templates too). Nested `html``` templates are minified the same way. A template that can't be minified safely, such as one with `style="${…}"` or a dynamic tag name, is kept as written, with a note in the build output.
+
+- `nutin-add` builds the feature template path from the generator's templates root instead of recomputing it. The CLI also drops several unused leftovers.
 
 ## 2.1.1
 

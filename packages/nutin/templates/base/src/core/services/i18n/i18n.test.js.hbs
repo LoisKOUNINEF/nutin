@@ -274,14 +274,37 @@ describe('i18n module', async () => {
     errSpy.restore();
   });
 
-  it('onDestroy resets translations and disposes the instance', async () => {
-    await I18nService.initTranslations();
-    expect(I18nService.translate('home.title')).toBe('My App');
+  it('onDestroy clears translations but keeps the saved language preference', async () => {
+    await I18nService.setCurrentLanguage('fr');
+    expect(I18nService.translate('home.title')).toBe('Mon App');
 
     I18nService.onDestroy();
 
     expect(I18nService.translate('home.title')).toBe('home.title');
+    expect(localStorage.getItem(I18nService.localStorageKey)).toBe('fr');
+  });
+
+  it('resetTranslations also forgets the saved language preference', async () => {
+    await I18nService.setCurrentLanguage('fr');
+
+    I18nService.resetTranslations();
+
+    expect(I18nService.currentLanguage).toBe('en');
     expect(localStorage.getItem(I18nService.localStorageKey)).toBe(null);
+  });
+
+  it('keeps working when storage access throws (site data blocked)', async () => {
+    const originalStorage = global.localStorage;
+    const blocked = () => { throw new Error('SecurityError'); };
+    global.localStorage = { getItem: blocked, setItem: blocked, removeItem: blocked };
+    try {
+      await I18nService.setCurrentLanguage('fr');
+      expect(I18nService.translate('home.title')).toBe('Mon App');
+      expect(() => I18nService.resetTranslations()).not.toThrow();
+      expect(I18nService['getPreferences']()).toBe(null);
+    } finally {
+      global.localStorage = originalStorage;
+    }
   });
 
   it('initI18n loads the translations when CONFIG.i18n is enabled', async () => {

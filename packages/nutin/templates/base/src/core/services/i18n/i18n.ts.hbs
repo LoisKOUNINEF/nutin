@@ -12,7 +12,7 @@ export class I18n extends Service<I18n> {
 
   constructor() {
     super();
-    this.registerCleanup(this.resetTranslations);
+    this.registerCleanup(this.clearTranslations);
     this._currentLanguage = this.getPreferredLanguage();
   }
 
@@ -103,16 +103,21 @@ export class I18n extends Service<I18n> {
     return value || null;
   }
 
+  // Also forgets the saved language preference.
   public resetTranslations(): void {
-    this._translations = {};
-    this._defaultTranslations = {};
-    localStorage.removeItem(this._localStorageKey);
-    this._currentLanguage = this._DEFAULT_LANGUAGE;
+    this.clearTranslations();
+    this.removePreferences();
   }
 
+  // Teardown keeps the saved preference: it belongs to the user, not to this instance.
   protected onDestroy(): void | Promise<void> {
-    this.resetTranslations();
     this.dispose();
+  }
+
+  private clearTranslations(): void {
+    this._translations = {};
+    this._defaultTranslations = {};
+    this._currentLanguage = this._DEFAULT_LANGUAGE;
   }
 
   private getPreferredLanguage(): Language {
@@ -155,12 +160,26 @@ export class I18n extends Service<I18n> {
     return value;
   }
 
+  // Storage access throws (SecurityError) when the browser blocks site data, e.g. in a
+  // sandboxed iframe: the preference is then simply not kept, rather than breaking the app.
   private savePreferences(): void {
-    localStorage.setItem(this._localStorageKey, this._currentLanguage);
+    try {
+      localStorage.setItem(this._localStorageKey, this._currentLanguage);
+    } catch {}
   }
 
   private getPreferences(): string | null {
-    return localStorage.getItem(this._localStorageKey);
+    try {
+      return localStorage.getItem(this._localStorageKey);
+    } catch {
+      return null;
+    }
+  }
+
+  private removePreferences(): void {
+    try {
+      localStorage.removeItem(this._localStorageKey);
+    } catch {}
   }
 }
 
