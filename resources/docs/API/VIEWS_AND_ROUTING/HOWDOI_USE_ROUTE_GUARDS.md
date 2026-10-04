@@ -2,8 +2,6 @@
 
 ```ts
 // src/app/guards.ts
-import { RouteGuard } from '../core/index.js';
-
 export const Guards = {
   requireAuth: (redirectTo: string = '/login'): RouteGuard => {
     return () => {

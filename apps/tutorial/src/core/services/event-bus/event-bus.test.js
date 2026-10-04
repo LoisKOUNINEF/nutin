@@ -175,6 +175,24 @@ describe('EventBus', () => {
     expect(regularCalls).toBe(2);
   });
 
+  it('keeps dispatching to the other listeners when one throws, and still removes a throwing once() handler', () => {
+    const errSpy = spyOn(console, 'error');
+    errSpy.andCallFake(() => {});
+    let received = 0;
+    let onceCalls = 0;
+
+    eventBus.once('notification', () => { onceCalls++; throw new Error('boom'); });
+    eventBus.subscribe('notification', () => { received++; });
+
+    eventBus.emit('notification', {});
+    eventBus.emit('notification', {});
+
+    expect(onceCalls).toBe(1);
+    expect(received).toBe(2);
+    expect(errSpy.callCount).toBe(1);
+    errSpy.restore();
+  });
+
   it('off(event) with no callback removes every handler for that event', () => {
     let callsA = 0;
     let callsB = 0;

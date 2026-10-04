@@ -2,19 +2,42 @@ import chokidar from 'chokidar';
 import { exec } from 'child_process';
 import path from 'path';
 import { print } from '../utils/index.js'
+import nutinConfig from '../../nutin.config.js';
 
-// Absolute paths — a relative '../../resources' starts with '..', which the
-// dotfile-skipping `ignored` regex below also matches at the start of the
-// string, silently dropping the whole watch root.
-const watcher = chokidar.watch([path.resolve('src'), path.resolve('../../resources')], {
+// config/, nutin.config.js and public/ are copied into the build too.
+const watcher = chokidar.watch(['src', 'config', 'public', 'nutin.config.js'], {
   ignored: /(^|[/\\])\../,
   persistent: true,
+  ignoreInitial: true,
 });
+
+// Markdown folders live outside src/ but still feed the build.
+// Website: resolved to absolute paths, since a relative '../../resources/...' starts with
+// '..', which the dotfile-skipping `ignored` regex above also matches, silently dropping it.
+watcher.add(
+  (nutinConfig.markdownSources?.sourceFolders ?? [])
+    .map((entry) => (typeof entry === 'string' ? entry : entry?.folder))
+    .filter(Boolean)
+    .map((folder) => path.resolve(folder))
+);
 
 let isBuilding = false;
 let pendingRebuild = false;
 let buildTimeout = null;
 let lastChangedPath = null;
+let serverUrl = null;
+
+function printWatching() {
+  if (serverUrl) print.boldInfo(`Serving at ${serverUrl}`);
+  print.boldBlue('Watching for changes...');
+}
+
+// Sent by dev-serve.js (relayed from serve.js) once the server is listening.
+process.on('message', (msg) => {
+  if (msg?.type === 'server-url') serverUrl = msg.url;
+});
+// Exit with dev-serve.js even if it dies without cleaning up (kill -9, crash).
+if (process.send) process.on('disconnect', () => process.exit(0));
 
 function runBuild() {
   isBuilding = true;
@@ -36,7 +59,9 @@ function runBuild() {
         print.boldError(`\nBuild failed: ${err.message}`);
       }
     } else {
-      print.boldBlue('Watching for changes...');
+      printWatching();
+      // Relayed by dev-serve.js to serve.js, which tells open pages to reload.
+      if (process.send && process.connected) process.send({ type: 'reload' });
     }
     isBuilding = false;
 
@@ -51,7 +76,9 @@ watcher.on('error', (err) => {
   print.boldError(`\nWatcher error: ${err.message}`);
 });
 
-watcher.on('change', (filePath) => {
+// New files (e.g. from `npm run generate`) and deletions need a rebuild too.
+watcher.on('all', (event, filePath) => {
+  if (!['add', 'change', 'unlink'].includes(event)) return;
   lastChangedPath = filePath;
 
   if (isBuilding) {

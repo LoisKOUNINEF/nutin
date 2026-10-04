@@ -1,13 +1,5 @@
 import { Service } from "../../index.js";
 
-export type IEventBus = InstanceType<typeof EventBus>;
-
-export type Subscription<K extends EventKey = EventKey> = {
-  event: K;
-  callback: (data: EventMap[K]) => void;
-  once?: boolean;
-};
-
 export class EventBus extends Service<EventBus> {
   private _subscriptions: Subscription[] = [];
 
@@ -39,7 +31,13 @@ export class EventBus extends Service<EventBus> {
     if (!callbacks) return;
 
     callbacks.slice().forEach(callback => {
-      callback(data!);
+      // A failing listener is reported but doesn't keep the others (the router's
+      // included) from receiving the event.
+      try {
+        callback(data!);
+      } catch (error) {
+        console.error(`Error in a "${event}" listener:`, error);
+      }
 
       const subIndex = this._subscriptions.findIndex(
         sub => sub.event === event && sub.callback === callback && sub.once
@@ -93,4 +91,4 @@ export class EventBus extends Service<EventBus> {
   };
 }
 
-export const AppEventBus = EventBus.getInstance();
+export const AppEventBus = /* @__PURE__ */ EventBus.getInstance();

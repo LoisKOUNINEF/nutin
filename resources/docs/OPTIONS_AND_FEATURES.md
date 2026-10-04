@@ -1,3 +1,7 @@
+---
+title: Options and features
+---
+
 # Nutin - Options and Features documentation
 
 ## Table of Contents

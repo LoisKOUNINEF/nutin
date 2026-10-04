@@ -16,7 +16,7 @@ You can override it when a template needs more than a single expression.
 
 ```ts
 // avatar.component.ts
-import { Component, ComponentProps, html, raw, type Template } from '../../../core/index.js';
+import { Component, html, raw } from '../../../core/index.js';
 
 interface AvatarConfig {
   alt: string;

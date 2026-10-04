@@ -5,6 +5,21 @@ export default {
   generateSEOFiles: true, // Generate per-route HTML, robots.txt and sitemap.xml; configure SEO data in config/seo.json
 
 // Nutin features
+  markdownSources: {       // Markdown folders compiled to /generated/<name>.<lang>.json at build time
+    sourceFolders: [
+      {
+        folder: '../../resources/docs',
+        routePrefix: 'docs',
+        hubFiles: ['API.md', 'OPTIONS_AND_FEATURES.md', 'TESTING.md', 'TOOLS.md'],
+        sectionInPath: true,
+        prefixReplacements: [['HOWDOI_', ''], ['WHATARE_', 'what-are-'], ['WHATIS_', 'what-is-'], ['WHAT_', 'what-']],
+      },
+      { folder: '../../resources/changelog', routePrefix: 'changelog', hubFiles: ['CHANGELOG.md'] },
+      { folder: '../../resources/tutorial', routePrefix: 'tutorial', hubFiles: ['TUTORIAL.md'] },
+      { folder: '../../resources/articles', routePrefix: 'articles', hubFiles: ['ARTICLES.md'] },
+      { folder: '../../resources/guides', routePrefix: 'guides', hubFiles: ['GUIDES.md'] },
+    ],
+  },
   dockerPorts: [9090, 9091],     // Ports the Docker container exposes/listens on — edit as needed
   
   // Components / Views scaffolding

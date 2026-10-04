@@ -1,3 +1,7 @@
+---
+title: Tools
+---
+
 # Nutin - Tools documentation
 
 ***IMPORTANT NOTE:*** 
@@ -15,3 +19,4 @@ Switching package manager in an existing Nutin app requires adapting:
 - [Generator](./TOOLS/GENERATOR.md)
 - [Builder](./TOOLS/BUILDER.md)
 - [Updater](./TOOLS/UPDATER.md)
+- [Upgrading from 2.x to 3.0](./TOOLS/UPGRADING_TO_V3.md)

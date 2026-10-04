@@ -4,6 +4,7 @@ import path from 'path';
 import { pathToFileURL } from 'url';
 import { PATHS } from '../../app/paths.js';
 import { builderConfig } from '../../../builder.config.js';
+import { sharedDefine } from '../../prod-bundle/bundle-options.js';
 
 const SSR_DIR = path.join(PATHS.temp, '.ssr');
 const ENTRY_FILE = path.join(PATHS.tempApp, '__ssr-entry.ts');
@@ -13,13 +14,6 @@ const ENTRY_CONTENT = `export { appRoutes } from './routes.js';
 export { I18nService, Service, registerPipes } from '../core/index.js';
 export { RouteGuardsManager } from '../core/services/router/helpers/route-guard-manager.helper.js';
 export { NavbarComponent, FooterComponent } from './components/index.js';
-export {
-  DocsManifestService,
-  ChangelogManifestService,
-  TutorialManifestService,
-  ArticlesManifestService,
-  GuidesManifestService
-} from './services/index.js';
 `;
 
 /**
@@ -43,9 +37,7 @@ export async function buildSsrBundle() {
       loader: {
         '.json': 'json',
       },
-      define: {
-        'process.env.NODE_ENV': '"production"',
-      },
+      define: sharedDefine({ ...builderConfig, isProd: true }),
       entryPoints: [ENTRY_FILE],
       outfile: OUT_FILE,
       keepNames: true,

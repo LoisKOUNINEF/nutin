@@ -1,4 +1,5 @@
 import { DataBindingHelper } from '#root/dist/src/core/base-classes/component/helpers/data-binding.helper.js';
+import { DomHelper } from '#root/dist/src/core/base-classes/base-component/helpers/dom.helper.js';
 
 describe('DataBindingHelper', () => {
   let container;
@@ -71,5 +72,17 @@ describe('DataBindingHelper', () => {
     container.innerHTML = '<span data-bind="">hi</span>';
     const values = DataBindingHelper.getDataBindingValues(container);
     expect(values).toEqual({});
+  });
+
+  it('skips fields inside a nested component root in both directions', () => {
+    container.innerHTML = '<input class="own" data-bind="name"><div class="child"><input class="nested" data-bind="name" value="child"></div>';
+    DomHelper.markComponentRoot(container.querySelector('.child'));
+
+    DataBindingHelper.applyDataBindings(container, { name: 'Ada' });
+
+    expect(container.querySelector('.own').value).toBe('Ada');
+    expect(container.querySelector('.nested').value).toBe('child');
+    container.querySelector('.own').value = 'parent';
+    expect(DataBindingHelper.getDataBindingValues(container)).toEqual({ name: 'parent' });
   });
 });

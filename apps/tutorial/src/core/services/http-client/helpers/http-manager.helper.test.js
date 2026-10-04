@@ -9,9 +9,43 @@ describe('HttpManager', () => {
   });
 
   it('should create an AbortController without a timeout', () => {
-    const { controller, timeoutId } = HttpManager.createAbortController();
+    const { controller, timeoutId, timedOut } = HttpManager.createAbortController();
     expect(controller).toBeInstanceOf(AbortController);
     expect(timeoutId).toBe(null);
+    expect(timedOut()).toBe(false);
+  });
+
+  it('should mark the request as timed out when its timeout fires', async () => {
+    const { controller, timedOut, cleanup } = HttpManager.createAbortController(5);
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    expect(controller.signal.aborted).toBe(true);
+    expect(timedOut()).toBe(true);
+    cleanup();
+  });
+
+  it('should reject a timeout that is not a positive number', () => {
+    expect(() => HttpManager.createAbortController(0)).toThrow('positive number');
+    expect(() => HttpManager.createAbortController(-5)).toThrow('positive number');
+  });
+
+  it('should forward an abort from the caller signal, and stop forwarding after cleanup', () => {
+    const caller = new AbortController();
+    const first = HttpManager.createAbortController(undefined, caller.signal);
+    caller.abort();
+    expect(first.controller.signal.aborted).toBe(true);
+    expect(first.timedOut()).toBe(false);
+
+    const other = new AbortController();
+    const second = HttpManager.createAbortController(undefined, other.signal);
+    second.cleanup();
+    other.abort();
+    expect(second.controller.signal.aborted).toBe(false);
+  });
+
+  it('should start aborted when the caller signal already is', () => {
+    const caller = new AbortController();
+    caller.abort();
+    expect(HttpManager.createAbortController(undefined, caller.signal).controller.signal.aborted).toBe(true);
   });
 
   it('should parse a valid JSON error response', async () => {
@@ -78,6 +112,9 @@ describe('HttpManager', () => {
   it('should detect JSON content types', () => {
     expect(HttpManager.isJsonResponse('application/json')).toBe(true);
     expect(HttpManager.isJsonResponse('application/json; charset=utf-8')).toBe(true);
+    expect(HttpManager.isJsonResponse('Application/JSON')).toBe(true);
+    expect(HttpManager.isJsonResponse('application/problem+json')).toBe(true);
+    expect(HttpManager.isJsonResponse('application/jsonp')).toBe(false);
     expect(HttpManager.isJsonResponse('text/html')).toBe(false);
     expect(HttpManager.isJsonResponse(null)).toBe(false);
   });
@@ -90,6 +127,13 @@ describe('HttpManager', () => {
     expect(JSON.stringify(result)).toBe(JSON.stringify({ message: 'ok' }));
   });
 
+  it('should resolve 204, 205 and empty bodies to undefined', async () => {
+    expect(await HttpManager.parseSuccessResponse(new Response(null, { status: 204 }))).toBe(undefined);
+    expect(await HttpManager.parseSuccessResponse(new Response(null, { status: 205 }))).toBe(undefined);
+    const empty = new Response('', { headers: { 'Content-Type': 'application/json' } });
+    expect(await HttpManager.parseSuccessResponse(empty)).toBe(undefined);
+  });
+
   it('should parse success text response as fallback', async () => {
     const mockResponse = new Response('plain text', {
       headers: { 'Content-Type': 'text/plain' }
@@ -98,19 +142,21 @@ describe('HttpManager', () => {
     expect(result).toBe('plain text');
   });
 
-  it('should detect timeout errors', () => {
-    const err = new DOMException('Aborted', 'AbortError');
-    expect(HttpManager.isTimeoutError(err)).toBe(true);
+  it('should detect abort errors', () => {
+    expect(HttpManager.isAbortError(new DOMException('Aborted', 'AbortError'))).toBe(true);
+    expect(HttpManager.isAbortError(new Error('Other'))).toBe(false);
+    expect(HttpManager.isAbortError(null)).toBe(false);
+  });
 
-    const otherErr = new Error('Other');
-    expect(HttpManager.isTimeoutError(otherErr)).toBe(false);
+  it('should rethrow an abort that was not the timeout as it is', () => {
+    expect(() => HttpManager.handleRequestError(new DOMException('Aborted', 'AbortError'))).toThrow('Aborted');
   });
 
   it('should throw timeout error from handleRequestError', () => {
     const err = new DOMException('Aborted', 'AbortError');
     let thrown = false;
     try {
-      HttpManager.handleRequestError(err);
+      HttpManager.handleRequestError(err, true);
     } catch (e) {
       thrown = true;
       expect(e.message).toBe('Request timed out');

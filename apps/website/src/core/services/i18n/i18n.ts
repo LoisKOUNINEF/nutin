@@ -1,4 +1,4 @@
-import { DEFAULT_LANGUAGE, LANGUAGES, Language, Translations } from './languages.js';
+import { DEFAULT_LANGUAGE, LANGUAGES } from './languages.js';
 import { AppEventBus, Service } from '../../index.js';
 import { CONFIG } from '../../config.js';
 
@@ -12,7 +12,7 @@ export class I18n extends Service<I18n> {
 
   constructor() {
     super();
-    this.registerCleanup(this.resetTranslations);
+    this.registerCleanup(this.clearTranslations);
     this._currentLanguage = this.getPreferredLanguage();
   }
 
@@ -39,8 +39,10 @@ export class I18n extends Service<I18n> {
     AppEventBus.emit('language-changed', { lang });
   }
 
-  public onLanguageChange(callback: (payload: { lang: string }) => void) {
+  // Returns the unsubscribe function, like Navigation.onNavigate().
+  public onLanguageChange(callback: (payload: { lang: string }) => void): () => void {
     AppEventBus.subscribe('language-changed', callback);
+    return () => AppEventBus.off('language-changed', callback);
   }
 
   public async loadTranslations(lang: Language): Promise<void> {
@@ -101,16 +103,21 @@ export class I18n extends Service<I18n> {
     return value || null;
   }
 
+  // Also forgets the saved language preference.
   public resetTranslations(): void {
-    this._translations = {};
-    this._defaultTranslations = {};
-    localStorage.removeItem(this._localStorageKey);
-    this._currentLanguage = this._DEFAULT_LANGUAGE;
+    this.clearTranslations();
+    this.removePreferences();
   }
 
+  // Teardown keeps the saved preference: it belongs to the user, not to this instance.
   protected onDestroy(): void | Promise<void> {
-    this.resetTranslations();
     this.dispose();
+  }
+
+  private clearTranslations(): void {
+    this._translations = {};
+    this._defaultTranslations = {};
+    this._currentLanguage = this._DEFAULT_LANGUAGE;
   }
 
   private getPreferredLanguage(): Language {
@@ -123,7 +130,7 @@ export class I18n extends Service<I18n> {
   }
 
   private getLocaleFromUrl(): Language | null {
-    if (!CONFIG.i18n) return null;
+    if (!(globalThis.__NUTIN_I18N__ ?? CONFIG.i18n)) return null;
 
     const first = window.location.pathname.split('/').filter(Boolean)[0] as Language;
     return first && this._LANGUAGES.includes(first) ? first : null;
@@ -143,20 +150,44 @@ export class I18n extends Service<I18n> {
 
   private getNestedValue(obj: any, keys: string[]): any {
     let value = obj;
+    // Own keys only: "constructor" or "__proto__" must not resolve to Object.prototype members.
     for (const key of keys) {
-      value = value?.[key];
+      value = value !== null && typeof value === 'object' && Object.prototype.hasOwnProperty.call(value, key)
+        ? value[key]
+        : undefined;
       if (!value) break;
     }
     return value;
   }
 
+  // Storage access throws (SecurityError) when the browser blocks site data, e.g. in a
+  // sandboxed iframe: the preference is then simply not kept, rather than breaking the app.
   private savePreferences(): void {
-    localStorage.setItem(this._localStorageKey, this._currentLanguage);
+    try {
+      localStorage.setItem(this._localStorageKey, this._currentLanguage);
+    } catch {}
   }
 
   private getPreferences(): string | null {
-    return localStorage.getItem(this._localStorageKey);
+    try {
+      return localStorage.getItem(this._localStorageKey);
+    } catch {
+      return null;
+    }
+  }
+
+  private removePreferences(): void {
+    try {
+      localStorage.removeItem(this._localStorageKey);
+    } catch {}
   }
 }
 
-export const I18nService = I18n.getInstance();
+export const I18nService = /* @__PURE__ */ I18n.getInstance();
+
+/**
+ * Loads the translations when i18n is enabled in nutin.config.js; a no-op otherwise.
+ */
+export async function initI18n(): Promise<void> {
+  if (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n) await I18nService.initTranslations();
+}

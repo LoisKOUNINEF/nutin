@@ -1,3 +1,7 @@
+---
+ogImage: /assets/images/og-covers/og-cover-articles.jpg
+---
+
 # The story behind Nutin
 
 Nutin started with a simple question:

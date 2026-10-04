@@ -2,36 +2,18 @@ import { DomHelper } from './helpers/dom.helper.js';
 import { EventHelper } from './helpers/event.helper.js';
 import { I18nHelper } from './helpers/i18n.helper.js';
 import { PipeHelper } from './helpers/pipe.helper.js';
-import { ChildrenHelper } from './helpers/children.helper.js';
-import { CatalogHelper, CatalogConfig } from './helpers/catalog.helper.js';
-import { Component, AppEventBus } from '../../index.js';
-import { SecurityHelper, TrustLevel } from './helpers/security.helper.js';
+import { ChildrenHelper, type ChildRegistry } from './helpers/children.helper.js';
+import { PreservationHelper } from './helpers/preservation.helper.js';
+import { CatalogHelper } from './helpers/catalog.helper.js';
+import { AppEventBus } from '../../index.js';
+import { SecurityHelper } from './helpers/security.helper.js';
 
-export { SecurityHelper, TrustLevel } from './helpers/security.helper.js';
-export { CatalogItemConfig, CatalogConfig, CatalogItemPrimitive } from './helpers/catalog.helper.js';
+export { SecurityHelper } from './helpers/security.helper.js';
 export { TokenHelper } from './helpers/token.helper.js';
-
-/**```typescript
- * export interface ComponentConfig {
- *   selector: string;
- *   factory: (element: HTMLElement) => Component;
- * }
- * ```
- */ 
-export interface ComponentConfig {
-  selector: string;
-  factory: (element: HTMLElement) => Component;
-}
-
-export interface BaseComponentOptions {
-  template?: string;
-  mountTarget?: string | HTMLElement;
-  tagName?: keyof HTMLElementTagNameMap;
-  trustLevel?: TrustLevel;
-}
+export { html, raw, trustedRaw, SafeHtml } from './helpers/html.helper.js';
 
 export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
-  private _children: BaseComponent[] = [];
+  private _children: ChildRegistry = ChildrenHelper.createRegistry();
   private _isRendering = false;
   protected element: T;
   protected eventListeners: Array<[EventTarget, string, EventListener]> = [];
@@ -45,6 +27,7 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
   }: BaseComponentOptions) {
     this.trustLevel = trustLevel;
     this.element = DomHelper.createElement<T>(tagName, '', trustLevel);
+    DomHelper.markComponentRoot(this.element);
     DomHelper.mountElement(this.element, mountTarget);
   }
 
@@ -62,11 +45,16 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
 
     try {
       this.onBeforeRender();
-      this.element.innerHTML = SecurityHelper.sanitizeTemplate(
-        this.generateTemplate(),
-        this.trustLevel
-      );
-      this.compose();
+      const preserved = PreservationHelper.preserve(ChildrenHelper.getKeyedElements(this._children));
+      try {
+        this.element.replaceChildren(
+          SecurityHelper.sanitizeToFragment(this.generateTemplate(), this.trustLevel)
+        );
+        this.compose();
+      } finally {
+        PreservationHelper.restore(preserved);
+      }
+      this._children.reused.splice(0).forEach(child => child.onReuse());
       this.hydrate();
       this.autoBindEvents()
       this.onAfterRender();
@@ -93,14 +81,16 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
   protected onAfterRender(): void {}
   protected onBeforeDestroy(): void {}
   protected onAfterDestroy(): void {}
+  // Called instead of a render when a parent re-render keeps this child as-is
+  protected onReuse(): void {}
 
-  protected generateTemplate(): string {
+  protected generateTemplate(): Template {
     return '';
   }
 
   protected hydrate(): void {
     this.parseDataAttributes();
-    DomHelper.cleanupOptionalContent();
+    DomHelper.cleanupOptionalContent(this.element);
   }
 
   protected compose(): void {

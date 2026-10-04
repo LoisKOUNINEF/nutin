@@ -1,0 +1,42 @@
+// :where() keeps these rules at zero specificity: see markdown.view.scss.
+:where(.markdown-nav__container) {
+  flex: 0 0 var(--markdown-nav-width, 16rem);
+}
+
+:where(.markdown-nav ul) {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+:where(.markdown-nav__section + .markdown-nav__section, .markdown-nav__group + .markdown-nav__group) {
+  margin-top: 1rem;
+}
+
+:where(.markdown-nav__section-title, .markdown-nav__group-title) {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+:where(.markdown-nav__group-title) {
+  font-size: 0.875rem;
+  opacity: 0.75;
+}
+
+:where(.markdown-nav__link) {
+  display: block;
+  padding: 0.25rem 0;
+}
+
+:where(.markdown-nav__link--active) {
+  font-weight: bold;
+}
+
+// Stacked above the content on narrow screens (see markdown.view.scss): the width
+// basis would otherwise become a fixed height.
+@media (max-width: 700px) {
+  :where(.markdown-nav__container) {
+    flex-basis: auto;
+  }
+}

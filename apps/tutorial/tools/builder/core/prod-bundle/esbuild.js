@@ -1,8 +1,9 @@
 import esbuild from 'esbuild';
 import path from 'path';
-import { print, errorExit } from '../../../utils/index.js';
+import { errorExit } from '../../../utils/index.js';
 import { PATHS } from '../app/paths.js';
 import { builderConfig } from '../../builder.config.js';
+import { sharedDefine, slimConfigPlugin } from './bundle-options.js';
 
 // Prod bundles straight from the copied .ts sources (tsc runs --noEmit there);
 // dev bundles tsc's emitted .js, which is kept on disk for testin-nutin.
@@ -25,9 +26,8 @@ async function build() {
     loader: {
       '.json': 'json',
     },
-    define: {
-      'process.env.NODE_ENV': builderConfig.isProd ? '"production"' : '"development"',
-    },
+    define: sharedDefine(builderConfig),
+    plugins: [slimConfigPlugin({ generateSEO: builderConfig.generateSEO })],
     entryPoints: [ENTRY_FILE],
     outfile: OUT_FILE,
     keepNames: false,

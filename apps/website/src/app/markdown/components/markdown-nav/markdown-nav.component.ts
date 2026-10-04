@@ -1,0 +1,72 @@
+import { Component, Navigation, html, raw, SafeHtml } from '../../../../core/index.js';
+import { IMarkdownGroup, IMarkdownSection, MarkdownManifest } from '../../markdown-manifest.js';
+import { markdownText } from '../../markdown-i18n.js';
+
+export interface IMarkdownNavConfig {
+  sections: IMarkdownSection[];
+  manifest: MarkdownManifest;
+  currentSlug: string;
+  pageHref: (slug: string) => string;
+}
+
+// The nav's building blocks, exported so a custom template can reuse them.
+// Links route through the component's _navigateTo (data-event).
+export function renderNavLink(slug: string, config: IMarkdownNavConfig): SafeHtml | string {
+  const page = config.manifest.getPage(slug);
+  if (!page) return '';
+
+  const current = slug === config.currentSlug;
+  return html`
+    <li>
+      <a
+        href="${config.pageHref(slug)}"
+        class="markdown-nav__link${current ? ' markdown-nav__link--active' : ''}"
+        ${current ? raw('aria-current="page"') : ''}
+        data-event="click:_navigateTo:@attr:href"
+      >${page.title}</a>
+    </li>
+  `;
+}
+
+export function renderNavGroup(group: IMarkdownGroup, config: IMarkdownNavConfig): SafeHtml {
+  const title = group.title ? html`<span class="markdown-nav__group-title">${group.title}</span>` : '';
+  return html`
+    <li class="markdown-nav__group">
+      ${title}
+      <ul class="markdown-nav__pages">${group.pages.map((slug) => renderNavLink(slug, config))}</ul>
+    </li>
+  `;
+}
+
+export function renderNavSection(section: IMarkdownSection, config: IMarkdownNavConfig): SafeHtml {
+  const items = section.groups
+    ? section.groups.map((group) => renderNavGroup(group, config))
+    : (section.pages ?? []).map((slug) => renderNavLink(slug, config));
+
+  return html`
+    <li class="markdown-nav__section">
+      <span class="markdown-nav__section-title">${section.title}</span>
+      <ul class="markdown-nav__groups">${items}</ul>
+    </li>
+  `;
+}
+
+export const markdownNavTemplate = (_config: IMarkdownNavConfig) => html`
+  <nav class="markdown-nav" aria-label="${markdownText('pages', 'Pages')}">
+    <ul class="markdown-nav__sections">
+      ${_config.sections.map((section) => renderNavSection(section, _config))}
+    </ul>
+  </nav>
+`;
+
+export class MarkdownNavComponent extends Component<HTMLElement, IMarkdownNavConfig> {
+  // templateFn: your own template, e.g. built from the render helpers above.
+  constructor(mountTarget: HTMLElement, config: IMarkdownNavConfig, templateFn: (config: IMarkdownNavConfig) => Template = markdownNavTemplate) {
+    // Mounting replaces the placeholder element, so its class is re-applied here.
+    super({ templateFn, mountTarget, config, props: { className: 'markdown-nav__container' } });
+  }
+
+  protected _navigateTo(href: string): void {
+    Navigation.navigateTo(href);
+  }
+}

@@ -1,7 +1,7 @@
 import { resolve } from 'path';
 import { spawnSync } from 'child_process';
 import process from 'process';
-import { print } from './index.js';
+import { print } from './print.js';
 
 export function runScript(path, message) {
   if (!message) print.boldSection(`Running ${path}...`);
@@ -9,7 +9,7 @@ export function runScript(path, message) {
 
   const args = [resolve(path), '--silent'];
 
-  const result = spawnSync('node', args,
+  const result = spawnSync(process.execPath, args,
     { 
       stdio: 'inherit',
       env: { ...process.env }, 

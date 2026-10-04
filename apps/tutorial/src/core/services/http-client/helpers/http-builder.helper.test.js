@@ -1,12 +1,4 @@
-import { HttpBuilder } from '#root/dist/src/core/services/http-client/helpers/http-builder.helper.js';
-
-const mockAbortSignal = {
-    aborted: false,
-    onabort: null,
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    dispatchEvent: () => true,
-  };
+import { HttpBuilder, path } from '#root/dist/src/core/services/http-client/helpers/http-builder.helper.js';
 
 describe('HttpBuilder', () => {
   // Tests for buildRequestBody
@@ -26,10 +18,35 @@ describe('HttpBuilder', () => {
     expect(result).toBe(JSON.stringify(data));
   });
 
-  it('buildRequestBody handles primitive types', () => {
+  it('buildRequestBody JSON-encodes primitives, falsy ones included', () => {
     expect(HttpBuilder.buildRequestBody(42)).toBe('42');
-    expect(HttpBuilder.buildRequestBody('text')).toContain('text');
-    expect(HttpBuilder.buildRequestBody(true)).toBeDefined();
+    expect(HttpBuilder.buildRequestBody('text')).toBe('"text"');
+    expect(HttpBuilder.buildRequestBody(0)).toBe('0');
+    expect(HttpBuilder.buildRequestBody(false)).toBe('false');
+    expect(HttpBuilder.buildRequestBody('')).toBe('""');
+  });
+
+  it('buildRequestBody passes fetch body types through unchanged', () => {
+    const bodies = [new FormData(), new Blob(['x']), new URLSearchParams('a=1'), new ArrayBuffer(1), new Uint8Array(1), new ReadableStream()];
+    bodies.forEach((body) => expect(HttpBuilder.buildRequestBody(body)).toBe(body));
+  });
+
+  it('appendQueryParams skips null/undefined, stringifies values and repeats arrays', () => {
+    const url = new URL('https://api.example.com');
+    HttpBuilder.appendQueryParams(url, { a: 1, b: false, c: null, d: undefined, e: ['x', null, 2] });
+    expect(url.search).toBe('?a=1&b=false&e=x&e=2');
+  });
+
+  it('appendQueryParams does nothing without params', () => {
+    const url = new URL('https://api.example.com/?a=1');
+    HttpBuilder.appendQueryParams(url, undefined);
+    expect(url.search).toBe('?a=1');
+  });
+
+  it('mergeHeaders merges case-insensitively, later records winning, and skips undefined', () => {
+    const headers = HttpBuilder.mergeHeaders({ 'Content-Type': 'a', 'X-One': '1' }, undefined, { 'content-type': 'b' });
+    expect(headers.get('content-type')).toBe('b');
+    expect(headers.get('x-one')).toBe('1');
   });
 
   // Tests for appendQueryParams
@@ -60,6 +77,65 @@ describe('HttpBuilder', () => {
   });
 
   // Tests for buildRequestUrl
+  it('resolveUrl keeps an absolute endpoint when there is no base URL', () => {
+    expect(HttpBuilder.resolveUrl('', 'https://api.example.com/users').href).toBe('https://api.example.com/users');
+  });
+
+  it('resolveUrl resolves a relative endpoint against the page origin when there is no base URL', () => {
+    expect(HttpBuilder.resolveUrl('', '/api/users').href).toBe('http://localhost/api/users');
+    expect(HttpBuilder.resolveUrl('', 'api/users?x=1').href).toBe('http://localhost/api/users?x=1');
+  });
+
+  it('resolveUrl joins endpoints under the base URL with or without slashes', () => {
+    expect(HttpBuilder.resolveUrl('https://api.example.com', '/users/1').href).toBe('https://api.example.com/users/1');
+    expect(HttpBuilder.resolveUrl('https://api.example.com/v1', '/users').href).toBe('https://api.example.com/v1/users');
+    expect(HttpBuilder.resolveUrl('https://api.example.com/v1/', 'users').href).toBe('https://api.example.com/v1/users');
+    expect(HttpBuilder.resolveUrl('https://api.example.com/v1', '').href).toBe('https://api.example.com/v1/');
+  });
+
+  it('resolveUrl keeps host-like endpoints on the base origin', () => {
+    expect(HttpBuilder.resolveUrl('https://api.example.com', '@other.example/x').href).toBe('https://api.example.com/@other.example/x');
+    expect(HttpBuilder.resolveUrl('https://api.example.com', '.other.example/x').href).toBe('https://api.example.com/.other.example/x');
+    expect(HttpBuilder.resolveUrl('https://api.example.com', '//other.example/x').href).toBe('https://api.example.com/other.example/x');
+  });
+
+  it('resolveUrl keeps the base URL query ahead of the endpoint query', () => {
+    expect(HttpBuilder.resolveUrl('https://api.example.com/v1?v=2', '/users?page=3').href).toBe('https://api.example.com/v1/users?v=2&page=3');
+  });
+
+  it('resolveUrl only allows http and https', () => {
+    expect(HttpBuilder.resolveUrl('', 'http://api.example.com/a').protocol).toBe('http:');
+    expect(() => HttpBuilder.resolveUrl('', 'ftp://files.example.com/a')).toThrow('must use http or https');
+  });
+
+  it('resolveUrl rejects an encoded slash or backslash in the path unless the URL is under a trusted API', () => {
+    expect(() => HttpBuilder.resolveUrl('https://api.example.com', '/files/a%2Fb')).toThrow('trustedAPIs');
+    expect(() => HttpBuilder.resolveUrl('https://api.example.com', '/files/a%5cb')).toThrow('trustedAPIs');
+    const trusted = ['https://api.example.com/files/'];
+    expect(HttpBuilder.resolveUrl('https://api.example.com', '/files/a%2Fb', trusted).pathname).toBe('/files/a%2Fb');
+    expect(() => HttpBuilder.resolveUrl('https://api.example.com', '/other/a%2Fb', trusted)).toThrow('trustedAPIs');
+    expect(() => HttpBuilder.resolveUrl('', 'https://cdn.example.com/files/a%2Fb', trusted)).toThrow('trustedAPIs');
+  });
+
+  it('resolveUrl matches trusted APIs on whole path segments', () => {
+    const trusted = ['https://api.example.com/v1'];
+    expect(HttpBuilder.resolveUrl('', 'https://api.example.com/v1/a%2Fb', trusted).pathname).toBe('/v1/a%2Fb');
+    expect(() => HttpBuilder.resolveUrl('', 'https://api.example.com/v10/a%2Fb', trusted)).toThrow('trustedAPIs');
+  });
+
+  it('describe shows origin and path only', () => {
+    expect(HttpBuilder.describe(new URL('https://api.example.com/a?key=secret#h'))).toBe('https://api.example.com/a');
+  });
+
+  it('resolveUrl rejects absolute URLs on another origin', () => {
+    expect(() => HttpBuilder.resolveUrl('https://api.example.com', 'https://other.example/x')).toThrow();
+  });
+
+  it('resolveUrl rejects endpoints that leave the base path', () => {
+    expect(() => HttpBuilder.resolveUrl('https://api.example.com/v1', '/users/../../admin')).toThrow();
+    expect(() => HttpBuilder.resolveUrl('https://api.example.com/v1', '%2e%2e/admin')).toThrow();
+  });
+
   it('buildRequestUrl returns URL without query params', () => {
     const url = HttpBuilder.buildRequestUrl('https://api.example.com');
     expect(url.search).toBe('');
@@ -81,54 +157,64 @@ describe('HttpBuilder', () => {
   });
 
   // Tests for buildRequestOptions
-  it('buildRequestOptions sets GET without body', () => {
-    const options = HttpBuilder.buildRequestOptions(
-      'GET',
-      null,
-      { headers: { 'X-Test': 'value' } },
-      mockAbortSignal
-    );
+  it('buildRequestOptions sets GET without body or content type', () => {
+    const headers = new Headers({ 'X-Test': 'value' });
+    const signal = new AbortController().signal;
+    const options = HttpBuilder.buildRequestOptions('GET', null, {}, headers, signal);
     expect(options.method).toBe('GET');
     expect(options.body).toBeUndefined();
-    expect(JSON.stringify(options.headers)).toBe(JSON.stringify({ 'X-Test': 'value' }));
-    expect(options.signal).toBe(mockAbortSignal);
+    expect(options.headers.get('x-test')).toBe('value');
+    expect(options.headers.has('content-type')).toBe(false);
+    expect(options.signal).toBe(signal);
   });
 
-  it('buildRequestOptions sets POST with body', () => {
-    const data = { name: 'Alice' };
+  it('buildRequestOptions sets a JSON body and content type', () => {
+    const options = HttpBuilder.buildRequestOptions('POST', { name: 'Alice' }, {}, new Headers(), new AbortController().signal);
+    expect(options.body).toBe('{"name":"Alice"}');
+    expect(options.headers.get('content-type')).toBe('application/json');
+  });
+
+  it('buildRequestOptions keeps an explicit content type and passes fetch options through', () => {
     const options = HttpBuilder.buildRequestOptions(
       'POST',
-      data,
-      { headers: { 'Content-Type': 'application/json' } },
-      mockAbortSignal
+      { a: 1 },
+      { credentials: 'include', cache: 'no-store', referrerPolicy: 'no-referrer', redirect: 'manual' },
+      new Headers({ 'content-type': 'text/plain' }),
+      new AbortController().signal
     );
-    expect(options.method).toBe('POST');
-    expect(options.body).toBe(JSON.stringify(data));
-  });
-
-  it('buildRequestOptions handles empty config', () => {
-    const options = HttpBuilder.buildRequestOptions('GET', null, {}, mockAbortSignal);
-    expect(options.body).toBeUndefined();
-    expect(options.headers).toBeUndefined();
+    expect(options.headers.get('content-type')).toBe('text/plain');
+    expect(options.credentials).toBe('include');
+    expect(options.cache).toBe('no-store');
+    expect(options.referrerPolicy).toBe('no-referrer');
+    expect(options.redirect).toBe('manual');
   });
 
   it('buildRequestOptions sets PUT with body', () => {
     const data = { id: 1, name: 'Updated' };
-    const options = HttpBuilder.buildRequestOptions('PUT', data, {}, mockAbortSignal);
+    const options = HttpBuilder.buildRequestOptions('PUT', data, {}, new Headers(), new AbortController().signal);
     expect(options.method).toBe('PUT');
     expect(options.body).toBe(JSON.stringify(data));
   });
 
   it('buildRequestOptions sets PATCH with body', () => {
     const data = { name: 'Patched' };
-    const options = HttpBuilder.buildRequestOptions('PATCH', data, {}, mockAbortSignal);
+    const options = HttpBuilder.buildRequestOptions('PATCH', data, {}, new Headers(), new AbortController().signal);
     expect(options.method).toBe('PATCH');
     expect(options.body).toBe(JSON.stringify(data));
   });
 
   it('buildRequestOptions sets DELETE without body', () => {
-    const options = HttpBuilder.buildRequestOptions('DELETE', undefined, {}, mockAbortSignal);
+    const options = HttpBuilder.buildRequestOptions('DELETE', undefined, {}, new Headers(), new AbortController().signal);
     expect(options.method).toBe('DELETE');
     expect(options.body).toBeUndefined();
   });
-})
+
+  it('path encodes values and keeps the static parts', () => {
+    expect(path`/users/${'a b'}/files/${'x/y'}?v=${1}`).toBe('/users/a%20b/files/x%2Fy?v=1');
+  });
+
+  it('path rejects "." and ".." values', () => {
+    expect(() => path`/a/${'.'}`).toThrow('not a valid path value');
+    expect(() => path`/a/${'..'}`).toThrow('not a valid path value');
+  });
+});

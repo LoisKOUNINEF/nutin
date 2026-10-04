@@ -1,3 +1,7 @@
+---
+title: API
+---
+
 # Nutin - API documentation
 
 ## Table of Contents

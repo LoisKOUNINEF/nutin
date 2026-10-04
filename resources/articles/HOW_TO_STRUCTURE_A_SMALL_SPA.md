@@ -1,3 +1,7 @@
+---
+ogImage: /assets/images/og-covers/og-cover-articles.jpg
+---
+
 # How to Structure a Small SPA
 
 A small single-page application can stay surprisingly simple, but there is a point where simplicity starts working against you.

@@ -33,13 +33,21 @@ function getKeyForFile(filePath) {
   }
 }
 
-function combineJsonFiles(files) {
+function combineJsonFiles(locale, files) {
   const combined = {};
+  const sources = {};
 
   files.forEach(file => {
     const key = getKeyForFile(file);
-    const content = JSON.parse(fs.readFileSync(file, 'utf8'));
-    combined[key] = content;
+    // Keys are folder names, so e.g. admin/user/ and public/user/ would share "user".
+    if (sources[key]) {
+      throw new Error(
+        `Translation key "${key}" (${locale}) is defined by two folders:\n  ${path.relative(process.cwd(), sources[key])}\n  ${path.relative(process.cwd(), file)}\n` +
+        `One would silently overwrite the other — rename one of the folders.`
+      );
+    }
+    sources[key] = file;
+    combined[key] = JSON.parse(fs.readFileSync(file, 'utf8'));
   });
 
   return combined;
@@ -107,9 +115,9 @@ async function mergeJson() {
 
   const localeFilesMap = findLocaleFiles();
   for (const [locale, files] of Object.entries(localeFilesMap)) {
-    const combined = combineJsonFiles(files);
+    const combined = combineJsonFiles(locale, files);
     fs.writeFileSync(
-      `${destDir}/${locale}.json`,
+      path.join(destDir, `${locale}.json`),
       JSON.stringify(combined, null, 2)
     );
   }
@@ -117,5 +125,5 @@ async function mergeJson() {
 }
 
 mergeJson().catch((err) => {
-  errorExit(err)
+  errorExit(err, 'build-i18n');
 });

@@ -1,11 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { PATHS } from '../app/paths.js';
-import { print, getFilesRecursive, errorExit } from '../../../utils/index.js';
+import { PATHS, isBundledSource } from '../app/paths.js';
+import { getFilesRecursive, errorExit } from '../../../utils/index.js';
 
 function addHashToFiles(distDir) {
-  const files = getFilesRecursive(distDir, ['.js', '.css']);
+  const files = getFilesRecursive(distDir, ['.js', '.css']).filter((file) => !isBundledSource(file));
 
   const fileMap = {}; // Track old → new filenames
 
@@ -49,7 +49,7 @@ function updateHtmlReferences(htmlPath, fileMap) {
 }
 
 try {
-  addHashToFiles(PATHS.tempSource)
+  addHashToFiles(PATHS.tempSource);
 } catch(err) {
   errorExit(err, 'hash-files');
 }

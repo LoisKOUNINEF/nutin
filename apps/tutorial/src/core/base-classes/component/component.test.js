@@ -44,6 +44,13 @@ describe('Component', () => {
     expect(component.getElement().classList.contains('highlight')).toBe(true);
   });
 
+  it('onBeforeRender applies a space-separated props.className as several classes', () => {
+    const component = new TestComponent({ props: { className: ' btn  primary ' } });
+    component.render();
+    expect(component.getElement().classList.contains('btn')).toBe(true);
+    expect(component.getElement().classList.contains('primary')).toBe(true);
+  });
+
   it('onBeforeRender applies props.style as cssText on render', () => {
     const component = new TestComponent({ props: { style: 'color: red;' } });
     component.render();

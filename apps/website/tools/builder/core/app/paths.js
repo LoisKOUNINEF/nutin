@@ -17,3 +17,11 @@ export const PATHS = {
   tempSource: path.join(BASE_PATHS.temp, SRC_FOLDERNAME),
   tempApp: path.join(BASE_PATHS.temp, SRC_FOLDERNAME, APP_FOLDERNAME),
 };
+
+// Copied sources that only feed the bundles — finalize-build.js removes them in prod,
+// so hashing/compressing them is wasted work (and renaming them breaks the SSR bundle).
+const BUNDLED_SOURCE_DIRS = [PATHS.tempApp, path.join(PATHS.tempSource, 'core')];
+
+export function isBundledSource(file) {
+  return BUNDLED_SOURCE_DIRS.some((dir) => file.startsWith(dir + path.sep));
+}

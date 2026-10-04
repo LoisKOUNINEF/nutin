@@ -19,13 +19,13 @@ describe('NavigationManager', () => {
       expect(url).toBe('/about');
     };
 
-    NavigationManager.updateHistory('/about', '/home', true);
+    NavigationManager.updateHistory('/about', '/home', 'push');
     expect(called).toBe(true);
 
     window.history.pushState = originalPushState;
   });
 
-  it('should not call pushState if shouldPushState returns false', () => {
+  it("should not touch history in 'none' mode", () => {
     const originalPushState = window.history.pushState;
     let called = false;
 
@@ -33,10 +33,31 @@ describe('NavigationManager', () => {
       called = true;
     };
 
-    NavigationManager.updateHistory('/about', '/home', false);
+    NavigationManager.updateHistory('/about', '/home', 'none');
 
     expect(called).toBe(false);
     window.history.pushState = originalPushState;
+  });
+
+  it("updateHistory in 'replace' mode rewrites the current entry instead of pushing", () => {
+    const originalReplaceState = window.history.replaceState;
+    const originalPushState = window.history.pushState;
+    let pushCalled = false;
+    let replacedUrl = null;
+
+    window.history.pushState = function () {
+      pushCalled = true;
+    };
+    window.history.replaceState = function (state, title, url) {
+      replacedUrl = url;
+    };
+
+    NavigationManager.updateHistory('/about', '/home', 'replace', 'team');
+
+    window.history.pushState = originalPushState;
+    window.history.replaceState = originalReplaceState;
+    expect(pushCalled).toBe(false);
+    expect(replacedUrl).toBe('/about#team');
   });
 
   it('replaceState calls history.replaceState (not pushState) with the locale-prefixed path', () => {
@@ -222,8 +243,45 @@ describe('NavigationManager', () => {
       .toEqual({ postId: '1', commentId: '2' });
   });
 
+  it('matchPattern decodes params and keeps a malformed escape as-is', () => {
+    expect(NavigationManager.matchPattern('/users/:name', '/users/J%C3%B6rg')).toEqual({ name: 'Jörg' });
+    expect(NavigationManager.matchPattern('/users/:name', '/users/100%')).toEqual({ name: '100%' });
+  });
+
+  it('matchPattern matches static segments literally', () => {
+    expect(NavigationManager.matchPattern('/files/report.pdf', '/files/report.pdf')).toEqual({});
+    expect(NavigationManager.matchPattern('/files/report.pdf', '/files/reportXpdf')).toBe(null);
+    expect(NavigationManager.matchPattern('/v1.0/:id', '/v1.0/7')).toEqual({ id: '7' });
+  });
+
+  it('updateHistory keeps the query string', () => {
+    const originalPushState = window.history.pushState;
+    let pushedUrl = null;
+    window.history.pushState = function (state, title, url) {
+      pushedUrl = url;
+    };
+
+    NavigationManager.updateHistory('/list', '/home', 'push', 'top', '?page=2');
+
+    window.history.pushState = originalPushState;
+    expect(pushedUrl).toBe('/list?page=2#top');
+  });
+
   it('matchPattern returns null when the path does not match the pattern at all', () => {
     expect(NavigationManager.matchPattern('/posts/:id', '/other/123')).toBe(null);
+  });
+
+  it('updateDocumentTitle prefers the view\'s own documentTitle() over seo.json and viewName', () => {
+    CONFIG.generateSEOFiles = true;
+    CONFIG.seo = { routes: [{ path: '/docs/:slug?', title: 'Docs' }] };
+    try {
+      NavigationManager.updateDocumentTitle({ viewName: 'docs', documentTitle: () => 'How do I navigate?' }, '/docs/:slug?');
+      expect(document.title).toBe('How do I navigate?');
+      NavigationManager.updateDocumentTitle({ viewName: 'docs', documentTitle: () => undefined }, '/docs/:slug?');
+      expect(document.title).toBe('Docs');
+    } finally {
+      CONFIG.generateSEOFiles = false;
+    }
   });
 
   it('updateDocumentTitle falls back to the view\'s viewName when generateSEOFiles is disabled', () => {
@@ -260,6 +318,7 @@ describe('NavigationManager', () => {
   });
 
   it('updateDocumentTitle resolves a per-language seo.json title to the current language', () => {
+    CONFIG.i18n = true;
     CONFIG.generateSEOFiles = true;
     CONFIG.seo = { routes: [{ path: '/', title: { en: 'Home', fr: 'Accueil' } }] };
     I18nService['_LANGUAGES'] = ['en', 'fr'];
@@ -268,12 +327,26 @@ describe('NavigationManager', () => {
       NavigationManager.updateDocumentTitle({ viewName: 'home' }, '/');
       expect(document.title).toBe('Accueil');
     } finally {
+      CONFIG.i18n = false;
       CONFIG.generateSEOFiles = false;
       I18nService['_currentLanguage'] = 'en';
     }
   });
 
+  it('updateDocumentTitle uses the first value of a per-language seo.json title when i18n is disabled', () => {
+    CONFIG.generateSEOFiles = true;
+    CONFIG.seo = { routes: [{ path: '/', title: { fr: 'Accueil', en: 'Home' } }] };
+    I18nService['_currentLanguage'] = 'en';
+    try {
+      NavigationManager.updateDocumentTitle({ viewName: 'home' }, '/');
+      expect(document.title).toBe('Accueil');
+    } finally {
+      CONFIG.generateSEOFiles = false;
+    }
+  });
+
   it('updateDocumentTitle falls back to the default language, then any available language, then viewName', () => {
+    CONFIG.i18n = true;
     CONFIG.generateSEOFiles = true;
     I18nService['_LANGUAGES'] = ['en', 'fr'];
 
@@ -289,6 +362,7 @@ describe('NavigationManager', () => {
       NavigationManager.updateDocumentTitle({ viewName: 'home' }, '/');
       expect(document.title).toBe('home');
     } finally {
+      CONFIG.i18n = false;
       CONFIG.generateSEOFiles = false;
       I18nService['_currentLanguage'] = 'en';
     }

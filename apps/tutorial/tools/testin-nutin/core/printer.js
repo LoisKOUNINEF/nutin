@@ -39,8 +39,9 @@ export function printStart() {
 
 export function printCoverageReport(report) {
   if (!report.length) {
-    print.warn('No app source files were covered.');
-    return { globalLinesPct: 100, globalFunctionsPct: 100, globalBranchesPct: 100 };
+    // 0, not 100: an empty report must not pass a coverage threshold by default.
+    print.warn('No source files were covered.');
+    return { globalLinesPct: 0, globalFunctionsPct: 0, globalBranchesPct: 0 };
   }
 
   print.boldBlue('\nCoverage Summary');
@@ -77,9 +78,10 @@ export function printCoverageReport(report) {
 
 export function toTsPath(input) {
   return input
-    .split('/')
+    .split(/[\\/]/)
     .slice(1)
     .join('/')
-    .replace(/\.js$/, '.ts');
+    // Test files stay .test.js in TypeScript projects too.
+    .replace(/(?<!\.test)\.js$/, '.ts');
 }
 

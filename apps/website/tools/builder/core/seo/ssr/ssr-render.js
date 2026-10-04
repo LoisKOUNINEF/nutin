@@ -15,28 +15,28 @@ export async function getAppRoutePaths(bundleUrl, lang, pageUrl) {
   // window.location.pathname, so a location-less window crashes as soon as the
   // bundle's module-load side effects instantiate I18n.getInstance().
   const { window } = parseHTML('<!doctype html><html><body></body></html>', { location: new URL(pageUrl) });
-  installGlobals(window, { lang });
+  installGlobals(window, { lang, localesDir: path.join(PATHS.tempSource, 'locales') });
   const bundle = await import(`${bundleUrl}?ssr=routes-check`);
   return Object.keys(bundle.appRoutes);
 }
 
 /**
- * Renders one (route, lang) pair by instantiating the real View via appRoutes and calling
- * .render(), returning the resulting real markup. Fresh linkedom window + cache-busted
+ * Renders one (route, lang) pair by running the route's guards, then instantiating the real
+ * View via appRoutes and calling .render(). Returns `{ html }`, or `{ blocked, redirectTo }`
+ * when a guard refuses the route. Fresh linkedom window + cache-busted
  * dynamic import per call, so no singleton state (I18nService, etc.) leaks between renders.
  */
-export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFetch, preloadManifest, lang, pageUrl, i18nEnabled }) {
+export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFetch, lang, pageUrl, i18nEnabled }) {
   // Passing a real URL instance as `location` gives `.pathname`/`.href`
   // which is what I18n's getLocaleFromUrl() actually reads.
   // <main id="app"> mirrors index.html's real mount target — View defaults to mounting
-  // there (view.ts), and without it the View tree is never attached to `document`, so
-  // DomHelper.cleanupOptionalContent()'s document-wide `[data-optional]` query silently
-  // misses it, leaking raw "undefined" text for any unset optional field (e.g. snippets).
+  // there (view.ts), so the rendered tree is attached to `document` as in the browser.
   const { window } = parseHTML('<!doctype html><html><body><main id="app"></main></body></html>', { location: new URL(pageUrl) });
   const { trackedFetches } = installGlobals(window, {
     lang,
     mockFetch: mockFetch ?? {},
     localesDir: path.join(PATHS.tempSource, 'locales'),
+    staticDir: PATHS.tempSource,
   });
 
   let Service;
@@ -45,12 +45,7 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
   try {
     const bundle = await import(`${bundleUrl}?ssr=${renderIndex++}`);
     ({ Service } = bundle);
-    const {
-      appRoutes, I18nService, RouteGuardsManager, registerPipes,
-      NavbarComponent, FooterComponent,
-      DocsManifestService, ChangelogManifestService, TutorialManifestService, ArticlesManifestService,
-      GuidesManifestService,
-    } = bundle;
+    const { appRoutes, I18nService, RouteGuardsManager, registerPipes, NavbarComponent, FooterComponent } = bundle;
 
     const routeConfig = appRoutes[appRoutesKey];
     if (!routeConfig) {
@@ -64,44 +59,34 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
 
     if (i18nEnabled) await I18nService.setCurrentLanguage(lang);
 
-    // Manifest-driven views (docs/changelog/tutorial/articles/guides) read their manifest service's
-    // already-loaded data synchronously in registerChildren() — main.ts normally loads it at
-    // bootstrap, which never runs here, so it must be preloaded before .render() or the view
-    // finds no page and renders its empty state instead of real content.
-    if (preloadManifest) {
-      const manifestServices = {
-        docs: DocsManifestService,
-        changelog: ChangelogManifestService,
-        tutorial: TutorialManifestService,
-        articles: ArticlesManifestService,
-        guides: GuidesManifestService,
-      };
-      await manifestServices[preloadManifest]?.load();
+    // The route's guards run as they would for an anonymous first visit (empty storage,
+    // no session): a blocked or redirected route must not ship as public static HTML.
+    // Running them in this bundle instance also keeps what loader guards fetched (e.g.
+    // a Markdown manifest) available to the view rendered below.
+    const guardResult = await RouteGuardsManager.processRouteGuards(routeConfig, pageUrl, mockParams ?? {});
+    if (!guardResult.allowed) {
+      return { blocked: true, redirectTo: guardResult.redirectTo };
     }
 
-    const viewConstructor = RouteGuardsManager.getViewConstructor(routeConfig);
-    const view = viewConstructor();
+    const view = guardResult.viewConstructor();
     constructorName = view.constructor.name;
 
     if (mockParams) view.setRouteParams(mockParams);
 
     const element = view.render();
 
-    // Static/i18n-only globals — no route-specific data or active-link-by-route logic —
-    // so rendering them per (route, lang) call is safe and needs no cross-call caching.
-    // ids are set to match Globals.register's mount() — the client relies on these ids to
-    // find and remove this static markup before mounting its own live copy on boot.
+    await Promise.all(trackedFetches);
+    await Promise.resolve();
+
+    // Website: the navbar/footer globals are prerendered around #app. They're static/i18n-only,
+    // so rendering them per (route, lang) is safe. Their ids match registerGlobals' mount(),
+    // which removes this static markup before mounting the live copy on boot.
     const navbarElement = new NavbarComponent('body').render();
     navbarElement.id = 'navbar';
     const footerElement = new FooterComponent('body').render();
     footerElement.id = 'footer';
-    const navbar = navbarElement.outerHTML;
-    const footer = footerElement.outerHTML;
 
-    await Promise.all(trackedFetches);
-    await Promise.resolve();
-
-    return { body: element.outerHTML, navbar, footer };
+    return { html: element.outerHTML, navbar: navbarElement.outerHTML, footer: footerElement.outerHTML };
   } catch (err) {
     throw new Error(
       `[ssr] Failed to render route "${appRoutesKey}" (lang "${lang}", view "${constructorName}"): ${err.message}${hintForError(err)}`,
@@ -123,7 +108,7 @@ function hintForError(err) {
     return (
       `\n  Hint: this usually means the component tree touches an unguarded browser global ` +
       `(e.g. "window", "navigator", "matchMedia") that isn't polyfilled for SSR — see ` +
-      `tools/builder/core/ssr/ssr-polyfills.js.`
+      `tools/builder/core/seo/ssr/ssr-polyfills.js.`
     );
   }
   return '';

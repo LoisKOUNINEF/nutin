@@ -26,3 +26,15 @@ describe('globals beforeEach/All and afterEach/All', () => {
     expect(afterEachCount).toEqual(1);
   });
 })
+
+describe('Hooks registered after it()', () => {
+  let beforeEachCount = 0;
+
+  it('still get the beforeEach declared further down', () => {
+    expect(beforeEachCount).toBe(1);
+  });
+
+  beforeEach(() => {
+    beforeEachCount++;
+  });
+});

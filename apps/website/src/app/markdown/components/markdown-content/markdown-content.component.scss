@@ -1,0 +1,53 @@
+// :where() keeps these rules at zero specificity: see markdown.view.scss.
+:where(.markdown-content) {
+  display: flex;
+  gap: var(--markdown-gap, 2rem);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+:where(.markdown-content__body) {
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: var(--markdown-line-height, 1.7);
+}
+
+:where(.markdown-content__body pre) {
+  overflow-x: auto;
+}
+
+:where(.markdown-toc) {
+  flex: 0 0 var(--markdown-toc-width, 14rem);
+  font-size: 0.875rem;
+}
+
+:where(.markdown-toc ul) {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+:where(.markdown-toc__title) {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+:where(.markdown-toc__item--depth-3) {
+  padding-left: 1rem;
+}
+
+:where(.markdown-toc__item--depth-4, .markdown-toc__item--depth-5, .markdown-toc__item--depth-6) {
+  padding-left: 2rem;
+}
+
+@media (max-width: 900px) {
+  :where(.markdown-content) {
+    flex-direction: column;
+  }
+
+  :where(.markdown-toc) {
+    order: -1;
+    flex-basis: auto;
+  }
+}

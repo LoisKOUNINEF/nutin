@@ -1,5 +1,6 @@
 import { PipeHelper } from '#root/dist/src/core/base-classes/base-component/helpers/pipe.helper.js';
 import { AppPipeRegistry } from '#root/dist/src/core/services/index.js';
+import { DomHelper } from '#root/dist/src/core/base-classes/base-component/helpers/dom.helper.js';
 
 describe('PipeHelper', () => {
   let container;
@@ -85,5 +86,15 @@ describe('PipeHelper', () => {
     expect(warnSpy.callCount).toBe(1);
 
     warnSpy.restore();
+  });
+
+  it('skips elements inside a nested component root, which pipes its own content', () => {
+    container.innerHTML = '<span class="own" data-pipe="upper">a</span><div class="child"><span class="nested" data-pipe="upper">b</span></div>';
+    DomHelper.markComponentRoot(container.querySelector('.child'));
+
+    PipeHelper.parsePipeAttributes(container);
+
+    expect(container.querySelector('.own').textContent).toBe('A');
+    expect(container.querySelector('.nested').textContent).toBe('b');
   });
 });

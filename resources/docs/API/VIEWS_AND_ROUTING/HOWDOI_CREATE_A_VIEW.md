@@ -14,7 +14,7 @@ See [How do I register child components](../COMPONENTS/HOWDOI_REGISTER_CHILD_COM
 
 ```ts
 // foo.view.ts
-import { View, ComponentConfig, html } from '../../../core/index.js';
+import { View, html } from '../../../core/index.js';
 
 const template = html`<h1>Title</h1>`;
 

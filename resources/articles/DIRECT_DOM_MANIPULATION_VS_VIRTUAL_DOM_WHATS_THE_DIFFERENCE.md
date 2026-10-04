@@ -1,3 +1,7 @@
+---
+ogImage: /assets/images/og-covers/og-cover-articles.jpg
+---
+
 # Direct DOM Manipulation vs. Virtual DOM: What's the Difference?
 
 If you've worked with modern frontend frameworks, you've probably heard that applications should not manipulate the DOM directly.

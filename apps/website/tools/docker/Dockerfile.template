@@ -8,7 +8,6 @@ RUN corepack enable
 COPY package.json package-lock.json .
 COPY apps/website/package.json apps/website/package.json
 COPY resources/ resources/
-COPY scripts/generate-docs.mjs scripts/generate-docs.mjs
 RUN npm ci
 COPY apps/website ./apps/website
 RUN npm run build:prod -w website

@@ -1,23 +1,11 @@
 import { View, Navigation, Service, I18nService, AppEventBus } from '../../index.js';
-import { Language } from '../i18n/languages.js';
-import { Routes, RouteConfig, RouteGuardsManager, GuardResult } from './helpers/route-guard-manager.helper.js';
+import { RouteGuardsManager, type GuardResult } from './helpers/route-guard-manager.helper.js';
 import { ViewRenderManager } from './helpers/view-render-manager.helper.js';
-import { NavigationManager } from './helpers/navigation-manager.helper.js';
+import { NavigationManager, HistoryMode } from './helpers/navigation-manager.helper.js';
+import { CONFIG } from '../../config.js';
 
 // centralized export
-export { Routes, RouteGuard } from './helpers/route-guard-manager.helper.js';
 export { NavigationManager } from './helpers/navigation-manager.helper.js';
-
-/**
- * IRouter is a type alias for the instance of Router, not a true interface 
- */
-export type IRouter = InstanceType<typeof Router>;
-
-export interface RouteMatch {
-  route: RouteConfig;
-  params: Record<string, string>;
-  pattern: string;
-}
 
 class Router extends Service<Router> {
   private _currentView: View | null = null;
@@ -26,11 +14,14 @@ class Router extends Service<Router> {
   private onNavigate = (data: { path: string }) => this.navigate(data.path);
   private onReload = () => this.reload();
   private _busSubscriptions: Array<() => void> = [];
+  // Bumped by every navigation: one whose guards resolve after a newer navigation started
+  // is dropped instead of rendering over it.
+  private _navId = 0;
 
   constructor(private routes: Routes) {
     super();
     this.initializeEventListeners();
-    this.navigate(NavigationManager.getCurrentPath() + window.location.hash);
+    this.navigate(this.currentLocation());
     this.registerCleanup(this.removeEventListeners);
   }
 
@@ -43,48 +34,11 @@ class Router extends Service<Router> {
   }
 
   public async reload(): Promise<void> {
-    const currentRoute = NavigationManager.getCurrentPath();
-    await this.navigate(currentRoute + window.location.hash, false);
+    await this.navigate(this.currentLocation(), false);
   }
 
   public async navigate(path: string | '', pushState: boolean = true): Promise<void> {
-    const [rawPath = '', hash] = path.split('#');
-    const normalizedPath = NavigationManager.normalizePath(rawPath);
-    const currentPath = NavigationManager.getCurrentPath();
-
-    // Try to match the route with parameters
-    const routeMatch = this.matchRoute(normalizedPath);
-
-    if (!routeMatch) {
-      await this.handleNotFound(normalizedPath, currentPath, pushState);
-      return;
-    }
-
-    const guardResult = await this.handleGuards(
-      normalizedPath,
-      routeMatch.route,
-      routeMatch.params,
-      pushState
-    );
-
-    if (!guardResult) return;
-
-    this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
-    this._currentParams = routeMatch.params;
-
-    // Must run before renderNewView(): the view's onEnter() (e.g. ResourceView
-    // canonicalizing a bare route to its first-page slug) uses replaceState on
-    // whatever history entry is current, so that entry needs to already be
-    // this route's — not the previous view's — before onEnter() can fire.
-    NavigationManager.updateHistory(normalizedPath, currentPath, pushState, hash);
-
-    this._currentView = ViewRenderManager.renderNewView(
-      guardResult.viewConstructor!,
-      routeMatch.params
-    );
-
-    NavigationManager.updateDocumentTitle(this._currentView, routeMatch.pattern);
-    NavigationManager.scrollToHash(hash);
+    await this.navigateWithMode(path, pushState ? 'push' : 'none');
   }
 
   public getCurrentParams(): Record<string, string> {
@@ -93,6 +47,56 @@ class Router extends Service<Router> {
 
   public getParam(key: string): string | undefined {
     return this._currentParams[key];
+  }
+
+  // Path, query and hash of the current URL, as navigate() takes them.
+  private currentLocation(): string {
+    return NavigationManager.getCurrentPath() + window.location.search + window.location.hash;
+  }
+
+  private async navigateWithMode(path: string, mode: HistoryMode): Promise<void> {
+    const navId = ++this._navId;
+    const isStale = () => navId !== this._navId;
+    const [pathAndQuery = '', hash] = path.split('#');
+    const [rawPath = '', query] = pathAndQuery.split('?');
+    const search = query ? `?${query}` : '';
+    const normalizedPath = NavigationManager.normalizePath(rawPath);
+    const currentPath = NavigationManager.getCurrentPath();
+
+    // Try to match the route with parameters
+    const routeMatch = this.matchRoute(normalizedPath);
+
+    if (!routeMatch) {
+      await this.handleNotFound(normalizedPath, currentPath, mode, isStale);
+      return;
+    }
+
+    const guardResult = await this.handleGuards(
+      normalizedPath,
+      routeMatch.route,
+      routeMatch.params,
+      currentPath,
+      mode
+    );
+
+    if (!guardResult || isStale()) return;
+
+    this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
+    this._currentParams = routeMatch.params;
+
+    // Must run before renderNewView(): a view's onEnter() may rewrite the URL via
+    // NavigationManager.replaceState (e.g. canonicalizing a bare route to a default
+    // sub-page), which acts on whatever history entry is current — so that entry needs
+    // to already be this route's, not the previous view's, before onEnter() fires.
+    NavigationManager.updateHistory(normalizedPath, currentPath, mode, hash, search);
+
+    this._currentView = ViewRenderManager.renderNewView(
+      guardResult.viewConstructor!,
+      routeMatch.params
+    );
+
+    NavigationManager.updateDocumentTitle(this._currentView, routeMatch.pattern);
+    NavigationManager.scrollToHash(hash);
   }
 
   private initializeEventListeners(): void {
@@ -115,11 +119,13 @@ class Router extends Service<Router> {
   }
 
   private async handlePopState(): Promise<void> {
-    const newLocale = NavigationManager.getCurrentLocale();
-    if (newLocale && newLocale !== I18nService.currentLanguage) {
-      await I18nService.setCurrentLanguage(newLocale as Language);
+    if (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n) {
+      const newLocale = NavigationManager.getCurrentLocale();
+      if (newLocale && newLocale !== I18nService.currentLanguage) {
+        await I18nService.setCurrentLanguage(newLocale as Language);
+      }
     }
-    this.navigate(NavigationManager.getCurrentPath() + window.location.hash, false);
+    this.navigate(this.currentLocation(), false);
   }
 
   /**
@@ -141,7 +147,8 @@ class Router extends Service<Router> {
   private async handleNotFound(
     normalizedPath: string, 
     currentPath: string, 
-    pushState: boolean
+    mode: HistoryMode,
+    isStale: () => boolean
   ): Promise<void> {
     const notFoundRoute = this.routes['/404'];
 
@@ -152,19 +159,21 @@ class Router extends Service<Router> {
 
     const notFoundConstructor = RouteGuardsManager.getViewConstructor(notFoundRoute);
     
+    if (isStale()) return;
     this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
     this._currentParams = {};
     this._currentView = ViewRenderManager.renderNewView(notFoundConstructor, {});
 
     NavigationManager.updateDocumentTitle(this._currentView, '/404');
-    NavigationManager.updateHistory(normalizedPath, currentPath, pushState);
+    NavigationManager.updateHistory(normalizedPath, currentPath, mode);
   }
 
   private async handleGuards(
     normalizedPath: string,
     routeConfig: RouteConfig,
     params: Record<string, string>,
-    pushState: boolean
+    currentPath: string,
+    mode: HistoryMode
   ): Promise<GuardResult | false> {
     const guardResult = await RouteGuardsManager.processRouteGuards(
       routeConfig, 
@@ -174,7 +183,11 @@ class Router extends Service<Router> {
 
     if (!guardResult.allowed) {
       if (guardResult.redirectTo) {
-        await this.navigate(guardResult.redirectTo, pushState);
+        // A guarded URL that's already the current history entry (back/forward,
+        // reload, first load) is replaced by the redirect target, so the address
+        // bar matches what's rendered and Back doesn't land on the guarded URL again.
+        const redirectMode = mode === 'push' && normalizedPath !== currentPath ? 'push' : 'replace';
+        await this.navigateWithMode(guardResult.redirectTo, redirectMode);
       }
       // If no redirect, stay on current route (guard blocked navigation)
       return false;

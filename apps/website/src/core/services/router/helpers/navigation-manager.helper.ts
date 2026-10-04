@@ -1,28 +1,36 @@
 import { I18nService, View } from "../../../index.js";
-import { Language } from "../../i18n/languages.js";
 import { CONFIG } from "../../../config.js";
+
+// How a navigation affects the history stack: add an entry, rewrite the current
+// one (e.g. a guard redirecting away from the URL already in the address bar),
+// or leave it untouched (back/forward, reload).
+export type HistoryMode = 'push' | 'replace' | 'none';
 
 /**
  * Navigation - handles path normalization and history management
  */
 export class NavigationManager {
+  // The i18n guards wrap their branch rather than returning early: esbuild only drops
+  // a constant-false block, not code after a constant early return, and I18nService
+  // must go unreferenced for prod builds to drop it when i18n is off.
   public static extractLocale(path: string): { locale: Language | null; strippedPath: string } {
-    if (!CONFIG.i18n) return { locale: null, strippedPath: path };
-
-    const segments = path.split('/').filter(Boolean);
-    const first = segments[0] as Language;
-    if (first && I18nService.languages.includes(first)) {
-      const rest = segments.slice(1).join('/');
-      return { locale: first, strippedPath: rest ? `/${rest}` : '/' };
+    if (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n) {
+      const segments = path.split('/').filter(Boolean);
+      const first = segments[0] as Language;
+      if (first && I18nService.languages.includes(first)) {
+        const rest = segments.slice(1).join('/');
+        return { locale: first, strippedPath: rest ? `/${rest}` : '/' };
+      }
     }
     return { locale: null, strippedPath: path };
   }
 
   public static addLocalePrefix(strippedPath: string): string {
-    if (!CONFIG.i18n) return strippedPath;
-
-    const lang = I18nService.currentLanguage;
-    return strippedPath === '/' ? `/${lang}` : `/${lang}${strippedPath}`;
+    if (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n) {
+      const lang = I18nService.currentLanguage;
+      return strippedPath === '/' ? `/${lang}` : `/${lang}${strippedPath}`;
+    }
+    return strippedPath;
   }
 
   public static getCurrentLocale(): Language | null {
@@ -34,7 +42,7 @@ export class NavigationManager {
     const { strippedPath } = this.extractLocale(rawPathname);
     const newUrl = this.addLocalePrefix(strippedPath);
     if (newUrl !== window.location.pathname) {
-      window.history.pushState({}, '', newUrl);
+      window.history.pushState({}, '', newUrl + window.location.search + window.location.hash);
     }
   }
 
@@ -48,18 +56,23 @@ export class NavigationManager {
   public static updateHistory(
     normalizedPath: string,
     currentPath: string,
-    pushState: boolean,
-    hash?: string
+    mode: HistoryMode,
+    hash?: string,
+    search: string = ''
   ): void {
-    const localizedPath = this.addLocalePrefix(normalizedPath) + (hash ? `#${hash}` : '');
-    const currentUrl = window.location.pathname + window.location.hash;
-    if (pushState && currentUrl !== localizedPath) {
+    if (mode === 'none') return;
+    const localizedPath = this.addLocalePrefix(normalizedPath) + search + (hash ? `#${hash}` : '');
+    const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+    if (currentUrl === localizedPath) return;
+    if (mode === 'push') {
       window.history.pushState({}, '', localizedPath);
+    } else {
+      window.history.replaceState({}, '', localizedPath);
     }
   }
 
   // Rewrites the current history entry's URL to match content already rendered
-  // (e.g. a resource route that fell back to its first page) without adding a
+  // (e.g. a route that fell back to a default sub-page) without adding a
   // new back/forward-navigable entry.
   public static replaceState(path: string): void {
     const localizedPath = this.addLocalePrefix(path) + window.location.hash;
@@ -87,29 +100,40 @@ export class NavigationManager {
       ? CONFIG.seo?.routes?.find((r) => r.path === pattern)
       : undefined;
     const seoTitle = route?.title ? this.resolveSeoTitle(route.title) : undefined;
-    const localeTitle = CONFIG.i18n ? I18nService.getTranslationObject<string>(`${view.viewName}.title`) : null;
-    document.title = seoTitle || localeTitle || view.viewName;
+    const localeTitle = (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n) ? I18nService.getTranslationObject<string>(`${view.viewName}.title`) : null;
+    document.title = view.documentTitle?.() || seoTitle || localeTitle || view.viewName;
   }
 
   private static resolveSeoTitle(title: string | Record<string, string>): string | undefined {
     if (typeof title !== 'object') return title;
-    const lang = I18nService.currentLanguage;
-    const defaultLang = I18nService.defaultLanguage;
-    return title[lang] ?? title[defaultLang] ?? Object.values(title)[0];
+    if (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n) {
+      const lang = I18nService.currentLanguage;
+      const defaultLang = I18nService.defaultLanguage;
+      return title[lang] ?? title[defaultLang] ?? Object.values(title)[0];
+    }
+    return Object.values(title)[0];
   }
 
   public static matchPattern(pattern: string, path: string): Record<string, string> | null {
     const paramNames: string[] = [];
 
+    // Splits on "/:param?" and ":param"; the static parts in between match literally.
     const regexPattern = pattern
-      .replace(/\/:([^/?]+)\?/g, (_, paramName) => {
-        paramNames.push(paramName);
-        return `(?:/([^/]+))?`; // whole "/param" is optional
+      .split(/(\/:[^/?]+\?|:[^/]+)/)
+      .map((part) => {
+        const optional = part.match(/^\/:([^/?]+)\?$/);
+        if (optional) {
+          paramNames.push(optional[1]!);
+          return `(?:/([^/]+))?`; // whole "/param" is optional
+        }
+        const required = part.match(/^:([^/]+)$/);
+        if (required) {
+          paramNames.push(required[1]!);
+          return `([^/]+)`;
+        }
+        return part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       })
-      .replace(/:([^/]+)/g, (_, paramName) => {
-        paramNames.push(paramName);
-        return `([^/]+)`;
-      });
+      .join('');
 
     const regex = new RegExp(`^${regexPattern}$`);
     const match = path.match(regex);
@@ -120,9 +144,18 @@ export class NavigationManager {
     paramNames.forEach((name, i) => {
       const value = match[i + 1];
       if (value) {
-        params[name] = value;
+        params[name] = this.decodeParam(value);
       }
     });
     return params;
+  }
+
+  // The path comes percent-encoded from the URL; a malformed escape is kept as-is.
+  private static decodeParam(value: string): string {
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
   }
 }

@@ -181,10 +181,63 @@ describe('DomHelper', () => {
     expect(container.querySelectorAll('span').length).toBe(0);
   });
 
+  it('cleanupOptionalContent only touches the given root, attached or not', () => {
+    container.innerHTML = '<p class="outside" data-optional></p>';
+    const detached = document.createElement('div');
+    detached.innerHTML = '<p class="inside" data-optional></p>';
+
+    DomHelper.cleanupOptionalContent(detached);
+
+    expect(detached.querySelector('.inside')).toBe(null);
+    expect(container.querySelector('.outside')).not.toBe(null);
+  });
+
   it('cleanupOptionalContent always strips the data-optional attribute from surviving elements', () => {
     container.innerHTML = '<span data-optional>hello</span>';
     DomHelper.cleanupOptionalContent();
     const span = container.querySelector('span');
     expect(span.hasAttribute('data-optional')).toBe(false);
+  });
+
+  it('isInsideNestedComponent is true only below another component root inside the given root', () => {
+    container.innerHTML = '<p class="own"></p><div class="child"><p class="nested"></p></div>';
+    const child = container.querySelector('.child');
+    DomHelper.markComponentRoot(child);
+
+    expect(DomHelper.isInsideNestedComponent(container.querySelector('.own'), container)).toBe(false);
+    expect(DomHelper.isInsideNestedComponent(child, container)).toBe(false);
+    expect(DomHelper.isInsideNestedComponent(container.querySelector('.nested'), container)).toBe(true);
+  });
+
+  it('replacePlaceholder swaps the placeholder for the element', () => {
+    container.innerHTML = '<div class="placeholder"></div>';
+    const el = document.createElement('section');
+
+    DomHelper.replacePlaceholder(el, container.querySelector('.placeholder'));
+
+    expect(container.firstElementChild).toBe(el);
+    expect(container.querySelector('.placeholder')).toBe(null);
+  });
+
+  it('replacePlaceholder uses moveBefore when the element is connected and the browser supports it', () => {
+    const moved = [];
+    Element.prototype.moveBefore = function (node, child) {
+      moved.push(node);
+      this.insertBefore(node, child);
+    };
+
+    try {
+      container.innerHTML = '<div class="placeholder"></div>';
+      const el = document.createElement('section');
+      document.body.appendChild(el);
+
+      DomHelper.replacePlaceholder(el, container.querySelector('.placeholder'));
+
+      expect(moved).toEqual([el]);
+      expect(container.firstElementChild).toBe(el);
+      expect(container.querySelector('.placeholder')).toBe(null);
+    } finally {
+      delete Element.prototype.moveBefore;
+    }
   });
 });

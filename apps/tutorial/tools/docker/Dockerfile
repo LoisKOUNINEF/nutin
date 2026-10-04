@@ -7,7 +7,6 @@ WORKDIR /usr/src/app
 RUN corepack enable
 COPY package.json package-lock.json .
 COPY apps/tutorial/package.json apps/tutorial/package.json
-COPY scripts/generate-docs.mjs scripts/generate-docs.mjs
 RUN npm ci
 COPY apps/tutorial ./apps/tutorial
 RUN npm run build:prod -w tutorial

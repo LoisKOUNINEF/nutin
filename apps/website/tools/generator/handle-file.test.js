@@ -33,9 +33,9 @@ describe('handle-file', () => {
     const targetPath = path.join(tmpDir, 'services', 'widget');
     const name = { kebab: 'widget', pascal: 'Widget', camel: 'widget', capitalized: 'Widget' };
 
-    generateFile({ name, targetPath, templateFn: () => 'x', suffix: 'service', extension: 'js' });
+    generateFile({ name, targetPath, templateFn: () => 'x', suffix: 'service', extension: 'scss' });
 
-    expect(fs.existsSync(path.join(targetPath, 'widget.service.js'))).toBeTruthy();
+    expect(fs.existsSync(path.join(targetPath, 'widget.service.scss'))).toBeTruthy();
   });
 
   it('generateFile calls process.exit(1) instead of overwriting an existing file', () => {

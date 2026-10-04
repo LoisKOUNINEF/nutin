@@ -1,13 +1,9 @@
-import { BaseComponent, BaseComponentOptions } from '../../index.js';
-
-export interface ViewOptions extends BaseComponentOptions {
-  viewName: string;
-}
+import { BaseComponent } from '../../index.js';
 
 export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComponent<T> {
   private _viewName: string;
   protected routeParams: Record<string, string> = {};
-  private _template: string;
+  private _template: Template;
 
   constructor({
     template,
@@ -26,7 +22,7 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
     return this._viewName;
   }
 
-  protected override generateTemplate(): string {
+  protected override generateTemplate(): Template {
     return this._template;
   }
 
@@ -44,6 +40,13 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
 
   public hasRouteParam(key: string): boolean {
     return key in this.routeParams && this.routeParams[key] !== undefined;
+  }
+
+  // The page's title, read by the router after each navigation (document.title). Override it
+  // for a title that depends on the route, e.g. the page being shown. Undefined: the router
+  // uses config/seo.json's title, then the "<viewName>.title" translation, then viewName.
+  public documentTitle(): string | undefined {
+    return undefined;
   }
 
   // Navigation hooks — called by router only, never by render lifecycle

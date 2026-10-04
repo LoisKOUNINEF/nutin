@@ -1,3 +1,8 @@
+---
+description: "Answers to common questions about Nutin: application size, virtual DOM, other libraries, and how it compares with htmx, Lit and shadcn/ui."
+ogImage: /assets/images/og-covers/og-cover-articles.jpg
+---
+
 # FAQ
 
 <details>

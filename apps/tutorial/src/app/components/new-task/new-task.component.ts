@@ -1,7 +1,7 @@
-import { Component } from '../../../core/index.js';
+import { Component, html } from '../../../core/index.js';
 import { taskService } from '../../services/index.js';
 
-const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
+const templateFn = () => html`__TEMPLATE_PLACEHOLDER__`;
 
 export class NewTaskComponent extends Component {
   constructor(mountTarget: HTMLElement) {

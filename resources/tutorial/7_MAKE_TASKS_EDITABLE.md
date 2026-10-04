@@ -24,10 +24,10 @@ npm run generate component components/task-inputs
 ## Give the component a task
 
 ```ts
-import { Component } from '../../../core/index.js';
+import { Component, html } from '../../../core/index.js';
 import { taskService } from '../../services/task/task.service.js';
 
-const templateFn = (_task: ITask) => `__TEMPLATE_PLACEHOLDER__`;
+const templateFn = (_task: ITask) => html`__TEMPLATE_PLACEHOLDER__`;
 
 export class TaskInputsComponent extends Component {
   private _task: ITask;

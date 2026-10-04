@@ -9,13 +9,14 @@
   },
   "scripts": {
     "build": "node tools/builder/builder.js",
-    "build:prod": "NODE_ENV=production node tools/builder/builder.js",
-    "serve": "npm run build && npm run serve:only",
+    "build:prod": "node tools/builder/builder.js --prod",
+    "serve": "npm run build && node tools/dev/serve.js",
     "serve:only": "node tools/dev/serve.js",
-    "serve:prod": "npm run build:prod && npm run serve:only",
+    "serve:prod": "npm run build:prod && node tools/dev/serve.js",
     "dev": "node tools/dev/dev-serve.js",
     "generate": "node tools/generator/generator.js",
     "testin-nutin": "npm run build && node tools/testin-nutin/runner.js",
+    "testin-nutin:only": "node tools/testin-nutin/runner.js",
     "testin-nutin:watch": "npm run build && node tools/testin-nutin/watch-tests.js",
     "testin-nutin:coverage": "npm run build && node tools/testin-nutin/runner.js --coverage",
     "testin-nutin:verbose": "npm run build && node tools/testin-nutin/runner.js --verbose",
@@ -23,14 +24,13 @@
     "docker:run": "node tools/docker/scripts/docker-run.js"
   },
   "devDependencies": {
-    "chokidar": "^4.0.3",
-    "esbuild": "^0.25.12",
+    "chokidar": "^5.0.0",
+    "esbuild": "^0.28.2",
     "html-minifier-terser": "^7.2.0",
-    "jsdom": "^26.1.0",
-    "linkedom": "^0.18.12",
-    "live-server": "^1.2.2",
+    "jsdom": "^30.1.1",
+    "linkedom": "^0.18.13",
     "sass": "^1.89.0",
-    "typescript": "^5.8.3"
+    "typescript": "^7.0.2"
   },
   "engines": {
     "node": ">=22"

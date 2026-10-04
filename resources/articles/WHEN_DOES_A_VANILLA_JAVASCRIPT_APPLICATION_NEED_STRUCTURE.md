@@ -1,3 +1,7 @@
+---
+ogImage: /assets/images/og-covers/og-cover-articles.jpg
+---
+
 # When Does a Vanilla JavaScript Application Need Structure?
 
 A vanilla JavaScript application can start remarkably simply.

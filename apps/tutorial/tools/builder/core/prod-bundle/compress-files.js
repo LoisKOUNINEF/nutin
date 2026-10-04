@@ -1,13 +1,13 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { gzipSync, brotliCompressSync, constants } from 'zlib';
-import { print, getFilesRecursive, errorExit } from '../../../utils/index.js';
-import { PATHS } from '../app/paths.js';
+import { getFilesRecursive, errorExit } from '../../../utils/index.js';
+import { PATHS, isBundledSource } from '../app/paths.js';
 
 function compressStaticAssets() {
   const files = getFilesRecursive(
     PATHS.tempSource,
-    ['.js', '.css', '.json', '.svg', '.ttf', '.otf', '.eot']
-  );
+    ['.html', '.js', '.css', '.json', '.svg', '.xml', '.txt', '.ttf', '.otf', '.eot']
+  ).filter((file) => !isBundledSource(file));
   
   for (const file of files) {
     const content = readFileSync(file);
@@ -27,11 +27,11 @@ function compressStaticAssets() {
       }
     });
     writeFileSync(`${file}.br`, brotlied);
-  };
+  }
 }
 
 try {
-  compressStaticAssets()
+  compressStaticAssets();
 } catch(err) {
   errorExit(err, 'compress-files');
 }

@@ -4,5 +4,5 @@ import { resolveTemplates } from './merge-templates.js';
 try {
   await resolveTemplates();
 } catch (err) {
-  errorExit(err);
+  errorExit(err, 'process-html-templates');
 }

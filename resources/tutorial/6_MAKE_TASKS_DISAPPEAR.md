@@ -22,14 +22,14 @@ npm run generate component components/task-action
 ## Pass configuration to the component
 
 ```ts
-import { Component, ComponentProps } from '../../../core/index.js';
+import { Component, html } from '../../../core/index.js';
 
 export interface ITaskActionConfig {
     callback: () => void;
     textContent: string;
 }
 
-const templateFn = (config: ITaskActionConfig) => `__TEMPLATE_PLACEHOLDER__`;
+const templateFn = (config: ITaskActionConfig) => html`__TEMPLATE_PLACEHOLDER__`;
 
 export class TaskActionComponent extends Component {
     private _callback: () => void;
@@ -74,7 +74,6 @@ export class TaskActionComponent extends Component {
 
 ```ts
 /* ... */
-import { ComponentConfig } from '../../../core/index.js';
 import { taskService } from '../../services/task/task.service.js';
 import { TaskActionComponent } from '../task-action/task-action.component.js';
 

@@ -10,7 +10,7 @@ npm run generate component components/greeting # target directory: src/app/compo
 
 ```ts
 // greeting.component.ts
-import { Component, ComponentConfig, html } from '../../../core/index.js';
+import { Component, html } from '../../../core/index.js';
 
 interface GreetingConfig {
   name?: string;

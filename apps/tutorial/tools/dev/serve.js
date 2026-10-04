@@ -1,33 +1,163 @@
 #!/usr/bin/env node
 
-import liveServer from 'live-server';
-import { print } from '../utils/index.js';
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import { print, resolvePort } from '../utils/index.js';
 
-const params = {
-  port: 9090,
-  root: 'dist/src',
-  open: false, // set to true to open a new window in browser
-  logLevel: 0, // 0 = errors only, 1 = some info, 2 = verbose
-  entryFile: 'index.html',
-  wait: 100, // debounce reloads
-  middleware: [
-    function(req, res, next) {
-      if (req.url.includes('.') && !req.url.endsWith('/')) {
-        return next();
-      }
-      req.url = '/index.html';
-      next();
-    }
-  ]
+const ROOT = path.resolve('dist', 'src');
+const RELOAD_EVENTS = '/__nutin/reload';
+const RELOAD_SCRIPT = '/__nutin/reload.js';
+const RELOAD_TAG = `<script src="${RELOAD_SCRIPT}"></script>`;
+// External rather than inline, so a page CSP without 'unsafe-inline' doesn't block it.
+const RELOAD_CLIENT = `new EventSource('${RELOAD_EVENTS}').addEventListener('reload', () => location.reload());\n`;
+
+const MIME_TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.map': 'application/json; charset=utf-8',
+  '.txt': 'text/plain; charset=utf-8',
+  '.xml': 'application/xml; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.webp': 'image/webp',
+  '.avif': 'image/avif',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
+  '.otf': 'font/otf',
+  '.eot': 'application/vnd.ms-fontobject',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
+  '.mp3': 'audio/mpeg',
+  '.wav': 'audio/wav',
+  '.ogg': 'audio/ogg',
+  '.pdf': 'application/pdf',
 };
 
+let port;
 try {
-  liveServer.start(params);
+  port = resolvePort(); // --port <n> or PORT env, defaults to 9090
 } catch (err) {
+  print.boldError(err.message);
+  process.exit(1);
+}
+
+// Live reload only when started by dev-serve.js (IPC channel present): watcher.js
+// reports each successful rebuild, relayed here as { type: 'reload' }.
+const liveReload = Boolean(process.send);
+const reloadClients = new Set();
+
+function isFile(filePath) {
+  try {
+    return fs.statSync(filePath).isFile();
+  } catch {
+    return false;
+  }
+}
+
+// Exact file, then a directory's index.html (prerendered SEO pages), else nothing.
+function resolveFile(pathname) {
+  let decoded;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    return null;
+  }
+  const candidate = path.join(ROOT, decoded);
+  if (candidate !== ROOT && !candidate.startsWith(ROOT + path.sep)) return null;
+  if (isFile(candidate)) return candidate;
+  const index = path.join(candidate, 'index.html');
+  return isFile(index) ? index : null;
+}
+
+// Browsers send Accept: text/html for page navigations — those get the SPA shell when no
+// file matches (whatever the URL looks like, dots included); a missing asset gets a 404.
+function wantsHtml(req) {
+  return (req.headers.accept ?? '').includes('text/html');
+}
+
+function send(res, status, body, headers = {}) {
+  res.writeHead(status, { 'Cache-Control': 'no-store', ...headers });
+  res.end(body);
+}
+
+function serveFile(req, res, filePath) {
+  const type = MIME_TYPES[path.extname(filePath).toLowerCase()] ?? 'application/octet-stream';
+  let body = fs.readFileSync(filePath);
+
+  if (liveReload && type.startsWith('text/html')) {
+    const html = body.toString('utf-8');
+    body = html.includes('</body>') ? html.replace('</body>', () => `${RELOAD_TAG}</body>`) : html + RELOAD_TAG;
+  }
+
+  send(res, 200, req.method === 'HEAD' ? undefined : body, { 'Content-Type': type });
+}
+
+function openReloadStream(req, res) {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-store',
+    Connection: 'keep-alive',
+  });
+  res.write(': connected\n\n');
+  reloadClients.add(res);
+  req.on('close', () => reloadClients.delete(res));
+}
+
+const server = http.createServer((req, res) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    return send(res, 405, 'Method Not Allowed', { Allow: 'GET, HEAD' });
+  }
+
+  const { pathname } = new URL(req.url, 'http://localhost');
+
+  if (liveReload && pathname === RELOAD_EVENTS) return openReloadStream(req, res);
+  if (liveReload && pathname === RELOAD_SCRIPT) {
+    return send(res, 200, RELOAD_CLIENT, { 'Content-Type': MIME_TYPES['.js'] });
+  }
+
+  const filePath = resolveFile(pathname) ?? (wantsHtml(req) ? resolveFile('/index.html') : null);
+  if (!filePath) return send(res, 404, 'Not Found', { 'Content-Type': MIME_TYPES['.txt'] });
+
+  serveFile(req, res, filePath);
+});
+
+server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
-    print.boldError(`Port ${params.port} is already in use — stop the process using it or change the dev port.`);
+    print.boldError(`Port ${port} is already in use. Pass another one with --port <n> (or PORT=<n>).`);
   } else {
-    print.boldError(`live-server failed to start: ${err.message}`);
+    print.boldError(`Dev server failed to start: ${err.message}`);
   }
   process.exit(1);
+});
+
+// Loopback only, like the URL printed below: the dev server isn't exposed to the network.
+server.listen(port, '127.0.0.1', () => {
+  const url = `http://127.0.0.1:${port}`;
+  print.boldInfo(`Serving at ${url}`);
+  // Started by dev-serve.js: report the URL so watcher.js can reprint it after rebuilds.
+  if (process.send) process.send({ type: 'server-url', url });
+});
+
+if (liveReload) {
+  process.on('message', (msg) => {
+    if (msg?.type !== 'reload') return;
+    for (const client of reloadClients) client.write('event: reload\ndata: {}\n\n');
+  });
+
+  // Keeps idle event streams from being closed by proxies/browsers.
+  setInterval(() => {
+    for (const client of reloadClients) client.write(': ping\n\n');
+  }, 30_000).unref();
+
+  // Started by dev-serve.js: exit with it even if it dies without cleaning up (kill -9, crash).
+  process.on('disconnect', () => process.exit(0));
 }

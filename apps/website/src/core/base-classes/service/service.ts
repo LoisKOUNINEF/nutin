@@ -16,7 +16,6 @@ export abstract class Service<T extends Service<T>> {
       );
     }
     this.autoBindMethods();
-    window.addEventListener('beforeunload', this.dispose);
   }
 
   /**
@@ -60,27 +59,36 @@ export abstract class Service<T extends Service<T>> {
     const instance = Service._instances.get(this);
     if (instance) {
       await instance.onDestroy();
+      instance.runCleanup();
       Service._instances.delete(this);
     }
   }
 
+  // No page-unload hook: the browser frees everything on unload, and tearing down on
+  // `beforeunload` left a page restored from the back/forward cache (or kept after a
+  // cancelled "Leave site?" prompt) with every service already disposed.
   public dispose = (): void => {
-    this._cleanupCallbacks.forEach(fn => fn());
-    this._cleanupCallbacks = [];
+    this.runCleanup();
     Service._instances.delete(this.constructor);
   };
 
   public static async destroyAll(): Promise<void> {
-    const destroyPromises = Array.from(Service._instances.values())
-      .map(instance => instance.onDestroy());
+    const instances = Array.from(Service._instances.values());
 
-    await Promise.all(destroyPromises);
+    await Promise.all(instances.map(instance => instance.onDestroy()));
+    instances.forEach(instance => instance.runCleanup());
     Service._instances.clear();
     Service._instantiating.clear();
   }
 
   protected registerCleanup(callback: () => void): void {
     this._cleanupCallbacks.push(callback);
+  }
+
+  private runCleanup(): void {
+    const callbacks = this._cleanupCallbacks;
+    this._cleanupCallbacks = [];
+    callbacks.forEach(fn => fn());
   }
 
   /**

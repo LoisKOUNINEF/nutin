@@ -1,3 +1,7 @@
+---
+ogImage: /assets/images/og-covers/og-cover-articles.jpg
+---
+
 # How Much Frontend Framework Do You Actually Need?
 
 There is a point in the life of a small frontend application where “just use JavaScript” starts to become less simple than it sounded.

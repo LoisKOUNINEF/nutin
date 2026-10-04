@@ -1,11 +1,11 @@
-import { Component, I18nService, Navigation } from '../../../../core/index.js';
+import { Component, I18nService, Navigation, html } from '../../../../core/index.js';
 
 // Text rendered inside (or as attributes of) an <a11y-*> element is
 // interpolated here rather than through data-i18n: data-i18n replaces an
 // element's textContent after render, wiping the markup the element builds.
 const translate = (key: string) => I18nService.translate(`a11y-demo-elements.${key}`);
 
-const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
+const templateFn = () => html`__TEMPLATE_PLACEHOLDER__`;
 
 export class A11yDemoElementsComponent extends Component {
   private focusableClicks = 0;

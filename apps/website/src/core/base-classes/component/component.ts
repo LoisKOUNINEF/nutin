@@ -1,44 +1,11 @@
-import { BaseComponent, BaseComponentOptions } from '../../index.js';
+import { BaseComponent } from '../../index.js';
 import { ConfigHelper } from './helpers/config.helper.js';
 import { DataBindingHelper } from './helpers/data-binding.helper.js';
 
-export interface ComponentProps {
-  // Common HTML attributes - extend as needed
-  className?: string;
-  style?: string;
-  textContent?: string;
-
-  // Form field bindings - extend as needed
-  name?: string;
-  email?: string;
-
-  // Allow for additional data-bind attributes
-  [key: string]: any;
-}
-
-export interface ComponentOptions<K = any> extends BaseComponentOptions {
-  props?: ComponentProps;
-  config?: K;
-  defaults?: Partial<K>;
-  templateFn?: (config?: K) => string;
-  normalizeKeys?: (keyof K)[];
-}
-
-/**
- * ```typescript
-interface ComponentOptions<K = any> extends BaseComponentOptions {
-  props?: ComponentProps;
-  config?: K;
-  defaults?: Partial<K>;
-  templateFn?: (config?: K) => string;
-  normalizeKeys?: (keyof K)[];
-}
-  ```
-*/
 export abstract class Component<T extends HTMLElement = HTMLElement, K = any> extends BaseComponent<T> {
   protected config: K;
   protected props: ComponentProps;
-  private _templateFn: (config?: K) => string;
+  private _templateFn: (config?: K) => Template;
   private _normalizeKeys: (keyof K)[];
   private _defaults: Partial<K>;
 
@@ -65,7 +32,7 @@ export abstract class Component<T extends HTMLElement = HTMLElement, K = any> ex
     return DataBindingHelper.getDataBindingValues(this.element);
   }
 
-  protected override generateTemplate(): string {
+  protected override generateTemplate(): Template {
     return ConfigHelper.createNormalizedTemplate({
       config: this.config,
       defaults: this._defaults,
@@ -84,7 +51,7 @@ export abstract class Component<T extends HTMLElement = HTMLElement, K = any> ex
 
   private applyProps(): void {
     if (this.props.className) {
-      this.element.classList.add(this.props.className);
+      this.element.classList.add(...this.props.className.split(/\s+/).filter(Boolean));
     }
     if (this.props.style) {
       this.element.style.cssText = this.props.style;

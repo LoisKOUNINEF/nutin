@@ -1,28 +1,10 @@
 import { View } from '../../../index.js';
 
-/**
- * Route guard function that receives route parameters and returns:
- * - true to allow navigation
- * - false to block it
- * - string to redirect to a different route
- */
-export type RouteGuard = (params: Record<string, string>) => boolean | string | Promise<boolean | string>;
-
 export type GuardResult = {
   allowed: boolean,
   redirectTo?: string,
   viewConstructor?: () => View,
 }
-
-/**
- * Route configuration - can be just a view constructor or an object with guards
- */
-export type RouteConfig = (() => View) | {
-  view: () => View;
-  guards?: RouteGuard[];
-};
-
-export type Routes = Record<string, RouteConfig>;
 
 export class RouteGuardsManager {
   public static getViewConstructor(routeConfig: RouteConfig): () => View {

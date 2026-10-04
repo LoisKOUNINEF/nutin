@@ -1,4 +1,3 @@
-import { Routes } from '../core/index.js';
 import { TaskCatalogView, NotFoundView } from './views/index.js';
 
 export const appRoutes: Routes = {

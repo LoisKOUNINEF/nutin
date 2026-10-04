@@ -101,12 +101,12 @@ global.expect = (actual) => {
       }
     },
     toBeLessThan(expected) {
-      if (actual > expected) {
+      if (!(actual < expected)) {
         throw new AssertionError(`Expected ${actual} to be less than ${expected}`)
       }
     },
     toBeGreaterThan(expected) {
-      if (actual < expected) {
+      if (!(actual > expected)) {
         throw new AssertionError(`Expected ${actual} to be greater than ${expected}`)
       }
     },

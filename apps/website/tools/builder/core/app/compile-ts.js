@@ -1,4 +1,4 @@
-import { runCommand, print, errorExit } from "../../../utils/index.js";
+import { runCommand, errorExit } from "../../../utils/index.js";
 import { builderConfig } from '../../builder.config.js';
 
 async function compileTS() {

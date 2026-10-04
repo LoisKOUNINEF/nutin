@@ -1,8 +1,8 @@
-import { Navigation, ComponentConfig, View } from '../../../core/index.js';
+import { Navigation, View, html } from '../../../core/index.js';
 import { SnippetComponent, HomeExtrasComponent } from '../../components/index.js';
 import { loadA11yFocusable } from '../../helpers/index.js';
 
-const template = `__TEMPLATE_PLACEHOLDER__`;
+const template = html`__TEMPLATE_PLACEHOLDER__`;
 
 export class HomeView extends View {
   constructor() {
@@ -58,7 +58,7 @@ export class HomeView extends View {
       factory: (el) => new SnippetComponent(el, {
         id: 0,
         sectionId: 0,
-        content: '&lt;!-- components/hello-world/hello-world.component.html --&gt;\n&lt;div&gt;Hello, world!&lt;/div&gt;',
+        content: '<!-- components/hello-world/hello-world.component.html -->\n<div>Hello, world!</div>',
         type: 'html',
       })
     },{
@@ -88,9 +88,9 @@ class HomeView extends View {
       factory: (el) => new SnippetComponent(el, {
         id: 0,
         sectionId: 0,
-        content: `&lt;!-- views/home/home.view.html --&gt;
-&lt;!-- ... --&gt;
-&lt;div data-component="hello"&gt;&lt;/div&gt;`,
+        content: `<!-- views/home/home.view.html -->
+<!-- ... -->
+<div data-component="hello"></div>`,
         type: 'html',
       })
     },{

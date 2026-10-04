@@ -16,6 +16,26 @@ function makeView(name) {
   };
 }
 
+// Records pushState/replaceState URLs while still applying them to the real history.
+function trackHistory() {
+  const originalPush = window.history.pushState;
+  const originalReplace = window.history.replaceState;
+  const tracked = { pushed: [], replaced: [] };
+  window.history.pushState = function (state, title, url) {
+    tracked.pushed.push(url);
+    return originalPush.call(this, state, title, url);
+  };
+  window.history.replaceState = function (state, title, url) {
+    tracked.replaced.push(url);
+    return originalReplace.call(this, state, title, url);
+  };
+  tracked.restore = () => {
+    window.history.pushState = originalPush;
+    window.history.replaceState = originalReplace;
+  };
+  return tracked;
+}
+
 describe('Router', () => {
   let router = null;
 
@@ -88,6 +108,52 @@ describe('Router', () => {
     expect(router.getParam('id')).toBe('42');
   });
 
+  it('navigate() keeps the query string and decodes route params', async () => {
+    const home = makeView('home');
+    const userView = makeView('user');
+    router = AppRouter({ '/': () => home, '/users/:name': () => userView });
+    await flushPromises();
+
+    await router.navigate('/users/J%C3%B6rg?tab=posts#top');
+
+    expect(router.getParam('name')).toBe('Jörg');
+    expect(window.location.pathname + window.location.search + window.location.hash).toBe('/users/J%C3%B6rg?tab=posts#top');
+  });
+
+  it('reload() keeps the current query string', async () => {
+    const home = makeView('home');
+    const list = makeView('list');
+    router = AppRouter({ '/': () => home, '/list': () => list });
+    await flushPromises();
+    await router.navigate('/list?page=2');
+
+    await router.reload();
+
+    expect(window.location.search).toBe('?page=2');
+  });
+
+  it('drops a navigation whose guard resolves after a newer navigation started', async () => {
+    const home = makeView('home');
+    const slow = makeView('slow');
+    const fast = makeView('fast');
+    let releaseGuard;
+    router = AppRouter({
+      '/': () => home,
+      '/slow': { view: () => slow, guards: [() => new Promise((resolve) => { releaseGuard = resolve; })] },
+      '/fast': () => fast,
+    });
+    await flushPromises();
+
+    const slowNav = router.navigate('/slow');
+    await router.navigate('/fast');
+    releaseGuard(true);
+    await slowNav;
+
+    expect(slow.calls.length).toBe(0);
+    expect(fast.calls.some(c => c[0] === 'render')).toBe(true);
+    expect(window.location.pathname).toBe('/fast');
+  });
+
   it('navigate() renders the /404 route when no pattern matches', async () => {
     const home = makeView('home');
     const notFound = makeView('not-found');
@@ -142,6 +208,91 @@ describe('Router', () => {
 
     expect(login.calls.some(c => c[0] === 'render')).toBe(true);
     expect(secret.calls.length).toBe(0);
+  });
+
+  it('navigate() pushes the redirect target when an in-app navigation is redirected by a guard', async () => {
+    const home = makeView('home');
+    const login = makeView('login');
+    const secret = makeView('secret');
+    router = AppRouter({
+      '/': () => home,
+      '/login': () => login,
+      '/secret': { view: () => secret, guards: [() => '/login'] },
+    });
+    await flushPromises();
+    const history = trackHistory();
+
+    await router.navigate('/secret');
+    history.restore();
+
+    expect(history.pushed).toEqual(['/login']);
+    expect(history.replaced).toEqual([]);
+    expect(window.location.pathname).toBe('/login');
+  });
+
+  it('replaces the guarded URL with the redirect target on first load', async () => {
+    const login = makeView('login');
+    const secret = makeView('secret');
+    window.history.pushState({}, '', '/secret');
+    const history = trackHistory();
+
+    router = AppRouter({
+      '/login': () => login,
+      '/secret': { view: () => secret, guards: [() => '/login'] },
+    });
+    await flushPromises();
+    history.restore();
+
+    expect(login.calls.some(c => c[0] === 'render')).toBe(true);
+    expect(history.pushed).toEqual([]);
+    expect(history.replaced).toEqual(['/login']);
+    expect(window.location.pathname).toBe('/login');
+  });
+
+  it('replaces the guarded URL with the redirect target on popstate', async () => {
+    const home = makeView('home');
+    const login = makeView('login');
+    const secret = makeView('secret');
+    router = AppRouter({
+      '/': () => home,
+      '/login': () => login,
+      '/secret': { view: () => secret, guards: [() => '/login'] },
+    });
+    await flushPromises();
+
+    window.history.pushState({}, '', '/secret');
+    const history = trackHistory();
+    window.dispatchEvent(new window.PopStateEvent('popstate'));
+    await flushPromises();
+    history.restore();
+
+    expect(login.calls.some(c => c[0] === 'render')).toBe(true);
+    expect(secret.calls.length).toBe(0);
+    expect(history.pushed).toEqual([]);
+    expect(history.replaced).toEqual(['/login']);
+    expect(window.location.pathname).toBe('/login');
+  });
+
+  it('reload() replaces the current URL when its guard now redirects', async () => {
+    let loggedIn = true;
+    const login = makeView('login');
+    const account = makeView('account');
+    window.history.pushState({}, '', '/account');
+    router = AppRouter({
+      '/login': () => login,
+      '/account': { view: () => account, guards: [() => loggedIn || '/login'] },
+    });
+    await flushPromises();
+
+    loggedIn = false;
+    const history = trackHistory();
+    await router.reload();
+    history.restore();
+
+    expect(login.calls.some(c => c[0] === 'render')).toBe(true);
+    expect(history.pushed).toEqual([]);
+    expect(history.replaced).toEqual(['/login']);
+    expect(window.location.pathname).toBe('/login');
   });
 
   it('navigate() renders the view when all guards pass', async () => {

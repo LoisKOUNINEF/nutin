@@ -1,8 +1,8 @@
-import { View, ComponentConfig } from '../../../core/index.js';
+import { View, html } from '../../../core/index.js';
 import { NewTaskComponent, TaskInputsComponent, TaskCardComponent } from '../../components/index.js';
 import { taskService } from '../../services/index.js';
 
-const template = `__TEMPLATE_PLACEHOLDER__`;
+const template = html`__TEMPLATE_PLACEHOLDER__`;
 
 export class TaskCatalogView extends View {
   private _tasks: ITask[] = [];

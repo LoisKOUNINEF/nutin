@@ -1,4 +1,5 @@
 import { BaseComponent } from '../base-component.js';
+import { DomHelper } from './dom.helper.js';
 import { TokenHelper } from './token.helper.js';
 
 export class EventHelper {
@@ -8,6 +9,9 @@ export class EventHelper {
     eventListeners: Array<[EventTarget, string, EventListener]>
   ): void {
     element.querySelectorAll('[data-event]').forEach(el => {
+      // A nested component binds its own data-event elements to its own methods.
+      if (DomHelper.isInsideNestedComponent(el, element)) return;
+
       const [eventName, handlerName, ...argParts] = el.getAttribute('data-event')!.split(':');
       const argsString = argParts.length ? argParts.join(':') : '';
 
@@ -39,6 +43,7 @@ export class EventHelper {
   ): EventListener {
     return (event: Event) => {
       if (this.isModifiedAnchorClick(el, event)) return;
+      if (this.isNavigationDefault(el, event)) event.preventDefault();
 
       const resolvedArgs = rawArgs.map(arg => TokenHelper.resolve(arg.trim(), el, event));
 
@@ -53,6 +58,17 @@ export class EventHelper {
 
     const mouseEvent = event as MouseEvent;
     return mouseEvent.ctrlKey || mouseEvent.metaKey || mouseEvent.shiftKey || mouseEvent.altKey || mouseEvent.button !== 0;
+  }
+
+  // Only the defaults that would leave the page are cancelled: following a link and
+  // submitting a form. Everything else (typing, checking a box, ...) keeps its default.
+  private static isNavigationDefault(el: Element, event: Event): boolean {
+    if (event.type === 'submit') return true;
+    if (event.type !== 'click') return false;
+    if (el.tagName === 'A') return el.hasAttribute('href');
+    return (el instanceof HTMLButtonElement || el instanceof HTMLInputElement)
+      && el.type === 'submit'
+      && el.form !== null;
   }
 
   private static addEvent(

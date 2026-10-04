@@ -1,4 +1,4 @@
-import { I18nService, AppEventBus } from '#root/dist/src/core/services/index.js';
+import { I18nService, initI18n } from '#root/dist/src/core/services/index.js';
 import { CONFIG } from '#root/dist/src/core/config.js';
 
 class FetchMock {
@@ -125,6 +125,13 @@ describe('i18n module', async () => {
     expect(I18nService.translate('non.existent.key')).toBe('non.existent.key');
   });
 
+  it('translate and getTranslationObject ignore inherited Object.prototype members', () => {
+    expect(I18nService.translate('constructor')).toBe('constructor');
+    expect(I18nService.translate('__proto__')).toBe('__proto__');
+    expect(I18nService.translate('home.toString')).toBe('home.toString');
+    expect(I18nService.getTranslationObject('constructor')).toBe(null);
+  });
+
   it('setCurrentLanguage updates the language, persists it and loads its translations', async () => {
     await I18nService.setCurrentLanguage('fr');
 
@@ -135,13 +142,22 @@ describe('i18n module', async () => {
 
   it('setCurrentLanguage emits a language-changed event with the new language', async () => {
     const received = [];
-    const callback = (data) => received.push(data);
-    I18nService.onLanguageChange(callback);
+    const unsubscribe = I18nService.onLanguageChange((data) => received.push(data));
 
     await I18nService.setCurrentLanguage('fr');
 
     expect(received).toEqual([{ lang: 'fr' }]);
-    AppEventBus.off('language-changed', callback);
+    unsubscribe();
+  });
+
+  it('onLanguageChange returns a function that stops further notifications', async () => {
+    const received = [];
+    const unsubscribe = I18nService.onLanguageChange((data) => received.push(data));
+    unsubscribe();
+
+    await I18nService.setCurrentLanguage('fr');
+
+    expect(received).toEqual([]);
   });
 
   it('getTranslationObject returns the nested value for the current language', async () => {
@@ -258,13 +274,62 @@ describe('i18n module', async () => {
     errSpy.restore();
   });
 
-  it('onDestroy resets translations and disposes the instance', async () => {
-    await I18nService.initTranslations();
-    expect(I18nService.translate('home.title')).toBe('My App');
+  it('onDestroy clears translations but keeps the saved language preference', async () => {
+    await I18nService.setCurrentLanguage('fr');
+    expect(I18nService.translate('home.title')).toBe('Mon App');
 
     I18nService.onDestroy();
 
     expect(I18nService.translate('home.title')).toBe('home.title');
+    expect(localStorage.getItem(I18nService.localStorageKey)).toBe('fr');
+  });
+
+  it('resetTranslations also forgets the saved language preference', async () => {
+    await I18nService.setCurrentLanguage('fr');
+
+    I18nService.resetTranslations();
+
+    expect(I18nService.currentLanguage).toBe('en');
     expect(localStorage.getItem(I18nService.localStorageKey)).toBe(null);
+  });
+
+  it('keeps working when storage access throws (site data blocked)', async () => {
+    const originalStorage = global.localStorage;
+    const blocked = () => { throw new Error('SecurityError'); };
+    global.localStorage = { getItem: blocked, setItem: blocked, removeItem: blocked };
+    try {
+      await I18nService.setCurrentLanguage('fr');
+      expect(I18nService.translate('home.title')).toBe('Mon App');
+      expect(() => I18nService.resetTranslations()).not.toThrow();
+      expect(I18nService['getPreferences']()).toBe(null);
+    } finally {
+      global.localStorage = originalStorage;
+    }
+  });
+
+  it('initI18n loads the translations when CONFIG.i18n is enabled', async () => {
+    const original = I18nService.initTranslations;
+    let calls = 0;
+    I18nService.initTranslations = async () => { calls++; };
+    CONFIG.i18n = true;
+    try {
+      await initI18n();
+      expect(calls).toBe(1);
+    } finally {
+      CONFIG.i18n = false;
+      I18nService.initTranslations = original;
+    }
+  });
+
+  it('initI18n does nothing when CONFIG.i18n is disabled (default)', async () => {
+    const original = I18nService.initTranslations;
+    let calls = 0;
+    I18nService.initTranslations = async () => { calls++; };
+    try {
+      await initI18n();
+      expect(calls).toBe(0);
+    } finally {
+      I18nService.initTranslations = original;
+    }
   });
 });

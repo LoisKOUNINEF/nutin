@@ -1,0 +1,155 @@
+@use "sass:map";
+@use "variables" as *;
+@use "mixins";
+
+.markdown-nav__container {
+    a {
+        text-decoration:none;
+    }
+    position: sticky;
+    top: 3rem;
+    // A fixed width (not min-width) keeps this footprint constant whether or
+    // not the scrollbar below is actually showing — otherwise its shrink-to-fit
+    // auto width grows to include the scrollbar track only when items overflow,
+    // squeezing .markdown-content__body and .markdown-toc closer together.
+    width: 20vw;
+    // Otherwise flex-shrink:1 (the default) lets this shrink well below 30vw
+    // whenever the row's total desired width exceeds .markdown-view__section.
+    flex-shrink: 0;
+    margin-right: 3rem;
+    padding-bottom: map.get($spacings, 'largest');
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    max-height: calc(100vh - 3rem);
+
+    // The sidebar moves into the drawer below: this container only keeps the
+    // (fixed) drawer toggle, so it must stay rendered but take no space.
+    @include mixins.respond-to(large) {
+        position: static;
+        width: auto;
+        max-height: none;
+        margin: 0;
+        padding: 0;
+        overflow: visible;
+    }
+}
+
+.markdown-nav--sidebar {
+    @include mixins.respond-to(large) {
+        display: none;
+    }
+}
+
+.markdown-nav__drawer-toggle {
+    display: none;
+    position: fixed;
+    left: map.get($spacings, 'large');
+    bottom: map.get($spacings, 'large');
+    z-index: 10;
+    width: 3rem;
+    height: 3rem;
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    background-color: var(--surface);
+    color: var(--primary);
+    cursor: pointer;
+    transition: ease-in-out 0.2s;
+    &:hover {
+        background-color: var(--secondary);
+        color: var(--background);
+    }
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+    @include mixins.respond-to(large) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    @media (hover: none) {
+        &:hover {
+            background-color: var(--surface);
+            color: var(--primary);
+        }
+    }
+}
+
+// Hidden until its CDN bundle defines it, so the SSR'd copy never flashes inline.
+a11y-drawer:not(:defined) {
+    display: none;
+}
+
+.a11y-drawer-content .markdown-nav {
+    padding: map.get($spacings, 'large');
+    a {
+        text-decoration: none;
+    }
+}
+
+.markdown-nav__sections,
+.markdown-nav__groups,
+.markdown-nav__pages {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.markdown-nav__section {
+    margin-bottom: map.get($spacings, 'large');
+}
+
+.markdown-nav__section-title {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: map.get($spacings, 'small');
+}
+
+.markdown-nav__group {
+    margin-bottom: map.get($spacings, 'medium');
+}
+
+.markdown-nav__group-title {
+    display: block;
+    font-size: 1.125rem;
+    color: var(--primary);
+    margin-bottom: map.get($spacings, 'smallest');
+}
+
+.markdown-nav__link {
+    display: block;
+    padding: map.get($spacings, 'smallest') 0;
+    color: var(--text);
+
+    &:hover {
+        color: var(--primary);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+    }
+}
+
+.markdown-nav__link--active {
+    font-weight: bold;
+    color: var(--primary);
+}
+
+// The Markdown feature's own nav defaults this design doesn't use: the container keeps its
+// 20vw width, spacing comes from margin-bottom only, and group titles keep their weight.
+.markdown-nav__container {
+    flex-grow: 0;
+    flex-basis: auto;
+}
+
+.markdown-nav__section + .markdown-nav__section,
+.markdown-nav__group + .markdown-nav__group {
+    margin-top: 0;
+}
+
+.markdown-nav__group-title {
+    font-weight: normal;
+    opacity: 1;
+}

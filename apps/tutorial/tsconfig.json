@@ -1,7 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": "./",
-    "paths": {},
     "target": "ESNext",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",

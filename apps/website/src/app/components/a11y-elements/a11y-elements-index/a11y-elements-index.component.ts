@@ -1,6 +1,6 @@
-import { Component, Navigation } from '../../../../core/index.js';
+import { Component, Navigation, html } from '../../../../core/index.js';
 
-const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
+const templateFn = () => html`__TEMPLATE_PLACEHOLDER__`;
 
 export class A11yElementsIndexComponent extends Component {
   constructor(mountTarget: HTMLElement) {

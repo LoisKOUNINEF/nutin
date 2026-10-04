@@ -1,10 +1,5 @@
 export * from './home/home.view.js';
 export * from './not-found/not-found.view.js';
-export * from './tutorial/tutorial.view.js';
 
-export * from './docs/index.js';
-export * from './changelog/changelog.view.js';
-export * from './articles/articles.view.js';
-export * from './guides/guides.view.js';
 export * from './articles-index/articles-index.view.js';
 export * from './a11y-elements/a11y-elements.view.js';

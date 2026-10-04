@@ -1,32 +1,11 @@
-import { Routes } from "../core/index.js";
-import {
-  A11yElementsView,
-  ArticlesView,
-  ArticlesIndexView,
-  ChangelogView,
-  DocsView,
-  GuidesView,
-  HomeView,
-  NotFoundView,
-  TutorialView
-} from "./views/index.js";
-import {
-  ArticlesManifestService,
-  ChangelogManifestService,
-  DocsManifestService,
-  GuidesManifestService,
-  TutorialManifestService,
-  RoadmapManifestService
-} from "./services/index.js";
-import { Guards } from "./guards.js";
+import { A11yElementsView, ArticlesIndexView, HomeView, NotFoundView } from './views/index.js';
+import { MarkdownPageView } from './views/markdown-page/markdown-page.view.js';
+import { markdownRoutes } from './markdown/markdown-routes.js';
 
 export const appRoutes: Routes = {
   '/': () => new HomeView(),
-  '/docs/:section?/:slug?': { view: () => new DocsView(), guards: [Guards.sectionPageExists(DocsManifestService, 'docs')] },
-  '/guides/:slug?': { view: () => new GuidesView(), guards: [Guards.resourcePageExists(GuidesManifestService)] },
-  '/tutorial/:slug?': { view: () => new TutorialView(), guards: [Guards.resourcePageExists(TutorialManifestService)] },
-  '/changelog/:slug?': { view: () => new ChangelogView(), guards: [Guards.resourcePageExists(ChangelogManifestService)] },
-  '/articles/:slug?': { view: () => new ArticlesView(), guards: [Guards.resourcePageExists(ArticlesManifestService)] },
+  // docs, changelog, tutorial, articles, guides: see nutin.config.js "markdownSources".
+  ...markdownRoutes({ view: (id) => new MarkdownPageView(id) }),
   '/articles-index': () => new ArticlesIndexView(),
   '/a11y-elements/:page?': () => new A11yElementsView(),
   '/404': () => new NotFoundView(),

@@ -10,7 +10,7 @@ npm run generate view views/task-catalog
 ## Render your tasks
 
 ```ts
-import { ComponentConfig, View } from '../../../core/index.js';
+import { View } from '../../../core/index.js';
 import { TaskCardComponent } from '../../components/task-card/task-card.component.js';
 
 export class TaskCatalogView extends View {

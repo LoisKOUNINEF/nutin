@@ -1,8 +1,8 @@
-import { View, ComponentConfig } from '../../../core/index.js';
+import { View, html } from '../../../core/index.js';
 import { ReadMoreComponent } from '../../components/index.js';
 import { loadA11yFocusable } from '../../helpers/index.js';
 
-const template = `__TEMPLATE_PLACEHOLDER__`;
+const template = html`__TEMPLATE_PLACEHOLDER__`;
 
 export class ArticlesIndexView extends View {
   constructor() {

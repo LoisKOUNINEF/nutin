@@ -23,6 +23,18 @@ Notably, `onExit()` fires *after* `destroy()` (the old element is already gone a
 
 See [What lifecycle hooks are available?](../LIFECYCLE_HOOKS/WHAT_LIFECYCLE_HOOKS_ARE_AVAILABLE.md).
 
+## Document title
+
+After each navigation, the router sets `document.title`. A view can provide its own, e.g. from the content it shows, by overriding `documentTitle()`:
+
+```ts
+public override documentTitle(): string | undefined {
+  return this.article?.title;
+}
+```
+
+When it returns `undefined` (the default), the router uses the route's `config/seo.json` title (with `generateSEOFiles`), then the `<viewName>.title` translation (with i18n), then `viewName`.
+
 ## Route params
 
 A view tracks the current route's params, set by the router via `setRouteParams()` immediately before each render.

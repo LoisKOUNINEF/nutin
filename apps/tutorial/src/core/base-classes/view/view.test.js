@@ -23,6 +23,10 @@ describe('View', () => {
     expect(() => new HomeView({ viewName: '' })).toThrow();
   });
 
+  it('has no document title of its own by default', () => {
+    expect(new NamedView({ viewName: 'custom-name' }).documentTitle()).toBe(undefined);
+  });
+
   it('uses the explicit viewName option', () => {
     const view = new NamedView({ viewName: 'custom-name' });
     expect(view.viewName).toBe('custom-name');

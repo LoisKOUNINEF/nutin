@@ -1,4 +1,4 @@
-import { View, ComponentConfig, NavigationManager } from '../../../core/index.js';
+import { View, NavigationManager, html } from '../../../core/index.js';
 import {
   A11yDemoElementsComponent,
   A11yDemoOverlaysComponent,
@@ -6,7 +6,7 @@ import {
 } from '../../components/index.js';
 import { loadA11yElements } from '../../helpers/index.js';
 
-const template = `__TEMPLATE_PLACEHOLDER__`;
+const template = html`__TEMPLATE_PLACEHOLDER__`;
 
 type A11yPage = 'index' | 'elements' | 'overlays';
 

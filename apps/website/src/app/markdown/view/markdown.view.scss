@@ -1,0 +1,19 @@
+// Every selector is wrapped in :where(), so it has no specificity: any rule of your own wins.
+// Adjust sizes through the custom properties below, e.g. in your own stylesheet:
+//   .markdown-view { --markdown-nav-width: 20rem; }
+:where(.markdown-view) {
+  --markdown-gap: 2rem;
+  --markdown-nav-width: 16rem;
+  --markdown-toc-width: 14rem;
+  --markdown-line-height: 1.7;
+
+  display: flex;
+  gap: var(--markdown-gap);
+  padding: 2rem 1rem;
+}
+
+@media (max-width: 700px) {
+  :where(.markdown-view) {
+    flex-direction: column;
+  }
+}

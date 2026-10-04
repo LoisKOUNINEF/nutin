@@ -1,4 +1,4 @@
-import { SecurityHelper, TrustLevel } from "./security.helper.js";
+import { SecurityHelper } from "./security.helper.js";
 
 interface DomElementConfig {
   target: Element | null;
@@ -6,7 +6,61 @@ interface DomElementConfig {
   element: HTMLElement
 }
 
+// Element.moveBefore() isn't in TypeScript's DOM lib yet.
+type MovableParent = ParentNode & { moveBefore?: (node: Node, child: Node | null) => void };
+
 export class DomHelper {
+  // Root element of every component instance, so a parent can tell its own
+  // nodes apart from the ones nested components own.
+  private static componentRoots = new WeakSet<Element>();
+
+  public static markComponentRoot(element: HTMLElement): void {
+    this.componentRoots.add(element);
+  }
+
+  // True when `el` lives inside another component's root below `root`.
+  public static isInsideNestedComponent(el: Element, root: Element): boolean {
+    let current = el.parentElement;
+    while (current && current !== root) {
+      if (this.componentRoots.has(current)) return true;
+      current = current.parentElement;
+    }
+    return false;
+  }
+
+  // State-preserving move (focus, iframes, animations, custom elements), only
+  // possible when both the node and the target parent are in the document.
+  public static canMoveBefore(parent: ParentNode, node: Node): boolean {
+    return typeof (parent as MovableParent).moveBefore === 'function'
+      && parent.isConnected
+      && node.isConnected;
+  }
+
+  public static moveBefore(parent: ParentNode, node: Node, child: Node | null): void {
+    (parent as MovableParent).moveBefore!(node, child);
+  }
+
+  // Chrome restarts the CSS animations of a subtree moved into a parent whose style
+  // hasn't been computed yet (e.g. created in the same task). Computing it first,
+  // before any move dirties it again, keeps them running.
+  public static prepareMoveTarget(parent: ParentNode | null, node: Node): void {
+    if (parent instanceof Element && this.canMoveBefore(parent, node)) {
+      void getComputedStyle(parent).display;
+    }
+  }
+
+  // Puts an already-mounted element where a placeholder is, moving it without
+  // detaching it when the browser supports it.
+  public static replacePlaceholder(element: HTMLElement, placeholder: HTMLElement): void {
+    const parent = placeholder.parentNode;
+    if (parent && this.canMoveBefore(parent, element)) {
+      this.moveBefore(parent, element, placeholder);
+      placeholder.remove();
+    } else {
+      placeholder.replaceWith(element);
+    }
+  }
+
   public static mountElement(element: HTMLElement, mountTarget: string | HTMLElement): void {
     const target = typeof mountTarget === 'string' 
       ? document.querySelector(mountTarget) 
@@ -21,11 +75,13 @@ export class DomHelper {
     trustLevel?: TrustLevel
   ): T {
     const element = document.createElement(tagName) as T;
-    element.innerHTML = SecurityHelper.sanitizeTemplate(template, trustLevel);
+    element.replaceChildren(SecurityHelper.sanitizeToFragment(template, trustLevel));
     return element;
   }
   
-  public static cleanupOptionalContent(): void {
+  // Scoped to the rendering component (a detached one included); the document-wide
+  // default only serves direct callers.
+  public static cleanupOptionalContent(root: ParentNode = document): void {
     const isEmpty = (el: HTMLElement): boolean => {
       if (el instanceof HTMLImageElement) {
         return !el.src || el.src.trim() === "";
@@ -59,7 +115,7 @@ export class DomHelper {
       );
     }
 
-    document.querySelectorAll<HTMLElement>("[data-optional]").forEach(el => {
+    root.querySelectorAll<HTMLElement>("[data-optional]").forEach(el => {
       if (isValueUndefined(el) || isEmpty(el)) el.remove();
       el.removeAttribute("data-optional");
     });

@@ -14,6 +14,17 @@ export const PrismHighlighter = {
     targets.forEach(target => {
       window.Prism.highlightAllUnder(target);
     });
+  },
+
+  /**
+   * Highlights every code block inside `element` (e.g. a rendered Markdown page).
+   */
+  highlight(element: HTMLElement): void {
+    if (typeof window.Prism === 'undefined') {
+      console.warn('PrismJS is not loaded. Make sure prism.js is included.');
+      return;
+    }
+    window.Prism.highlightAllUnder(element);
   }
 };
 

@@ -1,4 +1,4 @@
-import { Navigation, Component, I18nService } from '../../../../core/index.js';
+import { Navigation, Component, I18nService, html } from '../../../../core/index.js';
 
 // The dropdowns portal themselves to <body> as soon as their CDN bundle defines
 // them — possibly before data-i18n/data-event hydration runs. So their item text is
@@ -6,7 +6,7 @@ import { Navigation, Component, I18nService } from '../../../../core/index.js';
 // and they are looked up by id in the whole document rather than in this.element.
 const translate = (key: string) => I18nService.translate(`navbar.${key}`);
 
-const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
+const templateFn = () => html`__TEMPLATE_PLACEHOLDER__`;
 
 const DROPDOWN_IDS = ['navbar-docs-dropdown', 'navbar-guides-dropdown'];
 

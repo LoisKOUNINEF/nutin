@@ -99,6 +99,38 @@ describe('Service', () => {
     expect(Service.hasInstance(TestService)).toBe(false);
   });
 
+  it('destroy runs registerCleanup callbacks once', async () => {
+    const instance = TestService.getInstance();
+    let calls = 0;
+    instance.addCleanup(() => { calls++; });
+
+    await TestService.destroy();
+    instance.dispose();
+
+    expect(calls).toBe(1);
+  });
+
+  it('destroyAll runs every instance\'s registerCleanup callbacks', async () => {
+    const instance = TestService.getInstance();
+    let cleaned = false;
+    instance.addCleanup(() => { cleaned = true; });
+
+    await Service.destroyAll();
+
+    expect(cleaned).toBe(true);
+  });
+
+  it('does not tear anything down on page unload', () => {
+    const instance = TestService.getInstance();
+    let cleaned = false;
+    instance.addCleanup(() => { cleaned = true; });
+
+    window.dispatchEvent(new window.Event('beforeunload'));
+
+    expect(cleaned).toBe(false);
+    expect(Service.hasInstance(TestService)).toBe(true);
+  });
+
   it('destroy is a no-op when no instance exists', async () => {
     expect(Service.hasInstance(TestService)).toBe(false);
     await TestService.destroy();

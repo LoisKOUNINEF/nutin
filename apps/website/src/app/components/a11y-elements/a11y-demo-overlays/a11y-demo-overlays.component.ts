@@ -1,4 +1,4 @@
-import { Component, I18nService, Navigation } from '../../../../core/index.js';
+import { Component, I18nService, Navigation, html } from '../../../../core/index.js';
 
 // Every overlay portals itself to <body> as soon as its CDN bundle defines it
 // — possibly during this component's own render, before data-i18n/data-event
@@ -7,7 +7,7 @@ import { Component, I18nService, Navigation } from '../../../../core/index.js';
 // looked up by id in the whole document rather than in this.element.
 const translate = (key: string) => I18nService.translate(`a11y-demo-overlays.${key}`);
 
-const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
+const templateFn = () => html`__TEMPLATE_PLACEHOLDER__`;
 
 const OVERLAY_IDS = [
   'a11y-demo-modal',

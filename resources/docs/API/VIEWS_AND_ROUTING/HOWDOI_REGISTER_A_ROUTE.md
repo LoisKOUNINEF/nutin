@@ -2,7 +2,6 @@
 
 ```ts
 // src/app/routes.ts
-import { Routes } from '../core/index.js';
 import { HomeView } from './views/home/home.view.js';
 import { AdminView } from './views/admin/admin.view.js';
 import { NotFoundView } from './views/not-found/not-found.view.js';

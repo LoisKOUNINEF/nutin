@@ -1,11 +1,11 @@
-import { Component, ComponentProps } from '../../../core/index.js';
+import { Component, html } from '../../../core/index.js';
 
 export interface ITaskActionConfig {
   callback: () => void;
   textContent: string;
 }
 
-const templateFn = (config: ITaskActionConfig) => `__TEMPLATE_PLACEHOLDER__`;
+const templateFn = (config: ITaskActionConfig) => html`__TEMPLATE_PLACEHOLDER__`;
 
 export class TaskActionComponent extends Component {
   private _callback: () => void;

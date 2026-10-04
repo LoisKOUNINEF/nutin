@@ -1,8 +1,13 @@
 import { AppPipeRegistry } from '../../../index.js';
+import { DomHelper } from './dom.helper.js';
 
 export class PipeHelper {
   public static parsePipeAttributes(element: HTMLElement): void {
     element.querySelectorAll('[data-pipe]').forEach(el => {
+      // Nested components pipe their own content; piping it again here would
+      // apply every pipe twice.
+      if (DomHelper.isInsideNestedComponent(el, element)) return;
+
       const pipeRaw = el.getAttribute('data-pipe');
       if (!pipeRaw) return;
 

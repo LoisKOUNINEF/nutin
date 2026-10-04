@@ -1,77 +1,37 @@
 import { execFileSync } from 'child_process';
 import * as fs from 'fs';
 import path from 'path';
-import { print, runCommand, promptBoolean, errorExit } from '../../../utils/index.js';
+import { ensureDeps, errorExit } from '../../../utils/index.js';
 import { PATHS } from '../app/paths.js';
 import { builderConfig } from '../../builder.config.js';
 
-const REQUIRED_DEPS = [
-  { name: 'tailwindcss', version: '^4.3.0' },
-  { name: '@tailwindcss/cli', version: '^4.3.0' },
-];
+await ensureDeps({
+  feature: 'Tailwind CSS (tailwind: true)',
+  deps: [
+    { name: 'tailwindcss', version: '^4.3.0' },
+    { name: '@tailwindcss/cli', version: '^4.3.0' },
+  ],
+  isProd: builderConfig.isProd,
+  origin: 'tailwind',
+});
 
-const isInstalled = (depName) => fs.existsSync(path.join(process.cwd(), 'node_modules', depName, 'package.json'));
-
-const getPackageManager = () => {
-  if (fs.existsSync(path.join(process.cwd(), 'pnpm-lock.yaml'))) return 'pnpm';
-  if (fs.existsSync(path.join(process.cwd(), 'yarn.lock'))) return 'yarn';
-  if (fs.existsSync(path.join(process.cwd(), 'bun.lock')) || fs.existsSync(path.join(process.cwd(), 'bun.lockb'))) return 'bun';
-  return 'npm';
-};
-
-const getInstallCommand = (packageManager, deps) => {
-  const pkgList = deps.map(dep => `${dep.name}@${dep.version}`).join(' ');
-  switch (packageManager) {
-    case 'yarn': return `yarn add -D ${pkgList}`;
-    case 'pnpm': return `pnpm add -D ${pkgList}`;
-    case 'bun': return `bun add -D ${pkgList}`;
-    default: return `npm install -D ${pkgList}`;
-  }
-};
-
-const missingDeps = REQUIRED_DEPS.filter(dep => !isInstalled(dep.name));
-
-if (missingDeps.length) {
-  if (builderConfig.isProd) {
-    errorExit('Tailwind CSS is enabled (tailwind: true) but its dependencies are missing.\nRun "npm install" before rebuilding');
-  }
-  const packageManager = getPackageManager();
-  const installCommand = getInstallCommand(packageManager, missingDeps);
-
-  print.warn('Tailwind CSS is enabled (tailwind: true) but its dependencies are missing.');
-  print.gray('Required packages:');
-  missingDeps.forEach(dep => print.gray(`  - ${dep.name}@${dep.version}`));
-
-  let shouldInstall = true;
-  if (process.stdin.isTTY) {
-    shouldInstall = await promptBoolean('Install them now?');
-  } else {
-    print.gray(`Non-interactive shell detected. Installing automatically: ${installCommand}`);
-  }
-
-  if (!shouldInstall) {
-    print.boldError(`Aborting. Run manually: ${installCommand}`);
-    process.exit(1);
-  }
-
-  const [command, ...args] = installCommand.split(' ');
-  try {
-    await runCommand(command, args);
-  } catch (err) {
-    errorExit(err, 'tailwind-install');
-  }
+// Run the CLI's JS entry with node rather than node_modules/.bin/tailwindcss, which is a
+// .cmd shim on Windows that execFileSync can't launch without a shell.
+function tailwindEntry() {
+  const cliDir = path.join(process.cwd(), 'node_modules', '@tailwindcss', 'cli');
+  const { bin } = JSON.parse(fs.readFileSync(path.join(cliDir, 'package.json'), 'utf-8'));
+  return path.join(cliDir, typeof bin === 'string' ? bin : bin.tailwindcss);
 }
 
-const twBin = path.join(process.cwd(), 'node_modules', '.bin', 'tailwindcss');
 const input = path.join(PATHS.source, 'styles', 'tailwind.css');
 const output = path.join(PATHS.tempSource, 'tw-out.css');
 const mainCss = path.join(PATHS.tempSource, 'main.css');
 
-const args = ['-i', input, '-o', output, '--silent'];
+const args = [tailwindEntry(), '-i', input, '-o', output, '--silent'];
 if (builderConfig.isProd) args.push('--minify');
 
 try {
-  execFileSync(twBin, args, { stdio: 'inherit' });
+  execFileSync(process.execPath, args, { stdio: 'inherit' });
 } catch (err) {
   errorExit(err, 'tailwind');
 }

@@ -1,3 +1,7 @@
+---
+title: Testing
+---
+
 # Nutin - Testing toolkit documentation
 
 ## Table of Contents

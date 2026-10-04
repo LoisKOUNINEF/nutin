@@ -13,7 +13,7 @@ nutin-update
 - `-y`, `--yes`: apply the updates without the confirmation prompt. Required in a non-interactive shell (e.g. CI); without it, nothing is changed.
 - `--from <path>`: use a local `templates/` directory as the old baseline instead of fetching it from npm.
 
-`nutin-update` handles minor and patch updates. A major version change has to be migrated by hand: see the [changelog](https://nutin.org/changelog).
+`nutin-update` handles minor and patch updates. A major version change has to be migrated by hand: see the [changelog](https://nutin.org/changelog), and [Upgrading from 2.x to 3.0](./UPGRADING_TO_V3.md).
 
 ## How it works
 

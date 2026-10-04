@@ -1,40 +1,5 @@
-import { Component, ComponentConfig, ComponentOptions } from "../../index.js";
+import type { ReusableComponentConfig } from './children.helper.js';
 
-export interface CatalogConfig extends ComponentOptions {
-  items: CatalogItemConfig[];
-  elementName: string;
-  elementTag?: keyof HTMLElementTagNameMap;
-  selector: string;
-  component: new (el: HTMLElement, data: any, props?: any) => Component;
-};
-
-export interface CatalogItemBase {
-  index: number;
-}
-
-export type CatalogItemObject<T extends object> = T & CatalogItemBase;
-
-export interface CatalogItemPrimitive extends CatalogItemBase {
-  value: string | number | boolean | null | undefined;
-}
-
-export type CatalogItemConfig<T = any> =
-  T extends object ? CatalogItemObject<T> : CatalogItemPrimitive;
-
-/**
- * ```typescript
-interface CatalogConfig extends ComponentOptions {
-  items: CatalogItemConfig[];
-  elementName: string;
-  elementTag?: keyof HTMLElementTagNameMap;
-  selector: string;
-  component: new (el: HTMLElement, data: any) => Component;
-};
-
-type CatalogItemConfig<T = any> =
-  T extends object ? CatalogItemObject<T> : CatalogItemPrimitive;
-  ```
-*/
 export class CatalogHelper {
   public static generateCatalog(config: CatalogConfig, scope: Element = document.documentElement): ComponentConfig[] {
     if (!config.items || config.items.length < 1) return [];
@@ -72,15 +37,22 @@ export class CatalogHelper {
   private static pushConfig(index: number, componentConfigs: ComponentConfig[], config: CatalogConfig): void {
     const configWithIndex = this.getConfigWithIndex(config, index)
 
-    const { props, defaults, normalizeKeys } = config;
-    const options = { ...props, ...defaults, ...normalizeKeys };
+    const { props, defaults } = config;
+    const options = { ...props, ...defaults };
 
-    componentConfigs.push(
-      { 
-        selector: `${config.elementName}-${index}`,
-        factory: (el) => new config.component(el, configWithIndex, options),
-      },
-    )
+    const componentConfig: ReusableComponentConfig = {
+      selector: `${config.elementName}-${index}`,
+      factory: (el) => new config.component(el, configWithIndex, options),
+    };
+
+    if (config.trackBy) {
+      const item = config.items[index];
+      componentConfig.key = config.trackBy(item, index);
+      componentConfig.scope = `catalog:${config.selector}:${config.elementName}`;
+      componentConfig.reuseIf = { item, options, component: config.component };
+    }
+
+    componentConfigs.push(componentConfig);
   }
 
   private static getConfigWithIndex(config: CatalogConfig, index: number): CatalogItemConfig {

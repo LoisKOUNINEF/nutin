@@ -14,7 +14,9 @@ export async function renderFromTemplate(dockerDir, templateName, outputName, re
 
   for (const [placeholder, value] of replacements) {
     if (!content.includes(placeholder)) {
-      throw new Error(`tools/docker/${templateName} is missing the "${placeholder}" token — validate-docker has nothing to substitute. Restore the token or re-run "nutin-add docker".`);
+      // Nothing to insert: a template from before this token was added still renders.
+      if (value === '') continue;
+      throw new Error(`tools/docker/${templateName} is missing the "${placeholder}" token — validate-docker has nothing to substitute. Add the token back — "nutin-update" reports the current template's changes.`);
     }
     content = content.replace(placeholder, value);
   }
