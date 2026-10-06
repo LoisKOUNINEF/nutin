@@ -12,6 +12,19 @@ nutin-update
 
 - `-y`, `--yes`: apply the updates without the confirmation prompt. Required in a non-interactive shell (e.g. CI); without it, nothing is changed.
 - `--from <path>`: use a local `templates/` directory as the old baseline instead of fetching it from npm.
+- `--allow-dirty`: update even when the project has uncommitted changes or untracked files, or isn't in a git repository. The update then can't simply be undone with git.
+
+### Undoing an update
+
+Before writing anything, `nutin-update` checks that the project folder is committed: no changes and no untracked files (files ignored by `.gitignore`, like `node_modules/` and `dist/`, don't count). Otherwise it lists them and stops; commit or stash them first. So an update can always be undone, e.g. if a merge left conflicts you don't want to resolve now. From the project folder:
+
+```bash
+git checkout -- . && git clean -fd
+```
+
+Only the project folder is checked, so a project inside a larger repository isn't blocked by changes elsewhere in it.
+
+`nutin-update` needs [git](https://git-scm.com) to merge files you edited (it uses `git merge-file`; the project doesn't have to be a repository). Without git it stops before changing anything.
 
 `nutin-update` handles minor and patch updates. A major version change has to be migrated by hand: see the [changelog](https://nutin.org/changelog), and [Upgrading from 2.x to 3.0](./UPGRADING_TO_V3.md).
 
@@ -23,7 +36,7 @@ Your project's `.nutin-meta.json` records the Nutin version it was last generate
 |-----------|--------|
 | Unchanged since generation | Updated to the new version |
 | Edited by you, unchanged in the new version | Left as is |
-| Edited by you, **also changed** in the new version | **Conflict**: left as is, diff written to `NUTIN-UPDATE-REPORT.md` |
+| Edited by you, **also changed** in the new version | **Merged**: your edits and the new version's changes are both kept. Where they overlap, the file gets conflict markers |
 | Deleted by you | Not recreated |
 | New in this version | Added |
 | New in this version, but a different file already exists at that path | Left as is, listed in the summary |
@@ -31,7 +44,7 @@ Your project's `.nutin-meta.json` records the Nutin version it was last generate
 
 A summary is printed before anything is written.
 
-**Your edits are never overwritten.** When an update touches a file you changed, you get a diff to merge instead.
+**Your edits are kept.** When an update touches a file you changed, the new version's changes are merged into it, and only overlapping edits are left for you to resolve. Merged and conflicting files are listed in `NUTIN-UPDATE-REPORT.md`.
 
 ## Files that are never updated
 
@@ -44,11 +57,23 @@ A summary is printed before anything is written.
 
 ## Resolving conflicts
 
-`NUTIN-UPDATE-REPORT.md` contains, for each conflicting file, a diff from your file to the new version. Merge what you need by hand. Files are compared as a whole: there is no line-level automatic merge.
+Where your edit and the new version change the same lines, the file gets conflict markers, and the summary lists it. **The project won't build until they're resolved**: updated files around it may depend on the new version of those lines.
 
-Conflicts **will only be reported for files you edited outside of `src/app`**, for example `src/core/`, `tools/` or `nutin.config.js`.
+```text
+<<<<<<< yours
+    DomHelper.cleanupOptionalContent(); // your edit
+||||||| nutin v3.0.0
+    DomHelper.cleanupOptionalContent();
+=======
+    DomHelper.cleanupOptionalContent(this.element);
+>>>>>>> nutin v3.0.1
+```
 
-The project is marked as updated even when there are conflicts, so running `nutin-update` again won't report them. Keep the report until you're done merging.
+The middle section is the original Nutin version, so you can see what you changed and what Nutin changed. Keep what you need and delete the marker lines, or undo the whole update (see [Undoing an update](#undoing-an-update)).
+
+Files that still have conflict markers are recorded in `.nutin-meta.json`. Running `nutin-update` again checks them: it refuses to update while any are left and lists them, and clears the record once they're resolved.
+
+Merges only happen in files outside of `src/app` that you edited, for example `src/core/`, `tools/` or `nutin.config.js`. Binary files (e.g. images) can't be merged: yours is kept and listed in the report.
 
 ## Missing `.nutin-meta.json`
 

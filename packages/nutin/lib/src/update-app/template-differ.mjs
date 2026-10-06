@@ -114,8 +114,8 @@ export class TemplateDiffer {
       if (contentEquals(actualContent, oldEntry.content)) {
         toUpdate.push({ relPath, newEntry });
       } else if (!contentEquals(actualContent, newEntry.content)) {
-        // Differs from both baselines — a real conflict.
-        conflicts.push({ relPath, actualContent, newEntry });
+        // Differs from both baselines — a real conflict, merged from the old baseline at apply time.
+        conflicts.push({ relPath, actualContent, baseContent: oldEntry.content, newEntry });
       }
     }
 

@@ -38,6 +38,7 @@ Where `raw()` sits decides how it's handled:
 - Between elements: complete markup, as above. Half an element (an unclosed `<div>`) gets closed by the parser.
 - Inside a tag (`<input ${raw('checked')}>`): attributes only. Event handlers, `srcdoc`, binding attributes and `javascript:` URLs are dropped.
 - Inside an attribute value: escaped like any other value.
+- Inside `<textarea>` or `<title>`, which only hold text: inserted as text, the way `innerHTML` would put it there. Entities are decoded and tags show as written, and `raw('</textarea>…')` can't close the element.
 
 An untagged template literal escapes nothing. The build warns about every untagged `template`/`templateFn` that contains `${}`.
 
@@ -66,7 +67,9 @@ type TrustLevel = 'strict' | 'normal' | 'trusted'; // default: 'normal'
 
 `trustLevel` is per-instance and applies to every render. It's a blocklist, so it can't catch everything. It also keeps `data-event` and the other binding attributes, because your own template needs them. Never rely on it alone for untrusted data: escape with `html`, or use `raw()` for HTML.
 
-Escaping can't help with a URL: in `html`<a href="${link}">``, a `link` of `javascript:…` contains nothing to escape. The sanitizer removes such attributes at `normal`, but not at `trusted`, so validate URLs from untrusted sources yourself in `trusted` components.
+Escaping can't help with a URL: in `html`<a href="${link}">``, a `link` of `javascript:…` contains nothing to escape. So `html` checks values in `href`, `src`, `action`, `formaction`, `poster`, `background` and `xlink:href` itself, at every trust level: a value that makes the attribute a `javascript:` URL is replaced with `about:invalid#nutin-blocked`, and a warning is logged in development. A URL whose scheme is written in the template (`href="/users/${id}"`, `href="https://…/${path}"`) is left alone. Other schemes are still up to you: `data:` URLs are only removed at `strict`.
+
+At `trusted`, data inside an event handler or `srcdoc` attribute runs as code: in `onclick="go('${x}')"`, the escaped quotes in `x` are decoded before the script runs. Use `data-event` with a token instead (below).
 
 ## Data in `data-event` and `style`
 

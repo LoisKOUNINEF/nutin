@@ -7,7 +7,7 @@ export function printUpdateSummary({ toUpdate, toAdd, conflicts, unknown, remove
   print.info(`  ${toUpdate.length} file(s) will be updated (untouched since generation)`);
   print.info(`  ${toAdd.length} new file(s) will be added`);
   if (conflicts.length > 0) {
-    print.boldError(`  ${conflicts.length} file(s) you modified need manual attention`);
+    print.boldError(`  ${conflicts.length} file(s) you edited will be merged with the new version`);
   }
   if (noLongerGenerated.length > 0) {
     print.boldError(`  ${noLongerGenerated.length} file(s) nutin no longer generates — left in place, review manually:`);

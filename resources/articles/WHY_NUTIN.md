@@ -49,5 +49,5 @@ If you're interested in how Nutin evolved and the thinking behind its design, re
 
 ## FAQ
 
-- [123](FAQ.md#how-is-nutin-different-from-htmx)
+- See [Frequently Asked Questions](FAQ.md#how-is-nutin-different-from-htmx)
 

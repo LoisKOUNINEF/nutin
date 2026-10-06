@@ -185,7 +185,14 @@ The feature's styles have no specificity (they're wrapped in `:where()`): any ru
 | Nav | `.markdown-nav__container`, `.markdown-nav`, `.markdown-nav__section`, `.markdown-nav__section-title`, `.markdown-nav__group`, `.markdown-nav__group-title`, `.markdown-nav__link`, `.markdown-nav__link--active` |
 | Content | `.markdown-content`, `.markdown-content__body`, `.markdown-content__empty`, `.markdown-content__error` |
 | Table of contents | `.markdown-toc`, `.markdown-toc__title`, `.markdown-toc__item`, `.markdown-toc__item--depth-<2-6>` |
-| Landing | `.markdown-landing`, `.markdown-landing__title`, `.markdown-landing__description`, `.markdown-landing__section`, `.markdown-landing__section-title`, `.markdown-landing__group-title`, `.markdown-landing__link`, `.markdown-landing__page-description` |
+| Landing | `.markdown-landing`, `.markdown-landing__body`, `.markdown-landing__title`, `.markdown-landing__description`, `.markdown-landing__sections`, `.markdown-landing__section`, `.markdown-landing__section-title`, `.markdown-landing__section-description`, `.markdown-landing__group-title`, `.markdown-landing__pages`, `.markdown-landing__page`, `.markdown-landing__link`, `.markdown-landing__page-description` |
+
+A landing looks like the folder's pages: `.markdown-landing` shares `.markdown-content`'s rules and `.markdown-landing__body` shares `.markdown-content__body`'s. Style them the same way in your own stylesheet, e.g. with Sass `@extend` in the file that styles your pages:
+
+```scss
+.markdown-landing { @extend .markdown-content; }
+.markdown-landing__body { @extend .markdown-content__body; }
+```
 
 Below 700px the nav stacks above the content, and below 900px the table of contents moves above the page. To use other breakpoints, override `flex-direction` / `order` in your own media queries.
 

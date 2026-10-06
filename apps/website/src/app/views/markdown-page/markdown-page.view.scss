@@ -221,6 +221,41 @@
     padding-left: map.get($spacings, 'medium');
 }
 
+// Landings (a folder's index, e.g. /docs and /docs/<section>) look like the pages: same
+// layout and typography, through @extend (it only reaches selectors of this stylesheet).
+.markdown-landing {
+    @extend .markdown-content;
+}
+
+.markdown-landing__body {
+    @extend .markdown-content__body;
+}
+
+.markdown-landing__sections,
+.markdown-landing__pages {
+    list-style: none;
+    padding-left: 0;
+
+    li {
+        // Not indented like the body's lists: these are an index, not prose.
+        margin-left: 0;
+        margin-bottom: map.get($spacings, 'large');
+    }
+}
+
+.markdown-landing__link {
+    font-weight: 600;
+}
+
+// Muted like the table of contents.
+.markdown-landing__page-description,
+.markdown-landing__section-description {
+    color: var(--text-muted);
+    font-size: map.get($font-sizes, 'small');
+    margin-top: map.get($spacings, 'smallest');
+    margin-bottom: 0;
+}
+
 // The Markdown feature's own defaults this design doesn't use: the TOC keeps its 18vw width
 // and stays after the content when stacked, and deeper TOC items aren't indented.
 .markdown-toc {

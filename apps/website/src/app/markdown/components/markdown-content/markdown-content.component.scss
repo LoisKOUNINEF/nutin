@@ -1,12 +1,14 @@
 // :where() keeps these rules at zero specificity: see markdown.view.scss.
-:where(.markdown-content) {
+// A landing (.markdown-landing, .markdown-landing__body) shares the page's rules, so it
+// looks like the folder's pages and any restyling of them applies to it too.
+:where(.markdown-content, .markdown-landing) {
   display: flex;
   gap: var(--markdown-gap, 2rem);
   flex: 1 1 auto;
   min-width: 0;
 }
 
-:where(.markdown-content__body) {
+:where(.markdown-content__body, .markdown-landing__body) {
   flex: 1 1 auto;
   min-width: 0;
   line-height: var(--markdown-line-height, 1.7);
@@ -41,8 +43,28 @@
   padding-left: 2rem;
 }
 
+// The landing's index: its sections and pages, with their descriptions.
+:where(.markdown-landing__pages, .markdown-landing__sections) {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+:where(.markdown-landing__page, .markdown-landing__sections > .markdown-landing__section) {
+  margin-bottom: 0.75rem;
+}
+
+:where(.markdown-landing__link) {
+  font-weight: bold;
+}
+
+:where(.markdown-landing__page-description, .markdown-landing__section-description) {
+  margin: 0.25rem 0 0;
+  opacity: 0.75;
+}
+
 @media (max-width: 900px) {
-  :where(.markdown-content) {
+  :where(.markdown-content, .markdown-landing) {
     flex-direction: column;
   }
 

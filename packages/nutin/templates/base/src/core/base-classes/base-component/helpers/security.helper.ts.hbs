@@ -84,6 +84,12 @@ export class SecurityHelper {
       .join(' ');
   }
 
+  // A javascript: URL in a URL attribute (name lowercased). html`` checks values from data with it at
+  // every trust level, since the render sanitizer doesn't run at 'trusted'.
+  public static isScriptUrl(name: string, value: string): boolean {
+    return this.URL_ATTRS.has(name) && this.isDangerousUrl(value, 'normal');
+  }
+
   public static stripBindings(markup: string): string {
     const holder = document.createElement('template');
     holder.innerHTML = markup;
@@ -146,7 +152,7 @@ export class SecurityHelper {
   private static isAllowedRawAttribute(name: string, value: string): boolean {
     if (!/^[a-z_:][-a-z0-9_:.]*$/.test(name)) return false;
     if (name.startsWith('on') || name === 'srcdoc' || this.BINDING_ATTRS.includes(name)) return false;
-    return !(this.URL_ATTRS.has(name) && this.isDangerousUrl(value, 'normal'));
+    return !this.isScriptUrl(name, value);
   }
 
   // Only an HTML <template> has a content fragment; <svg><template> is a plain element.

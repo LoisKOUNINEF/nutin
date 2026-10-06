@@ -16,6 +16,9 @@
 
     - New `html` tag, `raw()` and `trustedRaw()`. In an `html`... template, every `${}` is HTML-escaped, so data from any source renders as text and can't inject markup or `data-event`/`data-component` attributes. Nested `html` results are inserted as-is. Unquoted attribute values (`title=${x}`) are quoted automatically, so a value with spaces can't add attributes. `raw()` inserts HTML unescaped: at render it's parsed, stripped of Nutin's binding attributes and sanitized as nodes, so injected markup can't call component methods or mount children; in tag position (`<input ${raw('checked')}>`) it keeps only safe attributes; `trustedRaw()` keeps them, for markup you wrote yourself (the `markdown` feature uses it).
     - `data-optional="${value}"` still removes its element when `value` is `null`/`undefined`: in that attribute, `html` writes them as the literal strings the check looks for. Everywhere else they render as empty.
+    - `html` checks URL attributes (`href`, `src`, `action`, `formaction`, `poster`, `background`, `xlink:href`) at every trust level, `trusted` included: a value from data that makes one a `javascript:` URL is replaced with `about:invalid#nutin-blocked`, with a warning in development. At `normal`/`strict` such a link now keeps an inert `href` instead of losing the attribute. A scheme written in the template itself (`href="/p/${id}"`) is left alone. New `SecurityHelper.isScriptUrl()`.
+    - `raw()` inside `<textarea>`/`<title>` is inserted as text (entities decoded, tags shown as written, `<` escaped so it can't close the element), instead of showing a `<template data-nutin-raw>` placeholder. This also stops a `raw('</textarea>…')` from breaking out of the element in `String()` of the template. Nested `html` and `trustedRaw()` there are unchanged.
+    - `String()` of a template with `raw()` no longer corrupts sources containing `$&`, `$1`, … (they were read as replacement patterns).
     - `data-event` tokens now pass raw values instead of HTML-escaped ones.
     - Removed `SecurityHelper.sanitizeInputElement()`.
     - The default `normal` trust level now also strips `srcdoc` attributes, SVG `<animate>`/`<set>` elements that rewrite a URL attribute and `javascript:` URLs. `data:` URLs are still stripped under `strict` only.
@@ -59,7 +62,7 @@
     - A folder whose manifest can't be loaded shows "This page couldn't be loaded." (new `loadError` locale key) instead of its empty state, and is tried again on the next visit.
     - Customizable from your own files: `markdownRoutes({ view })` builds each folder's view; `MarkdownView` takes `navComponent`, `contentComponent`, `landingComponent` (your own classes) and `onContentRendered(element, page)` (e.g. syntax highlighting), and its getters are protected. The nav, content and landing components take their template as an optional third constructor argument, and their render helpers are exported.
     - Easy to restyle: the feature's styles have no specificity (`:where()`), so any app rule wins, and sizes are custom properties on `.markdown-view` (`--markdown-gap`, `--markdown-nav-width`, `--markdown-toc-width`, `--markdown-line-height`). The nav no longer takes a fixed 16rem height when stacked on narrow screens.
-    - `landing` folder option: the bare route shows an index of the folder (hub title, description, groups and pages; with `sectionInPath`, a landing per section) instead of its first page, prerendered and in the sitemap with `generateSEOFiles`.
+    - `landing` folder option: the bare route shows an index of the folder (hub title, description, groups and pages; with `sectionInPath`, a landing per section) instead of its first page, prerendered and in the sitemap with `generateSEOFiles`. It's styled like the folder's pages (`.markdown-landing` and `.markdown-landing__body` share the content styles).
     - `ogImage` folder option: the default `og:image` of the folder's SEO pages.
     - In-app navigation sets `document.title` to the page's title, like its prerendered SEO page.
     - With `generateSEOFiles: true`, every page is prerendered at its own URL with its title, description and `og:image` (new frontmatter `ogImage`), and listed in `sitemap.xml`, with no `config/seo.json` entries needed. A `seo.json` route for the same URL overrides the generated one; `seo: false` on a folder opts it out. Descriptions taken from a page's first paragraph are plain text (no `[link](url)` or `**` marks).
@@ -80,6 +83,14 @@
     - `nutin-new --js-only` generates a plain JavaScript project. TypeScript remains the default and recommended option.
 
 ### Changes
+
+- **`nutin-update` merges files you edited.** A file you changed that also changed upstream used to be left at the old version, with a two-way diff in `NUTIN-UPDATE-REPORT.md`. The files around it were updated, so the project often didn't build until you merged by hand, and nothing said so. Now your file and the new version are merged three-way against the old one (`git merge-file`):
+    - Edits that don't overlap are merged cleanly.
+    - Overlapping ones get `diff3` conflict markers (yours / the original nutin version / the new one), and the update says the project won't build until they're resolved. This means `nutin-update` now writes to files you edited.
+    - Files left with markers are recorded in `.nutin-meta.json` (`unmergedFiles`). Running `nutin-update` again refuses to update while any are left and lists them, instead of saying "Already up to date".
+    - `NUTIN-UPDATE-REPORT.md` is now a short list of merged, conflicting and binary files, without diffs.
+    - `nutin-update` needs git for this (the binary only, not a repository). Without it, it stops before changing anything.
+    - Before writing anything, `nutin-update` checks that the project folder is committed: no changes and no untracked files (ignored files don't count), in a git repository. Otherwise it lists them and stops. So an update can always be undone with `git checkout -- . && git clean -fd`, which it prints when done. New `--allow-dirty` flag to skip the check.
 
 - The [a11y-elements guide](https://nutin.org/guides/a11y-elements) now uses a11y-elements' `removeOverlaysWithin()`: components and views remove their overlays with it before re-rendering and when destroyed, and with `generateSEOFiles`, `main.ts` removes the pre-rendered overlays once the first view is mounted. An overlay moves itself to `<body>`, so these used to stay next to the new one (two overlays with the same `id`). From a CDN, overlays are loaded after the first view is mounted instead.
 
@@ -212,6 +223,12 @@
 - Template minification no longer breaks a template that contains a nested `html```, such as `${items.map((i) => html`<li>${i}</li>`)}`. An inline template was cut at the inner backtick, and the minifier closed the "unclosed" markup, turning the code into a syntax error. The build now finds the real end of each template. Each `${…}` is swapped for a placeholder while the markup is minified, then put back exactly as written, so the minifier never sees JavaScript (it used to collapse spaces inside `${'a   b'}` in external templates too). Nested `html``` templates are minified the same way. A template that can't be minified safely, such as one with `style="${…}"` or a dynamic tag name, is kept as written, with a note in the build output.
 
 - `nutin-add` builds the feature template path from the generator's templates root instead of recomputing it. The CLI also drops several unused leftovers.
+
+- `nutin new` no longer fails when git isn't installed or `git init` fails. It warns and creates the project without a repository.
+
+- `nutin-update` and `nutin-add` in a project without `.nutin-meta.json` no longer crash (stdin closed, e.g. CI) or wait forever (stdin an open pipe) when the shell is non-interactive. They exit with a message that says to run the command in a terminal or create `.nutin-meta.json` by hand, with an example. Nothing is written.
+
+- When `nutin-update` or `nutin-add` rebuilds a missing `.nutin-meta.json`, it now detects JavaScript projects (`src/app/main.js` and no `main.ts`) instead of always recording `"lang": "ts"`. With `"ts"`, a `--js-only` project was compared against the TypeScript templates, so files you never touched (e.g. `AGENTS.md`) were reported as modified by you. The detected language and package manager are printed.
 
 ## 2.1.1
 

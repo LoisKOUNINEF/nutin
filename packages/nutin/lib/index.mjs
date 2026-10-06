@@ -71,6 +71,7 @@ export function updateAppCommand(command) {
     })
     .option('-y, --yes', 'Skip the confirmation prompt and apply safe updates immediately')
     .option('--from <path>', 'Use a local templates/ directory as the old baseline instead of fetching from npm')
+    .option('--allow-dirty', 'Update even with uncommitted changes or untracked files, or outside a git repository (the update then can\'t be undone with git)')
     .action(async (cliOptions) => {
       print.boldSuccess('🚀 nutin — update');
 
