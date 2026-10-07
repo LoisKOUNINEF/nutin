@@ -17,7 +17,7 @@ testinNutin: {
 ## Create the test files
 
 ```bash
-touch src/app/services/task/task.service.test.js src/app/views/task-catalog/task-catalog.view.test.js src/app/components/new-task/new-task.component.test.js src/app/components/task-action/task-action.component.test.js src/app/components/task-card/task-card.component.test.js src/app/components/task-inputs/task-inputs.component.test.js
+touch src/app/services/task/task.service.test.js src/app/views/task-catalog/task-catalog.view.test.js src/app/components/new-task/new-task.component.test.js src/app/components/task-action/task-action.component.test.js src/app/components/task-card/task-card.component.test.js src/app/components/task-inputs/task-inputs.component.test.js src/app/guards.test.js
 ```
 
 ```text
@@ -31,6 +31,7 @@ src/app/
         |---- task/task.service.test.js
  |---- views/
         |---- task-catalog/task-catalog.view.test.js
+ |---- guards.test.js
 ```
 
 - Tests run against the **compiled** output in `dist/`, which is why test files are `.js`.
@@ -341,6 +342,60 @@ describe('TaskCatalogView', () => {
     view.render();
 
     expect($('.task-inputs #name').value).toBe('Task 2');
+  });
+
+  it('keeps unchanged cards and the form when it re-renders', () => {
+    view.setRouteParams({ id: '1' });
+    view.render();
+    const [firstCard, secondCard] = $$('.task-card');
+    const form = $('.task-inputs');
+
+    // What saving the form does: the task changes, then the view re-renders
+    taskService.updateTask({ id: 1, name: 'Renamed' });
+    view.render();
+
+    expect($$('.task-card')[0]).toBe(firstCard);
+    expect($$('.task-card')[1]).not.toBe(secondCard);
+    expect($('.task-inputs')).toBe(form);
+  });
+});
+```
+
+`toBe` compares elements by identity: the first card is the same DOM node after the re-render, the renamed one is a new node.
+
+## Test the guard
+
+A guard is a function of the route's params, so call it directly:
+
+```js
+// src/app/guards.test.js
+import { Guards } from '#root/dist/src/app/guards.js';
+import { AppEventBus } from '#root/dist/src/core/index.js';
+import { taskService } from '#root/dist/src/app/services/task/task.service.js';
+
+describe('Guards.requireTask', () => {
+  let emitSpy;
+
+  beforeEach(() => {
+    emitSpy = spyOn(AppEventBus, 'emit').andCallFake(() => {});
+    taskService.createTask();
+  });
+
+  afterEach(() => {
+    taskService.tasks.forEach((task) => taskService.deleteTask(task.id));
+    emitSpy.restore();
+  });
+
+  it('lets an existing task through', () => {
+    expect(Guards.requireTask()({ id: '0' })).toBe(true);
+  });
+
+  it('redirects when the task does not exist', () => {
+    expect(Guards.requireTask()({ id: '5' })).toBe('/');
+  });
+
+  it('lets the route through without an id', () => {
+    expect(Guards.requireTask()({})).toBe(true);
   });
 });
 ```

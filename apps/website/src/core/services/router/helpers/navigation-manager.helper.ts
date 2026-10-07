@@ -56,7 +56,9 @@ export function updateLocaleInUrl(): void {
 export function normalizePath(path: string): string {
   const collapsed = path.replace(/\/\/+/g, '/');
   const url = new URL(collapsed, window.location.origin);
-  const pathname = (url.pathname || '/').replace(/\/+$/, '') || '/';
+  // Parsing can bring "//" back ("/./\\host" -> "//host"), which the browser reads as another
+  // host (pushState throws, a full page load leaves the site): collapse again.
+  const pathname = (url.pathname || '/').replace(/\/\/+/g, '/').replace(/\/+$/, '') || '/';
   return extractLocale(pathname).strippedPath;
 }
 

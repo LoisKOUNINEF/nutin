@@ -27,6 +27,8 @@ const templateFn = (tasks: ITask[]) => html`<ul>${tasks.map((task) => html`<li>$
 const templateFn = (post: IPost) => html`<article>${raw(post.bodyHtml)}</article>`;
 ```
 
+For HTML written by your users, sanitize it before `raw()`: see [Untrusted rich HTML](#untrusted-rich-html).
+
 - `trustedRaw()` inserts markup as-is, binding attributes included. Use it only for markup you wrote or compiled yourself, e.g. Markdown pages whose internal links use `data-event`:
 
 ```ts
@@ -65,11 +67,31 @@ type TrustLevel = 'strict' | 'normal' | 'trusted'; // default: 'normal'
 | `normal` | Default. Strips `<script>`, `<style>`, `<link>`, `<base>` and `<meta>` elements (HTML, SVG and MathML alike), any attribute whose name starts with `on` (`onclick`, `onerror`, ...), `srcdoc` attributes, SVG `<animate>`/`<set>` elements that rewrite one of the URL attributes below, and `href`/`src`/`action`/`formaction`/`poster`/`background`/`xlink:href` attributes whose value is a `javascript:` URL (including whitespace-obfuscated variants like `java\tscript:`). Also removes `data:` and `javascript:` documents from `<iframe>`/`<object>`/`<embed>` (`src`/`data`). |
 | `strict` | Everything `normal` does, plus strips `<iframe>`, `<object>`, `<embed>` tags, and also removes `data:` URLs from the URL attributes. |
 
-`trustLevel` is per-instance and applies to every render. It's a blocklist, so it can't catch everything. It also keeps `data-event` and the other binding attributes, because your own template needs them. Never rely on it alone for untrusted data: escape with `html`, or use `raw()` for HTML.
+`trustLevel` is per-instance and applies to every render. It's a blocklist, so it can't catch everything. It also keeps `data-event` and the other binding attributes, because your own template needs them. Never rely on it alone for untrusted data: escape with `html`, and sanitize untrusted HTML [with DOMPurify](#untrusted-rich-html) before `raw()`.
 
 Escaping can't help with a URL: in `html`<a href="${link}">``, a `link` of `javascript:…` contains nothing to escape. So `html` checks values in `href`, `src`, `action`, `formaction`, `poster`, `background` and `xlink:href` itself, at every trust level: a value that makes the attribute a `javascript:` URL is replaced with `about:invalid#nutin-blocked`, and a warning is logged in development. A URL whose scheme is written in the template (`href="/users/${id}"`, `href="https://…/${path}"`) is left alone. Other schemes are still up to you: `data:` URLs are only removed at `strict`.
 
 At `trusted`, data inside an event handler or `srcdoc` attribute runs as code: in `onclick="go('${x}')"`, the escaped quotes in `x` are decoded before the script runs. Use `data-event` with a token instead (below).
+
+## Untrusted rich HTML
+
+When the HTML comes from users (comments, messages, a third-party feed), run it through [DOMPurify](https://github.com/cure53/DOMPurify) first, then pass the result to `raw()`:
+
+```bash
+npm install dompurify
+```
+
+```ts
+import DOMPurify from 'dompurify';
+import { Component, html, raw } from '../../../core/index.js';
+
+const templateFn = (comment: IComment) => html`<div class="comment">${raw(DOMPurify.sanitize(comment.bodyHtml))}</div>`;
+```
+
+Each does a different job:
+
+- DOMPurify is an allowlist, kept up to date against browser parsing quirks. Nutin's trust levels are a blocklist (above).
+- DOMPurify keeps `data-*` attributes by default, so `data-event` and `data-component` survive it. `raw()` is what removes them, so the markup can't call your component's methods.
 
 ## Data in `data-event` and `style`
 

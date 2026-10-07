@@ -31,6 +31,12 @@ describe('NavigationManager', () => {
     expect(NavigationManager.normalizePath('')).toBe('/');
   });
 
+  it('never returns a path that starts with "//" (another host)', () => {
+    expect(NavigationManager.normalizePath('/./\\evil.example')).toBe('/evil.example');
+    expect(NavigationManager.normalizePath('/a/..\\/evil.example')).toBe('/evil.example');
+    expect(NavigationManager.normalizePath('/%2e/\\evil.example/x')).toBe('/evil.example/x');
+  });
+
   it('should call pushState when conditions are met', () => {
     const originalPushState = window.history.pushState;
     let called = false;

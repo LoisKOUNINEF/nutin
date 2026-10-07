@@ -103,6 +103,43 @@ export const appRoutes: Routes = {
 }
 ```
 
+### Guard the route
+
+Tasks only live in memory: reload the page on `/tasks/1` and there's no task 1 to edit. A route guard runs before the view is created, gets the route's params, and returns `true` to let the navigation through, or a path to redirect to.
+
+Add one next to the generated `requireAuth` example:
+
+```ts
+// src/app/guards.ts
+import { taskService } from './services/task/task.service.js';
+
+export const Guards = {
+    /* requireAuth ... */
+
+    /**
+     * Redirects when the route's task doesn't exist, e.g. after a reload: tasks only live in memory.
+     */
+    requireTask: (redirectTo: string = '/'): RouteGuard => {
+        return ({ id }) => id === undefined || taskService.getTask(+id) !== undefined || redirectTo;
+    },
+};
+```
+
+Then use the route's object form to attach it:
+
+```ts
+// src/app/routes.ts
+import { Guards } from './guards.js';
+
+export const appRoutes: Routes = {
+    /* ... */
+    '/tasks/:id?': { view: () => new TaskCatalogView(), guards: [Guards.requireTask()] },
+    /* ... */
+}
+```
+
+See [Use route guards](https://nutin.org/docs/api/use-route-guards).
+
 ### Handle routeParams in the view
 
 ```ts
@@ -189,5 +226,46 @@ export class TaskCardComponent extends Component {
     justify-content: flex-end;
 }
 ```
+
+## Keep elements across re-renders
+
+Edit a task, change its name, then press Tab to go to its details: the focus is lost. Saving the name emits `task-event`, the view re-renders, and every child is destroyed and created again, the form you're typing in included.
+
+Tell the view which children are the same as before:
+
+```ts
+export class TaskCatalogView extends View {
+    /* ... */
+
+    registerChildren(): ComponentConfig[] {
+        const taskCatalogChildren: ComponentConfig[] = [
+            /* add-task */
+            ...this.createCatalogComponents({
+                /* ... */
+                // A card whose task didn't change is kept on re-render.
+                trackBy: (task) => task.id,
+            }),
+        ];
+        /* ... */
+    }
+
+    private getTaskInputsChild(): ComponentConfig[] {
+        /* ... */
+        return [
+            {
+                selector: 'task-inputs',
+                // Same task, same form: it's kept while you edit.
+                key: task.id,
+                factory: (el) => new TaskInputsComponent(el, task),
+            },
+        ];
+    }
+}
+```
+
+- `trackBy` gives each card an identity. On re-render, a card whose task has the same id and the same values keeps its component and its DOM. The card you renamed changed, so it's created again with the new name.
+- `key` does the same for a single child. While you edit the same task, the form is kept as it is: the focus, the caret and what you typed stay where they were. Opening another task changes the key, so a new form is created for it.
+
+See [Keeping children across re-renders](https://nutin.org/docs/api/register-child-components#keeping-children-across-re-renders).
 
 **[Next step →](8_TAKE_A_LOOK_AT_WHAT_YOU_VE_BUILT.md)**

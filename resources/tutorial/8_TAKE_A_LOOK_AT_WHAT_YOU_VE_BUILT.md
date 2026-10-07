@@ -8,10 +8,11 @@ You built the application using:
 
 - **Components** to build reusable UI
 - **Views** to orchestrate each page
-- **Routes**, route parameters and navigation
+- **Routes**, route parameters, guards and navigation
 - **Services** to manage application data
 - **Events** to connect application behavior
 - **Lifecycle and rendering** to control when UI is created and destroyed
+- **Keyed children** (`trackBy`, `key`) to keep UI across re-renders
 
 ## Go further
 

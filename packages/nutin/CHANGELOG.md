@@ -137,6 +137,12 @@ Next releases will be more stable - consider this an exception.
 
 - New [Upgrading from 2.x to 3.0](https://nutin.org/docs/tools/upgrading-to-v3) guide: how to replace the generated files and migrate `src/app`, since `nutin-update` doesn't handle major versions. It also covers data a 2.x app saved with HTML-escaped `data-event` values (`a &amp; b`), which 3.0 displays as typed.
 
+- **The router keeps every path on the site.** A path passed to `Navigation.navigateTo()` that combined a dot segment and a backslash (`/./\host`, `/a/..\/host`) was normalized to `//host`, which the browser reads as another host. The 404 view rendered, then `pushState` threw a `SecurityError`; and when the route's view failed to load (a lazy route after a deploy), the full page load went to that host. Paths are now collapsed again after parsing, so they always stay on the current origin (`/host`). This matters when an app navigates to a path it didn't write (e.g. a `?next=` parameter).
+
+- [Control HTML sanitization](https://nutin.org/docs/api/control-html-sanitization) now covers untrusted rich HTML (user comments, third-party content): sanitize it with DOMPurify, then pass it to `raw()`. DOMPurify keeps `data-*` attributes by default, so `raw()` is still what removes `data-event`/`data-component`.
+
+- The [tutorial](https://nutin.org/tutorial) now guards the `/tasks/:id?` route (a `requireTask` guard redirects to `/` when the task doesn't exist, e.g. after a reload) and keeps children across re-renders: `trackBy` on the task cards and a `key` on the edit form, so pressing Tab from a task's name to its details no longer loses focus. The testing chapter tests both.
+
 - `build:prod` runs `node tools/builder/builder.js --prod` instead of `NODE_ENV=production node …`, which Windows shells don't understand. `NODE_ENV=production` still works, so existing `package.json` scripts keep working.
 
 - The dev server (`serve`, `dev`) listens on `127.0.0.1` only, the address it prints, instead of every network interface.
