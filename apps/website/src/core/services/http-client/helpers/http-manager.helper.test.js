@@ -1,4 +1,5 @@
-import { HttpManager, HttpError } from '#root/dist/src/core/services/http-client/helpers/http-manager.helper.js';
+import * as HttpManager from '#root/dist/src/core/services/http-client/helpers/http-manager.helper.js';
+import { HttpError } from '#root/dist/src/core/services/http-client/helpers/http-manager.helper.js';
 
 describe('HttpManager', () => {
   it('should create an AbortController with a timeout', () => {
@@ -48,20 +49,23 @@ describe('HttpManager', () => {
     expect(HttpManager.createAbortController(undefined, caller.signal).controller.signal.aborted).toBe(true);
   });
 
-  it('should parse a valid JSON error response', async () => {
+  it('parses a JSON error response into the HttpError', async () => {
     const mockResponse = new Response(JSON.stringify({ error: 'Invalid' }), {
+      status: 422,
       headers: { 'Content-Type': 'application/json' }
     });
-    const result = await HttpManager.safeParseErrorResponse(mockResponse);
-    expect(JSON.stringify(result)).toBe(JSON.stringify({ error: 'Invalid' }));
+    const error = await HttpManager.validateResponse(mockResponse).catch((e) => e);
+    expect(JSON.stringify(error.response)).toBe(JSON.stringify({ error: 'Invalid' }));
   });
 
-  it('should return null for non-JSON error response', async () => {
+  it('gives the HttpError a null response for a non-JSON error body', async () => {
     const mockResponse = new Response('Not JSON', {
+      status: 500,
       headers: { 'Content-Type': 'text/plain' }
     });
-    const result = await HttpManager.safeParseErrorResponse(mockResponse);
-    expect(result).toBe(null);
+    const error = await HttpManager.validateResponse(mockResponse).catch((e) => e);
+    expect(error.status).toBe(500);
+    expect(error.response).toBe(null);
   });
 
   it('should not throw for ok responses in validateResponse', async () => {
@@ -109,14 +113,14 @@ describe('HttpManager', () => {
     expect(thrown).toBe(true);
   });
 
-  it('should detect JSON content types', () => {
-    expect(HttpManager.isJsonResponse('application/json')).toBe(true);
-    expect(HttpManager.isJsonResponse('application/json; charset=utf-8')).toBe(true);
-    expect(HttpManager.isJsonResponse('Application/JSON')).toBe(true);
-    expect(HttpManager.isJsonResponse('application/problem+json')).toBe(true);
-    expect(HttpManager.isJsonResponse('application/jsonp')).toBe(false);
-    expect(HttpManager.isJsonResponse('text/html')).toBe(false);
-    expect(HttpManager.isJsonResponse(null)).toBe(false);
+  it('parses JSON and +json content types, and returns anything else as text', async () => {
+    const parse = (contentType) => HttpManager.parseSuccessResponse(new Response('{"a":1}', contentType ? { headers: { 'Content-Type': contentType } } : {}));
+    for (const type of ['application/json', 'application/json; charset=utf-8', 'Application/JSON', 'application/problem+json']) {
+      expect(await parse(type)).toEqual({ a: 1 });
+    }
+    for (const type of ['application/jsonp', 'text/html', null]) {
+      expect(await parse(type)).toBe('{"a":1}');
+    }
   });
 
   it('should parse success JSON response', async () => {
@@ -142,10 +146,9 @@ describe('HttpManager', () => {
     expect(result).toBe('plain text');
   });
 
-  it('should detect abort errors', () => {
-    expect(HttpManager.isAbortError(new DOMException('Aborted', 'AbortError'))).toBe(true);
-    expect(HttpManager.isAbortError(new Error('Other'))).toBe(false);
-    expect(HttpManager.isAbortError(null)).toBe(false);
+  it('reports only an AbortError as a timeout', () => {
+    expect(() => HttpManager.handleRequestError(new DOMException('Aborted', 'AbortError'), true)).toThrow('Request timed out');
+    expect(() => HttpManager.handleRequestError(new Error('Other'), true)).toThrow('Other');
   });
 
   it('should rethrow an abort that was not the timeout as it is', () => {

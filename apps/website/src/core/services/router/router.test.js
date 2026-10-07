@@ -36,6 +36,19 @@ function trackHistory() {
   return tracked;
 }
 
+// A view whose element is in the document, with an <h1>, so it can take focus. Each gets its
+// own container: rendering a view clears its container's other children.
+function makeFocusableView(name) {
+  const view = makeView(name);
+  const el = view.getElement();
+  el.innerHTML = `<h1>${name}</h1>`;
+  const container = document.createElement('div');
+  container.appendChild(el);
+  document.body.appendChild(container);
+  view.cleanup = () => container.remove();
+  return view;
+}
+
 describe('Router', () => {
   let router = null;
 
@@ -471,5 +484,142 @@ describe('Router', () => {
     window.dispatchEvent(new window.PopStateEvent('popstate'));
     await flushPromises();
     expect(about.calls.length).toBe(0);
+  });
+
+  it('leaves focus alone on the first load', async () => {
+    const home = makeFocusableView('home');
+    router = AppRouter({ '/': () => home });
+    await flushPromises();
+    expect(document.activeElement).not.toBe(home.getElement().querySelector('h1'));
+    home.cleanup();
+  });
+
+  it('focuses the new view\'s h1 on navigate()', async () => {
+    const home = makeFocusableView('home');
+    const about = makeFocusableView('about');
+    router = AppRouter({ '/': () => home, '/about': () => about });
+    await flushPromises();
+
+    await router.navigate('/about');
+    expect(document.activeElement).toBe(about.getElement().querySelector('h1'));
+    home.cleanup();
+    about.cleanup();
+  });
+
+  it('focuses the view on back/forward (popstate)', async () => {
+    const home = makeFocusableView('home');
+    const about = makeFocusableView('about');
+    router = AppRouter({ '/': () => home, '/about': () => about });
+    await flushPromises();
+
+    window.history.pushState({}, '', '/about');
+    window.dispatchEvent(new window.PopStateEvent('popstate'));
+    await flushPromises();
+    expect(document.activeElement).toBe(about.getElement().querySelector('h1'));
+    home.cleanup();
+    about.cleanup();
+  });
+
+  it('focuses the /404 view on an in-app navigation to an unknown path', async () => {
+    const home = makeFocusableView('home');
+    const notFound = makeFocusableView('not-found');
+    router = AppRouter({ '/': () => home, '/404': () => notFound });
+    await flushPromises();
+
+    await router.navigate('/nowhere');
+    expect(document.activeElement).toBe(notFound.getElement().querySelector('h1'));
+    home.cleanup();
+    notFound.cleanup();
+  });
+
+  it('does not move focus on reload()', async () => {
+    const home = makeFocusableView('home');
+    router = AppRouter({ '/': () => home });
+    await flushPromises();
+    const outside = document.createElement('button');
+    document.body.appendChild(outside);
+    outside.focus();
+
+    await router.reload();
+    expect(document.activeElement).toBe(outside);
+    outside.remove();
+    home.cleanup();
+  });
+
+  it('renders a lazy route once its factory resolves, keeping the current view up meanwhile', async () => {
+    const home = makeView('home');
+    const about = makeView('about');
+    let resolveAbout;
+    router = AppRouter({ '/': () => home, '/about': () => new Promise((resolve) => { resolveAbout = resolve; }) });
+    await flushPromises();
+
+    const navigation = router.navigate('/about');
+    await flushPromises();
+    expect(home.calls.some((c) => c[0] === 'destroy')).toBe(false);
+    expect(window.location.pathname).toBe('/');
+
+    resolveAbout(about);
+    await navigation;
+    expect(home.calls.some((c) => c[0] === 'destroy')).toBe(true);
+    expect(about.calls.map((c) => c[0])).toEqual(['setRouteParams', 'render', 'onEnter']);
+    expect(window.location.pathname).toBe('/about');
+  });
+
+  it('renders a lazy /404 route', async () => {
+    const home = makeView('home');
+    const notFound = makeView('not-found');
+    router = AppRouter({ '/': () => home, '/404': () => Promise.resolve(notFound) });
+    await flushPromises();
+
+    await router.navigate('/nowhere');
+    expect(notFound.calls.some((c) => c[0] === 'render')).toBe(true);
+  });
+
+  it('drops a lazy view that resolves after a newer navigation started', async () => {
+    const home = makeView('home');
+    const slow = makeView('slow');
+    const fast = makeView('fast');
+    let resolveSlow;
+    router = AppRouter({
+      '/': () => home,
+      '/slow': () => new Promise((resolve) => { resolveSlow = resolve; }),
+      '/fast': () => fast,
+    });
+    await flushPromises();
+
+    const slowNavigation = router.navigate('/slow');
+    await flushPromises();
+    await router.navigate('/fast');
+    resolveSlow(slow);
+    await slowNavigation;
+
+    expect(slow.calls.map((c) => c[0])).toEqual(['destroy']);
+    expect(fast.calls.some((c) => c[0] === 'render')).toBe(true);
+    expect(window.location.pathname).toBe('/fast');
+  });
+
+  it('falls back to a full page load of the target URL when a lazy view fails to load', async () => {
+    // The full page load itself (location.assign) is a no-op in jsdom: the record written
+    // right before it, in sessionStorage, shows it was attempted, and for which URL.
+    sessionStorage.clear();
+    const home = makeView('home');
+    const record = () => JSON.parse(sessionStorage.getItem('nutin:failed-view-load') ?? 'null');
+    try {
+      router = AppRouter({ '/': () => home, '/docs': () => Promise.reject(new TypeError('Failed to fetch dynamically imported module')) });
+      await flushPromises();
+
+      await silenceConsole('error', async () => {
+        await router.navigate('/docs?page=2#intro');
+        expect(record().url).toBe('/docs?page=2#intro');
+        expect(home.calls.some((c) => c[0] === 'destroy')).toBe(false);
+
+        // Failing again right after the reload: logged only, no reload loop (the record is kept as is).
+        const first = record().at;
+        await router.navigate('/docs?page=2#intro');
+        expect(record().at).toBe(first);
+      });
+    } finally {
+      sessionStorage.clear();
+    }
   });
 });

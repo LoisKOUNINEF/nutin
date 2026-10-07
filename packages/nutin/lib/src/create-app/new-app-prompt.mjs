@@ -27,7 +27,7 @@ export async function newAppPrompt(initialName, cliOptions = {}) {
   if (!packageManager) {
     const pmPreference = await inquirer.prompt([
       {
-        type: 'list',
+        type: 'select',
         name: 'packageManager',
         message: 'Package manager:',
         choices: PACKAGE_MANAGERS,

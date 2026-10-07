@@ -1,31 +1,29 @@
-import { I18nService } from '../../../index.js';
+import { I18nService } from '../../../services/i18n/i18n.js';
 import { CONFIG } from '../../../config.js';
-import { DomHelper } from './dom.helper.js';
+import * as DomHelper from './dom.helper.js';
 
-export class I18nHelper {
-  public static parseI18nAttributes(element: HTMLElement): void {
-    element.querySelectorAll('[data-i18n]').forEach(el => {
-      // Nested components translate their own content.
-      if (DomHelper.isInsideNestedComponent(el, element)) return;
-      const key = el.getAttribute('data-i18n')!;
-      this.setTranslatedContent(el, key);
-    });
-  }
+export function parseI18nAttributes(element: HTMLElement): void {
+  element.querySelectorAll('[data-i18n]').forEach(el => {
+    // Nested components translate their own content.
+    if (DomHelper.isInsideNestedComponent(el, element)) return;
+    const key = el.getAttribute('data-i18n')!;
+    setTranslatedContent(el, key);
+  });
+}
 
-  private static setTranslatedContent(
-    el: Element, 
-    key: string
-  ): void {
-    // With i18n off, apply translate()'s own no-translation fallback without
-    // referencing I18nService, so prod builds can drop the service entirely.
-    const text = (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n)
-      ? I18nService.translate(key, el.textContent)
-      : el.textContent || key;
+function setTranslatedContent(
+  el: Element, 
+  key: string
+): void {
+  // With i18n off, apply translate()'s own no-translation fallback without
+  // referencing I18nService, so prod builds can drop the service entirely.
+  const text = (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n)
+    ? I18nService.translate(key, el.textContent)
+    : el.textContent || key;
 
-    if (el instanceof HTMLInputElement) {
-      el.placeholder = text;
-    } else {
-      el.textContent = text;
-    }
+  if (el instanceof HTMLInputElement) {
+    el.placeholder = text;
+  } else {
+    el.textContent = text;
   }
 }

@@ -1,4 +1,4 @@
-import { CatalogHelper } from '#root/dist/src/core/base-classes/base-component/helpers/catalog.helper.js';
+import * as CatalogHelper from '#root/dist/src/core/base-classes/base-component/helpers/catalog.helper.js';
 
 describe('CatalogHelper', () => {
   let scope;

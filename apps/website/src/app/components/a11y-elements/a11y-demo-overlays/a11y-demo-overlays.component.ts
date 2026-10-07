@@ -1,6 +1,9 @@
+import type { FloatingElement } from 'a11y-elements/overlays/floating/element';
+import type { NotificationBannerElement, NotificationBannerType } from 'a11y-elements/overlays/notification-banner/element';
+import type { NotifyOptions, SnackbarElement, SnackbarType } from 'a11y-elements/overlays/snackbar/element';
 import { Component, I18nService, Navigation, html } from '../../../../core/index.js';
 
-// Every overlay portals itself to <body> as soon as its CDN bundle defines it
+// Every overlay portals itself to <body> as soon as its chunk defines it
 // — possibly during this component's own render, before data-i18n/data-event
 // hydration runs. So text inside an overlay is interpolated here, clicks
 // inside one are handled by delegation (see onAfterRender), and overlays are
@@ -9,34 +12,31 @@ const translate = (key: string) => I18nService.translate(`a11y-demo-overlays.${k
 
 const templateFn = () => html`__TEMPLATE_PLACEHOLDER__`;
 
+// In page order.
 const OVERLAY_IDS = [
-  'a11y-demo-modal',
+  'a11y-demo-blocking-loader',
+  'a11y-demo-context-menu',
   'a11y-demo-drawer-left',
   'a11y-demo-drawer-right',
-  'a11y-demo-emergency',
-  'a11y-demo-blocking-loader',
   'a11y-demo-dropdown',
-  'a11y-demo-context-menu',
-  'a11y-demo-popover',
-  'a11y-demo-tooltip',
-  'a11y-demo-snackbar',
+  'a11y-demo-emergency',
+  'a11y-demo-floating-menu',
+  'a11y-demo-floating-bubble',
+  'a11y-demo-floating-help',
+  'a11y-demo-modal',
   'a11y-demo-banner',
+  'a11y-demo-popover',
+  'a11y-demo-snackbar',
+  'a11y-demo-tooltip',
 ];
 
 const BLOCKING_LOADER_DURATION = 2500;
 
-// Structural types for the a11y-elements APIs used here: the elements come
-// from zero-build CDN bundles, so there are no package types to import.
 // Overlays are opened/closed through the `open` attribute rather than the
-// property: it also works before the element's bundle has upgraded it (a
-// property set then would shadow the class accessor for good).
-type Snackbar = HTMLElement & {
-  notify(message: string, options?: { type?: string; actionText?: string; onAction?: () => void }): void;
-};
-type NotificationBanner = HTMLElement & {
-  show(message: string, options?: { type?: string }): void;
-  dismissAll(): void;
-};
+// property, and floating elements shown through `hidden`: it also works before
+// the element's chunk has upgraded it (a property set then would shadow the
+// class accessor for good). Methods are called optionally for the same reason.
+// The types come from the package; these imports are type-only (erased).
 
 export class A11yDemoOverlaysComponent extends Component {
   private overlays: HTMLElement[] = [];
@@ -64,7 +64,7 @@ export class A11yDemoOverlaysComponent extends Component {
   // and scroll lock), and a later visit creates fresh ones.
   protected override onBeforeDestroy(): void {
     if (this.blockingLoaderTimer) clearTimeout(this.blockingLoaderTimer);
-    (this.overlay('a11y-demo-banner') as NotificationBanner | null)?.dismissAll?.();
+    (this.overlay('a11y-demo-banner') as NotificationBannerElement | null)?.dismissAll?.();
     this.overlays.forEach((overlay) => overlay.remove());
     this.overlays = [];
     super.onBeforeDestroy();
@@ -78,7 +78,9 @@ export class A11yDemoOverlaysComponent extends Component {
     const target = event.target as HTMLElement;
 
     if (target.closest('[data-a11y-demo-close]')) {
-      overlay.removeAttribute('open');
+      // <a11y-floating> has no `open`: its panel collapses instead.
+      if (overlay.localName === 'a11y-floating') (overlay as FloatingElement).collapse?.();
+      else overlay.removeAttribute('open');
       return;
     }
 
@@ -98,6 +100,11 @@ export class A11yDemoOverlaysComponent extends Component {
     this.overlay(id)?.toggleAttribute('open');
   }
 
+  // Visible by default, so the demo ones start `hidden`.
+  private showFloating(id: string): void {
+    this.overlay(id)?.removeAttribute('hidden');
+  }
+
   private openBlockingLoader(): void {
     this.openOverlay('a11y-demo-blocking-loader');
     if (this.blockingLoaderTimer) clearTimeout(this.blockingLoaderTimer);
@@ -107,11 +114,11 @@ export class A11yDemoOverlaysComponent extends Component {
     }, BLOCKING_LOADER_DURATION);
   }
 
-  private notify(message: string, options?: Parameters<Snackbar['notify']>[1]): void {
-    (this.overlay('a11y-demo-snackbar') as Snackbar | null)?.notify?.(message, options);
+  private notify(message: string, options?: NotifyOptions): void {
+    (this.overlay('a11y-demo-snackbar') as SnackbarElement | null)?.notify?.(message, options);
   }
 
-  private showSnackbar(type: string): void {
+  private showSnackbar(type: SnackbarType): void {
     this.notify(translate(`snackbar-${type}`), { type });
   }
 
@@ -122,7 +129,7 @@ export class A11yDemoOverlaysComponent extends Component {
     });
   }
 
-  private showBanner(type: string): void {
-    (this.overlay('a11y-demo-banner') as NotificationBanner | null)?.show?.(translate(`banner-${type}`), { type });
+  private showBanner(type: NotificationBannerType): void {
+    (this.overlay('a11y-demo-banner') as NotificationBannerElement | null)?.show?.(translate(`banner-${type}`), { type });
   }
 }

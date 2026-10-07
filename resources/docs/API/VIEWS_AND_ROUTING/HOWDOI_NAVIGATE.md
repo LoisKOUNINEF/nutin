@@ -15,4 +15,4 @@ Navigation.reload(): void                   // emits 'reload', re-renders the cu
 
 `Navigation.navigateTo(path)` doesn't call the router directly — it emits an event on the app event bus that the `Router` (once installed via [`AppRouter`](./HOWDOI_REGISTER_A_ROUTE.md)) listens for and reacts to. This means calling it before `AppRouter(routes)` has run is a no-op — there's no subscriber yet.
 
-Navigating runs guards, destroys the outgoing view, renders the incoming one, updates browser history, and scrolls to the top. Browser back/forward (`popstate`) is handled automatically and re-renders without pushing new history state, same as `reload()`.
+Navigating runs guards, destroys the outgoing view, renders the incoming one, updates browser history, scrolls to the top, and moves focus to the new view (see [Focus after navigation](./WHATIS_A_VIEW.md#focus-after-navigation)). Browser back/forward (`popstate`) is handled automatically and re-renders without pushing new history state, like `reload()`, but moves focus as a navigation does.

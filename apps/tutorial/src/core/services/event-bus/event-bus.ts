@@ -1,4 +1,4 @@
-import { Service } from "../../index.js";
+import { Service } from "../../base-classes/service/service.js";
 
 export class EventBus extends Service<EventBus> {
   private _subscriptions: Subscription[] = [];

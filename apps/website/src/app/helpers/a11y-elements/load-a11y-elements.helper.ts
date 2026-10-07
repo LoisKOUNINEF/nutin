@@ -1,64 +1,33 @@
-// a11y-elements' zero-build option: one self-contained ESM bundle per element
-// (dist/browser/**/define.js) plus the shared stylesheet, straight from the CDN.
-// Production's CSP only allows this exact version path (tools/docker/nginx.conf
-// and its .template): bump them together.
-const A11Y_ELEMENTS_DIST = 'https://cdn.jsdelivr.net/npm/a11y-elements@0.3.0/dist';
-
-const ACCESSIBILITY_COMPONENTS = [
-  'anchor', 'avatar', 'checkbox', 'checkbox-group', 'file-input', 'focusable',
-  'input', 'label', 'picture', 'progress', 'radio-group', 'select', 'skeleton',
-  'spinner', 'switch', 'textarea', 'visually-hidden',
-];
-
-const OVERLAYS = [
-  'blocking-loader', 'context-menu', 'drawer', 'dropdown', 'emergency-dialog',
-  'modal', 'notification-banner', 'popover', 'snackbar', 'tooltip',
-];
-
-const bundleUrl = (group: string, name: string) => `${A11Y_ELEMENTS_DIST}/browser/${group}/${name}/define.js`;
-const STYLESHEET = `${A11Y_ELEMENTS_DIST}/a11y.css`;
-
-// Idempotent: each tag is only appended once, however many loaders request it.
-function ensureStylesheet(href: string): void {
-  if (document.head.querySelector(`link[href="${href}"]`)) return;
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = href;
-  document.head.appendChild(link);
-}
-
-function ensureModuleScript(src: string): void {
-  if (document.head.querySelector(`script[src="${src}"]`)) return;
-  const script = document.createElement('script');
-  script.type = 'module';
-  script.src = src;
-  document.head.appendChild(script);
-}
+// a11y-elements from npm. Each loader is a dynamic import(), so esbuild puts the
+// elements it registers in their own chunks (dist/src/chunks/), fetched the first
+// time it runs: pages that don't call it never download them. Importing a define
+// entry registers its element(s); calling a loader again reuses the loaded module.
+// Their stylesheet is global, in src/styles/main.scss.
 
 // Every element, for the /a11y-elements demo pages.
-export function loadA11yElements(): void {
-  ensureStylesheet(STYLESHEET);
-  ACCESSIBILITY_COMPONENTS.forEach((name) => ensureModuleScript(bundleUrl('components', name)));
-  OVERLAYS.forEach((name) => ensureModuleScript(bundleUrl('overlays', name)));
+export function loadA11yElements(): Promise<unknown> {
+  return import('a11y-elements/all');
 }
 
 // Only <a11y-dropdown>, for the global navbar's Documentation and Guides menus. Client-only
-// (called from main.ts), so the pre-rendered HTML stays free of the CDN bundles.
-export function loadA11yDropdown(): void {
-  ensureStylesheet(STYLESHEET);
-  ensureModuleScript(bundleUrl('overlays', 'dropdown'));
+// (called from main.ts), so a defined dropdown never meets the pre-rendered navbar.
+export function loadA11yDropdown(): Promise<unknown> {
+  return import('a11y-elements/overlays/dropdown');
 }
 
-// Only <a11y-drawer>, for the resource views' mobile sidenav (ResourceNavComponent).
-// Client-only (called from ResourceView.onEnter), like loadA11yDropdown().
-export function loadA11yDrawer(): void {
-  ensureStylesheet(STYLESHEET);
-  ensureModuleScript(bundleUrl('overlays', 'drawer'));
+// <a11y-drawer> and the <a11y-floating> button that opens it, for the Markdown views'
+// mobile nav (DocsNavComponent). Client-only (called from MarkdownPageView.onEnter),
+// like loadA11yDropdown().
+export function loadA11yDrawer(): Promise<unknown> {
+  return import('a11y-elements/overlays/drawer');
 }
 
-// Only <a11y-focusable>, for the home and articles-index link cards (keyboard
-// activation). Client-only (called from the views' onEnter), like loadA11yDrawer().
-export function loadA11yFocusable(): void {
-  ensureStylesheet(STYLESHEET);
-  ensureModuleScript(bundleUrl('components', 'focusable'));
+export function loadA11yFloating(): Promise<unknown> {
+  return import('a11y-elements/overlays/floating');
+}
+
+// Only <a11y-card-link>, for the home and articles-index link cards. Client-only
+// (called from the views' onEnter), like loadA11yDrawer().
+export function loadA11yCardLink(): Promise<unknown> {
+  return import('a11y-elements/components/card-link');
 }

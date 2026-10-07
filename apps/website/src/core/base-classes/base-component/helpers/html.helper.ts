@@ -1,4 +1,4 @@
-import { SecurityHelper } from './security.helper.js';
+import * as SecurityHelper from './security.helper.js';
 
 // Markup from html``: `value` is safe markup; `raws` maps a placeholder token to the
 // unescaped source of a raw() that sits in element position, resolved as DOM nodes at render.
@@ -13,7 +13,8 @@ export class SafeHtml {
     // The render path (sanitizeToFragment) resolves placeholders as nodes instead.
     let out = this.value;
     this.raws.forEach((source, token) => {
-      out = out.replace(SafeHtml.placeholder(token), SecurityHelper.stripBindings(source));
+      // A replacer function: a string would expand `$&`, `$'`, ... found in the source.
+      out = out.replace(SafeHtml.placeholder(token), () => SecurityHelper.stripBindings(source));
     });
     return out;
   }
@@ -30,7 +31,23 @@ class RawHtml extends SafeHtml {
   }
 }
 
-type Context = 'text' | 'tag' | 'attr-dq' | 'attr-sq' | 'attr-unq-start' | 'attr-unq';
+type Context = 'text' | 'tag' | 'attr-dq' | 'attr-sq' | 'attr-unq-start' | 'attr-unq' | 'rcdata';
+
+interface ScanState {
+  ctx: Context;
+  tagName: string;      // element of the current tag, lowercased; '/'-prefixed for a closing tag
+  inTagName: boolean;
+  attrName: string;     // last attribute name in the current tag, lowercased
+  newAttrName: boolean; // whitespace seen: the next name character starts a new attribute name
+  attrStatic: string;   // the current attribute value's static text
+  attrValue: string;    // the current attribute value so far, static text and interpolations
+  rcdataTail: string;   // last characters seen in rcdata, to find its end tag
+}
+
+// Elements whose content is text: markup in them is never parsed as elements.
+const RCDATA_TAGS = new Set(['textarea', 'title']);
+
+const BLOCKED_URL = 'about:invalid#nutin-blocked';
 
 let rawCounter = 0;
 
@@ -43,27 +60,48 @@ const OPTIONAL_VALUE = /\sdata-optional=["']?$/;
 
 export function html(strings: TemplateStringsArray, ...values: unknown[]): SafeHtml {
   const raws = new Map<string, string>();
+  const state: ScanState = {
+    ctx: 'text', tagName: '', inTagName: false, attrName: '', newAttrName: false, attrStatic: '', attrValue: '', rcdataTail: '',
+  };
   let out = strings[0] as string;
-  let ctx: Context = scan('text', out);
+  scan(state, out);
   for (let i = 0; i < values.length; i++) {
     const value = values[i];
-    const fillsOptional = (value === null || value === undefined) && ctx !== 'text' && ctx !== 'tag' && OPTIONAL_VALUE.test(out);
-    const piece = fillsOptional ? String(value) : interpolate(value, ctx, raws);
+    const ctx = state.ctx;
+    const inAttr = ctx.startsWith('attr');
+    const fillsOptional = (value === null || value === undefined) && inAttr && OPTIONAL_VALUE.test(out);
+    let piece = fillsOptional ? String(value) : interpolate(value, ctx, raws);
+    if (inAttr) piece = checkUrl(state, piece);
     if (ctx === 'attr-unq-start') {
       // Unquoted attribute (`title=${x}`): quote the whole value so data can't add attributes.
       out += `"${piece.replace(/"/g, '&quot;')}"`;
-      ctx = 'tag';
+      state.ctx = 'tag';
+      state.newAttrName = true;
     } else if (ctx === 'attr-unq') {
       // Inside an unquoted value already started (`class=a${x}`): encode anything that would end it.
       out += piece.replace(/[\s"'`=<>]/g, (c) => `&#${c.charCodeAt(0)};`);
     } else {
       out += piece;
     }
+    state.rcdataTail = '';
     const next = strings[i + 1] as string;
     out += next;
-    ctx = scan(ctx, next);
+    scan(state, next);
   }
   return new SafeHtml(out, raws);
+}
+
+// Escaping can't make a URL safe: `javascript:alert(1)` has nothing to escape. A value from data that
+// turns a URL attribute into a javascript: URL is replaced, at every trust level (the render
+// sanitizer doesn't run at 'trusted'). A javascript: URL written in the template itself is kept.
+function checkUrl(state: ScanState, piece: string): string {
+  const value = state.attrValue + piece;
+  if (SecurityHelper.isScriptUrl(state.attrName, value) && !SecurityHelper.isScriptUrl(state.attrName, state.attrStatic)) {
+    console.warn(`Blocked a javascript: URL in the "${state.attrName}" attribute - validate URLs from data.`);
+    piece = BLOCKED_URL;
+  }
+  state.attrValue += piece;
+  return piece;
 }
 
 // Inserts markup unescaped, minus Nutin's binding attributes (data-event, data-component, ...),
@@ -83,6 +121,7 @@ function toMarkup(value: unknown): string {
 }
 
 function interpolate(value: unknown, ctx: Context, raws: Map<string, string>): string {
+  if (ctx === 'rcdata') return interpolateText(value);
   if (value instanceof RawHtml) return interpolateRaw(value.source, ctx, raws);
   if (value instanceof SafeHtml) {
     value.raws.forEach((source, token) => raws.set(token, source));
@@ -96,6 +135,27 @@ function interpolate(value: unknown, ctx: Context, raws: Map<string, string>): s
   return SecurityHelper.escapeHtml(value);
 }
 
+// Inside <textarea>/<title> everything is text, so no placeholder could be resolved there. raw() is
+// inserted as innerHTML would put it (entities decode, tags show as text) with `<` escaped, so it
+// can't end the element. Nested html`` and trustedRaw() are kept as they are, as anywhere else.
+function interpolateText(value: unknown): string {
+  if (value instanceof RawHtml) return rawAsText(value.source);
+  if (value instanceof SafeHtml) {
+    let out = value.value;
+    value.raws.forEach((source, token) => {
+      out = out.replace(SafeHtml.placeholder(token), () => rawAsText(source));
+    });
+    return out;
+  }
+  if (Array.isArray(value)) return value.map(interpolateText).join('');
+  if (value === null || value === undefined || value === false) return '';
+  return SecurityHelper.escapeHtml(value);
+}
+
+function rawAsText(source: string): string {
+  return source.replace(/</g, '&lt;');
+}
+
 function interpolateRaw(source: string, ctx: Context, raws: Map<string, string>): string {
   // In element position raw() is resolved as nodes at render; elsewhere it is inlined safely now.
   if (ctx === 'text') {
@@ -107,34 +167,76 @@ function interpolateRaw(source: string, ctx: Context, raws: Map<string, string>)
   return SecurityHelper.escapeHtml(source);
 }
 
-function scan(ctx: Context, chunk: string): Context {
-  let state: Context = ctx;
+// Follows the HTML tokenizer closely enough to know where each ${} lands: text, inside a tag,
+// inside an attribute value (and which attribute), or inside a <textarea>/<title>.
+function scan(state: ScanState, chunk: string): void {
   for (const ch of chunk) {
-    switch (state) {
+    switch (state.ctx) {
       case 'text':
-        if (ch === '<') state = 'tag';
+        if (ch === '<') {
+          state.ctx = 'tag';
+          state.tagName = '';
+          state.inTagName = true;
+          state.attrName = '';
+        }
         break;
       case 'tag':
-        if (ch === '>') state = 'text';
-        else if (ch === '=') state = 'attr-unq-start';
+        if (ch === '>') {
+          state.ctx = RCDATA_TAGS.has(state.tagName) ? 'rcdata' : 'text';
+          state.rcdataTail = '';
+        } else if (ch === '=') {
+          state.ctx = 'attr-unq-start';
+          state.attrStatic = '';
+          state.attrValue = '';
+        } else if (/\s/.test(ch) || (ch === '/' && state.tagName !== '')) {
+          state.inTagName = false;
+          state.newAttrName = true;
+        } else if (state.inTagName) {
+          state.tagName += ch.toLowerCase();
+        } else {
+          state.attrName = state.newAttrName ? ch.toLowerCase() : state.attrName + ch.toLowerCase();
+          state.newAttrName = false;
+        }
         break;
       case 'attr-unq-start':
-        if (ch === '"') state = 'attr-dq';
-        else if (ch === "'") state = 'attr-sq';
-        else if (ch === '>') state = 'text';
-        else if (!/\s/.test(ch)) state = 'attr-unq';
+        if (ch === '"') state.ctx = 'attr-dq';
+        else if (ch === "'") state.ctx = 'attr-sq';
+        else if (ch === '>') state.ctx = 'text';
+        else if (!/\s/.test(ch)) {
+          state.ctx = 'attr-unq';
+          addAttrChar(state, ch);
+        }
         break;
       case 'attr-unq':
-        if (ch === '>') state = 'text';
-        else if (/\s/.test(ch)) state = 'tag';
+        if (ch === '>') state.ctx = 'text';
+        else if (/\s/.test(ch)) {
+          state.ctx = 'tag';
+          state.newAttrName = true;
+        } else addAttrChar(state, ch);
         break;
       case 'attr-dq':
-        if (ch === '"') state = 'tag';
-        break;
       case 'attr-sq':
-        if (ch === "'") state = 'tag';
+        if (ch === (state.ctx === 'attr-dq' ? '"' : "'")) {
+          state.ctx = 'tag';
+          state.newAttrName = true;
+        } else addAttrChar(state, ch);
         break;
+      case 'rcdata': {
+        // Ends at `</textarea` (or `</title`) followed by whitespace, `/` or `>`.
+        const end = `</${state.tagName}`;
+        state.rcdataTail = (state.rcdataTail + ch).slice(-(end.length + 1));
+        if (state.rcdataTail.slice(0, -1).toLowerCase() === end && /[\s/>]/.test(ch)) {
+          state.ctx = ch === '>' ? 'text' : 'tag';
+          state.tagName = `/${state.tagName}`;
+          state.inTagName = false;
+        }
+        break;
+      }
     }
   }
-  return state;
+}
+
+function addAttrChar(state: ScanState, ch: string): void {
+  state.attrStatic += ch;
+  state.attrValue += ch;
 }

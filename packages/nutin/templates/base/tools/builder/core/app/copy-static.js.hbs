@@ -11,7 +11,8 @@ async function copyStatic() {
   // No compile step emits .js here, so sources are copied in dev and prod alike.
   extensions.push('.js');
 {{else}}
-  if (builderConfig.isProd) extensions.push('.ts');
+  // Templates are merged into these copies, then tsc checks them (and emits .js in dev).
+  extensions.push('.ts');
 {{/if}}
 
   // Every build starts from a clean dist-build: a failed/interrupted prior

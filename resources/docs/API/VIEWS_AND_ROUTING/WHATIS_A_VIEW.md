@@ -35,6 +35,18 @@ public override documentTitle(): string | undefined {
 
 When it returns `undefined` (the default), the router uses the route's `config/seo.json` title (with `generateSEOFiles`), then the `<viewName>.title` translation (with i18n), then `viewName`.
 
+## Focus after navigation
+
+After an in-app navigation (a link, `Navigation.navigateTo()`, back/forward, a guard redirect or the `/404` view), the router moves keyboard focus to the new view, so keyboard and screen-reader users start from it instead of from the top of the page, where focus falls once the link they used is gone:
+
+1. the view's first `<h1>`;
+2. otherwise, the `<h1>` inside `<main>` (e.g. one written in `index.html` around the view);
+3. otherwise, the view's own element, and the page title (`document.title`, see above) is announced through a visually hidden live region.
+
+If the focused element has no `tabindex`, it gets `tabindex="-1"` (so it can take focus without becoming a tab stop) and no focus ring, since it isn't interactive; both are removed once it loses focus. Screen readers still read it, and Tab continues from it. An element with its own `tabindex` keeps its own focus styling. The page doesn't scroll to it, so a `#hash` target stays in view.
+
+The first page load and `Navigation.reload()` leave focus where it is: the first load is the browser's to handle, and a reload re-renders the page the user is already on.
+
 ## Route params
 
 A view tracks the current route's params, set by the router via `setRouteParams()` immediately before each render.

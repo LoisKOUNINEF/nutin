@@ -88,8 +88,8 @@ If you want to add scripts, styles or other external resources, you'll have to a
 
 map $uri $csp_policy {
     default "default-src 'self'; 
-    script-src 'self' https://cdn.jsdelivr.net/npm/a11y-elements@0.3.0/; 
-    style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net/npm/a11y-elements@0.3.0/; 
+    script-src 'self' https://cdn.jsdelivr.net/npm/a11y-elements@0.4.0/; 
+    style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net/npm/a11y-elements@0.4.0/; 
     img-src 'self' data: https:; 
     font-src 'self'; 
     # ...

@@ -11,9 +11,10 @@ const ENTRY_FILE = path.join(PATHS.tempApp, '__ssr-entry.ts');
 const OUT_FILE = path.join(SSR_DIR, 'ssr-bundle.mjs');
 
 const ENTRY_CONTENT = `export { appRoutes } from './routes.js';
-export { I18nService, Service, registerPipes } from '../core/index.js';
-export { RouteGuardsManager } from '../core/services/router/helpers/route-guard-manager.helper.js';
-export { NavbarComponent, FooterComponent } from './components/index.js';
+export { I18nService, Service, SecurityHelper, registerPipes } from '../core/index.js';
+export * as RouteGuardsManager from '../core/services/router/helpers/route-guard-manager.helper.js';
+export { NavbarComponent } from './components/globals/navbar/navbar.component.js';
+export { FooterComponent } from './components/globals/footer/footer.component.js';
 `;
 
 /**
@@ -30,7 +31,7 @@ export async function buildSsrBundle() {
       ...builderConfig.esbuild,
       platform: 'node',
       format: 'esm',
-      target: ['node22'],
+      target: ['node24'],
       minify: false,
       drop: [],
       legalComments: 'none',

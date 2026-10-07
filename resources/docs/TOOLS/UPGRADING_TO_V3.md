@@ -36,6 +36,7 @@ Then merge by hand:
 - `package.json`:
   - take the 3.0 `scripts` (`build:prod` uses `--prod`, new `testin-nutin:only`);
   - take the `devDependencies`: TypeScript `^7.0.2`, `esbuild` 0.28, `jsdom` 30, `chokidar` 5, and remove `live-server`;
+  - set `engines.node` to `>=24` (3.0 requires Node 24, for the CLI and generated apps);
   - keep your own name, version and dependencies;
   - then reinstall.
 - `tsconfig.json`: remove `baseUrl` and the empty `paths` (TypeScript 7 doesn't accept `baseUrl`).

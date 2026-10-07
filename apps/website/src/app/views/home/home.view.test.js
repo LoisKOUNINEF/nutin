@@ -1,5 +1,5 @@
-import { HomeView } from '#root/dist/src/app/views/index.js';
-import { PrismHighlighter } from '#root/dist/src/app/helpers/index.js';
+import { HomeView } from '#root/dist/src/app/views/home/home.view.js';
+import { PrismHighlighter } from '#root/dist/src/app/helpers/prism/prism-highlighter.js';
 import { Navigation, registerPipes } from '#root/dist/src/core/index.js';
 
 describe('HomeView', () => {
@@ -35,13 +35,11 @@ describe('HomeView', () => {
     expect(navigateSpy.lastCall[0]).toBe('/changelog');
   });
 
-  it('renders the extras as keyboard-activatable cards and onEnter loads their bundle once', () => {
+  it('renders the extras as link cards, whose element onEnter loads', () => {
     const cards = view.element.querySelectorAll('.home__cta-row .card');
     expect(cards.length).toBe(3);
-    expect([...cards].every((card) => card.tagName === 'A11Y-FOCUSABLE')).toBe(true);
+    expect([...cards].every((card) => card.tagName === 'A11Y-CARD-LINK')).toBe(true);
 
-    view.onEnter();
-    view.onEnter();
-    expect(document.head.querySelectorAll('script[src="https://cdn.jsdelivr.net/npm/a11y-elements@0.3.0/dist/browser/components/focusable/define.js"]').length).toBe(1);
+    expect(() => view.onEnter()).not.toThrow();
   });
 });

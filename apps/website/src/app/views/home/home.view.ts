@@ -1,6 +1,7 @@
 import { Navigation, View, html } from '../../../core/index.js';
-import { SnippetComponent, HomeExtrasComponent } from '../../components/index.js';
-import { loadA11yFocusable } from '../../helpers/index.js';
+import { SnippetComponent } from '../../components/snippet/snippet.component.js';
+import { HomeExtrasComponent } from '../../components/home-extras/home-extras.component.js';
+import { loadA11yCardLink } from '../../helpers/a11y-elements/load-a11y-elements.helper.js';
 
 const template = html`__TEMPLATE_PLACEHOLDER__`;
 
@@ -9,9 +10,9 @@ export class HomeView extends View {
     super({template, viewName: 'home'});
   }
 
-  // Client-only (never during SSR): the extras cards are <a11y-focusable>.
+  // Client-only (never during SSR): the extras cards are <a11y-card-link>.
   public onEnter(): void {
-    loadA11yFocusable();
+    void loadA11yCardLink();
   }
 
   public registerChildren(): ComponentConfig[] {

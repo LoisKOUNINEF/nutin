@@ -9,7 +9,9 @@ import path from 'path';
 //   Contents", optional "### Group" headings and "- [Title](./path.md)" bullets). Each hub
 //   is one section; only the pages it lists are compiled, in its order.
 // - Frontmatter mode (no hub file): every .md file under the folder, in a single "index"
-//   section, grouped by frontmatter `group` and sorted by frontmatter `order`, then path.
+//   section, sorted by frontmatter `order`, then path. Pages are grouped by frontmatter
+//   `group`, else by the first-level subfolder they're in (see folderTitle()); pages at the
+//   folder's root are ungrouped.
 //
 // Page metadata comes from YAML frontmatter first (title, description, slug, order, group, ogImage),
 // then the hub entry, then the Markdown itself (first H1, first prose line, file name).
@@ -333,7 +335,7 @@ function collectFrontmatterSection(source, context) {
   const groups = [];
   const byId = new Map();
   for (const page of pages) {
-    const groupTitle = page.data.group ? String(page.data.group) : null;
+    const groupTitle = page.data.group ? String(page.data.group) : subfolderTitle(page.source, source.dir);
     const groupId = groupTitle ? slugify(groupTitle) : null;
     if (!byId.has(groupId)) {
       const group = { id: groupId, title: groupTitle, pages: [] };
@@ -345,6 +347,20 @@ function collectFrontmatterSection(source, context) {
   }
 
   return [{ id: 'index', title: source.sectionTitle ?? path.basename(source.dir), description: '', groups }];
+}
+
+// The navigation group of a page in a subfolder: its first-level folder's title.
+function subfolderTitle(file, dir) {
+  const [first, ...rest] = path.relative(dir, file).split(path.sep);
+  return rest.length ? folderTitle(first) : null;
+}
+
+// A folder name as a group title: a leading order prefix ("01-", "2_", "3.") lets folders be
+// ordered on disk and is dropped, "-" and "_" become spaces, and an all-lowercase name gets
+// a capital first letter ("getting-started" -> "Getting started"; "API" stays "API").
+export function folderTitle(name) {
+  const title = name.replace(/^\d+[-_.\s]+(?=\S)/, '').replace(/[-_]+/g, ' ').trim();
+  return /[A-Z]/.test(title) ? title : title.charAt(0).toUpperCase() + title.slice(1);
 }
 
 // --- Landing ---

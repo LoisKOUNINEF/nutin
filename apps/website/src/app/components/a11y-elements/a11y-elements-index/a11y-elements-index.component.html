@@ -7,26 +7,26 @@
   </div>
   <div class="home-extras">
     <div class="grid">
-      <a11y-focusable class="card pillar-card card-link" data-event="click:navigateTo:elements">
+      <a11y-card-link class="card pillar-card card-link" describe>
         <!-- checked box: form controls and inline elements -->
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <rect x="4" y="4" width="16" height="16" rx="2"/>
           <path d="M9 12l2 2l4 -4"/>
         </svg>
-        <p data-i18n="a11y-elements-index.elements-title" class="card-title"></p>
-        <p data-i18n="a11y-elements-index.elements-desc" class="card-desc"></p>
-      </a11y-focusable>
+        <p class="card-title"><a href="/a11y-elements/elements" data-event="click:navigateTo:@attr:href" data-i18n="a11y-elements-index.elements-title"></a></p>
+        <p class="card-desc" data-card-description data-i18n="a11y-elements-index.elements-desc"></p>
+      </a11y-card-link>
 
-      <a11y-focusable class="card pillar-card card-link" data-event="click:navigateTo:overlays">
+      <a11y-card-link class="card pillar-card card-link" describe>
         <!-- stacked layers: content floating above the page -->
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 4l8 4l-8 4l-8 -4z"/>
           <path d="M4 12l8 4l8 -4"/>
           <path d="M4 16l8 4l8 -4"/>
         </svg>
-        <p data-i18n="a11y-elements-index.overlays-title" class="card-title"></p>
-        <p data-i18n="a11y-elements-index.overlays-desc" class="card-desc"></p>
-      </a11y-focusable>
+        <p class="card-title"><a href="/a11y-elements/overlays" data-event="click:navigateTo:@attr:href" data-i18n="a11y-elements-index.overlays-title"></a></p>
+        <p class="card-desc" data-card-description data-i18n="a11y-elements-index.overlays-desc"></p>
+      </a11y-card-link>
     </div>
   </div>
 </div>

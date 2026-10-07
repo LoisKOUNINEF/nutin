@@ -1,6 +1,6 @@
-import { PipeHelper } from '#root/dist/src/core/base-classes/base-component/helpers/pipe.helper.js';
+import * as PipeHelper from '#root/dist/src/core/base-classes/base-component/helpers/pipe.helper.js';
 import { AppPipeRegistry } from '#root/dist/src/core/services/index.js';
-import { DomHelper } from '#root/dist/src/core/base-classes/base-component/helpers/dom.helper.js';
+import * as DomHelper from '#root/dist/src/core/base-classes/base-component/helpers/dom.helper.js';
 
 describe('PipeHelper', () => {
   let container;

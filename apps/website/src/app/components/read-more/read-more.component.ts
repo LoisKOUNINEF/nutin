@@ -7,7 +7,8 @@ export class ReadMoreComponent extends Component {
     super({templateFn, mountTarget});
   }
 
-  private navigateTo(slug: string) {
-    Navigation.navigateTo(`/articles/${slug}`);
+  // Bound to each card's title link; <a11y-card-link> forwards clicks elsewhere on the card to it.
+  private navigateTo(href: string) {
+    Navigation.navigateTo(href);
   }
 }

@@ -1,7 +1,7 @@
-import { I18nHelper } from '#root/dist/src/core/base-classes/base-component/helpers/i18n.helper.js';
+import * as I18nHelper from '#root/dist/src/core/base-classes/base-component/helpers/i18n.helper.js';
 import { I18nService } from '#root/dist/src/core/services/index.js';
 import { CONFIG } from '#root/dist/src/core/config.js';
-import { DomHelper } from '#root/dist/src/core/base-classes/base-component/helpers/dom.helper.js';
+import * as DomHelper from '#root/dist/src/core/base-classes/base-component/helpers/dom.helper.js';
 
 describe('I18nHelper', () => {
   let container;

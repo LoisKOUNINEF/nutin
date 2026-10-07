@@ -1,5 +1,6 @@
 import { DEFAULT_LANGUAGE, LANGUAGES } from './languages.js';
-import { AppEventBus, Service } from '../../index.js';
+import { AppEventBus } from '../event-bus/event-bus.js';
+import { Service } from '../../base-classes/service/service.js';
 import { CONFIG } from '../../config.js';
 
 export class I18n extends Service<I18n> {

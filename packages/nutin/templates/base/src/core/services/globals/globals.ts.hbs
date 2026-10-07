@@ -1,4 +1,4 @@
-import { Service } from '../../base-classes/index.js';
+import { Service } from '../../base-classes/service/service.js';
 
 export class Globals extends Service<Globals> {
   private _mounted: Record<string, GlobalMountable> = {};

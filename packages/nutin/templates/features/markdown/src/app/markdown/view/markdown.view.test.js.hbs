@@ -1,4 +1,3 @@
-import { NavigationManager } from '#root/dist/src/core/index.js';
 import { MarkdownView } from '#root/dist/src/app/markdown/view/markdown.view.js';
 import { MarkdownManifest } from '#root/dist/src/app/markdown/markdown-manifest.js';
 import { MarkdownManifestsService } from '#root/dist/src/app/markdown/markdown-manifests.service.js';
@@ -42,7 +41,8 @@ describe('MarkdownView', () => {
   let view;
 
   beforeEach(() => {
-    replaceSpy = spyOn(NavigationManager, 'replaceState').andCallFake(() => {});
+    // NavigationManager.replaceState() ends in history.replaceState(state, title, url).
+    replaceSpy = spyOn(window.history, 'replaceState').andCallFake(() => {});
   });
 
   afterEach(() => {
@@ -64,7 +64,7 @@ describe('MarkdownView', () => {
     view.render();
     view.onEnter();
     expect(view.getElement().querySelector('.markdown-content__body h1').textContent).toBe('Page A');
-    expect(replaceSpy.lastCall[0]).toBe('/docs/a');
+    expect(replaceSpy.lastCall[2]).toBe('/docs/a');
   });
 
   it('with a landing, renders it on the bare route and keeps the URL', async () => {

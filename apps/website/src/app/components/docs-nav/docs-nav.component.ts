@@ -4,8 +4,10 @@ import { IMarkdownNavConfig, MarkdownNavComponent } from '../../markdown/compone
 import { markdownText } from '../../markdown/markdown-i18n.js';
 
 // The docs nav: rendered twice, as a sidebar and inside a left <a11y-drawer> shown below
-// the `large` breakpoint. Links inside the drawer skip data-event: the drawer may portal itself
-// to <body> before hydration, so its clicks are delegated instead (onAfterRender).
+// the `large` breakpoint, opened by an <a11y-floating> button. Links inside the drawer skip
+// data-event: the drawer may portal itself to <body> before hydration, so its clicks are
+// delegated instead (onAfterRender). The floating button needs no handler at all: with
+// `controls`, it opens the drawer itself and keeps its aria-expanded in sync.
 function renderPageLink(slug: string, config: IMarkdownNavConfig, inDrawer: boolean): SafeHtml | string {
   const page = config.manifest.getPage(slug);
   if (!page) return '';
@@ -57,31 +59,42 @@ function renderNav(config: IMarkdownNavConfig, inDrawer: boolean): SafeHtml {
 }
 
 const DRAWER_ID = 'markdown-nav-drawer';
+const FLOATING_ID = 'markdown-nav-floating';
 
+// The floating button comes after the drawer, so the drawer it controls already exists when it connects.
 const templateFn = (_config: IMarkdownNavConfig) => html`
   ${renderNav(_config, false)}
-  <button type="button" class="markdown-nav__drawer-toggle" aria-label="${I18nService.translate('docs-nav.openNavigation', 'Open navigation')}" data-event="click:openDrawer">
-    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
-      <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
-    </svg>
-  </button>
   <a11y-drawer id="${DRAWER_ID}" edge="left">${renderNav(_config, true)}</a11y-drawer>
+  <a11y-floating id="${FLOATING_ID}" position="bottom-left" controls="${DRAWER_ID}">
+    <button type="button" class="markdown-nav__drawer-toggle" aria-label="${I18nService.translate('docs-nav.openNavigation', 'Open navigation')}">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+        <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+      </svg>
+    </button>
+  </a11y-floating>
 `;
 
 // Passed to MarkdownView as its navComponent (see views/markdown-page).
 export class DocsNavComponent extends MarkdownNavComponent {
   private drawer: HTMLElement | null = null;
+  private floating: HTMLElement | null = null;
 
   constructor(mountTarget: HTMLElement, config: IMarkdownNavConfig) {
     super(mountTarget, config, templateFn);
   }
 
+  // Both overlays portal themselves to <body> once their chunks define them, so a
+  // re-render doesn't replace them. Remove the previous ones before the new markup
+  // connects: otherwise the new floating button's `controls` lookup (and ours below)
+  // could find the stale drawer, which still has the same id.
+  protected override onBeforeRender(): void {
+    this.removeOverlays();
+    super.onBeforeRender();
+  }
+
   protected override onAfterRender(): void {
-    // The drawer portals itself to <body> once its CDN bundle defines it, so it
-    // is looked up in the whole document. A re-render builds a fresh one: drop
-    // the previously portaled drawer first so the lookup can't return it.
-    this.drawer?.remove();
     this.drawer = document.getElementById(DRAWER_ID);
+    this.floating = document.getElementById(FLOATING_ID);
 
     if (this.drawer) {
       const onClick = (event: Event) => this.onDrawerClick(event);
@@ -91,18 +104,19 @@ export class DocsNavComponent extends MarkdownNavComponent {
     super.onAfterRender();
   }
 
-  // Portaled outside this.element, so destroy() wouldn't remove it. Removing it
-  // runs its own teardown (releases the focus trap and scroll lock).
+  // Portaled outside this.element, so destroy() wouldn't remove them.
   protected override onBeforeDestroy(): void {
-    this.drawer?.remove();
-    this.drawer = null;
+    this.removeOverlays();
     super.onBeforeDestroy();
   }
 
-  // Opened through the attribute rather than the property: it also works before
-  // the element's bundle has upgraded it.
-  private openDrawer(): void {
-    this.drawer?.setAttribute('open', '');
+  // Removing each runs its own teardown: the drawer releases its focus trap and scroll
+  // lock, the floating button unbinds from the drawer and removes its emptied stack.
+  private removeOverlays(): void {
+    this.floating?.remove();
+    this.drawer?.remove();
+    this.floating = null;
+    this.drawer = null;
   }
 
   private onDrawerClick(event: Event): void {
@@ -112,5 +126,4 @@ export class DocsNavComponent extends MarkdownNavComponent {
     this.drawer?.removeAttribute('open');
     Navigation.navigateTo(link.getAttribute('href') ?? '');
   }
-
 }

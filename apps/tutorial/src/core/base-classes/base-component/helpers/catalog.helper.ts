@@ -1,64 +1,62 @@
 import type { ReusableComponentConfig } from './children.helper.js';
 
-export class CatalogHelper {
-  public static generateCatalog(config: CatalogConfig, scope: Element = document.documentElement): ComponentConfig[] {
-    if (!config.items || config.items.length < 1) return [];
+export function generateCatalog(config: CatalogConfig, scope: Element = document.documentElement): ComponentConfig[] {
+  if (!config.items || config.items.length < 1) return [];
 
-    const componentConfigs: ComponentConfig[] = [];
-    const containers = scope.querySelectorAll(`[data-catalog="${config.selector}"]`);
+  const componentConfigs: ComponentConfig[] = [];
+  const containers = scope.querySelectorAll(`[data-catalog="${config.selector}"]`);
 
-    containers.forEach((container) => {
-      if (!container || !(container instanceof HTMLElement)) return;
-      componentConfigs.push(...this.getComponentConfigItems(config, container))
-    })
+  containers.forEach((container) => {
+    if (!container || !(container instanceof HTMLElement)) return;
+    componentConfigs.push(...getComponentConfigItems(config, container))
+  })
 
-    return componentConfigs;
+  return componentConfigs;
+}
+
+function getComponentConfigItems(config: CatalogConfig, container: HTMLElement): ComponentConfig[] {
+  container.innerHTML = '';
+  const componentConfigs: ComponentConfig[] = [];
+  for (let i = 0; i < config.items.length; i++) {
+    createElements(i, config, container);
+    pushConfig(i, componentConfigs, config);
   }
+  return componentConfigs;
+}
 
-  private static getComponentConfigItems(config: CatalogConfig, container: HTMLElement): ComponentConfig[] {
-    container.innerHTML = '';
-    const componentConfigs: ComponentConfig[] = [];
-    for (let i = 0; i < config.items.length; i++) {
-      this.createElements(i, config, container);
-      this.pushConfig(i, componentConfigs, config);
-    }
-    return componentConfigs;
-  }
+function createElements(index: number, config: CatalogConfig, container: HTMLElement): void {
+  const wrapper = document.createElement(config.elementTag || 'div');
+  const el = document.createElement('div');
+  wrapper.appendChild(el);
+  el.setAttribute('data-component', `${config.elementName}-${index}`);
+  wrapper.dataset.index = String(index);
+  container?.appendChild(wrapper);
+}
 
-  private static createElements(index: number, config: CatalogConfig, container: HTMLElement): void {
-    const wrapper = document.createElement(config.elementTag || 'div');
-    const el = document.createElement('div');
-    wrapper.appendChild(el);
-    el.setAttribute('data-component', `${config.elementName}-${index}`);
-    wrapper.dataset.index = String(index);
-    container?.appendChild(wrapper);
-  }
+function pushConfig(index: number, componentConfigs: ComponentConfig[], config: CatalogConfig): void {
+  const configWithIndex = getConfigWithIndex(config, index)
 
-  private static pushConfig(index: number, componentConfigs: ComponentConfig[], config: CatalogConfig): void {
-    const configWithIndex = this.getConfigWithIndex(config, index)
+  const { props, defaults } = config;
+  const options = { ...props, ...defaults };
 
-    const { props, defaults } = config;
-    const options = { ...props, ...defaults };
+  const componentConfig: ReusableComponentConfig = {
+    selector: `${config.elementName}-${index}`,
+    factory: (el) => new config.component(el, configWithIndex, options),
+  };
 
-    const componentConfig: ReusableComponentConfig = {
-      selector: `${config.elementName}-${index}`,
-      factory: (el) => new config.component(el, configWithIndex, options),
-    };
-
-    if (config.trackBy) {
-      const item = config.items[index];
-      componentConfig.key = config.trackBy(item, index);
-      componentConfig.scope = `catalog:${config.selector}:${config.elementName}`;
-      componentConfig.reuseIf = { item, options, component: config.component };
-    }
-
-    componentConfigs.push(componentConfig);
-  }
-
-  private static getConfigWithIndex(config: CatalogConfig, index: number): CatalogItemConfig {
+  if (config.trackBy) {
     const item = config.items[index];
-    return (item && typeof item === 'object')
-      ? { ...(item as object), index: index }
-      : { value: item, index: index };    
+    componentConfig.key = config.trackBy(item, index);
+    componentConfig.scope = `catalog:${config.selector}:${config.elementName}`;
+    componentConfig.reuseIf = { item, options, component: config.component };
   }
+
+  componentConfigs.push(componentConfig);
+}
+
+function getConfigWithIndex(config: CatalogConfig, index: number): CatalogItemConfig {
+  const item = config.items[index];
+  return (item && typeof item === 'object')
+    ? { ...(item as object), index: index }
+    : { value: item, index: index };    
 }

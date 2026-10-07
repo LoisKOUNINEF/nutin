@@ -24,9 +24,10 @@ runScript(path.join(scriptsDir, 'markdown', 'generate-markdown-pages.js'), 'Comp
 runScript(path.join(scriptsDir, 'html-index', 'validate-html.js'), 'Processing index.html...');
 runScript(path.join(scriptsDir, 'app', 'validate-routes.js'), 'Validating app routes...');
 
-runScript(path.join(scriptsDir, 'app', 'compile-ts.js'), 'Compiling TypeScript...');
-
 runScript(path.join(scriptsDir, 'html-templates', 'process-html-templates.js'), 'Processing HTML templates...');
+// After the templates are merged, so they're type-checked too.
+runScript(path.join(scriptsDir, 'app', 'compile-ts.js'), 'Compiling TypeScript...');
+runScript(path.join(scriptsDir, 'html-templates', 'minify-templates.js'), 'Minifying HTML templates...');
 
 runScript(path.join(scriptsDir, 'styles', 'sass.js'), 'Compiling styles...');
 if (builderConfig.tailwind) runScript(path.join(scriptsDir, 'styles', 'tailwind.js'), 'Compiling Tailwind CSS...');

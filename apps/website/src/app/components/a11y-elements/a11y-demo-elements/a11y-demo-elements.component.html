@@ -25,6 +25,29 @@
   </section>
 
   <section class="a11y-demo__section">
+    <h2><code>&lt;a11y-card-link&gt;</code></h2>
+    <p data-i18n="a11y-demo-elements.card-link-desc"></p>
+    <div class="a11y-demo__stage a11y-demo__stage--cards">
+      <a11y-card-link describe>
+        <div class="a11y-demo__card">
+          <h3><a href="/a11y-elements/overlays" data-event="click:_navigateTo:@attr:href">${translate('card-link-overlays-title')}</a></h3>
+          <p data-card-description>${translate('card-link-overlays-desc')}</p>
+        </div>
+      </a11y-card-link>
+      <a11y-card-link describe>
+        <div class="a11y-demo__card">
+          <h3><a href="/guides/a11y-elements" data-event="click:_navigateTo:@attr:href">${translate('card-link-guide-title')}</a></h3>
+          <p data-card-description>${translate('card-link-guide-desc')}</p>
+          <p>
+            <button type="button" class="a11y-demo__button" data-event="click:countCardLinkButton">${translate('card-link-button')}</button>
+            <span>${translate('card-link-count')} <strong id="a11y-demo-card-link-count">0</strong></span>
+          </p>
+        </div>
+      </a11y-card-link>
+    </div>
+  </section>
+
+  <section class="a11y-demo__section">
     <h2><code>&lt;a11y-checkbox&gt;</code></h2>
     <p data-i18n="a11y-demo-elements.checkbox-desc"></p>
     <div class="a11y-demo__stage a11y-demo__stage--column">

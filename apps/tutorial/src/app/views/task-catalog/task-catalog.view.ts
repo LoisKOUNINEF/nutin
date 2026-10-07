@@ -1,6 +1,8 @@
 import { View, html } from '../../../core/index.js';
-import { NewTaskComponent, TaskInputsComponent, TaskCardComponent } from '../../components/index.js';
-import { taskService } from '../../services/index.js';
+import { NewTaskComponent } from '../../components/new-task/new-task.component.js';
+import { TaskInputsComponent } from '../../components/task-inputs/task-inputs.component.js';
+import { TaskCardComponent } from '../../components/task-card/task-card.component.js';
+import { taskService } from '../../services/task/task.service.js';
 
 const template = html`__TEMPLATE_PLACEHOLDER__`;
 

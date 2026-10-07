@@ -1,7 +1,5 @@
-import { A11yElementsView } from '#root/dist/src/app/views/index.js';
+import { A11yElementsView } from '#root/dist/src/app/views/a11y-elements/a11y-elements.view.js';
 import { CONFIG } from '#root/dist/src/core/config.js';
-
-const CDN = 'https://cdn.jsdelivr.net/npm/a11y-elements@0.3.0/dist';
 
 function renderWith(params) {
   const view = new A11yElementsView();
@@ -87,18 +85,5 @@ describe('A11yElementsView', () => {
       expect(calls).toEqual([]);
       view.destroy();
     }
-  });
-
-  it('onEnter loads the a11y-elements stylesheet and bundles once, however often it runs', () => {
-    const view = renderWith({});
-    view.onEnter();
-    view.onEnter();
-
-    const stylesheets = document.head.querySelectorAll(`link[href="${CDN}/a11y.css"]`);
-    const scripts = document.head.querySelectorAll(`script[type="module"][src^="${CDN}/browser/"]`);
-    expect(stylesheets.length).toBe(1);
-    expect(scripts.length).toBe(27);
-    expect(document.head.querySelector(`script[src="${CDN}/browser/overlays/modal/define.js"]`)).toBeTruthy();
-    view.destroy();
   });
 });

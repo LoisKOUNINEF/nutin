@@ -50,13 +50,51 @@ Add Alpine's CDN script to `src/index.html`'s `<head>`, pinned to an exact versi
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.17.4/dist/cdn.min.js"></script>
 </head>
 ```
 
 `cdn.min.js` starts Alpine on its own as soon as it loads.
 
-*Note:* If you're using Nutin's `docker` feature, you'll have to [add the CDN source to nginx CSP map](https://nutin.org/docs/options-and-features/use-docker-feature#adding-origins-in-csp-map).
+*Note:* With Nutin's `docker` feature, Alpine's standard builds don't run under its Content Security Policy. See [With the docker feature (CSP)](#with-the-docker-feature-csp).
+
+### With the docker feature (CSP)
+
+The `docker` feature serves your app with a Content Security Policy that allows only your own scripts (`script-src 'self'`). Alpine's standard builds (`alpinejs` from npm, `cdn.min.js`) evaluate your expressions with the `Function` constructor, which that policy blocks: Alpine loads, but no directive works, and the console shows `EvalError: Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script`.
+
+Use Alpine's CSP build instead, rather than adding `'unsafe-eval'` to the policy (it would weaken the protection against injected scripts). Everything in this guide works with it.
+
+- From npm: install `@alpinejs/csp` instead of `alpinejs`, and import it the same way:
+
+    ```bash
+    npm install @alpinejs/csp
+    npm install --save-dev @types/alpinejs
+    ```
+
+    ```ts
+    // src/app/main.ts
+    import Alpine from '@alpinejs/csp';
+    ```
+
+    It has no type definitions of its own; it shares Alpine's:
+
+    ```ts
+    // src/app/globals.d.ts
+    declare module '@alpinejs/csp' {
+        import Alpine from 'alpinejs';
+        export default Alpine;
+    }
+    ```
+
+- From a CDN: load the CSP build's `cdn.min.js`, and [add its origin to the nginx CSP map](https://nutin.org/docs/options-and-features/use-docker-feature#adding-origins-in-csp-map), scoped to the version's path (`script-src 'self' https://cdn.jsdelivr.net/npm/@alpinejs/csp@3.17.4/`):
+
+    ```html
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/csp@3.17.4/dist/cdn.min.js"></script>
+    ```
+
+- Use version 3.15.0 or later: earlier CSP builds can't read inline expressions like `x-data="{ count: 0 }"` or `@click="count++"`, only components registered with `Alpine.data()`.
+- Expressions can't reach globals such as `document`: `@click="document.getElementById('menu')…"` fails with `Undefined variable: document`. Put that code in a method of an `Alpine.data()` component or an `Alpine.store()`, and call the method from the expression. See [Alpine's CSP build](https://alpinejs.dev/advanced/csp) for what it supports.
+- The inline `<script type="module">` of [Declaring x-data in main.ts](#advanced-declaring-x-data-in-main-ts) is blocked too (inline scripts aren't allowed). Load Alpine from npm instead: you set `#app`'s `x-data` and start Alpine from `main.ts` the same way.
 
 ## Approach 1: Keeping Alpine separated from Nutin
 
@@ -75,7 +113,7 @@ const templateFn = () => html`
 
 export class AlpineRootComponent extends Component {
     constructor(mountTarget: HTMLElement) {
-        super({ mountTarget, tagName: 'div' });
+        super({ mountTarget, tagName: 'div', templateFn });
     }
 
     protected override onBeforeRender(): void {
@@ -160,7 +198,7 @@ Swap to Alpine's non-auto-starting ESM build to set #app's x-data from TypeScrip
     <!-- This replaces the `cdn.min.js` script tag from "Load Alpine" -->
     <!-- Use one or the other, not both. -->
     <script type="module">
-        import Alpine from 'https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/module.esm.js';
+        import Alpine from 'https://cdn.jsdelivr.net/npm/alpinejs@3.17.4/dist/module.esm.js';
         window.Alpine = Alpine;
     </script>
 </head>
@@ -191,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 ## Alternative: Holding Alpine state inside a component
 
-*Requires Nutin 2.2.0 or later.*
+*Requires Nutin 3.0.0 or later.*
 
 A component can hold its own `x-data` root if its parent registers it with a `key` (or, for catalog items, with `trackBy`). 
 
@@ -229,6 +267,41 @@ public registerChildren(): ComponentConfig[] {
 The same holds for catalog items tracked with `trackBy`, as long as the item itself didn't change.
 
 A changed item, or a child whose `key` changed, is recreated, and its state starts over.
+
+## With a11y-elements
+
+Alpine directives work inside [a11y-elements](https://nutin.org/guides/a11y-elements) components that stay where they're written, like form controls: e.g. `@change` on the checkbox of an `<a11y-switch>`.
+
+Overlays (`<a11y-modal>`, `<a11y-drawer>`, `<a11y-dropdown>`…) need a different setup: they move themselves to `<body>`, out of `#app`, so they leave its `x-data` scope. Directives on or inside them can't see that state any more (`modal is not defined`).
+
+- Give the overlay its own `x-data`, so Alpine still processes it in `<body>`.
+- Keep the state it shares with the page in an `Alpine.store()`, which any component can reach as `$store`.
+- Open it through its `open` attribute, from a store method: the overlay closes itself (its close button, Escape, the backdrop), so a state of your own tracking whether it's open would go stale.
+
+```ts
+// src/app/main.ts, before Alpine.start() (with the CDN script: before new App())
+Alpine.store('ui', {
+    count: 0,
+    open(id: string) {
+        document.getElementById(id)?.setAttribute('open', '');
+    },
+});
+```
+
+```html
+<!-- e.g. home.view.html -->
+<button @click="$store.ui.count++">Add one</button>
+<button @click="$store.ui.open('cart')">Open cart</button>
+
+<a11y-modal id="cart" x-data>
+    <h2>Cart</h2>
+    <p x-text="'Items: ' + $store.ui.count"></p>
+</a11y-modal>
+```
+
+The method works with both builds (see [With the docker feature (CSP)](#with-the-docker-feature-csp)). With the CDN script, Alpine is `window.Alpine`.
+
+The component or view whose template contains the overlay still has to remove it on re-render and destroy, as with any overlay: see [Use overlays inside components](https://nutin.org/guides/a11y-elements#use-overlays-inside-components).
 
 ## Important
 

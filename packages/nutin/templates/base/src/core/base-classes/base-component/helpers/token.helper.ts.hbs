@@ -36,68 +36,66 @@ const PREFIXED_TOKEN_RESOLVERS: Record<string, (suffix: string, el: HTMLElement)
   '@dataset:': (suffix, el) => (el.dataset as any)[suffix] ?? '',
 };
 
-export class TokenHelper {
-  private static customResolvers: Record<string, (el: HTMLElement, ev: Event) => any> = {};
+const customResolvers: Record<string, (el: HTMLElement, ev: Event) => any> = {};
 
-  public static resolve(token: string, el: Element, event: Event): any {
-    const htmlEl = el as HTMLElement;
+export function resolve(token: string, el: Element, event: Event): any {
+  const htmlEl = el as HTMLElement;
 
-    return (
-      this.resolveExact(token, htmlEl, event) ??
-      this.resolvePrefixed(token, htmlEl) ??
-      this.resolveCustom(token, htmlEl, event) ??
-      this.resolveLiteral(token) ??
-      token
-    );
-  }
+  return (
+    resolveExact(token, htmlEl, event) ??
+    resolvePrefixed(token, htmlEl) ??
+    resolveCustom(token, htmlEl, event) ??
+    resolveLiteral(token) ??
+    token
+  );
+}
 
 /** Register a new exact token like "@foo" */
-  public static registerCustomToken(
-    name: string,
-    resolver: (el: HTMLElement, ev: Event) => any
-  ): void {
-    this.customResolvers[name] = resolver;
-  }
+export function registerCustomToken(
+  name: string,
+  resolver: (el: HTMLElement, ev: Event) => any
+): void {
+  customResolvers[name] = resolver;
+}
 
 /** Register a new prefixed token like "@style:" */
-  public static registerPrefixedToken(
-    prefix: string,
-    resolver: (suffix: string, el: HTMLElement) => any
-  ): void {
-    PREFIXED_TOKEN_RESOLVERS[prefix] = resolver;
-  }
+export function registerPrefixedToken(
+  prefix: string,
+  resolver: (suffix: string, el: HTMLElement) => any
+): void {
+  PREFIXED_TOKEN_RESOLVERS[prefix] = resolver;
+}
 
-  private static resolveExact(token: string, el: HTMLElement, ev: Event): any | null {
-    const resolver = EXACT_TOKEN_RESOLVERS[token];
-    return resolver ? resolver(el, ev) : null;
-  }
+function resolveExact(token: string, el: HTMLElement, ev: Event): any | null {
+  const resolver = EXACT_TOKEN_RESOLVERS[token];
+  return resolver ? resolver(el, ev) : null;
+}
 
-  private static resolvePrefixed(token: string, el: HTMLElement): any | null {
-    for (const [prefix, resolver] of Object.entries(PREFIXED_TOKEN_RESOLVERS)) {
-      if (token.startsWith(prefix)) {
-        return resolver(token.slice(prefix.length), el);
-      }
+function resolvePrefixed(token: string, el: HTMLElement): any | null {
+  for (const [prefix, resolver] of Object.entries(PREFIXED_TOKEN_RESOLVERS)) {
+    if (token.startsWith(prefix)) {
+      return resolver(token.slice(prefix.length), el);
     }
-    return null;
   }
+  return null;
+}
 
-  private static resolveCustom(token: string, el: HTMLElement, ev: Event): any | null {
-    const resolver = this.customResolvers[token];
-    return resolver ? resolver(el, ev) : null;
-  }
+function resolveCustom(token: string, el: HTMLElement, ev: Event): any | null {
+  const resolver = customResolvers[token];
+  return resolver ? resolver(el, ev) : null;
+}
 
-  private static resolveLiteral(token: string): any | null {
-    // string literal
-    if (
-      (token.startsWith('"') && token.endsWith('"')) ||
-      (token.startsWith("'") && token.endsWith("'"))
-    ) {
-      return token.slice(1, -1);
-    }
-    // number literal
-    if (!isNaN(Number(token))) {
-      return Number(token);
-    }
-    return null;
+function resolveLiteral(token: string): any | null {
+  // string literal
+  if (
+    (token.startsWith('"') && token.endsWith('"')) ||
+    (token.startsWith("'") && token.endsWith("'"))
+  ) {
+    return token.slice(1, -1);
   }
+  // number literal
+  if (!isNaN(Number(token))) {
+    return Number(token);
+  }
+  return null;
 }

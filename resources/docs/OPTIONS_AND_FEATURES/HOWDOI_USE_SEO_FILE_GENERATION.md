@@ -88,6 +88,12 @@ export default {
 | `mockFetch` | no | `{ [url]: jsonBody }` | Exact-URL-keyed map — any `fetch(url)` call made while SSR-rendering this route that matches a key resolves to `jsonBody` instead of hitting the network. For views that fetch data on mount. |
 | `disallow` | no | `true \| string[]` | `true` blocks this path for every bot in `robots.txt` (and leaves it out of `sitemap.xml`); an array of bot names blocks it only for those bots. Dynamic segments become `*` wildcards, and with i18n each language prefix is covered. A bot listed in `disallowBots` stays fully blocked. |
 
+## Prerendered HTML
+
+Each page is your view rendered at build time: the same markup, classes and styles as in the browser, so it's what visitors see before the app starts, and what crawlers and visitors without JavaScript get. Once the app starts, it renders the view again over it; nothing is reused.
+
+So Nutin's binding attributes (`data-event`, `data-i18n`, `data-component`, `data-catalog`, `data-bind`, `data-pipe`, `data-pipe-source`) are removed from the prerendered HTML: nothing would ever bind them. Your own `data-*` attributes are kept, and so is text that shows them (e.g. in a code sample).
+
 ## Guarded routes
 
 A route's guards run at build time before its page is prerendered, as they would for a first-time anonymous visitor: storage is empty and there's no session. If a guard blocks the route or redirects it (e.g. an auth guard sending logged-out visitors to `/`), no HTML is written for it, it's left out of `sitemap.xml`, and the build prints a warning. Private pages therefore never ship as public static files.

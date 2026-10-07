@@ -1,34 +1,31 @@
-import { HttpBuilder, path } from '#root/dist/src/core/services/http-client/helpers/http-builder.helper.js';
+import * as HttpBuilder from '#root/dist/src/core/services/http-client/helpers/http-builder.helper.js';
+import { path } from '#root/dist/src/core/services/http-client/helpers/http-builder.helper.js';
 
 describe('HttpBuilder', () => {
-  // Tests for buildRequestBody
-  it('buildRequestBody returns undefined for null input', () => {
-    const result = HttpBuilder.buildRequestBody(null);
-    expect(result).toBeUndefined();
+  // The request body, as buildRequestOptions() builds it
+  const bodyOf = (data) => HttpBuilder.buildRequestOptions('POST', data, {}, new Headers(), new AbortController().signal).body;
+
+  it('sends no body for null or undefined data', () => {
+    expect(bodyOf(null)).toBeUndefined();
+    expect(bodyOf(undefined)).toBeUndefined();
   });
 
-  it('buildRequestBody returns undefined for undefined input', () => {
-    const result = HttpBuilder.buildRequestBody(undefined);
-    expect(result).toBeUndefined();
-  });
-
-  it('buildRequestBody returns string for object input', () => {
+  it('JSON-encodes an object body', () => {
     const data = { name: 'Alice' };
-    const result = HttpBuilder.buildRequestBody(data);
-    expect(result).toBe(JSON.stringify(data));
+    expect(bodyOf(data)).toBe(JSON.stringify(data));
   });
 
-  it('buildRequestBody JSON-encodes primitives, falsy ones included', () => {
-    expect(HttpBuilder.buildRequestBody(42)).toBe('42');
-    expect(HttpBuilder.buildRequestBody('text')).toBe('"text"');
-    expect(HttpBuilder.buildRequestBody(0)).toBe('0');
-    expect(HttpBuilder.buildRequestBody(false)).toBe('false');
-    expect(HttpBuilder.buildRequestBody('')).toBe('""');
+  it('JSON-encodes primitives, falsy ones included', () => {
+    expect(bodyOf(42)).toBe('42');
+    expect(bodyOf('text')).toBe('"text"');
+    expect(bodyOf(0)).toBe('0');
+    expect(bodyOf(false)).toBe('false');
+    expect(bodyOf('')).toBe('""');
   });
 
-  it('buildRequestBody passes fetch body types through unchanged', () => {
+  it('passes fetch body types through unchanged', () => {
     const bodies = [new FormData(), new Blob(['x']), new URLSearchParams('a=1'), new ArrayBuffer(1), new Uint8Array(1), new ReadableStream()];
-    bodies.forEach((body) => expect(HttpBuilder.buildRequestBody(body)).toBe(body));
+    bodies.forEach((body) => expect(bodyOf(body)).toBe(body));
   });
 
   it('appendQueryParams skips null/undefined, stringifies values and repeats arrays', () => {

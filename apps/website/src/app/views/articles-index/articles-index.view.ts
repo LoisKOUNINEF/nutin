@@ -1,6 +1,6 @@
 import { View, html } from '../../../core/index.js';
-import { ReadMoreComponent } from '../../components/index.js';
-import { loadA11yFocusable } from '../../helpers/index.js';
+import { ReadMoreComponent } from '../../components/read-more/read-more.component.js';
+import { loadA11yCardLink } from '../../helpers/a11y-elements/load-a11y-elements.helper.js';
 
 const template = html`__TEMPLATE_PLACEHOLDER__`;
 
@@ -9,9 +9,9 @@ export class ArticlesIndexView extends View {
     super({ template, viewName: 'articles-index' });
   }
 
-  // Client-only (never during SSR): the read-more cards are <a11y-focusable>.
+  // Client-only (never during SSR): the read-more cards are <a11y-card-link>.
   public onEnter(): void {
-    loadA11yFocusable();
+    void loadA11yCardLink();
   }
 
   public registerChildren(): ComponentConfig[] {

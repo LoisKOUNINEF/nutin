@@ -44,7 +44,7 @@ export class JsonManager {
       scripts,
       devDependencies,
       "engines": {
-        "node": ">=22"
+        "node": ">=24"
       }
     };
   }

@@ -23,3 +23,21 @@ export function runCommand(command, args = [], options = {}) {
     });
   });
 }
+
+// Like runCommand(), but collects the child's stdout and stderr (interleaved, in arrival order)
+// instead of printing them, and resolves with its exit code rather than rejecting: for a caller
+// that rewrites the output, e.g. compile-ts mapping tsc errors back to source files.
+export function captureCommand(command, args = [], options = {}) {
+  return new Promise((resolve, reject) => {
+    const stdio = ['inherit', 'pipe', 'pipe'];
+    const child = isWindows
+      ? spawn([command, ...args].map(quoteForCmd).join(' '), { stdio, shell: true, ...options })
+      : spawn(command, args, { stdio, ...options });
+
+    let output = '';
+    child.stdout.on('data', (chunk) => { output += chunk; });
+    child.stderr.on('data', (chunk) => { output += chunk; });
+    child.on('error', (err) => reject(err));
+    child.on('close', (code) => resolve({ code, output }));
+  });
+}

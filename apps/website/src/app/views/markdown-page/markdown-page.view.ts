@@ -1,7 +1,8 @@
 import { html } from '../../../core/index.js';
 import { MarkdownView } from '../../markdown/view/markdown.view.js';
 import { DocsNavComponent } from '../../components/docs-nav/docs-nav.component.js';
-import { loadA11yDrawer, PrismHighlighter } from '../../helpers/index.js';
+import { loadA11yDrawer, loadA11yFloating } from '../../helpers/a11y-elements/load-a11y-elements.helper.js';
+import { PrismHighlighter } from '../../helpers/prism/prism-highlighter.js';
 
 // The site's layout around the Markdown feature's nav and content (see markdown-page.view.scss).
 const withNav = html`
@@ -30,9 +31,10 @@ export class MarkdownPageView extends MarkdownView {
     });
   }
 
-  // The nav drawer's CDN bundle is loaded here, client-side only: the prerendered HTML stays free of it.
+  // The nav drawer's and its floating toggle's chunks are loaded here, client-side only (never during SSR).
   public override onEnter(): void {
-    loadA11yDrawer();
+    void loadA11yDrawer();
+    void loadA11yFloating();
     super.onEnter();
   }
 }

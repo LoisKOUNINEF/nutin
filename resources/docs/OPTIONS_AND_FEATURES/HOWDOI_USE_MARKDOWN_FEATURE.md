@@ -88,11 +88,17 @@ export const appRoutes: Routes = {
 }
 ```
 
-To build the folders' views yourself, pass a `view` factory. It is called with each folder's id (its `routePrefix`, its name by default):
+The routes are [lazy](../API/VIEWS_AND_ROUTING/HOWDOI_REGISTER_A_ROUTE.md#lazy-routes): `MarkdownView` and its components are loaded the first time one of the folders' pages is visited, not with the rest of your app.
+
+To build the folders' views yourself, pass a `view` factory. It is called with each folder's id (its `routePrefix`, its name by default). Return the view's Promise, to keep the routes lazy:
 
 ```ts
-...markdownRoutes({ view: (id) => new MarkdownView({ id, onContentRendered: highlight }) }),
+...markdownRoutes({
+  view: (id) => import('./views/docs/docs.view.js').then((m) => new m.DocsView(id)),
+}),
 ```
+
+Returning the view itself (`(id) => new MarkdownView({ id, onContentRendered: highlight })`) works too, but puts `MarkdownView` back in the main bundle.
 
 A route written after the spread with the same path also replaces the generated one; keep its guard (`MarkdownGuards.pageExists(id)`, or `MarkdownGuards.sectionPageExists(id)` with `sectionInPath`).
 
@@ -200,6 +206,8 @@ Below 700px the nav stacks above the content, and below 900px the table of conte
 
 Without hub files, every `.md` file in the folder (subfolders included) is a page.
 
+Subfolders become groups in the navigation, named after the folder: `getting-started/` is listed as "Getting started" (an all-lowercase name gets a capital first letter, `-` and `_` become spaces, `API/` stays "API"). A leading number orders folders without showing up: `01-basics/`, `02-advanced/`. Folders deeper down belong to their first-level folder's group, and pages at the folder's root come first, ungrouped. A page's frontmatter `group` puts it in another group.
+
 Metadata is read from an optional YAML frontmatter, and falls back to the Markdown itself:
 
 ```md
@@ -208,7 +216,7 @@ title: My page        # defaults to the first "# Heading"
 description: Summary  # defaults to the first paragraph (or list item), as plain text
 slug: my-page         # defaults to the file name
 order: 2              # pages are sorted by order, then by path
-group: Guides         # groups pages under a heading in the navigation
+group: Guides         # groups pages under a heading in the navigation (default: the page's subfolder)
 ogImage: /og/page.jpg # social preview image of the page's SEO HTML
 ---
 

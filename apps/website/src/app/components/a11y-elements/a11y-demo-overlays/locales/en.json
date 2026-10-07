@@ -60,5 +60,16 @@
   "banner-open-error": "Error",
   "banner-info": "A new version of the documentation is available.",
   "banner-success": "Your profile was updated.",
-  "banner-error": "We couldn't reach the server. Retrying won't lose your changes."
+  "banner-error": "We couldn't reach the server. Retrying won't lose your changes.",
+  "floating-desc": "Content pinned to a corner of the viewport, visible by default (no open attribute): it is shown and hidden through hidden. With controls, its button opens another overlay and keeps aria-expanded in sync. Expandable, it opens a non-modal panel that Escape, an outside click or its launcher collapse, returning focus to the launcher. Several in the same corner stack instead of overlapping. These start hidden; leaving this page removes them.",
+  "floating-show-menu": "Show menu button",
+  "floating-show-bubble": "Show info bubble",
+  "floating-show-help": "Show help launcher",
+  "floating-menu": "Menu",
+  "floating-bubble-label": "What's new",
+  "floating-bubble-text": "Dark mode is here. Dismiss this bubble with its × button; it also slides away while you scroll down.",
+  "floating-help-label": "Help",
+  "floating-help-title": "Need help?",
+  "floating-help-body": "A non-modal panel: focus moved to its first control, and Escape or a click outside collapses it.",
+  "floating-help-close": "Got it"
 }

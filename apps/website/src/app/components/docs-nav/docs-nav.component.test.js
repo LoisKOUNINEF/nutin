@@ -20,11 +20,20 @@ function mount() {
   return component;
 }
 
-// What a11y-elements does on connect once its bundle is loaded.
+// What a11y-elements does on connect once its chunks are loaded.
 function portalDrawer() {
   const drawer = document.getElementById('markdown-nav-drawer');
   document.body.appendChild(drawer);
   return drawer;
+}
+
+function portalFloating() {
+  const stack = document.createElement('div');
+  stack.className = 'a11y-floating-stack';
+  document.body.appendChild(stack);
+  const floating = document.getElementById('markdown-nav-floating');
+  stack.appendChild(floating);
+  return { stack, floating };
 }
 
 describe('DocsNavComponent', () => {
@@ -52,12 +61,16 @@ describe('DocsNavComponent', () => {
     component.destroy();
   });
 
-  it('opens the drawer from the toggle button', () => {
+  it('renders the toggle as an <a11y-floating> controlling the drawer, with no handler of its own', () => {
     const component = mount();
-    const drawer = portalDrawer();
+    const floating = document.getElementById('markdown-nav-floating');
 
-    component.element.querySelector('.markdown-nav__drawer-toggle').click();
-    expect(drawer.hasAttribute('open')).toBe(true);
+    expect(floating.localName).toBe('a11y-floating');
+    expect(floating.getAttribute('controls')).toBe('markdown-nav-drawer');
+    expect(floating.getAttribute('position')).toBe('bottom-left');
+    const toggle = floating.querySelector('button.markdown-nav__drawer-toggle');
+    expect(toggle.hasAttribute('aria-label')).toBe(true);
+    expect(toggle.hasAttribute('data-event')).toBe(false);
     component.destroy();
   });
 
@@ -73,19 +86,27 @@ describe('DocsNavComponent', () => {
     component.destroy();
   });
 
-  it('removes the portaled drawer when destroyed', () => {
+  it('removes the portaled drawer and floating toggle when destroyed', () => {
     const component = mount();
     portalDrawer();
+    const { stack } = portalFloating();
     component.destroy();
     expect(document.getElementById('markdown-nav-drawer')).toBe(null);
+    expect(document.getElementById('markdown-nav-floating')).toBe(null);
+    stack.remove();
   });
 
-  it('keeps a single drawer across re-renders', () => {
+  it('keeps a single drawer and floating toggle across re-renders, removing the old ones before rendering', () => {
     const component = mount();
-    portalDrawer();
+    const oldDrawer = portalDrawer();
+    const { stack, floating: oldFloating } = portalFloating();
     component.render();
+    expect(oldDrawer.isConnected).toBe(false);
+    expect(oldFloating.isConnected).toBe(false);
     expect(document.querySelectorAll('#markdown-nav-drawer').length).toBe(1);
+    expect(document.querySelectorAll('#markdown-nav-floating').length).toBe(1);
     component.destroy();
+    stack.remove();
   });
 
   it('renders grouped sections and skips slugs missing from the manifest', () => {

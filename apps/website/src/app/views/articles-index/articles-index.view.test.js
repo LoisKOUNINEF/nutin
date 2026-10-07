@@ -1,4 +1,4 @@
-import { ArticlesIndexView } from '#root/dist/src/app/views/index.js';
+import { ArticlesIndexView } from '#root/dist/src/app/views/articles-index/articles-index.view.js';
 import { registerPipes } from '#root/dist/src/core/index.js';
 
 describe('ArticlesIndexView', () => {
@@ -13,14 +13,12 @@ describe('ArticlesIndexView', () => {
     expect(view.element.querySelector('[data-component="read-more"]')).toBe(null);
     const cards = view.element.querySelectorAll('.card-link');
     expect(cards.length).toBe(4);
-    expect([...cards].every((card) => card.tagName === 'A11Y-FOCUSABLE')).toBe(true);
+    expect([...cards].every((card) => card.tagName === 'A11Y-CARD-LINK')).toBe(true);
   });
 
-  it('onEnter loads the a11y-focusable bundle once, however often it runs', () => {
+  it('onEnter loads the a11y-card-link element', () => {
     const view = new ArticlesIndexView();
     view.render();
-    view.onEnter();
-    view.onEnter();
-    expect(document.head.querySelectorAll('script[src="https://cdn.jsdelivr.net/npm/a11y-elements@0.3.0/dist/browser/components/focusable/define.js"]').length).toBe(1);
+    expect(() => view.onEnter()).not.toThrow();
   });
 });

@@ -1,5 +1,5 @@
 import { Component, html } from '../../../core/index.js';
-import { PrismHighlighter } from '../../helpers/index.js';
+import { PrismHighlighter } from '../../helpers/prism/prism-highlighter.js';
 
 const templateFn = (_snippet: ISnippet) => html`__TEMPLATE_PLACEHOLDER__`;
 

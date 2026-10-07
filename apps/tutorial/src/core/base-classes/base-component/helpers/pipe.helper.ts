@@ -1,52 +1,50 @@
-import { AppPipeRegistry } from '../../../index.js';
-import { DomHelper } from './dom.helper.js';
+import { AppPipeRegistry } from '../../../services/pipe-registry/pipe-registry.js';
+import * as DomHelper from './dom.helper.js';
 
-export class PipeHelper {
-  public static parsePipeAttributes(element: HTMLElement): void {
-    element.querySelectorAll('[data-pipe]').forEach(el => {
-      // Nested components pipe their own content; piping it again here would
-      // apply every pipe twice.
-      if (DomHelper.isInsideNestedComponent(el, element)) return;
+export function parsePipeAttributes(element: HTMLElement): void {
+  element.querySelectorAll('[data-pipe]').forEach(el => {
+    // Nested components pipe their own content; piping it again here would
+    // apply every pipe twice.
+    if (DomHelper.isInsideNestedComponent(el, element)) return;
 
-      const pipeRaw = el.getAttribute('data-pipe');
-      if (!pipeRaw) return;
+    const pipeRaw = el.getAttribute('data-pipe');
+    if (!pipeRaw) return;
 
-      const pipes = pipeRaw.split('|').map(s => s.trim());
-      const sourceAttr = el.getAttribute('data-pipe-source');
+    const pipes = pipeRaw.split('|').map(s => s.trim());
+    const sourceAttr = el.getAttribute('data-pipe-source');
 
-      this.processPipes(el, pipes, sourceAttr);
-    });
+    processPipes(el, pipes, sourceAttr);
+  });
+}
+
+function processPipes(
+  el: Element, 
+  pipes: string[], 
+  sourceAttr: string | null
+): void {
+  let value: string;
+
+  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+    value = sourceAttr !== null ? sourceAttr : el.value;
+  } else {
+    value = sourceAttr !== null ? sourceAttr : el.textContent || '';
   }
 
-  private static processPipes(
-    el: Element, 
-    pipes: string[], 
-    sourceAttr: string | null
-  ): void {
-    let value: string;
+  for (const pipe of pipes) {
+    const [pipeName, ...argParts] = pipe.split(':');
 
-    if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
-      value = sourceAttr !== null ? sourceAttr : el.value;
-    } else {
-      value = sourceAttr !== null ? sourceAttr : el.textContent || '';
+    if (!pipeName) {
+      console.warn(`Empty pipe name in segment "${pipe}" - skipping.`);
+      continue;
     }
 
-    for (const pipe of pipes) {
-      const [pipeName, ...argParts] = pipe.split(':');
+    const args = argParts.length ? argParts.join(':').split(',') : [];
+    value = AppPipeRegistry.apply(pipeName.trim(), value, args.map(a => a.trim()));
+  }
 
-      if (!pipeName) {
-        console.warn(`Empty pipe name in segment "${pipe}" - skipping.`);
-        continue;
-      }
-
-      const args = argParts.length ? argParts.join(':').split(',') : [];
-      value = AppPipeRegistry.apply(pipeName.trim(), value, args.map(a => a.trim()));
-    }
-
-    if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
-      el.value = value;
-    } else {
-      el.textContent = value;
-    }
+  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+    el.value = value;
+  } else {
+    el.textContent = value;
   }
 }

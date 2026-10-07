@@ -1,4 +1,4 @@
-import { DomHelper } from '#root/dist/src/core/base-classes/base-component/helpers/dom.helper.js';
+import * as DomHelper from '#root/dist/src/core/base-classes/base-component/helpers/dom.helper.js';
 
 describe('DomHelper', () => {
   let container;

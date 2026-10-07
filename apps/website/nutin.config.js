@@ -15,10 +15,10 @@ export default {
         sectionInPath: true,
         prefixReplacements: [['HOWDOI_', ''], ['WHATARE_', 'what-are-'], ['WHATIS_', 'what-is-'], ['WHAT_', 'what-']],
       },
-      { folder: '../../resources/changelog', routePrefix: 'changelog', hubFiles: ['CHANGELOG.md'] },
+      { folder: '../../resources/changelog', routePrefix: 'changelog', hubFiles: ['CHANGELOG.md'], landing: { title: 'Changelog' } },
       { folder: '../../resources/tutorial', routePrefix: 'tutorial', hubFiles: ['TUTORIAL.md'] },
       { folder: '../../resources/articles', routePrefix: 'articles', hubFiles: ['ARTICLES.md'] },
-      { folder: '../../resources/guides', routePrefix: 'guides', hubFiles: ['GUIDES.md'] },
+      { folder: '../../resources/guides', routePrefix: 'guides', hubFiles: ['GUIDES.md'], landing: { title: 'Guides' } },
     ],
   },
   dockerPorts: [9090, 9091],     // Ports the Docker container exposes/listens on — edit as needed

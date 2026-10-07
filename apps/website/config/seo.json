@@ -26,7 +26,7 @@
       "outputPath": "/a11y-elements/elements",
       "mockParams": {"page": "elements"},
       "title": {"en": "a11y-elements: elements demo"},
-      "description": {"en": "Live demo of every a11y-elements accessibility component: form controls, links, images, and loading states."},
+      "description": {"en": "Live demo of every a11y-elements accessibility component: form controls, links, cards, images, and loading states."},
       "ogImage": "/assets/images/og-covers/og-cover-home.jpg"
     },
     {
@@ -34,7 +34,7 @@
       "outputPath": "/a11y-elements/overlays",
       "mockParams": {"page": "overlays"},
       "title": {"en": "a11y-elements: overlays demo"},
-      "description": {"en": "Live demo of every a11y-elements overlay: modals, drawers, menus, tooltips, and notifications."},
+      "description": {"en": "Live demo of every a11y-elements overlay: modals, drawers, menus, tooltips, notifications, and floating buttons."},
       "ogImage": "/assets/images/og-covers/og-cover-home.jpg"
     }
   ]

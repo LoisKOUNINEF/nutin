@@ -1,11 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { PATHS, isBundledSource } from '../app/paths.js';
+import { PATHS, isBundledSource, isChunk } from '../app/paths.js';
 import { getFilesRecursive, errorExit } from '../../../utils/index.js';
 
 function addHashToFiles(distDir) {
-  const files = getFilesRecursive(distDir, ['.js', '.css']).filter((file) => !isBundledSource(file));
+  const files = getFilesRecursive(distDir, ['.js', '.css']).filter((file) => !isBundledSource(file) && !isChunk(file));
 
   const fileMap = {}; // Track old → new filenames
 

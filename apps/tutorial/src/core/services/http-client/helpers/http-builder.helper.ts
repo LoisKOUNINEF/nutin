@@ -1,145 +1,143 @@
 const ALLOWED_PROTOCOLS = new Set(['http:', 'https:']);
 const ENCODED_SEPARATOR = /%2f|%5c/i;
 
-export class HttpBuilder {
-  public static buildRequestOptions(
-    method: HttpMethod,
-    data: unknown,
-    config: IRequestConfig,
-    headers: Headers,
-    signal: AbortSignal
-  ): RequestInit {
-    const body = this.buildRequestBody(data);
-    if (this.isJsonBody(data) && !headers.has('content-type')) {
-      headers.set('content-type', 'application/json');
-    }
-
-    const options: RequestInit = { method, headers, body, signal };
-    if (config.credentials) options.credentials = config.credentials;
-    if (config.cache) options.cache = config.cache;
-    if (config.referrerPolicy) options.referrerPolicy = config.referrerPolicy;
-    if (config.redirect) options.redirect = config.redirect;
-    return options;
+export function buildRequestOptions(
+  method: HttpMethod,
+  data: unknown,
+  config: IRequestConfig,
+  headers: Headers,
+  signal: AbortSignal
+): RequestInit {
+  const body = buildRequestBody(data);
+  if (isJsonBody(data) && !headers.has('content-type')) {
+    headers.set('content-type', 'application/json');
   }
 
-  // Merges header records case-insensitively: later records win ("content-type" overrides "Content-Type").
-  public static mergeHeaders(...records: Array<Record<string, string> | undefined>): Headers {
-    const headers = new Headers();
-    records.forEach((record) => {
-      if (record) new Headers(record).forEach((value, name) => headers.set(name, value));
-    });
-    return headers;
+  const options: RequestInit = { method, headers, body, signal };
+  if (config.credentials) options.credentials = config.credentials;
+  if (config.cache) options.cache = config.cache;
+  if (config.referrerPolicy) options.referrerPolicy = config.referrerPolicy;
+  if (config.redirect) options.redirect = config.redirect;
+  return options;
+}
+
+// Merges header records case-insensitively: later records win ("content-type" overrides "Content-Type").
+export function mergeHeaders(...records: Array<Record<string, string> | undefined>): Headers {
+  const headers = new Headers();
+  records.forEach((record) => {
+    if (record) new Headers(record).forEach((value, name) => headers.set(name, value));
+  });
+  return headers;
+}
+
+// Resolves an endpoint to the URL that will be fetched.
+// - With a base URL, the endpoint is joined onto it as a URL (never as a string), and the
+//   result must stay on the base origin and under the base path; the base's query is kept.
+// - Without one, a relative endpoint resolves against the page's origin (not document.baseURI).
+// Only http(s) is allowed, and an encoded "/" or "\" in the path is rejected (servers may decode
+// it into a separator) unless the URL is under one of `trustedAPIs`.
+export function resolveUrl(baseUrl: string, endpoint: string, trustedAPIs: string[] = []): URL {
+  const url = baseUrl ? resolveAgainstBase(baseUrl, endpoint) : new URL(endpoint, window.location.origin);
+
+  if (!ALLOWED_PROTOCOLS.has(url.protocol)) {
+    throw new Error(`Request URL must use http or https, got "${url.protocol}".`);
   }
-
-  // Resolves an endpoint to the URL that will be fetched.
-  // - With a base URL, the endpoint is joined onto it as a URL (never as a string), and the
-  //   result must stay on the base origin and under the base path; the base's query is kept.
-  // - Without one, a relative endpoint resolves against the page's origin (not document.baseURI).
-  // Only http(s) is allowed, and an encoded "/" or "\" in the path is rejected (servers may decode
-  // it into a separator) unless the URL is under one of `trustedAPIs`.
-  public static resolveUrl(baseUrl: string, endpoint: string, trustedAPIs: string[] = []): URL {
-    const url = baseUrl ? this.resolveAgainstBase(baseUrl, endpoint) : new URL(endpoint, window.location.origin);
-
-    if (!ALLOWED_PROTOCOLS.has(url.protocol)) {
-      throw new Error(`Request URL must use http or https, got "${url.protocol}".`);
-    }
-    if (ENCODED_SEPARATOR.test(url.pathname) && !this.isTrusted(url, trustedAPIs)) {
-      throw new Error(
-        `Request URL "${this.describe(url)}" contains an encoded "/" or "\\". ` +
-          'List its API in the HttpClient "trustedAPIs" option if it expects them.'
-      );
-    }
-    return url;
-  }
-
-  public static buildRequestUrl(endpoint: string, queryParams?: IRequestConfig['queryParams']): URL {
-    const url = new URL(endpoint);
-    this.appendQueryParams(url, queryParams);
-    return url;
-  }
-
-  public static appendQueryParams(url: URL, queryParams?: IRequestConfig['queryParams']): void {
-    if (!queryParams) return;
-    Object.entries(queryParams).forEach(([key, value]) => {
-      const values = Array.isArray(value) ? value : [value];
-      values.forEach((item) => {
-        if (item !== null && item !== undefined) url.searchParams.append(key, String(item));
-      });
-    });
-  }
-
-  // Origin + path only: query strings often carry keys or tokens.
-  public static describe(url: URL): string {
-    return `${url.origin}${url.pathname}`;
-  }
-
-  // A followed redirect must end where the request itself was allowed to go: under the base
-  // URL, or (without one) on the requested origin. Otherwise the response is another origin's,
-  // and custom headers (unlike Authorization) were forwarded to it.
-  public static assertRedirectTarget(baseUrl: string, requested: URL, finalUrl: string): void {
-    const final = new URL(finalUrl);
-    const allowed = baseUrl ? this.isUnderBase(final, baseUrl) : final.origin === requested.origin;
-    if (!allowed) {
-      throw new Error(
-        `Request to "${this.describe(requested)}" was redirected to "${this.describe(final)}", outside ` +
-          `${baseUrl ? `the HttpClient base URL "${this.describe(new URL(baseUrl))}"` : 'its origin'}.`
-      );
-    }
-  }
-
-  private static isUnderBase(url: URL, baseUrl: string): boolean {
-    const base = new URL(baseUrl);
-    const basePath = base.pathname.endsWith('/') ? base.pathname : `${base.pathname}/`;
-    const underBase = url.pathname.startsWith(basePath) || `${url.pathname}/` === basePath;
-    return url.origin === base.origin && underBase;
-  }
-
-  private static resolveAgainstBase(baseUrl: string, endpoint: string): URL {
-    const base = new URL(baseUrl);
-    const basePath = base.pathname.endsWith('/') ? base.pathname : `${base.pathname}/`;
-    const url = new URL(endpoint.replace(/^\/+/, ''), `${base.origin}${basePath}`);
-
-    if (!this.isUnderBase(url, baseUrl)) {
-      throw new Error(
-        `Request URL "${this.describe(url)}" is outside the HttpClient base URL "${this.describe(base)}".`
-      );
-    }
-
-    // Keep the base URL's own query (e.g. an API version), before the endpoint's.
-    if (base.search) {
-      const params = new URLSearchParams(base.search);
-      url.searchParams.forEach((value, key) => params.append(key, value));
-      url.search = params.toString();
-    }
-    return url;
-  }
-
-  // Same segment boundary as the base URL: a trusted ".../v1" doesn't cover ".../v10".
-  private static isTrusted(url: URL, trustedAPIs: string[]): boolean {
-    return trustedAPIs.some((entry) => this.isUnderBase(url, entry));
-  }
-
-  // Only null/undefined mean "no body"; fetch's own body types are sent as they are.
-  private static buildRequestBody(data: unknown): BodyInit | undefined {
-    if (data === null || data === undefined) return undefined;
-    if (this.isNativeBody(data)) return data as BodyInit;
-    return JSON.stringify(data);
-  }
-
-  private static isJsonBody(data: unknown): boolean {
-    return data !== null && data !== undefined && !this.isNativeBody(data);
-  }
-
-  private static isNativeBody(data: unknown): boolean {
-    return (
-      (typeof FormData !== 'undefined' && data instanceof FormData) ||
-      (typeof Blob !== 'undefined' && data instanceof Blob) ||
-      (typeof URLSearchParams !== 'undefined' && data instanceof URLSearchParams) ||
-      (typeof ReadableStream !== 'undefined' && data instanceof ReadableStream) ||
-      data instanceof ArrayBuffer ||
-      ArrayBuffer.isView(data)
+  if (ENCODED_SEPARATOR.test(url.pathname) && !isTrusted(url, trustedAPIs)) {
+    throw new Error(
+      `Request URL "${describe(url)}" contains an encoded "/" or "\\". ` +
+        'List its API in the HttpClient "trustedAPIs" option if it expects them.'
     );
   }
+  return url;
+}
+
+export function buildRequestUrl(endpoint: string, queryParams?: IRequestConfig['queryParams']): URL {
+  const url = new URL(endpoint);
+  appendQueryParams(url, queryParams);
+  return url;
+}
+
+export function appendQueryParams(url: URL, queryParams?: IRequestConfig['queryParams']): void {
+  if (!queryParams) return;
+  Object.entries(queryParams).forEach(([key, value]) => {
+    const values = Array.isArray(value) ? value : [value];
+    values.forEach((item) => {
+      if (item !== null && item !== undefined) url.searchParams.append(key, String(item));
+    });
+  });
+}
+
+// Origin + path only: query strings often carry keys or tokens.
+export function describe(url: URL): string {
+  return `${url.origin}${url.pathname}`;
+}
+
+// A followed redirect must end where the request itself was allowed to go: under the base
+// URL, or (without one) on the requested origin. Otherwise the response is another origin's,
+// and custom headers (unlike Authorization) were forwarded to it.
+export function assertRedirectTarget(baseUrl: string, requested: URL, finalUrl: string): void {
+  const final = new URL(finalUrl);
+  const allowed = baseUrl ? isUnderBase(final, baseUrl) : final.origin === requested.origin;
+  if (!allowed) {
+    throw new Error(
+      `Request to "${describe(requested)}" was redirected to "${describe(final)}", outside ` +
+        `${baseUrl ? `the HttpClient base URL "${describe(new URL(baseUrl))}"` : 'its origin'}.`
+    );
+  }
+}
+
+function isUnderBase(url: URL, baseUrl: string): boolean {
+  const base = new URL(baseUrl);
+  const basePath = base.pathname.endsWith('/') ? base.pathname : `${base.pathname}/`;
+  const underBase = url.pathname.startsWith(basePath) || `${url.pathname}/` === basePath;
+  return url.origin === base.origin && underBase;
+}
+
+function resolveAgainstBase(baseUrl: string, endpoint: string): URL {
+  const base = new URL(baseUrl);
+  const basePath = base.pathname.endsWith('/') ? base.pathname : `${base.pathname}/`;
+  const url = new URL(endpoint.replace(/^\/+/, ''), `${base.origin}${basePath}`);
+
+  if (!isUnderBase(url, baseUrl)) {
+    throw new Error(
+      `Request URL "${describe(url)}" is outside the HttpClient base URL "${describe(base)}".`
+    );
+  }
+
+  // Keep the base URL's own query (e.g. an API version), before the endpoint's.
+  if (base.search) {
+    const params = new URLSearchParams(base.search);
+    url.searchParams.forEach((value, key) => params.append(key, value));
+    url.search = params.toString();
+  }
+  return url;
+}
+
+// Same segment boundary as the base URL: a trusted ".../v1" doesn't cover ".../v10".
+function isTrusted(url: URL, trustedAPIs: string[]): boolean {
+  return trustedAPIs.some((entry) => isUnderBase(url, entry));
+}
+
+// Only null/undefined mean "no body"; fetch's own body types are sent as they are.
+function buildRequestBody(data: unknown): BodyInit | undefined {
+  if (data === null || data === undefined) return undefined;
+  if (isNativeBody(data)) return data as BodyInit;
+  return JSON.stringify(data);
+}
+
+function isJsonBody(data: unknown): boolean {
+  return data !== null && data !== undefined && !isNativeBody(data);
+}
+
+function isNativeBody(data: unknown): boolean {
+  return (
+    (typeof FormData !== 'undefined' && data instanceof FormData) ||
+    (typeof Blob !== 'undefined' && data instanceof Blob) ||
+    (typeof URLSearchParams !== 'undefined' && data instanceof URLSearchParams) ||
+    (typeof ReadableStream !== 'undefined' && data instanceof ReadableStream) ||
+    data instanceof ArrayBuffer ||
+    ArrayBuffer.isView(data)
+  );
 }
 
 // Builds an endpoint path from values: each value is URL-encoded, so it stays one path

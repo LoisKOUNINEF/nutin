@@ -17,11 +17,11 @@ describe('A11yElementsIndexComponent', () => {
   it('renders one link card per demo page', () => {
     const component = mount();
     const cards = Array.from(component.element.querySelectorAll('.home-extras .card.pillar-card.card-link'));
-    expect(cards.map((card) => card.getAttribute('data-event'))).toEqual([
-      'click:navigateTo:elements',
-      'click:navigateTo:overlays',
+    expect(cards.map((card) => card.querySelector('.card-title a').getAttribute('href'))).toEqual([
+      '/a11y-elements/elements',
+      '/a11y-elements/overlays',
     ]);
-    expect(cards.every((card) => card.tagName === 'A11Y-FOCUSABLE')).toBe(true);
+    expect(cards.every((card) => card.tagName === 'A11Y-CARD-LINK')).toBe(true);
     component.destroy();
   });
 
@@ -29,7 +29,7 @@ describe('A11yElementsIndexComponent', () => {
     const navigateSpy = spyOn(Navigation, 'navigateTo').andCallFake(() => {});
     const component = mount();
     try {
-      component.element.querySelectorAll('.card-link').forEach((card) => card.click());
+      component.element.querySelectorAll('.card-link .card-title a').forEach((link) => link.click());
     } finally {
       navigateSpy.restore();
     }

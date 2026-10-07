@@ -1,11 +1,17 @@
-import { View, Navigation, Service, I18nService, AppEventBus } from '../../index.js';
-import { RouteGuardsManager, type GuardResult } from './helpers/route-guard-manager.helper.js';
-import { ViewRenderManager } from './helpers/view-render-manager.helper.js';
-import { NavigationManager, HistoryMode } from './helpers/navigation-manager.helper.js';
+import type { View } from '../../base-classes/view/view.js';
+import { Service } from '../../base-classes/service/service.js';
+import { Navigation } from '../event-bus/navigation.facade.js';
+import { AppEventBus } from '../event-bus/event-bus.js';
+import { I18nService } from '../i18n/i18n.js';
+import * as RouteGuardsManager from './helpers/route-guard-manager.helper.js';
+import type { GuardResult } from './helpers/route-guard-manager.helper.js';
+import * as ViewRenderManager from './helpers/view-render-manager.helper.js';
+import * as NavigationManager from './helpers/navigation-manager.helper.js';
+import type { HistoryMode } from './helpers/navigation-manager.helper.js';
 import { CONFIG } from '../../config.js';
 
 // centralized export
-export { NavigationManager } from './helpers/navigation-manager.helper.js';
+export * as NavigationManager from './helpers/navigation-manager.helper.js';
 
 class Router extends Service<Router> {
   private _currentView: View | null = null;
@@ -17,6 +23,8 @@ class Router extends Service<Router> {
   // Bumped by every navigation: one whose guards resolve after a newer navigation started
   // is dropped instead of rendering over it.
   private _navId = 0;
+  // False until the first view is rendered: the first load leaves focus to the browser.
+  private _hasRendered = false;
 
   constructor(private routes: Routes) {
     super();
@@ -33,12 +41,13 @@ class Router extends Service<Router> {
     window.removeEventListener('popstate', this.onPopState);
   }
 
+  // Re-renders the current page, so focus isn't moved (see focusView()).
   public async reload(): Promise<void> {
-    await this.navigate(this.currentLocation(), false);
+    await this.navigateWithMode(this.currentLocation(), 'none', false);
   }
 
   public async navigate(path: string | '', pushState: boolean = true): Promise<void> {
-    await this.navigateWithMode(path, pushState ? 'push' : 'none');
+    await this.navigateWithMode(path, pushState ? 'push' : 'none', this._hasRendered);
   }
 
   public getCurrentParams(): Record<string, string> {
@@ -54,7 +63,7 @@ class Router extends Service<Router> {
     return NavigationManager.getCurrentPath() + window.location.search + window.location.hash;
   }
 
-  private async navigateWithMode(path: string, mode: HistoryMode): Promise<void> {
+  private async navigateWithMode(path: string, mode: HistoryMode, moveFocus: boolean): Promise<void> {
     const navId = ++this._navId;
     const isStale = () => navId !== this._navId;
     const [pathAndQuery = '', hash] = path.split('#');
@@ -67,7 +76,7 @@ class Router extends Service<Router> {
     const routeMatch = this.matchRoute(normalizedPath);
 
     if (!routeMatch) {
-      await this.handleNotFound(normalizedPath, currentPath, mode, isStale);
+      await this.handleNotFound(normalizedPath, currentPath, mode, isStale, moveFocus);
       return;
     }
 
@@ -76,10 +85,15 @@ class Router extends Service<Router> {
       routeMatch.route,
       routeMatch.params,
       currentPath,
-      mode
+      mode,
+      moveFocus
     );
 
     if (!guardResult || isStale()) return;
+
+    // Before the current view is torn down: it stays up while a lazy route's chunk loads.
+    const view = await this.resolveView(guardResult.viewConstructor!, NavigationManager.localizedUrl(normalizedPath, search, hash), isStale);
+    if (!view) return;
 
     this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
     this._currentParams = routeMatch.params;
@@ -90,13 +104,40 @@ class Router extends Service<Router> {
     // to already be this route's, not the previous view's, before onEnter() fires.
     NavigationManager.updateHistory(normalizedPath, currentPath, mode, hash, search);
 
-    this._currentView = ViewRenderManager.renderNewView(
-      guardResult.viewConstructor!,
-      routeMatch.params
-    );
+    this._currentView = ViewRenderManager.renderNewView(view, routeMatch.params);
 
     NavigationManager.updateDocumentTitle(this._currentView, routeMatch.pattern);
     NavigationManager.scrollToHash(hash);
+    this.afterRender(moveFocus);
+  }
+
+  // Runs a route's view factory. A sync one behaves as it always did (its errors propagate).
+  // A lazy one is awaited: if it fails to load, recoverFromFailedViewLoad() takes over; if a
+  // newer navigation started meanwhile, the view (already mounted, empty, by its
+  // constructor) is destroyed and dropped.
+  private async resolveView(factory: ViewFactory, url: string, isStale: () => boolean): Promise<View | null> {
+    if (isStale()) return null;
+    const result = factory();
+    if (!isPromise(result)) return result;
+
+    let view: View;
+    try {
+      view = await result;
+    } catch (error) {
+      if (!isStale()) NavigationManager.recoverFromFailedViewLoad(url, error);
+      return null;
+    }
+    if (isStale()) {
+      view.destroy();
+      return null;
+    }
+    return view;
+  }
+
+  // After updateDocumentTitle(): focusView() announces document.title when the view has no h1.
+  private afterRender(moveFocus: boolean): void {
+    if (moveFocus && this._currentView) NavigationManager.focusView(this._currentView);
+    this._hasRendered = true;
   }
 
   private initializeEventListeners(): void {
@@ -125,7 +166,7 @@ class Router extends Service<Router> {
         await I18nService.setCurrentLanguage(newLocale as Language);
       }
     }
-    this.navigate(this.currentLocation(), false);
+    this.navigateWithMode(this.currentLocation(), 'none', this._hasRendered);
   }
 
   /**
@@ -148,7 +189,8 @@ class Router extends Service<Router> {
     normalizedPath: string, 
     currentPath: string, 
     mode: HistoryMode,
-    isStale: () => boolean
+    isStale: () => boolean,
+    moveFocus: boolean
   ): Promise<void> {
     const notFoundRoute = this.routes['/404'];
 
@@ -157,15 +199,17 @@ class Router extends Service<Router> {
       return;
     }
 
-    const notFoundConstructor = RouteGuardsManager.getViewConstructor(notFoundRoute);
-    
-    if (isStale()) return;
+    const notFoundFactory = RouteGuardsManager.getViewConstructor(notFoundRoute);
+    const view = await this.resolveView(notFoundFactory, NavigationManager.localizedUrl(normalizedPath), isStale);
+    if (!view) return;
+
     this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
     this._currentParams = {};
-    this._currentView = ViewRenderManager.renderNewView(notFoundConstructor, {});
+    this._currentView = ViewRenderManager.renderNewView(view, {});
 
     NavigationManager.updateDocumentTitle(this._currentView, '/404');
     NavigationManager.updateHistory(normalizedPath, currentPath, mode);
+    this.afterRender(moveFocus);
   }
 
   private async handleGuards(
@@ -173,7 +217,8 @@ class Router extends Service<Router> {
     routeConfig: RouteConfig,
     params: Record<string, string>,
     currentPath: string,
-    mode: HistoryMode
+    mode: HistoryMode,
+    moveFocus: boolean
   ): Promise<GuardResult | false> {
     const guardResult = await RouteGuardsManager.processRouteGuards(
       routeConfig, 
@@ -187,7 +232,7 @@ class Router extends Service<Router> {
         // reload, first load) is replaced by the redirect target, so the address
         // bar matches what's rendered and Back doesn't land on the guarded URL again.
         const redirectMode = mode === 'push' && normalizedPath !== currentPath ? 'push' : 'replace';
-        await this.navigateWithMode(guardResult.redirectTo, redirectMode);
+        await this.navigateWithMode(guardResult.redirectTo, redirectMode, moveFocus);
       }
       // If no redirect, stay on current route (guard blocked navigation)
       return false;
@@ -195,6 +240,10 @@ class Router extends Service<Router> {
 
     return guardResult;
   }
+}
+
+function isPromise<T>(value: T | Promise<T>): value is Promise<T> {
+  return typeof (value as Promise<T> | null)?.then === 'function';
 }
 
 export const AppRouter = (routes: Routes) => Router.getInstance(routes);

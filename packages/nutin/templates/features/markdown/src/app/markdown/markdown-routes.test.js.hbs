@@ -4,13 +4,15 @@ import { MarkdownView } from '#root/dist/src/app/markdown/view/markdown.view.js'
 import { MarkdownManifestsService } from '#root/dist/src/app/markdown/markdown-manifests.service.js';
 
 describe('markdownRoutes', () => {
-  it('registers one guarded route per folder, with its section in the path when configured', () => {
+  it('registers one guarded route per folder, with its section in the path when configured, lazy by default', async () => {
     const routes = markdownRoutes();
     const expected = MarkdownManifestsService.all.map(({ id, sectionInPath }) => (sectionInPath ? `/${id}/:section?/:slug?` : `/${id}/:slug?`));
     expect(Object.keys(routes)).toEqual(expected);
     for (const route of Object.values(routes)) {
       expect(route.guards.length).toBe(1);
-      expect(route.view()).toBeInstanceOf(MarkdownView);
+      const view = route.view();
+      expect(typeof view.then).toBe('function');
+      expect(await view).toBeInstanceOf(MarkdownView);
     }
   });
 

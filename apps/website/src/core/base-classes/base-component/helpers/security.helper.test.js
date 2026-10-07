@@ -1,4 +1,4 @@
-import { SecurityHelper } from '#root/dist/src/core/base-classes/base-component/helpers/security.helper.js';
+import * as SecurityHelper from '#root/dist/src/core/base-classes/base-component/helpers/security.helper.js';
 
 describe('SecurityHelper', () => {
   it('sanitizeTemplate returns an empty string for null and undefined', () => {
@@ -178,6 +178,25 @@ describe('SecurityHelper', () => {
         'data-i18n="k" data-pipe="upper" data-pipe-source="s" data-id="7">x</button>'
     );
     expect(result).toBe('<button class="b" data-id="7">x</button>');
+  });
+
+  it('stripBindingsFrom strips an element in place, keeping class, style, other data-* and text', () => {
+    const root = document.createElement('section');
+    root.innerHTML = '<a href="/x" class="link" style="color: red" data-event="click:_go" data-i18n="nav.x" data-card-description>X</a>'
+      + '<div data-component="child" data-catalog="items" data-bind="name" data-pipe="upper" data-pipe-source="v"></div>'
+      + '<pre><code>&lt;div data-component="hello"&gt;&lt;/div&gt;</code></pre>'
+      + '<template><i data-event="click:_x">i</i></template>';
+
+    SecurityHelper.stripBindingsFrom(root);
+
+    const link = root.querySelector('a');
+    expect(link.getAttribute('class')).toBe('link');
+    expect(link.getAttribute('style')).toBe('color: red');
+    expect(link.hasAttribute('data-card-description')).toBe(true);
+    expect(link.hasAttribute('data-event') || link.hasAttribute('data-i18n')).toBe(false);
+    expect(root.querySelector('div').attributes.length).toBe(0);
+    expect(root.querySelector('code').textContent).toBe('<div data-component="hello"></div>');
+    expect(root.querySelector('template').innerHTML).toBe('<i>i</i>');
   });
 
   it('stripBindings also strips nested <template> content', () => {

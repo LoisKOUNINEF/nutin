@@ -265,6 +265,122 @@ describe('html', () => {
     expect(String(html`<b ${raw('a"b="1" ok="2"')}>t</b>`)).toBe('<b ok="2">t</b>');
   });
 
+  it('html replaces a javascript: URL from data in a URL attribute and warns', () => {
+    const warnSpy = spyOn(console, 'warn').andCallFake(() => {});
+    const bad = 'javascript:alert(1)';
+    const results = [
+      String(html`<a href="${bad}">x</a>`),
+      String(html`<a href='${bad}'>x</a>`),
+      String(html`<a href=${bad}>x</a>`),
+      String(html`<a href=" ${bad}">x</a>`),
+      String(html`<a HREF="${'java\tscript:x'}">x</a>`),
+      String(html`<a href="${'JavaScript:x'}">x</a>`),
+      String(html`<button formaction="${bad}">x</button>`),
+      String(html`<svg><a xlink:href="${bad}">x</a></svg>`),
+      String(html`<a href="${html`${bad}`}">x</a>`),
+      String(html`<a href="${raw(bad)}">x</a>`),
+      String(html`<a href="${'java'}${'script:x'}">x</a>`),
+    ];
+    warnSpy.restore();
+
+    expect(results).toEqual([
+      '<a href="about:invalid#nutin-blocked">x</a>',
+      "<a href='about:invalid#nutin-blocked'>x</a>",
+      '<a href="about:invalid#nutin-blocked">x</a>',
+      '<a href=" about:invalid#nutin-blocked">x</a>',
+      '<a HREF="about:invalid#nutin-blocked">x</a>',
+      '<a href="about:invalid#nutin-blocked">x</a>',
+      '<button formaction="about:invalid#nutin-blocked">x</button>',
+      '<svg><a xlink:href="about:invalid#nutin-blocked">x</a></svg>',
+      '<a href="about:invalid#nutin-blocked">x</a>',
+      '<a href="about:invalid#nutin-blocked">x</a>',
+      '<a href="javaabout:invalid#nutin-blocked">x</a>',
+    ]);
+    expect(warnSpy.callCount).toBe(11);
+  });
+
+  it('a javascript: URL from data is blocked at the trusted level too', () => {
+    const component = new TestComponent({
+      config: { url: 'javascript:alert(1)' },
+      templateFn: (cfg) => html`<a href="${cfg.url}">x</a>`,
+      trustLevel: 'trusted',
+    });
+
+    silenceConsole('warn', () => component.render());
+
+    expect(component.getElement().querySelector('a').getAttribute('href')).toBe('about:invalid#nutin-blocked');
+  });
+
+  it('html keeps URLs whose scheme is fixed by the template, other schemes and non-URL attributes', () => {
+    const warnSpy = spyOn(console, 'warn').andCallFake(() => {});
+    const results = [
+      String(html`<a href="/p/${'javascript:x'}">x</a>`),
+      String(html`<a href="#${'javascript:x'}">x</a>`),
+      String(html`<a href="${'https://example.com/a'}">x</a>`),
+      String(html`<a title="${'javascript:x'}" data-x=${'javascript:x'}>x</a>`),
+      String(html`<a href="javascript:go(${1})">x</a>`),
+      String(html`<a title="t"href="${'/ok'}">x</a>`),
+    ];
+    warnSpy.restore();
+
+    expect(results).toEqual([
+      '<a href="/p/javascript:x">x</a>',
+      '<a href="#javascript:x">x</a>',
+      '<a href="https://example.com/a">x</a>',
+      '<a title="javascript:x" data-x="javascript:x">x</a>',
+      '<a href="javascript:go(1)">x</a>',
+      '<a title="t"href="/ok">x</a>',
+    ]);
+    expect(warnSpy.callCount).toBe(0);
+  });
+
+  it('raw in a textarea or title is inserted as text, with entities decoded', () => {
+    app.innerHTML = String(html`<textarea>${raw('<b>Tom &amp; Jerry</b>')}</textarea>`);
+    expect(app.querySelector('textarea').value).toBe('<b>Tom & Jerry</b>');
+
+    const fragment = String(html`<TITLE>${raw('<i>t</i>')}</TITLE>`);
+    expect(fragment).toBe('<TITLE>&lt;i>t&lt;/i></TITLE>');
+  });
+
+  it('raw in a textarea cannot close it, in String() and at render', () => {
+    const payload = '</textarea><img src="x" onerror="x()">';
+    expect(String(html`<textarea>${raw(payload)}</textarea>`))
+      .toBe('<textarea>&lt;/textarea>&lt;img src="x" onerror="x()"></textarea>');
+
+    const component = new TestComponent({ templateFn: () => html`<div><textarea>${raw(payload)}</textarea></div>` });
+    component.render();
+
+    expect(component.getElement().querySelector('img')).toBe(null);
+    expect(component.getElement().querySelector('textarea').value).toBe(payload);
+  });
+
+  it('nested html and trustedRaw in a textarea are kept as they are, raws inside nested html become text', () => {
+    expect(String(html`<title>${html`${'Tom & Jerry'} - Site`}</title>`)).toBe('<title>Tom &amp; Jerry - Site</title>');
+    expect(String(html`<textarea>${trustedRaw('a &amp; b')}</textarea>`)).toBe('<textarea>a &amp; b</textarea>');
+    expect(String(html`<textarea>${[html`<b>${raw('<i>$&</i>')}</b>`, 'x', null]}</textarea>`))
+      .toBe('<textarea><b>&lt;i>$&&lt;/i></b>x</textarea>');
+  });
+
+  it('html tracks the end of a textarea: tag position on it and raw after it work as usual', () => {
+    const result = html`<textarea ${raw('rows="3" onclick="x()"')}>a</textarea >${raw('<b>b</b>')}`;
+
+    expect(/^<textarea rows="3">a<\/textarea ><template data-nutin-raw="r\d+"><\/template>$/.test(result.value)).toBe(true);
+    expect(result.raws.size).toBe(1);
+  });
+
+  it('a raw after a textarea is resolved as nodes at render', () => {
+    const component = new TestComponent({
+      templateFn: () => html`<div><textarea>a < b</textarea>${raw('<b>bold</b>')}</div>`,
+    });
+    component.render();
+
+    expect(component.getElement().innerHTML).toBe('<div><textarea>a &lt; b</textarea><b>bold</b></div>');
+  });
+
+  it('String() of a raw containing $ patterns keeps them literally', () => {
+    expect(String(html`<p>${raw('cost: $& $1')}</p>`)).toBe('<p>cost: $&amp; $1</p>');
+  });
+
   it('a component templateFn using html renders injected markup as text', () => {
     const payload = '<button class="evil" data-event="click:_remove">x</button>';
     const component = new TestComponent({

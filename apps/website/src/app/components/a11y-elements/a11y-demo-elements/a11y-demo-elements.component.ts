@@ -9,6 +9,7 @@ const templateFn = () => html`__TEMPLATE_PLACEHOLDER__`;
 
 export class A11yDemoElementsComponent extends Component {
   private focusableClicks = 0;
+  private cardLinkButtonClicks = 0;
 
   constructor(mountTarget: HTMLElement) {
     super({templateFn, mountTarget});
@@ -16,7 +17,7 @@ export class A11yDemoElementsComponent extends Component {
 
   protected override onAfterRender(): void {
     // A plain property, not an attribute: since 0.2.0, properties set before
-    // the CDN bundle upgrades the element are kept, so load order doesn't matter here.
+    // the element is upgraded are kept, so load order doesn't matter here.
     const username = this.element.querySelector('#a11y-demo-username') as (HTMLElement & { validators?: unknown }) | null;
     if (username) username.validators = [(value: string) => (/\s/.test(value) ? translate('input-username-no-spaces') : null)];
     super.onAfterRender();
@@ -46,5 +47,11 @@ export class A11yDemoElementsComponent extends Component {
   private countFocusable(): void {
     const output = this.element.querySelector('#a11y-demo-focusable-count');
     if (output) output.textContent = String(++this.focusableClicks);
+  }
+
+  // A control inside an <a11y-card-link> keeps its own click: the card doesn't forward it to the link.
+  private countCardLinkButton(): void {
+    const output = this.element.querySelector('#a11y-demo-card-link-count');
+    if (output) output.textContent = String(++this.cardLinkButtonClicks);
   }
 }

@@ -1,4 +1,4 @@
-import { ThemeTogglerService } from '../../../services/index.js';
+import { ThemeTogglerService } from '../../../services/togglers/theme-toggler/theme-toggler.service.js';
 import { Component, Navigation, html } from '../../../../core/index.js';
 
 const templateFn = () => html`__TEMPLATE_PLACEHOLDER__`;

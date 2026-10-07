@@ -1,5 +1,5 @@
 import { SnippetComponent } from '#root/dist/src/app/components/snippet/snippet.component.js';
-import { PrismHighlighter } from '#root/dist/src/app/helpers/index.js';
+import { PrismHighlighter } from '#root/dist/src/app/helpers/prism/prism-highlighter.js';
 
 function mount(config) {
   const target = document.createElement('div');

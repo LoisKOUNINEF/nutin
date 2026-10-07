@@ -1,4 +1,4 @@
-import { PreservationHelper } from '#root/dist/src/core/base-classes/base-component/helpers/preservation.helper.js';
+import * as PreservationHelper from '#root/dist/src/core/base-classes/base-component/helpers/preservation.helper.js';
 
 describe('PreservationHelper', () => {
   let container;

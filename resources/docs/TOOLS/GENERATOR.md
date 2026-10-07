@@ -26,6 +26,8 @@ Generator-produced components and views intentionally include the `__TEMPLATE_PL
 
 A template can also be written directly inline (remove the `.html` file and the `__TEMPLATE_PLACEHOLDER__` token). Defining both an inline template and an external `.html` file, or neither, fails the build.
 
+In TypeScript projects, templates are type-checked either way: the build merges `.html` templates before running `tsc`, and reports an error in one at its `.html` file and line (e.g. `src/app/components/task/task.component.html(3,13): error TS2339: Property 'nmae' does not exist on type 'ITask'.`). Editors don't see the markup in the `.ts` file, so these errors only show up in the build.
+
 - Stylesheet: `<name>.<type>.scss`
 - *when `i18n` is on*: Locale files: `locales/*.json` - from `config/languages.json`'s `LANGUAGES`. For a view, each file is seeded with a top-level `title` key (used as a `document.title` fallback — see [How do I create a view?](../API/VIEWS_AND_ROUTING/HOWDOI_CREATE_A_VIEW.md)); component locale files don't get one.
 - *when `testinNutin.includeApp` is on*: Test files: `<name>.<type>.test.js`

@@ -3,7 +3,7 @@ import os from 'os';
 import path from 'path';
 import { Marked } from 'marked';
 import matter from 'gray-matter';
-import { compileLanguages, compileSource, firstProse, headingId, normalizeSource, slugFromFilename, stripInlineMarkdown } from './markdown-compiler.js';
+import { compileLanguages, compileSource, firstProse, folderTitle, headingId, normalizeSource, slugFromFilename, stripInlineMarkdown } from './markdown-compiler.js';
 
 let root;
 
@@ -100,12 +100,43 @@ describe('markdown-compiler', () => {
 
     expect(section.id).toBe('index');
     expect(section.groups).toEqual([
-      { id: null, title: null, pages: ['a', 'c'] },
+      { id: null, title: null, pages: ['a'] },
       { id: 'guides', title: 'Guides', pages: ['b'] },
+      { id: 'nested', title: 'Nested', pages: ['c'] },
     ]);
     expect(manifest.pages.a.title).toBe('First page');
     expect(manifest.pages.a.description).toBe('First page.');
     expect(manifest.pages.c.source).toBe('content/nested/c.md');
+  });
+
+  it('groups a frontmatter-only folder\'s pages by first-level subfolder, root pages first', () => {
+    write('content/intro.md', '# Intro\n\nWelcome.\n');
+    write('content/01-getting-started/install.md', '# Install\n\nRun it.\n');
+    write('content/01-getting-started/configure.md', '# Configure\n\nSet it up.\n');
+    write('content/02_advanced/routing.md', '# Routing\n\nRoutes.\n');
+    write('content/02_advanced/deep/guards.md', '# Guards\n\nGuards.\n');
+    write('content/02_advanced/faq.md', '---\ngroup: Help\n---\n# FAQ\n\nQuestions.\n');
+    write('content/API/reference.md', '# Reference\n\nAll of it.\n');
+    write('content/misc.md', '---\ngroup: API\n---\n# Misc\n\nOther.\n');
+
+    const [section] = compile('content').manifest.sections;
+
+    expect(section.groups).toEqual([
+      { id: null, title: null, pages: ['intro'] },
+      { id: 'getting-started', title: 'Getting started', pages: ['configure', 'install'] },
+      { id: 'advanced', title: 'Advanced', pages: ['guards', 'routing'] },
+      { id: 'help', title: 'Help', pages: ['faq'] },
+      { id: 'api', title: 'API', pages: ['reference', 'misc'] },
+    ]);
+  });
+
+  it('makes a folder name a readable group title', () => {
+    expect(folderTitle('getting-started')).toBe('Getting started');
+    expect(folderTitle('02_advanced_topics')).toBe('Advanced topics');
+    expect(folderTitle('3. reference')).toBe('Reference');
+    expect(folderTitle('API')).toBe('API');
+    expect(folderTitle('HowTo')).toBe('HowTo');
+    expect(folderTitle('2024')).toBe('2024');
   });
 
   it('compiles hub files into sections, honoring their order and link titles', () => {
@@ -330,6 +361,16 @@ describe('markdown-compiler', () => {
 
     expect(Object.keys(manifests)).toEqual(['']);
     expect(manifests[''].pages.a.title).toBe('A');
+  });
+
+  it('groups a localized frontmatter-only folder by subfolder within each language, ids shared across languages', () => {
+    write('content/en/start/a.md', '# A\n\nText.\n');
+    write('content/fr/start/a.md', '---\ngroup: Débuter\n---\n# A fr\n\nTexte.\n');
+
+    const { manifests } = compileAll('content');
+
+    expect(manifests.en.sections[0].groups).toEqual([{ id: 'start', title: 'Start', pages: ['a'] }]);
+    expect(manifests.fr.sections[0].groups).toEqual([{ id: 'start', title: 'Débuter', pages: ['a'] }]);
   });
 
   it('translates hub section and group titles', () => {

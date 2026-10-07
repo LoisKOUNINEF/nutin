@@ -115,10 +115,17 @@ declare type CatalogItemConfig<T = any> =
 declare type RouteGuard = (params: Record<string, string>) => boolean | string | Promise<boolean | string>;
 
 /**
- * Route configuration - can be just a view constructor or an object with guards
+ * Creates a route's view. Returning a Promise makes the route lazy: e.g.
+ * `() => import('./views/about/about.view.js').then((m) => new m.AboutView())`
+ * puts the view's code in its own chunk, loaded on the first visit.
  */
-declare type RouteConfig = (() => import('./index.js').View) | {
-  view: () => import('./index.js').View;
+declare type ViewFactory = () => import('./index.js').View | Promise<import('./index.js').View>;
+
+/**
+ * Route configuration - can be just a view factory or an object with guards
+ */
+declare type RouteConfig = ViewFactory | {
+  view: ViewFactory;
   guards?: RouteGuard[];
 };
 

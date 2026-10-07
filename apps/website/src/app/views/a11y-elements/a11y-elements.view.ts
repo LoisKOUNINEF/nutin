@@ -1,10 +1,8 @@
 import { View, NavigationManager, html } from '../../../core/index.js';
-import {
-  A11yDemoElementsComponent,
-  A11yDemoOverlaysComponent,
-  A11yElementsIndexComponent,
-} from '../../components/index.js';
-import { loadA11yElements } from '../../helpers/index.js';
+import { A11yDemoElementsComponent } from '../../components/a11y-elements/a11y-demo-elements/a11y-demo-elements.component.js';
+import { A11yDemoOverlaysComponent } from '../../components/a11y-elements/a11y-demo-overlays/a11y-demo-overlays.component.js';
+import { A11yElementsIndexComponent } from '../../components/a11y-elements/a11y-elements-index/a11y-elements-index.component.js';
+import { loadA11yElements } from '../../helpers/a11y-elements/load-a11y-elements.helper.js';
 
 const template = html`__TEMPLATE_PLACEHOLDER__`;
 
@@ -20,10 +18,10 @@ export class A11yElementsView extends View {
     return page === 'elements' || page === 'overlays' ? page : 'index';
   }
 
-  // Never invoked during SSR, so the pre-rendered HTML stays free of the
-  // CDN bundles; an unknown page is canonicalized to the index it renders.
+  // Never invoked during SSR, so the elements are only defined client-side;
+  // an unknown page is canonicalized to the index it renders.
   public onEnter(): void {
-    loadA11yElements();
+    void loadA11yElements();
     if (this.hasRouteParam('page') && this.page === 'index') {
       NavigationManager.replaceState('/a11y-elements');
     }

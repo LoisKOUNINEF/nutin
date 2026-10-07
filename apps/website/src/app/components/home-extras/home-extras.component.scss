@@ -109,7 +109,21 @@
       scale: 1.1;
     }
   }
-  &:focus-visible {
-    outline: 2px solid var(--primary);
+}
+
+// Navigating cards are <a11y-card-link>: the title holds the real link, styled as
+// plain title text. While it has keyboard focus, a11y-elements outlines the whole
+// card (:has(), colored by --a11y-card-link-focus-outline-color), so the link drops
+// its own ring wherever :has() is supported.
+a11y-card-link {
+  --a11y-card-link-focus-outline-color: var(--primary);
+  .card-title a {
+    color: inherit;
+    text-decoration: none;
+  }
+  @supports selector(:has(*)) {
+    a:focus-visible {
+      outline: none;
+    }
   }
 }

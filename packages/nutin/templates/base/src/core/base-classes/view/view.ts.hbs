@@ -1,4 +1,4 @@
-import { BaseComponent } from '../../index.js';
+import { BaseComponent } from '../base-component/base-component.js';
 
 export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComponent<T> {
   private _viewName: string;

@@ -7,7 +7,8 @@ export class A11yElementsIndexComponent extends Component {
     super({templateFn, mountTarget});
   }
 
-  private navigateTo(page: string) {
-    Navigation.navigateTo(`/a11y-elements/${page}`);
+  // Bound to each card's title link; <a11y-card-link> forwards clicks elsewhere on the card to it.
+  private navigateTo(href: string) {
+    Navigation.navigateTo(href);
   }
 }

@@ -1,6 +1,6 @@
-import { Service } from "../../index.js";
-import { HttpBuilder } from "./helpers/http-builder.helper.js";
-import { HttpManager } from "./helpers/http-manager.helper.js";
+import { Service } from "../../base-classes/service/service.js";
+import * as HttpBuilder from "./helpers/http-builder.helper.js";
+import * as HttpManager from "./helpers/http-manager.helper.js";
 
 export { path } from "./helpers/http-builder.helper.js";
 export { HttpError } from "./helpers/http-manager.helper.js";

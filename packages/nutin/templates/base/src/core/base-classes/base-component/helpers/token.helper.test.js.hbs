@@ -1,4 +1,4 @@
-import { TokenHelper } from '#root/dist/src/core/base-classes/base-component/helpers/token.helper.js';
+import * as TokenHelper from '#root/dist/src/core/base-classes/base-component/helpers/token.helper.js';
 
 describe('TokenHelper', () => {
   const makeEvent = (overrides = {}) => ({

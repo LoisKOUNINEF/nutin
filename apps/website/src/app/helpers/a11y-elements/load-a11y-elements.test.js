@@ -1,45 +1,27 @@
-import { loadA11yDrawer, loadA11yDropdown, loadA11yElements } from '#root/dist/src/app/helpers/a11y-elements/load-a11y-elements.helper.js';
-
-const DIST = 'https://cdn.jsdelivr.net/npm/a11y-elements@0.3.0/dist';
-
-const stylesheets = () => [...document.head.querySelectorAll('link[rel="stylesheet"]')].map((link) => link.getAttribute('href'));
-const scripts = () => [...document.head.querySelectorAll('script[type="module"]')].map((script) => script.getAttribute('src'));
+import { loadA11yCardLink, loadA11yDrawer, loadA11yDropdown, loadA11yElements, loadA11yFloating } from '#root/dist/src/app/helpers/a11y-elements/load-a11y-elements.helper.js';
 
 describe('loadA11yElements', () => {
   beforeAll(() => {
     setupJsdom();
   });
 
-  beforeEach(() => {
-    document.head.innerHTML = '';
+  it('loadA11yElements resolves to the entry registering every element', async () => {
+    const all = await loadA11yElements();
+    expect(typeof all.SwitchElement).toBe('function');
+    expect(typeof all.ModalElement).toBe('function');
+    expect(typeof all.FloatingElement).toBe('function');
+    expect(typeof all.CardLinkElement).toBe('function');
   });
 
-  it('loadA11yElements injects the stylesheet and every component and overlay bundle', () => {
-    loadA11yElements();
-    expect(stylesheets()).toEqual([`${DIST}/a11y.css`]);
-    expect(scripts().length).toBe(27);
-    expect(scripts()).toContain(`${DIST}/browser/components/switch/define.js`);
-    expect(scripts()).toContain(`${DIST}/browser/overlays/modal/define.js`);
+  it('loadA11yDropdown, loadA11yDrawer, loadA11yFloating and loadA11yCardLink each resolve to their own element', async () => {
+    expect(typeof (await loadA11yDropdown()).DropdownElement).toBe('function');
+    expect(typeof (await loadA11yDrawer()).DrawerElement).toBe('function');
+    expect(typeof (await loadA11yFloating()).FloatingElement).toBe('function');
+    expect(typeof (await loadA11yCardLink()).CardLinkElement).toBe('function');
   });
 
-  it('loadA11yDropdown only injects the stylesheet and the dropdown bundle', () => {
-    loadA11yDropdown();
-    expect(stylesheets()).toEqual([`${DIST}/a11y.css`]);
-    expect(scripts()).toEqual([`${DIST}/browser/overlays/dropdown/define.js`]);
-  });
-
-  it('loadA11yDrawer only injects the stylesheet and the drawer bundle', () => {
-    loadA11yDrawer();
-    expect(stylesheets()).toEqual([`${DIST}/a11y.css`]);
-    expect(scripts()).toEqual([`${DIST}/browser/overlays/drawer/define.js`]);
-  });
-
-  it('never injects the same tag twice', () => {
-    loadA11yDropdown();
-    loadA11yDrawer();
-    loadA11yElements();
-    loadA11yElements();
-    expect(stylesheets().length).toBe(1);
-    expect(scripts().length).toBe(27);
+  it('loads each module once, however many times it is called', async () => {
+    expect(await loadA11yDropdown()).toBe(await loadA11yDropdown());
+    expect(await loadA11yElements()).toBe(await loadA11yElements());
   });
 });

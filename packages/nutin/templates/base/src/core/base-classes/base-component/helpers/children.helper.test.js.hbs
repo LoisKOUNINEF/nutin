@@ -1,4 +1,4 @@
-import { ChildrenHelper } from '#root/dist/src/core/base-classes/base-component/helpers/children.helper.js';
+import * as ChildrenHelper from '#root/dist/src/core/base-classes/base-component/helpers/children.helper.js';
 import { BaseComponent } from '#root/dist/src/core/index.js';
 
 class Widget extends BaseComponent {

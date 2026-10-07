@@ -23,7 +23,8 @@
     max-height: calc(100vh - 3rem);
 
     // The sidebar moves into the drawer below: this container only keeps the
-    // (fixed) drawer toggle, so it must stay rendered but take no space.
+    // drawer and its floating toggle (until they portal to <body>), so it must
+    // stay rendered but take no space.
     @include mixins.respond-to(large) {
         position: static;
         width: auto;
@@ -40,12 +41,24 @@
     }
 }
 
-.markdown-nav__drawer-toggle {
+// The drawer's toggle: an <a11y-floating> pinned bottom-left (it positions itself
+// through its body-level stack), shown below the `large` breakpoint only.
+#markdown-nav-floating {
     display: none;
-    position: fixed;
-    left: map.get($spacings, 'large');
-    bottom: map.get($spacings, 'large');
-    z-index: 10;
+    @include mixins.respond-to(large) {
+        display: flex;
+    }
+}
+
+// The offset is read by the stack, not by the element it holds.
+.a11y-floating-stack:has(> #markdown-nav-floating) {
+    --a11y-floating-offset: #{map.get($spacings, 'large')};
+}
+
+.markdown-nav__drawer-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 3rem;
     height: 3rem;
     border: 2px solid var(--primary);
@@ -62,11 +75,6 @@
         outline: 2px solid var(--primary);
         outline-offset: 2px;
     }
-    @include mixins.respond-to(large) {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
     @media (hover: none) {
         &:hover {
             background-color: var(--surface);
@@ -75,8 +83,9 @@
     }
 }
 
-// Hidden until its CDN bundle defines it, so the SSR'd copy never flashes inline.
-a11y-drawer:not(:defined) {
+// Hidden until their chunks define them, so the SSR'd copies never flash inline.
+a11y-drawer:not(:defined),
+a11y-floating:not(:defined) {
     display: none;
 }
 

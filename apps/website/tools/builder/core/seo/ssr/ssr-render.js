@@ -45,7 +45,7 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
   try {
     const bundle = await import(`${bundleUrl}?ssr=${renderIndex++}`);
     ({ Service } = bundle);
-    const { appRoutes, I18nService, RouteGuardsManager, registerPipes, NavbarComponent, FooterComponent } = bundle;
+    const { appRoutes, I18nService, RouteGuardsManager, SecurityHelper, registerPipes, NavbarComponent, FooterComponent } = bundle;
 
     const routeConfig = appRoutes[appRoutesKey];
     if (!routeConfig) {
@@ -68,7 +68,8 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
       return { blocked: true, redirectTo: guardResult.redirectTo };
     }
 
-    const view = guardResult.viewConstructor();
+    // A lazy route's factory returns a Promise (its import() is inlined in this bundle).
+    const view = await guardResult.viewConstructor();
     constructorName = view.constructor.name;
 
     if (mockParams) view.setRouteParams(mockParams);
@@ -85,6 +86,10 @@ export async function renderRoute({ bundleUrl, appRoutesKey, mockParams, mockFet
     navbarElement.id = 'navbar';
     const footerElement = new FooterComponent('body').render();
     footerElement.id = 'footer';
+
+    // Nothing binds a prerendered page (the app re-renders it on load): Nutin's binding
+    // attributes (data-event, data-i18n, ...) are dropped, on the DOM so text is untouched.
+    [element, navbarElement, footerElement].forEach((el) => SecurityHelper.stripBindingsFrom(el));
 
     return { html: element.outerHTML, navbar: navbarElement.outerHTML, footer: footerElement.outerHTML };
   } catch (err) {

@@ -1,5 +1,5 @@
-import { EventHelper } from '#root/dist/src/core/base-classes/base-component/helpers/event.helper.js';
-import { DomHelper } from '#root/dist/src/core/base-classes/base-component/helpers/dom.helper.js';
+import * as EventHelper from '#root/dist/src/core/base-classes/base-component/helpers/event.helper.js';
+import * as DomHelper from '#root/dist/src/core/base-classes/base-component/helpers/dom.helper.js';
 
 describe('EventHelper', () => {
   let container;

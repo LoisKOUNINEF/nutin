@@ -1,12 +1,20 @@
 import fs from 'fs';
 import path from 'path';
+import { createRequire } from 'module';
 import { print } from './print.js';
 import { errorExit } from './error-exit.js';
 import { runCommand } from './run-command.js';
 import { promptBoolean } from './prompt-boolean.js';
 
+// Monorepo: resolved the way Node does, so packages hoisted to the monorepo's root
+// node_modules (npm workspaces) count as installed.
 export function isInstalled(depName) {
-  return fs.existsSync(path.join(process.cwd(), 'node_modules', depName, 'package.json'));
+  try {
+    createRequire(path.join(process.cwd(), 'package.json')).resolve(`${depName}/package.json`);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function detectPackageManager() {

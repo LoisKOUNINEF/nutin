@@ -1,5 +1,5 @@
 import { Component, html } from '../../../core/index.js';
-import { taskService } from '../../services/index.js';
+import { taskService } from '../../services/task/task.service.js';
 
 const templateFn = () => html`__TEMPLATE_PLACEHOLDER__`;
 

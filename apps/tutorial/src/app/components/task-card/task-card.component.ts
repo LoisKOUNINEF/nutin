@@ -1,6 +1,6 @@
 import { Component, Navigation, html } from '../../../core/index.js';
-import { TaskActionComponent } from '../index.js';
-import { taskService } from '../../services/index.js';
+import { TaskActionComponent } from '../task-action/task-action.component.js';
+import { taskService } from '../../services/task/task.service.js';
 
 const templateFn = (_task: ITask) => html`__TEMPLATE_PLACEHOLDER__`;
 

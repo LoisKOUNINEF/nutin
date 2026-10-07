@@ -1,5 +1,5 @@
 import { FooterComponent } from '#root/dist/src/app/components/globals/footer/footer.component.js';
-import { ThemeTogglerService } from '#root/dist/src/app/services/index.js';
+import { ThemeTogglerService } from '#root/dist/src/app/services/togglers/theme-toggler/theme-toggler.service.js';
 import { Navigation } from '#root/dist/src/core/index.js';
 
 function mount() {

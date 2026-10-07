@@ -15,18 +15,19 @@ describe('HomeExtrasComponent', () => {
     component.destroy();
   });
 
-  it('routes each card through the SPA router', () => {
+  it('routes each card link through the SPA router', () => {
     const navigateSpy = spyOn(Navigation, 'navigateTo').andCallFake(() => {});
     const target = document.createElement('div');
     document.body.appendChild(target);
     const component = new HomeExtrasComponent(target);
     component.render();
+    const links = [...component.element.querySelectorAll('a11y-card-link .card-title a[href]')];
     try {
-      component.element.querySelector('[data-event="click:navigateTo:tutorial"]').click();
+      links.forEach((link) => link.click());
     } finally {
       navigateSpy.restore();
     }
-    expect(navigateSpy.lastCall[0]).toBe('/tutorial');
+    expect(navigateSpy.calls).toEqual([['/tutorial'], ['/docs'], ['/articles/why-nutin']]);
     component.destroy();
   });
 });

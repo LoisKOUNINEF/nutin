@@ -2,6 +2,14 @@
 
 ## 3.0.0
 
+It wasn't expected to have release another major version so soon, but too many overlooked things needed to be adressed.
+
+Security and performance have been improved.
+
+Outdated dependencies have been upgraded or replaced.
+
+Next releases will be more stable - consider this an exception.
+
 ### Breaking Changes
 
 - **`HttpClient` URLs, bodies and responses**
@@ -64,6 +72,7 @@
     - Easy to restyle: the feature's styles have no specificity (`:where()`), so any app rule wins, and sizes are custom properties on `.markdown-view` (`--markdown-gap`, `--markdown-nav-width`, `--markdown-toc-width`, `--markdown-line-height`). The nav no longer takes a fixed 16rem height when stacked on narrow screens.
     - `landing` folder option: the bare route shows an index of the folder (hub title, description, groups and pages; with `sectionInPath`, a landing per section) instead of its first page, prerendered and in the sitemap with `generateSEOFiles`. It's styled like the folder's pages (`.markdown-landing` and `.markdown-landing__body` share the content styles).
     - `ogImage` folder option: the default `og:image` of the folder's SEO pages.
+    - Without hub files, subfolders are groups in the navigation, titled after the folder (`01-getting-started/` → "Getting started"); a page's frontmatter `group` overrides it.
     - In-app navigation sets `document.title` to the page's title, like its prerendered SEO page.
     - With `generateSEOFiles: true`, every page is prerendered at its own URL with its title, description and `og:image` (new frontmatter `ogImage`), and listed in `sitemap.xml`, with no `config/seo.json` entries needed. A `seo.json` route for the same URL overrides the generated one; `seo: false` on a folder opts it out. Descriptions taken from a page's first paragraph are plain text (no `[link](url)` or `**` marks).
     - i18n: with `i18n: true`, a folder with one subfolder per language (`markdown-content/en/`, `markdown-content/fr/`) is compiled to one manifest per language (`/generated/<name>.<lang>.json`). The default language defines the pages; a missing translation shows the default-language page and is listed in a build warning, and a page that only exists in a translation fails the build. Links carry the `/<lang>` prefix, a language change reloads the current page in the new language, and with `generateSEOFiles` every language gets its own SEO page with `hreflang` alternates. The feature's UI texts are translatable through `src/app/markdown/locales/<lang>.json`. Without i18n, nothing changes and no i18n code is bundled.
@@ -82,7 +91,39 @@
 
     - `nutin-new --js-only` generates a plain JavaScript project. TypeScript remains the default and recommended option.
 
+- **Code splitting**
+
+    - The client bundle is now built with esbuild's code splitting: each dynamic `import()` (e.g. `import('some-package')` in a view's `onEnter`) becomes a chunk in `dist/src/chunks/`, fetched only the first time it runs, instead of being inlined into `bundle.js`. Code shared between chunks gets its own chunk, so it is downloaded once.
+    - The entry is still `bundle.js` (hashed in production as before). Chunk names are already content-hashed by esbuild, so `hash-files.js` leaves them as they are; they're compressed like every other file.
+
+- **Lazy routes**
+
+    - A route's view factory may return a Promise: `'/reports': () => import('./views/reports/reports.view.js').then((m) => new m.ReportsView())` puts the view and the code only it uses in their own chunk, loaded on the first visit. Works in the `{ view, guards }` form and in SEO prerendering. New global type `ViewFactory`.
+    - The current view stays on screen while the chunk loads; a navigation overtaken by a newer one is dropped.
+    - If a chunk fails to load (typically after a deploy replaced the chunks while a tab was open), the router logs it and does a full page load of the target URL. A URL that fails again within 10 seconds is only logged.
+    - The `markdown` feature's routes are lazy by default: `MarkdownView` and its components are no longer in the main bundle. `markdownRoutes({ view })` accepts a factory returning a Promise.
+    - Lazy routes only shrink the main bundle when views are imported by their own file: a barrel (`views/index.ts`) imported anywhere brings them back. See the routing docs.
+
+- **Focus moves to the new view after navigation**
+
+    - After an in-app navigation (link, `Navigation.navigateTo()`, back/forward, guard redirect, `/404`), the router focuses the view's `<h1>`, else the `<h1>` in `<main>`, else the view itself while announcing the page title in a polite live region. Keyboard and screen-reader users used to be left at the top of the page with no signal that it had changed.
+    - An element without a `tabindex` gets `tabindex="-1"` and no focus ring while focused (it isn't interactive), both removed on blur. The page isn't scrolled to it. The first load and `Navigation.reload()` don't move focus.
+
 ### Changes
+
+- **Prerendered SEO pages drop Nutin's binding attributes.** `data-event`, `data-i18n`, `data-component`, `data-catalog`, `data-bind`, `data-pipe` and `data-pipe-source` are removed from the HTML written by `generateSEOFiles`: the app renders the page again when it starts, so nothing ever binds them. They're removed on the DOM, so text showing them (code samples) is kept, as are classes, styles and other `data-*` attributes. On nutin.org: −10% HTML, −6% brotli. `SecurityHelper.stripBindingsFrom(root)`, the in-place version of `stripBindings(markup)`, is now exported.
+
+- **`.html` templates are type-checked.** The build now merges `.html` templates into their components and views before running `tsc` (it ran on `src/`, where they were still `__TEMPLATE_PLACEHOLDER__`), so `${task.nmae}` in an `.html` template fails the build like it does in an inline one. Errors are reported at the `.html` file and line. An app upgrading may see errors that were always there. Builds otherwise produce the same output: templates are still minified, after type-checking. `tsc` now runs on `dist-build`'s copies through a generated `dist-build/tsconfig.json` that extends yours (removed at the end of the build).
+
+- **Core's static helper classes are now modules of functions.** The 16 helpers made only of static methods (`DomHelper`, `SecurityHelper`, `TokenHelper`, `NavigationManager`, `HttpBuilder`, …) export plain functions, imported as namespaces (`import * as DomHelper from './helpers/dom.helper.js'`). esbuild can now shorten their names and drop what's unused: a fresh app's bundle went from 33.7 KB to 29.8 KB minified (9.9 KB → 9.2 KB brotli). Their former `private static` members are no longer exported.
+    - Calls are unchanged: `TokenHelper.registerCustomToken()`, `SecurityHelper.escapeHtml()`, `NavigationManager.replaceState()` work as before (`core/index.ts` exports them as namespaces).
+    - Code that subclassed a helper, reassigned one of its members, or spied on it in tests (`spyOn(NavigationManager, 'replaceState')`) must change: module namespaces are read-only. Spy on what the function calls instead (e.g. `window.history.replaceState`), or check its effect.
+    - `nutin-update` merges the helper files you edited, like any other core file.
+
+- **Node 24 required.** The CLI and generated apps now declare `engines.node: ">=24"` (was `>=22`), and the SEO prerender bundle targets `node24`. The Docker feature's image and the CI workflows already used Node 24. Upgraded apps: set `engines.node` in `package.json` by hand (`nutin-update` doesn't manage it).
+- **CLI dependencies upgraded.** handlebars 4.7.10 (fixes a critical advisory), inquirer 14 (drops `tmp`, flagged high), commander 15, fs-extra 11.4. `npm audit` is clean. With commander 15, extra arguments are rejected (`nutin update extra` errors instead of ignoring `extra`).
+
+- **`src/core` files import each other directly, not through `core/index.ts`.** The barrel made circular imports (e.g. `Component` → `index.ts` → `BaseComponent` → `index.ts`), which a single bundle tolerated but code splitting doesn't: once core code is shared between chunks, a class could be evaluated before the class it extends (`Class extends value undefined`). Apps keep importing from `core/index.ts`. Internally, `ViewRenderManager.renderNewView()` now takes the view instance instead of its factory.
 
 - **`nutin-update` merges files you edited.** A file you changed that also changed upstream used to be left at the old version, with a two-way diff in `NUTIN-UPDATE-REPORT.md`. The files around it were updated, so the project often didn't build until you merged by hand, and nothing said so. Now your file and the new version are merged three-way against the old one (`git merge-file`):
     - Edits that don't overlap are merged cleanly.

@@ -6,6 +6,7 @@
     "rootDir": "src",
     "outDir": "dist-build/src",
     "strict": true,
+    "removeComments": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noUncheckedIndexedAccess": true,
@@ -27,7 +28,6 @@
     "src/libs"
   ],
   "exclude": [
-    "node_modules",
-    "src/app/views/tutorial/sections"
+    "node_modules"
   ]
 }

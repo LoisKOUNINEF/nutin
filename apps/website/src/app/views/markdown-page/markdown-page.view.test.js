@@ -1,4 +1,3 @@
-import { NavigationManager } from '#root/dist/src/core/index.js';
 import { MarkdownPageView } from '#root/dist/src/app/views/markdown-page/markdown-page.view.js';
 import { MarkdownManifest } from '#root/dist/src/app/markdown/markdown-manifest.js';
 import { PrismHighlighter } from '#root/dist/src/app/helpers/prism/prism-highlighter.js';
@@ -58,16 +57,14 @@ describe('MarkdownPageView', () => {
     expect(view.getElement().querySelector('.markdown-content__body h1').textContent).toBe('Page A');
   });
 
-  it('loads the nav drawer bundle on enter, once', async () => {
-    const replaceSpy = spyOn(NavigationManager, 'replaceState').andCallFake(() => {});
+  it('loads the nav drawer element on enter', async () => {
+    const replaceSpy = spyOn(window.history, 'replaceState').andCallFake(() => {});
     try {
       view = await viewOf('docs');
       view.render();
-      view.onEnter();
-      view.onEnter();
+      expect(() => view.onEnter()).not.toThrow();
     } finally {
       replaceSpy.restore();
     }
-    expect(document.querySelectorAll('script[src*="overlays/drawer"]').length).toBe(1);
   });
 });

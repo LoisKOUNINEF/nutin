@@ -1,4 +1,4 @@
-import { Service } from "../../base-classes/index.js";
+import { Service } from "../../base-classes/service/service.js";
 
 class PipeRegistry extends Service<PipeRegistry> {
   private _pipes: Record<string, PipeFunction> = {};

@@ -7,7 +7,8 @@ import { builderConfig } from '../../builder.config.js';
 
 async function copyStatic() {
   const extensions = [...BINARY_EXTENSIONS, '.html'];
-  if (builderConfig.isProd) extensions.push('.ts');
+  // Templates are merged into these copies, then tsc checks them (and emits .js in dev).
+  extensions.push('.ts');
 
   // Every build starts from a clean dist-build: a failed/interrupted prior
   // build never gets renamed away by finalize-build.js, so a stale sibling

@@ -1,8 +1,29 @@
-import { NavigationManager } from '#root/dist/src/core/services/router/helpers/navigation-manager.helper.js';
+import * as NavigationManager from '#root/dist/src/core/services/router/helpers/navigation-manager.helper.js';
 import { I18nService } from '#root/dist/src/core/services/index.js';
 import { CONFIG } from '#root/dist/src/core/config.js';
 
+// Past the announcer's delay.
+const afterAnnounceDelay = () => new Promise((resolve) => setTimeout(resolve, 150));
+
+// A view element inside a <main>, both in the document.
+function mountView(html) {
+  const main = document.createElement('main');
+  const element = document.createElement('div');
+  element.innerHTML = html;
+  main.appendChild(element);
+  document.body.appendChild(main);
+  return { view: { viewName: 'probe', getElement: () => element }, main, element };
+}
+
+function cleanupFocusView() {
+  document.querySelectorAll('main, [data-nutin-announcer]').forEach((el) => el.remove());
+}
+
 describe('NavigationManager', () => {
+  afterEach(() => {
+    cleanupFocusView();
+  });
+
   it('should normalize paths by removing trailing slashes', () => {
     expect(NavigationManager.normalizePath('/about/')).toBe('/about');
     expect(NavigationManager.normalizePath('/about///')).toBe('/about');
@@ -406,5 +427,78 @@ describe('NavigationManager', () => {
     } finally {
       I18nService['_translations'] = {};
     }
+  });
+
+  it('focuses the view\'s h1, made focusable with tabindex="-1"', () => {
+    const { view, element } = mountView('<p>intro</p><h1>Title</h1>');
+    NavigationManager.focusView(view);
+    const h1 = element.querySelector('h1');
+    expect(document.activeElement).toBe(h1);
+    expect(h1.getAttribute('tabindex')).toBe('-1');
+  });
+
+  it('keeps an h1\'s own tabindex and styling', () => {
+    const { view, element } = mountView('<h1 tabindex="0">Title</h1>');
+    const h1 = element.querySelector('h1');
+    NavigationManager.focusView(view);
+    expect(h1.getAttribute('tabindex')).toBe('0');
+    expect(h1.style.outline).toBe('');
+    expect(document.activeElement).toBe(h1);
+  });
+
+  it('hides the focus ring of an element it made focusable, and restores it on blur', () => {
+    const { view, element } = mountView('<h1 style="color: red">Title</h1>');
+    const h1 = element.querySelector('h1');
+    NavigationManager.focusView(view);
+    expect(h1.style.outline).toBe('none');
+
+    h1.blur();
+    expect(h1.hasAttribute('tabindex')).toBe(false);
+    expect(h1.style.outline).toBe('');
+    expect(h1.getAttribute('style')).toBe('color: red;');
+  });
+
+  it('leaves no style attribute behind on an element that had none', () => {
+    const { view, element } = mountView('<h1>Title</h1>');
+    const h1 = element.querySelector('h1');
+    NavigationManager.focusView(view);
+    h1.blur();
+    expect(h1.hasAttribute('style')).toBe(false);
+  });
+
+  it('falls back to the h1 in <main> when the view has none', () => {
+    const { view, main } = mountView('<p>no heading</p>');
+    const h1 = document.createElement('h1');
+    h1.textContent = 'Layout title';
+    main.prepend(h1);
+    NavigationManager.focusView(view);
+    expect(document.activeElement).toBe(h1);
+  });
+
+  it('focuses the view itself and announces document.title when there is no h1', async () => {
+    const { view, element } = mountView('<p>no heading</p>');
+    document.title = 'Probe page';
+    NavigationManager.focusView(view);
+    expect(document.activeElement).toBe(element);
+    expect(element.getAttribute('tabindex')).toBe('-1');
+
+    const region = document.querySelector('[data-nutin-announcer]');
+    expect(region.getAttribute('role')).toBe('status');
+    expect(region.getAttribute('aria-live')).toBe('polite');
+    await afterAnnounceDelay();
+    expect(region.textContent).toBe('Probe page');
+  });
+
+  it('reuses one announcer, emptying it first so the same title is announced again', async () => {
+    const { view } = mountView('<p>no heading</p>');
+    document.title = 'Same';
+    NavigationManager.focusView(view);
+    await afterAnnounceDelay();
+    NavigationManager.focusView(view);
+    const regions = document.querySelectorAll('[data-nutin-announcer]');
+    expect(regions.length).toBe(1);
+    expect(regions[0].textContent).toBe('');
+    await afterAnnounceDelay();
+    expect(regions[0].textContent).toBe('Same');
   });
 });

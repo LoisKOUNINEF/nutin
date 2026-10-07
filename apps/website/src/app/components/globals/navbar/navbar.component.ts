@@ -1,6 +1,6 @@
 import { Navigation, Component, I18nService, html } from '../../../../core/index.js';
 
-// The dropdowns portal themselves to <body> as soon as their CDN bundle defines
+// The dropdowns portal themselves to <body> as soon as their chunk defines
 // them — possibly before data-i18n/data-event hydration runs. So their item text is
 // interpolated here, their clicks are handled by delegation (see onAfterRender),
 // and they are looked up by id in the whole document rather than in this.element.

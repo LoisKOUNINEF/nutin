@@ -1,15 +1,16 @@
-import { DomHelper } from './helpers/dom.helper.js';
-import { EventHelper } from './helpers/event.helper.js';
-import { I18nHelper } from './helpers/i18n.helper.js';
-import { PipeHelper } from './helpers/pipe.helper.js';
-import { ChildrenHelper, type ChildRegistry } from './helpers/children.helper.js';
-import { PreservationHelper } from './helpers/preservation.helper.js';
-import { CatalogHelper } from './helpers/catalog.helper.js';
-import { AppEventBus } from '../../index.js';
-import { SecurityHelper } from './helpers/security.helper.js';
+import * as DomHelper from './helpers/dom.helper.js';
+import * as EventHelper from './helpers/event.helper.js';
+import * as I18nHelper from './helpers/i18n.helper.js';
+import * as PipeHelper from './helpers/pipe.helper.js';
+import * as ChildrenHelper from './helpers/children.helper.js';
+import type { ChildRegistry } from './helpers/children.helper.js';
+import * as PreservationHelper from './helpers/preservation.helper.js';
+import * as CatalogHelper from './helpers/catalog.helper.js';
+import { AppEventBus } from '../../services/event-bus/event-bus.js';
+import * as SecurityHelper from './helpers/security.helper.js';
 
-export { SecurityHelper } from './helpers/security.helper.js';
-export { TokenHelper } from './helpers/token.helper.js';
+export * as SecurityHelper from './helpers/security.helper.js';
+export * as TokenHelper from './helpers/token.helper.js';
 export { html, raw, trustedRaw, SafeHtml } from './helpers/html.helper.js';
 
 export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {

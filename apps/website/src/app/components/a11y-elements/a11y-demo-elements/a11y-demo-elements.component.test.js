@@ -2,7 +2,7 @@ import { A11yDemoElementsComponent } from '#root/dist/src/app/components/a11y-el
 import { Navigation } from '#root/dist/src/core/index.js';
 
 const ELEMENTS = [
-  'a11y-anchor', 'a11y-avatar', 'a11y-checkbox', 'a11y-checkbox-group', 'a11y-file-input', 'a11y-focusable',
+  'a11y-anchor', 'a11y-avatar', 'a11y-card-link', 'a11y-checkbox', 'a11y-checkbox-group', 'a11y-file-input', 'a11y-focusable',
   'a11y-input', 'a11y-label', 'a11y-picture', 'a11y-progress', 'a11y-radio-group', 'a11y-select',
   'a11y-skeleton', 'a11y-spinner', 'a11y-switch', 'a11y-textarea', 'a11y-visually-hidden',
 ];
@@ -49,6 +49,24 @@ describe('A11yDemoElementsComponent', () => {
     component.element.querySelector('a11y-focusable').click();
     component.element.querySelector('a11y-focusable').click();
     expect(component.element.querySelector('#a11y-demo-focusable-count').textContent).toBe('2');
+    component.destroy();
+  });
+
+  it('routes the card links through the SPA router and counts the in-card button separately', () => {
+    const navigateSpy = spyOn(Navigation, 'navigateTo').andCallFake(() => {});
+    const component = mount();
+    try {
+      const links = component.element.querySelectorAll('a11y-card-link a[href]');
+      expect([...links].map((link) => link.getAttribute('href'))).toEqual(['/a11y-elements/overlays', '/guides/a11y-elements']);
+      links[1].click();
+      expect(navigateSpy.lastCall[0]).toBe('/guides/a11y-elements');
+
+      component.element.querySelector('[data-event="click:countCardLinkButton"]').click();
+      expect(component.element.querySelector('#a11y-demo-card-link-count').textContent).toBe('1');
+      expect(navigateSpy.callCount).toBe(1);
+    } finally {
+      navigateSpy.restore();
+    }
     component.destroy();
   });
 

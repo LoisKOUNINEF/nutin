@@ -4,7 +4,7 @@
   "sublead": "A behavior layer, not a themed UI kit.",
   "light-dom": "Every element is Light DOM only: it enhances real markup you author yourself, and you style it with your own CSS.",
   "elements-title": "Elements demo",
-  "elements-desc": "Anchor, avatar, checkbox, checkbox group, file input, focusable, input, label, picture, progress, radio group, select, skeleton, spinner, switch, textarea and visually-hidden.",
+  "elements-desc": "Anchor, avatar, card link, checkbox, checkbox group, file input, focusable, input, label, picture, progress, radio group, select, skeleton, spinner, switch, textarea and visually-hidden.",
   "overlays-title": "Overlays demo",
-  "overlays-desc": "Modal, drawer, emergency dialog, blocking loader, dropdown, context menu, popover, tooltip, snackbar and notification banner."
+  "overlays-desc": "Blocking loader, context menu, drawer, dropdown, emergency dialog, floating, modal, notification banner, popover, snackbar and tooltip."
 }

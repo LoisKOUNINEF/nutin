@@ -1,5 +1,5 @@
-import { DataBindingHelper } from '#root/dist/src/core/base-classes/component/helpers/data-binding.helper.js';
-import { DomHelper } from '#root/dist/src/core/base-classes/base-component/helpers/dom.helper.js';
+import * as DataBindingHelper from '#root/dist/src/core/base-classes/component/helpers/data-binding.helper.js';
+import * as DomHelper from '#root/dist/src/core/base-classes/base-component/helpers/dom.helper.js';
 
 describe('DataBindingHelper', () => {
   let container;
