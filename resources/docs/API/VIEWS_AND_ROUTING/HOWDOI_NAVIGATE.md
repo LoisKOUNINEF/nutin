@@ -11,7 +11,11 @@ private _handleHome(): void {
 ```ts
 Navigation.navigateTo(path: string): void  // emits 'navigate' with { path }
 Navigation.reload(): void                   // emits 'reload', re-renders the current route without pushing history
+Navigation.onNavigate(callback): () => void // subscribes to 'navigate'; returns an unsubscribe function
+Navigation.onReload(callback): () => void   // subscribes to 'reload'; returns an unsubscribe function
 ```
+
+The path's query string and `#hash` are kept. The path is always resolved on the current site: a path the app didn't write (e.g. from a `?next=` parameter) can't send the browser to another host.
 
 `Navigation.navigateTo(path)` doesn't call the router directly — it emits an event on the app event bus that the `Router` (once installed via [`AppRouter`](./HOWDOI_REGISTER_A_ROUTE.md)) listens for and reacts to. This means calling it before `AppRouter(routes)` has run is a no-op — there's no subscriber yet.
 

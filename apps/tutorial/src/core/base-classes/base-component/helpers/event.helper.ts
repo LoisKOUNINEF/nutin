@@ -18,12 +18,37 @@ export function bindEvents(
 
     const handler = (component as any)[handlerName];
 
-    if (typeof handler === 'function') {
-      const rawArgs = argsString ? argsString.split(',') : [];
-      const boundHandler = createBoundHandler(el, component, handler, rawArgs);
-      addEvent(el, eventName, boundHandler, eventListeners);
+    if (typeof handler !== 'function') {
+      // TypeScript builds already fail on a handler the class doesn't have (see handler-refs.js).
+      console.warn(`data-event="${el.getAttribute('data-event')}": ${component.constructor.name} has no method "${handlerName}".`);
+      return;
     }
+
+    const rawArgs = argsString ? splitArgs(argsString) : [];
+    const boundHandler = createBoundHandler(el, component, handler, rawArgs);
+    addEvent(el, eventName, boundHandler, eventListeners);
   });
+}
+
+// Splits data-event args on commas, except inside a quoted literal ('a,b' or "a,b").
+function splitArgs(argsString: string): string[] {
+  const args: string[] = [];
+  let current = '';
+  let quote: string | null = null;
+  for (const ch of argsString) {
+    if (quote) {
+      if (ch === quote) quote = null;
+    } else if (ch === '"' || ch === "'") {
+      quote = ch;
+    } else if (ch === ',') {
+      args.push(current);
+      current = '';
+      continue;
+    }
+    current += ch;
+  }
+  args.push(current);
+  return args;
 }
 
 export function destroyEvents(

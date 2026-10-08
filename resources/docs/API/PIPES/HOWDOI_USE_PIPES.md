@@ -2,9 +2,9 @@
 
 ```html
 <div data-pipe="capitalizeAll"></div>
-<div data-pipe="date:fr-FR,long,time"></div>
+<div data-pipe="date:fr-FR,long,true"></div>
 <div data-pipe="date|capitalizeAll"></div>
-<div data-pipe="date:en-US,long,time|capitalizeAll"></div>
+<div data-pipe="date:en-US,long,true|capitalizeAll"></div>
 <div data-pipe="capitalizeAll" data-pipe-source="raw text to capitalize"></div>
 ```
 

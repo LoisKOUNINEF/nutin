@@ -58,3 +58,5 @@ title: API
 ### HTTP Client
 
 - [How do I make HTTP requests?](./API/HTTP_CLIENT/HOWDOI_MAKE_HTTP_REQUESTS.md)
+
+***NOTE:*** framework types (`ComponentConfig`, `Routes`, `RouteGuard`, `Template`, `TrustLevel`, `ViewFactory`, …) are ambient globals declared in `core/internals.d.ts`: use them without importing them.

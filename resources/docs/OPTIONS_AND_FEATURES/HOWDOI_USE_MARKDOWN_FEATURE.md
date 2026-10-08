@@ -20,9 +20,9 @@ This adds:
 - the compiler, in `tools/builder/core/markdown/`
 - a `markdown:check` script
 - the runtime, in `src/app/markdown/`: `MarkdownManifestsService`, `MarkdownView`, `MarkdownGuards`, `markdownRoutes()` and the navigation / content components
-- `...markdownRoutes()` to your `appRoutes` in `routes.ts`, and the Markdown build step to `tools/builder/builder.js` and `tools/dev/watcher.js`
+- `...markdownRoutes()` to your `appRoutes` in `routes.ts`, the Markdown build step to `tools/builder/builder.js` and `tools/dev/watcher.js`, and the Markdown pages to `tools/builder/core/seo/seo-routes.js`
 
-These three files are patched: your own changes to them, such as routes you added, are kept. If the lines the patch attaches to are gone, the file is left untouched and the patch is printed for you to apply.
+These four files are patched: your own changes to them, such as routes you added, are kept. If the lines the patch attaches to are gone, the file is left untouched and the patch is printed for you to apply.
 
 The compiler's dependencies (`marked`, `gray-matter`) are installed on your first build, as dev dependencies. You are asked first - pass `-y` to accept without a prompt:
 
@@ -30,7 +30,7 @@ The compiler's dependencies (`marked`, `gray-matter`) are installed on your firs
 <pm> run build -- -y
 ```
 
-In a non-interactive shell (CI, ...), the build stops instead of installing them, unless `-y` is passed. A production build never installs them: install them beforehand.
+In a non-interactive shell (CI, the `dev` watcher, ...), the build stops instead of installing them, unless `-y` is passed (or `NUTIN_ASSUME_YES=1` is set). A production build never installs them: install them beforehand.
 
 Or you can install them manually as devDependencies
 
@@ -124,6 +124,7 @@ To have every manifest available from the start, load them all before the app st
 
 ```ts
 document.addEventListener('DOMContentLoaded', async () => {
+  await initI18n();
   await MarkdownManifestsService.loadAll();
   new App();
 });
@@ -322,6 +323,7 @@ Set `seo: false` on a folder to skip its pages. See [How do I use SEO file gener
 ## Important
 
 - The page HTML is injected as trusted content: only compile Markdown you wrote.
+- With the [Docker feature](./HOWDOI_USE_DOCKER_FEATURE.md#dockerfile), `docker:build` copies every `markdownSources` folder into the image build. The folders must be inside the project.
 
 ## Limitations
 

@@ -10,6 +10,8 @@ We are going to build a basic CRUD application in the form of a to-do list.
 
 ## Install the CLI
 
+Nutin requires Node.js 24 or later.
+
 ```bash
 npm install -g @nutin/cli
 ```
@@ -36,6 +38,7 @@ src/
         |---- services/
         |---- views/
         |---- globals.d.ts
+        |---- guards.ts
         |---- main.ts
         |---- routes.ts
  |---- core     // Nutin source code

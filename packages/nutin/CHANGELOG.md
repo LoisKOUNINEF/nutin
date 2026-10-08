@@ -48,6 +48,12 @@ It corrects or reworks several earlier decisions and establishes a more solid fu
 
     - The package manager flag is now `-p, --package-manager`, and only accepts `npm`, `yarn`, `pnpm` or `bun`. Any other value used to end up in the install command and in the generated scripts. `-pm` was a multi-letter short flag that newer Commander versions reject.
 
+- **Typed `emit()` payloads and `getInstance()` arguments**
+
+    - `AppEventBus.emit(event, data)` requires the payload its `EventMap` entry declares; `emit('navigate')` no longer compiles. An event declared `undefined` takes none. The framework's payload-less events (`reload`, `before-render`, `after-render`, `before-destroy`, `after-destroy`) are now declared `undefined` instead of `{}`.
+    - `MyService.getInstance(...args)` checks its arguments against the service's constructor and returns the service's type. A service without its own constructor accepts no arguments. `Service`'s own constructor takes none.
+    - Migration: in `src/app/globals.d.ts`, declare payload-less app events as `undefined` instead of `{}` (or pass `{}` when emitting them); fix the type errors reported for `getInstance()` calls.
+
 ### Features
 
 - **JS-only projects**
@@ -94,6 +100,12 @@ It corrects or reworks several earlier decisions and establishes a more solid fu
     - After an in-app navigation (link, `Navigation.navigateTo()`, back/forward, guard redirect, `/404`), the router focuses the view's `<h1>`, else the `<h1>` in `<main>`, else the view itself while announcing the page title in a polite live region. Keyboard and screen-reader users used to be left at the top of the page with no signal that it had changed.
     - An element without a `tabindex` gets `tabindex="-1"` and no focus ring while focused (it isn't interactive), both removed on blur. The page isn't scrolled to it. The first load and `Navigation.reload()` don't move focus.
 
+- **`data-event` handlers are checked**
+
+    - TypeScript builds check every handler named in a component's or view's template (`data-event="click:_save"`) against its class: a typo fails `tsc`, reported at the template's line with TypeScript's "Did you mean" suggestion. The check references the handlers from the class in `dist-build`'s copy only, for `tsc`, and is removed before bundling. Handlers named with `${}` aren't checked, and a handler used by a subclass's template must be `protected`.
+    - Template-only handlers now count as used, so new apps' `tsconfig.json` enables `noUnusedLocals`. Existing apps can add it (`nutin-update` lists it as a difference).
+    - At runtime, a `data-event` whose handler doesn't exist logs a `console.warn` naming the component and the method (development builds only). It used to be ignored silently.
+
 - **Views can set their document title**
 
     - New `View.documentTitle()`: return a title (e.g. the article shown) and the router uses it for `document.title` after each navigation, before `config/seo.json`'s title, the `<viewName>.title` translation and `viewName`.
@@ -127,6 +139,8 @@ It corrects or reworks several earlier decisions and establishes a more solid fu
     - Before writing anything, `nutin-update` checks that the project folder is committed: no changes and no untracked files (ignored files don't count), in a git repository. Otherwise it lists them and stops. So an update can always be undone with `git checkout -- . && git clean -fd`, which it prints when done. New `--allow-dirty` flag to skip the check.
 
 - **The router keeps every path on the site.** A path passed to `Navigation.navigateTo()` that combined a dot segment and a backslash (`/./\host`, `/a/..\/host`) was normalized to `//host`, which the browser reads as another host. The 404 view rendered, then `pushState` threw a `SecurityError`; and when the route's view failed to load (a lazy route after a deploy), the full page load went to that host. Paths are now collapsed again after parsing, so they always stay on the current origin (`/host`). This matters when an app navigates to a path it didn't write (e.g. a `?next=` parameter).
+
+- **Apps without the router build.** The route check only runs when app code imports `routes.ts` (or `generateSEOFiles` is on, since prerendering uses `appRoutes`), and `index.html` only needs an `id="app"` element in those cases. An app that mounts its components into its own elements (a widget in an existing page, a browser extension popup) needs neither. A mount target that isn't found (a selector matching nothing, or a `null` element) now logs a `console.error` in development instead of leaving the page silently empty.
 
 - `build:prod` runs `node tools/builder/builder.js --prod` instead of `NODE_ENV=production node …`, which Windows shells don't understand. `NODE_ENV=production` still works, so existing `package.json` scripts keep working.
 
@@ -229,6 +243,8 @@ It corrects or reworks several earlier decisions and establishes a more solid fu
 - `data-optional` cleanup only looks inside the rendering component. It used to scan the whole document on every render, and it missed components rendered while detached.
 
 - `props.className` accepts several space-separated classes; it threw `InvalidCharacterError`.
+
+- A comma inside a quoted `data-event` literal (`click:_tag:'a,b'`) no longer splits it into two arguments.
 
 - The `date` pipe's time flag reads `"true"`/`"false"` from templates: `date:en-US,long,false` showed the time.
 

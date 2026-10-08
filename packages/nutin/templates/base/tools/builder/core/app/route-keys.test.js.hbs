@@ -1,4 +1,5 @@
-import { findDuplicateRouteKeys } from './route-keys.js';
+import path from 'path';
+import { findDuplicateRouteKeys, findRoutesImporters } from './route-keys.js';
 
 const TS = { loader: 'ts', sourcefile: 'routes.ts' };
 
@@ -68,3 +69,29 @@ describe('findDuplicateRouteKeys', () => {
     await expect(() => findDuplicateRouteKeys('export const appRoutes = {', TS)).toThrow();
   });
 });
+
+describe('findRoutesImporters', () => {
+  const APP = path.resolve('/project/src/app');
+  const ROUTES = path.join(APP, 'routes.ts');
+  const file = (rel, content) => ({ path: path.join(APP, rel), content });
+
+  it('finds static, bare and dynamic imports of the routes module, from any folder', () => {
+    const files = [
+      file('main.ts', "import { appRoutes } from './routes.js';"),
+      file('setup.ts', "import './routes.js';"),
+      file('lazy/boot.ts', "const r = await import('../routes.js');"),
+    ];
+    expect(findRoutesImporters(files, ROUTES)).toEqual(files.map((f) => f.path));
+  });
+
+  it('ignores other modules named routes, packages, and the routes file itself', () => {
+    const files = [
+      file('main.ts', "import { CounterComponent } from './components/counter/counter.component.js';"),
+      file('admin/main.ts', "import { adminRoutes } from './routes.js';"),
+      file('x.ts', "import routes from 'routes.js';"),
+      file('routes.ts', "import { markdownRoutes } from './markdown/markdown-routes.js';"),
+    ];
+    expect(findRoutesImporters(files, ROUTES)).toEqual([]);
+  });
+});
+

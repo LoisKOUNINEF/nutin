@@ -213,6 +213,7 @@ A few English strings end up in accessible names and announcements (e.g. `Loadin
 ```ts
 // src/app/main.ts
 import { setStrings } from 'a11y-elements/core';
+import { I18nService, initI18n } from '../core/index.js';
 
 const applyA11yStrings = () => setStrings({
     loading: I18nService.translate('a11y.loading'),
@@ -220,7 +221,7 @@ const applyA11yStrings = () => setStrings({
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await I18nService.initTranslations();
+    await initI18n();
     applyA11yStrings();
     I18nService.onLanguageChange(applyA11yStrings);
     new App();

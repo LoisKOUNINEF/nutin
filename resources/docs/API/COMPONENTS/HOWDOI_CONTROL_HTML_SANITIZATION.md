@@ -5,7 +5,7 @@
 Write templates with the `html` tag. Every `${}` in an `html` template is HTML-escaped, wherever the value comes from (an input, an HTTP response, localStorage, the server):
 
 ```ts
-import { Component, html } from '../../../core/index.js';
+import { Component, html, raw, trustedRaw } from '../../../core/index.js';
 
 const templateFn = (task: ITask) => html`<li title="${task.name}">${task.name}</li>`;
 ```
@@ -111,6 +111,12 @@ const safeName = SecurityHelper.escapeHtml(userInput.name);
 ```
 
 It returns `''` for `null`/`undefined` and stringifies other values first. Don't pass its result into an `html` template: it would be escaped twice.
+
+`SecurityHelper` also exposes the steps `render()` uses, for markup you insert yourself:
+
+- `sanitizeToFragment(value, trustLevel?)` — sanitizes a template and returns its nodes, ready to insert (what `render()` does). `sanitizeTemplate(value, trustLevel?)` returns the sanitized markup as a string.
+- `isScriptUrl(name, value)` — whether `value` makes the URL attribute `name` (`href`, `src`, …) a `javascript:` URL.
+- `stripBindings(markup)` / `stripBindingsFrom(root)` — remove Nutin's binding attributes (`data-event`, `data-component`, `data-bind`, …) from a string, or in place from a DOM tree.
 
 ## Token values are raw
 

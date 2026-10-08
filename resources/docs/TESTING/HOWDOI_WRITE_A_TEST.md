@@ -8,6 +8,8 @@ entry, so test files can write `import { foo } from '#root/path/to/foo.js'`.
 Files matching `*.test.js`, anywhere under a configured origin directory, are
 discovered automatically (see [How do I configure testin-nutin?](./HOWDOI_CONFIGURE_TESTIN_NUTIN.md)). 
 
+Tests are plain JavaScript, also in TypeScript projects: they import the compiled output (`#root/dist/...`), so they aren't type-checked. 
+
 ## Global API
 
 Installed before any test file loads:

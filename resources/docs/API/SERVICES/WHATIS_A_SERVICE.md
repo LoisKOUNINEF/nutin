@@ -15,7 +15,7 @@ Every service method is auto-bound to its instance at construction, so methods c
 
 ## Cleanup
 
-A service has two independent teardown paths — `dispose()` (runs `registerCleanup()`-queued callbacks, wired automatically to `window.beforeunload`) and `Service.destroy()`/`destroyAll()` (awaits the `onDestroy()` hook). They cover different kinds of teardown and aren't interchangeable. See [How do I register service cleanup?](./HOWDOI_REGISTER_SERVICE_CLEANUP.md).
+A service queues teardown logic with `registerCleanup()`, and can override the `onDestroy()` hook for async teardown. `dispose()`, `MyService.destroy()` and `Service.destroyAll()` all run the queued callbacks; `destroy()`/`destroyAll()` await `onDestroy()` first. Nothing runs on page unload. See [How do I register service cleanup?](./HOWDOI_REGISTER_SERVICE_CLEANUP.md).
 
 ## Nutin services are services too
 

@@ -5,6 +5,7 @@
 ```ts
 export class MyView extends View {
   constructor() {
+    super({ viewName: 'my-view' });
     this.listen('language-changed', () => console.log('language changed'));
     this.listenToRenderEvents(['language-changed']); // re-render whenever it fires
   }

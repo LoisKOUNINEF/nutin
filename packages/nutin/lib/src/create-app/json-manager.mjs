@@ -61,6 +61,7 @@ export class JsonManager {
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "noUncheckedIndexedAccess": true,
+        "noUnusedLocals": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "lib": ["es2022", "DOM"],

@@ -22,7 +22,7 @@ export class TaskCatalogView extends View {
     // One TaskCardComponent is created for each task.
     const taskCatalogChildren: ComponentConfig[] = [
       {
-        selector: 'add-task',
+        selector: 'new-task',
         factory: (el) => new NewTaskComponent(el),
       },
       ...this.createCatalogComponents({

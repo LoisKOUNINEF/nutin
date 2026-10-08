@@ -61,9 +61,15 @@ export function replacePlaceholder(element: HTMLElement, placeholder: HTMLElemen
 }
 
 export function mountElement(element: HTMLElement, mountTarget: string | HTMLElement): void {
-  const target = typeof mountTarget === 'string' 
-    ? document.querySelector(mountTarget) 
+  const target = typeof mountTarget === 'string'
+    ? document.querySelector(mountTarget)
     : mountTarget;
+
+  // Nothing would show up, and nothing else says why (e.g. a misspelled selector, or no #app).
+  if (!(target instanceof HTMLElement)) {
+    const where = typeof mountTarget === 'string' ? `"${mountTarget}" isn't in the page` : `its mount target is ${mountTarget}`;
+    console.error(`Nothing to mount <${element.tagName.toLowerCase()}> into: ${where}.`);
+  }
 
   appendOrReplace({ target, element, mountTarget });
 }

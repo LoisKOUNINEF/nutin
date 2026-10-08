@@ -1,5 +1,8 @@
 import { Service } from "../../base-classes/service/service.js";
 
+// The payload is required unless the event declares none (`undefined` in its EventMap entry).
+type EventArgs<K extends EventKey> = undefined extends EventMap[K] ? [data?: EventMap[K]] : [data: EventMap[K]];
+
 export class EventBus extends Service<EventBus> {
   private _subscriptions: Subscription[] = [];
 
@@ -26,7 +29,7 @@ export class EventBus extends Service<EventBus> {
     this.addHandler(event, callback, true);
   }
 
-  public emit<K extends EventKey>(event: K, data?: EventMap[K]): void {
+  public emit<K extends EventKey>(event: K, ...[data]: EventArgs<K>): void {
     const callbacks = this.handlers[event];
     if (!callbacks) return;
 
@@ -34,7 +37,7 @@ export class EventBus extends Service<EventBus> {
       // A failing listener is reported but doesn't keep the others (the router's
       // included) from receiving the event.
       try {
-        callback(data!);
+        callback(data as EventMap[K]);
       } catch (error) {
         console.error(`Error in a "${event}" listener:`, error);
       }

@@ -76,7 +76,7 @@ Each item is turned into the child's `data` argument:
 type CatalogItemConfig<T = any> = T extends object ? T & { index: number } : { value: T; index: number };
 ```
 
-The third factory argument (`props`) is a shallow merge of the catalog config's own `props`, `defaults`, and `normalizeKeys` fields — in that precedence order.
+The third factory argument (`props`) is a shallow merge of the catalog config's own `props` and `defaults` fields; `defaults` win on a shared key.
 
 ## Keeping children across re-renders
 
@@ -110,7 +110,7 @@ Choosing a key means the child owns its own updates: either put in the key whate
 }),
 ```
 
-An item is kept when its `trackBy` value is the same **and** it hasn't changed: the item is shallow-equal to the previous one (own properties compared with `Object.is`), and the catalog's `props`/`defaults`/`normalizeKeys` and `component` are unchanged.
+An item is kept when its `trackBy` value is the same **and** it hasn't changed: the item is shallow-equal to the previous one (own properties compared with `Object.is`), and the catalog's `props`/`defaults` and `component` are unchanged.
 
 Changed items are destroyed and recreated. Kept items follow reorders, insertions and removals; their wrapper's `data-index` is updated, but the child's own `config.index` stays the index it was created with.
 

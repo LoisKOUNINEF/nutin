@@ -28,7 +28,7 @@ form.render();
 <textarea data-bind="bio"></textarea>
 ```
 
-- **Writing in**: after each render, every `[data-bind="key"]` element has `props[key]` written into it (`.value` for `<input>`/`<textarea>`, `.textContent` otherwise) — but only if `props[key] !== undefined`; an unset key leaves the element's existing content untouched.
+- **Writing in**: after each render, every `[data-bind="key"]` element of the component (not those inside a nested child component) has `props[key]` written into it (`.value` for `<input>`/`<textarea>`, `.textContent` otherwise) — but only if `props[key] !== undefined`; an unset key leaves the element's existing content untouched.
 - **Reading back**: call `getValues()` to read the *current DOM state* of every `[data-bind]` element, not the original `props` object:
 
 ```ts
@@ -37,6 +37,6 @@ const values = form.getValues(); // { name: '<whatever the input currently conta
 
 This means `getValues()` reflects live user edits even though `this.props` still holds the construction-time values. `props` values are only re-applied on an explicit `render()` call — mutating `this.props` between renders has no effect until you render again.
 
-`props.className` and `props.style` get special generic handling (applied in `onBeforeRender`, before `data-bind`): `className` is added via `classList.add` (additive — a changed `className` across renders won't remove the old class), and `style` fully replaces the element's `cssText` each render (not additive).
+`props.className` and `props.style` get special generic handling (applied in `onBeforeRender`, before `data-bind`): `className` (one or more space-separated classes) is added via `classList.add` (additive — a changed `className` across renders won't remove the old class), and `style` fully replaces the element's `cssText` each render (not additive).
 
 See also [How do I create a component?](./HOWDOI_CREATE_A_COMPONENT.md) for the full constructor option list.

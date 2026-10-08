@@ -1,5 +1,5 @@
 ---
-title: Testing
+title: Testing toolkit
 ---
 
 # Nutin - Testing toolkit documentation

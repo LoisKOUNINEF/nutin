@@ -2,14 +2,14 @@
 // would merge with this one, giving 'navigate' two conflicting payload types.
 declare interface RouterEventMap {
   'navigate': { path: string };
-  'reload': {};
+  'reload': undefined;
 }
 
 declare interface LifecycleEventMap {
-  'before-render': {};
-  'after-render': {};
-  'before-destroy': {};
-  'after-destroy': {};
+  'before-render': undefined;
+  'after-render': undefined;
+  'before-destroy': undefined;
+  'after-destroy': undefined;
   'view-mount': { viewName: string };
   'view-unmount': { viewName: string };
 }

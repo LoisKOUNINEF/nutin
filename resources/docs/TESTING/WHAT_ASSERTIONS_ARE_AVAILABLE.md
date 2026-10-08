@@ -14,8 +14,8 @@ throws a descriptive `Error` on failure.
 | `.toBeInstanceOf(ctor)` | `actual instanceof ctor` |
 | `.toHaveBeenCalled()` | spy/mock handle has a non-empty `.calls` |
 | `.toHaveBeenCalledWith(...args)` | deep-equal match against any recorded call |
-| `.toBeLessThan(expected)` | fails only if `actual > expected` |
-| `.toBeGreaterThan(expected)` | fails only if `actual < expected` |
+| `.toBeLessThan(expected)` | `actual < expected` (equal values fail) |
+| `.toBeGreaterThan(expected)` | `actual > expected` (equal values fail) |
 | `.toThrow(expectedMessage?)` | `actual()` throws; if given, the error message must include `expectedMessage` |
 
 `.not` is supported on every matcher above — it's built generically by

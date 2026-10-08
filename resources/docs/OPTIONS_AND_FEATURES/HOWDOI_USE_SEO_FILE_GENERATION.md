@@ -9,7 +9,7 @@ export default {
 }
 ```
 
-`route.title` is also consumed at runtime: on every route change, `document.title` is set from the matching route's `title` here (falling back to the view's `viewName` when `generateSEOFiles` is off or no route matches) — see [How do I create a view?](../API/VIEWS_AND_ROUTING/HOWDOI_CREATE_A_VIEW.md).
+`route.title` is also consumed at runtime: on every route change, `document.title` is set from the view's `documentTitle()`, else the matching route's `title` here, else the view's locale `title` (with `i18n`), else its `viewName`. With `i18n` off, a per-language `title` resolves to its first value — see [How do I create a view?](../API/VIEWS_AND_ROUTING/HOWDOI_CREATE_A_VIEW.md).
 
 ## Configuration file
 
@@ -93,6 +93,8 @@ export default {
 Each page is your view rendered at build time: the same markup, classes and styles as in the browser, so it's what visitors see before the app starts, and what crawlers and visitors without JavaScript get. Once the app starts, it renders the view again over it; nothing is reused.
 
 So Nutin's binding attributes (`data-event`, `data-i18n`, `data-component`, `data-catalog`, `data-bind`, `data-pipe`, `data-pipe-source`) are removed from the prerendered HTML: nothing would ever bind them. Your own `data-*` attributes are kept, and so is text that shows them (e.g. in a code sample).
+
+In production builds, prerendered pages, `sitemap.xml` and `robots.txt` are compressed (`.gz`/`.br`) along with the rest of the build.
 
 ## Guarded routes
 

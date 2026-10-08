@@ -172,3 +172,22 @@ async function minifyNested(body, start, end, nested) {
   }
   return out + body.slice(last, end);
 }
+
+// Up to the opening backtick; scanTemplate() finds the closing one, past any nested html``.
+const TEMPLATE_START = /const\s+(?:template|templateFn)\s*=?\s*(?:\(.*?\)\s*=>\s*)?(html\s*)?`/;
+
+// The first `const template`/`templateFn` literal: whether it is html``-tagged, where its
+// body starts and ends, and the body (null when its closing backtick can't be found).
+export function findInlineTemplate(content) {
+  const match = TEMPLATE_START.exec(content);
+  if (!match) return null;
+
+  const open = match.index + match[0].length;
+  const scan = scanTemplate(content, open);
+  return {
+    tagged: Boolean(match[1]),
+    open,
+    end: scan?.end ?? null,
+    body: scan ? content.slice(open, scan.end) : null,
+  };
+}

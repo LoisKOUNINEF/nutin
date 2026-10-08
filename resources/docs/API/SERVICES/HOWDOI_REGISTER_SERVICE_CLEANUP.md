@@ -16,12 +16,15 @@ export class PollingService extends Service<PollingService> {
 }
 ```
 
-`registerCleanup(fn)` is `protected` — call it from inside your own service (typically the constructor) to queue teardown logic. There are two independent cleanup paths, and they run **different** things:
+`registerCleanup(fn)` is `protected` — call it from inside your own service (typically the constructor) to queue teardown logic. Override `onDestroy()` for teardown that needs to be async.
 
-- **`dispose()`** — runs every queued `registerCleanup` callback, then clears the callback list and removes the instance from the singleton registry. This is wired automatically to `window.beforeunload` for every service instance; you never call it yourself.
-- **`Service.destroy(MyService)` / `Service.destroyAll()`** — awaits and calls `onDestroy()` on the instance(s), then removes them from the registry. This does **not** run `registerCleanup` callbacks — only the `onDestroy()` hook. `main.ts` typically wires `Service.destroyAll()` to `window.beforeunload` at the app level, so in practice both paths can fire on unload, each covering a different kind of teardown.
+A service is torn down in one of three ways, and each one runs the queued `registerCleanup` callbacks, then removes the instance from the singleton registry:
 
-Override `onDestroy()` for cleanup that needs to be async or explicitly triggered (e.g. from app shutdown logic), and use `registerCleanup()` for cleanup that should always run alongside every other service's, on page unload.
+- **`myService.dispose()`** — runs the callbacks synchronously. It doesn't call `onDestroy()`.
+- **`MyService.destroy()`** — awaits `onDestroy()`, then runs the callbacks.
+- **`Service.destroyAll()`** — does the same for every service.
+
+Nothing runs on page unload: the browser frees everything when the page goes away, and tearing services down on `beforeunload` would leave a page restored from the back/forward cache with every service already disposed.
 
 ## Test-only resets
 

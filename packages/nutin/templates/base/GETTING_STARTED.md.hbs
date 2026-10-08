@@ -27,7 +27,7 @@ src/
 
 tools/    -- build, development, generator and testing
 
-nutin.config.js   -- features and configuration
+nutin.config.js   -- options and configuration
 ```
 
 ### Imports
@@ -64,12 +64,9 @@ Elements are generated in `src/app/<path>/`, so you choose the project structure
 {{packageManager}} run generate <component|view|service> PATH/TO/ELEMENT_NAME
 
 # Examples
-{{packageManager}} run generate component components/my-component # Target dir: src/app/components/my-component/
-{{packageManager}} run generate view user/user-view                # Target dir: src/app/user/user-view/
-{{packageManager}} run generate service user/user-service          # Target dir: src/app/user/user-service/
+{{packageManager}} run generate component components/hello-world # generates src/app/components/hello-world/hello-world.component.ts|html|scss
+{{packageManager}} run generate view user/dashboard # generates src/app/user/dashboard/dashboard.view.ts|html|scss
 ```
-
-Import generated elements by their file path (e.g. `./views/home/home.view.js`). 
 
 ## What does a typical component look like?
 
@@ -82,7 +79,7 @@ components/
 ```
 
 ```ts
-// The builder injects the component's .html template here.
+// The component's .html template is injected here.
 const templateFn = (product: Product) => html`__TEMPLATE_PLACEHOLDER__`;
 
 export class ProductCardComponent extends Component {
@@ -127,7 +124,8 @@ export class ProductCardComponent extends Component {
 
 ```html
 <div
-  data-event="click:_goToProductPage:${product.id}"
+  data-product-id="${product.id}"
+  data-event="click:_goToProductPage:@dataset:productId"
   class="product-card"
 >
   <h2 class="product-card__name">${product.name}</h2>
@@ -154,12 +152,12 @@ Defining both an inline template and an external `.html` file, or neither, fails
 
 ### Main file
 
-`nutin.config.js` - Main Nutin configuration and tool options. See the inline comments for details.
+`nutin.config.js` - Main Nutin configuration and tool options. See the inline comments and [How do I configure Nutin?](https://www.nutin.org/docs/options-and-features/configure-nutin) for details.
 
-- `tailwind`, `i18n`, `generateSEOFiles` — top-level features, `false` by default. 
-See [Options and features](https://github.com/LoisKOUNINEF/nutin/tree/main/docs/OPTIONS_AND_FEATURES.md).
-- `builder.*` — controls build behavior.
-- `testinNutin.*` — controls Nutin's built-in testing toolkit.
+This is where you can:
+
+- Toggle options ([Tailwind CSS](https://www.nutin.org/docs/options-and-features/use-tailwind-css), [i18n](https://www.nutin.org/docs/options-and-features/use-i18n), [SEO file generation](https://www.nutin.org/docs/options-and-features/use-seo-file-generation)). 
+- Configure the builder and the built-in testing toolkit.
 
 ### Specialized files
 
@@ -178,7 +176,7 @@ See [Options and features](https://github.com/LoisKOUNINEF/nutin/tree/main/docs/
 
 You can use any testing tool you prefer for application code.
 
-This project includes [testin-nutin](https://github.com/LoisKOUNINEF/nutin/tree/main/docs/TESTING.md), Nutin's lightweight testing toolkit. Nutin itself is tested exclusively with it, and the tests are included in the generated project so you can:
+This project includes [testin-nutin](https://www.nutin.org/docs/testing), Nutin's small testing toolkit. Nutin itself is tested exclusively with it, and the tests are included in the generated project so you can:
 - use them as executable documentation;
 - run and modify Nutin's tests when modifying its code.
 
@@ -194,13 +192,13 @@ testinNutin: {
   includeApp: true,
 }
 ```
-*Note:* TestinNutin files use root imports.
+*Note:* TestinNutin files are plain JavaScript and use root imports{{#if (eq lang "ts")}}: they test the compiled output, so they aren't type-checked{{/if}}.
 ```js
 import { MyModule } from '#root/dist/src/path/to/my-module.js';
 ```
 
 ## Go further
 
-- [Repository documentation](https://github.com/LoisKOUNINEF/nutin/tree/main/docs/API.md)
+- [Documentation](https://www.nutin.org/docs)
 - [First app tutorial](https://www.nutin.org/tutorial)
 - [Nutin website](https://www.nutin.org)

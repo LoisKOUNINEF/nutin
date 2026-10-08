@@ -26,7 +26,7 @@ Only the project folder is checked, so a project inside a larger repository isn'
 
 `nutin-update` needs [git](https://git-scm.com) to merge files you edited (it uses `git merge-file`; the project doesn't have to be a repository). Without git it stops before changing anything.
 
-`nutin-update` handles minor and patch updates. A major version change has to be migrated by hand: see the [changelog](https://nutin.org/changelog), and [Upgrading from 2.x to 3.0](./UPGRADING_TO_V3.md).
+`nutin-update` handles minor and patch updates. A major version change has to be migrated by hand: see the [changelog](https://nutin.org/changelog).
 
 ## How it works
 
@@ -53,7 +53,7 @@ A summary is printed before anything is written.
 - `config/*.json`.
 - `src/styles/**`: existing files are kept; only files new in this version are added.
 
-`package.json` isn't managed by `nutin-update` either: new scripts or dependency versions are listed in the changelog.
+`package.json` and `tsconfig.json` aren't written by `nutin-update` either. The summary lists each `package.json` script and `devDependencies` entry, and each `tsconfig.json` option, that differs from what this Nutin version generates, so you can apply what you need by hand. `engines.node` isn't checked: see the changelog.
 
 ## Resolving conflicts
 
@@ -77,4 +77,6 @@ Merges only happen in files outside of `src/app` that you edited, for example `s
 
 ## Missing `.nutin-meta.json`
 
-Projects generated before `.nutin-meta.json` existed (or that lost it) can still be updated: `nutin-update` asks which Nutin version the project was created with and which features it uses, then writes the file. A wrong answer gives a wrong baseline, which shows up as false conflicts.
+Projects generated before `.nutin-meta.json` existed (or that lost it) can still be updated: `nutin-update` asks which Nutin version the project was created with and which features it uses, then writes the file. It detects the language (`src/app/main.js` without `main.ts` is a JavaScript project) and the package manager, and prints them. A wrong answer gives a wrong baseline, which shows up as false conflicts.
+
+In a non-interactive shell (e.g. CI) it can't ask: it stops with a message showing an example `.nutin-meta.json` to create by hand.

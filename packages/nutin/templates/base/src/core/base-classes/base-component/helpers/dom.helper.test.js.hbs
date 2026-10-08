@@ -20,10 +20,19 @@ describe('DomHelper', () => {
     expect(container.contains(el)).toBe(true);
   });
 
-  it('mountElement does nothing when the string selector target is not found', () => {
+  it('mountElement mounts nothing and logs an error when the target is not found', () => {
     const el = document.createElement('span');
-    DomHelper.mountElement(el, '#does-not-exist');
-    expect(el.parentElement).toBe(null);
+    const errorSpy = spyOn(console, 'error').andCallFake(() => {});
+    try {
+      DomHelper.mountElement(el, '#does-not-exist');
+      DomHelper.mountElement(document.createElement('div'), null);
+      expect(el.parentElement).toBe(null);
+      expect(errorSpy.callCount).toBe(2);
+      expect(errorSpy.calls[0][0]).toBe('Nothing to mount <span> into: "#does-not-exist" isn\'t in the page.');
+      expect(errorSpy.calls[1][0]).toContain('its mount target is null');
+    } finally {
+      errorSpy.restore();
+    }
   });
 
   it('mountElement replaces an HTMLElement target with the element', () => {

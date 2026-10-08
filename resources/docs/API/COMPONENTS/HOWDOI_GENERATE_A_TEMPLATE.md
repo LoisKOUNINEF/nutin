@@ -1,6 +1,6 @@
 # How do I generate a template?
 
-Every component inherits `generateTemplate(): Template` (a string or an `html` result) from `BaseComponent`. `render()` calls it and assigns the (sanitized) result to the component's `innerHTML`. 
+Every component inherits `generateTemplate(): Template` (a string or an `html` result) from `BaseComponent`. `render()` calls it, sanitizes the result and inserts the resulting nodes into the component's element. 
 
 You can override it when a template needs more than a single expression.
 
@@ -65,7 +65,7 @@ protected override generateTemplate(): Template {
 
 ## Notes
 
-- The string you return still goes through the full pipeline: sanitized according to `trustLevel`, then children are mounted, `data-i18n`/`data-pipe` are hydrated, empty `data-optional` elements are removed and `data-event` listeners are bound. 
+- The template you return still goes through the full pipeline: sanitized according to `trustLevel`, then children are mounted, `data-i18n`/`data-pipe` are hydrated, empty `data-optional` elements are removed and `data-event` listeners are bound. 
 - Return an `html` template so interpolated data is escaped. A plain template literal escapes nothing, see [How do I control HTML sanitization?](./HOWDOI_CONTROL_HTML_SANITIZATION.md).
 - Work on the rendered children (e.g. `querySelector`) belongs in `onAfterRender()`. **In a `Component`, call `super.onBeforeRender()`/`super.onAfterRender()`**.
 

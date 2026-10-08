@@ -59,6 +59,8 @@ export class NewTaskComponent extends Component {
 </div>
 ```
 
+The build checks the handler name against the component: a typo like `click:_newTsk` fails the build, pointing at that line of the template.
+
 ## A little bit of styling
 
 ```scss

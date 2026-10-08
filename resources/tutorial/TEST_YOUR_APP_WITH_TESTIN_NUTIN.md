@@ -34,7 +34,7 @@ src/app/
  |---- guards.test.js
 ```
 
-- Tests run against the **compiled** output in `dist/`, which is why test files are `.js`.
+- Tests run against the **compiled** output in `dist/`, which is why test files are `.js` and aren't type-checked.
 - `#root/` points to your project root.
 - `describe`, `it`, `expect`, `spyOn`, `click`, `$`, `$$`... are globals and need no import.
 - *Note:* With `includeApp` enabled, the generator creates a `*.test.js` file alongside every new component, view and service.
@@ -45,6 +45,7 @@ src/app/
 ```bash
 npm run testin-nutin          # Builds, then runs the tests once
 npm run testin-nutin task     # Only runs test files whose path contains "task"
+npm run testin-nutin:only     # Runs the tests without rebuilding
 npm run testin-nutin:watch    # Re-runs the tests on file changes
 npm run testin-nutin:verbose  # Logs test suites & individual tests
 ```

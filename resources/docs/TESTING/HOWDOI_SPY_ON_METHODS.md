@@ -17,4 +17,9 @@ With neither `.andCallFake` nor `.andReturn` set, calls **pass through** to
 the original implementation while still being recorded — spies default to
 transparent, not silent.
 
+Core helpers (`DomHelper`, `SecurityHelper`, `NavigationManager`, …) are
+modules of functions, imported as read-only namespaces: `spyOn` can't replace
+their functions. Spy on what the function calls instead (e.g.
+`spyOn(window.history, 'replaceState')`), or check its effect.
+
 See [How do I fake timers?](./HOWDOI_FAKE_TIMERS.md).

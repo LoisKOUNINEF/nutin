@@ -24,6 +24,8 @@ const IGNORED_TEMPLATE_FILES = new Set(['.DS_Store', '.gitkeep']);
 // Templates that only make sense in a TypeScript project — not generated for JS-only ones.
 const TS_ONLY_TEMPLATES = [
   path.join('tools', 'builder', 'core', 'app', 'compile-ts.js.hbs'),
+  path.join('tools', 'builder', 'core', 'app', 'handler-refs.js.hbs'),
+  path.join('tools', 'builder', 'core', 'app', 'handler-refs.test.js.hbs'),
 ];
 
 export class FileGenerator {

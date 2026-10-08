@@ -27,10 +27,11 @@ nutin.config.js   build/feature config — see below
 
 ## Commands
 
-- Serve: `{{packageManager}} run serve` (build + serve), `{{packageManager}} run serve:only` (no rebuild), `{{packageManager}} run dev` (watch mode). Port defaults to 9090; override with `-- --port <n>` or `PORT=<n>`.
-- Build: `{{packageManager}} run build` (dev) or `{{packageManager}} run build:prod` (production).
+- Serve: `{{packageManager}} run serve` (build + serve), `{{packageManager}} run serve:prod` (prod build + serve), `{{packageManager}} run serve:only` (no rebuild), `{{packageManager}} run dev` (watch mode, reloads the page after each rebuild). Port defaults to 9090; override with `-- --port <n>` or `PORT=<n>`.
+- Build: `{{packageManager}} run build` (dev) or `{{packageManager}} run build:prod` (production). Opt-in dependencies (Tailwind, `markdown`) are only installed automatically in an interactive terminal; elsewhere pass `-- -y` (or set `NUTIN_ASSUME_YES`).
 - Generate: `{{packageManager}} run generate ELEMENT ELEMENT_NAME` (`ELEMENT` = `component`/`view`/`service`; `ELEMENT_NAME` may be a nested path, generated in `src/app/<path>/`; fails if that folder already exists and isn't empty).
-- Test: `{{packageManager}} run testin-nutin` (build + run), `{{packageManager}} run testin-nutin:only` (no rebuild), `{{packageManager}} run testin-nutin:watch`.
+- Test: `{{packageManager}} run testin-nutin` (build + run), `{{packageManager}} run testin-nutin:only` (no rebuild), `{{packageManager}} run testin-nutin:watch`, `{{packageManager}} run testin-nutin:coverage`, `{{packageManager}} run testin-nutin:verbose`.
+- Update Nutin: `nutin-update` refuses to run unless the project is committed (no changes, no untracked files; `--allow-dirty` skips the check). Files edited here that also changed upstream are merged three-way; overlapping edits get `diff3` conflict markers, and the project won't build, nor will `nutin-update` run again, until they're resolved (listed in `.nutin-meta.json`'s `unmergedFiles` and `NUTIN-UPDATE-REPORT.md`).
 
 ## Base classes
 
@@ -41,7 +42,7 @@ BaseComponent<T>     — render/destroy engine, data-* parsing, children
 └── View              — one per route; mounted/unmounted by the Router
 ```
 
-- `render()`: `onBeforeRender()` → sanitize + set `innerHTML` → mount children (`data-component`/`data-catalog`) → parse `data-i18n`/`data-pipe` → bind `data-event` listeners → `onAfterRender()`. Runs in full on every `render()` call — no virtual DOM/diffing.
+- `render()`: `onBeforeRender()` → sanitize the template and insert the resulting nodes (`SecurityHelper.sanitizeToFragment()`, never assigned to `innerHTML`) → mount children (`data-component`/`data-catalog`) → parse `data-i18n`/`data-pipe` → bind `data-event` listeners → `onAfterRender()`. Runs in full on every `render()` call — no virtual DOM/diffing; only children with a `key`/`trackBy` are kept (see "Children components").
 - `destroy()`: unbinds events, unsubscribes bus listeners, destroys children, removes the element.
 - `Service`: direct `new` throws — always use `MyService.getInstance()` (or the exported const). Auto-binds all methods to the instance. `registerCleanup(fn)` callbacks run on `dispose()`, `MyService.destroy()` and `Service.destroyAll()` (tests, SSR) — nothing is torn down on page unload.
 - Overridable hooks (all no-op by default): `onBeforeRender`, `onAfterRender`, `onBeforeDestroy`, `onAfterDestroy`, `onReuse`, `generateTemplate()`, `registerChildren()`. `View` adds router-only `onEnter()`/`onExit()`.
@@ -67,7 +68,7 @@ BaseComponent<T>     — render/destroy engine, data-* parsing, children
 
 ## DOM events binding
 
-Handlers are (re-)bound on every `render()`, not at build time. Always use private methods prefixed with underscore:
+Handlers are (re-)bound on every `render()`, not at build time. Always use private methods prefixed with underscore{{#if (eq lang "ts")}} (`protected` for a handler a subclass's template uses){{/if}}:
 
 ```html
 <div data-event="event:_myFunction:@value,@id">
@@ -76,16 +77,18 @@ Handlers are (re-)bound on every `render()`, not at build time. Always use priva
 private _myFunction(value: string, id: string) { doStuff() }
 ```
 
-Tokens: `@value`, `@id`, `@class`, `@textContent`, `@event`, `@target`, `@attr:name`, `@dataset:key`, plus string/number literals. Token values are raw (not HTML-escaped): escaping happens when they are rendered through an `html` template.
+{{#if (eq lang "ts")}}The build type-checks each handler name written in a template against the class: a missing one fails `tsc` at the template line, and handlers count as used for `noUnusedLocals` (on in this project). Names built with `${}` aren't checked. {{/if}}At runtime, a missing handler binds nothing and logs a `console.warn` in development.
+
+Tokens: `@value`, `@id`, `@class`, `@textContent`, `@event`, `@target`, `@attr:name`, `@dataset:key`, plus string/number literals (quoted literals may contain commas). Token values are raw (not HTML-escaped): escaping happens when they are rendered through an `html` template.
 
 Only defaults that leave the page are cancelled: link clicks (`<a href>`, unless modified, e.g. ctrl+click), form `submit` and submit-button clicks inside a form. Other events keep their default (typing, checking a box); take `@event` and call `preventDefault()` yourself if needed. A component only binds its own `data-event`/`data-bind`/`data-i18n` elements, not those inside nested child components.
 
 ## Core services
 
-- `AppEventBus` — `subscribe`/`once`/`emit`/`off`. Inside a component, prefer `this.listen(event, cb)` (auto-unsubscribes on `destroy()`) or `this.listenToRenderEvents([event1, event2, ...])` (re-runs `this.render()` whenever any of the given events fire) over calling the bus directly. Typed facades — each `on*` subscriber returns a closure you call directly to unsubscribe (`const off = Navigation.onNavigate(cb); ...; off();`), no need to keep the original callback reference around for `off()`:
+- `AppEventBus` — `subscribe`/`once`/`emit`/`off`.{{#if (eq lang "ts")}} Declare app events in `src/app/globals.d.ts`'s `AppEventMap`: `emit()` requires the declared payload, and an event declared `undefined` takes none.{{/if}} Inside a component, prefer `this.listen(event, cb)` (auto-unsubscribes on `destroy()`) or `this.listenToRenderEvents([event1, event2, ...])` (re-runs `this.render()` whenever any of the given events fire) over calling the bus directly. Typed facades — each `on*` subscriber returns a closure you call directly to unsubscribe (`const off = Navigation.onNavigate(cb); ...; off();`), no need to keep the original callback reference around for `off()`:
   - `Navigation` — `navigateTo(path)`/`onNavigate`, `reload()`/`onReload`.
   - `Lifecycle` — `viewMount(viewName)`/`onViewMount`, `viewUnmount(viewName)`/`onViewUnmount`, plus generic `beforeRender`/`afterRender`/`beforeDestroy`/`afterDestroy`.
-- `AppRouter(routes)` — call once in `main.ts`; routes support `:param`/`:param?`, per-route guards, and lazy views: a factory returning `import('./views/x/x.view.js').then((m) => new m.XView())` loads the view on first visit (import it by its own file, not through a barrel).
+- `AppRouter(routes)` — call once in `main.ts` (optional: without it, mount components into any element with `new X(el).render()`; the build then skips the `routes` and `#app` checks, unless `generateSEOFiles` is on; a mount target that isn't found logs a `console.error` in development); routes support `:param`/`:param?`, per-route guards, and lazy views: a factory returning `import('./views/x/x.view.js').then((m) => new m.XView())` loads the view on first visit (import it by its own file, not through a barrel{{#if (eq lang "ts")}}; factory type: global `ViewFactory`{{/if}}). Keep `/` and `/404` eager. After each in-app navigation (not the first load or `Navigation.reload()`), focus moves to the view's `<h1>`, else the `<h1>` in `<main>`, else the view element, with `document.title` announced in a polite live region in that last case only (a focused heading is read by screen readers). Give each view an `<h1>`. `document.title` comes from `View.documentTitle()` if overridden, else `config/seo.json`'s title (with `generateSEOFiles`), the `<viewName>.title` translation, then `viewName`.
 - `registerGlobals({ before?, after? })` — each entry is `{ component, id }` (a bare class, constructed internally); mounts them outside `<main id="app">` (`before`/`after` control placement relative to it), stamping each root element with `id`. `hideGlobals(ids)`/`revealGlobals(ids)` (same module) toggle visibility by those ids from any component or view. Call once in `main.ts`.
 - `AppHttpClient` — `get/post/put/patch/delete<T>(endpoint, data?, config?)`; non-OK responses throw `HttpError`. Relative endpoints resolve against the page origin; a subclass with a base URL rejects endpoints leaving it. Build paths from values with ``path`/users/${id}` `` (encoded `/` and `\` in paths are rejected unless the API is in the `trustedAPIs` option). FormData/Blob bodies are sent as-is; 204 → `undefined`.
 - `I18nService` — `translate(key, fallback?)`, `setCurrentLanguage(lang)`; language list comes from `config/languages.json`. `initI18n()` (same module) loads the translations when `i18n` is enabled and does nothing otherwise; `main.ts` awaits it before starting the app. With `i18n: false`, prod builds drop the i18n code unless app code references `I18nService`.
@@ -98,40 +101,27 @@ Only defaults that leave the page are cancelled: link clicks (`<a href>`, unless
 
 ## Pipes
 
-```
-// currency
-AppPipeRegistry.register('currency');
-    
-// date
-AppPipeRegistry.register('date');
+Built-in pipes, registered by `registerPipes()` in `main.ts` (args in `data-pipe="name:arg1,arg2"`):
 
-// number (toFixed)
-AppPipeRegistry.register('number');
+- `currency:currency,locale` (defaults `USD`, `en-US`), `date:locale,format,time` (defaults browser language, `long`), `number:decimals` (`toFixed`, default `0`)
+- `uppercase`, `lowercase`, `capitalize`, `capitalizeAll`, `truncate:length,suffix` (defaults `50`, `...`)
+- `default:fallback`, `json`
 
-// string pipes
-AppPipeRegistry.register('uppercase');
-AppPipeRegistry.register('lowercase');    
-AppPipeRegistry.register('capitalize');
-AppPipeRegistry.register('capitalizeAll');
-AppPipeRegistry.register('truncate');
-    
-// utility pipes
-AppPipeRegistry.register('default');
-AppPipeRegistry.register('json');
-```
+Add your own with `AppPipeRegistry.register(name, (value, ...args) => string)`; args arrive as strings.
 
 ## Configuration
 
 ### `nutin.config.js`
 
 Central options/tools config (see the inline comments for details):
-- `i18n`, `tailwind`, `generateSEO`, `dockerPorts`, `markdownSources` — top-level feature toggles (`dockerPorts` and `markdownSources` only apply once the docker/markdown feature is added).
+- `i18n`, `tailwind`, `generateSEOFiles` — top-level feature toggles.
+- `dockerPorts`, `markdownSources` — options of the `docker`/`markdown` features, only present once added with `nutin-add <feature>`.
 - `builder.{sass.paths, esbuild}` — build pipeline behavior.
 - `testinNutin.{includeFramework, includeTools, includeApp, jsdomOptions}` — test discovery/environment.
 
 ### `config/seo.json`
 
-Consumed by builder (production only) to generate static HTML per route. Unused if `nutin.config.js -> generateSEO` is disabled.
+Consumed by builder (production only) to generate static HTML per route. Unused if `nutin.config.js -> generateSEOFiles` is disabled. Dynamic routes (`/blog/:slug`) are written at their real URL from `mockParams` (or `outputPath`). Route guards run first, as an anonymous visitor: a route they block or redirect isn't prerendered nor listed in `sitemap.xml`.
 
 ### `config/languages.json`
 
@@ -141,16 +131,18 @@ Consumed by i18nService and builder. Unused if i18n is disabled.
 
 Write every template with the `html` tag (`import { html, raw } from` core): `templateFn = (task) => html\`<li>${task.name}</li>\``. Every `${}` is HTML-escaped, whatever the data's source (input, HTTP, localStorage). Nested `html` results are inserted as-is, and arrays are inserted item by item (no `.join('')`). For lists, use `createCatalogComponents()` (see "Children components") rather than mapping items to markup in the template: each item becomes a child component with its own events and state, kept across renders with `trackBy`. Unquoted attribute values (`title=${x}`) are quoted automatically. A plain value in tag position (`<input ${x}>`) is filtered like `raw()` there: plain attributes stay, handlers, bindings and script URLs are dropped. Wrap HTML you want rendered in `raw()`: it's parsed in place at render (works inside `<svg>`/`<table>`) and loses Nutin's binding attributes (`data-event`, `data-component`, `data-catalog`, `data-bind`, `data-i18n`, `data-pipe*`). `trustedRaw()` keeps them, for markup you wrote yourself (e.g. compiled Markdown). An untagged template literal escapes nothing, and the build warns about each one containing `${}`.
 
-Every `render()` also sanitizes the template (`SecurityHelper.sanitizeToFragment()`) and inserts the resulting nodes directly — never re-parsed from a string. `trustLevel` (`'strict' | 'normal' | 'trusted'`, default `'normal'`) controls how much is stripped (`<script>`/`<style>`/`<link>`/`<base>`/`<meta>`, inline handlers, `srcdoc`, `javascript:` URLs, `data:` frames and SVG `<animate>`/`<set>` targeting URL attributes from `normal` up; `<iframe>`/`<object>`/`<embed>` and all `data:` URLs under `strict` only). Don't interpolate data into `data-event` args or `style`: use `data-x="${v}"` + `@dataset:x`. It is a second layer for `raw()` content, not a substitute for `html`.
+Every `render()` also sanitizes the template (`SecurityHelper.sanitizeToFragment()`) and inserts the resulting nodes directly — never re-parsed from a string. `trustLevel` (`'strict' | 'normal' | 'trusted'`, default `'normal'`) controls how much is stripped (`<script>`/`<style>`/`<link>`/`<base>`/`<meta>`, inline handlers, `srcdoc`, `javascript:` URLs, `data:` frames and SVG `<animate>`/`<set>` targeting URL attributes from `normal` up; `<iframe>`/`<object>`/`<embed>` and all `data:` URLs under `strict` only). Don't interpolate data into `data-event` args or `style`: use `data-x="${v}"` + `@dataset:x`. URL attributes (`href`, `src`, `action`, …) whose interpolated value makes them a `javascript:` URL get `about:invalid#nutin-blocked` instead, at every trust level. It is a second layer for `raw()` content, not a substitute for `html`.
 
 ## Testing (testin-nutin)
 
-Nutin's own hand-built test runner + jsdom - not Jest. `describe`/`it` only (**no `test()` alias**), `beforeAll`/`beforeEach`/`afterEach`/`afterAll` (one of each per suite, no stacking - inside `describe` statement, not top-level). All globals — no imports needed in test files.
+Nutin's own hand-built test runner + jsdom - not Jest. Tests are plain JavaScript (`*.test.js` importing the compiled `#root/dist/...` output){{#if (eq lang "ts")}}, so they aren't type-checked{{/if}}. `describe`/`it` only (**no `test()` alias**), `beforeAll`/`beforeEach`/`afterEach`/`afterAll` (one of each per suite, no stacking - anywhere inside the `describe` statement, not top-level). `it.todo(name)` lists a pending test. All globals — no imports needed in test files.
 
 - Matchers: `toBe`, `toEqual`, `toContain`, `toBeTruthy`/`toBeFalsy`, `toBeDefined`/`toBeUndefined`, `toBeInstanceOf`, `toHaveBeenCalled`/`toHaveBeenCalledWith`, `toBeLessThan`/`toBeGreaterThan`, `toThrow` — each has a `.not` counterpart.
 - `spyOn(obj, 'method')` returns `.calls`/`.callCount`/`.lastCall`, `.andCallFake(fn)`/`.andReturn(v)`, `.restore()` — unlike mocks, calls pass through by default.
 - `tools/testin-nutin/mocks/` has ready-made `MockEventBus`/`MockHttpClient`/`MockI18n`/`MockRouter` for constructor injection.
-- `useFakeTimers()`/`useRealTimers()`/`advanceTimersByTime(ms)`/`runAllTimers()` for time-dependent code.
+- `useFakeTimers()`/`useRealTimers()`/`advanceTimersByTime(ms)`/`runAllTimers()` for time-dependent code; `flushPromises()` for pending promises.
+- `silenceConsole(method | methods, fn)` runs `fn` with those `console` methods muted (sync or async). Use it in any test that triggers an expected warning/error.
+- `$(selector)`/`$$(selector)` — `document.querySelector`/`querySelectorAll` (as an array).
 - Test discovery/scope controlled by `nutin.config.js`'s `testinNutin.includeApp`/`includeFramework`.
 
 ## Nutin
@@ -174,4 +166,4 @@ When modifying Nutin `core/` files:
 
 ## Documentation
 
-[Nutin Documentation](https://github.com/LoisKOUNINEF/nutin/tree/main/docs)
+[Nutin Documentation](https://www.nutin.org/docs)

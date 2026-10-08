@@ -6,7 +6,7 @@ Constructing a component creates and mounts its root element immediately (at `mo
 
 ## What a component owns
 
-- **A render pipeline** — `onBeforeRender()` → sanitized `innerHTML` from `generateTemplate()` → mount `data-component`/`data-catalog` children → hydrate `data-i18n`/`data-pipe` attributes and drop empty `data-optional` elements → bind `data-event` listeners → `onAfterRender()`. Runs the same way on every render, not just the first. See [What lifecycle hooks are available?](../LIFECYCLE_HOOKS/WHAT_LIFECYCLE_HOOKS_ARE_AVAILABLE.md).
+- **A render pipeline** — `onBeforeRender()` → sanitized nodes from `generateTemplate()` → mount `data-component`/`data-catalog` children → hydrate `data-i18n`/`data-pipe` attributes and drop empty `data-optional` elements → bind `data-event` listeners → `onAfterRender()`. Runs the same way on every render, not just the first. See [What lifecycle hooks are available?](../LIFECYCLE_HOOKS/WHAT_LIFECYCLE_HOOKS_ARE_AVAILABLE.md).
 - **Two independent data channels** — `config` feeds `templateFn` (with `defaults`/`normalizeKeys` merging), while `props` + `data-bind` handle form-field binding. See [How do I pass data to a component?](./HOWDOI_PASS_DATA_TO_A_COMPONENT.md).
 - **Child composition** — `registerChildren()` mounts nested components (`data-component`) or repeated lists (`data-catalog`), re-run on every render. Children are recreated each time unless given a `key` (or a `trackBy` for catalogs), which keeps them and their DOM state across the parent's re-renders. See [How do I register child components?](./HOWDOI_REGISTER_CHILD_COMPONENTS.md).
 - **DOM events** — `data-event="click:_handler"` attributes are bound/rebound automatically each render and torn down on `destroy()`. See [How do I handle DOM events?](../EVENTS/HOWDOI_HANDLE_DOM_EVENTS.md).
@@ -17,7 +17,7 @@ Constructing a component creates and mounts its root element immediately (at `mo
 
 `Component` and [`View`](../VIEWS_AND_ROUTING/WHATIS_A_VIEW.md) are siblings — both extend `BaseComponent`.
 
-A component is small, reusable, and embeddable anywhere a parent component or view mounts it; it isn't tied to a route, and application code constructs it directly (`new SomeComponent(el, config)`). 
+A component is small, reusable, and embeddable anywhere a parent component or view mounts it; it isn't tied to a route, and application code constructs it directly (`new SomeComponent(el, config)`). Components also work without the router: `main.ts` can mount one into any element of the page (`new SomeComponent(el, config).render()`) and never call `AppRouter`, e.g. for a widget in an existing page or a browser extension popup. 
 
 Nutin favors composing many small, focused components rather than a few large ones, orchestrated by parent components and, ultimately, a view.
 

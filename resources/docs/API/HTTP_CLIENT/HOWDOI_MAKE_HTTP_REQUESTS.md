@@ -1,7 +1,7 @@
 # How do I make HTTP requests?
 
 ```ts
-import { AppHttpClient, Service, path } from '../core/index.js';
+import { AppHttpClient, HttpClient, Service, path } from '../core/index.js';
 
 export class UsersService extends Service<UsersService> {
   constructor() { super(); }
@@ -109,7 +109,7 @@ class FilesClient extends HttpClient {
 }
 ```
 
-A URL is trusted when it has the same origin as an entry and its path starts with the entry's path.
+A URL is trusted when it has the same origin as an entry and its path is under the entry's path, segment by segment: `/api/v1` covers `/api/v1/users` but not `/api/v10`.
 
 ## Interceptors
 

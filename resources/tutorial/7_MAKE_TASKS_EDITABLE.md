@@ -204,7 +204,7 @@ export class TaskCardComponent extends Component {
     }
 
     private _goToEdit(): void {
-        Navigation.navigateTo(`/tasks/${this._task.id}`)
+        Navigation.navigateTo(`/tasks/${this.config.id}`)
     }
 }
 ```
@@ -239,7 +239,7 @@ export class TaskCatalogView extends View {
 
     registerChildren(): ComponentConfig[] {
         const taskCatalogChildren: ComponentConfig[] = [
-            /* add-task */
+            /* new-task */
             ...this.createCatalogComponents({
                 /* ... */
                 // A card whose task didn't change is kept on re-render.

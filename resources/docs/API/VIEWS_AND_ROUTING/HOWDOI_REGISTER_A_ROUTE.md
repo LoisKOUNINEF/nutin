@@ -54,7 +54,7 @@ export const appRoutes: Routes = {
 ```
 
 - **Import the view by its own file, never through a barrel** (`views/index.ts`, `components/index.ts`). A static import anywhere in the app, even of a barrel re-exporting it, puts a file back in the main bundle. The same goes for the components a lazy view uses: import them by their file in the view, so they follow it into its chunk.
-- **Keep the first page eager.** A lazy home page costs an extra request before anything renders.
+- **Keep the first page eager.** A lazy home page costs an extra request before anything renders. The same goes, to a lesser extent, for `/404`.
 - **Navigation:** guards run first, then the chunk loads. The current view stays on screen until the new one is ready. If another navigation starts meanwhile, the slower one is dropped.
 - **Failed loads:** if the chunk can't be loaded (typically a deploy replaced the chunks while a tab was open, or the network dropped), the error is logged and the browser does a full page load of the target URL, which fetches the current build. If the same URL fails again within 10 seconds, it's only logged, so a broken chunk can't reload forever.
 - **SEO pages:** with `generateSEOFiles`, lazy routes are prerendered like the others.

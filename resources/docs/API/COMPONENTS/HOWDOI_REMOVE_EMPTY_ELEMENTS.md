@@ -1,6 +1,6 @@
 # How do I remove empty elements?
 
-Mark an element `data-optional`, and it's removed after render if it (or its interpolated value) ends up empty.
+Mark an element `data-optional`, and it's removed after render if it (or its interpolated value) ends up empty. Only the rendering component's own elements are checked.
 
 ```html
 <!-- Removed if myOptionalData is undefined -->

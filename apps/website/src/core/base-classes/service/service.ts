@@ -3,11 +3,11 @@
  * Supports constructor parameters for initialization.
  */
 export abstract class Service<T extends Service<T>> {
-  private static _instances = new Map<Function, any>();
+  private static _instances = new Map<Function, Service<any>>();
   private static _instantiating = new Set<Function>();
   private _cleanupCallbacks: (() => void)[] = [];
 
-  constructor(...args: any[]) {
+  constructor() {
     const constructor = this.constructor as new (...args: any[]) => T;
 
     if (!Service._instantiating.has(constructor)) {
@@ -23,10 +23,10 @@ export abstract class Service<T extends Service<T>> {
    * doesn't exist yet. Throws if args are passed to an already-initialized instance,
    * preventing silent re-initialization mismatches.
    */
-  public static getInstance<T extends Service<T>>(
-    this: new (...args: any[]) => T,
-    ...args: any[]
-  ): T {
+  public static getInstance<C extends new (...args: any) => Service<any>>(
+    this: C,
+    ...args: ConstructorParameters<C> | []
+  ): InstanceType<C> {
     const alreadyExists = Service._instances.has(this);
 
     if (alreadyExists && args.length > 0) {
@@ -44,7 +44,7 @@ export abstract class Service<T extends Service<T>> {
       Service._instantiating.delete(this);
     }
 
-    return Service._instances.get(this);
+    return Service._instances.get(this) as InstanceType<C>;
   }
 
   public static hasInstance<T extends Service<T>>(

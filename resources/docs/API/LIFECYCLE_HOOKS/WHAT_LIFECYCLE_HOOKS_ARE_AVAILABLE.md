@@ -27,7 +27,7 @@ public onExit(): void {}
 
 ```
 onBeforeRender()
-element.innerHTML = sanitize(generateTemplate())
+element.replaceChildren(sanitizeToFragment(generateTemplate()))
 compose()          → addChildren()             (mount data-component/data-catalog children)
 child.onReuse()    for every kept child (see below)
 hydrate()          → parseDataAttributes()     (data-i18n, data-pipe)
@@ -58,13 +58,15 @@ onAfterDestroy()
 These are called **only by the router**, never by `render()`/`destroy()` — they fire on navigation, not on every re-render. In the full navigation sequence: 
 
 ```
-oldView.destroy() 
-oldView.onExit() 
-view-unmount event 
-newView.setRouteParams(params) 
-newView.render() 
-newView.onEnter() 
-view-mount event.
+newView = route's factory()   (a lazy route's chunk loads here, while the old view stays up)
+oldView.destroy()
+oldView.onExit()
+view-unmount event
+newView.setRouteParams(params)
+newView.render()
+newView.onEnter()
+view-mount event
+document.title updated, scroll to the URL's #hash, focus moved to the new view
 ```
 
 A view rendered outside the router (e.g. `new SomeView().render()` by hand) never has `onEnter`/`onExit` called.
@@ -74,7 +76,7 @@ A view rendered outside the router (e.g. `new SomeView().render()` by hand) neve
 `Lifecycle` (from `core/index.ts`) exposes emitters/subscribers with the *same names* as the hooks above (`beforeRender`, `afterRender`, `beforeDestroy`, `afterDestroy`, plus `viewMount(viewName)`/`viewUnmount(viewName)`):
 
 ```ts
-Lifecycle.onViewMount((viewName) => console.log('mounted', viewName));
+Lifecycle.onViewMount(({ viewName }) => console.log('mounted', viewName));
 ```
 
 Only `viewMount`/`viewUnmount` are actually emitted by the framework (from the router, on every navigation). `Lifecycle.beforeRender()`/`afterRender()`/`beforeDestroy()`/`afterDestroy()` are **not** auto-emitted by `render()`/`destroy()` or by the protected hooks above — overriding `onBeforeRender()` on your own component customizes that component's own render step, but does not cause `Lifecycle.onBeforeRender(cb)` subscribers elsewhere in the app to fire. Treat the two as unrelated, same-named mechanisms.

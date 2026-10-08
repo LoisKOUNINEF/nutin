@@ -57,11 +57,33 @@ describe('EventHelper', () => {
     expect(eventListeners.length).toBe(0);
   });
 
-  it('does nothing when the referenced handler does not exist or is not a function', () => {
-    container.innerHTML = '<button data-event="click:missingHandler"></button>';
+  it('binds nothing and warns when the referenced handler does not exist or is not a function', () => {
+    container.innerHTML = '<button data-event="click:missingHandler"></button><a data-event="click:typo"></a>';
     const component = { missingHandler: 'not-a-function' };
+    const warnSpy = spyOn(console, 'warn').andCallFake(() => {});
+    try {
+      EventHelper.bindEvents(component, container, eventListeners);
+      expect(eventListeners.length).toBe(0);
+      expect(warnSpy.callCount).toBe(2);
+      expect(warnSpy.calls[1][0]).toContain('has no method "typo"');
+    } finally {
+      warnSpy.restore();
+    }
+  });
+
+  it('keeps commas inside quoted literal args', () => {
+    container.innerHTML = `<button data-event="click:handleClick:'a,b',2,&quot;c,d&quot;"></button>`;
+    const button = container.querySelector('button');
+
+    let received = null;
+    const component = {
+      handleClick(...args) { received = args; },
+    };
+
     EventHelper.bindEvents(component, container, eventListeners);
-    expect(eventListeners.length).toBe(0);
+    click(button);
+
+    expect(received).toEqual(['a,b', 2, 'c,d']);
   });
 
   it('tracks each bound listener in the eventListeners array', () => {

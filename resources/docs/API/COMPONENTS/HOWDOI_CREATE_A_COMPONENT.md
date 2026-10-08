@@ -75,7 +75,7 @@ interface ComponentOptions<K = any> {
 }
 ```
 
-- `mountTarget` as a CSS selector string **appends** the component into that element; passing an actual `HTMLElement` **replaces** it instead. A selector that matches nothing leaves the component unmounted, silently.
+- `mountTarget` as a CSS selector string **appends** the component into that element; passing an actual `HTMLElement` **replaces** it instead. A selector that matches nothing (or a `null` element) leaves the component unmounted, and logs a `console.error` in development.
 - `templateFn` always receives the *normalized* config — `defaults` merged under `config`, then every key listed in `normalizeKeys` coerced to `''` if it's still `undefined`/`null`. See [How do I pass data to a component?](./HOWDOI_PASS_DATA_TO_A_COMPONENT.md) for the full normalization rules.
 - For templates that need branching or instance state, override `generateTemplate()` instead of passing `templateFn`. See [How do I generate a template?](./HOWDOI_GENERATE_A_TEMPLATE.md).
 - `trustLevel` controls HTML sanitization of the rendered template — see [How do I control HTML sanitization?](./HOWDOI_CONTROL_HTML_SANITIZATION.md).
@@ -86,8 +86,9 @@ interface ComponentOptions<K = any> {
 
 ```
 onBeforeRender()
-element.innerHTML = sanitize(generateTemplate())
+element.replaceChildren(sanitizeToFragment(generateTemplate()))
 compose()      → mounts data-component/data-catalog children (see registerChildren)
+child.onReuse() → for every child kept across the re-render (key / trackBy)
 hydrate()      → parses data-i18n / data-pipe, then removes empty data-optional elements
 autoBindEvents() → rebinds all data-event listeners
 onAfterRender()

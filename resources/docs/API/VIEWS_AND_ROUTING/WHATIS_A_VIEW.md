@@ -43,6 +43,8 @@ After an in-app navigation (a link, `Navigation.navigateTo()`, back/forward, a g
 2. otherwise, the `<h1>` inside `<main>` (e.g. one written in `index.html` around the view);
 3. otherwise, the view's own element, and the page title (`document.title`, see above) is announced through a visually hidden live region.
 
+When a heading takes focus, nothing is announced separately: screen readers read the focused heading, which tells the user the page changed. The live region is only for a view without one, whose element has nothing meaningful to read.
+
 If the focused element has no `tabindex`, it gets `tabindex="-1"` (so it can take focus without becoming a tab stop) and no focus ring, since it isn't interactive; both are removed once it loses focus. Screen readers still read it, and Tab continues from it. An element with its own `tabindex` keeps its own focus styling. The page doesn't scroll to it, so a `#hash` target stays in view.
 
 The first page load and `Navigation.reload()` leave focus where it is: the first load is the browser's to handle, and a reload re-renders the page the user is already on.

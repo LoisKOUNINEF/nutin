@@ -4,30 +4,20 @@ ogImage: /assets/images/og-covers/og-cover-articles.jpg
 
 # Why Nutin?
 
-## An already powerful platform
+## A powerful platform
 
 The web platform already provides powerful primitives for building web applications.
 
-What it doesn't provide is an application architecture.
-
-Nutin provides that structure without replacing the platform underneath it, and without runtime dependencies.
-
-## Structure without replacing the platform
-
-Nutin is a lightweight frontend framework for building structured web applications with standard HTML, CSS, and TypeScript or JavaScript, using the browser's native APIs at its core.
-
-Nutin doesn't try to replace the web platform with its own abstractions; it gives a structured way to use native APIs. Its abstractions are boundaries around platform capabilities, rather than replacements for them.
-
-Nutin adds structure where an application benefits from it, while leaving the underlying platform visible and accessible.
+What it doesn't provide is an architecture for organizing an application as it grows.
 
 ## Nutin's concepts
 
 Nutin provides a small set of explicit concepts, each with a clear responsibility:
 
 * Views **orchestrate application flow**
-* Components **encapsulate UI behavior**
-* Services **handle application concerns**
-* Events **connect them without coupling them**
+* Components **encapsulate UI behavior** with explicit lifecycle methods
+* Services **handle application concerns** through shared instances
+* Events **connect them** through type-checked contracts
 
 ## What Nutin adds
 
@@ -50,20 +40,21 @@ Your application owns its architecture. Nutin provides structure within it.
 
 Nutin is a good fit when you:
 
-* want application structure without adopting a separate rendering model;
-* want to work directly with the DOM and browser APIs;
+* want application structure with a thin, explicit rendering model;
+* want to work mostly with the DOM and browser APIs;
 * want framework code and abstractions to remain visible and editable;
 * prefer a small set of explicit concepts over a larger framework ecosystem.
 
-This can include internal tools, dashboards, CRUD applications, documentation and content sites, browser extensions, embedded interfaces, and other small-to-medium applications.
+This can include internal tools, dashboards, CRUD applications, documentation and content sites, and other small-to-medium applications. Without the router, Nutin can also be a guest on someone else's page (a widget, a browser extension's popup...).
 
 ## When not to use Nutin?
 
 Nutin is not a good fit if:
 
-* server-side rendering, hydration, or other framework-specific rendering strategies are central requirements;
 * your project depends heavily on a mature ecosystem of framework-specific libraries or UI components;
-* your team benefits from the conventions and tooling of an established framework ecosystem.
+* your team benefits from the conventions and tooling of an established framework ecosystem;
+* much of your UI depends on fine-grained state that changes often: Nutin has no reactive state and no DOM diffing;
+* you need routing inside an embedded widget.
 
 ## More about Nutin
 

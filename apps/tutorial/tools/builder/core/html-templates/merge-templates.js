@@ -3,12 +3,10 @@ import path from 'path';
 import esbuild from 'esbuild';
 import { getFilesRecursive, print, pascalCased, capitalized } from '../../../utils/index.js';
 import { PATHS } from '../app/paths.js';
-import { scanTemplate, minifyTemplateBody } from './template-literal.js';
+import { findInlineTemplate, minifyTemplateBody } from './template-literal.js';
 
 const PLACEHOLDER = '__TEMPLATE_PLACEHOLDER__';
 const TARGET_EXTENSIONS = ['.ts', '.js'];
-// Up to the opening backtick; scanTemplate() finds the closing one, past any nested html``.
-const TEMPLATE_START = /const\s+(?:template|templateFn)\s*=?\s*(?:\(.*?\)\s*=>\s*)?(html\s*)?`/;
 
 // Where each merged .html template sits in its code file (merge-templates writes it,
 // compile-ts reads it to report type errors at the .html line). Keyed by path relative to
@@ -168,22 +166,6 @@ export function placeholderPosition(content) {
   const index = content.indexOf(PLACEHOLDER);
   const before = content.slice(0, index);
   return { line: before.split('\n').length, col: index - before.lastIndexOf('\n') };
-}
-
-// The first `const template`/`templateFn` literal: whether it is html``-tagged, where its
-// body starts and ends, and the body (null when its closing backtick can't be found).
-function findInlineTemplate(content) {
-  const match = TEMPLATE_START.exec(content);
-  if (!match) return null;
-
-  const open = match.index + match[0].length;
-  const scan = scanTemplate(content, open);
-  return {
-    tagged: Boolean(match[1]),
-    open,
-    end: scan?.end ?? null,
-    body: scan ? content.slice(open, scan.end) : null,
-  };
 }
 
 // Last safety net: minified code that no longer parses is replaced by the code as written.

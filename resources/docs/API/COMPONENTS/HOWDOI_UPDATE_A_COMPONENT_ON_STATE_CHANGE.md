@@ -6,14 +6,14 @@ Dynamic rendering relies on events. You can also call `.render()` directly. You 
 
 ```ts
 class UserCardComponent extends Component {
-  /* ... */
-  onBeforeRender() {
+  constructor(mountTarget: HTMLElement) {
+    super({ mountTarget, templateFn: /* ... */ });
     this.listenToRenderEvents(['logged-in', 'logged-out']);
   }
 }
 ```
 
-Each call re-runs the whole pipeline — regenerating the template, rebuilding children/catalogs from scratch, and rebinding events. There's no diffing/patching, so a full re-render is the only update mechanism.
+Each call re-runs the whole pipeline — regenerating the template, rebuilding children/catalogs from scratch, and rebinding events. There's no diffing/patching: a child is only kept across the re-render when it has a `key` (or its catalog a `trackBy`), see [Keeping children across re-renders](./HOWDOI_REGISTER_CHILD_COMPONENTS.md#keeping-children-across-re-renders).
 
 See [How do I listen to application events?](../EVENTS/HOWDOI_LISTEN_TO_APPLICATION_EVENTS.md)
 

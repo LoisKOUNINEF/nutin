@@ -2,16 +2,25 @@ import { readFileSync } from 'fs';
 import path from 'path';
 import { errorExit } from '../../../utils/index.js';
 import { PATHS } from './paths.js';
-import { findDuplicateRouteKeys } from './route-keys.js';
+import { builderConfig } from '../../builder.config.js';
+import { findDuplicateRouteKeys, readRoutesImporters } from './route-keys.js';
 
 const ROUTES_FILE = path.join(PATHS.sourceApp, 'routes.{{#if (eq lang "js")}}js{{else}}ts{{/if}}');
 
+// Only when the routes are used: imported by app code, or prerendered (generateSEOFiles bundles
+// appRoutes). An app without the router (components mounted into a page) needs no routes file.
 async function validateRoutes() {
+  const importers = readRoutesImporters(PATHS.sourceApp, ROUTES_FILE);
+  if (importers.length === 0 && !builderConfig.generateSEO) return;
+
   let source;
   try {
     source = readFileSync(ROUTES_FILE, 'utf-8');
   } catch {
-    errorExit(`Failed to read ${ROUTES_FILE}`, 'validate-routes');
+    const usedBy = importers.length
+      ? `imported by ${importers.map((file) => path.relative(process.cwd(), file)).join(', ')}`
+      : 'needed by generateSEOFiles';
+    errorExit(`Failed to read ${ROUTES_FILE} (${usedBy})`, 'validate-routes');
   }
 
   if (!/\bappRoutes\b/.test(source)) {
