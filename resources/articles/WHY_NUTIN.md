@@ -4,50 +4,73 @@ ogImage: /assets/images/og-covers/og-cover-articles.jpg
 
 # Why Nutin?
 
-## What is Nutin?
+## An already powerful platform
 
-Nutin is a lightweight frontend framework for building structured web applications with standard HTML, CSS, and TypeScript or JavaScript.
+The web platform already provides powerful primitives for building web applications.
 
-It provides the structure you need as an application grows — components, views, routing, services, events, and a build system — while keeping the browser's native APIs at the center of your application.
+What it doesn't provide is an application architecture.
 
-Nutin doesn't try to replace the web platform with its own abstractions; it gives a structured way to use native APIs. 
+Nutin provides that structure without replacing the platform underneath it, and without runtime dependencies.
 
-**Your application owns the framework, not the other way around**: rather than treating the framework as an opaque dependency, Nutin lives alongside your application. Nutin's update system never overwrites your edits: when an update touches a file you changed, you get a diff to merge instead. See [Updater](https://nutin.org/docs/tools/updater).
+## Structure without replacing the platform
 
-## What problems does Nutin solve?
+Nutin is a lightweight frontend framework for building structured web applications with standard HTML, CSS, and TypeScript or JavaScript, using the browser's native APIs at its core.
 
-| Criteria | The problem | How Nutin approaches it |
-|----------|--------------------------|-------------------|
-| **Vanilla JS vs. Application Structure** | The web platform gives you powerful primitives, but leaves application architecture largely up to you. As an application grows, responsibilities can become difficult to organize consistently. | Nutin provides a small set of explicit concepts — components, views, services, routes, and events — while keeping your application close to the platform. |
-| **Structure without a large runtime** | Larger frameworks can introduce abstractions and runtime machinery that aren't necessary for every application. | Nutin builds on native HTML, DOM APIs, and browser events rather than replacing them with a separate rendering model. |
-| **Framework ownership** | Framework upgrades can make the framework itself an increasingly important part of an application's architecture. | Nutin is designed so that the application's code and architecture remain visible and editable. |
-| **Growing applications** | A project can start comfortably with vanilla JavaScript and reach a point where introducing structure becomes increasingly difficult. | Nutin provides structure without requiring an application to adopt a fundamentally different programming model. |
+Nutin doesn't try to replace the web platform with its own abstractions; it gives a structured way to use native APIs. Its abstractions are boundaries around platform capabilities, rather than replacements for them.
+
+Nutin adds structure where an application benefits from it, while leaving the underlying platform visible and accessible.
+
+## Nutin's concepts
+
+Nutin provides a small set of explicit concepts, each with a clear responsibility:
+
+* Views **orchestrate application flow**
+* Components **encapsulate UI behavior**
+* Services **handle application concerns**
+* Events **connect them without coupling them**
+
+## What Nutin adds
+
+* **[Runtime](https://nutin.org/docs/api)**: a router (guards, lazy routes), pipes, an HTTP client and an HTML tagged template that escapes interpolated values.
+* **[Tooling](https://nutin.org/docs/tools)**: a generator, a dev server with live reload, and a builder (code splitting, minification, compression).
+* **[Options](https://nutin.org/docs/options-and-features)**: Tailwind CSS, i18n and SEO file generation.
+* **[Features](https://nutin.org/docs/options-and-features)**: Docker and Markdown.
+
+## Your application owns Nutin
+
+**The framework should remain subordinate to the application**.
+
+Rather than treating the framework as an opaque dependency, Nutin's framework code lives alongside your application, with its own tests.
+
+When an update modifies a file you've changed, Nutin merges the changes and leaves only conflicting edits for you to resolve. See [Updater](https://nutin.org/docs/tools/updater).
+
+Your application owns its architecture. Nutin provides structure within it.
 
 ## When to use Nutin?
 
 Nutin is a good fit when you:
 
-- want explicit structure without adopting a large framework;
-- want to work directly with the DOM and browser APIs;
-- are comfortable bringing your own UI components and libraries when needed;
-- want the framework's concepts and implementation to remain understandable and accessible.
+* want application structure without adopting a separate rendering model;
+* want to work directly with the DOM and browser APIs;
+* want framework code and abstractions to remain visible and editable;
+* prefer a small set of explicit concepts over a larger framework ecosystem.
 
-This can include internal tools, dashboards, CRUD applications, browser extensions, embedded interfaces, and other small-to-medium applications where a larger framework would introduce more structure or machinery than the application needs.
+This can include internal tools, dashboards, CRUD applications, documentation and content sites, browser extensions, embedded interfaces, and other small-to-medium applications.
 
 ## When not to use Nutin?
 
-Nutin may not be the right fit if your project depends heavily on:
+Nutin is not a good fit if:
 
-- a large ecosystem of framework-specific libraries or UI components;
-- established conventions and tooling provided by a large framework;
-- a team that benefits significantly from the established conventions, ecosystem, and developer pool of another framework;
-- features or abstractions that Nutin deliberately leaves to the web platform or third-party libraries.
+* server-side rendering, hydration, or other framework-specific rendering strategies are central requirements;
+* your project depends heavily on a mature ecosystem of framework-specific libraries or UI components;
+* your team benefits from the conventions and tooling of an established framework ecosystem.
 
-## Behind Nutin
+## More about Nutin
+
+### Behind Nutin
 
 If you're interested in how Nutin evolved and the thinking behind its design, read [The Story Behind Nutin](https://nutin.org/articles/the-story-behind-nutin).
 
-## FAQ
+### FAQ
 
-- See [Frequently Asked Questions](FAQ.md#how-is-nutin-different-from-htmx)
-
+See the [FAQ](https://nutin.org/articles/faq).
