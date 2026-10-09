@@ -154,7 +154,7 @@ Listeners pushed to `this.eventListeners` are removed along with the component's
 
 Using AlpineJS? Moved overlays also leave its `x-data` scopes: see [With a11y-elements](https://nutin.org/guides/alpinejs#with-a11y-elements) in the AlpineJS guide.
 
-`removeOverlaysWithin(host)` removes every overlay written anywhere inside `host`, even once it has moved to `<body>`, including the overlays of child components. A component or view that keeps children across re-renders (a `key` or `trackBy`) would remove the overlays of those kept children too. Call it on an element around your own overlays instead:
+`removeOverlaysWithin(host)` removes every overlay written anywhere inside `host`, even once it has moved to `<body>`, including the overlays of child components. A component or view that keeps children across re-renders (`keep` or `keepBy`) would remove the overlays of those kept children too. Call it on an element around your own overlays instead:
 
 ```ts
 // The view's own overlays are wrapped in <div class="home__overlays"> in its template.

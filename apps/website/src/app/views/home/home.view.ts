@@ -15,21 +15,21 @@ export class HomeView extends View {
     void loadA11yCardLink();
   }
 
-  public registerChildren(): ComponentConfig[] {
+  public registerChildren(): Nutin.ComponentConfig[] {
     return [
       this.getExtrasConfig(),
       ...this.getSnippetsConfig(),
     ]
   }
 
-  private getExtrasConfig(): ComponentConfig {
+  private getExtrasConfig(): Nutin.ComponentConfig {
     return {
       selector: 'home-extras',
       factory: (el) => new HomeExtrasComponent(el)
     }
   }
 
-  private getSnippetsConfig(): ComponentConfig[] {
+  private getSnippetsConfig(): Nutin.ComponentConfig[] {
     return [{
       selector: 'snippet-create',
       factory: (el) => new SnippetComponent(el, {
@@ -63,7 +63,7 @@ import { HelloWorldComponent } from '../../components/hello-world/hello-world.co
 class HomeView extends View {
   /* ... */
 
-  registerChildren(): ComponentConfig[] {
+  registerChildren(): Nutin.ComponentConfig[] {
     return [
       {
         selector: 'hello',

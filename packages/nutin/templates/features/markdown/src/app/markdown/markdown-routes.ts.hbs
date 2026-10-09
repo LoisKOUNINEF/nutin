@@ -15,7 +15,7 @@ export interface IMarkdownRoutesOptions {
 // written after the spread with the same path replaces the generated one.
 // By default, the routes are lazy: MarkdownView and its components are loaded on the first
 // visit to one of them, not with the rest of the app.
-export function markdownRoutes(options: IMarkdownRoutesOptions = {}): Routes {
+export function markdownRoutes(options: IMarkdownRoutesOptions = {}): Nutin.Routes {
   const view = options.view ?? ((id: string) => import('./view/markdown.view.js').then((m) => new m.MarkdownView({ id })));
   return Object.fromEntries(
     MarkdownManifestsService.all.map(({ id, sectionInPath }) => sectionInPath

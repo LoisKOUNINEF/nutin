@@ -1,5 +1,6 @@
 import { NavbarComponent } from '#root/dist/src/app/components/globals/navbar/navbar.component.js';
 import { Navigation } from '#root/dist/src/core/index.js';
+import { CONFIG } from '#root/dist/src/core/config.js';
 function mount() {
   const target = document.createElement('div');
   document.body.appendChild(target);
@@ -10,6 +11,7 @@ function mount() {
 
 describe('NavbarComponent', () => {
   let navigateSpy;
+  let originalI18n;
 
   beforeAll(() => {
     setupJsdom();
@@ -18,16 +20,20 @@ describe('NavbarComponent', () => {
   beforeEach(() => {
     navigateSpy = spyOn(Navigation, 'navigateTo');
     navigateSpy.andCallFake(() => {});
+    // The site is i18n: links are rendered with the "/en" prefix. Other suites may leave i18n off.
+    originalI18n = CONFIG.i18n;
+    CONFIG.i18n = true;
   });
 
   afterEach(() => {
     navigateSpy.restore();
+    CONFIG.i18n = originalI18n;
   });
 
   it('lists the four documentation sections in the docs dropdown', () => {
     const component = mount();
     const hrefs = [...document.querySelectorAll('#navbar-docs-dropdown [role="menuitem"]')].map((a) => a.getAttribute('href'));
-    expect(hrefs).toEqual(['/docs/api', '/docs/options-and-features', '/docs/testing', '/docs/tools']);
+    expect(hrefs).toEqual(['/en/docs/api/', '/en/docs/options-and-features/', '/en/docs/testing/', '/en/docs/tools/']);
     component.destroy();
   });
 
@@ -37,9 +43,9 @@ describe('NavbarComponent', () => {
     // What a11y-elements does on connect once its bundle is loaded.
     document.body.appendChild(dropdown);
 
-    dropdown.querySelector('[href="/docs/testing"]').click();
+    dropdown.querySelector('[href="/en/docs/testing/"]').click();
     expect(navigateSpy.callCount).toBe(1);
-    expect(navigateSpy.lastCall[0]).toBe('/docs/testing');
+    expect(navigateSpy.lastCall[0]).toBe('/en/docs/testing/');
     component.destroy();
   });
 
@@ -55,7 +61,7 @@ describe('NavbarComponent', () => {
   it('lists the guides in the guides dropdown', () => {
     const component = mount();
     const hrefs = [...document.querySelectorAll('#navbar-guides-dropdown [role="menuitem"]')].map((a) => a.getAttribute('href'));
-    expect(hrefs).toEqual(['/guides/a11y-elements', '/guides/alpinejs']);
+    expect(hrefs).toEqual(['/en/guides/a11y-elements/', '/en/guides/alpinejs/', '/en/guides/jest-vitest/']);
     component.destroy();
   });
 
@@ -64,9 +70,9 @@ describe('NavbarComponent', () => {
     const dropdown = document.getElementById('navbar-guides-dropdown');
     document.body.appendChild(dropdown);
 
-    dropdown.querySelector('[href="/guides/a11y-elements"]').click();
+    dropdown.querySelector('[href="/en/guides/a11y-elements/"]').click();
     expect(navigateSpy.callCount).toBe(1);
-    expect(navigateSpy.lastCall[0]).toBe('/guides/a11y-elements');
+    expect(navigateSpy.lastCall[0]).toBe('/en/guides/a11y-elements/');
     component.destroy();
   });
 
@@ -80,8 +86,8 @@ describe('NavbarComponent', () => {
 
   it('routes its own links through the SPA router', () => {
     const component = mount();
-    component.element.querySelector('a[href="/tutorial"]').click();
-    expect(navigateSpy.lastCall[0]).toBe('/tutorial');
+    component.element.querySelector('a[href="/en/tutorial/"]').click();
+    expect(navigateSpy.lastCall[0]).toBe('/en/tutorial/');
     component.destroy();
   });
 

@@ -30,7 +30,7 @@ export class TaskCatalogView extends View {
 
     constructor() { /* ... */ }
 
-    registerChildren(): ComponentConfig[] {
+    registerChildren(): Nutin.ComponentConfig[] {
         // One TaskCardComponent is created for each task.
         return this.createCatalogComponents({
             items: this._tasks,
@@ -86,7 +86,7 @@ export class TaskCatalogView extends View {
 /* ... */
 import { TaskCatalogView } from './views/task-catalog/task-catalog.view.js';
 
-export const appRoutes: Routes = {
+export const appRoutes: Nutin.Routes = {
     // Make your new page the landing page
     '/': () => new TaskCatalogView(),
     /* ... */

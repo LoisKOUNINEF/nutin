@@ -81,7 +81,7 @@ Adding a folder is all it takes: `markdownRoutes()` creates its route (`/<routeP
 `markdownRoutes()` returns one route per folder, each rendering a `MarkdownView` guarded by `MarkdownGuards`:
 
 ```ts
-export const appRoutes: Routes = {
+export const appRoutes: Nutin.Routes = {
   '/': () => new HomeView(),
   ...markdownRoutes(),
   '/404': () => new NotFoundView(),

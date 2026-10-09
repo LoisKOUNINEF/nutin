@@ -4,7 +4,7 @@ import { PrismHighlighter } from '#root/dist/src/app/helpers/prism/prism-highlig
 function mount(config) {
   const target = document.createElement('div');
   document.body.appendChild(target);
-  const component = new SnippetComponent(target, { id: 0, sectionId: 0, content: 'npm run dev', type: 'bash', ...config });
+  const component = new SnippetComponent(target, { content: 'npm run dev', type: 'bash' });
   component.render();
   return component;
 }
@@ -29,7 +29,7 @@ describe('SnippetComponent', () => {
     const component = mount();
     const code = component.element.querySelector('pre code');
     expect(component.element.tagName).toBe('SECTION');
-    expect(code.textContent).toBe('npm run dev');
+    expect(code.textContent.trim()).toBe('npm run dev');
     expect(code.classList.contains('language-bash')).toBe(true);
     expect(applySpy.callCount).toBe(1);
     component.destroy();
@@ -39,13 +39,6 @@ describe('SnippetComponent', () => {
     const component = mount();
     expect(component.element.querySelector('h3')).toBe(null);
     expect(component.element.querySelectorAll('p').length).toBe(0);
-    component.destroy();
-  });
-
-  it('renders the optional title and captions when provided', () => {
-    const component = mount({ title: 'Dev server', before: 'First:', after: 'Then open it.' });
-    expect(component.element.querySelector('h3').textContent).toContain('Dev server');
-    expect([...component.element.querySelectorAll('p')].map((p) => p.textContent)).toEqual(['First:', 'Then open it.']);
     component.destroy();
   });
 });

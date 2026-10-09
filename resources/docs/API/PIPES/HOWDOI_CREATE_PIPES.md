@@ -12,9 +12,10 @@ AppPipeRegistry.register('slug', (value) =>
 ```
 
 ```ts
+// Nutin.PipeFunction
 type PipeFunction = (value: any, ...args: any[]) => string;
 
-AppPipeRegistry.register(name: string, fn: PipeFunction): void
+AppPipeRegistry.register(name: string, fn: Nutin.PipeFunction): void
 AppPipeRegistry.apply(name: string, value: any, args?: string[]): string
 ```
 

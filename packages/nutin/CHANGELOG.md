@@ -28,10 +28,12 @@ It corrects or reworks several earlier decisions and establishes a more solid fu
     - Responses: 204/205 and empty bodies resolve to `undefined` (they threw); `+json` types are parsed (they were returned as text). Response interceptors get a clone, so reading its body no longer breaks the request.
     - Redirects: a followed redirect that ends outside the base URL (or, without one, on another origin than requested) now throws instead of returning that origin's response, and response interceptors don't see it. Browsers strip `Authorization` on cross-origin redirects but forward custom headers (e.g. `X-Api-Key`), so APIs using those should pass `redirect: 'error'`.
 
-- **Framework types are globals**
+- **Framework types live in a global `Nutin` namespace**
 
-    - The public types are now declared in `src/core/internals.d.ts`, next to the event maps, and no longer exported from `core/index`: `ComponentConfig`, `BaseComponentOptions`, `ComponentOptions`, `ComponentProps`, `ViewOptions`, `CatalogConfig`, `CatalogItemConfig`, `CatalogItemObject`, `CatalogItemPrimitive`, `Template`, `TrustLevel`, `Routes`, `RouteGuard`, `RouteConfig`, `RouteMatch`, `IRouter`, `IEventBus`, `IHttpClient`, `IHttpClientOptions`, `IRequestConfig`, `QueryValue`, `HttpMethod`, `Language`, `Translations`, `PipeFunction`, `GlobalMountable`, `GlobalConfig`, `RegisterGlobalsOptions`, `Subscription`.
-    - Migration: remove these names from your `import { … } from '…/core/index.js'` lines. Classes and functions (`Component`, `View`, `html`, `AppRouter`, …) are still imported as before.
+    - The public types are now declared in `src/core/internals.d.ts`, inside `declare namespace Nutin`, and no longer exported from `core/index`. Use them without an import: `Nutin.ComponentConfig`, `Nutin.BaseComponentOptions`, `Nutin.ComponentOptions`, `Nutin.ComponentProps`, `Nutin.ViewOptions`, `Nutin.CatalogConfig`, `Nutin.CatalogItemConfig`, `Nutin.CatalogItemObject`, `Nutin.CatalogItemPrimitive`, `Nutin.Template`, `Nutin.TrustLevel`, `Nutin.Routes`, `Nutin.RouteGuard`, `Nutin.RouteConfig`, `Nutin.ViewFactory`, `Nutin.RouteMatch`, `Nutin.Router`, `Nutin.EventBus`, `Nutin.HttpClient`, `Nutin.HttpClientOptions`, `Nutin.RequestConfig`, `Nutin.QueryValue`, `Nutin.HttpMethod`, `Nutin.Language`, `Nutin.Translations`, `Nutin.PipeFunction`, `Nutin.GlobalMountable`, `Nutin.GlobalConfig`, `Nutin.RegisterGlobalsOptions`, `Nutin.Subscription`, and the event maps (`Nutin.EventMap`, `Nutin.EventKey`, `Nutin.AppEventMap`…).
+    - `IRouter`, `IEventBus`, `IHttpClient`, `IHttpClientOptions` and `IRequestConfig` lose their `I` prefix: `Nutin.Router`, `Nutin.EventBus`, `Nutin.HttpClient`, `Nutin.HttpClientOptions`, `Nutin.RequestConfig`.
+    - Only the name `Nutin` is global, so these types can no longer collide with lib.dom (as `NavigationEventMap` did) or with other packages' global types.
+    - Migration: remove these names from your `import { … } from '…/core/index.js'` lines and prefix them with `Nutin.`. In `src/app/globals.d.ts` (not touched by `nutin-update`), wrap your `declare interface AppEventMap { … }` in `declare namespace Nutin { interface AppEventMap { … } }`: until then, emitting an app event is a type error. Classes and functions (`Component`, `View`, `html`, `AppRouter`, …) are still imported as before.
 
 - **No teardown on page unload**
 
@@ -50,7 +52,7 @@ It corrects or reworks several earlier decisions and establishes a more solid fu
 
 - **Typed `emit()` payloads and `getInstance()` arguments**
 
-    - `AppEventBus.emit(event, data)` requires the payload its `EventMap` entry declares; `emit('navigate')` no longer compiles. An event declared `undefined` takes none. The framework's payload-less events (`reload`, `before-render`, `after-render`, `before-destroy`, `after-destroy`) are now declared `undefined` instead of `{}`.
+    - `AppEventBus.emit(event, data)` requires the payload its `Nutin.EventMap` entry declares; `emit('navigate')` no longer compiles. An event declared `undefined` takes none. The framework's payload-less events (`reload`, `before-render`, `after-render`, `before-destroy`, `after-destroy`) are now declared `undefined` instead of `{}`.
     - `MyService.getInstance(...args)` checks its arguments against the service's constructor and returns the service's type. A service without its own constructor accepts no arguments. `Service`'s own constructor takes none.
     - Migration: in `src/app/globals.d.ts`, declare payload-less app events as `undefined` instead of `{}` (or pass `{}` when emitting them); fix the type errors reported for `getInstance()` calls.
 
@@ -79,11 +81,11 @@ It corrects or reworks several earlier decisions and establishes a more solid fu
     - i18n: with `i18n: true`, a folder with one subfolder per language (`markdown-content/en/`, `markdown-content/fr/`) is compiled to one manifest per language (`/generated/<name>.<lang>.json`). The default language defines the pages; a missing translation shows the default-language page and is listed in a build warning, and a page that only exists in a translation fails the build. Links carry the `/<lang>` prefix, a language change reloads the current page in the new language, and with `generateSEOFiles` every language gets its own SEO page with `hreflang` alternates. The feature's UI texts are translatable through `src/app/markdown/locales/<lang>.json`.
     - `docker:build` works with the `markdown` feature: the Dockerfile copies every `markdownSources` folder into the image build (folder names with spaces included). A folder outside the project is rejected with a clear error.
 
-- **Stable child identity and reuse**
+- **Keeping children across re-renders**
 
-    - Children can now survive their parent's re-render. Give a single child a `key` in `registerChildren()`, or a catalog a `trackBy(item, index)`: while the key stays the same (and, for catalogs, the item is shallow-equal), the child keeps its instance and DOM — its factory isn't called and it isn't re-rendered. Its focus, caret, scroll position and unsaved input are kept. A changed or removed key still destroys and recreates it, and children without a key are recreated as before.
+    - Children can now survive their parent's re-render. Give a single child a `keep` value in `registerChildren()`, or a catalog a `keepBy(item, index)`: while that value stays the same (and, for catalogs, the item is shallow-equal), the child keeps its instance and DOM — its factory isn't called and it isn't re-rendered. Its focus, caret, scroll position and unsaved input are kept. A changed or removed value still destroys and recreates it, and children without one are recreated as before.
     - A kept child is moved into its new placeholder with `Element.moveBefore()`, so it never leaves the document: iframes don't reload, CSS animations keep running and custom elements don't get `disconnectedCallback`. Where `moveBefore()` isn't supported (Safari), it is re-inserted, and focus, caret and scroll are restored.
-    - New `onReuse()` lifecycle hook, called on a kept child instead of a render.
+    - New `onKept()` lifecycle hook, called on a kept child instead of a render.
 
 - **Code splitting**
 
@@ -91,7 +93,7 @@ It corrects or reworks several earlier decisions and establishes a more solid fu
 
 - **Lazy routes**
 
-    - A route's view factory may return a Promise: `'/reports': () => import('./views/reports/reports.view.js').then((m) => new m.ReportsView())`. New global type `ViewFactory`.
+    - A route's view factory may return a Promise: `'/reports': () => import('./views/reports/reports.view.js').then((m) => new m.ReportsView())`. New type `Nutin.ViewFactory`.
     - If a chunk fails to load, the router logs it and does a full page load of the target URL. A URL that fails again within 10 seconds is only logged.
     - Don't use lazy routes for the default route (`/`) (or the `404`, to a lesser extent).
 
@@ -115,6 +117,10 @@ It corrects or reworks several earlier decisions and establishes a more solid fu
     - The update summary now lists each `scripts`/`devDependencies` entry and `tsconfig.json` option that differs from what the installed nutin generates. They are listed only: nothing is written.
 
 ### Changes
+
+- **i18n links are localized at render.** A root-relative `<a href="/docs">` is rendered as `/en/docs/` (current language, trailing slash as in the canonical URL), so prerendered SEO pages and copied links point at the real page. They used to link to `/docs`, which served the bare SPA shell with a 200 (no title, canonical or `hreflang`) as a duplicate of `/en/docs/`. External, relative, already-prefixed and file links are left as written; i18n-off builds don't include the code.
+
+- **Docker: unprefixed paths redirect with i18n.** The `docker` feature's nginx config 301-redirects every unprefixed, extension-less path (`/docs` → `/en/docs`) to the default language, not only `/`, so old and external links stop getting a duplicate shell. `/health` is now an exact-match location so the redirect can't catch it. Language codes in `config/languages.json` must be letters, digits and `-`.
 
 - **Prerendered SEO pages drop Nutin's binding attributes.** `data-event`, `data-i18n`, `data-component`, `data-catalog`, `data-bind`, `data-pipe` and `data-pipe-source` are removed from the HTML written by `generateSEOFiles`: the app renders the page again when it starts, so nothing ever binds them. They're removed on the DOM, so text showing them (code samples) is kept, as are classes, styles and other `data-*` attributes. On nutin.org: −10% HTML, −6% brotli. `SecurityHelper.stripBindingsFrom(root)`, the in-place version of `stripBindings(markup)`, is now exported.
 
@@ -156,7 +162,7 @@ It corrects or reworks several earlier decisions and establishes a more solid fu
 
     - The build's route check (`validate-routes.js`) no longer imports `typescript`, since TypeScript 7 has no JavaScript API. It now uses esbuild for both TS and JS apps and reports the line of each duplicate route. A duplicate key anywhere in `routes.ts` is now reported, not only inside `appRoutes`. The CLI keeps its own pinned TypeScript 5.9.3 for `--js-only` generation; that version is separate from your app's.
     - The generated `tsconfig.json` no longer sets `baseUrl` (removed in TypeScript 7) or the empty `paths`.
-    - The global `NavigationEventMap` declaration in `core/internals.d.ts` is renamed `RouterEventMap`. lib.dom now has its own `NavigationEventMap` (the Navigation API), and the two merged into conflicting `navigate` types.
+    - The global `NavigationEventMap` declaration in `core/internals.d.ts` is now `Nutin.RouterEventMap`. lib.dom now has its own `NavigationEventMap` (the Navigation API), and the two merged into conflicting `navigate` types.
     - To upgrade an existing app: run `nutin-update`, set `"typescript": "^7.0.2"` in `devDependencies`, and remove `baseUrl` and the empty `paths` from `tsconfig.json`. The updated tools also still work on TypeScript 5.
 
 - The `dev` watcher now also rebuilds when files are added or deleted (e.g. by `npm run generate`), and when `config/`, `public/` or `nutin.config.js` change. It used to react to edits of existing `src/` files only.

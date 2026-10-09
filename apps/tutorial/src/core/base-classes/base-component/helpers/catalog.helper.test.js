@@ -123,17 +123,17 @@ describe('CatalogHelper', () => {
     expect(calls[1]).toEqual({ value: 'blue', index: 1 });
   });
 
-  it('without trackBy, configs carry no key so every item is recreated on re-render', () => {
+  it('without keepBy, configs carry no keep value so every item is recreated on re-render', () => {
     scope.innerHTML = '<div data-catalog="list"></div>';
     const configs = CatalogHelper.generateCatalog(
       { items: [{ id: 1 }], selector: 'list', elementName: 'item', component: class {} },
       scope
     );
-    expect(configs[0].key).toBe(undefined);
-    expect(configs[0].reuseIf).toBe(undefined);
+    expect(configs[0].keep).toBe(undefined);
+    expect(configs[0].keepIf).toBe(undefined);
   });
 
-  it('with trackBy, each config carries the tracked key, a catalog-scoped identity and the raw item to compare', () => {
+  it('with keepBy, each config carries the keepBy value, a catalog-scoped identity and the raw item to compare', () => {
     scope.innerHTML = '<div data-catalog="list"></div>';
     const items = [{ id: 'a' }, { id: 'b' }];
     class FakeComponent {}
@@ -144,16 +144,16 @@ describe('CatalogHelper', () => {
         elementName: 'item',
         component: FakeComponent,
         props: { a: 1 },
-        trackBy: (item, index) => `${item.id}-${index}`,
+        keepBy: (item, index) => `${item.id}-${index}`,
       },
       scope
     );
 
     expect(configs[1].selector).toBe('item-1');
-    expect(configs[1].key).toBe('b-1');
+    expect(configs[1].keep).toBe('b-1');
     expect(configs[1].scope).toBe('catalog:list:item');
-    expect(configs[1].reuseIf.item).toBe(items[1]);
-    expect(configs[1].reuseIf.options).toEqual({ a: 1 });
-    expect(configs[1].reuseIf.component).toBe(FakeComponent);
+    expect(configs[1].keepIf.item).toBe(items[1]);
+    expect(configs[1].keepIf.options).toEqual({ a: 1 });
+    expect(configs[1].keepIf.component).toBe(FakeComponent);
   });
 });

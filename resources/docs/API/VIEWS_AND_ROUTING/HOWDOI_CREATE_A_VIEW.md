@@ -23,14 +23,14 @@ export class FooView extends View {
     super({ template, viewName: 'foo' });
   }
 
-  public registerChildren(): ComponentConfig[] {
+  public registerChildren(): Nutin.ComponentConfig[] {
     return []; // mount child components the same way as any other component — see the Components docs
   }
 }
 ```
 
 ```ts
-export const appRoutes: Routes = {
+export const appRoutes: Nutin.Routes = {
   '/foo': () => new FooView(),
 };
 ```
@@ -44,15 +44,16 @@ export const appRoutes: Routes = {
 - `View` tracks route params and adds router-only hooks `onEnter()`/`onExit()` — see [How do I access route parameters?](./HOWDOI_ACCESS_ROUTE_PARAMS.md) and [What lifecycle hooks are available?](../LIFECYCLE_HOOKS/WHAT_LIFECYCLE_HOOKS_ARE_AVAILABLE.md).
 - Views are constructed via a factory function referenced from the route table, not instantiated directly by application code the way components are. The factory may return a Promise, to load the view's code on first visit — see [Lazy routes](./HOWDOI_REGISTER_A_ROUTE.md#lazy-routes).
 
-## `ViewOptions`
+## `Nutin.ViewOptions`
 
 ```ts
+// Nutin.ViewOptions
 interface ViewOptions {
-  template?: Template; // an html`` result or a string
+  template?: Nutin.Template; // an html`` result or a string
   mountTarget?: string | HTMLElement; // default: '#app'
   tagName?: keyof HTMLElementTagNameMap; // default: 'section'
   viewName: string;
-  trustLevel?: TrustLevel; // 'strict' | 'normal' | 'trusted', default: 'normal'
+  trustLevel?: Nutin.TrustLevel; // 'strict' | 'normal' | 'trusted', default: 'normal'
 }
 ```
 

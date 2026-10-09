@@ -18,9 +18,9 @@ export class TaskCatalogView extends View {
     this._tasks = taskService.tasks;
   }
 
-  registerChildren(): ComponentConfig[] {
+  registerChildren(): Nutin.ComponentConfig[] {
     // One TaskCardComponent is created for each task.
-    const taskCatalogChildren: ComponentConfig[] = [
+    const taskCatalogChildren: Nutin.ComponentConfig[] = [
       {
         selector: 'new-task',
         factory: (el) => new NewTaskComponent(el),
@@ -32,7 +32,7 @@ export class TaskCatalogView extends View {
         component: TaskCardComponent,
         elementTag: 'article',
         // A card whose task didn't change is kept on re-render.
-        trackBy: (task) => task.id,
+        keepBy: (task) => task.id,
       }),
     ];
 
@@ -43,7 +43,7 @@ export class TaskCatalogView extends View {
     return taskCatalogChildren;
   }
 
-  private getTaskInputsChild(): ComponentConfig[] {
+  private getTaskInputsChild(): Nutin.ComponentConfig[] {
     const taskId = this.getRouteParam('id') || 0;
     const task = taskService.getTask(+taskId);
     if (!task) return [];
@@ -52,7 +52,7 @@ export class TaskCatalogView extends View {
       {
         selector: 'task-inputs',
         // Same task, same form: it's kept while you edit.
-        key: task.id,
+        keep: task.id,
         factory: (el) => new TaskInputsComponent(el, task),
       },
     ];

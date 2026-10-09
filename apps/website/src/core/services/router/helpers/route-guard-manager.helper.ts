@@ -1,15 +1,15 @@
 export type GuardResult = {
   allowed: boolean,
   redirectTo?: string,
-  viewConstructor?: ViewFactory,
+  viewConstructor?: Nutin.ViewFactory,
 }
 
-export function getViewConstructor(routeConfig: RouteConfig): ViewFactory {
+export function getViewConstructor(routeConfig: Nutin.RouteConfig): Nutin.ViewFactory {
   return typeof routeConfig === 'function' ? routeConfig : routeConfig.view;
 }
 
 export async function processRouteGuards(
-  routeConfig: RouteConfig,
+  routeConfig: Nutin.RouteConfig,
   targetPath: string,
   params: Record<string, string> = {}
 ): Promise<GuardResult> {
@@ -31,7 +31,7 @@ export async function processRouteGuards(
   return { allowed: true, viewConstructor };
 }
 
-function getRouteGuards(routeConfig: RouteConfig): RouteGuard[] {
+function getRouteGuards(routeConfig: Nutin.RouteConfig): Nutin.RouteGuard[] {
   return typeof routeConfig === 'function' ? [] : (routeConfig.guards || []);
 }
 
@@ -39,7 +39,7 @@ function getRouteGuards(routeConfig: RouteConfig): RouteGuard[] {
  * Runs all guards in sequence with route parameters and returns the result
  */
 async function runGuards(
-  guards: RouteGuard[], 
+  guards: Nutin.RouteGuard[], 
   params: Record<string, string>
 ): Promise<boolean | string> {
   for (const guard of guards) {

@@ -2,9 +2,9 @@ const ALLOWED_PROTOCOLS = new Set(['http:', 'https:']);
 const ENCODED_SEPARATOR = /%2f|%5c/i;
 
 export function buildRequestOptions(
-  method: HttpMethod,
+  method: Nutin.HttpMethod,
   data: unknown,
-  config: IRequestConfig,
+  config: Nutin.RequestConfig,
   headers: Headers,
   signal: AbortSignal
 ): RequestInit {
@@ -51,13 +51,13 @@ export function resolveUrl(baseUrl: string, endpoint: string, trustedAPIs: strin
   return url;
 }
 
-export function buildRequestUrl(endpoint: string, queryParams?: IRequestConfig['queryParams']): URL {
+export function buildRequestUrl(endpoint: string, queryParams?: Nutin.RequestConfig['queryParams']): URL {
   const url = new URL(endpoint);
   appendQueryParams(url, queryParams);
   return url;
 }
 
-export function appendQueryParams(url: URL, queryParams?: IRequestConfig['queryParams']): void {
+export function appendQueryParams(url: URL, queryParams?: Nutin.RequestConfig['queryParams']): void {
   if (!queryParams) return;
   Object.entries(queryParams).forEach(([key, value]) => {
     const values = Array.isArray(value) ? value : [value];

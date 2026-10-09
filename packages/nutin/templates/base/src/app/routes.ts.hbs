@@ -4,7 +4,7 @@ import { NotFoundView } from './views/not-found/not-found.view.js';
 import { markdownRoutes } from './markdown/markdown-routes.js';
 {{/if}}
 
-export const appRoutes: Routes = {
+export const appRoutes: Nutin.Routes = {
   '/': () => new HomeView(),
 {{#if markdown}}
   ...markdownRoutes(),

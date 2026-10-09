@@ -71,7 +71,7 @@ export function mountElement(element: HTMLElement, mountTarget: string | HTMLEle
 export function createElement<T extends HTMLElement>(
   tagName: keyof HTMLElementTagNameMap, 
   template: string = '',
-  trustLevel?: TrustLevel
+  trustLevel?: Nutin.TrustLevel
 ): T {
   const element = document.createElement(tagName) as T;
   element.replaceChildren(SecurityHelper.sanitizeToFragment(template, trustLevel));

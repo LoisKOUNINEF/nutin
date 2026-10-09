@@ -3,7 +3,7 @@
 ## Dynamic segments
 
 ```ts
-export const appRoutes: Routes = {
+export const appRoutes: Nutin.Routes = {
   '/posts/:id': () => new PostView(),      // required segment
   '/users/:id?': () => new UsersView(),    // optional segment, must be trailing
 };

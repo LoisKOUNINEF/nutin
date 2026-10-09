@@ -16,7 +16,7 @@ export class HttpClient extends Service<HttpClient> {
   constructor(
     baseUrl: string = '',
     defaultHeaders: Record<string, string> = {},
-    options: IHttpClientOptions = {}
+    options: Nutin.HttpClientOptions = {}
   ) {
     super();
     this._baseUrl = baseUrl;
@@ -24,19 +24,19 @@ export class HttpClient extends Service<HttpClient> {
     this._trustedAPIs = [...(options.trustedAPIs ?? [])];
   }
 
-  public get<T = unknown>(endpoint: string, config?: IRequestConfig): Promise<T> {
+  public get<T = unknown>(endpoint: string, config?: Nutin.RequestConfig): Promise<T> {
     return this.request<T>('GET', endpoint, null, config);
   }
-  public post<T = unknown>(endpoint: string, data?: unknown, config?: IRequestConfig): Promise<T> {
+  public post<T = unknown>(endpoint: string, data?: unknown, config?: Nutin.RequestConfig): Promise<T> {
     return this.request<T>('POST', endpoint, data, config);
   }
-  public put<T = unknown>(endpoint: string, data?: unknown, config?: IRequestConfig): Promise<T> {
+  public put<T = unknown>(endpoint: string, data?: unknown, config?: Nutin.RequestConfig): Promise<T> {
     return this.request<T>('PUT', endpoint, data, config);
   }
-  public patch<T = unknown>(endpoint: string, data?: unknown, config?: IRequestConfig): Promise<T> {
+  public patch<T = unknown>(endpoint: string, data?: unknown, config?: Nutin.RequestConfig): Promise<T> {
     return this.request<T>('PATCH', endpoint, data, config);
   }
-  public delete<T = unknown>(endpoint: string, config?: IRequestConfig): Promise<T> {
+  public delete<T = unknown>(endpoint: string, config?: Nutin.RequestConfig): Promise<T> {
     return this.request<T>('DELETE', endpoint, undefined, config);
   }
 
@@ -58,10 +58,10 @@ export class HttpClient extends Service<HttpClient> {
   }
 
   private async request<T>(
-    method: HttpMethod,
+    method: Nutin.HttpMethod,
     endpoint: string,
     data?: unknown,
-    config: IRequestConfig = {}
+    config: Nutin.RequestConfig = {}
   ): Promise<T> {
     const abort = HttpManager.createAbortController(config.timeout, config.signal);
 

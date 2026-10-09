@@ -79,6 +79,8 @@ If the [Markdown feature](./HOWDOI_USE_MARKDOWN_FEATURE.md) is added, every fold
 - uses non-standard port(s), configurable via `nutin.config.js`'s top-level `dockerPorts` (see [Configure ports](#configure-ports) above).
 - does not include `add_header Strict-Transport-Security  "max-age=63072000" always;`. Add it here only if Nginx is exposed directly over HTTPS.
 
+With `i18n: true`, it also 301-redirects `/` and any unprefixed path without an extension (`/docs` → `/en/docs`) to the default language, so an old or external link never gets a duplicate SPA shell. Files (`/robots.txt`, assets) and `/health` aren't redirected.
+
 ### Adding origins in CSP map
 
 If you want to add scripts, styles or other external resources, you'll have to add the origins to `nginx.conf.template` CSP map.

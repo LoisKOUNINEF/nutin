@@ -6,7 +6,7 @@ const TS = { loader: 'ts', sourcefile: 'routes.ts' };
 describe('findDuplicateRouteKeys', () => {
   it('returns nothing for distinct keys, TypeScript syntax included', async () => {
     const source = `
-      export const appRoutes: Routes = {
+      export const appRoutes: Nutin.Routes = {
         '/': () => new HomeView(),
         '/about': () => new AboutView() as any,
         '/users/:id': () => new UserView(),
@@ -17,7 +17,7 @@ describe('findDuplicateRouteKeys', () => {
 
   it('reports a duplicate across quote styles and computed keys, with its line', async () => {
     const source = [
-      'export const appRoutes: Routes = {',
+      'export const appRoutes: Nutin.Routes = {',
       "  '/': () => new HomeView(),",
       '  "/": () => new OtherView(),',
       "  ['/c']: () => new C(),",
@@ -41,7 +41,7 @@ describe('findDuplicateRouteKeys', () => {
   });
 
   it('does not flag the view/guards keys shared by several guarded routes', async () => {
-    const source = `export const appRoutes: Routes = {
+    const source = `export const appRoutes: Nutin.Routes = {
       '/admin': { view: () => new AdminView(), guards: [() => true] },
       '/settings': { view: () => new SettingsView(), guards: [() => '/'] },
     };`;
@@ -50,7 +50,7 @@ describe('findDuplicateRouteKeys', () => {
   });
 
   it('flags a plain and a guarded route sharing a path', async () => {
-    const source = `export const appRoutes: Routes = {
+    const source = `export const appRoutes: Nutin.Routes = {
       '/admin': () => new AdminView(),
       '/admin': { view: () => new AdminView(), guards: [() => true] },
     };`;
@@ -60,7 +60,7 @@ describe('findDuplicateRouteKeys', () => {
 
   it('checks the whole file, not only appRoutes', async () => {
     const source = `const other = { a: 1, a: 2 };
-      export const appRoutes: Routes = { '/': () => new HomeView() };`;
+      export const appRoutes: Nutin.Routes = { '/': () => new HomeView() };`;
 
     expect(await findDuplicateRouteKeys(source, TS)).toEqual([{ key: 'a', line: 1 }]);
   });

@@ -27,7 +27,7 @@ export class A11yElementsView extends View {
     }
   }
 
-  public registerChildren(): ComponentConfig[] {
+  public registerChildren(): Nutin.ComponentConfig[] {
     return [{
       selector: 'a11y-elements-page',
       factory: (el) => {

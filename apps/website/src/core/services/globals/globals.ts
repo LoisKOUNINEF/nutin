@@ -1,12 +1,12 @@
 import { Service } from '../../base-classes/service/service.js';
 
 export class Globals extends Service<Globals> {
-  private _mounted: Record<string, GlobalMountable> = {};
+  private _mounted: Record<string, Nutin.GlobalMountable> = {};
   private _originalDisplay: Record<string, string> = {};
 
   constructor() { super(); }
 
-  public register({ before = [], after = [] }: RegisterGlobalsOptions): void {
+  public register({ before = [], after = [] }: Nutin.RegisterGlobalsOptions): void {
     // Component subclasses generated via `nutin generate component` type their
     // mountTarget param as HTMLElement, but DomHelper.mountElement only
     // *appends* (rather than replacing) the target when mountTarget is a string
@@ -16,7 +16,7 @@ export class Globals extends Service<Globals> {
     const mountTarget = 'body' as unknown as HTMLElement;
     const isElement = (el: HTMLElement | null): el is HTMLElement => el !== null;
 
-    const mount = ({ component: Component, id }: GlobalConfig): HTMLElement | null => {
+    const mount = ({ component: Component, id }: Nutin.GlobalConfig): HTMLElement | null => {
       if (this._mounted[id]) {
         console.warn(`Global "${id}" is already registered - skipping.`);
         return null;
@@ -71,7 +71,7 @@ export class Globals extends Service<Globals> {
  * later by that same id. Registering an `id` that's already registered logs
  * a `console.warn` and skips it.
  */
-export const registerGlobals = (options: RegisterGlobalsOptions): void => {
+export const registerGlobals = (options: Nutin.RegisterGlobalsOptions): void => {
   Globals.getInstance().register(options);
 };
 

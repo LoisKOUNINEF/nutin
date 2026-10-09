@@ -3,7 +3,7 @@ import { MarkdownManifestsService } from './markdown-manifests.service.js';
 // Both guards load the source's manifest (once) before the page renders.
 export const MarkdownGuards = {
   // For '/<id>/:slug?' routes. A bare '/<id>' renders the first page.
-  pageExists: (id: string): RouteGuard => {
+  pageExists: (id: string): Nutin.RouteGuard => {
     return async (params) => {
       const manifest = await MarkdownManifestsService.load(id);
       if (!manifest.hasPages) return true;
@@ -14,7 +14,7 @@ export const MarkdownGuards = {
 
   // For '/<id>/:section?/:slug?' routes ("sectionInPath: true").
   // A bare '/<id>/<slug>' redirects to that page's section.
-  sectionPageExists: (id: string): RouteGuard => {
+  sectionPageExists: (id: string): Nutin.RouteGuard => {
     return async (params) => {
       const manifest = await MarkdownManifestsService.load(id);
       if (!manifest.hasPages || !params.section) return true;

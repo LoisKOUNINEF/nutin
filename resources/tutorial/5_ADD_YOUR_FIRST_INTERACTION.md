@@ -88,7 +88,7 @@ import { NewTaskComponent } from '../../components/new-task/new-task.component.j
 export class TaskCatalogView extends View {
     /* ... */
 
-    registerChildren(): ComponentConfig[] {
+    registerChildren(): Nutin.ComponentConfig[] {
         return [
             {
                 selector: 'new-task',
@@ -115,9 +115,11 @@ export class TaskCatalogView extends View {
 
 ```ts
 // src/app/globals.d.ts
-declare interface AppEventMap {
-    // to keep this lean, we'll reuse the same event for all operations
-    'task-event': { taskId: number };
+declare namespace Nutin {
+    interface AppEventMap {
+        // to keep this lean, we'll reuse the same event for all operations
+        'task-event': { taskId: number };
+    }
 }
 ```
 

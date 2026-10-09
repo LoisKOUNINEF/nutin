@@ -58,6 +58,7 @@ export class NoteComponent extends Component {
 ```
 
 ```ts
+// Nutin.TrustLevel
 type TrustLevel = 'strict' | 'normal' | 'trusted'; // default: 'normal'
 ```
 

@@ -1,10 +1,10 @@
 import { Service } from "../../base-classes/service/service.js";
 
 // The payload is required unless the event declares none (`undefined` in its EventMap entry).
-type EventArgs<K extends EventKey> = undefined extends EventMap[K] ? [data?: EventMap[K]] : [data: EventMap[K]];
+type EventArgs<K extends Nutin.EventKey> = undefined extends Nutin.EventMap[K] ? [data?: Nutin.EventMap[K]] : [data: Nutin.EventMap[K]];
 
 export class EventBus extends Service<EventBus> {
-  private _subscriptions: Subscription[] = [];
+  private _subscriptions: Nutin.Subscription[] = [];
 
   constructor() {
     super();
@@ -12,24 +12,24 @@ export class EventBus extends Service<EventBus> {
   }
 
   private handlers: {
-    [K in EventKey]?: Array<(data: EventMap[K]) => void>;
+    [K in Nutin.EventKey]?: Array<(data: Nutin.EventMap[K]) => void>;
   } = {};
 
-  public subscribe<K extends EventKey>(
+  public subscribe<K extends Nutin.EventKey>(
     event: K,
-    callback: (data: EventMap[K]) => void
+    callback: (data: Nutin.EventMap[K]) => void
   ): void {
     this.addHandler(event, callback, false);
   }
 
-  public once<K extends EventKey>(
+  public once<K extends Nutin.EventKey>(
     event: K,
-    callback: (data: EventMap[K]) => void
+    callback: (data: Nutin.EventMap[K]) => void
   ): void {
     this.addHandler(event, callback, true);
   }
 
-  public emit<K extends EventKey>(event: K, ...[data]: EventArgs<K>): void {
+  public emit<K extends Nutin.EventKey>(event: K, ...[data]: EventArgs<K>): void {
     const callbacks = this.handlers[event];
     if (!callbacks) return;
 
@@ -37,7 +37,7 @@ export class EventBus extends Service<EventBus> {
       // A failing listener is reported but doesn't keep the others (the router's
       // included) from receiving the event.
       try {
-        callback(data as EventMap[K]);
+        callback(data as Nutin.EventMap[K]);
       } catch (error) {
         console.error(`Error in a "${event}" listener:`, error);
       }
@@ -51,17 +51,17 @@ export class EventBus extends Service<EventBus> {
     });
   }
 
-  public off<K extends EventKey>(
+  public off<K extends Nutin.EventKey>(
     event: K,
-    callback?: (data: EventMap[K]) => void
+    callback?: (data: Nutin.EventMap[K]) => void
   ): void {
     const handlers = this.handlers[event];
     if (!handlers) return;
 
     if (callback) {
       (this.handlers as Record<
-        EventKey,
-        Array<(data: EventMap[K]) => void>
+        Nutin.EventKey,
+        Array<(data: Nutin.EventMap[K]) => void>
       >)[event] = handlers.filter(h => h !== callback);
     } else {
       delete this.handlers[event];
@@ -72,18 +72,18 @@ export class EventBus extends Service<EventBus> {
     );
   }
 
-  private addHandler<K extends EventKey>(
+  private addHandler<K extends Nutin.EventKey>(
     event: K,
-    callback: (data: EventMap[K]) => void,
+    callback: (data: Nutin.EventMap[K]) => void,
     once: boolean
   ): void {
     if (!this.handlers[event]) {
       this.handlers[event] = [];
     }
     (
-      this.handlers as Record<EventKey, Array<(data: EventMap[K]) => void>>
+      this.handlers as Record<Nutin.EventKey, Array<(data: Nutin.EventMap[K]) => void>>
     )[event].push(callback);
-    this._subscriptions.push({ event, callback, once } as Subscription);
+    this._subscriptions.push({ event, callback, once } as Nutin.Subscription);
   }
 
   private cleanupEventListeners = (): void => {

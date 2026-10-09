@@ -96,7 +96,7 @@ export class TaskInputsComponent extends Component {
 
 ```ts
 // src/app/routes.ts
-export const appRoutes: Routes = {
+export const appRoutes: Nutin.Routes = {
     /* ... */
     '/tasks/:id?': () => new TaskCatalogView(),
     /* ... */
@@ -119,7 +119,7 @@ export const Guards = {
     /**
      * Redirects when the route's task doesn't exist, e.g. after a reload: tasks only live in memory.
      */
-    requireTask: (redirectTo: string = '/'): RouteGuard => {
+    requireTask: (redirectTo: string = '/'): Nutin.RouteGuard => {
         return ({ id }) => id === undefined || taskService.getTask(+id) !== undefined || redirectTo;
     },
 };
@@ -131,7 +131,7 @@ Then use the route's object form to attach it:
 // src/app/routes.ts
 import { Guards } from './guards.js';
 
-export const appRoutes: Routes = {
+export const appRoutes: Nutin.Routes = {
     /* ... */
     '/tasks/:id?': { view: () => new TaskCatalogView(), guards: [Guards.requireTask()] },
     /* ... */
@@ -149,8 +149,8 @@ import { TaskInputsComponent } from '../../components/task-inputs/task-inputs.co
 export class TaskCatalogView extends View {
     /* ... */
 
-    registerChildren(): ComponentConfig[] {
-        const taskCatalogChildren: ComponentConfig[] = [ /* new-task, task-cards */ ];
+    registerChildren(): Nutin.ComponentConfig[] {
+        const taskCatalogChildren: Nutin.ComponentConfig[] = [ /* new-task, task-cards */ ];
 
         if (this.hasRouteParam('id')) {
             taskCatalogChildren.push(...this.getTaskInputsChild());
@@ -159,7 +159,7 @@ export class TaskCatalogView extends View {
         return taskCatalogChildren;
     }
   
-    private getTaskInputsChild(): ComponentConfig[] {
+    private getTaskInputsChild(): Nutin.ComponentConfig[] {
         const taskId = this.getRouteParam('id') || 0;
         const task = taskService.getTask(+taskId);
         if (!task) return [];
@@ -190,7 +190,7 @@ import { Navigation } from '../../../core/index.js';
 export class TaskCardComponent extends Component {
     /* ... */
 
-    registerChildren(): ComponentConfig[] {
+    registerChildren(): Nutin.ComponentConfig[] {
         return [
             /* ... */
             {
@@ -237,25 +237,25 @@ Tell the view which children are the same as before:
 export class TaskCatalogView extends View {
     /* ... */
 
-    registerChildren(): ComponentConfig[] {
-        const taskCatalogChildren: ComponentConfig[] = [
+    registerChildren(): Nutin.ComponentConfig[] {
+        const taskCatalogChildren: Nutin.ComponentConfig[] = [
             /* new-task */
             ...this.createCatalogComponents({
                 /* ... */
                 // A card whose task didn't change is kept on re-render.
-                trackBy: (task) => task.id,
+                keepBy: (task) => task.id,
             }),
         ];
         /* ... */
     }
 
-    private getTaskInputsChild(): ComponentConfig[] {
+    private getTaskInputsChild(): Nutin.ComponentConfig[] {
         /* ... */
         return [
             {
                 selector: 'task-inputs',
                 // Same task, same form: it's kept while you edit.
-                key: task.id,
+                keep: task.id,
                 factory: (el) => new TaskInputsComponent(el, task),
             },
         ];
@@ -263,8 +263,8 @@ export class TaskCatalogView extends View {
 }
 ```
 
-- `trackBy` gives each card an identity. On re-render, a card whose task has the same id and the same values keeps its component and its DOM. The card you renamed changed, so it's created again with the new name.
-- `key` does the same for a single child. While you edit the same task, the form is kept as it is: the focus, the caret and what you typed stay where they were. Opening another task changes the key, so a new form is created for it.
+- `keepBy` gives each card an identity. On re-render, a card whose task has the same id and the same values keeps its component and its DOM. The card you renamed changed, so it's created again with the new name.
+- `keep` does the same for a single child. While you edit the same task, the form is kept as it is: the focus, the caret and what you typed stay where they were. Opening another task changes the `keep` value, so a new form is created for it.
 
 See [Keeping children across re-renders](https://nutin.org/docs/api/register-child-components#keeping-children-across-re-renders).
 

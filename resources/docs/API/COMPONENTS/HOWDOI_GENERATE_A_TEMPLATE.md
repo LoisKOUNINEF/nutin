@@ -1,6 +1,6 @@
 # How do I generate a template?
 
-Every component inherits `generateTemplate(): Template` (a string or an `html` result) from `BaseComponent`. `render()` calls it, sanitizes the result and inserts the resulting nodes into the component's element. 
+Every component inherits `generateTemplate(): Nutin.Template` (a string or an `html` result) from `BaseComponent`. `render()` calls it, sanitizes the result and inserts the resulting nodes into the component's element. 
 
 You can override it when a template needs more than a single expression.
 
@@ -26,7 +26,7 @@ interface AvatarConfig {
 }
 
 export class AvatarComponent extends Component<HTMLDivElement, AvatarConfig> {
-  constructor(mountTarget: HTMLElement, config: AvatarConfig, props?: ComponentProps) {
+  constructor(mountTarget: HTMLElement, config: AvatarConfig, props?: Nutin.ComponentProps) {
     super({ mountTarget, config, normalizeKeys: ['src', 'initials', 'shape'], props });
   }
 
@@ -35,7 +35,7 @@ export class AvatarComponent extends Component<HTMLDivElement, AvatarConfig> {
     this.element.classList.add('app-avatar', `avatar--${this.config.shape || 'circle'}`);
   }
 
-  protected override generateTemplate(): Template {
+  protected override generateTemplate(): Nutin.Template {
     const { src, alt, initials } = this.config;
 
     if (src) {
@@ -50,7 +50,7 @@ export class AvatarComponent extends Component<HTMLDivElement, AvatarConfig> {
 - Attributes that depend on optional flags can be nested `html` fragments. `false` renders nothing, and `raw()` marks a fixed attribute as markup:
 
 ```ts
-protected override generateTemplate(): Template {
+protected override generateTemplate(): Nutin.Template {
   const { id, name, checked, disabled } = this.config;
 
   return html`<input

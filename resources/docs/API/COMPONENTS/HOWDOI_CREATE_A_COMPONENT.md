@@ -44,7 +44,7 @@ export class GreetingComponent extends Component<HTMLDivElement, GreetingConfig>
 
 ```ts
 // in a parent component
-registerChildren(): ComponentConfig[] {
+registerChildren(): Nutin.ComponentConfig[] {
   return [
     {
       selector: 'my-greeting-selector',
@@ -63,11 +63,12 @@ Constructing a component mounts its root element immediately, but does **not** r
 ## Constructor options
 
 ```ts
+// Nutin.ComponentOptions
 interface ComponentOptions<K = any> {
-  templateFn?: (config?: K) => Template; // string or html`` result; default: () => ''
+  templateFn?: (config?: K) => Nutin.Template; // string or html`` result; default: () => ''
   mountTarget?: string | HTMLElement;    // default: '#app'
   tagName?: keyof HTMLElementTagNameMap; // default: 'div'
-  props?: ComponentProps;                // default: {}
+  props?: Nutin.ComponentProps;                // default: {}
   config?: K;
   defaults?: Partial<K>;
   normalizeKeys?: (keyof K)[];
@@ -88,7 +89,7 @@ interface ComponentOptions<K = any> {
 onBeforeRender()
 element.replaceChildren(sanitizeToFragment(generateTemplate()))
 compose()      → mounts data-component/data-catalog children (see registerChildren)
-child.onReuse() → for every child kept across the re-render (key / trackBy)
+child.onKept()  → for every child kept across the re-render (keep / keepBy)
 hydrate()      → parses data-i18n / data-pipe, then removes empty data-optional elements
 autoBindEvents() → rebinds all data-event listeners
 onAfterRender()

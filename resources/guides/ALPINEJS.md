@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 *Requires Nutin 3.0.0 or later.*
 
-A component can hold its own `x-data` root if its parent registers it with a `key` (or, for catalog items, with `trackBy`). 
+A component can hold its own `x-data` root if its parent registers it with `keep` (or, for catalog items, with `keepBy`). 
 
 When the parent re-renders, a kept child is moved into the new template as-is instead of being recreated, so its Alpine state survives.
 
@@ -257,16 +257,16 @@ export class CounterComponent extends Component {
 
 ```ts
 // In the parent component or view
-public registerChildren(): ComponentConfig[] {
+public registerChildren(): Nutin.ComponentConfig[] {
     return [
-        { selector: 'counter', key: 'counter', factory: (el) => new CounterComponent(el) },
+        { selector: 'counter', keep: 'counter', factory: (el) => new CounterComponent(el) },
     ];
 }
 ```
 
-The same holds for catalog items tracked with `trackBy`, as long as the item itself didn't change.
+The same holds for catalog items kept with `keepBy`, as long as the item itself didn't change.
 
-A changed item, or a child whose `key` changed, is recreated, and its state starts over.
+A changed item, or a child whose `keep` value changed, is recreated, and its state starts over.
 
 ## With a11y-elements
 
@@ -310,5 +310,5 @@ The component or view whose template contains the overlay still has to remove it
 It is reset when:
 
 - The component holding it renders again: its own `render()`, or a `listenToRenderEvents()` event, rebuilds its content.
-- It isn't kept across an ancestor's re-render: it has no `key`/`trackBy`, or any component between it and the re-rendering ancestor has none. An unkeyed component is recreated along with everything inside it.
-- It is part of a view's own template: views are destroyed on every navigation. Never declare `x-data` in a view's template, only in keyed components or on `#app` ([Approach 2](#approach-2-using-alpine-state-inside-nutin)).
+- It isn't kept across an ancestor's re-render: it has no `keep`/`keepBy`, or any component between it and the re-rendering ancestor has none. Such a component is recreated along with everything inside it.
+- It is part of a view's own template: views are destroyed on every navigation. Never declare `x-data` in a view's template, only in kept components or on `#app` ([Approach 2](#approach-2-using-alpine-state-inside-nutin)).

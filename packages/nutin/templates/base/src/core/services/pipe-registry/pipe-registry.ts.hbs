@@ -1,11 +1,11 @@
 import { Service } from "../../base-classes/service/service.js";
 
 class PipeRegistry extends Service<PipeRegistry> {
-  private _pipes: Record<string, PipeFunction> = {};
+  private _pipes: Record<string, Nutin.PipeFunction> = {};
 
   constructor() { super(); }
 
-  public register(name: string, fn: PipeFunction): void {
+  public register(name: string, fn: Nutin.PipeFunction): void {
     if(this._pipes[name]) {
       console.warn(`Pipe "${name}" already exists - skipping.`);
       return;

@@ -36,7 +36,7 @@ const STRICT_URL_SCHEMES = /^(javascript|data):/i;
 
 // String form of sanitizeToFragment(). Rendering inserts the fragment instead: assigning
 // this string to innerHTML parses it a second time.
-export function sanitizeTemplate(value: unknown, trustLevel: TrustLevel = 'normal'): string {
+export function sanitizeTemplate(value: unknown, trustLevel: Nutin.TrustLevel = 'normal'): string {
   if (value === null || value === undefined) return '';
   if (trustLevel === 'trusted' && !rawsOf(value)) return String(value);
 
@@ -60,7 +60,7 @@ export function escapeHtml(value: unknown): string {
 // cleaned markup, which is where mutation XSS turns inert text back into elements.
 // A SafeHtml from html`` may carry raw() sources behind placeholders: each is parsed once,
 // in its real parent context, stripped of bindings and sanitized as nodes, then put in place.
-export function sanitizeToFragment(value: unknown, trustLevel: TrustLevel = 'normal'): DocumentFragment {
+export function sanitizeToFragment(value: unknown, trustLevel: Nutin.TrustLevel = 'normal'): DocumentFragment {
   const holder = document.createElement('template');
   const raws = rawsOf(value);
   holder.innerHTML = value === null || value === undefined ? '' : raws ? (value as { value: string }).value : String(value);
@@ -114,7 +114,7 @@ function rawsOf(value: unknown): ReadonlyMap<string, string> | null {
   return raws instanceof Map ? raws : null;
 }
 
-function resolveRaws(root: ParentNode, raws: ReadonlyMap<string, string>, trustLevel: TrustLevel): void {
+function resolveRaws(root: ParentNode, raws: ReadonlyMap<string, string>, trustLevel: Nutin.TrustLevel): void {
   // Snapshot first: content put in place is never searched for placeholders again.
   for (const placeholder of collectPlaceholders(root)) {
     const source = raws.get(placeholder.getAttribute('data-nutin-raw') ?? '');
@@ -162,7 +162,7 @@ function templateContent(el: Element): DocumentFragment | null {
   return content && typeof content.querySelectorAll === 'function' ? content : null;
 }
 
-function sanitizeNode(root: ParentNode, trustLevel: TrustLevel): void {
+function sanitizeNode(root: ParentNode, trustLevel: Nutin.TrustLevel): void {
   // Snapshot children before mutating — removing an element from a live
   // collection while iterating it would skip its next sibling.
   const children = Array.from(root.children);
@@ -209,7 +209,7 @@ function animatesUrlAttribute(el: Element): boolean {
   return URL_ATTRS.has(target) || URL_ATTRS.has(target.replace(/^xlink:/, ''));
 }
 
-function isDangerousUrl(value: string, trustLevel: TrustLevel): boolean {
+function isDangerousUrl(value: string, trustLevel: Nutin.TrustLevel): boolean {
   // Browsers strip ASCII tab/newline/CR from a URL (and trim leading C0
   // control/space) before scheme-sniffing, so "java\tscript:" still runs
   // as javascript: — normalize the same way before checking the scheme.

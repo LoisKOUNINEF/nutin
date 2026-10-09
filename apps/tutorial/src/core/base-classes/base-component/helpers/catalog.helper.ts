@@ -1,9 +1,9 @@
-import type { ReusableComponentConfig } from './children.helper.js';
+import type { KeepableComponentConfig } from './children.helper.js';
 
-export function generateCatalog(config: CatalogConfig, scope: Element = document.documentElement): ComponentConfig[] {
+export function generateCatalog(config: Nutin.CatalogConfig, scope: Element = document.documentElement): Nutin.ComponentConfig[] {
   if (!config.items || config.items.length < 1) return [];
 
-  const componentConfigs: ComponentConfig[] = [];
+  const componentConfigs: Nutin.ComponentConfig[] = [];
   const containers = scope.querySelectorAll(`[data-catalog="${config.selector}"]`);
 
   containers.forEach((container) => {
@@ -14,9 +14,9 @@ export function generateCatalog(config: CatalogConfig, scope: Element = document
   return componentConfigs;
 }
 
-function getComponentConfigItems(config: CatalogConfig, container: HTMLElement): ComponentConfig[] {
+function getComponentConfigItems(config: Nutin.CatalogConfig, container: HTMLElement): Nutin.ComponentConfig[] {
   container.innerHTML = '';
-  const componentConfigs: ComponentConfig[] = [];
+  const componentConfigs: Nutin.ComponentConfig[] = [];
   for (let i = 0; i < config.items.length; i++) {
     createElements(i, config, container);
     pushConfig(i, componentConfigs, config);
@@ -24,7 +24,7 @@ function getComponentConfigItems(config: CatalogConfig, container: HTMLElement):
   return componentConfigs;
 }
 
-function createElements(index: number, config: CatalogConfig, container: HTMLElement): void {
+function createElements(index: number, config: Nutin.CatalogConfig, container: HTMLElement): void {
   const wrapper = document.createElement(config.elementTag || 'div');
   const el = document.createElement('div');
   wrapper.appendChild(el);
@@ -33,28 +33,28 @@ function createElements(index: number, config: CatalogConfig, container: HTMLEle
   container?.appendChild(wrapper);
 }
 
-function pushConfig(index: number, componentConfigs: ComponentConfig[], config: CatalogConfig): void {
+function pushConfig(index: number, componentConfigs: Nutin.ComponentConfig[], config: Nutin.CatalogConfig): void {
   const configWithIndex = getConfigWithIndex(config, index)
 
   const { props, defaults } = config;
   const options = { ...props, ...defaults };
 
-  const componentConfig: ReusableComponentConfig = {
+  const componentConfig: KeepableComponentConfig = {
     selector: `${config.elementName}-${index}`,
     factory: (el) => new config.component(el, configWithIndex, options),
   };
 
-  if (config.trackBy) {
+  if (config.keepBy) {
     const item = config.items[index];
-    componentConfig.key = config.trackBy(item, index);
+    componentConfig.keep = config.keepBy(item, index);
     componentConfig.scope = `catalog:${config.selector}:${config.elementName}`;
-    componentConfig.reuseIf = { item, options, component: config.component };
+    componentConfig.keepIf = { item, options, component: config.component };
   }
 
   componentConfigs.push(componentConfig);
 }
 
-function getConfigWithIndex(config: CatalogConfig, index: number): CatalogItemConfig {
+function getConfigWithIndex(config: Nutin.CatalogConfig, index: number): Nutin.CatalogItemConfig {
   const item = config.items[index];
   return (item && typeof item === 'object')
     ? { ...(item as object), index: index }

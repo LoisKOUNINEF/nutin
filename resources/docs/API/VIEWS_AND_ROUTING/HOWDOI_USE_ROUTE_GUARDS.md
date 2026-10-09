@@ -3,7 +3,7 @@
 ```ts
 // src/app/guards.ts
 export const Guards = {
-  requireAuth: (redirectTo: string = '/login'): RouteGuard => {
+  requireAuth: (redirectTo: string = '/login'): Nutin.RouteGuard => {
     return () => {
       const isAuthenticated = !!localStorage.getItem('user_token');
       return isAuthenticated || redirectTo;
@@ -13,12 +13,13 @@ export const Guards = {
 ```
 
 ```ts
-export const appRoutes: Routes = {
+export const appRoutes: Nutin.Routes = {
   '/admin': { view: () => new AdminView(), guards: [Guards.requireAuth()] },
 };
 ```
 
 ```ts
+// Nutin.RouteGuard
 type RouteGuard = (params: Record<string, string>) => boolean | string | Promise<boolean | string>;
 ```
 

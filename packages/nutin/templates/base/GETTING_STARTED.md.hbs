@@ -40,7 +40,7 @@ import { Foo } from 'relative/path/to/foo.js';
 
 - Use Nutin's code barrel file (`src/core/index.js`) to import Nutin's modules.
 {{#if (eq lang "ts")}}
-- Nutin's types (`ComponentConfig`, `Routes`, `Template`, …) are globals declared in `src/core/internals.d.ts`: no import needed.
+- Nutin's types (`Nutin.ComponentConfig`, `Nutin.Routes`, `Nutin.Template`, …) live in the global `Nutin` namespace declared in `src/core/internals.d.ts`: no import needed.
 {{/if}}
 
 ## How do I run my app?
@@ -91,7 +91,7 @@ export class ProductCardComponent extends Component {
   }
 
   // Declares children mounted into the data-component / data-catalog placeholders below.
-  public registerChildren(): ComponentConfig[] {
+  public registerChildren(): Nutin.ComponentConfig[] {
     // Single child, matched to <div data-component="product-details">
     const detailsComponent = {
       selector: `product-details`,

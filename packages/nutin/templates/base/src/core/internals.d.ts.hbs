@@ -1,202 +1,205 @@
-// Not "NavigationEventMap": that global already exists in lib.dom (Navigation API) and
-// would merge with this one, giving 'navigate' two conflicting payload types.
-declare interface RouterEventMap {
-  'navigate': { path: string };
-  'reload': undefined;
-}
-
-declare interface LifecycleEventMap {
-  'before-render': undefined;
-  'after-render': undefined;
-  'before-destroy': undefined;
-  'after-destroy': undefined;
-  'view-mount': { viewName: string };
-  'view-unmount': { viewName: string };
-}
-
-declare interface I18nEventMap {
-  'language-changed': {
-    lang: string;
-  };
-}
-
-declare interface FrameworkEventMap extends RouterEventMap, LifecycleEventMap, I18nEventMap {}
-
-declare interface AppEventMap {}
-
-declare interface EventMap extends FrameworkEventMap, AppEventMap {}
-
-declare type EventKey = keyof EventMap;
-
-declare type Subscription<K extends EventKey = EventKey> = {
-  event: K;
-  callback: (data: EventMap[K]) => void;
-  once?: boolean;
-};
-
+// Nutin's public types, all inside the global `Nutin` namespace so they can't collide with
+// lib.dom or other packages' globals (e.g. lib.dom's NavigationEventMap). No import needed:
+// `Nutin.ComponentConfig`, `Nutin.Routes`… The app extends it in src/app/globals.d.ts.
 // This file must stay free of top-level import/export, so runtime classes go through import().
+declare namespace Nutin {
+  interface RouterEventMap {
+    'navigate': { path: string };
+    'reload': undefined;
+  }
 
-// Components
+  interface LifecycleEventMap {
+    'before-render': undefined;
+    'after-render': undefined;
+    'before-destroy': undefined;
+    'after-destroy': undefined;
+    'view-mount': { viewName: string };
+    'view-unmount': { viewName: string };
+  }
 
-declare type Template = string | import('./index.js').SafeHtml;
+  interface I18nEventMap {
+    'language-changed': {
+      lang: string;
+    };
+  }
 
-declare type TrustLevel = 'strict' | 'normal' | 'trusted';
+  interface FrameworkEventMap extends RouterEventMap, LifecycleEventMap, I18nEventMap {}
 
-declare interface ComponentConfig {
-  selector: string;
-  factory: (element: HTMLElement) => import('./index.js').Component;
-  // Same key on the next render: the child is kept as-is instead of recreated
-  key?: string | number;
-}
+  interface AppEventMap {}
 
-declare interface BaseComponentOptions {
-  template?: Template;
-  mountTarget?: string | HTMLElement;
-  tagName?: keyof HTMLElementTagNameMap;
-  trustLevel?: TrustLevel;
-}
+  interface EventMap extends FrameworkEventMap, AppEventMap {}
 
-declare interface ComponentProps {
-  // Common HTML attributes - extend as needed
-  className?: string;
-  style?: string;
-  textContent?: string;
+  type EventKey = keyof EventMap;
 
-  // Form field bindings - extend as needed
-  name?: string;
-  email?: string;
+  type Subscription<K extends EventKey = EventKey> = {
+    event: K;
+    callback: (data: EventMap[K]) => void;
+    once?: boolean;
+  };
 
-  // Allow for additional data-bind attributes
-  [key: string]: any;
-}
+  // Components
 
-declare interface ComponentOptions<K = any> extends BaseComponentOptions {
-  props?: ComponentProps;
-  config?: K;
-  defaults?: Partial<K>;
-  templateFn?: (config?: K) => Template;
-  normalizeKeys?: (keyof K)[];
-}
+  type Template = string | import('./index.js').SafeHtml;
 
-declare interface ViewOptions extends BaseComponentOptions {
-  viewName: string;
-}
+  type TrustLevel = 'strict' | 'normal' | 'trusted';
 
-declare interface CatalogConfig extends ComponentOptions {
-  items: CatalogItemConfig[];
-  elementName: string;
-  elementTag?: keyof HTMLElementTagNameMap;
-  selector: string;
-  component: new (el: HTMLElement, data: any, props?: any) => import('./index.js').Component;
-  trackBy?: (item: any, index: number) => string | number;
-}
+  interface ComponentConfig {
+    selector: string;
+    factory: (element: HTMLElement) => import('./index.js').Component;
+    // Same keep value on the next render: the child is kept as-is instead of recreated
+    keep?: string | number;
+  }
 
-declare interface CatalogItemBase {
-  index: number;
-}
+  interface BaseComponentOptions {
+    template?: Template;
+    mountTarget?: string | HTMLElement;
+    tagName?: keyof HTMLElementTagNameMap;
+    trustLevel?: TrustLevel;
+  }
 
-declare type CatalogItemObject<T extends object> = T & CatalogItemBase;
+  interface ComponentProps {
+    // Common HTML attributes - extend as needed
+    className?: string;
+    style?: string;
+    textContent?: string;
 
-declare interface CatalogItemPrimitive extends CatalogItemBase {
-  value: string | number | boolean | null | undefined;
-}
+    // Form field bindings - extend as needed
+    name?: string;
+    email?: string;
 
-declare type CatalogItemConfig<T = any> =
-  T extends object ? CatalogItemObject<T> : CatalogItemPrimitive;
+    // Allow for additional data-bind attributes
+    [key: string]: any;
+  }
 
-// Router
+  interface ComponentOptions<K = any> extends BaseComponentOptions {
+    props?: ComponentProps;
+    config?: K;
+    defaults?: Partial<K>;
+    templateFn?: (config?: K) => Template;
+    normalizeKeys?: (keyof K)[];
+  }
 
-/**
- * Route guard function that receives route parameters and returns:
- * - true to allow navigation
- * - false to block it
- * - string to redirect to a different route
- */
-declare type RouteGuard = (params: Record<string, string>) => boolean | string | Promise<boolean | string>;
+  interface ViewOptions extends BaseComponentOptions {
+    viewName: string;
+  }
 
-/**
- * Creates a route's view. Returning a Promise makes the route lazy: e.g.
- * `() => import('./views/about/about.view.js').then((m) => new m.AboutView())`
- * puts the view's code in its own chunk, loaded on the first visit.
- */
-declare type ViewFactory = () => import('./index.js').View | Promise<import('./index.js').View>;
+  interface CatalogConfig extends ComponentOptions {
+    items: CatalogItemConfig[];
+    elementName: string;
+    elementTag?: keyof HTMLElementTagNameMap;
+    selector: string;
+    component: new (el: HTMLElement, data: any, props?: any) => import('./index.js').Component;
+    // Same value on the next render keeps an unchanged item as-is; changed items are recreated
+    keepBy?: (item: any, index: number) => string | number;
+  }
 
-/**
- * Route configuration - can be just a view factory or an object with guards
- */
-declare type RouteConfig = ViewFactory | {
-  view: ViewFactory;
-  guards?: RouteGuard[];
-};
+  interface CatalogItemBase {
+    index: number;
+  }
 
-declare type Routes = Record<string, RouteConfig>;
+  type CatalogItemObject<T extends object> = T & CatalogItemBase;
 
-declare interface RouteMatch {
-  route: RouteConfig;
-  params: Record<string, string>;
-  pattern: string;
-}
+  interface CatalogItemPrimitive extends CatalogItemBase {
+    value: string | number | boolean | null | undefined;
+  }
 
-// Instance types of the framework services, not true interfaces
-declare type IRouter = ReturnType<typeof import('./index.js').AppRouter>;
-declare type IEventBus = InstanceType<typeof import('./index.js').EventBus>;
-declare type IHttpClient = InstanceType<typeof import('./index.js').HttpClient>;
+  type CatalogItemConfig<T = any> =
+    T extends object ? CatalogItemObject<T> : CatalogItemPrimitive;
 
-// HTTP
+  // Router
 
-declare type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  /**
+   * Route guard function that receives route parameters and returns:
+   * - true to allow navigation
+   * - false to block it
+   * - string to redirect to a different route
+   */
+  type RouteGuard = (params: Record<string, string>) => boolean | string | Promise<boolean | string>;
 
-declare type QueryValue = string | number | boolean | null | undefined;
+  /**
+   * Creates a route's view. Returning a Promise makes the route lazy: e.g.
+   * `() => import('./views/about/about.view.js').then((m) => new m.AboutView())`
+   * puts the view's code in its own chunk, loaded on the first visit.
+   */
+  type ViewFactory = () => import('./index.js').View | Promise<import('./index.js').View>;
 
-/**
- * headers?: Record<string, string>;
- * queryParams?: Record<string, QueryValue | QueryValue[]>;
- * timeout?: number;
- * signal?: AbortSignal;
- * credentials? / cache? / referrerPolicy? / redirect?: passed to fetch as-is.
- */
-declare interface IRequestConfig {
-  headers?: Record<string, string>;
-  queryParams?: Record<string, QueryValue | QueryValue[]>;
-  timeout?: number;
-  signal?: AbortSignal;
-  credentials?: RequestCredentials;
-  cache?: RequestCache;
-  referrerPolicy?: ReferrerPolicy;
-  redirect?: RequestRedirect;
-}
+  /**
+   * Route configuration - can be just a view factory or an object with guards
+   */
+  type RouteConfig = ViewFactory | {
+    view: ViewFactory;
+    guards?: RouteGuard[];
+  };
 
-declare interface IHttpClientOptions {
-  // URL prefixes (origin + path) whose paths may contain encoded "/" or "\" (%2F, %5C).
-  trustedAPIs?: string[];
-}
+  type Routes = Record<string, RouteConfig>;
 
-// i18n & pipes
+  interface RouteMatch {
+    route: RouteConfig;
+    params: Record<string, string>;
+    pattern: string;
+  }
 
-declare type Language = typeof import('./services/i18n/languages.js').LANGUAGES[number];
-declare type Translations = Record<string, any>;
+  // Instance types of the framework services
+  type Router = ReturnType<typeof import('./index.js').AppRouter>;
+  type EventBus = InstanceType<typeof import('./index.js').EventBus>;
+  type HttpClient = InstanceType<typeof import('./index.js').HttpClient>;
 
-declare type PipeFunction = (value: any, ...args: any[]) => string;
+  // HTTP
 
-// Globals
+  type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
-declare interface GlobalMountable {
-  render(): HTMLElement;
-  destroy?(): void;
-}
+  type QueryValue = string | number | boolean | null | undefined;
 
-declare interface GlobalConfig<T extends GlobalMountable = GlobalMountable> {
-  /** The component's own class — constructed internally as `new component(mountTarget)`. */
-  component: new (mountTarget: HTMLElement) => T;
-  /** Stamped onto the mounted root element; pass this same id to `hideGlobals`/`revealGlobals`. */
-  id: string;
-}
+  /**
+   * headers?: Record<string, string>;
+   * queryParams?: Record<string, QueryValue | QueryValue[]>;
+   * timeout?: number;
+   * signal?: AbortSignal;
+   * credentials? / cache? / referrerPolicy? / redirect?: passed to fetch as-is.
+   */
+  interface RequestConfig {
+    headers?: Record<string, string>;
+    queryParams?: Record<string, QueryValue | QueryValue[]>;
+    timeout?: number;
+    signal?: AbortSignal;
+    credentials?: RequestCredentials;
+    cache?: RequestCache;
+    referrerPolicy?: ReferrerPolicy;
+    redirect?: RequestRedirect;
+  }
 
-declare interface RegisterGlobalsOptions {
-  /** Rendered and prepended to `<body>`, in the given order (e.g. a header). */
-  before?: GlobalConfig[];
-  /** Rendered and appended to `<body>`, in the given order (e.g. a footer). */
-  after?: GlobalConfig[];
+  interface HttpClientOptions {
+    // URL prefixes (origin + path) whose paths may contain encoded "/" or "\" (%2F, %5C).
+    trustedAPIs?: string[];
+  }
+
+  // i18n & pipes
+
+  type Language = typeof import('./services/i18n/languages.js').LANGUAGES[number];
+  type Translations = Record<string, any>;
+
+  type PipeFunction = (value: any, ...args: any[]) => string;
+
+  // Globals
+
+  interface GlobalMountable {
+    render(): HTMLElement;
+    destroy?(): void;
+  }
+
+  interface GlobalConfig<T extends GlobalMountable = GlobalMountable> {
+    /** The component's own class — constructed internally as `new component(mountTarget)`. */
+    component: new (mountTarget: HTMLElement) => T;
+    /** Stamped onto the mounted root element; pass this same id to `hideGlobals`/`revealGlobals`. */
+    id: string;
+  }
+
+  interface RegisterGlobalsOptions {
+    /** Rendered and prepended to `<body>`, in the given order (e.g. a header). */
+    before?: GlobalConfig[];
+    /** Rendered and appended to `<body>`, in the given order (e.g. a footer). */
+    after?: GlobalConfig[];
+  }
 }
 
 // Set by the builder's esbuild `define` so prod bundles can drop i18n code when it's

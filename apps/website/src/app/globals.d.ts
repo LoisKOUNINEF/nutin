@@ -1,4 +1,6 @@
-declare interface AppEventMap { }
+declare namespace Nutin {
+  interface AppEventMap {}
+}
 
 // Prism
 declare interface Window {

@@ -3,7 +3,7 @@ import { BaseComponent } from '../base-component/base-component.js';
 export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComponent<T> {
   private _viewName: string;
   protected routeParams: Record<string, string> = {};
-  private _template: Template;
+  private _template: Nutin.Template;
 
   constructor({
     template,
@@ -11,7 +11,7 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
     mountTarget = '#app',
     viewName,
     trustLevel,
-  }: ViewOptions) {
+  }: Nutin.ViewOptions) {
     super({ mountTarget, tagName, trustLevel });
     if (!viewName) throw new Error('View requires a viewName.');
     this._template = template ?? '';
@@ -22,7 +22,7 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
     return this._viewName;
   }
 
-  protected override generateTemplate(): Template {
+  protected override generateTemplate(): Nutin.Template {
     return this._template;
   }
 

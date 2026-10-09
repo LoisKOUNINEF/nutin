@@ -24,17 +24,18 @@ export class UsersService extends Service<UsersService> {
 ```
 
 ```ts
-get<T = unknown>(endpoint: string, config?: IRequestConfig): Promise<T>;
-post<T = unknown>(endpoint: string, data?: unknown, config?: IRequestConfig): Promise<T>;
-put<T = unknown>(endpoint: string, data?: unknown, config?: IRequestConfig): Promise<T>;
-patch<T = unknown>(endpoint: string, data?: unknown, config?: IRequestConfig): Promise<T>;
-delete<T = unknown>(endpoint: string, config?: IRequestConfig): Promise<T>;
+get<T = unknown>(endpoint: string, config?: Nutin.RequestConfig): Promise<T>;
+post<T = unknown>(endpoint: string, data?: unknown, config?: Nutin.RequestConfig): Promise<T>;
+put<T = unknown>(endpoint: string, data?: unknown, config?: Nutin.RequestConfig): Promise<T>;
+patch<T = unknown>(endpoint: string, data?: unknown, config?: Nutin.RequestConfig): Promise<T>;
+delete<T = unknown>(endpoint: string, config?: Nutin.RequestConfig): Promise<T>;
 ```
 
 `AppHttpClient` is the framework's default `HttpClient` singleton, without a base URL: a relative endpoint (`/api/users`) is resolved against the page's origin, and an absolute one (`https://…`) is used as it is. Only `http:` and `https:` URLs are accepted.
 
 ```ts
-interface IRequestConfig {
+// Nutin.RequestConfig
+interface RequestConfig {
   headers?: Record<string, string>;
   queryParams?: Record<string, string | number | boolean | null | undefined | Array<…>>;
   timeout?: number;            // ms, > 0; throws Error('Request timed out') when exceeded

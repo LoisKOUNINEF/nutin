@@ -4,11 +4,11 @@ import { Service } from '../../base-classes/service/service.js';
 import { CONFIG } from '../../config.js';
 
 export class I18n extends Service<I18n> {
-  private readonly _DEFAULT_LANGUAGE: Language = DEFAULT_LANGUAGE;
+  private readonly _DEFAULT_LANGUAGE: Nutin.Language = DEFAULT_LANGUAGE;
   private readonly _LANGUAGES = LANGUAGES;
-  private _currentLanguage: Language = this._DEFAULT_LANGUAGE;
-  private _translations: Translations = {};
-  private _defaultTranslations: Translations = {};
+  private _currentLanguage: Nutin.Language = this._DEFAULT_LANGUAGE;
+  private _translations: Nutin.Translations = {};
+  private _defaultTranslations: Nutin.Translations = {};
   private readonly _localStorageKey = 'nutin-fav-lang';
 
   constructor() {
@@ -17,15 +17,15 @@ export class I18n extends Service<I18n> {
     this._currentLanguage = this.getPreferredLanguage();
   }
 
-  public get currentLanguage(): Language {
+  public get currentLanguage(): Nutin.Language {
     return this._currentLanguage;
   }
 
-  public get defaultLanguage(): Language {
+  public get defaultLanguage(): Nutin.Language {
     return this._DEFAULT_LANGUAGE;
   }
 
-  public get languages(): Language[] {
+  public get languages(): Nutin.Language[] {
     return this._LANGUAGES;
   }
 
@@ -33,7 +33,7 @@ export class I18n extends Service<I18n> {
     return this._localStorageKey;
   }
 
-  public async setCurrentLanguage(lang: Language): Promise<void> {
+  public async setCurrentLanguage(lang: Nutin.Language): Promise<void> {
     this._currentLanguage = lang;
     this.savePreferences();
     await this.loadTranslations(lang);
@@ -46,7 +46,7 @@ export class I18n extends Service<I18n> {
     return () => AppEventBus.off('language-changed', callback);
   }
 
-  public async loadTranslations(lang: Language): Promise<void> {
+  public async loadTranslations(lang: Nutin.Language): Promise<void> {
     try {
       const response = await fetch(`/locales/${lang}.json`);
       
@@ -121,19 +121,19 @@ export class I18n extends Service<I18n> {
     this._currentLanguage = this._DEFAULT_LANGUAGE;
   }
 
-  private getPreferredLanguage(): Language {
+  private getPreferredLanguage(): Nutin.Language {
     const urlLocale = this.getLocaleFromUrl();
     if (urlLocale) return urlLocale;
     const stored = this.getPreferences();
-    if (stored && this._LANGUAGES.includes(stored as Language)) return stored as Language;
-    const browserLang = navigator.language.split('-')[0] as Language;
+    if (stored && this._LANGUAGES.includes(stored as Nutin.Language)) return stored as Nutin.Language;
+    const browserLang = navigator.language.split('-')[0] as Nutin.Language;
     return this._LANGUAGES.includes(browserLang) ? browserLang : this._DEFAULT_LANGUAGE;
   }
 
-  private getLocaleFromUrl(): Language | null {
+  private getLocaleFromUrl(): Nutin.Language | null {
     if (!(globalThis.__NUTIN_I18N__ ?? CONFIG.i18n)) return null;
 
-    const first = window.location.pathname.split('/').filter(Boolean)[0] as Language;
+    const first = window.location.pathname.split('/').filter(Boolean)[0] as Nutin.Language;
     return first && this._LANGUAGES.includes(first) ? first : null;
   }
 

@@ -14,7 +14,7 @@ export class ArticlesIndexView extends View {
     void loadA11yCardLink();
   }
 
-  public registerChildren(): ComponentConfig[] {
+  public registerChildren(): Nutin.ComponentConfig[] {
     return [{
       selector: 'read-more',
       factory: (el) => new ReadMoreComponent(el)

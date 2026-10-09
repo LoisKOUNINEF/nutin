@@ -7,7 +7,7 @@ import { AdminView } from './views/admin/admin.view.js';
 import { NotFoundView } from './views/not-found/not-found.view.js';
 import { Guards } from './guards.js';
 
-export const appRoutes: Routes = {
+export const appRoutes: Nutin.Routes = {
   '/': () => new HomeView(),                                          // plain-function form
   '/admin': { view: () => new AdminView(), guards: [Guards.requireAuth()] }, // guarded form
   '/404': () => new NotFoundView(),                                   // required — see below
@@ -23,6 +23,7 @@ AppRouter(appRoutes);
 ```
 
 ```ts
+// In the global Nutin namespace: Nutin.RouteGuard, Nutin.ViewFactory, Nutin.RouteConfig, Nutin.Routes
 type RouteGuard = (params: Record<string, string>) => boolean | string | Promise<boolean | string>;
 type ViewFactory = () => View | Promise<View>;
 type RouteConfig = ViewFactory | { view: ViewFactory; guards?: RouteGuard[] };
@@ -42,7 +43,7 @@ A view factory may return a Promise. Import the view's file with `import()` and 
 import { HomeView } from './views/home/home.view.js';
 import { NotFoundView } from './views/not-found/not-found.view.js';
 
-export const appRoutes: Routes = {
+export const appRoutes: Nutin.Routes = {
   '/': () => new HomeView(),
   '/reports': () => import('./views/reports/reports.view.js').then((m) => new m.ReportsView()),
   '/admin': {

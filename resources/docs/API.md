@@ -59,4 +59,4 @@ title: API
 
 - [How do I make HTTP requests?](./API/HTTP_CLIENT/HOWDOI_MAKE_HTTP_REQUESTS.md)
 
-***NOTE:*** framework types (`ComponentConfig`, `Routes`, `RouteGuard`, `Template`, `TrustLevel`, `ViewFactory`, …) are ambient globals declared in `core/internals.d.ts`: use them without importing them.
+***NOTE:*** framework types (`Nutin.ComponentConfig`, `Nutin.Routes`, `Nutin.RouteGuard`, `Nutin.Template`, `Nutin.TrustLevel`, `Nutin.ViewFactory`, …) live in the global `Nutin` namespace declared in `core/internals.d.ts`: use them without importing them. Only that one global name is reserved, so they can't collide with lib.dom or other packages' types.

@@ -9,9 +9,9 @@ protected onBeforeRender(): void {}
 protected onAfterRender(): void {}
 protected onBeforeDestroy(): void {}
 protected onAfterDestroy(): void {}
-protected onReuse(): void {}
-protected generateTemplate(): Template { return ''; }    // Component/View override this
-public registerChildren(): ComponentConfig[] { return []; }
+protected onKept(): void {}
+protected generateTemplate(): Nutin.Template { return ''; }    // Component/View override this
+public registerChildren(): Nutin.ComponentConfig[] { return []; }
 ```
 
 `View` additionally exposes:
@@ -29,7 +29,7 @@ public onExit(): void {}
 onBeforeRender()
 element.replaceChildren(sanitizeToFragment(generateTemplate()))
 compose()          → addChildren()             (mount data-component/data-catalog children)
-child.onReuse()    for every kept child (see below)
+child.onKept()     for every kept child (see below)
 hydrate()          → parseDataAttributes()     (data-i18n, data-pipe)
                    → cleanupOptionalContent()  (data-optional)
 autoBindEvents()   → rebinds all data-event listeners
@@ -38,9 +38,9 @@ onAfterRender()
 
 `hydrate()` leaves `data-pipe` inside child components alone: each child already piped its own content.
 
-- `onReuse()`:
+- `onKept()`:
 
-Called on a child kept across its parent's re-render — one registered with a `key`, or a catalog item with `trackBy` whose item didn't change. A kept child isn't rendered or destroyed, so none of the other hooks fire for it: its existing DOM is moved into the parent's new template as-is, then `onReuse()` is called. Use it for light work on that existing DOM (re-measuring, re-reading a value); don't rebuild the DOM in it — that's what a new key is for. See [How do I register child components?](../COMPONENTS/HOWDOI_REGISTER_CHILD_COMPONENTS.md#keeping-children-across-re-renders).
+Called on a child kept across its parent's re-render — one registered with `keep`, or a catalog item with `keepBy` whose item didn't change. A kept child isn't rendered or destroyed, so none of the other hooks fire for it: its existing DOM is moved into the parent's new template as-is, then `onKept()` is called. Use it for light work on that existing DOM (re-measuring, re-reading a value); don't rebuild the DOM in it — that's what a new `keep` value is for. See [How do I register child components?](../COMPONENTS/HOWDOI_REGISTER_CHILD_COMPONENTS.md#keeping-children-across-re-renders).
 
 `destroy()`:
 

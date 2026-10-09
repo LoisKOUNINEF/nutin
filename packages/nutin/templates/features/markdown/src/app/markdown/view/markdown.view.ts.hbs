@@ -15,7 +15,7 @@ export interface IMarkdownViewOptions {
   id: string;
   // A custom layout needs data-component="markdown-nav" and data-component="markdown-content"
   // (the content placeholder also receives the landing). Leave out "markdown-nav" for no nav.
-  template?: Template;
+  template?: Nutin.Template;
   viewName?: string;
   // Replace a part of the page with your own component class, e.g. a subclass with its own
   // template (see the components' optional `templateFn` constructor argument).
@@ -119,7 +119,7 @@ export class MarkdownView extends View {
     this.stopLanguageSync();
   }
 
-  public registerChildren(): ComponentConfig[] {
+  public registerChildren(): Nutin.ComponentConfig[] {
     const Nav = this.options.navComponent ?? MarkdownNavComponent;
     const Content = this.options.contentComponent ?? MarkdownContentComponent;
     const Landing = this.options.landingComponent ?? MarkdownLandingComponent;

@@ -56,8 +56,9 @@ server {
     # Hide nginx version
     server_tokens off;
 
-    # With i18n enabled, redirects bare "/" to the default language so the served URL
-    # always matches each page's canonical/og:url (filled in by validate-docker).
+    # With i18n enabled, redirects "/" and unprefixed paths ("/docs") to the default
+    # language, so every served URL matches a page's canonical/og:url instead of
+    # returning a duplicate SPA shell (filled in by validate-docker).
     __ROOT_REDIRECT_PLACEHOLDER__
 
     # SPA routing: serve index.html for unknown paths
@@ -109,7 +110,8 @@ server {
     # ---------------------------
     # HEALTH ENDPOINT
     # ---------------------------
-    location /health {
+    # Exact match: it must win over the i18n unprefixed-path redirect (a regex location).
+    location = /health {
         access_log off;
         add_header Content-Type text/plain always;
         add_header Cache-Control "no-store" always;

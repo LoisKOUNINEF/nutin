@@ -4,8 +4,8 @@ import * as DataBindingHelper from './helpers/data-binding.helper.js';
 
 export abstract class Component<T extends HTMLElement = HTMLElement, K = any> extends BaseComponent<T> {
   protected config: K;
-  protected props: ComponentProps;
-  private _templateFn: (config?: K) => Template;
+  protected props: Nutin.ComponentProps;
+  private _templateFn: (config?: K) => Nutin.Template;
   private _normalizeKeys: (keyof K)[];
   private _defaults: Partial<K>;
 
@@ -18,7 +18,7 @@ export abstract class Component<T extends HTMLElement = HTMLElement, K = any> ex
     normalizeKeys = [],
     defaults = {},
     trustLevel,
-  }: ComponentOptions) {
+  }: Nutin.ComponentOptions) {
     super({ mountTarget, tagName, trustLevel });
 
     this.config = ConfigHelper.setConfigValue(config, normalizeKeys);
@@ -32,7 +32,7 @@ export abstract class Component<T extends HTMLElement = HTMLElement, K = any> ex
     return DataBindingHelper.getDataBindingValues(this.element);
   }
 
-  protected override generateTemplate(): Template {
+  protected override generateTemplate(): Nutin.Template {
     return ConfigHelper.createNormalizedTemplate({
       config: this.config,
       defaults: this._defaults,

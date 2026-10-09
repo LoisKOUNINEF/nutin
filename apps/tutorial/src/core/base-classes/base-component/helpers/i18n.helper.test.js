@@ -89,4 +89,43 @@ describe('I18nHelper', () => {
     expect(container.querySelector('.own').textContent).toBe('[a]');
     expect(container.querySelector('.nested').textContent).toBe('b');
   });
+  it('prefixes root-relative links with the current language and a trailing slash, keeping query and hash', () => {
+    const lang = I18nService.currentLanguage;
+    container.innerHTML = '<a class="a" href="/docs"></a><a class="b" href="/"></a><a class="c" href="/docs/api?x=1#h"></a><a class="d" href="/docs/#h"></a>';
+
+    I18nHelper.parseI18nAttributes(container);
+
+    expect(container.querySelector('.a').getAttribute('href')).toBe(`/${lang}/docs/`);
+    expect(container.querySelector('.b').getAttribute('href')).toBe(`/${lang}/`);
+    expect(container.querySelector('.c').getAttribute('href')).toBe(`/${lang}/docs/api/?x=1#h`);
+    expect(container.querySelector('.d').getAttribute('href')).toBe(`/${lang}/docs/#h`);
+  });
+
+  it('leaves localized, external, protocol-relative, relative, hash, mailto and file links untouched', () => {
+    const lang = I18nService.currentLanguage;
+    const hrefs = [`/${lang}/docs`, `/${lang}`, 'https://example.com/docs', '//example.com/docs', 'docs', '#top', 'mailto:a@b.c', '/favicon.ico', '/files/guide.pdf?v=2'];
+    container.innerHTML = hrefs.map((href) => `<a href="${href}"></a>`).join('');
+
+    I18nHelper.parseI18nAttributes(container);
+
+    expect([...container.querySelectorAll('a')].map((a) => a.getAttribute('href'))).toEqual(hrefs);
+  });
+
+  it('leaves links inside a nested component root, which localizes its own', () => {
+    container.innerHTML = '<div class="child"><a href="/docs"></a></div>';
+    DomHelper.markComponentRoot(container.querySelector('.child'));
+
+    I18nHelper.parseI18nAttributes(container);
+
+    expect(container.querySelector('a').getAttribute('href')).toBe('/docs');
+  });
+
+  it('leaves links untouched when i18n is disabled', () => {
+    CONFIG.i18n = false;
+    container.innerHTML = '<a href="/docs"></a>';
+
+    I18nHelper.parseI18nAttributes(container);
+
+    expect(container.querySelector('a').getAttribute('href')).toBe('/docs');
+  });
 });

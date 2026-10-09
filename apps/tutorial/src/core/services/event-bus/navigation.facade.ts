@@ -1,7 +1,7 @@
 import { AppEventBus } from "./event-bus.js";
 
 class NavigationFacade {
-  constructor(private bus: IEventBus) {}
+  constructor(private bus: Nutin.EventBus) {}
 
   navigateTo(path: string): void {
     this.bus.emit('navigate', { path });

@@ -2,41 +2,41 @@ import type { BaseComponent } from '../base-component.js';
 import * as DomHelper from './dom.helper.js';
 
 // What a catalog item was built from: a kept item must still match it.
-export interface ReuseState {
+export interface KeepCondition {
   item: unknown;
   options: Record<string, unknown>;
   component: unknown;
 }
 
 // Internal fields CatalogHelper sets on top of the public ComponentConfig.
-export interface ReusableComponentConfig extends ComponentConfig {
+export interface KeepableComponentConfig extends Nutin.ComponentConfig {
   scope?: string;
-  reuseIf?: ReuseState;
+  keepIf?: KeepCondition;
 }
 
-interface KeyedChild {
+interface KeepableChild {
   instance: BaseComponent;
-  reuseIf?: ReuseState;
+  keepIf?: KeepCondition;
 }
 
 export interface ChildRegistry {
-  keyed: Map<string, KeyedChild>;
-  unkeyed: BaseComponent[];
-  reused: BaseComponent[];
+  keepable: Map<string, KeepableChild>;
+  rebuilt: BaseComponent[];
+  kept: BaseComponent[];
 }
 
 interface Placement {
-  config: ReusableComponentConfig;
+  config: KeepableComponentConfig;
   placeholder: HTMLElement;
   id?: string;
-  kept?: KeyedChild;
+  kept?: KeepableChild;
 }
 
 export function createRegistry(): ChildRegistry {
-  return { keyed: new Map(), unkeyed: [], reused: [] };
+  return { keepable: new Map(), rebuilt: [], kept: [] };
 }
 
-// Keyed children whose identity is unchanged are moved into their new
+// Children whose keep value is unchanged are moved into their new
 // placeholder as-is; everything else is destroyed and recreated.
 export function addChildren(
   component: BaseComponent,
@@ -50,24 +50,24 @@ export function addChildren(
   // prepared once rather than after each DOM change.
   const kept = placements.filter(({ kept }) => kept);
   kept.forEach(({ kept, placeholder }) => DomHelper.prepareMoveTarget(placeholder.parentNode, kept!.instance.getElement()));
-  kept.forEach(placement => reuse(placement, registry));
+  kept.forEach(placement => keep(placement, registry));
   placements.filter(({ kept }) => !kept).forEach(placement => create(placement, registry));
 }
 
-export function getKeyedElements(registry: ChildRegistry): HTMLElement[] {
-  return Array.from(registry.keyed.values(), ({ instance }) => instance.getElement());
+export function getKeepableElements(registry: ChildRegistry): HTMLElement[] {
+  return Array.from(registry.keepable.values(), ({ instance }) => instance.getElement());
 }
 
 export function destroyChildren(registry: ChildRegistry): void {
-  registry.unkeyed.forEach(child => child.destroy());
-  registry.keyed.forEach(({ instance }) => instance.destroy());
-  registry.unkeyed = [];
-  registry.keyed.clear();
-  registry.reused = [];
+  registry.rebuilt.forEach(child => child.destroy());
+  registry.keepable.forEach(({ instance }) => instance.destroy());
+  registry.rebuilt = [];
+  registry.keepable.clear();
+  registry.kept = [];
 }
 
 function matchPlaceholders(
-  configs: ReusableComponentConfig[],
+  configs: KeepableComponentConfig[],
   element: HTMLElement,
   registry: ChildRegistry
 ): Placement[] {
@@ -78,8 +78,8 @@ function matchPlaceholders(
     element.querySelectorAll(`[data-component="${config.selector}"]`).forEach((placeholder, occurrence) => {
       if (!(placeholder instanceof HTMLElement)) return;
       const id = getId(config, occurrence, seen);
-      const previous = id === undefined ? undefined : registry.keyed.get(id);
-      const kept = previous && canReuse(previous, config) ? previous : undefined;
+      const previous = id === undefined ? undefined : registry.keepable.get(id);
+      const kept = previous && canKeep(previous, config) ? previous : undefined;
       placements.push({ config, placeholder, id, kept });
     });
   });
@@ -87,22 +87,22 @@ function matchPlaceholders(
   return placements;
 }
 
-function getId(config: ReusableComponentConfig, occurrence: number, seen: Set<string>): string | undefined {
-  if (config.key === undefined) return undefined;
+function getId(config: KeepableComponentConfig, occurrence: number, seen: Set<string>): string | undefined {
+  if (config.keep === undefined) return undefined;
 
   const scope = config.scope ?? config.selector;
-  const id = JSON.stringify([scope, config.key, occurrence]);
+  const id = JSON.stringify([scope, config.keep, occurrence]);
   if (seen.has(id)) {
-    console.warn(`Duplicate child key "${config.key}" in "${scope}" - it will be recreated on every render.`);
+    console.warn(`Duplicate child keep value "${config.keep}" in "${scope}" - it will be recreated on every render.`);
     return undefined;
   }
   seen.add(id);
   return id;
 }
 
-function canReuse(previous: KeyedChild, config: ReusableComponentConfig): boolean {
-  const before = previous.reuseIf;
-  const after = config.reuseIf;
+function canKeep(previous: KeepableChild, config: KeepableComponentConfig): boolean {
+  const before = previous.keepIf;
+  const after = config.keepIf;
   if (!before || !after) return before === after;
 
   return before.component === after.component
@@ -113,27 +113,27 @@ function canReuse(previous: KeyedChild, config: ReusableComponentConfig): boolea
 function destroyUnkept(registry: ChildRegistry, placements: Placement[]): void {
   const keptIds = new Set(placements.filter(({ kept }) => kept).map(({ id }) => id));
 
-  registry.unkeyed.forEach(child => child.destroy());
-  registry.unkeyed = [];
-  registry.reused = [];
-  registry.keyed.forEach((entry, id) => {
+  registry.rebuilt.forEach(child => child.destroy());
+  registry.rebuilt = [];
+  registry.kept = [];
+  registry.keepable.forEach((entry, id) => {
     if (keptIds.has(id)) return;
     entry.instance.destroy();
-    registry.keyed.delete(id);
+    registry.keepable.delete(id);
   });
 }
 
-function reuse({ config, placeholder, kept }: Placement, registry: ChildRegistry): void {
+function keep({ config, placeholder, kept }: Placement, registry: ChildRegistry): void {
   DomHelper.replacePlaceholder(kept!.instance.getElement(), placeholder);
-  kept!.reuseIf = config.reuseIf;
-  registry.reused.push(kept!.instance);
+  kept!.keepIf = config.keepIf;
+  registry.kept.push(kept!.instance);
 }
 
 function create({ config, placeholder, id }: Placement, registry: ChildRegistry): void {
   const child = config.factory(placeholder);
   child.render();
-  if (id === undefined) registry.unkeyed.push(child);
-  else registry.keyed.set(id, { instance: child, reuseIf: config.reuseIf });
+  if (id === undefined) registry.rebuilt.push(child);
+  else registry.keepable.set(id, { instance: child, keepIf: config.keepIf });
 }
 
 function shallowEqual(a: unknown, b: unknown): boolean {

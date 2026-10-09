@@ -20,10 +20,10 @@ const RELOAD_WINDOW = 10_000;
 // The i18n guards wrap their branch rather than returning early: esbuild only drops
 // a constant-false block, not code after a constant early return, and I18nService
 // must go unreferenced for prod builds to drop it when i18n is off.
-export function extractLocale(path: string): { locale: Language | null; strippedPath: string } {
+export function extractLocale(path: string): { locale: Nutin.Language | null; strippedPath: string } {
   if (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n) {
     const segments = path.split('/').filter(Boolean);
-    const first = segments[0] as Language;
+    const first = segments[0] as Nutin.Language;
     if (first && I18nService.languages.includes(first)) {
       const rest = segments.slice(1).join('/');
       return { locale: first, strippedPath: rest ? `/${rest}` : '/' };
@@ -40,7 +40,7 @@ export function addLocalePrefix(strippedPath: string): string {
   return strippedPath;
 }
 
-export function getCurrentLocale(): Language | null {
+export function getCurrentLocale(): Nutin.Language | null {
   return extractLocale(window.location.pathname).locale;
 }
 

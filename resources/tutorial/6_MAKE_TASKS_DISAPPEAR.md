@@ -37,7 +37,7 @@ export class TaskActionComponent extends Component {
     constructor(
         mountTarget: HTMLElement,
         config: ITaskActionConfig,
-        props: ComponentProps = { /* className: '', style: '' */ },
+        props: Nutin.ComponentProps = { /* className: '', style: '' */ },
     ) {
         super({ templateFn, mountTarget, config, props });
         this._callback = config.callback;
@@ -80,7 +80,7 @@ import { TaskActionComponent } from '../task-action/task-action.component.js';
 export class TaskCardComponent extends Component {
     constructor(mountTarget: HTMLElement, config: ITask) { /* ... */ }
 
-    registerChildren(): ComponentConfig[] {
+    registerChildren(): Nutin.ComponentConfig[] {
         return [
             {
                 selector: 'remove',

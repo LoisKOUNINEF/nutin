@@ -18,14 +18,14 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
   private _isRendering = false;
   protected element: T;
   protected eventListeners: Array<[EventTarget, string, EventListener]> = [];
-  private _busSubscriptions: Array<[EventKey, (data: any) => void]> = [];
-  protected trustLevel: TrustLevel | undefined;
+  private _busSubscriptions: Array<[Nutin.EventKey, (data: any) => void]> = [];
+  protected trustLevel: Nutin.TrustLevel | undefined;
 
   constructor({
     mountTarget = '#app',
     tagName = 'div',
     trustLevel
-  }: BaseComponentOptions) {
+  }: Nutin.BaseComponentOptions) {
     this.trustLevel = trustLevel;
     this.element = DomHelper.createElement<T>(tagName, '', trustLevel);
     DomHelper.markComponentRoot(this.element);
@@ -36,7 +36,7 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
     return this.element;
   }
 
-  public registerChildren(): ComponentConfig[] {
+  public registerChildren(): Nutin.ComponentConfig[] {
     return [];
   }
 
@@ -46,7 +46,7 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
 
     try {
       this.onBeforeRender();
-      const preserved = PreservationHelper.preserve(ChildrenHelper.getKeyedElements(this._children));
+      const preserved = PreservationHelper.preserve(ChildrenHelper.getKeepableElements(this._children));
       try {
         this.element.replaceChildren(
           SecurityHelper.sanitizeToFragment(this.generateTemplate(), this.trustLevel)
@@ -55,7 +55,7 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
       } finally {
         PreservationHelper.restore(preserved);
       }
-      this._children.reused.splice(0).forEach(child => child.onReuse());
+      this._children.kept.splice(0).forEach(child => child.onKept());
       this.hydrate();
       this.autoBindEvents()
       this.onAfterRender();
@@ -83,9 +83,9 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
   protected onBeforeDestroy(): void {}
   protected onAfterDestroy(): void {}
   // Called instead of a render when a parent re-render keeps this child as-is
-  protected onReuse(): void {}
+  protected onKept(): void {}
 
-  protected generateTemplate(): Template {
+  protected generateTemplate(): Nutin.Template {
     return '';
   }
 
@@ -113,20 +113,20 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
     ChildrenHelper.addChildren(this, this.element, this._children);
   }
 
-  protected createCatalogComponents(config: CatalogConfig): ComponentConfig[] {
+  protected createCatalogComponents(config: Nutin.CatalogConfig): Nutin.ComponentConfig[] {
     return CatalogHelper.generateCatalog(config, this.element);
   }
 
-  protected listen<K extends EventKey>(
+  protected listen<K extends Nutin.EventKey>(
     event: K,
-    callback: (data: EventMap[K]) => void
+    callback: (data: Nutin.EventMap[K]) => void
   ): void {
     AppEventBus.subscribe(event, callback);
     this._busSubscriptions.push([event, callback]);
   }
 
-  protected listenToRenderEvents(events: EventKey[]): void {
-    events.forEach((event: EventKey) => {
+  protected listenToRenderEvents(events: Nutin.EventKey[]): void {
+    events.forEach((event: Nutin.EventKey) => {
       this.listen(event, () => this.render());
     });
   }

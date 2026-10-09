@@ -48,7 +48,7 @@ export const markdownContentTemplate = (_config: IMarkdownContentConfig) => {
 
 export class MarkdownContentComponent extends Component<HTMLElement, IMarkdownContentConfig> {
   // templateFn: your own template, e.g. built from renderToc() and the page's html.
-  constructor(mountTarget: HTMLElement, config: IMarkdownContentConfig, templateFn: (config: IMarkdownContentConfig) => Template = markdownContentTemplate) {
+  constructor(mountTarget: HTMLElement, config: IMarkdownContentConfig, templateFn: (config: IMarkdownContentConfig) => Nutin.Template = markdownContentTemplate) {
     // Mounting replaces the placeholder element, so its class is re-applied here.
     super({ templateFn, mountTarget, config, trustLevel: 'trusted', props: { className: 'markdown-content' } });
   }

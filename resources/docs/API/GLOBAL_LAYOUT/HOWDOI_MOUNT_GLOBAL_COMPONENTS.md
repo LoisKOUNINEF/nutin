@@ -13,12 +13,13 @@ registerGlobals({
 ```
 
 ```ts
+// Nutin.GlobalConfig
 interface GlobalConfig {
   component: new (mountTarget: HTMLElement) => Component; // constructed internally — you never pass mountTarget
   id: string;                                              // stamped onto the rendered root element
 }
 
-registerGlobals(options: { before?: GlobalConfig[]; after?: GlobalConfig[] }): void
+registerGlobals(options: { before?: Nutin.GlobalConfig[]; after?: Nutin.GlobalConfig[] }): void
 ```
 
 Call this once in `main.ts`, alongside `registerPipes()`/`AppRouter(routes)`. Each entry's `component` is constructed and rendered internally, its root element's `id` is set to the entry's `id`, and:

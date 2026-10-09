@@ -26,7 +26,7 @@ class Router extends Service<Router> {
   // False until the first view is rendered: the first load leaves focus to the browser.
   private _hasRendered = false;
 
-  constructor(private routes: Routes) {
+  constructor(private routes: Nutin.Routes) {
     super();
     this.initializeEventListeners();
     this.navigate(this.currentLocation());
@@ -115,7 +115,7 @@ class Router extends Service<Router> {
   // A lazy one is awaited: if it fails to load, recoverFromFailedViewLoad() takes over; if a
   // newer navigation started meanwhile, the view (already mounted, empty, by its
   // constructor) is destroyed and dropped.
-  private async resolveView(factory: ViewFactory, url: string, isStale: () => boolean): Promise<View | null> {
+  private async resolveView(factory: Nutin.ViewFactory, url: string, isStale: () => boolean): Promise<View | null> {
     if (isStale()) return null;
     const result = factory();
     if (!isPromise(result)) return result;
@@ -163,7 +163,7 @@ class Router extends Service<Router> {
     if (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n) {
       const newLocale = NavigationManager.getCurrentLocale();
       if (newLocale && newLocale !== I18nService.currentLanguage) {
-        await I18nService.setCurrentLanguage(newLocale as Language);
+        await I18nService.setCurrentLanguage(newLocale as Nutin.Language);
       }
     }
     this.navigateWithMode(this.currentLocation(), 'none', this._hasRendered);
@@ -175,7 +175,7 @@ class Router extends Service<Router> {
    * - '/users/:id?' matches '/users' and '/users/123'
    * - '/posts/:id' matches '/posts/123' but not '/posts'
    */
-  private matchRoute(path: string): RouteMatch | null {
+  private matchRoute(path: string): Nutin.RouteMatch | null {
     for (const [pattern, routeConfig] of Object.entries(this.routes)) {
       const match = NavigationManager.matchPattern(pattern, path);
       if (match) {
@@ -214,7 +214,7 @@ class Router extends Service<Router> {
 
   private async handleGuards(
     normalizedPath: string,
-    routeConfig: RouteConfig,
+    routeConfig: Nutin.RouteConfig,
     params: Record<string, string>,
     currentPath: string,
     mode: HistoryMode,
@@ -246,4 +246,4 @@ function isPromise<T>(value: T | Promise<T>): value is Promise<T> {
   return typeof (value as Promise<T> | null)?.then === 'function';
 }
 
-export const AppRouter = (routes: Routes) => Router.getInstance(routes);
+export const AppRouter = (routes: Nutin.Routes) => Router.getInstance(routes);

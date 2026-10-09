@@ -76,7 +76,7 @@ export const markdownLandingTemplate = (_config: IMarkdownLandingConfig) => html
 // The index shown on the bare route of a folder with "landing": its hub(s) and pages.
 export class MarkdownLandingComponent extends Component<HTMLElement, IMarkdownLandingConfig> {
   // templateFn: your own template, e.g. built from the render helpers above.
-  constructor(mountTarget: HTMLElement, config: IMarkdownLandingConfig, templateFn: (config: IMarkdownLandingConfig) => Template = markdownLandingTemplate) {
+  constructor(mountTarget: HTMLElement, config: IMarkdownLandingConfig, templateFn: (config: IMarkdownLandingConfig) => Nutin.Template = markdownLandingTemplate) {
     // Mounting replaces the placeholder element, so its class is set here.
     super({ templateFn, mountTarget, config, props: { className: 'markdown-landing' } });
   }
