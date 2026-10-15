@@ -76,26 +76,24 @@
     }
 }
 
-.home__catchphrase {
-    max-width: 60ch;
-    color: var(--primary);
-    font-size: map.get($font-sizes, 'largest');
-    font-weight: bold;
-    padding-bottom: map.get($spacings, small);
+.home__catchphrase-container {
     padding-top: map.get($spacings, small);
+    max-width: 90ch;
     @include mixins.respond-to(medium) {
-    width: 100%;
+        width: 100%;
         // font-size: map.get($font-sizes, 'large');
     }
 }
 
+.home__catchphrase {
+    color: var(--primary);
+    font-size: map.get($font-sizes, 'largest');
+    font-weight: bold;
+}
+
 .home__subcatchphrase {
-    max-width: 60ch;
     font-size: map.get($font-sizes, 'largest');
     color: var(--secondary);
-    @include mixins.respond-to(medium) {
-    width: 100%;
-    }
 }
 
 .home__section-header {

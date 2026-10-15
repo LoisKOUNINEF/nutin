@@ -2,6 +2,16 @@
 @use "variables" as *;
 @use "mixins";
 
+.snippet {
+    padding-top: map.get($spacings, 'small');
+    padding-bottom: map.get($spacings, 'small');
+}
+
+.snippet__body {
+    @include mixins.flex-center;
+    @include mixins.flex-column;
+}
+
 .snippet__code {
     border-radius: map.get($border-radius, medium);
     overflow-x: auto;

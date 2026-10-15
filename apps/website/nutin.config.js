@@ -35,7 +35,6 @@ export default {
     sass: {
       paths: [
         'base',
-        'core',
       ], // Directories in styles/ to include in the Sass load path
     },
 
