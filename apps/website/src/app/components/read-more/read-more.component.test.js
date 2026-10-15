@@ -13,17 +13,17 @@ describe('ReadMoreComponent', () => {
     component.render();
 
     const navigateSpy = spyOn(Navigation, 'navigateTo').andCallFake(() => {});
-    const cards = [...component.element.querySelectorAll('.card-link')];
+    const cards = [...component.element.querySelectorAll('a11y-card-link.card-link')];
+    const links = cards.map((card) => card.querySelector('.card-title a[href]'));
     try {
-      cards.forEach((card) => card.click());
+      links.forEach((link) => link.click());
     } finally {
       navigateSpy.restore();
     }
 
     expect(cards.length).toBe(4);
-    expect(navigateSpy.calls.map(([href]) => href)).toEqual(
-      cards.map((card) => `/articles/${card.getAttribute('data-event').split(':')[2]}`)
-    );
+    expect(cards.every((card) => card.hasAttribute('describe') && card.querySelector('[data-card-description]'))).toBe(true);
+    expect(navigateSpy.calls.map(([href]) => href)).toEqual(links.map((link) => link.getAttribute('href')));
     expect(navigateSpy.calls[0][0]).toBe('/articles/how-much-frontend-framework-do-you-actually-need');
     component.destroy();
   });

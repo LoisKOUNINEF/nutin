@@ -37,4 +37,22 @@ describe('PrismHighlighter', () => {
     PrismHighlighter.apply(document.getElementById('root'));
     expect(highlighted.map((el) => el.id)).toEqual(['inside']);
   });
+
+  it('highlight highlights every code block inside the given element', () => {
+    const highlighted = [];
+    window.Prism = { highlightAllUnder: (el) => highlighted.push(el) };
+    const element = document.createElement('div');
+    PrismHighlighter.highlight(element);
+    expect(highlighted).toEqual([element]);
+  });
+
+  it('highlight warns and does nothing when Prism is not loaded', () => {
+    const warnSpy = spyOn(console, 'warn').andCallFake(() => {});
+    try {
+      PrismHighlighter.highlight(document.createElement('div'));
+    } finally {
+      warnSpy.restore();
+    }
+    expect(warnSpy.callCount).toBe(1);
+  });
 });

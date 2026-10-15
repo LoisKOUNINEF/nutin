@@ -18,7 +18,7 @@ AppEventBus.emit('language-changed', { lang: 'fr' });
 AppEventBus.off('language-changed', callback);
 ```
 
-Event names and payload shapes are typed via a global `EventMap`, built from the framework's own `FrameworkEventMap` plus an `AppEventMap` your app extends through TypeScript declaration merging — a compile-time-only mechanism; the bus itself accepts any string key at runtime. 
+Event names and payload shapes are typed via `Nutin.EventMap`, built from the framework's own `Nutin.FrameworkEventMap` plus a `Nutin.AppEventMap` your app extends through TypeScript declaration merging — a compile-time-only mechanism; the bus itself accepts any string key at runtime. 
 
 See [How do I listen to application events?](./HOWDOI_LISTEN_TO_APPLICATION_EVENTS.md) and [How do I emit events?](./HOWDOI_EMIT_EVENTS.md).
 

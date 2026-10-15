@@ -7,26 +7,34 @@ const fs = fsExtra.default;
 export class JsonManager {
   async generateJsonFiles(projectPath, context) {
     await this.generatePackageJson(projectPath, context);
-    await this.generateTsconfigJson(projectPath, context);
+    if (context.lang !== 'js') await this.generateTsconfigJson(projectPath);
   }
 
   async generatePackageJson(projectPath, context) {
-    const { testinNutin, projectName } = context;
+    await fs.writeJSON(path.join(projectPath, 'package.json'), this.buildPackageJson(context), { spaces: 2 });
+  }
+
+  async generateTsconfigJson(projectPath) {
+    await fs.writeJSON(path.join(projectPath, 'tsconfig.json'), this.buildTsconfigJson(), { spaces: 2 });
+  }
+
+  // Also used by nutin-update to compare an existing project's files with the current defaults.
+  buildPackageJson(context) {
+    const { projectName, lang } = context;
 
     const devDependencies = {
-      "chokidar": "^4.0.3",
-      "esbuild": "^0.25.12",
+      "chokidar": "^5.0.0",
+      "esbuild": "^0.28.2",
       "html-minifier-terser": "^7.2.0",
-      "jsdom": "^26.1.0",
-      "linkedom": "^0.18.12",
-      "live-server": "^1.2.2",
+      "jsdom": "^30.1.1",
+      "linkedom": "^0.18.13",
       "sass": "^1.89.0",
-      "typescript": "^5.8.3"
+      ...(lang === 'js' ? {} : { "typescript": "^7.0.2" })
     };
 
     const scripts = getAllScripts(context);
 
-    const packageJson = {
+    return {
       "name": projectName,
       "version": "0.1.0",
       "type": "module",
@@ -36,18 +44,14 @@ export class JsonManager {
       scripts,
       devDependencies,
       "engines": {
-        "node": ">=22"
+        "node": ">=24"
       }
     };
-    
-    await fs.writeJSON(path.join(projectPath, 'package.json'), packageJson, { spaces: 2 });
   }
 
-  async generateTsconfigJson(projectPath) {
-    const tsconfig = {
+  buildTsconfigJson() {
+    return {
       "compilerOptions": {
-        "baseUrl": "./",
-        "paths": {},
         "target": "ESNext",
         "module": "NodeNext",
         "moduleResolution": "NodeNext",
@@ -57,6 +61,7 @@ export class JsonManager {
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "noUncheckedIndexedAccess": true,
+        "noUnusedLocals": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "lib": ["es2022", "DOM"],
@@ -67,7 +72,5 @@ export class JsonManager {
       "include": ["src/app", "src/core"],
       "exclude": ["node_modules"]
     };
-    
-    await fs.writeJSON(path.join(projectPath, 'tsconfig.json'), tsconfig, { spaces: 2 });
   }
 }

@@ -14,6 +14,7 @@ export class ContextBuilder {
     return {
       projectName: preferences.projectName,
       packageManager: preferences.packageManager,
+      lang: preferences.lang,
       ciCommand: ciCommand,
       version: version
     };

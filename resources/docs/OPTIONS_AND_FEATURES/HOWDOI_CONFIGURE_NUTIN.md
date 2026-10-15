@@ -4,11 +4,20 @@
 
 **`nutin.config.js`** - See inline comments in the actual file for details
 
-- `i18n`, `tailwind`, `generateSEO` — top-level option toggles.
+- `i18n`, `tailwind`, `generateSEOFiles` — top-level option toggles.
 - `builder.{sass.paths, esbuild}` — build pipeline behavior.
 - `testinNutin.{includeFramework, includeTools, includeApp, coverage, jsdomOptions}` — built-in testing toolkit.
+- `dockerPorts`, `markdownSources` - Nutin features configuration (*only when related feature is present*). See [How do I use the Docker feature?](HOWDOI_USE_DOCKER_FEATURE.md) and [How do I use the Markdown feature?](HOWDOI_USE_MARKDOWN_FEATURE.md). `nutin-add` adds them to a single `// Nutin features` block.
+
+The tooling-only keys (`builder`, `testinNutin`, `dockerPorts`, `markdownSources`) aren't shipped in the browser bundle.
 
 ## Specialized configuration files
 
 - `config/languages.json`: Configure supported languages and default language. *See [How do I use i18n](HOWDOI_USE_I18N.md)*
 - `config/seo.json`: Configure route paths to generate SEO files. *See [How do I use SEO files generation](HOWDOI_USE_SEO_FILE_GENERATION.md)*
+
+## What is the difference between options and features?
+
+Options can be toggled on and off in `nutin.config.js`
+
+Features are added with `nutin-add <feature>` and can only be removed manually. Only their configuration lives in `nutin.config.js`

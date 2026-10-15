@@ -13,12 +13,13 @@ registerGlobals({
 ```
 
 ```ts
+// Nutin.GlobalConfig
 interface GlobalConfig {
   component: new (mountTarget: HTMLElement) => Component; // constructed internally — you never pass mountTarget
   id: string;                                              // stamped onto the rendered root element
 }
 
-registerGlobals(options: { before?: GlobalConfig[]; after?: GlobalConfig[] }): void
+registerGlobals(options: { before?: Nutin.GlobalConfig[]; after?: Nutin.GlobalConfig[] }): void
 ```
 
 Call this once in `main.ts`, alongside `registerPipes()`/`AppRouter(routes)`. Each entry's `component` is constructed and rendered internally, its root element's `id` is set to the entry's `id`, and:
@@ -26,7 +27,7 @@ Call this once in `main.ts`, alongside `registerPipes()`/`AppRouter(routes)`. Ea
 - `before` entries are **prepended** to `<body>`, in the given order.
 - `after` entries are **appended** to `<body>`, in the given order.
 
-This mounts them as **siblings of `<main id="app">`**, not inside it — global components persist across every route change, unaffected by the router swapping views.
+This mounts them as **siblings of `<main id="app">`**, not inside it: global components have no parent Component or View and persist across every route change, unaffected by the router swapping views.
 
 ## Duplicate ids
 

@@ -1,13 +1,21 @@
 #!/usr/bin/env node
 
 import { spawn, spawnSync } from 'child_process';
-import { print, runCommand } from '../utils/index.js';
+import { print, resolvePort, runCommand } from '../utils/index.js';
 
 const isWindows = process.platform === 'win32';
 
 async function startDev() {
   console.clear();
   print.blue('🚀 Starting Dev Environment...\n');
+
+  let port;
+  try {
+    port = resolvePort();
+  } catch (err) {
+    print.boldError(err.message);
+    process.exit(1);
+  }
 
   try {
     await runCommand('npm', ['run', 'build', '--silent']);
@@ -25,8 +33,23 @@ async function startDev() {
   // Not on Windows: there, detached children leave the console, so Ctrl-C would no
   // longer reach them, and negative-pid group kills aren't supported — taskkill /T
   // walks the process tree instead.
-  const serve = spawn(['npm', 'run', 'serve:only', '--silent'].join(' '), { stdio: 'inherit', shell: true, detached: !isWindows });
-  const watcher = spawn(['node', 'tools/dev/watcher.js', '--silent'].join(' '), { stdio: 'inherit', shell: true, detached: !isWindows });
+  // Hand serve.js the already-resolved port via PORT; npm_config_port is dropped so it
+  // can't take precedence over it in the child.
+  const { npm_config_port, ...serveEnv } = process.env;
+  serveEnv.PORT = String(port);
+  // Both run node directly (no shell/npm layer) with an IPC channel, used as a relay:
+  // serve.js reports the URL it listens on (watcher.js reprints it after every rebuild),
+  // and watcher.js reports each successful rebuild (serve.js reloads open pages).
+  const stdio = ['inherit', 'inherit', 'inherit', 'ipc'];
+  const serve = spawn(process.execPath, ['tools/dev/serve.js'], { stdio, detached: !isWindows, env: serveEnv });
+  const watcher = spawn(process.execPath, ['tools/dev/watcher.js'], { stdio, detached: !isWindows });
+
+  serve.on('message', (msg) => {
+    if (msg?.type === 'server-url' && watcher.connected) watcher.send(msg);
+  });
+  watcher.on('message', (msg) => {
+    if (msg?.type === 'reload' && serve.connected) serve.send(msg);
+  });
 
   const children = [serve, watcher];
   let shuttingDown = false;
@@ -53,14 +76,16 @@ async function startDev() {
 
   process.on('SIGINT', () => shutdown('SIGINT'));
   process.on('SIGTERM', () => shutdown('SIGTERM'));
+  // Closing the terminal tab/window sends SIGHUP; the detached children don't get it.
+  process.on('SIGHUP', () => shutdown('SIGTERM'));
 
   serve.on('error', (err) => {
-    print.boldError(`live-server failed to start: ${err.message}`);
+    print.boldError(`dev server failed to start: ${err.message}`);
     process.exit(1);
   });
   serve.on('close', (code) => {
     if (shuttingDown) return;
-    print.error(`live-server exited with code ${code}`);
+    print.error(`dev server exited with code ${code}`);
     shutdown('SIGTERM', code ?? 1);
   });
   watcher.on('error', (err) => {

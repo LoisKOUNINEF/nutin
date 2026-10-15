@@ -1,4 +1,4 @@
-import { RouteGuardsManager } from '#root/dist/src/core/services/router/helpers/route-guard-manager.helper.js';
+import * as RouteGuardsManager from '#root/dist/src/core/services/router/helpers/route-guard-manager.helper.js';
 import { View } from '#root/dist/src/core/index.js';
 
 describe('RouteGuardsManager', () => {
@@ -17,40 +17,39 @@ describe('RouteGuardsManager', () => {
     expect(result).toBe(mockViewConstructor);
   });
 
-  it('should return empty guards array for function route config', () => {
-    const result = RouteGuardsManager.getRouteGuards(mockViewConstructor);
-    expect(result.length).toBe(0)
+  it('allows a function route config, which has no guards', async () => {
+    const result = await RouteGuardsManager.processRouteGuards(mockViewConstructor, '/');
+    expect(result.allowed).toBe(true);
+    expect(result.viewConstructor).toBe(mockViewConstructor);
   });
 
-  it('should return guards array from object route config', () => {
-    const guard = () => true;
-    const config = { view: mockViewConstructor, guards: [guard] };
-    const result = RouteGuardsManager.getRouteGuards(config);
-    expect(JSON.stringify(result)).toBe(JSON.stringify([guard]));
+  it('allows an object route config without guards', async () => {
+    const result = await RouteGuardsManager.processRouteGuards({ view: mockViewConstructor }, '/');
+    expect(result.allowed).toBe(true);
   });
 
-  it('should default to an empty guards array when an object route config has no guards', () => {
-    const config = { view: mockViewConstructor };
-    const result = RouteGuardsManager.getRouteGuards(config);
-    expect(result).toEqual([]);
+  it('runs every guard, sync or async, and allows when all return true', async () => {
+    const calls = [];
+    const guards = [() => { calls.push(1); return true; }, () => { calls.push(2); return Promise.resolve(true); }];
+    const result = await RouteGuardsManager.processRouteGuards({ view: mockViewConstructor, guards }, '/');
+    expect(result.allowed).toBe(true);
+    expect(calls).toEqual([1, 2]);
   });
 
-  it('should pass all guards and return true from runGuards', async () => {
-    const guards = [() => true, () => Promise.resolve(true)];
-    const result = await RouteGuardsManager.runGuards(guards);
-    expect(result).toBe(true);
+  it('stops at the first guard returning false', async () => {
+    let ranAfter = false;
+    const guards = [() => true, () => false, () => { ranAfter = true; return true; }];
+    const result = await RouteGuardsManager.processRouteGuards({ view: mockViewConstructor, guards }, '/');
+    expect(result.allowed).toBe(false);
+    expect(ranAfter).toBe(false);
   });
 
-  it('should stop on first false from runGuards', async () => {
-    const guards = [() => true, () => false, () => true];
-    const result = await RouteGuardsManager.runGuards(guards);
-    expect(result).toBe(false);
-  });
-
-  it('should stop on redirect string from runGuards', async () => {
-    const guards = [() => true, () => '/login'];
-    const result = await RouteGuardsManager.runGuards(guards);
-    expect(result).toBe('/login');
+  it('stops at the first guard returning a redirect', async () => {
+    let ranAfter = false;
+    const guards = [() => true, () => '/login', () => { ranAfter = true; return true; }];
+    const result = await RouteGuardsManager.processRouteGuards({ view: mockViewConstructor, guards }, '/');
+    expect(result.redirectTo).toBe('/login');
+    expect(ranAfter).toBe(false);
   });
 
   it('should return allowed false when guard returns false in processRouteGuards', async () => {

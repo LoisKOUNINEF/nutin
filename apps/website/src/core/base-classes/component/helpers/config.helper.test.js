@@ -1,4 +1,4 @@
-import { ConfigHelper } from '#root/dist/src/core/base-classes/component/helpers/config.helper.js';
+import * as ConfigHelper from '#root/dist/src/core/base-classes/component/helpers/config.helper.js';
 
 describe('ConfigHelper', () => {
   it('normalize shallow-merges defaults under config, letting config win', () => {

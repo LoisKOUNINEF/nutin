@@ -5,7 +5,7 @@
 Override `registerChildren()` and match each entry's `selector` to a `data-component` mount point in your template:
 
 ```ts
-public registerChildren(): ComponentConfig[] {
+public registerChildren(): Nutin.ComponentConfig[] {
   return [
     { selector: 'user-card', factory: (el) => new UserCardComponent(el, { id: 1 }) },
   ];
@@ -17,20 +17,26 @@ public registerChildren(): ComponentConfig[] {
 ```
 
 ```ts
+// Nutin.ComponentConfig
 interface ComponentConfig {
   selector: string;
   factory: (element: HTMLElement) => Component;
+  keep?: string | number;
 }
 ```
 
-`registerChildren()` runs on **every** render (it's called from `compose()`, part of the standard render pipeline). For each config, every `[data-component="selector"]` element currently in the template is matched — if more than one element uses the same selector, each gets its own instance. Each match's element is passed to `factory`, the returned component is rendered immediately, and tracked so `destroy()` can recursively tear it down later.
+`registerChildren()` runs on **every** render. For each config, every `[data-component="selector"]` element currently in the template is matched — if more than one element uses the same selector, each gets its own instance.
+
+Each match's element is passed to `factory`, the returned component is rendered immediately, and tracked so `destroy()` can recursively tear it down later.
+
+Children without `keep` are destroyed and recreated on every render — see [Keeping children across re-renders](#keeping-children-across-re-renders) to avoid that.
 
 ## Repeated children (catalogs)
 
 Use `createCatalogComponents()` instead of hand-writing one entry per item:
 
 ```ts
-public registerChildren(): ComponentConfig[] {
+public registerChildren(): Nutin.ComponentConfig[] {
   return [
     ...this.createCatalogComponents({
       items: this.users,           // array of objects or primitives
@@ -48,12 +54,14 @@ public registerChildren(): ComponentConfig[] {
 ```
 
 ```ts
+// Nutin.CatalogConfig
 interface CatalogConfig {
-  items: CatalogItemConfig[];
+  items: Nutin.CatalogItemConfig[];
   elementName: string;
   elementTag?: keyof HTMLElementTagNameMap;
   selector: string;
   component: new (el: HTMLElement, data: any, props?: any) => Component;
+  keepBy?: (item: any, index: number) => string | number;
 }
 ```
 
@@ -67,12 +75,59 @@ Each item is turned into the child's `data` argument:
 - **Primitive items** (string, number, boolean, `null`, `undefined`) can't be spread, so they're wrapped instead: `'red'` → `{ value: 'red', index: 0 }`. Use `config.value` to read the raw primitive back out.
 
 ```ts
+// Nutin.CatalogItemConfig
 type CatalogItemConfig<T = any> = T extends object ? T & { index: number } : { value: T; index: number };
 ```
 
-The third factory argument (`props`) is a shallow merge of the catalog config's own `props`, `defaults`, and `normalizeKeys` fields — in that precedence order.
+The third factory argument (`props`) is a shallow merge of the catalog config's own `props` and `defaults` fields; `defaults` win on a shared key.
 
-## Gotchas
+## Keeping children across re-renders
 
-- Because `registerChildren()`/`createCatalogComponents()` re-run on every render with no diffing, a catalog container is wiped and fully rebuilt each time — any DOM state local to a catalog child (scroll position, focus, unsaved input) is lost on re-render.
-- A `data-component` or `data-catalog` container whose `selector` doesn't match renders nothing, silently — check for typos in `selector`/`elementName` first.
+By default, a parent's re-render destroys and recreates every child, losing its DOM state (focus, scroll position, unsaved input). Give a child a stable identity to keep it instead.
+
+### Single children: `keep`
+
+```ts
+public registerChildren(): Nutin.ComponentConfig[] {
+  return [
+    { selector: 'search', keep: 'search', factory: (el) => new SearchComponent(el) },
+  ];
+}
+```
+
+As long as the next render returns the same `keep` value for that selector, the child is **kept as-is**: its factory isn't called, it isn't re-rendered, and its element is moved into the new placeholder.
+
+A kept child ignores whatever its factory would have passed it this time. 
+
+Choosing a `keep` value means the child owns its own updates: either put in it whatever should recreate the child (``keep: `${task.id}:${task.updatedAt}` ``), or have the child re-render itself with `listenToRenderEvents()`/`listen()`.
+
+### Catalogs: `keepBy`
+
+```ts
+...this.createCatalogComponents({
+  items: this.users,
+  elementName: 'user-item',
+  selector: 'users',
+  component: UserItemComponent,
+  keepBy: (user) => user.id,
+}),
+```
+
+An item is kept when its `keepBy` value is the same **and** it hasn't changed: the item is shallow-equal to the previous one (own properties compared with `Object.is`), and the catalog's `props`/`defaults` and `component` are unchanged.
+
+Changed items are destroyed and recreated. Kept items follow reorders, insertions and removals; their wrapper's `data-index` is updated, but the child's own `config.index` stays the index it was created with.
+
+Without `keepBy`, the catalog is fully rebuilt on every render.
+
+### What a kept child goes through
+
+- No `onBeforeRender`/`onAfterRender`, no destroy hooks: it wasn't rendered or destroyed. Its own `onKept()` hook is called instead, once it's back in place.
+- Its element never leaves the document where `Element.moveBefore()` is supported: iframes don't reload, CSS animations keep running, custom elements get no `disconnectedCallback`, focus and scroll stay. Where it isn't (Safari), the element is detached and re-inserted: focus, caret, scroll and input values are restored, but iframes reload, animations restart and custom elements are disconnected and reconnected.
+- Attributes from its placeholder (`class`, `id`...) are copied only when it's created — a kept child doesn't pick up placeholder attribute changes.
+- Only the child is kept: the parent's own markup around it, including a `data-catalog` container, is rebuilt as usual. To keep a scrollable list's scroll position, make the scrolling element part of a kept child.
+
+## Important
+
+- A `data-component` or `data-catalog` container whose `selector` doesn't match renders nothing, silently — **check for typos in `selector`/`elementName` first**.
+- Without `keep`/`keepBy`, `registerChildren()`/`createCatalogComponents()` re-run on every render with no diffing: a catalog container is wiped and fully rebuilt each time, and any DOM state local to a child (scroll position, focus, unsaved input) is lost on re-render.
+- A `keep` value repeated for the same selector in one render logs a warning; the duplicate is recreated on every render.

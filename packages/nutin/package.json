@@ -1,6 +1,6 @@
 {
   "name": "@nutin/cli",
-  "version": "2.1.1",
+  "version": "3.0.0",
   "description": "The structure of a framework. The freedom of vanilla.",
   "preferGlobal": true,
   "main": "lib/index.mjs",
@@ -30,15 +30,16 @@
   "author": "Loïs Kouninef <loiskouninef@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "commander": "^9.0.0",
+    "commander": "^15.0.0",
     "diff": "^9.0.0",
-    "fs-extra": "^11.0.0",
-    "handlebars": "^4.7.8",
-    "inquirer": "^9.0.0",
-    "tar": "^7.5.22"
+    "fs-extra": "^11.4.1",
+    "handlebars": "^4.7.10",
+    "inquirer": "^14.2.3",
+    "tar": "^7.5.22",
+    "typescript": "5.9.3"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "repository": {
     "type": "git",
@@ -47,5 +48,5 @@
   "bugs": {
     "url": "https://github.com/LoisKOUNINEF/nutin/issues"
   },
-  "homepage": "www.nutin.org"
+  "homepage": "www.nutin.dev"
 }

@@ -73,7 +73,7 @@ jobs:
       SERVICE_NAME: "website"
       STACK_NAME: "staging"
       CLIENT_PORT: "9091"
-      DOMAIN_NAME: "staging.nutin.org"
+      DOMAIN_NAME: "staging.nutin.dev"
     permissions:
       contents: read
       packages: read

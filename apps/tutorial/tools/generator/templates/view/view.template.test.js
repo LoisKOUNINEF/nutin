@@ -8,9 +8,9 @@ describe('viewTemplate', () => {
     // The generator always leaves the html body as a placeholder — the builder
     // swaps in the .html sibling's content at build time.
     expect(viewTemplate(name, targetPath)).toBe(
-      `import { View } from '../../../core/index.js';
+      `import { View, html } from '../../../core/index.js';
 
-const template = \`__TEMPLATE_PLACEHOLDER__\`;
+const template = html\`__TEMPLATE_PLACEHOLDER__\`;
 
 export class WidgetView extends View {
   constructor() {

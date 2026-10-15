@@ -1,3 +1,7 @@
+---
+title: Options and features
+---
+
 # Nutin - Options and Features documentation
 
 ## Table of Contents
@@ -15,3 +19,4 @@
 ### Features
 
 - [How do I use the Docker feature?](./OPTIONS_AND_FEATURES/HOWDOI_USE_DOCKER_FEATURE.md)
+- [How do I use the Markdown feature?](./OPTIONS_AND_FEATURES/HOWDOI_USE_MARKDOWN_FEATURE.md)

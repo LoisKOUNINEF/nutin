@@ -1,15 +1,15 @@
-import { Component, ComponentConfig, Navigation } from '../../../core/index.js';
-import { TaskActionComponent } from '../index.js';
-import { taskService } from '../../services/index.js';
+import { Component, Navigation, html } from '../../../core/index.js';
+import { TaskActionComponent } from '../task-action/task-action.component.js';
+import { taskService } from '../../services/task/task.service.js';
 
-const templateFn = (_task: ITask) => `__TEMPLATE_PLACEHOLDER__`;
+const templateFn = (_task: ITask) => html`__TEMPLATE_PLACEHOLDER__`;
 
 export class TaskCardComponent extends Component {
   constructor(mountTarget: HTMLElement, config: ITask) {
     super({ templateFn, config, mountTarget });
   }
 
-  registerChildren(): ComponentConfig[] {
+  registerChildren(): Nutin.ComponentConfig[] {
     return [
       {
         selector: 'remove',

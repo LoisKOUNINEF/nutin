@@ -1,6 +1,5 @@
 node_modules
 dist*/
-apps/website/generated/
 .env
 **/.DS_Store
 .idea

@@ -16,7 +16,7 @@ export const chalk = {
 };
 
 export const print = {
-  head: (s) => console.info(`${chalk.purple(s)}`),  
+  head: (s) => console.info(`${chalk.purple(s)}`),
   boldHead : (s) => console.info(`${chalk.boldPurple(s)}`),
   section: (s) => console.info(`${chalk.yellow(s)}`),
   boldSection: (s) => console.info(`${chalk.boldYellow(s)}`),
@@ -32,6 +32,6 @@ export const print = {
   boldError: (s) => console.error(`${chalk.boldRed(s)}`),
   grayError: (s) => console.error(`${chalk.boldGray(s)}`),
   warn: (s) => console.warn(`${chalk.yellow(s)}`),
-  boldWarn: (s) => console.warn(`${chalk.yellow(s)}`),
+  boldWarn: (s) => console.warn(`${chalk.boldYellow(s)}`),
   debug: (s) => console.debug(`${chalk.gray(s)}`),
 }

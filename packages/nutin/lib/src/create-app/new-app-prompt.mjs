@@ -1,5 +1,6 @@
 import inquirer from 'inquirer';
 import { defaults } from './context-builder.mjs';
+import { PACKAGE_MANAGERS } from '../common/package-json-helper.mjs';
 
 export async function newAppPrompt(initialName, cliOptions = {}) {
 
@@ -26,10 +27,10 @@ export async function newAppPrompt(initialName, cliOptions = {}) {
   if (!packageManager) {
     const pmPreference = await inquirer.prompt([
       {
-        type: 'list',
+        type: 'select',
         name: 'packageManager',
         message: 'Package manager:',
-        choices: ['npm', 'yarn', 'pnpm', 'bun'],
+        choices: PACKAGE_MANAGERS,
         default: defaults.packageManager,
       },
     ]);
@@ -39,6 +40,7 @@ export async function newAppPrompt(initialName, cliOptions = {}) {
   return {
     projectName,
     packageManager,
+    lang: cliOptions.jsOnly ? 'js' : 'ts',
   };
 }
 

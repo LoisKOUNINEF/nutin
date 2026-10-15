@@ -52,6 +52,16 @@ describe('pipes (registerPipes)', () => {
     expect(AppPipeRegistry.apply('date', value, ['en-US', 'long', true])).toBe(expected);
   });
 
+  it('date reads the time flag from template strings: "true" adds the time, "false" does not', () => {
+    const value = '2024-03-15T14:30:00Z';
+    const dateOnly = new Date(value).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const withTime = new Date(value).toLocaleString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
+    });
+    expect(AppPipeRegistry.apply('date', value, ['en-US', 'long', 'false'])).toBe(dateOnly);
+    expect(AppPipeRegistry.apply('date', value, ['en-US', 'long', 'true'])).toBe(withTime);
+  });
+
   it('date warns and returns the raw stringified value for an invalid date', () => {
     const warnSpy = spyOn(console, 'warn');
     warnSpy.andCallFake(() => {});

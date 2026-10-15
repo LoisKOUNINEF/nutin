@@ -1,3 +1,7 @@
+---
+ogImage: /assets/images/og-covers/og-cover-articles.jpg
+---
+
 # Direct DOM Manipulation vs. Virtual DOM: What's the Difference?
 
 If you've worked with modern frontend frameworks, you've probably heard that applications should not manipulate the DOM directly.
@@ -619,4 +623,4 @@ ask:
 
 Choose the rendering machinery that solves your application's actual problems — not the one that happens to be fashionable.
 
-If you're interested in a small SPA architecture built around direct DOM rendering, explicit lifecycle management, and HTML templates, see how [Nutin](https://nutin.org/) approaches **Rendering**, **Components**, **Lifecycle**, and **Templates** in its [documentation](https://nutin.org/docs).
+If you're interested in a small SPA architecture built around direct DOM rendering, explicit lifecycle management, and HTML templates, see how [Nutin](https://nutin.dev/) approaches **Rendering**, **Components**, **Lifecycle**, and **Templates** in its [documentation](https://nutin.dev/docs).

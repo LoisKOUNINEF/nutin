@@ -116,7 +116,7 @@
     }
 }
 
-// Documentation/guides menus (<a11y-dropdown>, portaled to <body> once its CDN bundle
+// Documentation/guides menus (<a11y-dropdown>, portaled to <body> once its chunk
 // defines it). Hidden until then so the SSR'd markup never flashes inline.
 a11y-dropdown:not(:defined) {
     display: none;

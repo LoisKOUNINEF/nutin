@@ -1,0 +1,78 @@
+import nutinConfig from '#root/dist/nutin.config.js';
+import { I18nService } from '#root/dist/src/core/index.js';
+import { markdownLanguage, markdownText, onMarkdownLanguageChange } from '#root/dist/src/app/markdown/markdown-i18n.js';
+
+describe('markdown-i18n', () => {
+  let hadDefine;
+  let savedDefine;
+
+  beforeEach(() => {
+    hadDefine = '__NUTIN_I18N__' in globalThis;
+    savedDefine = globalThis.__NUTIN_I18N__;
+  });
+
+  afterEach(() => {
+    if (hadDefine) globalThis.__NUTIN_I18N__ = savedDefine;
+    else delete globalThis.__NUTIN_I18N__;
+  });
+
+  it('markdownLanguage returns the current language with i18n, null without', () => {
+    globalThis.__NUTIN_I18N__ = true;
+    expect(markdownLanguage()).toBe(I18nService.currentLanguage);
+    globalThis.__NUTIN_I18N__ = false;
+    expect(markdownLanguage()).toBe(null);
+  });
+
+  it('markdownLanguage follows nutin.config.js "i18n" when the builder define is missing', () => {
+    delete globalThis.__NUTIN_I18N__;
+    expect(markdownLanguage()).toBe(nutinConfig.i18n ? I18nService.currentLanguage : null);
+  });
+
+  it('markdownText translates a "markdown." key with i18n, passing the fallback', () => {
+    globalThis.__NUTIN_I18N__ = true;
+    const translateSpy = spyOn(I18nService, 'translate').andCallFake(() => 'Sommaire');
+    try {
+      expect(markdownText('toc', 'Contents')).toBe('Sommaire');
+      expect(translateSpy.lastCall).toEqual(['markdown.toc', 'Contents']);
+    } finally {
+      translateSpy.restore();
+    }
+  });
+
+  it('markdownText returns the fallback without i18n, without translating', () => {
+    globalThis.__NUTIN_I18N__ = false;
+    const translateSpy = spyOn(I18nService, 'translate');
+    try {
+      expect(markdownText('toc', 'Contents')).toBe('Contents');
+      expect(translateSpy.callCount).toBe(0);
+    } finally {
+      translateSpy.restore();
+    }
+  });
+
+  it('onMarkdownLanguageChange subscribes to language changes with i18n and returns their unsubscribe', () => {
+    globalThis.__NUTIN_I18N__ = true;
+    const unsubscribe = () => {};
+    const callback = () => {};
+    const subscribeSpy = spyOn(I18nService, 'onLanguageChange').andCallFake(() => unsubscribe);
+    try {
+      expect(onMarkdownLanguageChange(callback)).toBe(unsubscribe);
+      expect(subscribeSpy.lastCall).toEqual([callback]);
+    } finally {
+      subscribeSpy.restore();
+    }
+  });
+
+  it('onMarkdownLanguageChange returns a no-op without i18n, without subscribing', () => {
+    globalThis.__NUTIN_I18N__ = false;
+    const subscribeSpy = spyOn(I18nService, 'onLanguageChange');
+    try {
+      const unsubscribe = onMarkdownLanguageChange(() => {});
+      expect(typeof unsubscribe).toBe('function');
+      expect(unsubscribe()).toBe(undefined);
+      expect(subscribeSpy.callCount).toBe(0);
+    } finally {
+      subscribeSpy.restore();
+    }
+  });
+});

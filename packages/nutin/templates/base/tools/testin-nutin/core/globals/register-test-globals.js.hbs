@@ -23,15 +23,14 @@ export function registerTestGlobals() {
     fn();
   };
 
+  // The suite's hooks object is shared by reference (read when the queue runs), so a hook
+  // registered after some it() calls in the same describe() still applies to them.
   global.it = (name, fn) => {
-    addTest({ 
-      suiteName: currentSuite, 
-      testName: name, 
+    addTest({
+      suiteName: currentSuite,
+      testName: name,
       testFn: fn,
-      beforeEach: currentSuiteHooks.beforeEach,
-      beforeAll: currentSuiteHooks.beforeAll,
-      afterEach: currentSuiteHooks.afterEach,
-      afterAll: currentSuiteHooks.afterAll
+      hooks: currentSuiteHooks,
     });
   };
   global.it.todo = (s) => {

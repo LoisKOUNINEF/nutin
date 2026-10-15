@@ -21,10 +21,10 @@ npm run generate component components/task-card
 ## Give the component a task to render
 
 ```ts
-import { Component } from '../../../core/index.js';
+import { Component, html } from '../../../core/index.js';
 
 // The component's .html template is injected here.
-const templateFn = (_task: ITask) => `__TEMPLATE_PLACEHOLDER__`;
+const templateFn = (_task: ITask) => html`__TEMPLATE_PLACEHOLDER__`;
 
 export class TaskCardComponent extends Component {
   constructor(mountTarget: HTMLElement, config: ITask) {
@@ -42,6 +42,8 @@ export class TaskCardComponent extends Component {
     <p data-optional>${_task.content}</p>
 </div>
 ```
+
+`html` escapes every `${}` value: a task named `<b>milk</b>` is shown as text, not as bold markup.
 
 ## Give it some style
 
@@ -72,7 +74,7 @@ export class TaskCardComponent extends Component {
 /* src/styles/_styles.scss */
 /* Global styles */
 :root {
-    font-size: clamp(16px, 0.909rem + 0.455vw, 20px);
+    font-size: clamp(16px, 0.909rem + 0.455vw, 19px);
     scrollbar-gutter: stable;
     body {
         background-color: #FAFAF9;

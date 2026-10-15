@@ -1,7 +1,7 @@
-import { AppEventBus, IEventBus } from "./event-bus.js";
+import { AppEventBus } from "./event-bus.js";
 
 class LifecycleFacade {
-  constructor(private bus: IEventBus) {}
+  constructor(private bus: Nutin.EventBus) {}
 
   beforeRender(): void {
     this.bus.emit('before-render');
@@ -58,4 +58,4 @@ class LifecycleFacade {
   }
 }
 
-export const Lifecycle = new LifecycleFacade(AppEventBus);
+export const Lifecycle = /* @__PURE__ */ new LifecycleFacade(AppEventBus);

@@ -13,7 +13,7 @@ export async function maybeWriteUncoveredReport(report) {
     return;
   }
 
-  if (!config.testinNutin.coverage.reportUncovered) return;
+  if (!config.testinNutin.coverage?.reportUncovered) return;
 
   try {
     fs.mkdirSync(path.dirname(REPORT_PATH), { recursive: true });

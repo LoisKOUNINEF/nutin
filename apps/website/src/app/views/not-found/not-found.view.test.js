@@ -1,4 +1,4 @@
-import { NotFoundView } from '#root/dist/src/app/views/index.js';
+import { NotFoundView } from '#root/dist/src/app/views/not-found/not-found.view.js';
 import { Navigation, registerPipes } from '#root/dist/src/core/index.js';
 
 describe('NotFoundView', () => {

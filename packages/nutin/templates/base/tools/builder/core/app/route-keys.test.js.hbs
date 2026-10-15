@@ -1,0 +1,97 @@
+import path from 'path';
+import { findDuplicateRouteKeys, findRoutesImporters } from './route-keys.js';
+
+const TS = { loader: 'ts', sourcefile: 'routes.ts' };
+
+describe('findDuplicateRouteKeys', () => {
+  it('returns nothing for distinct keys, TypeScript syntax included', async () => {
+    const source = `
+      export const appRoutes: Nutin.Routes = {
+        '/': () => new HomeView(),
+        '/about': () => new AboutView() as any,
+        '/users/:id': () => new UserView(),
+      };`;
+
+    expect(await findDuplicateRouteKeys(source, TS)).toEqual([]);
+  });
+
+  it('reports a duplicate across quote styles and computed keys, with its line', async () => {
+    const source = [
+      'export const appRoutes: Nutin.Routes = {',
+      "  '/': () => new HomeView(),",
+      '  "/": () => new OtherView(),',
+      "  ['/c']: () => new C(),",
+      "  ['/c']: () => new D(),",
+      '};',
+    ].join('\n');
+
+    expect(await findDuplicateRouteKeys(source, TS)).toEqual([
+      { key: '/', line: 3 },
+      { key: '/c', line: 5 },
+    ]);
+  });
+
+  it('reports a duplicated :param route', async () => {
+    const source = `export const appRoutes = {
+      '/users/:id': () => new A(),
+      '/users/:id': () => new B(),
+    };`;
+
+    expect((await findDuplicateRouteKeys(source, { loader: 'js', sourcefile: 'routes.js' })).map((d) => d.key)).toEqual(['/users/:id']);
+  });
+
+  it('does not flag the view/guards keys shared by several guarded routes', async () => {
+    const source = `export const appRoutes: Nutin.Routes = {
+      '/admin': { view: () => new AdminView(), guards: [() => true] },
+      '/settings': { view: () => new SettingsView(), guards: [() => '/'] },
+    };`;
+
+    expect(await findDuplicateRouteKeys(source, TS)).toEqual([]);
+  });
+
+  it('flags a plain and a guarded route sharing a path', async () => {
+    const source = `export const appRoutes: Nutin.Routes = {
+      '/admin': () => new AdminView(),
+      '/admin': { view: () => new AdminView(), guards: [() => true] },
+    };`;
+
+    expect((await findDuplicateRouteKeys(source, TS)).map((d) => d.key)).toEqual(['/admin']);
+  });
+
+  it('checks the whole file, not only appRoutes', async () => {
+    const source = `const other = { a: 1, a: 2 };
+      export const appRoutes: Nutin.Routes = { '/': () => new HomeView() };`;
+
+    expect(await findDuplicateRouteKeys(source, TS)).toEqual([{ key: 'a', line: 1 }]);
+  });
+
+  it('rejects when the source does not parse', async () => {
+    await expect(() => findDuplicateRouteKeys('export const appRoutes = {', TS)).toThrow();
+  });
+});
+
+describe('findRoutesImporters', () => {
+  const APP = path.resolve('/project/src/app');
+  const ROUTES = path.join(APP, 'routes.ts');
+  const file = (rel, content) => ({ path: path.join(APP, rel), content });
+
+  it('finds static, bare and dynamic imports of the routes module, from any folder', () => {
+    const files = [
+      file('main.ts', "import { appRoutes } from './routes.js';"),
+      file('setup.ts', "import './routes.js';"),
+      file('lazy/boot.ts', "const r = await import('../routes.js');"),
+    ];
+    expect(findRoutesImporters(files, ROUTES)).toEqual(files.map((f) => f.path));
+  });
+
+  it('ignores other modules named routes, packages, and the routes file itself', () => {
+    const files = [
+      file('main.ts', "import { CounterComponent } from './components/counter/counter.component.js';"),
+      file('admin/main.ts', "import { adminRoutes } from './routes.js';"),
+      file('x.ts', "import routes from 'routes.js';"),
+      file('routes.ts', "import { markdownRoutes } from './markdown/markdown-routes.js';"),
+    ];
+    expect(findRoutesImporters(files, ROUTES)).toEqual([]);
+  });
+});
+

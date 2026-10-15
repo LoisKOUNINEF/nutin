@@ -46,6 +46,18 @@ describe('renderFromTemplate', () => {
     ).toThrow('missing.template');
   });
 
+  it('skips a missing placeholder token when its value is empty', async () => {
+    fs.writeFileSync(path.join(tmpDir, 'Dockerfile.template'), 'ARG PORT="__PORTS_PLACEHOLDER__"\n');
+
+    await renderFromTemplate(tmpDir, 'Dockerfile.template', 'Dockerfile', [
+      ['__PORTS_PLACEHOLDER__', '8080'],
+      ['__MARKDOWN_SOURCES_PLACEHOLDER__', ''],
+    ]);
+
+    const output = fs.readFileSync(path.join(tmpDir, 'Dockerfile'), 'utf-8');
+    expect(output).toBe('ARG PORT="8080"\n');
+  });
+
   it('throws when a placeholder token is missing from the template, without writing the output', async () => {
     fs.writeFileSync(path.join(tmpDir, 'nginx.conf.template'), 'listen 9090;\n');
 

@@ -1,5 +1,5 @@
-import { HomeView } from '#root/dist/src/app/views/index.js';
-import { PrismHighlighter } from '#root/dist/src/app/helpers/index.js';
+import { HomeView } from '#root/dist/src/app/views/home/home.view.js';
+import { PrismHighlighter } from '#root/dist/src/app/helpers/prism/prism-highlighter.js';
 import { Navigation, registerPipes } from '#root/dist/src/core/index.js';
 
 describe('HomeView', () => {
@@ -33,5 +33,13 @@ describe('HomeView', () => {
   it('routes its own links through the SPA router', () => {
     view.element.querySelector('[data-event="click:navigateTo:changelog"]').click();
     expect(navigateSpy.lastCall[0]).toBe('/changelog');
+  });
+
+  it('renders the extras as link cards, whose element onEnter loads', () => {
+    const cards = view.element.querySelectorAll('.home__cta-row .card');
+    expect(cards.length).toBe(3);
+    expect([...cards].every((card) => card.tagName === 'A11Y-CARD-LINK')).toBe(true);
+
+    expect(() => view.onEnter()).not.toThrow();
   });
 });

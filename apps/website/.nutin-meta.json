@@ -1,7 +1,9 @@
 {
-  "version": "2.1.1",
+  "version": "3.0.0",
   "packageManager": "npm",
+  "lang": "ts",
   "features": {
-    "docker": true
+    "docker": true,
+    "markdown": true
   }
 }

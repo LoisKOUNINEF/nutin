@@ -4,8 +4,8 @@ import { I18nService, Navigation } from '#root/dist/src/core/index.js';
 const t = (key) => I18nService.translate(`a11y-demo-overlays.${key}`);
 
 const OVERLAYS = [
-  'a11y-modal', 'a11y-drawer', 'a11y-emergency-dialog', 'a11y-blocking-loader', 'a11y-dropdown',
-  'a11y-context-menu', 'a11y-popover', 'a11y-tooltip', 'a11y-snackbar', 'a11y-notification-banner',
+  'a11y-blocking-loader', 'a11y-context-menu', 'a11y-drawer', 'a11y-dropdown', 'a11y-emergency-dialog', 'a11y-floating',
+  'a11y-modal', 'a11y-notification-banner', 'a11y-popover', 'a11y-snackbar', 'a11y-tooltip',
 ];
 
 function mount() {
@@ -99,7 +99,7 @@ describe('A11yDemoOverlaysComponent', () => {
   it('shows each snackbar variant, including the undo action', () => {
     const component = mount();
     const calls = [];
-    // The CDN bundle isn't loaded under jsdom, so stand in for the upgraded element's API.
+    // The elements aren't defined under jsdom, so stand in for the upgraded element's API.
     document.getElementById('a11y-demo-snackbar').notify = (message, options) => calls.push([message, options]);
 
     ['info', 'success', 'error'].forEach((type) => component.element.querySelector(`[data-event="click:showSnackbar:${type}"]`).click());
@@ -147,6 +147,37 @@ describe('A11yDemoOverlaysComponent', () => {
     document.getElementById('a11y-demo-dropdown').click();
     expect(calls).toEqual([`${t('menu-selected')} ${enabled.textContent.trim()}`]);
     component.destroy();
+  });
+
+  it('shows each hidden floating example and collapses the help panel from its close button', () => {
+    const component = mount();
+    const ids = ['a11y-demo-floating-menu', 'a11y-demo-floating-bubble', 'a11y-demo-floating-help'];
+    expect(ids.every((id) => document.getElementById(id).hidden)).toBe(true);
+
+    ids.forEach((id) => component.element.querySelector(`[data-event="click:showFloating:${id}"]`).click());
+    expect(ids.some((id) => document.getElementById(id).hidden)).toBe(false);
+
+    const help = document.getElementById('a11y-demo-floating-help');
+    let collapsed = 0;
+    // The elements aren't defined under jsdom, so stand in for the upgraded element's API.
+    help.collapse = () => collapsed++;
+    help.querySelector('[data-a11y-demo-close]').click();
+    expect(collapsed).toBe(1);
+    expect(help.hasAttribute('hidden')).toBe(false);
+    component.destroy();
+  });
+
+  it('removes floating elements moved to <body> when destroyed', () => {
+    const component = mount();
+    // What <a11y-floating> does on connect: it moves into a body-level stack.
+    const stack = document.createElement('div');
+    stack.className = 'a11y-floating-stack';
+    document.body.appendChild(stack);
+    stack.appendChild(document.getElementById('a11y-demo-floating-help'));
+
+    component.destroy();
+    expect(document.querySelector('a11y-floating')).toBeFalsy();
+    stack.remove();
   });
 
   it('restarts the blocking loader timer when reopened before it closes', () => {

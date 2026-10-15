@@ -1,15 +1,8 @@
-import { AppRouter, Service, I18nService, registerPipes, registerGlobals } from '../core/index.js';
-import { FooterComponent, NavbarComponent } from './components/index.js';
-import {
-  ArticlesManifestService,
-  ChangelogManifestService,
-  DocsManifestService,
-  GuidesManifestService,
-  TutorialManifestService,
-  RoadmapManifestService
-} from './services/index.js';
+import { AppRouter, initI18n, registerPipes, registerGlobals } from '../core/index.js';
+import { NavbarComponent } from './components/globals/navbar/navbar.component.js';
+import { FooterComponent } from './components/globals/footer/footer.component.js';
 import { appRoutes } from './routes.js';
-import { loadA11yDropdown } from './helpers/index.js';
+import { loadA11yDropdown } from './helpers/a11y-elements/load-a11y-elements.helper.js';
 
 class App {
   constructor() {
@@ -23,20 +16,13 @@ class App {
   }
 }
 
+// Markdown manifests (docs, changelog, tutorial, articles, guides) are loaded by their
+// route's guard on first visit.
 document.addEventListener('DOMContentLoaded', async () => {
-  loadA11yDropdown();
-  await I18nService.initTranslations();
-  await Promise.all([
-    DocsManifestService.load(),
-    ChangelogManifestService.load(),
-    TutorialManifestService.load(),
-    ArticlesManifestService.load(),
-    GuidesManifestService.load(),
-    RoadmapManifestService.load(),
-  ]);
+  await initI18n();
   new App();
-});
-
-window.addEventListener('beforeunload', async () => {
-  await Service.destroyAll();
+  // Only once the app has replaced the prerendered navbar: a defined <a11y-dropdown> moves
+  // itself to <body>, so a prerendered one defined earlier would escape that removal and
+  // stay next to the live navbar's (two dropdowns with the same id).
+  void loadA11yDropdown();
 });

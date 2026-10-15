@@ -5,7 +5,7 @@ export const serviceTemplate = (name, targetPath) => {
 
   return `import { Service } from '${relToCore}';
 
-export class ${name.pascal}Service extends Service<${name.pascal}Service> {  
+export class ${name.pascal}Service extends Service{{#unless (eq lang "js")}}<${name.pascal}Service>{{/unless}} {  
   constructor() {
     super();
   }

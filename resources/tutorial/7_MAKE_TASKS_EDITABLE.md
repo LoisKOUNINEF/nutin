@@ -24,10 +24,10 @@ npm run generate component components/task-inputs
 ## Give the component a task
 
 ```ts
-import { Component } from '../../../core/index.js';
+import { Component, html } from '../../../core/index.js';
 import { taskService } from '../../services/task/task.service.js';
 
-const templateFn = (_task: ITask) => `__TEMPLATE_PLACEHOLDER__`;
+const templateFn = (_task: ITask) => html`__TEMPLATE_PLACEHOLDER__`;
 
 export class TaskInputsComponent extends Component {
   private _task: ITask;
@@ -96,12 +96,49 @@ export class TaskInputsComponent extends Component {
 
 ```ts
 // src/app/routes.ts
-export const appRoutes: Routes = {
+export const appRoutes: Nutin.Routes = {
     /* ... */
     '/tasks/:id?': () => new TaskCatalogView(),
     /* ... */
 }
 ```
+
+### Guard the route
+
+A route guard runs before the view is created, gets the route's params, and returns `true` to let the navigation through, or a path to redirect to.
+
+Add one next to the generated `requireAuth` example:
+
+```ts
+// src/app/guards.ts
+import { taskService } from './services/task/task.service.js';
+
+export const Guards = {
+    /* requireAuth ... */
+
+    /**
+     * Redirects when the route's task doesn't exist, e.g. after a reload: tasks only live in memory.
+     */
+    requireTask: (redirectTo: string = '/'): Nutin.RouteGuard => {
+        return ({ id }) => id === undefined || taskService.getTask(+id) !== undefined || redirectTo;
+    },
+};
+```
+
+Then use the route's object form to attach it:
+
+```ts
+// src/app/routes.ts
+import { Guards } from './guards.js';
+
+export const appRoutes: Nutin.Routes = {
+    /* ... */
+    '/tasks/:id?': { view: () => new TaskCatalogView(), guards: [Guards.requireTask()] },
+    /* ... */
+}
+```
+
+See [Use route guards](https://nutin.dev/docs/api/use-route-guards).
 
 ### Handle routeParams in the view
 
@@ -112,8 +149,8 @@ import { TaskInputsComponent } from '../../components/task-inputs/task-inputs.co
 export class TaskCatalogView extends View {
     /* ... */
 
-    registerChildren(): ComponentConfig[] {
-        const taskCatalogChildren: ComponentConfig[] = [ /* new-task, task-cards */ ];
+    registerChildren(): Nutin.ComponentConfig[] {
+        const taskCatalogChildren: Nutin.ComponentConfig[] = [ /* new-task, task-cards */ ];
 
         if (this.hasRouteParam('id')) {
             taskCatalogChildren.push(...this.getTaskInputsChild());
@@ -122,7 +159,7 @@ export class TaskCatalogView extends View {
         return taskCatalogChildren;
     }
   
-    private getTaskInputsChild(): ComponentConfig[] {
+    private getTaskInputsChild(): Nutin.ComponentConfig[] {
         const taskId = this.getRouteParam('id') || 0;
         const task = taskService.getTask(+taskId);
         if (!task) return [];
@@ -153,7 +190,7 @@ import { Navigation } from '../../../core/index.js';
 export class TaskCardComponent extends Component {
     /* ... */
 
-    registerChildren(): ComponentConfig[] {
+    registerChildren(): Nutin.ComponentConfig[] {
         return [
             /* ... */
             {
@@ -167,7 +204,7 @@ export class TaskCardComponent extends Component {
     }
 
     private _goToEdit(): void {
-        Navigation.navigateTo(`/tasks/${this._task.id}`)
+        Navigation.navigateTo(`/tasks/${this.config.id}`)
     }
 }
 ```
@@ -189,5 +226,43 @@ export class TaskCardComponent extends Component {
     justify-content: flex-end;
 }
 ```
+
+## Keep elements across re-renders
+
+The focus is lost when  the view re-renders: every child is destroyed and created again.
+
+Tell the view which children are the same as before:
+
+```ts
+export class TaskCatalogView extends View {
+    /* ... */
+
+    registerChildren(): Nutin.ComponentConfig[] {
+        const taskCatalogChildren: Nutin.ComponentConfig[] = [
+            /* new-task */
+            ...this.createCatalogComponents({
+                /* ... */
+                // A card whose task didn't change is kept on re-render.
+                keepBy: (task) => task.id,
+            }),
+        ];
+        /* ... */
+    }
+
+    private getTaskInputsChild(): Nutin.ComponentConfig[] {
+        /* ... */
+        return [
+            {
+                selector: 'task-inputs',
+                // Same task, same form: it's kept while you edit.
+                keep: task.id,
+                factory: (el) => new TaskInputsComponent(el, task),
+            },
+        ];
+    }
+}
+```
+
+See [Keeping children across re-renders](https://nutin.dev/docs/api/register-child-components#keeping-children-across-re-renders).
 
 **[Next step →](8_TAKE_A_LOOK_AT_WHAT_YOU_VE_BUILT.md)**

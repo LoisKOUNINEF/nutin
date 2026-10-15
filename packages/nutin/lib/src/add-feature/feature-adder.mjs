@@ -1,19 +1,16 @@
 import path from 'path';
-import { fileURLToPath } from 'url';
 import * as fsExtra from 'fs-extra';
 import { print } from '../utils/print.mjs';
 import { FileGenerator } from '../common/file-generator.mjs';
 import { FEATURES } from '../common/feature-registry.mjs';
 import { PACKAGE_VERSION } from '../common/package-data.mjs';
-import { installDependencies } from '../common/package-json-helper.mjs';
 import { readProjectMeta, updateProjectMeta } from '../common/project-meta.mjs';
 import { FeatureContextBuilder } from './feature-context-builder.mjs';
 import { updatePackageJson } from './package-json-updater.mjs';
 import { updateNutinConfig } from './nutin-config-updater.mjs';
+import { patchBaseTemplates } from './base-template-patcher.mjs';
 
 const fs = fsExtra.default;
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export class FeatureAdder {
   constructor() {
@@ -28,7 +25,7 @@ export class FeatureAdder {
     }
 
     const projectPath = process.cwd();
-    await this.validateProject(projectPath, feature);
+    await this.validateProject(projectPath);
 
     const meta = await readProjectMeta(projectPath);
     if (meta?.features?.[feature.key]) {
@@ -44,9 +41,10 @@ export class FeatureAdder {
     await this.runPostAddTasks(projectPath, feature, context);
 
     print.boldInfo(`${feature.key} added.`);
+    this.printNextSteps(feature, context);
   }
 
-  async validateProject(projectPath, feature) {
+  async validateProject(projectPath) {
     const packageJsonPath = path.join(projectPath, 'package.json');
     if (!(await fs.pathExists(packageJsonPath))) {
       throw new Error(`No package.json found in ${projectPath} — run this from a nutin project's root.`);
@@ -57,12 +55,13 @@ export class FeatureAdder {
   }
 
   async applyFeatureTemplate(projectPath, feature, context) {
-    const featureTemplateDir = path.join(__dirname, '..', '..', '..', 'templates', 'features', feature.key);
+    const featureTemplateDir = path.join(this.fileGenerator.getTemplatesRoot(), 'features', feature.key);
 
     await this.fileGenerator.processTemplateDirectory(featureTemplateDir, projectPath, context, { skipExisting: true });
 
     await updatePackageJson(projectPath, feature);
     await updateNutinConfig(projectPath, feature);
+    await patchBaseTemplates(projectPath, feature, context, this.fileGenerator);
   }
 
   async runPostAddTasks(projectPath, feature, context) {
@@ -71,8 +70,20 @@ export class FeatureAdder {
       packageManager: context.packageManager,
       features: { [feature.key]: true },
     });
-    if (feature.key === 'docker') return;
-    await installDependencies(projectPath, context.packageManager);
+    // No feature adds dependencies here: markdown's are installed by its first build
+    // (tools/utils/ensure-deps.js), docker has none.
+  }
+
+  printNextSteps(feature, context) {
+    if (feature.key === 'docker') {
+      print.info('\nNext steps:');
+      print.gray('  Edit dockerPorts in nutin.config.js.');
+    }
+    if (feature.key === 'markdown') {
+      print.info('\nNext steps:');
+      print.gray('  1. List your Markdown folders in nutin.config.js "markdownSources.sourceFolders" — each one is served at /<folder name>. (Start with the generated default markdown-content).');
+      print.gray(`  2. Run "${context.packageManager} run build" — you will be asked to install marked and gray-matter (pass "-- -y" to accept non-interactively).`);  
+    }
   }
 }
 

@@ -1,77 +1,34 @@
 import { readFileSync } from 'fs';
 import path from 'path';
-import ts from 'typescript';
-import { print, errorExit } from '../../../utils/index.js';
+import { errorExit } from '../../../utils/index.js';
 import { PATHS } from './paths.js';
+import { findDuplicateRouteKeys } from './route-keys.js';
 
 const ROUTES_FILE = path.join(PATHS.sourceApp, 'routes.ts');
 
-function findAppRoutesObjectLiteral(sourceFile) {
-  let objectLiteral;
-
-  ts.forEachChild(sourceFile, function visit(node) {
-    if (
-      ts.isVariableDeclaration(node) &&
-      ts.isIdentifier(node.name) &&
-      node.name.text === 'appRoutes' &&
-      node.initializer &&
-      ts.isObjectLiteralExpression(node.initializer)
-    ) {
-      objectLiteral = node.initializer;
-      return;
-    }
-    ts.forEachChild(node, visit);
-  });
-
-  return objectLiteral;
-}
-
-function getRouteKeys(objectLiteral) {
-  return objectLiteral.properties
-    .filter((prop) => ts.isPropertyAssignment(prop) && ts.isStringLiteralLike(prop.name))
-    .map((prop) => prop.name.text);
-}
-
-function findDuplicates(keys) {
-  const seen = new Set();
-  const duplicates = new Set();
-
-  for (const key of keys) {
-    if (seen.has(key)) duplicates.add(key);
-    seen.add(key);
-  }
-
-  return [...duplicates];
-}
-
-function validateRoutes() {
+async function validateRoutes() {
   let source;
   try {
     source = readFileSync(ROUTES_FILE, 'utf-8');
   } catch {
-    errorExit(`Failed to read ${ROUTES_FILE}`);
+    errorExit(`Failed to read ${ROUTES_FILE}`, 'validate-routes');
   }
 
-  const sourceFile = ts.createSourceFile(ROUTES_FILE, source, ts.ScriptTarget.Latest, true);
-  const objectLiteral = findAppRoutesObjectLiteral(sourceFile);
-
-  if (!objectLiteral) {
-    errorExit(`Could not find an "appRoutes" object literal in ${ROUTES_FILE}`);
+  if (!/\bappRoutes\b/.test(source)) {
+    errorExit(`Could not find "appRoutes" in ${ROUTES_FILE}`, 'validate-routes');
   }
 
-  const duplicates = findDuplicates(getRouteKeys(objectLiteral));
+  const duplicates = await findDuplicateRouteKeys(source, { loader: 'ts', sourcefile: ROUTES_FILE });
 
   if (duplicates.length > 0) {
-    const list = duplicates.map((key) => `"${key}"`).join(', ');
+    const list = duplicates.map(({ key, line }) => `"${key}"${line ? ` (line ${line})` : ''}`).join(', ');
     errorExit(
-      `Duplicate route key(s) in ${ROUTES_FILE}: ${list} — an earlier route with this path is silently unreachable.`
+      `Duplicate route key(s) in ${ROUTES_FILE}: ${list} — an earlier route with this path is silently unreachable.`,
+      'validate-routes'
     );
   }
-
 }
 
-try {
-  validateRoutes();
-} catch(err) {
+validateRoutes().catch((err) => {
   errorExit(err, 'validate-routes');
-}
+});
