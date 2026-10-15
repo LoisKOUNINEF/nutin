@@ -6,10 +6,10 @@ import { buildSsrBundle, cleanupSsrBundle } from './ssr/ssr-bundle.js';
 import { renderRoute } from './ssr/ssr-render.js';
 import { builderConfig } from '../../builder.config.js';
 import { resolveLocaleValue, valueForLangWithFallback, collectI18nSeoIssues } from './i18n-resolution.js';
-import { segmentsOf, validateMockParams, writeRouteHtml, warnForRoutesMissingSeoConfig } from './route-output.js';
-import { expandDynamicRoutes } from './dynamic-routes.js';
+import { segmentsOf, routeSuffixOf, validateMockParams, writeRouteHtml, warnForRoutesMissingSeoConfig } from './route-output.js';
+import { resolveSeoRoutes, resolveSeoOptOutPaths } from './seo-routes.js';
 
-// og:image/twitter:image require an absolute URL for Discord/Twitter to resolve them;
+// og:image/twitter:image require an absolute URL for social platforms to resolve them;
 // every other absolute field (og:url, canonical) is already baseUrl-prefixed, so ogImage
 // (a repo-relative path in config/seo.json) needs the same treatment.
 function toAbsoluteUrl(urlOrPath, baseUrl) {
@@ -17,37 +17,43 @@ function toAbsoluteUrl(urlOrPath, baseUrl) {
   return /^https?:\/\//.test(urlOrPath) ? urlOrPath : `${baseUrl}${urlOrPath}`;
 }
 
+// Returns the guard result when a route guard refused the route (nothing written), else null.
 async function processRoute(template, baseUrl, defaultLanguage, languages, route, bundleUrl) {
   validateMockParams(route);
 
-  const routeSuffix = route.outputPath;
+  const routeSuffix = routeSuffixOf(route);
 
   if (builderConfig.i18n) {
     // Same for every language variant of this route — lets crawlers know these URLs
     // are alternates of one page rather than duplicate/competing content. x-default
-    // points at the default language since that's also where nginx redirects an
-    // unprefixed request to (see tools/docker/nginx.conf's "location = /").
+    // points at the default language.
     const hreflangLinks = [
       ...languages.map((l) => ({ hreflang: l, href: `${baseUrl}/${l}${routeSuffix}/` })),
       { hreflang: 'x-default', href: `${baseUrl}/${defaultLanguage}${routeSuffix}/` },
     ];
 
+    // Every language is rendered before anything is written: a guard refusing any of
+    // them skips the whole route, rather than shipping some language variants.
+    const pages = [];
     for (const lang of languages) {
-      const title = valueForLangWithFallback(route.title, lang, defaultLanguage);
-      const description = valueForLangWithFallback(route.description, lang, defaultLanguage);
-      const ogImage = toAbsoluteUrl(valueForLangWithFallback(route.ogImage, lang, defaultLanguage), baseUrl);
-
       const pageUrl = `${baseUrl}/${lang}${routeSuffix}`;
-      const { body, navbar, footer } = await renderRoute({
+      const result = await renderRoute({
         bundleUrl,
         appRoutesKey: route.path,
         mockParams: route.mockParams,
         mockFetch: route.mockFetch,
-        preloadManifest: route.preloadManifest,
         lang,
         pageUrl,
         i18nEnabled: builderConfig.i18n,
       });
+      if (result.blocked) return result;
+      pages.push({ lang, pageUrl, body: result.html, navbar: result.navbar, footer: result.footer });
+    }
+
+    for (const { lang, pageUrl, body, navbar, footer } of pages) {
+      const title = valueForLangWithFallback(route.title, lang, defaultLanguage);
+      const description = valueForLangWithFallback(route.description, lang, defaultLanguage);
+      const ogImage = toAbsoluteUrl(valueForLangWithFallback(route.ogImage, lang, defaultLanguage), baseUrl);
 
       await writeRouteHtml({
         template, lang, title, description, pageUrl, ogImage, body, navbar, footer, hreflangLinks,
@@ -65,23 +71,34 @@ async function processRoute(template, baseUrl, defaultLanguage, languages, route
     }
 
     const pageUrl = `${baseUrl}${routeSuffix}`;
-    const { body, navbar, footer } = await renderRoute({
+    const result = await renderRoute({
       bundleUrl,
       appRoutesKey: route.path,
       mockParams: route.mockParams,
       mockFetch: route.mockFetch,
-      preloadManifest: route.preloadManifest,
       lang: defaultLanguage,
       pageUrl,
       i18nEnabled: builderConfig.i18n,
     });
+    if (result.blocked) return result;
 
     await writeRouteHtml({
-      template, lang: defaultLanguage, title, description, pageUrl, ogImage, body, navbar, footer,
+      template, lang: defaultLanguage, title, description, pageUrl, ogImage, body: result.html,
+      navbar: result.navbar, footer: result.footer,
       outputSegments: segmentsOf(routeSuffix),
       routePath: route.path,
     });
   }
+
+  return null;
+}
+
+function describeBlocked(route, { redirectTo }) {
+  const outcome = redirectTo ? `redirected an anonymous visitor to "${redirectTo}"` : 'blocked an anonymous visitor';
+  const url = routeSuffixOf(route) || '/';
+  const where = url === route.path ? `"${route.path}"` : `"${route.path}" (${url})`;
+  return `[generate-seo-html] Route ${where} was not prerendered: its guard ${outcome}. ` +
+    `It is left out of sitemap.xml too.`;
 }
 
 export async function generateSeoHtml() {
@@ -94,7 +111,6 @@ export async function generateSeoHtml() {
 
   const seoConfigPath = path.join(PATHS.temp, 'config', 'seo.json');
   const seoConfig = JSON.parse(fs.readFileSync(seoConfigPath, 'utf-8'));
-  seoConfig.routes = expandDynamicRoutes(seoConfig.routes);
   const baseUrl = seoConfig.baseUrl.replace(/\/$/, '');
 
   const languagesConfigPath = path.join(PATHS.temp, 'config', 'languages.json');
@@ -136,14 +152,24 @@ export async function generateSeoHtml() {
     }
   }
 
+  // routeSuffixOf() of every route a guard refused, so the sitemap can leave them out too.
+  const skippedSuffixes = new Set();
+
   try {
     const bundleUrl = await buildSsrBundle();
-    await warnForRoutesMissingSeoConfig(bundleUrl, seoConfig.routes, defaultLanguage, baseUrl);
+    // seo.json routes plus feature-generated ones (e.g. one per Markdown page).
+    const routes = resolveSeoRoutes(seoConfig);
+    await warnForRoutesMissingSeoConfig(bundleUrl, routes, defaultLanguage, baseUrl, resolveSeoOptOutPaths());
 
-    for (const route of seoConfig.routes) {
-      await processRoute(template, baseUrl, defaultLanguage, languages, route, bundleUrl);
+    for (const route of routes) {
+      const blocked = await processRoute(template, baseUrl, defaultLanguage, languages, route, bundleUrl);
+      if (!blocked) continue;
+      print.warn(describeBlocked(route, blocked));
+      skippedSuffixes.add(routeSuffixOf(route));
     }
   } finally {
     cleanupSsrBundle();
   }
+
+  return skippedSuffixes;
 }

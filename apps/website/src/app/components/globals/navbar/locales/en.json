@@ -9,5 +9,6 @@
 	"docs-testing": "Testing toolkit",
 	"docs-tools": "Tools",
 	"guides-alpinejs": "AlpineJS",
-	"guides-a11y-elements": "a11y-elements"
+	"guides-a11y-elements": "a11y-elements",
+	"guides-jest-vitest": "Jest / Vitest"
 }

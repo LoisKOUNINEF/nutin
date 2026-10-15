@@ -18,7 +18,7 @@
     }
 }
 
-.not-found__home-btn-container {
+.not-found__redirect-btn-container {
     padding-top: 2rem;
     width: 100%;
     @include mixins.flex-center;
@@ -30,13 +30,20 @@
         box-shadow: none;
     }
     button {
+        background-color: inherit;
+        font-size: clamp(1.25rem,5vw,2rem);
+        font-style: italic;
+        padding: clamp(.75rem,2vw,1rem);
+        text-decoration: underline;
+        color: var(--primary);
+        transition: ease-in-out .2s;
+        border-radius: 8px;
         &::before {
             content: '<\00a0';
         }
-        transition: ease-in-out .2s;
         &:hover {
-            color: $primary-color;
-            text-decoration: underline;
+            color: var(--primary);
+            box-shadow: -10px -10px inset var(--surface);
         }
         @media(hover:none) {
             &:hover {

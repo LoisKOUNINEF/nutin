@@ -18,12 +18,14 @@ export const registerPipes = (): void => {
     value: string | number | Date,
     locale = navigator.language,
     format = 'long',
-    time = false,
+    time: boolean | string = false,
   ) => {
     const date = new Date(value);
     // '' is not a valid Intl.DateTimeFormatOptions value for hour/minute, so
     // omit those keys entirely rather than setting them when time is false.
-    const timeOptions: Intl.DateTimeFormatOptions = time ? { hour: '2-digit', minute: '2-digit' } : {};
+    // From a template the flag arrives as a string ("false" is truthy).
+    const withTime = time === true || time === 'true';
+    const timeOptions: Intl.DateTimeFormatOptions = withTime ? { hour: '2-digit', minute: '2-digit' } : {};
     const formats = {
       short: { year: 'numeric', month: 'short', day: 'numeric', ...timeOptions } as Intl.DateTimeFormatOptions,
       long: { year: 'numeric', month: 'long', day: 'numeric', ...timeOptions } as Intl.DateTimeFormatOptions,

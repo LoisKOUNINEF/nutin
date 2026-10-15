@@ -8,9 +8,8 @@
     margin-left: clamp(1rem, 5vw, 10rem);
     margin-right: clamp(1rem, 5vw, 10rem);
     h1 {
-        font-size: 3rem;
         font-weight: 700;
-        color: var(--primary);
+        color: var(--secondary);
     }
     @include mixins.respond-to(medium) {
         margin-left: 1rem;
@@ -26,6 +25,9 @@
 body {
     --a11y-avatar-color-surface: var(--border);
     --a11y-avatar-color-text-muted: var(--text-muted);
+    --a11y-checkbox-group-color-text-muted: var(--text-muted);
+    --a11y-checkbox-group-select-all-border: 1px solid var(--border);
+    --a11y-file-input-color-dragover-bg: var(--surface);
     --a11y-blocking-loader-color-overlay: var(--overlay);
     --a11y-blocking-loader-color-text: var(--text);
     --a11y-picture-color-text-muted: var(--text-muted);
@@ -35,7 +37,7 @@ body {
     --a11y-skeleton-color-surface: var(--disabled-bg);
     --a11y-spinner-color: var(--primary);
 
-    @each $control in checkbox, radio-group, switch, select, input, textarea {
+    @each $control in checkbox, radio-group, switch, select, input, textarea, file-input {
         --a11y-#{$control}-color-background: var(--background);
         --a11y-#{$control}-color-surface: var(--surface);
         --a11y-#{$control}-color-text: var(--text);
@@ -51,7 +53,7 @@ body {
         --a11y-#{$overlay}-color-background: var(--background);
         --a11y-#{$overlay}-color-text: var(--text);
     }
-    @each $field in input, textarea {
+    @each $field in input, textarea, file-input {
         --a11y-#{$field}-color-error: var(--error);
     }
     --a11y-field-color-error: var(--error);
@@ -64,6 +66,11 @@ body {
     --a11y-modal-color-secondary: var(--text-muted);
     --a11y-modal-color-secondary-hover: var(--text);
     --a11y-menu-item-color-secondary-hover: var(--text-muted);
+
+    --a11y-floating-panel-color-background: var(--surface);
+    --a11y-floating-panel-color-text: var(--text);
+    --a11y-floating-launcher-color-background: var(--primary);
+    --a11y-floating-launcher-color-text: var(--background);
 }
 
 // Shared by both demo pages. Top-level on purpose: overlay content is
@@ -189,6 +196,57 @@ body {
         outline: 2px solid var(--primary);
         outline-offset: 2px;
     }
+}
+
+.a11y-demo__stage--cards {
+    align-items: stretch;
+    > a11y-card-link {
+        display: flex;
+    }
+}
+
+.a11y-demo__card {
+    max-width: 22rem;
+    padding: map.get($spacings, medium) map.get($spacings, large);
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    h3 {
+        font-size: 1.1rem;
+        margin-bottom: map.get($spacings, small);
+    }
+    a {
+        color: var(--primary);
+    }
+    &:hover {
+        border-color: var(--primary);
+    }
+}
+
+// <a11y-floating> has no background of its own, so the bubble is styled on the
+// element (its × button sits next to the content). Top-level: it portals to <body>.
+.a11y-demo__bubble {
+    align-items: flex-start;
+    max-width: 22rem;
+    padding: map.get($spacings, small) map.get($spacings, medium);
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    p {
+        margin: 0;
+    }
+}
+
+.a11y-demo__button--solid {
+    background: var(--background);
+}
+
+// The site's `:root button { color: inherit }` outranks a11y-elements' class selector.
+button.a11y-floating-launcher {
+    color: var(--a11y-floating-launcher-color-text);
 }
 
 .a11y-demo__picture {

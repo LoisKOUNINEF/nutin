@@ -1,4 +1,4 @@
-import { ViewRenderManager } from '#root/dist/src/core/services/router/helpers/view-render-manager.helper.js';
+import * as ViewRenderManager from '#root/dist/src/core/services/router/helpers/view-render-manager.helper.js';
 import { AppEventBus } from '#root/dist/src/core/index.js';
 
 global.requestAnimationFrame = (cb) => setTimeout(cb, 0);
@@ -79,7 +79,7 @@ describe('ViewRenderManager', () => {
       onEnter: () => calls.push(['onEnter']),
     };
 
-    ViewRenderManager.renderNewView(() => view, { id: '42' });
+    ViewRenderManager.renderNewView(view, { id: '42' });
 
     expect(calls).toEqual([
       ['setRouteParams', { id: '42' }],
@@ -101,7 +101,7 @@ describe('ViewRenderManager', () => {
       onEnter: () => {},
     };
 
-    expect(() => ViewRenderManager.renderNewView(() => view)).not.toThrow();
+    expect(() => ViewRenderManager.renderNewView(view)).not.toThrow();
   });
 
   it('should clear stale mount content before rendering the new view', () => {
@@ -121,7 +121,7 @@ describe('ViewRenderManager', () => {
       onEnter: () => {},
     };
 
-    ViewRenderManager.renderNewView(() => view);
+    ViewRenderManager.renderNewView(view);
 
     expect(container.children.length).toBe(1);
     expect(container.contains(stale)).toBe(false);

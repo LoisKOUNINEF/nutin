@@ -13,6 +13,7 @@ export class UpdateContextBuilder {
     const baseContext = {
       projectName: packageJson.name,
       packageManager,
+      lang: meta.lang ?? 'ts',
       ...meta.features,
       ciCommand: getCiCommand(packageManager),
     };

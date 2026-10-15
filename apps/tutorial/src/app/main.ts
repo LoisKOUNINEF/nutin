@@ -1,5 +1,4 @@
-import nutinConfig from '../../nutin.config.js';
-import { AppRouter, Service, I18nService, registerPipes } from '../core/index.js';
+import { AppRouter, initI18n, registerPipes } from '../core/index.js';
 import { appRoutes } from './routes.js';
 
 class App {
@@ -10,12 +9,6 @@ class App {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  if (nutinConfig.i18n) {
-    await I18nService.initTranslations();
-  }
+  await initI18n();
   new App();
-});
-
-window.addEventListener('beforeunload', async () => {
-  await Service.destroyAll();
 });

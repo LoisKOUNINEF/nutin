@@ -77,10 +77,12 @@ async function runTests() {
 
   if (coverageEnabled) await startCoverage();
 
+  let loadFailures = 0;
   for (const file of testFiles) {
     try {
       await loadTestFile(file);
     } catch (error) {
+      loadFailures++;
       print.boldError(`✗ ${file} failed to load:`);
       print.grayError(error.stack);
     }
@@ -88,7 +90,10 @@ async function runTests() {
 
   const testResults = await runQueuedTests();
 
-  if (testResults.failed > 0) process.exitCode = 1;
+  if (loadFailures > 0) {
+    print.boldError(`✗ ${loadFailures} test file(s) failed to load — see errors above.\n`);
+  }
+  if (testResults.failed > 0 || loadFailures > 0) process.exitCode = 1;
 
   if (coverageEnabled) await runCoverage(testResults);
 }

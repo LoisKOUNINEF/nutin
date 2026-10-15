@@ -23,11 +23,14 @@ RUN {{ciCommand}} || pnpm approve-builds --all
 {{else}}
 RUN {{ciCommand}}
 {{/if}}
+{{#unless (eq lang "js")}}
 COPY tsconfig.json .
+{{/unless}}
 COPY ./src ./src
 COPY ./public ./public
 COPY ./nutin.config.js .
 COPY ./config ./config
+__MARKDOWN_SOURCES_PLACEHOLDER__
 COPY ./tools/builder ./tools/builder
 COPY ./tools/docker ./tools/docker
 COPY ./tools/utils ./tools/utils

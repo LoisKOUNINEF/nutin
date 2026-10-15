@@ -10,13 +10,13 @@ npm run generate component components/greeting # target directory: src/app/compo
 
 ```ts
 // greeting.component.ts
-import { Component, ComponentConfig } from '../../../core/index.js';
+import { Component, html } from '../../../core/index.js';
 
 interface GreetingConfig {
   name?: string;
 }
 
-const templateFn = (config?: GreetingConfig) => `
+const templateFn = (config?: GreetingConfig) => html`
 <div>
   <span data-bind="name">${config?.name}</span>
   <button data-event="click:_sayHi">Say hi</button>
@@ -44,7 +44,7 @@ export class GreetingComponent extends Component<HTMLDivElement, GreetingConfig>
 
 ```ts
 // in a parent component
-registerChildren(): ComponentConfig[] {
+registerChildren(): Nutin.ComponentConfig[] {
   return [
     {
       selector: 'my-greeting-selector',
@@ -63,11 +63,12 @@ Constructing a component mounts its root element immediately, but does **not** r
 ## Constructor options
 
 ```ts
+// Nutin.ComponentOptions
 interface ComponentOptions<K = any> {
-  templateFn?: (config?: K) => string;   // default: () => ''
+  templateFn?: (config?: K) => Nutin.Template; // string or html`` result; default: () => ''
   mountTarget?: string | HTMLElement;    // default: '#app'
   tagName?: keyof HTMLElementTagNameMap; // default: 'div'
-  props?: ComponentProps;                // default: {}
+  props?: Nutin.ComponentProps;                // default: {}
   config?: K;
   defaults?: Partial<K>;
   normalizeKeys?: (keyof K)[];
@@ -75,7 +76,7 @@ interface ComponentOptions<K = any> {
 }
 ```
 
-- `mountTarget` as a CSS selector string **appends** the component into that element; passing an actual `HTMLElement` **replaces** it instead. A selector that matches nothing leaves the component unmounted, silently.
+- `mountTarget` as a CSS selector string **appends** the component into that element; passing an actual `HTMLElement` **replaces** it instead. A selector that matches nothing (or a `null` element) leaves the component unmounted, and logs a `console.error` in development.
 - `templateFn` always receives the *normalized* config — `defaults` merged under `config`, then every key listed in `normalizeKeys` coerced to `''` if it's still `undefined`/`null`. See [How do I pass data to a component?](./HOWDOI_PASS_DATA_TO_A_COMPONENT.md) for the full normalization rules.
 - For templates that need branching or instance state, override `generateTemplate()` instead of passing `templateFn`. See [How do I generate a template?](./HOWDOI_GENERATE_A_TEMPLATE.md).
 - `trustLevel` controls HTML sanitization of the rendered template — see [How do I control HTML sanitization?](./HOWDOI_CONTROL_HTML_SANITIZATION.md).
@@ -84,10 +85,11 @@ interface ComponentOptions<K = any> {
 
 `render()` runs the same pipeline on every call (initial and any subsequent re-render):
 
-```
+```text
 onBeforeRender()
-element.innerHTML = sanitize(generateTemplate())
+element.replaceChildren(sanitizeToFragment(generateTemplate()))
 compose()      → mounts data-component/data-catalog children (see registerChildren)
+child.onKept()  → for every child kept across the re-render (keep / keepBy)
 hydrate()      → parses data-i18n / data-pipe, then removes empty data-optional elements
 autoBindEvents() → rebinds all data-event listeners
 onAfterRender()

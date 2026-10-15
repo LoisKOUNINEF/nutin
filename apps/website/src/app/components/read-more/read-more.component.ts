@@ -1,13 +1,14 @@
-import { Component, Navigation } from '../../../core/index.js';
+import { Component, Navigation, html } from '../../../core/index.js';
 
-const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
+const templateFn = () => html`__TEMPLATE_PLACEHOLDER__`;
 
 export class ReadMoreComponent extends Component {
   constructor(mountTarget: HTMLElement) {
     super({templateFn, mountTarget});
   }
 
-  private navigateTo(slug: string) {
-    Navigation.navigateTo(`/articles/${slug}`);
+  // Bound to each card's title link; <a11y-card-link> forwards clicks elsewhere on the card to it.
+  private navigateTo(href: string) {
+    Navigation.navigateTo(href);
   }
 }

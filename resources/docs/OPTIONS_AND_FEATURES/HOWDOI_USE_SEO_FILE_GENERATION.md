@@ -9,7 +9,7 @@ export default {
 }
 ```
 
-`route.title` is also consumed at runtime: on every route change, `document.title` is set from the matching route's `title` here (falling back to the view's `viewName` when `generateSEOFiles` is off or no route matches) — see [How do I create a view?](../API/VIEWS_AND_ROUTING/HOWDOI_CREATE_A_VIEW.md).
+`route.title` is also consumed at runtime: on every route change, `document.title` is set from the view's `documentTitle()`, else the matching route's `title` here, else the view's locale `title` (with `i18n`), else its `viewName`. With `i18n` off, a per-language `title` resolves to its first value — see [How do I create a view?](../API/VIEWS_AND_ROUTING/HOWDOI_CREATE_A_VIEW.md).
 
 ## Configuration file
 
@@ -83,6 +83,27 @@ export default {
 | `title` | yes | `string \| { [lang]: string }` | A flat string applies to every language uniformly; use a per-language object to localize. |
 | `description` | yes | `string \| { [lang]: string }` | Same rules as `title`. |
 | `ogImage` | no | `string \| { [lang]: string }` | Only written into `og:image`/`twitter:image` when present — omit to leave those tags out entirely. |
-| `mockParams` | required if `path` has dynamic segments | `{ [param]: string }` | One representative value per dynamic segment, used to SSR-render that route at build time; missing one is a build-time `exit(1)`. |
+| `mockParams` | required if `path` has dynamic segments | `{ [param]: string }` | One representative value per dynamic segment, used to SSR-render that route at build time; missing one is a build-time `exit(1)`. The page is written to `path` with those values filled in (`/blog/:slug` + `{ "slug": "hello-world" }` → `/blog/hello-world/`), which is also the URL listed in `sitemap.xml`. |
+| `outputPath` | no | `string` | Overrides the URL path the page is written to and listed under in `sitemap.xml`, e.g. to prerender several pages of one dynamic route as separate entries. |
 | `mockFetch` | no | `{ [url]: jsonBody }` | Exact-URL-keyed map — any `fetch(url)` call made while SSR-rendering this route that matches a key resolves to `jsonBody` instead of hitting the network. For views that fetch data on mount. |
-| `disallow` | no | `true \| string[]` | `true` blocks this path for every bot in `robots.txt`; an array of bot names blocks it only for those bots. |
+| `disallow` | no | `true \| string[]` | `true` blocks this path for every bot in `robots.txt` (and leaves it out of `sitemap.xml`); an array of bot names blocks it only for those bots. Dynamic segments become `*` wildcards, and with i18n each language prefix is covered. A bot listed in `disallowBots` stays fully blocked. |
+
+## Prerendered HTML
+
+Each page is your view rendered at build time: the same markup, classes and styles as in the browser, so it's what visitors see before the app starts, and what crawlers and visitors without JavaScript get. Once the app starts, it renders the view again over it; nothing is reused.
+
+So Nutin's binding attributes (`data-event`, `data-i18n`, `data-component`, `data-catalog`, `data-bind`, `data-pipe`, `data-pipe-source`) are removed from the prerendered HTML: nothing would ever bind them. Your own `data-*` attributes are kept, and so is text that shows them (e.g. in a code sample).
+
+In production builds, prerendered pages, `sitemap.xml` and `robots.txt` are compressed (`.gz`/`.br`) along with the rest of the build.
+
+Each page is written to `<route>/index.html`, so its URL ends with a slash (`/docs/`), as in its canonical URL and in `sitemap.xml`. A server like nginx redirects `/docs` to `/docs/`. Without i18n, write internal links with the trailing slash (`href="/docs/"`) to save crawlers and visitors that redirect. With i18n, links are rewritten for you (see [Links](./HOWDOI_USE_I18N.md#links)).
+
+## Guarded routes
+
+A route's guards run at build time before its page is prerendered, as they would for a first-time anonymous visitor: storage is empty and there's no session. If a guard blocks the route or redirects it (e.g. an auth guard sending logged-out visitors to `/`), no HTML is written for it, it's left out of `sitemap.xml`, and the build prints a warning. Private pages therefore never ship as public static files.
+
+Guards that load data and allow the route still work, like the `markdown` feature's guards: during the build, `fetch()` can read files the build already wrote (e.g. `/generated/<name>.json`), plus any `mockFetch` entry.
+
+## Markdown pages
+
+With the [Markdown feature](HOWDOI_USE_MARKDOWN_FEATURE.md#seo-file-generation), every compiled page gets its SEO HTML and sitemap entry automatically, without `config/seo.json` routes. A `config/seo.json` route producing the same URL replaces the generated one.

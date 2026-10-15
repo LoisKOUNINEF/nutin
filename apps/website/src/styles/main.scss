@@ -1,8 +1,6 @@
-// Libraries styles (snackbar, popover).
-@use "libs";
-
-// built-in classes
-@use "utilities";
+// a11y-elements default styles (the elements themselves load lazily, see
+// src/app/helpers/a11y-elements); rethemed in a11y-elements.view.scss.
+@use "pkg:a11y-elements/a11y.css";
 
 // global styles
 @use "styles";

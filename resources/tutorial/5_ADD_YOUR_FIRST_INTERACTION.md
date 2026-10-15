@@ -1,6 +1,6 @@
 # 5. Add your first interaction
 
-## Let the service add tasks
+## Let the service create tasks
 
 ```ts
 class TaskService extends Service<TaskService> {
@@ -38,10 +38,10 @@ npm run generate component components/new-task
 ## Add the callback
 
 ```ts
-import { Component } from '../../../core/index.js';
+import { Component, html } from '../../../core/index.js';
 import { taskService } from '../../services/task/task.service.js';
 
-const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
+const templateFn = () => html`__TEMPLATE_PLACEHOLDER__`;
 
 export class NewTaskComponent extends Component {
     /* ... */
@@ -58,6 +58,8 @@ export class NewTaskComponent extends Component {
     <button data-event="click:_newTask">New Task</button>
 </div>
 ```
+
+The build checks the handler name against the component: a typo like `click:_newTsk` fails the build, pointing at that line of the template.
 
 ## A little bit of styling
 
@@ -86,7 +88,7 @@ import { NewTaskComponent } from '../../components/new-task/new-task.component.j
 export class TaskCatalogView extends View {
     /* ... */
 
-    registerChildren(): ComponentConfig[] {
+    registerChildren(): Nutin.ComponentConfig[] {
         return [
             {
                 selector: 'new-task',
@@ -113,9 +115,11 @@ export class TaskCatalogView extends View {
 
 ```ts
 // src/app/globals.d.ts
-declare interface AppEventMap {
-    // to keep this lean, we'll reuse the same event for all operations
-    'task-event': { taskId: number };
+declare namespace Nutin {
+    interface AppEventMap {
+        // to keep this lean, we'll reuse the same event for all operations
+        'task-event': { taskId: number };
+    }
 }
 ```
 

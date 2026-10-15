@@ -1,6 +1,6 @@
-import { Navigation, View } from '../../../core/index.js';
+import { Navigation, View, html } from '../../../core/index.js';
 
-const template = `__TEMPLATE_PLACEHOLDER__`;
+const template = html`__TEMPLATE_PLACEHOLDER__`;
 
 export class NotFoundView extends View {
   constructor() {

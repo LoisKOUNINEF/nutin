@@ -3,11 +3,11 @@
  * Supports constructor parameters for initialization.
  */
 export abstract class Service<T extends Service<T>> {
-  private static _instances = new Map<Function, any>();
+  private static _instances = new Map<Function, Service<any>>();
   private static _instantiating = new Set<Function>();
   private _cleanupCallbacks: (() => void)[] = [];
 
-  constructor(...args: any[]) {
+  constructor() {
     const constructor = this.constructor as new (...args: any[]) => T;
 
     if (!Service._instantiating.has(constructor)) {
@@ -16,7 +16,6 @@ export abstract class Service<T extends Service<T>> {
       );
     }
     this.autoBindMethods();
-    window.addEventListener('beforeunload', this.dispose);
   }
 
   /**
@@ -24,10 +23,10 @@ export abstract class Service<T extends Service<T>> {
    * doesn't exist yet. Throws if args are passed to an already-initialized instance,
    * preventing silent re-initialization mismatches.
    */
-  public static getInstance<T extends Service<T>>(
-    this: new (...args: any[]) => T,
-    ...args: any[]
-  ): T {
+  public static getInstance<C extends new (...args: any) => Service<any>>(
+    this: C,
+    ...args: ConstructorParameters<C> | []
+  ): InstanceType<C> {
     const alreadyExists = Service._instances.has(this);
 
     if (alreadyExists && args.length > 0) {
@@ -45,7 +44,7 @@ export abstract class Service<T extends Service<T>> {
       Service._instantiating.delete(this);
     }
 
-    return Service._instances.get(this);
+    return Service._instances.get(this) as InstanceType<C>;
   }
 
   public static hasInstance<T extends Service<T>>(
@@ -60,27 +59,36 @@ export abstract class Service<T extends Service<T>> {
     const instance = Service._instances.get(this);
     if (instance) {
       await instance.onDestroy();
+      instance.runCleanup();
       Service._instances.delete(this);
     }
   }
 
+  // No page-unload hook: the browser frees everything on unload, and tearing down on
+  // `beforeunload` left a page restored from the back/forward cache (or kept after a
+  // cancelled "Leave site?" prompt) with every service already disposed.
   public dispose = (): void => {
-    this._cleanupCallbacks.forEach(fn => fn());
-    this._cleanupCallbacks = [];
+    this.runCleanup();
     Service._instances.delete(this.constructor);
   };
 
   public static async destroyAll(): Promise<void> {
-    const destroyPromises = Array.from(Service._instances.values())
-      .map(instance => instance.onDestroy());
+    const instances = Array.from(Service._instances.values());
 
-    await Promise.all(destroyPromises);
+    await Promise.all(instances.map(instance => instance.onDestroy()));
+    instances.forEach(instance => instance.runCleanup());
     Service._instances.clear();
     Service._instantiating.clear();
   }
 
   protected registerCleanup(callback: () => void): void {
     this._cleanupCallbacks.push(callback);
+  }
+
+  private runCleanup(): void {
+    const callbacks = this._cleanupCallbacks;
+    this._cleanupCallbacks = [];
+    callbacks.forEach(fn => fn());
   }
 
   /**

@@ -1,3 +1,7 @@
+---
+ogImage: /assets/images/og-covers/og-cover-articles.jpg
+---
+
 # When Does a Vanilla JavaScript Application Need Structure?
 
 A vanilla JavaScript application can start remarkably simply.
@@ -531,7 +535,7 @@ while still preferring:
 
 ## Nutin: structured vanilla without requiring reactivity
 
-[Nutin](https://nutin.org) is one example of this middle ground.
+[Nutin](https://nutin.dev) is one example of this middle ground.
 
 The idea behind Nutin is not that vanilla JavaScript is inadequate.
 

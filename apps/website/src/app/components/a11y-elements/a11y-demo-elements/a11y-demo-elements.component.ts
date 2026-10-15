@@ -1,24 +1,25 @@
-import { Component, I18nService, Navigation } from '../../../../core/index.js';
+import { Component, I18nService, Navigation, html } from '../../../../core/index.js';
 
 // Text rendered inside (or as attributes of) an <a11y-*> element is
 // interpolated here rather than through data-i18n: data-i18n replaces an
 // element's textContent after render, wiping the markup the element builds.
-const t = (key: string) => I18nService.translate(`a11y-demo-elements.${key}`);
+const translate = (key: string) => I18nService.translate(`a11y-demo-elements.${key}`);
 
-const templateFn = () => `__TEMPLATE_PLACEHOLDER__`;
+const templateFn = () => html`__TEMPLATE_PLACEHOLDER__`;
 
 export class A11yDemoElementsComponent extends Component {
   private focusableClicks = 0;
+  private cardLinkButtonClicks = 0;
 
   constructor(mountTarget: HTMLElement) {
     super({templateFn, mountTarget});
   }
 
   protected override onAfterRender(): void {
-    // A plain property, not an attribute: 0.2.0 keeps properties set before
-    // the CDN bundle upgrades the element, so load order doesn't matter here.
+    // A plain property, not an attribute: since 0.2.0, properties set before
+    // the element is upgraded are kept, so load order doesn't matter here.
     const username = this.element.querySelector('#a11y-demo-username') as (HTMLElement & { validators?: unknown }) | null;
-    if (username) username.validators = [(value: string) => (/\s/.test(value) ? t('input-username-no-spaces') : null)];
+    if (username) username.validators = [(value: string) => (/\s/.test(value) ? translate('input-username-no-spaces') : null)];
     super.onAfterRender();
   }
 
@@ -40,11 +41,17 @@ export class A11yDemoElementsComponent extends Component {
     const form = event.target as HTMLFormElement;
     form.reset();
     const status = this.element.querySelector('#a11y-demo-form-status');
-    if (status) status.textContent = t('input-submitted');
+    if (status) status.textContent = translate('input-submitted');
   }
 
   private countFocusable(): void {
     const output = this.element.querySelector('#a11y-demo-focusable-count');
     if (output) output.textContent = String(++this.focusableClicks);
+  }
+
+  // A control inside an <a11y-card-link> keeps its own click: the card doesn't forward it to the link.
+  private countCardLinkButton(): void {
+    const output = this.element.querySelector('#a11y-demo-card-link-count');
+    if (output) output.textContent = String(++this.cardLinkButtonClicks);
   }
 }

@@ -1,0 +1,87 @@
+import nutinConfig from '#root/nutin.config.js';
+import distConfig from '#root/dist/nutin.config.js';
+import { MarkdownManifests, MarkdownManifestsService } from '#root/dist/src/app/markdown/markdown-manifests.service.js';
+import { resolveMarkdownSources } from '#root/dist/src/app/markdown/markdown-sources.js';
+
+// Builds a separate instance (the exported MarkdownManifestsService is left as it is),
+// then drops it from the registry.
+function freshManifests() {
+  MarkdownManifests.testingReset();
+  try {
+    return MarkdownManifests.getInstance();
+  } finally {
+    MarkdownManifests.testingReset();
+  }
+}
+
+describe('MarkdownManifestsService', () => {
+  let loadSpies = [];
+
+  afterEach(() => {
+    loadSpies.forEach((spy) => spy.restore());
+    loadSpies = [];
+    delete globalThis.__NUTIN_MARKDOWN_SOURCES__;
+  });
+
+  it('has one manifest per nutin.config.js "markdownSources" folder', () => {
+    const expected = resolveMarkdownSources(nutinConfig.markdownSources);
+    expect(MarkdownManifestsService.ids).toEqual(expected.map((source) => source.id));
+    expect(MarkdownManifestsService.all.map(({ id, sectionInPath }) => ({ id, sectionInPath }))).toEqual(expected);
+  });
+
+  it('returns the same manifest instance for an id', () => {
+    for (const id of MarkdownManifestsService.ids) {
+      expect(MarkdownManifestsService.get(id)).toBe(MarkdownManifestsService.get(id));
+    }
+  });
+
+  it('throws on an unknown id, listing the known ones', () => {
+    expect(() => MarkdownManifestsService.get('__unknown__')).toThrow('Unknown Markdown source "__unknown__"');
+    expect(() => MarkdownManifestsService.get('__unknown__')).toThrow(`known: ${MarkdownManifestsService.ids.join(', ')}`);
+  });
+
+  it('load() loads the manifest of an id and resolves to it', async () => {
+    const [id] = MarkdownManifestsService.ids;
+    const manifest = MarkdownManifestsService.get(id);
+    const loadSpy = spyOn(manifest, 'load').andCallFake(() => Promise.resolve());
+    loadSpies.push(loadSpy);
+    expect(await MarkdownManifestsService.load(id)).toBe(manifest);
+    expect(loadSpy.callCount).toBe(1);
+  });
+
+  it('load() rejects on an unknown id without loading anything', async () => {
+    let error;
+    try {
+      await MarkdownManifestsService.load('__unknown__');
+    } catch (e) {
+      error = e;
+    }
+    expect(error.message).toContain('Unknown Markdown source "__unknown__"');
+  });
+
+  it('loadAll() loads every manifest', async () => {
+    loadSpies = MarkdownManifestsService.all.map((manifest) => spyOn(manifest, 'load').andCallFake(() => Promise.resolve()));
+    await MarkdownManifestsService.loadAll();
+    loadSpies.forEach((spy) => expect(spy.callCount).toBe(1));
+  });
+
+  it('reads the folders from the builder define when bundled', () => {
+    globalThis.__NUTIN_MARKDOWN_SOURCES__ = JSON.stringify(['guides', { folder: 'content/api-docs/', routePrefix: 'api', sectionInPath: true }]);
+    const manifests = freshManifests();
+    expect(manifests.ids).toEqual(['guides', 'api']);
+    expect(manifests.get('api').sectionInPath).toBe(true);
+  });
+
+  it('has no manifests without "markdownSources", and says so for an unknown id', () => {
+    const saved = distConfig.markdownSources;
+    delete distConfig.markdownSources;
+    try {
+      const manifests = freshManifests();
+      expect(manifests.ids).toEqual([]);
+      expect(manifests.all).toEqual([]);
+      expect(() => manifests.get('docs')).toThrow('known: none');
+    } finally {
+      distConfig.markdownSources = saved;
+    }
+  });
+});

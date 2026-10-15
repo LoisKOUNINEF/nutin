@@ -5,6 +5,7 @@
 ```ts
 export class MyView extends View {
   constructor() {
+    super({ viewName: 'my-view' });
     this.listen('language-changed', () => console.log('language changed'));
     this.listenToRenderEvents(['language-changed']); // re-render whenever it fires
   }
@@ -30,4 +31,4 @@ AppEventBus.off('language-changed', callback); // omit callback to remove ALL ha
 
 - `subscribe`/`once` return `void`, not an unsubscribe function — to unsubscribe you must call `AppEventBus.off(event, callback)` yourself with the same callback reference. This is why `this.listen(...)` (which handles that bookkeeping for you) is preferred inside a component/view.
 
-See [How do I emit events?](./HOWDOI_EMIT_EVENTS.md) for adding your own typed events to `EventMap`.
+See [How do I emit events?](./HOWDOI_EMIT_EVENTS.md) for adding your own typed events to `Nutin.EventMap`.

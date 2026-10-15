@@ -1,10 +1,10 @@
 import { MockEventBus } from './mock-event-bus.js';
 
 describe('MockEventBus', () => {
-  it('on() + emit() dispatches the event data to the registered handler', () => {
+  it('subscribe() + emit() dispatches the event data to the subscribed callback', () => {
     const bus = new MockEventBus();
     let received;
-    bus.on('greet', (data) => { received = data; });
+    bus.subscribe('greet', (data) => { received = data; });
 
     bus.emit('greet', 'hello');
 
@@ -12,53 +12,61 @@ describe('MockEventBus', () => {
     expect(bus.emit.calls).toEqual([['greet', 'hello']]);
   });
 
-  it('on() is a trackable mock', () => {
+  it('subscribe() is a trackable mock', () => {
     const bus = new MockEventBus();
     const handler = () => {};
-    bus.on('greet', handler);
+    bus.subscribe('greet', handler);
 
-    expect(bus.on).toHaveBeenCalled();
-    expect(bus.on).toHaveBeenCalledWith('greet', handler);
+    expect(bus.subscribe).toHaveBeenCalledWith('greet', handler);
   });
 
-  it('off() removes a previously registered handler', () => {
+  it('once() callbacks run for the first emit only', () => {
     const bus = new MockEventBus();
     let callCount = 0;
-    const handler = () => { callCount++; };
-    bus.on('greet', handler);
+    bus.once('greet', () => { callCount++; });
+
+    bus.emit('greet');
+    bus.emit('greet');
+
+    expect(callCount).toBe(1);
+  });
+
+  it('off(event, callback) removes that callback only', () => {
+    const bus = new MockEventBus();
+    let removed = 0;
+    let kept = 0;
+    const handler = () => { removed++; };
+    bus.subscribe('greet', handler);
+    bus.subscribe('greet', () => { kept++; });
     bus.off('greet', handler);
 
     bus.emit('greet', 'hello');
 
-    expect(callCount).toBe(0);
+    expect(removed).toBe(0);
+    expect(kept).toBe(1);
   });
 
-  it('subscribe() is a bare mock and does not actually register a handler', () => {
+  it('off(event) removes every callback for that event', () => {
     const bus = new MockEventBus();
-    let called = false;
-    const handler = () => { called = true; };
-    bus.subscribe('greet', handler);
+    let callCount = 0;
+    bus.subscribe('greet', () => { callCount++; });
+    bus.off('greet');
 
-    bus.emit('greet', 'hello');
+    bus.emit('greet');
 
-    expect(called).toBeFalsy();
-    expect(bus.subscribe.calls.length).toBe(1);
-    expect(bus.subscribe.calls[0][0]).toBe('greet');
-    expect(bus.subscribe.calls[0][1]).toBe(handler);
+    expect(callCount).toBe(0);
   });
 
   it('reset() clears handlers and call logs', () => {
     const bus = new MockEventBus();
     let callCount = 0;
-    bus.on('greet', () => { callCount++; });
+    bus.subscribe('greet', () => { callCount++; });
     bus.emit('greet', 'x');
-    bus.subscribe('greet', () => {});
 
     bus.reset();
 
     expect(bus.emit.calls).toEqual([]);
     expect(bus.subscribe.calls).toEqual([]);
-    expect(bus.on.calls).toEqual([]);
 
     bus.emit('greet', 'y');
     expect(callCount).toBe(1); // only the pre-reset emit reached the handler

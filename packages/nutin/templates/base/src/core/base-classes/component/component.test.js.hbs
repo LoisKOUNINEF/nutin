@@ -1,5 +1,4 @@
 import { Component } from '#root/dist/src/core/index.js';
-import { DataBindingHelper } from '#root/dist/src/core/base-classes/component/helpers/data-binding.helper.js';
 
 class TestComponent extends Component {
   constructor(options = {}) {
@@ -44,6 +43,13 @@ describe('Component', () => {
     expect(component.getElement().classList.contains('highlight')).toBe(true);
   });
 
+  it('onBeforeRender applies a space-separated props.className as several classes', () => {
+    const component = new TestComponent({ props: { className: ' btn  primary ' } });
+    component.render();
+    expect(component.getElement().classList.contains('btn')).toBe(true);
+    expect(component.getElement().classList.contains('primary')).toBe(true);
+  });
+
   it('onBeforeRender applies props.style as cssText on render', () => {
     const component = new TestComponent({ props: { style: 'color: red;' } });
     component.render();
@@ -61,25 +67,19 @@ describe('Component', () => {
     expect(component.getElement().querySelector('span').textContent).toBe('Ada');
   });
 
-  it('onAfterRender calls DataBindingHelper.applyDataBindings with the element and props, after the template has been written', () => {
-    // onAfterRender runs after render() sets innerHTML from generateTemplate(),
-    // so the template's own [data-bind] nodes already exist by the time this fires.
-    const calls = [];
-    const spy = spyOn(DataBindingHelper, 'applyDataBindings');
-    spy.andCallFake((element, props) => {
-      calls.push({ props, htmlAtCallTime: element.innerHTML });
-    });
-
-    const component = new TestComponent({
+  it('applies data-bindings in onAfterRender, so a subclass sees them once it calls super', () => {
+    let seen = null;
+    class BoundComponent extends Component {
+      onAfterRender() {
+        super.onAfterRender();
+        seen = this.getElement().querySelector('span').textContent;
+      }
+    }
+    const component = new BoundComponent({
       templateFn: () => '<span data-bind="name"></span>',
       props: { name: 'Ada' },
     });
     component.render();
-
-    expect(calls.length).toBe(1);
-    expect(calls[0].props).toEqual({ name: 'Ada' });
-    expect(calls[0].htmlAtCallTime).toBe('<span data-bind="name"></span>');
-
-    spy.restore();
+    expect(seen).toBe('Ada');
   });
 });

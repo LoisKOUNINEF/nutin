@@ -10,8 +10,10 @@ npm run generate view views/task-catalog
 ## Render your tasks
 
 ```ts
-import { ComponentConfig, View } from '../../../core/index.js';
+import { View, html } from '../../../core/index.js';
 import { TaskCardComponent } from '../../components/task-card/task-card.component.js';
+
+const template = html`__TEMPLATE_PLACEHOLDER__`;
 
 export class TaskCatalogView extends View {
     private _tasks: ITask[] = [
@@ -23,13 +25,12 @@ export class TaskCatalogView extends View {
         {
             id: 2,
             name: 'Second task',
-            content: 'This is the second task.'
         }
     ];
 
     constructor() { /* ... */ }
 
-    registerChildren(): ComponentConfig[] {
+    registerChildren(): Nutin.ComponentConfig[] {
         // One TaskCardComponent is created for each task.
         return this.createCatalogComponents({
             items: this._tasks,
@@ -85,7 +86,7 @@ export class TaskCatalogView extends View {
 /* ... */
 import { TaskCatalogView } from './views/task-catalog/task-catalog.view.js';
 
-export const appRoutes: Routes = {
+export const appRoutes: Nutin.Routes = {
     // Make your new page the landing page
     '/': () => new TaskCatalogView(),
     /* ... */

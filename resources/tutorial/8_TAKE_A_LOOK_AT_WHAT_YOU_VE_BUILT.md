@@ -8,12 +8,13 @@ You built the application using:
 
 - **Components** to build reusable UI
 - **Views** to orchestrate each page
-- **Routes**, route parameters and navigation
+- **Routes**, route parameters, guards and navigation
 - **Services** to manage application data
 - **Events** to connect application behavior
 - **Lifecycle and rendering** to control when UI is created and destroyed
+- **Kept children** (`keepBy`, `keep`) to keep UI across re-renders
 
 ## Go further
 
-- See [Nutin documentation](https://nutin.org/docs/)
-- [Test your app](TEST_YOUR_APP.md) with testin-nutin
+- See [Nutin documentation](https://nutin.dev/docs/)
+- See how to [test your app with testin-nutin](TEST_YOUR_APP_WITH_TESTIN_NUTIN.md)

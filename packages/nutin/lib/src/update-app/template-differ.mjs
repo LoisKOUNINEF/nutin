@@ -11,8 +11,8 @@ function contentEquals(a, b) {
   return a === b;
 }
 
-// Paths the user is expected to hand-edit right after `create-app` — their generated
-// content is just placeholder/starter scaffolding, so nutin-update must never rewrite
+// Paths the user is expected to hand-edit right after `create-app`.
+// Their generated content is just placeholder/starter scaffolding, so nutin-update must never rewrite
 // or conflict-flag them.
 const FULLY_EXCLUDED_PATTERNS = [
   /^config\/[^/]+\.json$/,
@@ -21,7 +21,7 @@ const FULLY_EXCLUDED_PATTERNS = [
 ];
 
 // Like FULLY_EXCLUDED_PATTERNS, but only for files that already existed before this
-// update — a brand new file introduced by a newer template version should still be added.
+// update. A brand new file introduced by a newer template version should still be added.
 const ADD_ONLY_PATTERNS = [
   /^src\/styles(\/|$)/,
 ];
@@ -114,8 +114,8 @@ export class TemplateDiffer {
       if (contentEquals(actualContent, oldEntry.content)) {
         toUpdate.push({ relPath, newEntry });
       } else if (!contentEquals(actualContent, newEntry.content)) {
-        // Differs from both baselines — a real conflict.
-        conflicts.push({ relPath, actualContent, newEntry });
+        // Differs from both baselines: a real conflict, merged from the old baseline at apply time.
+        conflicts.push({ relPath, actualContent, baseContent: oldEntry.content, newEntry });
       }
     }
 

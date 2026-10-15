@@ -8,7 +8,7 @@ export function capitalized(input) {
   const formatted = input.replace(
     /\w*/g,
     function(txt) {
-      return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+      return txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase();
     }) 
   return formatted.replace(/,/g, '');
 }

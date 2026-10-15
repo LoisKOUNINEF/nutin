@@ -1,7 +1,7 @@
-import { AppEventBus, IEventBus } from "./event-bus.js";
+import { AppEventBus } from "./event-bus.js";
 
 class NavigationFacade {
-  constructor(private bus: IEventBus) {}
+  constructor(private bus: Nutin.EventBus) {}
 
   navigateTo(path: string): void {
     this.bus.emit('navigate', { path });
@@ -22,4 +22,4 @@ class NavigationFacade {
   }
 }
 
-export const Navigation = new NavigationFacade(AppEventBus);
+export const Navigation = /* @__PURE__ */ new NavigationFacade(AppEventBus);

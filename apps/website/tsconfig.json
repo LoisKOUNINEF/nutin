@@ -1,16 +1,16 @@
 {
   "compilerOptions": {
-    "baseUrl": "./",
-    "paths": {},
     "target": "ESNext",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "rootDir": "src",
     "outDir": "dist-build/src",
     "strict": true,
+    "removeComments": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "lib": [
@@ -29,7 +29,6 @@
     "src/libs"
   ],
   "exclude": [
-    "node_modules",
-    "src/app/views/tutorial/sections"
+    "node_modules"
   ]
 }

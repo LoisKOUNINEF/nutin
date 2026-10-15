@@ -1,35 +1,17 @@
-import { Routes } from "../core/index.js";
-import {
-  A11yElementsView,
-  ArticlesView,
-  ArticlesIndexView,
-  ChangelogView,
-  DocsView,
-  GuidesView,
-  HomeView,
-  NotFoundView,
-  TutorialView,
-  RoadmapView
-} from "./views/index.js";
-import {
-  ArticlesManifestService,
-  ChangelogManifestService,
-  DocsManifestService,
-  GuidesManifestService,
-  TutorialManifestService,
-  RoadmapManifestService
-} from "./services/index.js";
-import { Guards } from "./guards.js";
+import { HomeView } from './views/home/home.view.js';
+import { NotFoundView } from './views/not-found/not-found.view.js';
+import { markdownRoutes } from './markdown/markdown-routes.js';
 
-export const appRoutes: Routes = {
+// Home and 404 are in the main bundle; every other view is lazy (its own chunk, loaded on
+// the first visit). Views are imported by their own file, never through views/index.ts or
+// components/index.ts: a barrel would pull every view and component back into the bundle.
+export const appRoutes: Nutin.Routes = {
   '/': () => new HomeView(),
-  '/docs/:section?/:slug?': { view: () => new DocsView(), guards: [Guards.sectionPageExists(DocsManifestService, 'docs')] },
-  '/guides/:slug?': { view: () => new GuidesView(), guards: [Guards.resourcePageExists(GuidesManifestService)] },
-  '/tutorial/:slug?': { view: () => new TutorialView(), guards: [Guards.resourcePageExists(TutorialManifestService)] },
-  '/changelog/:slug?': { view: () => new ChangelogView(), guards: [Guards.resourcePageExists(ChangelogManifestService)] },
-  '/articles/:slug?': { view: () => new ArticlesView(), guards: [Guards.resourcePageExists(ArticlesManifestService)] },
-  '/articles-index': () => new ArticlesIndexView(),
-  '/a11y-elements/:page?': () => new A11yElementsView(),
-  '/roadmap/:slug?': { view: () => new RoadmapView(), guards: [Guards.resourcePageExists(RoadmapManifestService)] },
+  // docs, changelog, tutorial, articles, guides: see nutin.config.js "markdownSources".
+  ...markdownRoutes({
+    view: (id) => import('./views/markdown-page/markdown-page.view.js').then((m) => new m.MarkdownPageView(id)),
+  }),
+  '/articles-index': () => import('./views/articles-index/articles-index.view.js').then((m) => new m.ArticlesIndexView()),
+  '/a11y-elements/:page?': () => import('./views/a11y-elements/a11y-elements.view.js').then((m) => new m.A11yElementsView()),
   '/404': () => new NotFoundView(),
 }

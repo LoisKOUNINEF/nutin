@@ -39,4 +39,19 @@ describe('TaskCatalogView', () => {
 
     expect($('.task-inputs #name').value).toBe('Task 2');
   });
+
+  it('keeps unchanged cards and the form when it re-renders', () => {
+    view.setRouteParams({ id: '1' });
+    view.render();
+    const [firstCard, secondCard] = $$('.task-card');
+    const form = $('.task-inputs');
+
+    // What saving the form does: the task changes, then the view re-renders
+    taskService.updateTask({ id: 1, name: 'Renamed' });
+    view.render();
+
+    expect($$('.task-card')[0]).toBe(firstCard);
+    expect($$('.task-card')[1]).not.toBe(secondCard);
+    expect($('.task-inputs')).toBe(form);
+  });
 });

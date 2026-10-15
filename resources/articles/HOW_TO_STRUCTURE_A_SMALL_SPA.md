@@ -1,3 +1,7 @@
+---
+ogImage: /assets/images/og-covers/og-cover-articles.jpg
+---
+
 # How to Structure a Small SPA
 
 A small single-page application can stay surprisingly simple, but there is a point where simplicity starts working against you.
@@ -295,7 +299,7 @@ Nutin aims to support the application's architecture rather than become the arch
 
 Its tooling and framework code can be inspected and modified, and developers can bypass its abstractions when their application needs something different.
 
-For implementation details, see the relevant [Nutin documentation](https://nutin.org/docs) for Components, Views, Services, Routing, Lifecycle, Configuration, Testing, and Getting Started.
+For implementation details, see the relevant [Nutin documentation](https://nutin.dev/docs) for Components, Views, Services, Routing, Lifecycle, Configuration, Testing, and Getting Started.
 
 ## When is this architecture enough?
 
@@ -324,7 +328,7 @@ You may eventually reach a point where:
 
 At that point, introducing additional infrastructure or adopting a more opinionated framework may be more than reasonable.
 
-This is the same principle explored in [How much frontend framework do you actually need?](https://nutin.org/articles/how-much-frontend-framework-do-you-actually-need): **choose the amount of infrastructure that solves the problems you actually have**.
+This is the same principle explored in [How much frontend framework do you actually need?](https://nutin.dev/articles/how-much-frontend-framework-do-you-actually-need): **choose the amount of infrastructure that solves the problems you actually have**.
 
 ## Clear boundaries are more valuable than a perfect architecture
 

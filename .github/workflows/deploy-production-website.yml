@@ -16,7 +16,7 @@ jobs:
       SERVICE_NAME: "website"
       STACK_NAME: "production"
       CLIENT_PORT: "9090"
-      DOMAIN_NAME: "nutin.org"
+      DOMAIN_NAME: "nutin.dev"
     permissions:
       contents: read
       packages: read

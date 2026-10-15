@@ -4,11 +4,13 @@ We are going to build a basic CRUD application in the form of a to-do list.
 
 *Estimated time:* 15-20 minutes.
 
-- [See what you'll build](https://nutin-todo.nutin.org)
+- [See what you'll build](https://nutin-todo.nutin.dev)
 
 - [Refer to the full app code if you ever get lost](https://github.com/LoisKOUNINEF/nutin/tree/main/apps/tutorial)
 
 ## Install the CLI
+
+Nutin requires Node.js 24 or later.
 
 ```bash
 npm install -g @nutin/cli
@@ -36,6 +38,7 @@ src/
         |---- services/
         |---- views/
         |---- globals.d.ts
+        |---- guards.ts
         |---- main.ts
         |---- routes.ts
  |---- core     // Nutin source code
@@ -46,9 +49,9 @@ src/
 
 ### How the pieces fit together
 
-* Views **orchestrate**
-* Components **handle UI**
-* Services **hold data**
-* Events **connect** them
+* Views **orchestrate application flow**
+* Components **encapsulate UI behavior**
+* Services **handle application concerns**
+* Events **connect them**
 
 **[Next step →](2_BUILD_THE_UI_FOR_A_TASK.md)**

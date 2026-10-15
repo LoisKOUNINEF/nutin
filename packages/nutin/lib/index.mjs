@@ -1,10 +1,11 @@
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import { print, chalk } from './src/utils/print.mjs';
 import { newAppPrompt } from './src/create-app/new-app-prompt.mjs';
 import { createProject } from './src/create-app/project-generator.mjs';
 import { displaySuccessMessage } from './src/create-app/success-message.mjs';
 import { PACKAGE_VERSION } from './src/common/package-data.mjs';
 import { FEATURES, findFeatureByCli } from './src/common/feature-registry.mjs';
+import { PACKAGE_MANAGERS } from './src/common/package-json-helper.mjs';
 import { addFeatureToProject } from './src/add-feature/feature-adder.mjs';
 import { updateProject } from './src/update-app/project-updater.mjs';
 
@@ -15,7 +16,9 @@ export function createAppCommand(command) {
       helpWidth: 100
     })
     .argument('[projectName]', 'Name of the project')
-    .option('-pm, --package-manager <manager>', 'Specify package manager (npm, yarn, pnpm, bun)')
+    // Restricted to known managers: the value ends up in shell commands and package.json scripts.
+    .addOption(new Option('-p, --package-manager <manager>', 'Specify package manager').choices(PACKAGE_MANAGERS))
+    .option('--js-only', 'Generate a plain JavaScript project (no TypeScript)')
     .action(async (projectName, cliOptions) => {
       print.boldSuccess('\n🚀 Welcome to your new nutin app!\n');
       try {
@@ -68,6 +71,7 @@ export function updateAppCommand(command) {
     })
     .option('-y, --yes', 'Skip the confirmation prompt and apply safe updates immediately')
     .option('--from <path>', 'Use a local templates/ directory as the old baseline instead of fetching from npm')
+    .option('--allow-dirty', 'Update even with uncommitted changes or untracked files, or outside a git repository (the update then can\'t be undone with git)')
     .action(async (cliOptions) => {
       print.boldSuccess('🚀 nutin — update');
 

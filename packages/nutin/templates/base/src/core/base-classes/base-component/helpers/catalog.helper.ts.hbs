@@ -1,92 +1,62 @@
-import { Component, ComponentConfig, ComponentOptions } from "../../index.js";
+import type { KeepableComponentConfig } from './children.helper.js';
 
-export interface CatalogConfig extends ComponentOptions {
-  items: CatalogItemConfig[];
-  elementName: string;
-  elementTag?: keyof HTMLElementTagNameMap;
-  selector: string;
-  component: new (el: HTMLElement, data: any, props?: any) => Component;
-};
+export function generateCatalog(config: Nutin.CatalogConfig, scope: Element = document.documentElement): Nutin.ComponentConfig[] {
+  if (!config.items || config.items.length < 1) return [];
 
-export interface CatalogItemBase {
-  index: number;
+  const componentConfigs: Nutin.ComponentConfig[] = [];
+  const containers = scope.querySelectorAll(`[data-catalog="${config.selector}"]`);
+
+  containers.forEach((container) => {
+    if (!container || !(container instanceof HTMLElement)) return;
+    componentConfigs.push(...getComponentConfigItems(config, container))
+  })
+
+  return componentConfigs;
 }
 
-export type CatalogItemObject<T extends object> = T & CatalogItemBase;
-
-export interface CatalogItemPrimitive extends CatalogItemBase {
-  value: string | number | boolean | null | undefined;
+function getComponentConfigItems(config: Nutin.CatalogConfig, container: HTMLElement): Nutin.ComponentConfig[] {
+  container.innerHTML = '';
+  const componentConfigs: Nutin.ComponentConfig[] = [];
+  for (let i = 0; i < config.items.length; i++) {
+    createElements(i, config, container);
+    pushConfig(i, componentConfigs, config);
+  }
+  return componentConfigs;
 }
 
-export type CatalogItemConfig<T = any> =
-  T extends object ? CatalogItemObject<T> : CatalogItemPrimitive;
+function createElements(index: number, config: Nutin.CatalogConfig, container: HTMLElement): void {
+  const wrapper = document.createElement(config.elementTag || 'div');
+  const el = document.createElement('div');
+  wrapper.appendChild(el);
+  el.setAttribute('data-component', `${config.elementName}-${index}`);
+  wrapper.dataset.index = String(index);
+  container?.appendChild(wrapper);
+}
 
-/**
- * ```typescript
-interface CatalogConfig extends ComponentOptions {
-  items: CatalogItemConfig[];
-  elementName: string;
-  elementTag?: keyof HTMLElementTagNameMap;
-  selector: string;
-  component: new (el: HTMLElement, data: any) => Component;
-};
+function pushConfig(index: number, componentConfigs: Nutin.ComponentConfig[], config: Nutin.CatalogConfig): void {
+  const configWithIndex = getConfigWithIndex(config, index)
 
-type CatalogItemConfig<T = any> =
-  T extends object ? CatalogItemObject<T> : CatalogItemPrimitive;
-  ```
-*/
-export class CatalogHelper {
-  public static generateCatalog(config: CatalogConfig, scope: Element = document.documentElement): ComponentConfig[] {
-    if (!config.items || config.items.length < 1) return [];
+  const { props, defaults } = config;
+  const options = { ...props, ...defaults };
 
-    const componentConfigs: ComponentConfig[] = [];
-    const containers = scope.querySelectorAll(`[data-catalog="${config.selector}"]`);
+  const componentConfig: KeepableComponentConfig = {
+    selector: `${config.elementName}-${index}`,
+    factory: (el) => new config.component(el, configWithIndex, options),
+  };
 
-    containers.forEach((container) => {
-      if (!container || !(container instanceof HTMLElement)) return;
-      componentConfigs.push(...this.getComponentConfigItems(config, container))
-    })
-
-    return componentConfigs;
-  }
-
-  private static getComponentConfigItems(config: CatalogConfig, container: HTMLElement): ComponentConfig[] {
-    container.innerHTML = '';
-    const componentConfigs: ComponentConfig[] = [];
-    for (let i = 0; i < config.items.length; i++) {
-      this.createElements(i, config, container);
-      this.pushConfig(i, componentConfigs, config);
-    }
-    return componentConfigs;
-  }
-
-  private static createElements(index: number, config: CatalogConfig, container: HTMLElement): void {
-    const wrapper = document.createElement(config.elementTag || 'div');
-    const el = document.createElement('div');
-    wrapper.appendChild(el);
-    el.setAttribute('data-component', `${config.elementName}-${index}`);
-    wrapper.dataset.index = String(index);
-    container?.appendChild(wrapper);
-  }
-
-  private static pushConfig(index: number, componentConfigs: ComponentConfig[], config: CatalogConfig): void {
-    const configWithIndex = this.getConfigWithIndex(config, index)
-
-    const { props, defaults, normalizeKeys } = config;
-    const options = { ...props, ...defaults, ...normalizeKeys };
-
-    componentConfigs.push(
-      { 
-        selector: `${config.elementName}-${index}`,
-        factory: (el) => new config.component(el, configWithIndex, options),
-      },
-    )
-  }
-
-  private static getConfigWithIndex(config: CatalogConfig, index: number): CatalogItemConfig {
+  if (config.keepBy) {
     const item = config.items[index];
-    return (item && typeof item === 'object')
-      ? { ...(item as object), index: index }
-      : { value: item, index: index };    
+    componentConfig.keep = config.keepBy(item, index);
+    componentConfig.scope = `catalog:${config.selector}:${config.elementName}`;
+    componentConfig.keepIf = { item, options, component: config.component };
   }
+
+  componentConfigs.push(componentConfig);
+}
+
+function getConfigWithIndex(config: Nutin.CatalogConfig, index: number): Nutin.CatalogItemConfig {
+  const item = config.items[index];
+  return (item && typeof item === 'object')
+    ? { ...(item as object), index: index }
+    : { value: item, index: index };    
 }

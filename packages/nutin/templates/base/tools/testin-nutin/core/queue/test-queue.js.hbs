@@ -20,7 +20,6 @@ export function addTest(test) {
 
 export async function runQueuedTests() {
   printStart();
-  const startTime = performance.now();
   const testAmount = testQueue.length;
   const results = [];
   let previousSuiteKey = null;
@@ -70,10 +69,10 @@ export async function runQueuedTests() {
 
       previousSuiteKey = suiteKey(test);
       previousSuite = test.suiteName;
-      previousSuiteAfterAll = test.afterAll;
-      if (test.beforeAll) {
+      previousSuiteAfterAll = test.hooks?.afterAll;
+      if (test.hooks?.beforeAll) {
         try {
-          await test.beforeAll();
+          await test.hooks.beforeAll();
         } catch (err) {
           failed++;
           results.push({
@@ -99,7 +98,7 @@ export async function runQueuedTests() {
 
     let testError = null;
     try {
-      if (test.beforeEach) await test.beforeEach();
+      if (test.hooks?.beforeEach) await test.hooks.beforeEach();
       await test.testFn();
     } catch (err) {
       testError = err;
@@ -107,7 +106,7 @@ export async function runQueuedTests() {
 
     let afterEachError = null;
     try {
-      if (test.afterEach) await test.afterEach();
+      if (test.hooks?.afterEach) await test.hooks.afterEach();
     } catch (err) {
       afterEachError = err;
     }
@@ -145,8 +144,9 @@ export async function runQueuedTests() {
     teardownJsdom();
   }
 
-  const endTime = performance.now();
-  elapsedTime = (endTime - startTime);
+  // Since the process started (performance's time origin): Node startup, discovery and
+  // the test files' imports count too, not only running the queued tests.
+  elapsedTime = performance.now();
   printResults(results);
   printSummary(todo, passed, failed, elapsedTime);
 

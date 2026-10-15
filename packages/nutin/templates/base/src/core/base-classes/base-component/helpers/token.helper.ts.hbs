@@ -1,19 +1,24 @@
-import { SecurityHelper } from './security.helper.js';
+// Tokens resolve to raw values: escaping happens at output, in html`` templates.
+function readInputValue(el: HTMLElement): string {
+  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return el.value;
+  if (el.hasAttribute('contenteditable')) return el.innerText;
+  return '';
+}
 
 // Exact token resolvers
 const EXACT_TOKEN_RESOLVERS: Record<string, (el: HTMLElement, ev: Event) => any> = {
-  '@id': (el) => SecurityHelper.escapeHtml(el.id),
-  '@class': (el) => SecurityHelper.escapeHtml(el.className),
-  '@name': (el) => SecurityHelper.escapeHtml((el as any).name ?? ''),
-  '@tag': (el) => SecurityHelper.escapeHtml(el.tagName),
+  '@id': (el) => el.id,
+  '@class': (el) => el.className,
+  '@name': (el) => (el as any).name ?? '',
+  '@tag': (el) => el.tagName,
 
-  '@value': (el) => SecurityHelper.sanitizeInputElement(el as any),
+  '@value': (el) => readInputValue(el),
   '@checked': (el) => (el as HTMLInputElement).checked,
   '@selected': (el) => (el as HTMLOptionElement).selected,
 
-  '@textContent': (el) => SecurityHelper.escapeHtml(el.textContent ?? ''),
-  '@innerText': (el) => SecurityHelper.escapeHtml(el.innerText ?? ''),
-  '@html': (el) => SecurityHelper.escapeHtml(el.innerHTML ?? ''),
+  '@textContent': (el) => el.textContent ?? '',
+  '@innerText': (el) => el.innerText ?? '',
+  '@html': (el) => el.innerHTML ?? '',
 
   '@event': (_el, ev) => ev,
   '@target': (_el, ev) => ev.target,
@@ -21,79 +26,76 @@ const EXACT_TOKEN_RESOLVERS: Record<string, (el: HTMLElement, ev: Event) => any>
   '@x': (_el, ev) => (ev as MouseEvent).clientX ?? 0,
   '@y': (_el, ev) => (ev as MouseEvent).clientY ?? 0,
 
-  '@key': (_el, ev) => SecurityHelper.escapeHtml((ev as KeyboardEvent).key ?? ''),
-  '@code': (_el, ev) => SecurityHelper.escapeHtml((ev as KeyboardEvent).code ?? ''),
+  '@key': (_el, ev) => (ev as KeyboardEvent).key ?? '',
+  '@code': (_el, ev) => (ev as KeyboardEvent).code ?? '',
 };
 
 // Prefix-based token resolvers
 const PREFIXED_TOKEN_RESOLVERS: Record<string, (suffix: string, el: HTMLElement) => any> = {
-  '@attr:': (suffix, el) => SecurityHelper.escapeHtml(el.getAttribute(suffix) ?? ''),
-  '@dataset:': (suffix, el) => SecurityHelper.escapeHtml((el.dataset as any)[suffix] ?? ''),
+  '@attr:': (suffix, el) => el.getAttribute(suffix) ?? '',
+  '@dataset:': (suffix, el) => (el.dataset as any)[suffix] ?? '',
 };
 
-export class TokenHelper {
-  private static customResolvers: Record<string, (el: HTMLElement, ev: Event) => any> = {};
+const customResolvers: Record<string, (el: HTMLElement, ev: Event) => any> = {};
 
-  public static resolve(token: string, el: Element, event: Event): any {
-    const htmlEl = el as HTMLElement;
-    event.preventDefault();
+export function resolve(token: string, el: Element, event: Event): any {
+  const htmlEl = el as HTMLElement;
 
-    return (
-      this.resolveExact(token, htmlEl, event) ??
-      this.resolvePrefixed(token, htmlEl) ??
-      this.resolveCustom(token, htmlEl, event) ??
-      this.resolveLiteral(token) ??
-      token
-    );
-  }
+  return (
+    resolveExact(token, htmlEl, event) ??
+    resolvePrefixed(token, htmlEl) ??
+    resolveCustom(token, htmlEl, event) ??
+    resolveLiteral(token) ??
+    token
+  );
+}
 
 /** Register a new exact token like "@foo" */
-  public static registerCustomToken(
-    name: string,
-    resolver: (el: HTMLElement, ev: Event) => any
-  ): void {
-    this.customResolvers[name] = resolver;
-  }
+export function registerCustomToken(
+  name: string,
+  resolver: (el: HTMLElement, ev: Event) => any
+): void {
+  customResolvers[name] = resolver;
+}
 
 /** Register a new prefixed token like "@style:" */
-  public static registerPrefixedToken(
-    prefix: string,
-    resolver: (suffix: string, el: HTMLElement) => any
-  ): void {
-    PREFIXED_TOKEN_RESOLVERS[prefix] = resolver;
-  }
+export function registerPrefixedToken(
+  prefix: string,
+  resolver: (suffix: string, el: HTMLElement) => any
+): void {
+  PREFIXED_TOKEN_RESOLVERS[prefix] = resolver;
+}
 
-  private static resolveExact(token: string, el: HTMLElement, ev: Event): any | null {
-    const resolver = EXACT_TOKEN_RESOLVERS[token];
-    return resolver ? resolver(el, ev) : null;
-  }
+function resolveExact(token: string, el: HTMLElement, ev: Event): any | null {
+  const resolver = EXACT_TOKEN_RESOLVERS[token];
+  return resolver ? resolver(el, ev) : null;
+}
 
-  private static resolvePrefixed(token: string, el: HTMLElement): any | null {
-    for (const [prefix, resolver] of Object.entries(PREFIXED_TOKEN_RESOLVERS)) {
-      if (token.startsWith(prefix)) {
-        return resolver(token.slice(prefix.length), el);
-      }
+function resolvePrefixed(token: string, el: HTMLElement): any | null {
+  for (const [prefix, resolver] of Object.entries(PREFIXED_TOKEN_RESOLVERS)) {
+    if (token.startsWith(prefix)) {
+      return resolver(token.slice(prefix.length), el);
     }
-    return null;
   }
+  return null;
+}
 
-  private static resolveCustom(token: string, el: HTMLElement, ev: Event): any | null {
-    const resolver = this.customResolvers[token];
-    return resolver ? resolver(el, ev) : null;
-  }
+function resolveCustom(token: string, el: HTMLElement, ev: Event): any | null {
+  const resolver = customResolvers[token];
+  return resolver ? resolver(el, ev) : null;
+}
 
-  private static resolveLiteral(token: string): any | null {
-    // string literal
-    if (
-      (token.startsWith('"') && token.endsWith('"')) ||
-      (token.startsWith("'") && token.endsWith("'"))
-    ) {
-      return token.slice(1, -1);
-    }
-    // number literal
-    if (!isNaN(Number(token))) {
-      return Number(token);
-    }
-    return null;
+function resolveLiteral(token: string): any | null {
+  // string literal
+  if (
+    (token.startsWith('"') && token.endsWith('"')) ||
+    (token.startsWith("'") && token.endsWith("'"))
+  ) {
+    return token.slice(1, -1);
   }
+  // number literal
+  if (!isNaN(Number(token))) {
+    return Number(token);
+  }
+  return null;
 }

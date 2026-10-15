@@ -1,24 +1,65 @@
 import { MockI18n } from './mock-i18n.js';
 
 describe('MockI18n', () => {
-  it('exposes the constructor defaults via currentLanguage', () => {
+  it('exposes the constructor defaults via the language getters', () => {
     const i18n = new MockI18n('fr', ['en', 'fr']);
+
     expect(i18n.currentLanguage).toBe('fr');
+    expect(i18n.defaultLanguage).toBe('fr');
+    expect(i18n.languages).toEqual(['en', 'fr']);
   });
 
-  it('translate/getBrowserLanguage run their built-in default implementation without needing .mockImplementation', () => {
+  it('translate() falls back to textContent, then to the key itself', () => {
     const i18n = new MockI18n();
 
-    // No translations set — translate() falls back to returning the key itself.
+    expect(i18n.translate('some.key', 'Fallback text')).toBe('Fallback text');
     expect(i18n.translate('some.key')).toBe('some.key');
-    expect(i18n.getBrowserLanguage()).toBe('en');
   });
 
-  it('loadTranslations/initTranslations run their default implementation and update currentLanguage', async () => {
-    const i18n = new MockI18n('en', ['en', 'fr']);
+  it('translate() resolves nested dot keys from setTranslations()', () => {
+    const i18n = new MockI18n();
+    i18n.setTranslations({ home: { title: 'Home' } });
 
+    expect(i18n.translate('home.title')).toBe('Home');
+  });
+
+  it('translate() falls back to the default-language translations off the default language', async () => {
+    const i18n = new MockI18n('en', ['en', 'fr']);
+    i18n.setDefaultTranslations({ greeting: 'Hello' });
     await i18n.loadTranslations('fr');
+
+    expect(i18n.translate('greeting')).toBe('Hello');
+  });
+
+  it('getTranslationObject() returns the nested value, or null', () => {
+    const i18n = new MockI18n();
+    i18n.setTranslations({ nav: { home: 'Home', about: 'About' } });
+
+    expect(i18n.getTranslationObject('nav')).toEqual({ home: 'Home', about: 'About' });
+    expect(i18n.getTranslationObject('missing')).toBe(null);
+  });
+
+  it('setCurrentLanguage() updates currentLanguage and notifies onLanguageChange() callbacks', async () => {
+    const i18n = new MockI18n('en', ['en', 'fr']);
+    let payload;
+    i18n.onLanguageChange((data) => { payload = data; });
+
+    await i18n.setCurrentLanguage('fr');
+
     expect(i18n.currentLanguage).toBe('fr');
+    expect(payload).toEqual({ lang: 'fr' });
+    expect(i18n.setCurrentLanguage).toHaveBeenCalledWith('fr');
+  });
+
+  it('onLanguageChange() returns a function that stops further notifications', async () => {
+    const i18n = new MockI18n('en', ['en', 'fr']);
+    let calls = 0;
+    const unsubscribe = i18n.onLanguageChange(() => { calls++; });
+    unsubscribe();
+
+    await i18n.setCurrentLanguage('fr');
+
+    expect(calls).toBe(0);
   });
 
   it('translate is still trackable as a mock alongside its default implementation', () => {
@@ -28,30 +69,10 @@ describe('MockI18n', () => {
     expect(i18n.translate).toHaveBeenCalledWith('some.key');
   });
 
-  it('translate can be given real interpolation behavior via .mockImplementation', () => {
-    const i18n = new MockI18n();
-    i18n.setTranslations({ greeting: 'Hello {name}' });
-    i18n.translate.mockImplementation((key, params) => {
-      const value = i18n._translations[key] || key;
-      if (!params) return value;
-      return Object.entries(params).reduce((acc, [k, v]) => acc.replace(`{${k}}`, v), value);
-    });
-
-    expect(i18n.translate('greeting', { name: 'Ada' })).toBe('Hello Ada');
-  });
-
-  it('setTranslations/setDefaultTranslations seed real, readable state', () => {
-    const i18n = new MockI18n();
+  it('reset() restores the constructor default language and clears translations', async () => {
+    const i18n = new MockI18n('en', ['en', 'fr']);
     i18n.setTranslations({ a: '1' });
-    i18n.setDefaultTranslations({ b: '2' });
-
-    expect(i18n._translations).toEqual({ a: '1' });
-    expect(i18n._defaultTranslations).toEqual({ b: '2' });
-  });
-
-  it('reset() restores the constructor default language and clears translations', () => {
-    const i18n = new MockI18n('en');
-    i18n.setTranslations({ a: '1' });
+    await i18n.setCurrentLanguage('fr');
 
     i18n.reset();
 

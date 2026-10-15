@@ -94,4 +94,10 @@ describe('assertions', () => {
     }
     expect(caught).toBeInstanceOf(TypeError);
   });
+  it('toBeLessThan / toBeGreaterThan are strict comparisons', () => {
+    expect(1).toBeLessThan(2);
+    expect(2).toBeGreaterThan(1);
+    expect(2).not.toBeLessThan(2);
+    expect(2).not.toBeGreaterThan(2);
+  });
 });

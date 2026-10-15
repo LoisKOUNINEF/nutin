@@ -1,6 +1,6 @@
 # 6. Make tasks disappear
 
-## Let the service remove tasks
+## Let the service delete tasks
 
 ```ts
 export class TaskService extends Service<TaskService> {
@@ -22,14 +22,14 @@ npm run generate component components/task-action
 ## Pass configuration to the component
 
 ```ts
-import { Component, ComponentProps } from '../../../core/index.js';
+import { Component, html } from '../../../core/index.js';
 
 export interface ITaskActionConfig {
     callback: () => void;
     textContent: string;
 }
 
-const templateFn = (config: ITaskActionConfig) => `__TEMPLATE_PLACEHOLDER__`;
+const templateFn = (config: ITaskActionConfig) => html`__TEMPLATE_PLACEHOLDER__`;
 
 export class TaskActionComponent extends Component {
     private _callback: () => void;
@@ -37,7 +37,7 @@ export class TaskActionComponent extends Component {
     constructor(
         mountTarget: HTMLElement,
         config: ITaskActionConfig,
-        props: ComponentProps = { /* className: '', style: '' */ },
+        props: Nutin.ComponentProps = { /* className: '', style: '' */ },
     ) {
         super({ templateFn, mountTarget, config, props });
         this._callback = config.callback;
@@ -74,14 +74,13 @@ export class TaskActionComponent extends Component {
 
 ```ts
 /* ... */
-import { ComponentConfig } from '../../../core/index.js';
 import { taskService } from '../../services/task/task.service.js';
 import { TaskActionComponent } from '../task-action/task-action.component.js';
 
 export class TaskCardComponent extends Component {
     constructor(mountTarget: HTMLElement, config: ITask) { /* ... */ }
 
-    registerChildren(): ComponentConfig[] {
+    registerChildren(): Nutin.ComponentConfig[] {
         return [
             {
                 selector: 'remove',

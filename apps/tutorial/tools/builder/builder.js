@@ -13,14 +13,19 @@ const scriptsDir = path.join(process.cwd(), 'tools', 'builder', 'core');
 
 print.boldHead(`\nStarting build...`);
 
+// runScript forwards env vars but not argv, so -y/--yes (auto-install an opt-in
+// feature's missing dependencies, see utils/ensure-deps.js) is passed through the env.
+if (process.argv.includes('-y') || process.argv.includes('--yes')) process.env.NUTIN_ASSUME_YES = '1';
+
 runScript(path.join(scriptsDir, 'app', 'copy-static.js'), 'Copying files...');
 
 runScript(path.join(scriptsDir, 'html-index', 'validate-html.js'), 'Processing index.html...');
 runScript(path.join(scriptsDir, 'app', 'validate-routes.js'), 'Validating app routes...');
 
-runScript(path.join(scriptsDir, 'app', 'compile-ts.js'), 'Compiling TypeScript...');
-
 runScript(path.join(scriptsDir, 'html-templates', 'process-html-templates.js'), 'Processing HTML templates...');
+// After the templates are merged, so they're type-checked too.
+runScript(path.join(scriptsDir, 'app', 'compile-ts.js'), 'Compiling TypeScript...');
+runScript(path.join(scriptsDir, 'html-templates', 'minify-templates.js'), 'Minifying HTML templates...');
 
 runScript(path.join(scriptsDir, 'styles', 'sass.js'), 'Compiling styles...');
 if (builderConfig.tailwind) runScript(path.join(scriptsDir, 'styles', 'tailwind.js'), 'Compiling Tailwind CSS...');
@@ -30,12 +35,13 @@ if (builderConfig.i18n) runScript(path.join(scriptsDir, 'i18n', 'build-i18n.js')
 runScript(path.join(scriptsDir, 'prod-bundle', 'esbuild.js'), 'Running esbuild...');
 
 if (builderConfig.isProd) {
-	runScript(path.join(scriptsDir, 'prod-bundle', 'hash-files.js'), 'Hashing files...');
-	runScript(path.join(scriptsDir, 'prod-bundle', 'compress-files.js'), 'Compressing files...');
-	if (builderConfig.generateSEO) runScript(path.join(scriptsDir, 'seo', 'generate-seo-files.js'), 'Generating SEO Files...');
+  runScript(path.join(scriptsDir, 'prod-bundle', 'hash-files.js'), 'Hashing files...');
+  if (builderConfig.generateSEO) runScript(path.join(scriptsDir, 'seo', 'generate-seo-files.js'), 'Generating SEO Files...');
+  // Last, so the prerendered SEO pages, sitemap.xml and robots.txt get compressed too.
+  runScript(path.join(scriptsDir, 'prod-bundle', 'compress-files.js'), 'Compressing files...');
 }
 
-runScript(path.join(scriptsDir, 'finalize-build.js'), 'Finalizing build...')
+runScript(path.join(scriptsDir, 'finalize-build.js'), 'Finalizing build...');
 
 print.boldSuccess(`\nBuild successful!\n`);
 

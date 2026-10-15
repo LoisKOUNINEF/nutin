@@ -76,26 +76,24 @@
     }
 }
 
-.home__catchphrase {
-    max-width: 60ch;
-    color: var(--primary);
-    font-size: map.get($font-sizes, 'largest');
-    font-weight: bold;
-    padding-bottom: map.get($spacings, small);
+.home__catchphrase-container {
     padding-top: map.get($spacings, small);
+    max-width: 90ch;
     @include mixins.respond-to(medium) {
-    width: 100%;
+        width: 100%;
         // font-size: map.get($font-sizes, 'large');
     }
 }
 
+.home__catchphrase {
+    color: var(--primary);
+    font-size: map.get($font-sizes, 'largest');
+    font-weight: bold;
+}
+
 .home__subcatchphrase {
-    max-width: 60ch;
     font-size: map.get($font-sizes, 'largest');
     color: var(--secondary);
-    @include mixins.respond-to(medium) {
-    width: 100%;
-    }
 }
 
 .home__section-header {
@@ -160,6 +158,52 @@
     font-size: map.get($font-sizes, 'large');
     padding-top: map.get($spacings, 'large');
     min-width: 100%;
+    // Overrides for prism-tomorrow's dark-theme token colours
+    .token.comment {
+        color: var(--disabled-text);
+    }
+    .token.punctuation,
+    .token.operator {
+        color: var(--text-muted);
+    }
+    .token.entity,
+    .token.url,
+    .token.attr-value,
+    .token.string,
+    .token.char,
+    .token.regex,
+    .token.variable,
+    .token.inserted {
+        color: var(--text);
+    }
+    .token.tag,
+    .token.namespace,
+    .token.deleted,
+    .token.class-name {
+        color: var(--error);
+    }
+    .token.attr-name,
+    .token.constant,
+    .token.property,
+    .token.symbol,
+    .token.function,
+    .token.function-name,
+    .token.boolean,
+    .token.number {
+        color: var(--info);
+    } 
+    .token.keyword,
+    .token.atrule,
+    .token.builtin,
+    .token.selector,
+    .token.important {
+        color: var(--warning);
+    }
+
+    // Bash snippets stay plain text (comments excepted)
+    .language-bash .token:not(.comment) {
+        color: var(--text);
+    }
     .snippet__code {
         max-width: 100ch;
         @include mixins.respond-to(medium) {
@@ -178,6 +222,9 @@
         font-size: map.get($font-sizes, 'medium');
         code {
             color: var(--primary);
+        }
+        code.language-bash {
+            color: var(--text);
         }
         @include mixins.respond-to(medium) {
             padding-left: map.get($spacings, 'small');
@@ -200,9 +247,6 @@
             svg {
             scale: 1.1;
             }
-        }
-        &:focus-visible {
-            outline: 2px solid var(--primary);
         }
     }
     .card-title {

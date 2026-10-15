@@ -29,9 +29,9 @@ Container port(s) are configured via `nutin.config.js`'s `dockerPorts` (`number[
 export default {
   tailwind: false,
   i18n: false,
-  inlineTemplates: false,
-
   generateSEOFiles: false,
+
+  // Nutin features
   dockerPorts: [9090],
 }
 ```
@@ -71,11 +71,15 @@ RUN apk add --no-cache nginx nginx-mod-http-brotli
 - Includes an optional container healthcheck
 - Exposes ports for reverse proxies
 
+If the [Markdown feature](./HOWDOI_USE_MARKDOWN_FEATURE.md) is added, every folder listed in `markdownSources.sourceFolders` is copied into the build stage. These folders must be inside the project: `docker:build` fails with a clear error otherwise.
+
 ## Nginx config
 
 **This Nginx config assumes the use of a reverse proxy**, so it:
 - uses non-standard port(s), configurable via `nutin.config.js`'s top-level `dockerPorts` (see [Configure ports](#configure-ports) above).
 - does not include `add_header Strict-Transport-Security  "max-age=63072000" always;`. Add it here only if Nginx is exposed directly over HTTPS.
+
+With `i18n: true`, it also 301-redirects `/` and any unprefixed path without an extension (`/docs` → `/en/docs`) to the default language, so an old or external link never gets a duplicate SPA shell. Files (`/robots.txt`, assets) and `/health` aren't redirected.
 
 ### Adding origins in CSP map
 
@@ -86,8 +90,8 @@ If you want to add scripts, styles or other external resources, you'll have to a
 
 map $uri $csp_policy {
     default "default-src 'self'; 
-    script-src 'self' https://cdn.jsdelivr.net/npm/a11y-elements@0.2.0/; 
-    style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net/npm/a11y-elements@0.2.0/; 
+    script-src 'self' https://cdn.jsdelivr.net/npm/a11y-elements@0.4.0/; 
+    style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net/npm/a11y-elements@0.4.0/; 
     img-src 'self' data: https:; 
     font-src 'self'; 
     # ...
@@ -98,7 +102,7 @@ map $uri $csp_policy {
 
 Gzip is globally enabled.
 
-```
+```text
 gzip on # enables gzip compression for responses
 gzip_static on # serves .gz files if present
 gzip_proxied any # makes gzip work through a proxy
@@ -110,7 +114,7 @@ gzip_proxied any # makes gzip work through a proxy
 
 Brotli is globally enabled.
 
-```
+```text
 brotli on; # compresses anything not precompressed
 brotli_static on; # serves .br files if present
 ```

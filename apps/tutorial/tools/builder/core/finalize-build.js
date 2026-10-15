@@ -5,9 +5,15 @@ import { builderConfig } from '../builder.config.js';
 import { print, errorExit } from "../../utils/index.js";
 
 function finalizeBuild() {
+  removeBuildFiles();
   if (builderConfig.isProd) removeFoldersAfterBundle();
   if (builderConfig.isProd) removeNutinConfig();
   replaceDir(PATHS.temp, PATHS.build);
+}
+
+// Only used during the build: compile-ts's tsconfig and merge-templates' template map.
+function removeBuildFiles() {
+  ['tsconfig.json', '.template-map.json'].forEach((file) => fs.rmSync(path.join(PATHS.temp, file), { force: true }));
 }
 
 function removeFoldersAfterBundle() {

@@ -1,5 +1,7 @@
-import { I18nHelper } from '#root/dist/src/core/base-classes/base-component/helpers/i18n.helper.js';
+import * as I18nHelper from '#root/dist/src/core/base-classes/base-component/helpers/i18n.helper.js';
 import { I18nService } from '#root/dist/src/core/services/index.js';
+import { CONFIG } from '#root/dist/src/core/config.js';
+import * as DomHelper from '#root/dist/src/core/base-classes/base-component/helpers/dom.helper.js';
 
 describe('I18nHelper', () => {
   let container;
@@ -9,9 +11,11 @@ describe('I18nHelper', () => {
     container = document.createElement('div');
     document.body.appendChild(container);
     originalTranslate = I18nService.translate;
+    CONFIG.i18n = true;
   });
 
   afterEach(() => {
+    CONFIG.i18n = false;
     I18nService.translate = originalTranslate;
     container.remove();
     container = null;
@@ -58,5 +62,70 @@ describe('I18nHelper', () => {
     const spans = container.querySelectorAll('span');
     expect(spans[0].textContent).toBe('[a]');
     expect(spans[1].textContent).toBe('[b]');
+  });
+
+  it('keeps the element text, or falls back to the key, without calling I18nService when i18n is disabled', () => {
+    CONFIG.i18n = false;
+    let called = false;
+    I18nService.translate = () => { called = true; return 'translated'; };
+    container.innerHTML = '<span data-i18n="a">kept</span><span data-i18n="b"></span><input data-i18n="c">';
+
+    I18nHelper.parseI18nAttributes(container);
+
+    const spans = container.querySelectorAll('span');
+    expect(called).toBeFalsy();
+    expect(spans[0].textContent).toBe('kept');
+    expect(spans[1].textContent).toBe('b');
+    expect(container.querySelector('input').placeholder).toBe('c');
+  });
+
+  it('skips elements inside a nested component root, which translates its own content', () => {
+    I18nService.translate = (key) => `[${key}]`;
+    container.innerHTML = '<span class="own" data-i18n="a"></span><div class="child"><span class="nested" data-i18n="b">b</span></div>';
+    DomHelper.markComponentRoot(container.querySelector('.child'));
+
+    I18nHelper.parseI18nAttributes(container);
+
+    expect(container.querySelector('.own').textContent).toBe('[a]');
+    expect(container.querySelector('.nested').textContent).toBe('b');
+  });
+  it('prefixes root-relative links with the current language and a trailing slash, keeping query and hash', () => {
+    const lang = I18nService.currentLanguage;
+    container.innerHTML = '<a class="a" href="/docs"></a><a class="b" href="/"></a><a class="c" href="/docs/api?x=1#h"></a><a class="d" href="/docs/#h"></a>';
+
+    I18nHelper.parseI18nAttributes(container);
+
+    expect(container.querySelector('.a').getAttribute('href')).toBe(`/${lang}/docs/`);
+    expect(container.querySelector('.b').getAttribute('href')).toBe(`/${lang}/`);
+    expect(container.querySelector('.c').getAttribute('href')).toBe(`/${lang}/docs/api/?x=1#h`);
+    expect(container.querySelector('.d').getAttribute('href')).toBe(`/${lang}/docs/#h`);
+  });
+
+  it('leaves localized, external, protocol-relative, relative, hash, mailto and file links untouched', () => {
+    const lang = I18nService.currentLanguage;
+    const hrefs = [`/${lang}/docs`, `/${lang}`, 'https://example.com/docs', '//example.com/docs', 'docs', '#top', 'mailto:a@b.c', '/favicon.ico', '/files/guide.pdf?v=2'];
+    container.innerHTML = hrefs.map((href) => `<a href="${href}"></a>`).join('');
+
+    I18nHelper.parseI18nAttributes(container);
+
+    expect([...container.querySelectorAll('a')].map((a) => a.getAttribute('href'))).toEqual(hrefs);
+  });
+
+  it('leaves links inside a nested component root, which localizes its own', () => {
+    container.innerHTML = '<div class="child"><a href="/docs"></a></div>';
+    DomHelper.markComponentRoot(container.querySelector('.child'));
+
+    I18nHelper.parseI18nAttributes(container);
+
+    expect(container.querySelector('a').getAttribute('href')).toBe('/docs');
+  });
+
+  it('leaves links untouched when i18n is disabled', () => {
+    CONFIG.i18n = false;
+    container.innerHTML = '<a href="/docs"></a>';
+
+    I18nHelper.parseI18nAttributes(container);
+
+    expect(container.querySelector('a').getAttribute('href')).toBe('/docs');
   });
 });

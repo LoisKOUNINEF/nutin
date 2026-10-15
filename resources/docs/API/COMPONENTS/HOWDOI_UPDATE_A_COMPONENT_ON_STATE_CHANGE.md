@@ -1,19 +1,21 @@
 # How do I update a component on state change?
 
-Dynamic rendering relies on events. You can also call `.render()` directly. You can also use AlpineJS.
+Dynamic rendering relies on events. You can also call `.render()` directly.
+
+You can also [use AlpineJS](#use-alpinejs).
 
 ## Use unherited methods
 
 ```ts
 class UserCardComponent extends Component {
-  /* ... */
-  onBeforeRender() {
+  constructor(mountTarget: HTMLElement) {
+    super({ mountTarget, templateFn: /* ... */ });
     this.listenToRenderEvents(['logged-in', 'logged-out']);
   }
 }
 ```
 
-Each call re-runs the whole pipeline — regenerating the template, rebuilding children/catalogs from scratch, and rebinding events. There's no diffing/patching, so a full re-render is the only update mechanism.
+Each call re-runs the whole pipeline — regenerating the template, rebuilding children/catalogs from scratch, and rebinding events. There's no diffing/patching: a child is only kept across the re-render when it has a `keep` value (or its catalog a `keepBy`), see [Keeping children across re-renders](./HOWDOI_REGISTER_CHILD_COMPONENTS.md#keeping-children-across-re-renders).
 
 See [How do I listen to application events?](../EVENTS/HOWDOI_LISTEN_TO_APPLICATION_EVENTS.md)
 
@@ -30,7 +32,7 @@ modal.destroy();
 
 ## Use AlpineJS
 
-See [How to integrate AlpineJS?](https://nutin.org/guides/alpinejs)
+See [How to integrate AlpineJS?](https://nutin.dev/guides/alpinejs)
 
 ## Notes
 
@@ -42,6 +44,6 @@ See [How to integrate AlpineJS?](https://nutin.org/guides/alpinejs)
 
 ***Note:*** `Router` listens to the `reload` event to re-render the view itself - destroys and rebuilds the whole `<main>` DOM.
 
-### Gotchas
+### Important
 
 - Calling `render()` after `destroy()` still runs the full pipeline and mutates `this.element`, but that element is already detached from the document — nothing becomes visible again. Don't reuse a destroyed instance.

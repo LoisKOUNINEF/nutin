@@ -3,6 +3,6 @@
 import { buildCli } from '../lib/index.mjs';
 
 buildCli().parseAsync(process.argv).catch((err) => {
-  console.error(err instanceof Error ? err.stack : err);
+  console.error(err instanceof Error ? err.message : err);
   process.exitCode = 1;
 });

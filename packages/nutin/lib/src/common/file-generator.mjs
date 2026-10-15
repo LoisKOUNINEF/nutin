@@ -4,6 +4,7 @@ import * as fsExtra from 'fs-extra';
 import { TemplateCompiler } from './template-compiler.mjs';
 import { print } from '../utils/print.mjs';
 import { FEATURES } from './feature-registry.mjs';
+import { toJsOutput } from './transpile-ts.mjs';
 
 const fs = fsExtra.default;
 const __filename = fileURLToPath(import.meta.url);
@@ -15,6 +16,17 @@ const BINARY_EXTENSIONS = new Set([
   '.mp4', '.webm', '.mp3', '.wav', '.ogg',
   '.pdf', '.zip', '.tar', '.gz'
 ]);
+
+// Template-repo housekeeping, never generated. .gitkeep only keeps otherwise-empty
+// template folders in git/npm; the folder itself is still created (ensureDir).
+const IGNORED_TEMPLATE_FILES = new Set(['.DS_Store', '.gitkeep']);
+
+// Templates that only make sense in a TypeScript project — not generated for JS-only ones.
+const TS_ONLY_TEMPLATES = [
+  path.join('tools', 'builder', 'core', 'app', 'compile-ts.js.hbs'),
+  path.join('tools', 'builder', 'core', 'app', 'handler-refs.js.hbs'),
+  path.join('tools', 'builder', 'core', 'app', 'handler-refs.test.js.hbs'),
+];
 
 export class FileGenerator {
   constructor() {
@@ -42,7 +54,7 @@ export class FileGenerator {
     const entries = await fs.readdir(templateDir, { withFileTypes: true });
 
     for (const entry of entries) {
-      if (entry.name === '.DS_Store') continue;
+      if (IGNORED_TEMPLATE_FILES.has(entry.name)) continue;
 
       const templatePath = path.join(templateDir, entry.name);
 
@@ -76,8 +88,13 @@ export class FileGenerator {
   }
 
   async isRenderTemplateFile(templatePath, fileName, context) {
+    const isJsOnly = context.lang === 'js';
+    if (isJsOnly && TS_ONLY_TEMPLATES.some((template) => templatePath.endsWith(template))) {
+      return null;
+    }
+
     const fileExt = path.extname(fileName).toLowerCase();
-    const outputFileName = fileName.endsWith('.hbs') ? fileName.replace('.hbs', '') : fileName;
+    const outputFileName = fileName.replace(/\.hbs$/, '');
     const isBinary = BINARY_EXTENSIONS.has(fileExt);
 
     let content;
@@ -87,6 +104,11 @@ export class FileGenerator {
       content = await this.compiler.compileFile(templatePath, context);
     } else {
       content = await fs.readFile(templatePath, 'utf8');
+    }
+
+    if (isJsOnly && !isBinary) {
+      const jsOutput = await toJsOutput(outputFileName, content);
+      return jsOutput && { ...jsOutput, isBinary };
     }
 
     return { outputFileName, isBinary, content };
@@ -140,7 +162,7 @@ export class FileGenerator {
     const entries = await fs.readdir(dir, { withFileTypes: true });
 
     for (const entry of entries) {
-      if (entry.name === '.DS_Store') continue;
+      if (IGNORED_TEMPLATE_FILES.has(entry.name)) continue;
 
       const entryPath = path.join(dir, entry.name);
 
