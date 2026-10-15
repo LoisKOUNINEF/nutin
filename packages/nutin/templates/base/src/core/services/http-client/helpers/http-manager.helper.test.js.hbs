@@ -16,12 +16,19 @@ describe('HttpManager', () => {
     expect(timedOut()).toBe(false);
   });
 
-  it('should mark the request as timed out when its timeout fires', async () => {
-    const { controller, timedOut, cleanup } = HttpManager.createAbortController(5);
-    await new Promise((resolve) => setTimeout(resolve, 30));
-    expect(controller.signal.aborted).toBe(true);
-    expect(timedOut()).toBe(true);
-    cleanup();
+  it('should mark the request as timed out when its timeout fires', () => {
+    useFakeTimers();
+    try {
+      const { controller, timedOut, cleanup } = HttpManager.createAbortController(5);
+      advanceTimersByTime(4);
+      expect(timedOut()).toBe(false);
+      advanceTimersByTime(1);
+      expect(controller.signal.aborted).toBe(true);
+      expect(timedOut()).toBe(true);
+      cleanup();
+    } finally {
+      useRealTimers();
+    }
   });
 
   it('should reject a timeout that is not a positive number', () => {

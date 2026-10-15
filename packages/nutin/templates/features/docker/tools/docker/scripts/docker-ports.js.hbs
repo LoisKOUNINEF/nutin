@@ -31,7 +31,7 @@ export function validateDockerPorts(rawPorts) {
     }
 
     if (port > MAX_PORT) {
-      throw new Error(`nutin.config.js: "dockerPorts[${i}]" (${port}) is in the OS ephemeral port range (49152-65535) — use a registered port between ${MIN_PORT} and ${MAX_PORT}.`);
+      throw new Error(`nutin.config.js: "dockerPorts[${i}]": use a registered port between ${MIN_PORT} and ${MAX_PORT}.`);
     }
 
     if (port < MIN_PORT || port > MAX_PORT) {

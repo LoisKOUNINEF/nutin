@@ -146,7 +146,7 @@ It corrects or reworks several earlier decisions and establishes a more solid, s
 
 - **The router keeps every path on the site.** A path passed to `Navigation.navigateTo()` that combined a dot segment and a backslash (`/./\host`, `/a/..\/host`) was normalized to `//host`, which the browser reads as another host. The 404 view rendered, then `pushState` threw a `SecurityError`; and when the route's view failed to load (a lazy route after a deploy), the full page load went to that host. Paths are now collapsed again after parsing, so they always stay on the current origin (`/host`). This matters when an app navigates to a path it didn't write (e.g. a `?next=` parameter).
 
-- **Apps without the router build.** The route check only runs when app code imports `routes.ts` (or `generateSEOFiles` is on, since prerendering uses `appRoutes`), and `index.html` only needs an `id="app"` element in those cases. An app that mounts its components into its own elements (a widget in an existing page, a browser extension popup) needs neither. A mount target that isn't found (a selector matching nothing, or a `null` element) now logs a `console.error` in development instead of leaving the page silently empty.
+- **Apps without the router build.** The route check only runs when app code imports `routes.ts` (or `generateSEOFiles` is on, since prerendering uses `appRoutes`), and `index.html` only needs an `id="app"` element in those cases. An app that mounts its components into its own elements (a widget in an existing page, a browser extension popup) needs neither. A mount target that isn't found (a selector matching nothing, or a `null` element) now logs a `console.error` in development instead of leaving the page silently empty. testin-nutin's framework tests still mount into `#app`: without it, keep an empty `<div id="app"></div>` in `src/index.html` or set `testinNutin.includeFramework: false`.
 
 - `build:prod` runs `node tools/builder/builder.js --prod` instead of `NODE_ENV=production node …`, which Windows shells don't understand. `NODE_ENV=production` still works, so existing `package.json` scripts keep working.
 
@@ -232,6 +232,7 @@ It corrects or reworks several earlier decisions and establishes a more solid, s
     - TODO lines now show the real `.test.js` path in TypeScript projects instead of `.test.ts`.
     - `testin-nutin:watch` works and also rebuilds before each run, watches `src/` (plus `tools/` with `includeTools`), and reacts to added and deleted files. A change made while tests are running now triggers another run instead of being dropped.
     - A test file that fails to import (syntax error, bad import) now fails the run with exit code 1. It used to be printed and skipped, so CI passed.
+    - The printed `Time` (and the coverage summary's) is the whole run, from the runner's start: it only counted running the queued tests, leaving out Node startup and importing the test files (about a third of the run).
 
 - A coverage run that covers no file now reports 0% instead of 100%, so it fails a threshold instead of passing it.
 

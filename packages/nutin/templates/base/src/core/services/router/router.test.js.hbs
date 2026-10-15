@@ -53,12 +53,17 @@ describe('Router', () => {
   let router = null;
 
   beforeEach(() => {
+    // Fake timers: navigating to a view without an <h1> starts the announcer's timer,
+    // which would otherwise keep the test process alive after the last test.
+    useFakeTimers();
     CONFIG.i18n = false;
     CONFIG.generateSEOFiles = false;
     window.history.pushState({}, '', '/');
   });
 
   afterEach(() => {
+    runAllTimers();
+    useRealTimers();
     if (router) {
       router.dispose();
       router = null;

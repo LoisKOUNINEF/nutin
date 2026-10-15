@@ -43,10 +43,8 @@ if (fileFilters.length) {
 }
 
 async function loadTestFile(file) {
-  setupJsdom();
   setCurrentTestFile(file);
   await import(file);
-  teardownJsdom();
 }
 
 async function runCoverage(testResults) {
@@ -79,7 +77,10 @@ async function runTests() {
 
   if (coverageEnabled) await startCoverage();
 
+  // One DOM for importing every file (module-level code may use it); each suite
+  // then runs in a fresh one (see runQueuedTests).
   let loadFailures = 0;
+  setupJsdom();
   for (const file of testFiles) {
     try {
       await loadTestFile(file);
@@ -89,6 +90,7 @@ async function runTests() {
       print.grayError(error.stack);
     }
   }
+  teardownJsdom();
 
   const testResults = await runQueuedTests();
 

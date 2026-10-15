@@ -195,6 +195,7 @@ export class ProjectUpdater {
     }
     if (gitStatus) {
       print.info(`\nTo undo this update, run from the project folder: ${UNDO_COMMAND}`);
+      print.info(`Important: this will also remove any untracked folder.`);
     }
 
     print.boldSuccess(`\n✅ Updated to nutin v${packageVersion}.`);

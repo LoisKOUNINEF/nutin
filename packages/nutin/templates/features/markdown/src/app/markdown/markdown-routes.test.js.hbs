@@ -1,9 +1,19 @@
 import { View } from '#root/dist/src/core/index.js';
 import { markdownRoutes } from '#root/dist/src/app/markdown/markdown-routes.js';
+import { MarkdownGuards } from '#root/dist/src/app/markdown/markdown-guards.js';
 import { MarkdownView } from '#root/dist/src/app/markdown/view/markdown.view.js';
 import { MarkdownManifestsService } from '#root/dist/src/app/markdown/markdown-manifests.service.js';
 
+// Swaps the configured folders for these, on the shared instance markdownRoutes() reads.
+function useSources(sources) {
+  Object.defineProperty(MarkdownManifestsService, 'all', { value: sources, configurable: true });
+}
+
 describe('markdownRoutes', () => {
+  afterEach(() => {
+    delete MarkdownManifestsService.all;
+  });
+
   it('registers one guarded route per folder, with its section in the path when configured, lazy by default', async () => {
     const routes = markdownRoutes();
     const expected = MarkdownManifestsService.all.map(({ id, sectionInPath }) => (sectionInPath ? `/${id}/:section?/:slug?` : `/${id}/:slug?`));
@@ -24,5 +34,41 @@ describe('markdownRoutes', () => {
     const routes = markdownRoutes({ view: (id) => { ids.push(id); return new CustomView(); } });
     for (const route of Object.values(routes)) expect(route.view()).toBeInstanceOf(CustomView);
     expect(ids).toEqual(MarkdownManifestsService.ids);
+  });
+
+  it('guards a plain folder with pageExists and a "sectionInPath" folder with sectionPageExists', () => {
+    useSources([{ id: 'guides', sectionInPath: false }, { id: 'api', sectionInPath: true }]);
+    const pageGuard = () => true;
+    const sectionGuard = () => true;
+    const pageSpy = spyOn(MarkdownGuards, 'pageExists').andCallFake(() => pageGuard);
+    const sectionSpy = spyOn(MarkdownGuards, 'sectionPageExists').andCallFake(() => sectionGuard);
+    try {
+      const routes = markdownRoutes({ view: () => new MarkdownView({ id: 'guides' }) });
+      expect(Object.keys(routes)).toEqual(['/guides/:slug?', '/api/:section?/:slug?']);
+      expect(routes['/guides/:slug?'].guards).toEqual([pageGuard]);
+      expect(routes['/api/:section?/:slug?'].guards).toEqual([sectionGuard]);
+      expect(pageSpy.calls).toEqual([['guides']]);
+      expect(sectionSpy.calls).toEqual([['api']]);
+    } finally {
+      pageSpy.restore();
+      sectionSpy.restore();
+    }
+  });
+
+  it('passes the folder id to the default lazy view, for "sectionInPath" folders too', async () => {
+    useSources([{ id: 'api', sectionInPath: true }]);
+    const getSpy = spyOn(MarkdownManifestsService, 'get').andCallFake(() => ({ id: 'api', sectionInPath: true }));
+    try {
+      const view = await markdownRoutes()['/api/:section?/:slug?'].view();
+      expect(view).toBeInstanceOf(MarkdownView);
+      expect(getSpy.lastCall).toEqual(['api']);
+    } finally {
+      getSpy.restore();
+    }
+  });
+
+  it('returns no routes without folders', () => {
+    useSources([]);
+    expect(markdownRoutes()).toEqual({});
   });
 });

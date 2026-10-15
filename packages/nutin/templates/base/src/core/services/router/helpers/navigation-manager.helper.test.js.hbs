@@ -2,8 +2,8 @@ import * as NavigationManager from '#root/dist/src/core/services/router/helpers/
 import { I18nService } from '#root/dist/src/core/services/index.js';
 import { CONFIG } from '#root/dist/src/core/config.js';
 
-// Past the announcer's delay.
-const afterAnnounceDelay = () => new Promise((resolve) => setTimeout(resolve, 150));
+// The announcer's delay, run on fake timers.
+const ANNOUNCE_DELAY = 100;
 
 // A view element inside a <main>, both in the document.
 function mountView(html) {
@@ -21,6 +21,7 @@ function cleanupFocusView() {
 
 describe('NavigationManager', () => {
   afterEach(() => {
+    useRealTimers();
     cleanupFocusView();
   });
 
@@ -481,7 +482,8 @@ describe('NavigationManager', () => {
     expect(document.activeElement).toBe(h1);
   });
 
-  it('focuses the view itself and announces document.title when there is no h1', async () => {
+  it('focuses the view itself and announces document.title when there is no h1', () => {
+    useFakeTimers();
     const { view, element } = mountView('<p>no heading</p>');
     document.title = 'Probe page';
     NavigationManager.focusView(view);
@@ -491,20 +493,23 @@ describe('NavigationManager', () => {
     const region = document.querySelector('[data-nutin-announcer]');
     expect(region.getAttribute('role')).toBe('status');
     expect(region.getAttribute('aria-live')).toBe('polite');
-    await afterAnnounceDelay();
+    advanceTimersByTime(ANNOUNCE_DELAY - 1);
+    expect(region.textContent).toBe('');
+    advanceTimersByTime(1);
     expect(region.textContent).toBe('Probe page');
   });
 
-  it('reuses one announcer, emptying it first so the same title is announced again', async () => {
+  it('reuses one announcer, emptying it first so the same title is announced again', () => {
+    useFakeTimers();
     const { view } = mountView('<p>no heading</p>');
     document.title = 'Same';
     NavigationManager.focusView(view);
-    await afterAnnounceDelay();
+    advanceTimersByTime(ANNOUNCE_DELAY);
     NavigationManager.focusView(view);
     const regions = document.querySelectorAll('[data-nutin-announcer]');
     expect(regions.length).toBe(1);
     expect(regions[0].textContent).toBe('');
-    await afterAnnounceDelay();
+    advanceTimersByTime(ANNOUNCE_DELAY);
     expect(regions[0].textContent).toBe('Same');
   });
 });
