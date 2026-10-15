@@ -1,6 +1,8 @@
 # How do I update a component on state change?
 
-Dynamic rendering relies on events. You can also call `.render()` directly. You can also use AlpineJS.
+Dynamic rendering relies on events. You can also call `.render()` directly.
+
+You can also [use AlpineJS](#use-alpinejs).
 
 ## Use unherited methods
 

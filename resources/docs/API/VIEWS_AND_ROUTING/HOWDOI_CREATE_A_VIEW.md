@@ -37,7 +37,9 @@ export const appRoutes: Nutin.Routes = {
 
 ## `View` vs. `Component`
 
-`View` is for full-page routes; [`Component`](../COMPONENTS/HOWDOI_CREATE_A_COMPONENT.md) is for reusable, non-routed UI. The key differences:
+`View` is for full-page routes; [`Component`](../COMPONENTS/HOWDOI_CREATE_A_COMPONENT.md) is for reusable, non-routed UI.
+
+The key differences:
 
 - `View` takes a static `template` (`html` or a string) — no `templateFn`/`config` normalization layer.
 - Defaults differ: `tagName: 'section'`, `mountTarget: '#app'` (vs. `Component`'s `tagName: 'div'`).

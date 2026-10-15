@@ -24,10 +24,10 @@ declare namespace Nutin {
 }
 ```
 
-This merge is purely a compile-time typing mechanism — `Nutin.AppEventMap`/`Nutin.EventMap` are type-only declarations in the global `Nutin` namespace, not exported values, so there's nothing to import. The underlying event bus isn't restricted to statically known keys at runtime; the declaration only adds type safety on top of it.
+This merge is purely a compile-time typing mechanism: `Nutin.AppEventMap` / `Nutin.EventMap` are type-only declarations in the global `Nutin` namespace, not exported values, so there's nothing to import. The underlying event bus isn't restricted to statically known keys at runtime; the declaration only adds type safety on top of it.
 
 ```ts
-AppEventBus.emit('task-saved', { taskId: 3 }); // payload required and type-checked
+AppEventBus.emit('task-saved', { taskId: 3 });  // payload required and type-checked
 AppEventBus.emit('tasks-cleared');              // declared `undefined`: no payload
 AppEventBus.emit('task-saved');                 // type error: payload missing
 AppEventBus.emit('unknown-event');              // type error: not in Nutin.EventMap

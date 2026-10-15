@@ -6,8 +6,6 @@ This guide describes two ways to load [AlpineJS](https://alpinejs.dev) into a Nu
 
 ### From npm
 
-*Requires Nutin 2.1.1 or later.*
-
 ```bash
 npm install alpinejs
 npm install --save-dev @types/alpinejs
@@ -228,8 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
 ```
 
 ## Alternative: Holding Alpine state inside a component
-
-*Requires Nutin 3.0.0 or later.*
 
 A component can hold its own `x-data` root if its parent registers it with `keep` (or, for catalog items, with `keepBy`). 
 

@@ -6,8 +6,6 @@ a11y-elements is a set of framework-agnostic accessibility Custom Elements. They
 
 ## Install from npm
 
-*Requires Nutin 2.1.1 or later.*
-
 ```bash
 npm install a11y-elements
 ```
@@ -28,8 +26,6 @@ Keep these imports in `main.ts`, not in a component or view file. Static imports
 
 ## Load elements on demand
 
-*Requires Nutin 3.0.0 or later.*
-
 The builder splits every dynamic `import()` into its own chunk, which is only downloaded the first time it runs. Elements that only some pages use can be loaded from those pages' views:
 
 ```ts
@@ -44,14 +40,14 @@ public onEnter(): void {
 - The element is defined after the view has rendered, so the overlay moves to `<body>` then, not during the render. Everything under [Use overlays inside components](#use-overlays-inside-components) works either way.
 - An element used on every page (e.g. a navbar dropdown) can be loaded the same way from `main.ts`, after `new App()`. Loaded that late, it also avoids [Pre-rendered overlays](#pre-rendered-overlays): the first view has already replaced the pre-rendered markup when the element is defined.
 
-    ```ts
-    // src/app/main.ts
-    document.addEventListener('DOMContentLoaded', async () => {
-        await initI18n();
-        new App();
-        void import('a11y-elements/overlays/dropdown');
-    });
-    ```
+```ts
+// src/app/main.ts
+document.addEventListener('DOMContentLoaded', async () => {
+    await initI18n();
+    new App();
+    void import('a11y-elements/overlays/dropdown');
+});
+```
 
 ## Styles
 

@@ -27,7 +27,7 @@ Call this once in `main.ts`, alongside `registerPipes()`/`AppRouter(routes)`. Ea
 - `before` entries are **prepended** to `<body>`, in the given order.
 - `after` entries are **appended** to `<body>`, in the given order.
 
-This mounts them as **siblings of `<main id="app">`**, not inside it — global components persist across every route change, unaffected by the router swapping views.
+This mounts them as **siblings of `<main id="app">`**, not inside it: global components have no parent Component or View and persist across every route change, unaffected by the router swapping views.
 
 ## Duplicate ids
 

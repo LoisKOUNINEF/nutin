@@ -105,7 +105,7 @@ export const appRoutes: Nutin.Routes = {
 
 ### Guard the route
 
-Tasks only live in memory: reload the page on `/tasks/1` and there's no task 1 to edit. A route guard runs before the view is created, gets the route's params, and returns `true` to let the navigation through, or a path to redirect to.
+A route guard runs before the view is created, gets the route's params, and returns `true` to let the navigation through, or a path to redirect to.
 
 Add one next to the generated `requireAuth` example:
 
@@ -229,7 +229,7 @@ export class TaskCardComponent extends Component {
 
 ## Keep elements across re-renders
 
-Edit a task, change its name, then press Tab to go to its details: the focus is lost. Saving the name emits `task-event`, the view re-renders, and every child is destroyed and created again, the form you're typing in included.
+The focus is lost when  the view re-renders: every child is destroyed and created again.
 
 Tell the view which children are the same as before:
 
@@ -262,9 +262,6 @@ export class TaskCatalogView extends View {
     }
 }
 ```
-
-- `keepBy` gives each card an identity. On re-render, a card whose task has the same id and the same values keeps its component and its DOM. The card you renamed changed, so it's created again with the new name.
-- `keep` does the same for a single child. While you edit the same task, the form is kept as it is: the focus, the caret and what you typed stay where they were. Opening another task changes the `keep` value, so a new form is created for it.
 
 See [Keeping children across re-renders](https://nutin.org/docs/api/register-child-components#keeping-children-across-re-renders).
 

@@ -38,7 +38,8 @@ In HTML templates, use `data-i18n` attribute to register keys.
 ``` 
 
 `data-i18n` will replace the element text content with the first value found
-```
+
+```text
 language value -> default language value -> text content -> raw key
 ```
 

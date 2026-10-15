@@ -96,6 +96,8 @@ So Nutin's binding attributes (`data-event`, `data-i18n`, `data-component`, `dat
 
 In production builds, prerendered pages, `sitemap.xml` and `robots.txt` are compressed (`.gz`/`.br`) along with the rest of the build.
 
+Each page is written to `<route>/index.html`, so its URL ends with a slash (`/docs/`), as in its canonical URL and in `sitemap.xml`. A server like nginx redirects `/docs` to `/docs/`. Without i18n, write internal links with the trailing slash (`href="/docs/"`) to save crawlers and visitors that redirect. With i18n, links are rewritten for you (see [Links](./HOWDOI_USE_I18N.md#links)).
+
 ## Guarded routes
 
 A route's guards run at build time before its page is prerendered, as they would for a first-time anonymous visitor: storage is empty and there's no session. If a guard blocks the route or redirects it (e.g. an auth guard sending logged-out visitors to `/`), no HTML is written for it, it's left out of `sitemap.xml`, and the build prints a warning. Private pages therefore never ship as public static files.

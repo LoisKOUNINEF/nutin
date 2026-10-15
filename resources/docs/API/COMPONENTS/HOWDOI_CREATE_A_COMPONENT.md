@@ -85,7 +85,7 @@ interface ComponentOptions<K = any> {
 
 `render()` runs the same pipeline on every call (initial and any subsequent re-render):
 
-```
+```text
 onBeforeRender()
 element.replaceChildren(sanitizeToFragment(generateTemplate()))
 compose()      → mounts data-component/data-catalog children (see registerChildren)

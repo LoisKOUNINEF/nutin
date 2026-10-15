@@ -3,7 +3,7 @@
 ## 3.0.0
 
 v3 is a major revision focused on security, performance and maintainability.
-It corrects or reworks several earlier decisions and establishes a more solid fundation for the future.
+It corrects or reworks several earlier decisions and establishes a more solid, stable fundation for the future.
 
 ### Breaking Changes
 
@@ -196,13 +196,11 @@ It corrects or reworks several earlier decisions and establishes a more solid fu
 - **Smaller prod bundle**: a new app's `bundle.js` goes from ~39 KB to ~30 KB minified (~10 KB gzipped, ~9 KB brotlied).
 
     - Core services you don't use are left out of the bundle.
-    - With `i18n: false`, the i18n code is left out of the bundle unless app code references `I18nService`. New `initI18n()` loads the translations when `i18n` is enabled and does nothing otherwise. `main.ts` now calls `await initI18n()` instead of checking `nutinConfig.i18n` itself. `I18nService.initTranslations()` is unchanged.
+    - With `i18n: false`, the i18n code is left out of the bundle (unless app code references `I18nService`). New `initI18n()` loads the translations when `i18n` is enabled and does nothing otherwise. `main.ts` now calls `await initI18n()` instead of checking `nutinConfig.i18n` itself. `I18nService.initTranslations()` is unchanged.
     - With i18n disabled, a per-language `title` in `config/seo.json` resolves to its first value. It used to depend on the browser's language.
     - The browser bundle no longer includes the tooling-only parts of `nutin.config.js` (`builder`, `testinNutin`, `dockerPorts`, `markdownSources`).
 
 ### Fixes
-
-- SEO page generation no longer expands `$&`, `` $` ``, `$'` in `config/seo.json` titles/descriptions (they copied raw page HTML into `<title>`/meta tags). The page URL and `hreflang` links are now HTML-escaped too.
 
 - i18n lookups only follow a translation file's own keys: `translate('constructor')` returned `Object`'s source text.
 
@@ -214,31 +212,26 @@ It corrects or reworks several earlier decisions and establishes a more solid fu
 
 - New apps no longer ship with a CSS reset.
 
-- testin-nutin's TODO lines now show the real `.test.js` path in TypeScript projects instead of `.test.ts`.
-
-- `testin-nutin:watch` works and also rebuilds before each run, watches `src/` (plus `tools/` with `includeTools`), and reacts to added and deleted files. A change made while tests are running now triggers another run instead of being dropped.
-
-- A test file that fails to import (syntax error, bad import) now fails the run with exit code 1. It used to be printed and skipped, so CI passed.
-
 - A build killed by Ctrl-C, `kill` or a crash no longer leaves `.build-lock` behind. The next build used to wait 2 minutes and then fail. The lock is released on `SIGINT`/`SIGTERM`/`SIGHUP`, and a lock whose process is gone is freed right away.
 
 - `$$`, `$&`, `` $` `` and `$'` in component/view templates are kept literally when merged. `Cost: $$5` used to become `Cost: $5`, and `$&` pasted the placeholder back in. The same applies to prerendered SEO pages (`$&` in rendered content duplicated the `#app` element).
 
-- `robots.txt`: a bot listed in `disallowBots` stays fully blocked even when a route also names it in `disallow`. A bot with its own group now repeats the global `disallow: true` paths, since robots.txt groups don't inherit `*`. With i18n, disallowed paths cover each `/<lang>/` prefix, and dynamic segments become `*`.
+- SEO files generation
+    - `robots.txt`: a bot listed in `disallowBots` stays fully blocked even when a route also names it in `disallow`. A bot with its own group now repeats the global `disallow: true` paths, since robots.txt groups don't inherit `*`. With i18n, disallowed paths cover each `/<lang>/` prefix, and dynamic segments become `*`.
+    - `sitemap.xml` leaves out routes disallowed for every bot, and its URLs are XML-escaped.
+    - SEO prerendering runs each route's guards first, as an anonymous visitor. A route a guard blocks or redirects (e.g. a logged-out `/admin` sent to `/`) is no longer written as public static HTML. It's also left out of `sitemap.xml`, with a build warning naming it. Guards that allow the route still run, so loader guards have their data when the page renders.
+    - SEO prerendering fills any element with `id="app"`, not only `<main id="app">`, and keeps its attributes (other elements used to get empty pages). It fails the build when index.html has no closed `#app` element.
+    - SSR's route check passes the locales folder, so a locale fetch during module load no longer throws an unhandled rejection.
+    - SEO page generation no longer expands `$&`, `` $` ``, `$'` in `config/seo.json` titles/descriptions (they copied raw page HTML into `<title>`/meta tags). The page URL and `hreflang` links are now HTML-escaped too.
 
-- `sitemap.xml` leaves out routes disallowed for every bot, and its URLs are XML-escaped.
+- Sass partials (`_name.scss`) under `src/app` are no longer compiled on their own, which duplicated their CSS in the output.
 
-- SEO prerendering runs each route's guards first, as an anonymous visitor. A route a guard blocks or redirects (e.g. a logged-out `/admin` sent to `/`) is no longer written as public static HTML. It's also left out of `sitemap.xml`, with a build warning naming it. Guards that allow the route still run, so loader guards have their data when the page renders. During SSR, `fetch()` can also read files the build already wrote (e.g. `/generated/<name>.json`); paths outside the build folder are refused.
-
-- SEO prerendering fills any element with `id="app"`, not only `<main id="app">`, and keeps its attributes (other elements used to get empty pages). It fails the build when index.html has no closed `#app` element.
-
-- SSR's route check passes the locales folder, so a locale fetch during module load no longer throws an unhandled rejection.
-
-- Sass partials (`_name.scss`) under `src/app` are no longer compiled on their own, which duplicated their CSS in `main.css`.
-
-- `toBeLessThan`/`toBeGreaterThan` no longer pass when both values are equal.
-
-- In testin-nutin, a `beforeEach`/`afterEach`/`beforeAll`/`afterAll` declared after some `it()` calls now applies to them too.
+- testin-nutin:
+    - `toBeLessThan`/`toBeGreaterThan` no longer pass when both values are equal.
+    - a `beforeEach`/`afterEach`/`beforeAll`/`afterAll` declared after some `it()` calls now applies to them too.
+    - TODO lines now show the real `.test.js` path in TypeScript projects instead of `.test.ts`.
+    - `testin-nutin:watch` works and also rebuilds before each run, watches `src/` (plus `tools/` with `includeTools`), and reacts to added and deleted files. A change made while tests are running now triggers another run instead of being dropped.
+    - A test file that fails to import (syntax error, bad import) now fails the run with exit code 1. It used to be printed and skipped, so CI passed.
 
 - A coverage run that covers no file now reports 0% instead of 100%, so it fails a threshold instead of passing it.
 
@@ -264,19 +257,15 @@ It corrects or reworks several earlier decisions and establishes a more solid fu
 
 - i18n no longer crashes the app at load when the browser blocks site storage (`localStorage` throws a `SecurityError`). Teardown keeps the saved language preference; `resetTranslations()` still forgets it.
 
-- `trustedAPIs` match on whole path segments: a trusted `https://api.example.com/v1` no longer trusts `/v10`.
-
 - Catalog items no longer get the `normalizeKeys` array spread into their props as `0`, `1`, … keys.
 
-- Template minification no longer breaks a template that contains a nested `html`, such as ``${items.map((i) => html`<li>${i}</li>`)}``. An inline template was cut at the inner backtick, and the minifier closed the "unclosed" markup, turning the code into a syntax error. The build now finds the real end of each template. Each `${…}` is swapped for a placeholder while the markup is minified, then put back exactly as written, so the minifier never sees JavaScript (it used to collapse spaces inside `${'a   b'}` in external templates too). Nested `html` templates are minified the same way. A template that can't be minified safely, such as one with `style="${…}"` or a dynamic tag name, is kept as written, with a note in the build output.
+- Template minification no longer breaks a template that contains a nested `html`, such as ``${items.map((i) => html`<li>${i}</li>`)}``. An inline template was cut at the inner backtick, and the minifier closed the "unclosed" markup, turning the code into a syntax error. The build now finds the real end of each template. A template that can't be minified safely, such as one with `style="${…}"` or a dynamic tag name, is kept as written, with a note in the build output.
 
 - `nutin-add` builds the feature template path from the generator's templates root instead of recomputing it. The CLI also drops several unused leftovers.
 
 - `nutin new` no longer fails when git isn't installed or `git init` fails. It warns and creates the project without a repository.
 
 - `nutin-update` and `nutin-add` in a project without `.nutin-meta.json` no longer crash (stdin closed, e.g. CI) or wait forever (stdin an open pipe) when the shell is non-interactive. They exit with a message that says to run the command in a terminal or create `.nutin-meta.json` by hand, with an example. Nothing is written.
-
-- When `nutin-update` or `nutin-add` rebuilds a missing `.nutin-meta.json`, it now detects JavaScript projects (`src/app/main.js` and no `main.ts`) instead of always recording `"lang": "ts"`. Detected language and package manager are printed.
 
 ## 2.1.1
 

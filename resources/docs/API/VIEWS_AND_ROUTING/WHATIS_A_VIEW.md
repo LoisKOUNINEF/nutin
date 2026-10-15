@@ -14,7 +14,7 @@ See [How do I create a view?](./HOWDOI_CREATE_A_VIEW.md) and [How do I register 
 
 Beyond the render/destroy hooks every `BaseComponent` has, `View` adds `onEnter()`/`onExit()` — fired only by the router, never by `render()`/`destroy()` directly, in this exact sequence on navigation:
 
-```
+```text
 oldView.destroy() → oldView.onExit() → view-unmount event
 newView.setRouteParams(params) → newView.render() → newView.onEnter() → view-mount event
 ```
@@ -37,7 +37,7 @@ When it returns `undefined` (the default), the router uses the route's `config/s
 
 ## Focus after navigation
 
-After an in-app navigation (a link, `Navigation.navigateTo()`, back/forward, a guard redirect or the `/404` view), the router moves keyboard focus to the new view, so keyboard and screen-reader users start from it instead of from the top of the page, where focus falls once the link they used is gone:
+After an in-app navigation (a link, `Navigation.navigateTo()`, back/forward, a guard redirect or the `/404` view), the router moves keyboard focus to the new view, so keyboard and screen-reader users start from it:
 
 1. the view's first `<h1>`;
 2. otherwise, the `<h1>` inside `<main>` (e.g. one written in `index.html` around the view);

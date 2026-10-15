@@ -7,7 +7,7 @@
 <input data-event="input:_handleName:@value">
 ```
 
-```
+```text
 data-event="eventName:handlerMethodName[:arg1,arg2,...]"
 ```
 

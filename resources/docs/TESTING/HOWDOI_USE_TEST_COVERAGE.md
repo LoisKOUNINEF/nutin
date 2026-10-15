@@ -22,7 +22,7 @@ testinNutin: {
 
 ## How does coverage work
 
-Coverage is real V8 precise coverage, collected via `node:inspector`'s
+Coverage is real V8 coverage, collected via `node:inspector`'s
 `Profiler` API (`core/coverage/collect-coverage.js`).
 
 ### Scope

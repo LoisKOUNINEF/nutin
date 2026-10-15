@@ -52,6 +52,6 @@ src/
 * Views **orchestrate application flow**
 * Components **encapsulate UI behavior**
 * Services **handle application concerns**
-* Events **connect them without coupling them**
+* Events **connect them**
 
 **[Next step →](2_BUILD_THE_UI_FOR_A_TASK.md)**

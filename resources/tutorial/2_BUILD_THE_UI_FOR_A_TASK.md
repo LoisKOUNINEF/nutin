@@ -74,7 +74,7 @@ export class TaskCardComponent extends Component {
 /* src/styles/_styles.scss */
 /* Global styles */
 :root {
-    font-size: clamp(16px, 0.909rem + 0.455vw, 20px);
+    font-size: clamp(16px, 0.909rem + 0.455vw, 19px);
     scrollbar-gutter: stable;
     body {
         background-color: #FAFAF9;

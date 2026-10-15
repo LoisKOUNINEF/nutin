@@ -25,7 +25,7 @@ public onExit(): void {}
 
 - `render()`:
 
-```
+```text
 onBeforeRender()
 element.replaceChildren(sanitizeToFragment(generateTemplate()))
 compose()          → addChildren()             (mount data-component/data-catalog children)
@@ -44,7 +44,7 @@ Called on a child kept across its parent's re-render — one registered with `ke
 
 `destroy()`:
 
-```
+```text
 onBeforeDestroy()
 EventHelper.destroyEvents(...)      — remove all data-event DOM listeners
 AppEventBus.off(...) for every bus subscription made via this.listen()
@@ -57,7 +57,7 @@ onAfterDestroy()
 
 These are called **only by the router**, never by `render()`/`destroy()` — they fire on navigation, not on every re-render. In the full navigation sequence: 
 
-```
+```text
 newView = route's factory()   (a lazy route's chunk loads here, while the old view stays up)
 oldView.destroy()
 oldView.onExit()

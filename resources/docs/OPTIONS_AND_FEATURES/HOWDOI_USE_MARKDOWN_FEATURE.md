@@ -2,7 +2,7 @@
 
 ## What is the Markdown feature?
 
-Write pages in Markdown and serve them in your app, e.g. documentation, a blog or a changelog.
+Write pages in Markdown and serve them in your app, e.g. documentation, a blog or a changelog. The page you're on uses it.
 
 At build time, each configured folder is compiled into one JSON manifest (`/generated/<name>.json`) containing every page's HTML, title, description and headings.
 At runtime, a manifest service loads it and a view renders the pages with a navigation and an "On this page" table of contents.
@@ -291,7 +291,7 @@ Check every folder without building the app:
 
 With `i18n: true` (see [How do I use i18n?](HOWDOI_USE_I18N.md)), put each language's pages in a subfolder named after it, with the same file names (or frontmatter `slug`) in every language:
 
-```
+```text
 markdown-content/
   en/
     getting-started.md
