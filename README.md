@@ -4,11 +4,9 @@
 
 Nutin provides the structure and tooling you'd expect from a framework, while keeping the underlying web platform visible and giving you code ownership.
 
-**Your app owns Nutin — not the other way around.** The source code lives alongside your application, so you can read it, modify it, and make it yours. The update system never overwrites your edits: when an update touches a file you changed, you get a diff to merge instead.
-
 Nutin is deliberately pragmatic and focused, with no runtime dependencies.
 
-**[Create your first app →](https://www.nutin.org/)**
+**[Create your first app →](https://www.nutin.org/tutorial)**
 
 ## 🗃️ Repository
 
@@ -22,6 +20,7 @@ Nutin is deliberately pragmatic and focused, with no runtime dependencies.
 - **[Options and features](resources/docs/OPTIONS_AND_FEATURES.md)**: Tailwind CSS, i18n...
 - **[Testing](resources/docs/TESTING.md)**: Built-in testing toolkit - used to test Nutin and available for application tests.
 - **[Tools](resources/docs/TOOLS.md)**: Scripts, Generator, builder.
+- All docs are available on the [website](https://nutin.org).
 
 ## 📚 Changelog
 
