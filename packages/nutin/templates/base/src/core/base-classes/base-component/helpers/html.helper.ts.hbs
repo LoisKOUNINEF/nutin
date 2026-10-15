@@ -31,7 +31,7 @@ class RawHtml extends SafeHtml {
   }
 }
 
-type Context = 'text' | 'tag' | 'attr-dq' | 'attr-sq' | 'attr-unq-start' | 'attr-unq' | 'rcdata';
+type Context = 'text' | 'tag' | 'attr-doublequoted' | 'attr-singlequoted' | 'attr-unquoted-start' | 'attr-unquoted' | 'rcdata';
 
 interface ScanState {
   ctx: Context;
@@ -72,12 +72,12 @@ export function html(strings: TemplateStringsArray, ...values: unknown[]): SafeH
     const fillsOptional = (value === null || value === undefined) && inAttr && OPTIONAL_VALUE.test(out);
     let piece = fillsOptional ? String(value) : interpolate(value, ctx, raws);
     if (inAttr) piece = checkUrl(state, piece);
-    if (ctx === 'attr-unq-start') {
+    if (ctx === 'attr-unquoted-start') {
       // Unquoted attribute (`title=${x}`): quote the whole value so data can't add attributes.
       out += `"${piece.replace(/"/g, '&quot;')}"`;
       state.ctx = 'tag';
       state.newAttrName = true;
-    } else if (ctx === 'attr-unq') {
+    } else if (ctx === 'attr-unquoted') {
       // Inside an unquoted value already started (`class=a${x}`): encode anything that would end it.
       out += piece.replace(/[\s"'`=<>]/g, (c) => `&#${c.charCodeAt(0)};`);
     } else {
@@ -185,7 +185,7 @@ function scan(state: ScanState, chunk: string): void {
           state.ctx = RCDATA_TAGS.has(state.tagName) ? 'rcdata' : 'text';
           state.rcdataTail = '';
         } else if (ch === '=') {
-          state.ctx = 'attr-unq-start';
+          state.ctx = 'attr-unquoted-start';
           state.attrStatic = '';
           state.attrValue = '';
         } else if (/\s/.test(ch) || (ch === '/' && state.tagName !== '')) {
@@ -198,25 +198,25 @@ function scan(state: ScanState, chunk: string): void {
           state.newAttrName = false;
         }
         break;
-      case 'attr-unq-start':
-        if (ch === '"') state.ctx = 'attr-dq';
-        else if (ch === "'") state.ctx = 'attr-sq';
+      case 'attr-unquoted-start':
+        if (ch === '"') state.ctx = 'attr-doublequoted';
+        else if (ch === "'") state.ctx = 'attr-singlequoted';
         else if (ch === '>') state.ctx = 'text';
         else if (!/\s/.test(ch)) {
-          state.ctx = 'attr-unq';
+          state.ctx = 'attr-unquoted';
           addAttrChar(state, ch);
         }
         break;
-      case 'attr-unq':
+      case 'attr-unquoted':
         if (ch === '>') state.ctx = 'text';
         else if (/\s/.test(ch)) {
           state.ctx = 'tag';
           state.newAttrName = true;
         } else addAttrChar(state, ch);
         break;
-      case 'attr-dq':
-      case 'attr-sq':
-        if (ch === (state.ctx === 'attr-dq' ? '"' : "'")) {
+      case 'attr-doublequoted':
+      case 'attr-singlequoted':
+        if (ch === (state.ctx === 'attr-doublequoted' ? '"' : "'")) {
           state.ctx = 'tag';
           state.newAttrName = true;
         } else addAttrChar(state, ch);

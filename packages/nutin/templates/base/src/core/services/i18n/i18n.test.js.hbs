@@ -57,7 +57,6 @@ describe('i18n module', async () => {
   });
   afterEach(() => {
     fetchMock.restore();
-    localStorage.removeItem(I18nService.localStorageKey)
   });
 
   beforeAll(() =>{
@@ -137,7 +136,6 @@ describe('i18n module', async () => {
 
     expect(I18nService.currentLanguage).toBe('fr');
     expect(I18nService.translate('home.title')).toBe('Mon App');
-    expect(localStorage.getItem(I18nService.localStorageKey)).toBe('fr');
   });
 
   it('setCurrentLanguage emits a language-changed event with the new language', async () => {
@@ -240,12 +238,6 @@ describe('i18n module', async () => {
     errSpy.restore();
   });
 
-  it('honors a previously saved language preference from localStorage', async () => {
-    localStorage.setItem(I18nService.localStorageKey, 'fr');
-    await I18nService.initTranslations();
-    expect(I18nService.currentLanguage).toBe('fr');
-  });
-
   it('loadTranslations logs and leaves the language unchanged when the fetch rejects', async () => {
     Object.defineProperty(navigator, 'language', { writable: true, configurable: true, value: 'en-US' });
     const errSpy = spyOn(console, 'error');
@@ -281,7 +273,6 @@ describe('i18n module', async () => {
     I18nService.onDestroy();
 
     expect(I18nService.translate('home.title')).toBe('home.title');
-    expect(localStorage.getItem(I18nService.localStorageKey)).toBe('fr');
   });
 
   it('resetTranslations also forgets the saved language preference', async () => {
@@ -290,21 +281,6 @@ describe('i18n module', async () => {
     I18nService.resetTranslations();
 
     expect(I18nService.currentLanguage).toBe('en');
-    expect(localStorage.getItem(I18nService.localStorageKey)).toBe(null);
-  });
-
-  it('keeps working when storage access throws (site data blocked)', async () => {
-    const originalStorage = global.localStorage;
-    const blocked = () => { throw new Error('SecurityError'); };
-    global.localStorage = { getItem: blocked, setItem: blocked, removeItem: blocked };
-    try {
-      await I18nService.setCurrentLanguage('fr');
-      expect(I18nService.translate('home.title')).toBe('Mon App');
-      expect(() => I18nService.resetTranslations()).not.toThrow();
-      expect(I18nService['getPreferences']()).toBe(null);
-    } finally {
-      global.localStorage = originalStorage;
-    }
   });
 
   it('initI18n loads the translations when CONFIG.i18n is enabled', async () => {

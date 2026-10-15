@@ -9,7 +9,6 @@ export class I18n extends Service<I18n> {
   private _currentLanguage: Nutin.Language = this._DEFAULT_LANGUAGE;
   private _translations: Nutin.Translations = {};
   private _defaultTranslations: Nutin.Translations = {};
-  private readonly _localStorageKey = 'nutin-fav-lang';
 
   constructor() {
     super();
@@ -29,13 +28,8 @@ export class I18n extends Service<I18n> {
     return this._LANGUAGES;
   }
 
-  public get localStorageKey(): string {
-    return this._localStorageKey;
-  }
-
   public async setCurrentLanguage(lang: Nutin.Language): Promise<void> {
     this._currentLanguage = lang;
-    this.savePreferences();
     await this.loadTranslations(lang);
     AppEventBus.emit('language-changed', { lang });
   }
@@ -59,8 +53,7 @@ export class I18n extends Service<I18n> {
         await this.loadDefaultTranslations();
       }
       
-      document.documentElement.lang = lang;   
-      this.savePreferences();
+      document.documentElement.lang = lang;
     } catch (error) {
       console.error('Translation load error:', error);
     }
@@ -107,7 +100,6 @@ export class I18n extends Service<I18n> {
   // Also forgets the saved language preference.
   public resetTranslations(): void {
     this.clearTranslations();
-    this.removePreferences();
   }
 
   // Teardown keeps the saved preference: it belongs to the user, not to this instance.
@@ -124,8 +116,6 @@ export class I18n extends Service<I18n> {
   private getPreferredLanguage(): Nutin.Language {
     const urlLocale = this.getLocaleFromUrl();
     if (urlLocale) return urlLocale;
-    const stored = this.getPreferences();
-    if (stored && this._LANGUAGES.includes(stored as Nutin.Language)) return stored as Nutin.Language;
     const browserLang = navigator.language.split('-')[0] as Nutin.Language;
     return this._LANGUAGES.includes(browserLang) ? browserLang : this._DEFAULT_LANGUAGE;
   }
@@ -159,28 +149,6 @@ export class I18n extends Service<I18n> {
       if (!value) break;
     }
     return value;
-  }
-
-  // Storage access throws (SecurityError) when the browser blocks site data, e.g. in a
-  // sandboxed iframe: the preference is then simply not kept, rather than breaking the app.
-  private savePreferences(): void {
-    try {
-      localStorage.setItem(this._localStorageKey, this._currentLanguage);
-    } catch {}
-  }
-
-  private getPreferences(): string | null {
-    try {
-      return localStorage.getItem(this._localStorageKey);
-    } catch {
-      return null;
-    }
-  }
-
-  private removePreferences(): void {
-    try {
-      localStorage.removeItem(this._localStorageKey);
-    } catch {}
   }
 }
 

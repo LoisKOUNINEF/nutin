@@ -1,6 +1,5 @@
-// Nutin's public types, all inside the global `Nutin` namespace so they can't collide with
-// lib.dom or other packages' globals (e.g. lib.dom's NavigationEventMap). No import needed:
-// `Nutin.ComponentConfig`, `Nutin.Routes`… The app extends it in src/app/globals.d.ts.
+// Nutin's public types, all inside the global `Nutin` namespace so they can't collide with other packages' globals.
+// No import needed: the app extends it in src/app/globals.d.ts.
 // This file must stay free of top-level import/export, so runtime classes go through import().
 declare namespace Nutin {
   interface RouterEventMap {

@@ -98,10 +98,8 @@ class Router extends Service<Router> {
     this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
     this._currentParams = routeMatch.params;
 
-    // Must run before renderNewView(): a view's onEnter() may rewrite the URL via
-    // NavigationManager.replaceState (e.g. canonicalizing a bare route to a default
-    // sub-page), which acts on whatever history entry is current — so that entry needs
-    // to already be this route's, not the previous view's, before onEnter() fires.
+    // Must run before renderNewView(): a view's onEnter() may rewrite the URL via NavigationManager.replaceState(), 
+    // which acts on whatever history entry is current. This ensures current before onEnter() fires.
     NavigationManager.updateHistory(normalizedPath, currentPath, mode, hash, search);
 
     this._currentView = ViewRenderManager.renderNewView(view, routeMatch.params);

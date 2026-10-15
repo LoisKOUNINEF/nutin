@@ -2,8 +2,7 @@ import type { View } from "../../../base-classes/view/view.js";
 import { I18nService } from "../../i18n/i18n.js";
 import { CONFIG } from "../../../config.js";
 
-// How a navigation affects the history stack: add an entry, rewrite the current
-// one (e.g. a guard redirecting away from the URL already in the address bar),
+// How a navigation affects the history stack: add an entry, rewrite the current one,
 // or leave it untouched (back/forward, reload).
 export type HistoryMode = 'push' | 'replace' | 'none';
 

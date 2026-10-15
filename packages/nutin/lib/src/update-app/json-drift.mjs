@@ -6,7 +6,7 @@ const fs = fsExtra.default;
 
 // package.json and tsconfig.json aren't rendered from templates (JsonManager writes them
 // once, at creation), so the template diff never sees them. They're compared with what
-// this CLI would generate instead, and only reported: the user owns these files.
+// this CLI would generate instead, and only reported.
 // Only the entries nutin generates are compared; anything the user added is ignored.
 const PACKAGE_JSON_SECTIONS = ['scripts', 'devDependencies'];
 

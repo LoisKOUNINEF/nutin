@@ -8,9 +8,8 @@ const fs = fsExtra.default;
 // Base templates may carry `{{#if <featureKey>}}` blocks (e.g. the markdown build step in
 // builder.js.hbs). New projects render them with the feature off; this brings an existing
 // project's files in line once the feature is added, by rendering each gated template
-// without and with the feature and applying the difference as a patch — so unrelated user
-// edits to the file are kept. nutin-update renders base with the project's features too,
-// so patched files then match upstream.
+// without and with the feature and applying the difference as a patch.
+// Unrelated user edits to the file are kept.
 function gatesOnFeature(source, featureKey) {
   return new RegExp(`\\{\\{[#^]?(if|unless)\\s+${featureKey}\\b`).test(source);
 }
