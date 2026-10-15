@@ -315,7 +315,7 @@ A framework does not have to solve every possible frontend problem to be useful.
 
 ## One example of the middle ground: Nutin
 
-This is the architectural space [Nutin](https://nutin.org/docs) is designed to occupy.
+This is the architectural space [Nutin](https://nutin.dev/docs) is designed to occupy.
 
 Nutin provides application structure around the problems that tend to become repetitive or error-prone in small SPAs while keeping the underlying web platform visible.
 
@@ -496,7 +496,7 @@ Identify the problems.
 
 Then decide which ones are worth solving yourself and which ones are worth delegating to an abstraction.
 
-If you're looking for the middle ground — explicit structure, lifecycle management, routing, and tooling while staying close to the DOM and HTML — [Nutin](https://nutin.org/) is designed specifically for that kind of application.
+If you're looking for the middle ground — explicit structure, lifecycle management, routing, and tooling while staying close to the DOM and HTML — [Nutin](https://nutin.dev/) is designed specifically for that kind of application.
 
 ***The framework is a means of organizing the application, not the reason the application exists.***
 

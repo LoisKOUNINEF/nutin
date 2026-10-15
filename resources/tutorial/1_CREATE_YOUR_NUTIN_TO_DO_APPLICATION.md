@@ -4,7 +4,7 @@ We are going to build a basic CRUD application in the form of a to-do list.
 
 *Estimated time:* 15-20 minutes.
 
-- [See what you'll build](https://nutin-todo.nutin.org)
+- [See what you'll build](https://nutin-todo.nutin.dev)
 
 - [Refer to the full app code if you ever get lost](https://github.com/LoisKOUNINEF/nutin/tree/main/apps/tutorial)
 

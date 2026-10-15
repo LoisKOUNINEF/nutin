@@ -6,12 +6,12 @@ Nutin provides the structure and tooling you'd expect from a framework, while ke
 
 Nutin is deliberately pragmatic and focused, with no runtime dependencies.
 
-**[Create your first app →](https://www.nutin.org/tutorial)**
+**[Create your first app →](https://www.nutin.dev/tutorial)**
 
 ## 🗃️ Repository
 
 - **[NPM package](packages/nutin/README.md)** — Nutin CLI, generator and templates
-- **[Website](apps/website/README.md)** — Nutin's [website](https://nutin.org/), built with Nutin
+- **[Website](apps/website/README.md)** — Nutin's [website](https://nutin.dev/), built with Nutin
 - **[Tutorial app](apps/tutorial)** — Working example of the application built in the tutorial - See [Tutorial](resources/tutorial/TUTORIAL.md)
 
 ## 📄 Docs
@@ -20,7 +20,7 @@ Nutin is deliberately pragmatic and focused, with no runtime dependencies.
 - **[Options and features](resources/docs/OPTIONS_AND_FEATURES.md)**: Tailwind CSS, i18n...
 - **[Testing](resources/docs/TESTING.md)**: Built-in testing toolkit - used to test Nutin and available for application tests.
 - **[Tools](resources/docs/TOOLS.md)**: Scripts, Generator, builder.
-- All docs are available on the [website](https://nutin.org).
+- All docs are available on the [website](https://nutin.dev).
 
 ## 📚 Changelog
 

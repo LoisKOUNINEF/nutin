@@ -32,7 +32,7 @@ modal.destroy();
 
 ## Use AlpineJS
 
-See [How to integrate AlpineJS?](https://nutin.org/guides/alpinejs)
+See [How to integrate AlpineJS?](https://nutin.dev/guides/alpinejs)
 
 ## Notes
 

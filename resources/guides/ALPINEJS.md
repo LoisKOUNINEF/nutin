@@ -84,7 +84,7 @@ Use Alpine's CSP build instead, rather than adding `'unsafe-eval'` to the policy
     }
     ```
 
-- From a CDN: load the CSP build's `cdn.min.js`, and [add its origin to the nginx CSP map](https://nutin.org/docs/options-and-features/use-docker-feature#adding-origins-in-csp-map), scoped to the version's path (`script-src 'self' https://cdn.jsdelivr.net/npm/@alpinejs/csp@3.17.4/`):
+- From a CDN: load the CSP build's `cdn.min.js`, and [add its origin to the nginx CSP map](https://nutin.dev/docs/options-and-features/use-docker-feature#adding-origins-in-csp-map), scoped to the version's path (`script-src 'self' https://cdn.jsdelivr.net/npm/@alpinejs/csp@3.17.4/`):
 
     ```html
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/csp@3.17.4/dist/cdn.min.js"></script>
@@ -98,7 +98,7 @@ Use Alpine's CSP build instead, rather than adding `'unsafe-eval'` to the policy
 
 This pattern keeps Alpine state completely isolated; it is never touched by Nutin, so it's safe ground for Alpine to own. 
 
-- You can mount it through Nutin's [global layout service](https://nutin.org/en/docs/api/mount-global-components) `registerGlobals` API. This gives the Alpine root a clear entrypoint in `main.ts` alongside the rest of the app's global components:
+- You can mount it through Nutin's [global layout service](https://nutin.dev/en/docs/api/mount-global-components) `registerGlobals` API. This gives the Alpine root a clear entrypoint in `main.ts` alongside the rest of the app's global components:
 
 ```ts
 // src/app/components/globals/alpine-root/alpine-root.component.ts
@@ -266,7 +266,7 @@ A changed item, or a child whose `keep` value changed, is recreated, and its sta
 
 ## With a11y-elements
 
-Alpine directives work inside [a11y-elements](https://nutin.org/guides/a11y-elements) components that stay where they're written, like form controls: e.g. `@change` on the checkbox of an `<a11y-switch>`.
+Alpine directives work inside [a11y-elements](https://nutin.dev/guides/a11y-elements) components that stay where they're written, like form controls: e.g. `@change` on the checkbox of an `<a11y-switch>`.
 
 Overlays (`<a11y-modal>`, `<a11y-drawer>`, `<a11y-dropdown>`…) need a different setup: they move themselves to `<body>`, out of `#app`, so they leave its `x-data` scope. Directives on or inside them can't see that state any more (`modal is not defined`).
 
@@ -297,7 +297,7 @@ Alpine.store('ui', {
 
 The method works with both builds (see [With the docker feature (CSP)](#with-the-docker-feature-csp)). With the CDN script, Alpine is `window.Alpine`.
 
-The component or view whose template contains the overlay still has to remove it on re-render and destroy, as with any overlay: see [Use overlays inside components](https://nutin.org/guides/a11y-elements#use-overlays-inside-components).
+The component or view whose template contains the overlay still has to remove it on re-render and destroy, as with any overlay: see [Use overlays inside components](https://nutin.dev/guides/a11y-elements#use-overlays-inside-components).
 
 ## Important
 

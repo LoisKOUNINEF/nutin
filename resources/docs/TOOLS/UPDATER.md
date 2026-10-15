@@ -26,7 +26,7 @@ Only the project folder is checked, so a project inside a larger repository isn'
 
 `nutin-update` needs [git](https://git-scm.com) to merge files you edited (it uses `git merge-file`; the project doesn't have to be a repository). Without git it stops before changing anything.
 
-`nutin-update` handles minor and patch updates. A major version change has to be migrated by hand: see the [changelog](https://nutin.org/changelog).
+`nutin-update` handles minor and patch updates. A major version change has to be migrated by hand: see the [changelog](https://nutin.dev/changelog).
 
 ## How it works
 

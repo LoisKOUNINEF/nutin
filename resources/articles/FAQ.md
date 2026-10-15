@@ -24,7 +24,7 @@ ogImage: /assets/images/og-covers/og-cover-articles.jpg
 <details>
 <summary style="color:var(--primary);font-size:1.2rem;padding:.5rem;">Can I use other libraries with Nutin?</summary>
 <div style="padding-left:1rem;">
-<p>Yes. Nutin works with the DOM and browser APIs directly, so most libraries work as they would in a vanilla application. See the <a href="https://nutin.org/guides/a11y-elements">a11y-elements</a> and <a href="https://nutin.org/guides/alpinejs">AlpineJS</a> guides.</p>
+<p>Yes. Nutin works with the DOM and browser APIs directly, so most libraries work as they would in a vanilla application. See the <a href="https://nutin.dev/guides/a11y-elements">a11y-elements</a> and <a href="https://nutin.dev/guides/alpinejs">AlpineJS</a> guides.</p>
 </div>
 </details>
 
@@ -44,7 +44,7 @@ ogImage: /assets/images/og-covers/og-cover-articles.jpg
 <div style="padding-left:1rem;">
 <p>Lit focuses on components. The application around them is left to you or to other packages.</p>
 
-<p>Nutin provides that application structure, and its components are plain classes rendering plain HTML templates into the light DOM. Rendering is explicit rather than driven by reactive properties. See <a href="https://nutin.org/docs/api/what-is-a-component">Why aren't components Web Components?</a>.</p>
+<p>Nutin provides that application structure, and its components are plain classes rendering plain HTML templates into the light DOM. Rendering is explicit rather than driven by reactive properties. See <a href="https://nutin.dev/docs/api/what-is-a-component">Why aren't components Web Components?</a>.</p>
 
 <p>The elements you build with Lit can also be used inside a Nutin application.</p>
 </div>
@@ -55,6 +55,6 @@ ogImage: /assets/images/og-covers/og-cover-articles.jpg
 <div style="padding-left:1rem;">
 <p>shadcn/ui is a collection of React components. Its CLI copies their source code into your project, so you can read and change your buttons and dialogs. React itself remains a regular dependency.</p>
 
-<p>Nutin applies the same idea to the framework layer itself.<br/>Its source code and its tools are generated into your project. When a new version comes out, <a href="https://nutin.org/docs/tools/updater"><code>nutin-update</code></a> updates the files you haven't changed, and merges the new version into the ones you did: only overlapping edits are left for you to resolve.</p>
+<p>Nutin applies the same idea to the framework layer itself.<br/>Its source code and its tools are generated into your project. When a new version comes out, <a href="https://nutin.dev/docs/tools/updater"><code>nutin-update</code></a> updates the files you haven't changed, and merges the new version into the ones you did: only overlapping edits are left for you to resolve.</p>
 </div>
 </details>

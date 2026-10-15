@@ -138,7 +138,7 @@ export const appRoutes: Nutin.Routes = {
 }
 ```
 
-See [Use route guards](https://nutin.org/docs/api/use-route-guards).
+See [Use route guards](https://nutin.dev/docs/api/use-route-guards).
 
 ### Handle routeParams in the view
 
@@ -263,6 +263,6 @@ export class TaskCatalogView extends View {
 }
 ```
 
-See [Keeping children across re-renders](https://nutin.org/docs/api/register-child-components#keeping-children-across-re-renders).
+See [Keeping children across re-renders](https://nutin.dev/docs/api/register-child-components#keeping-children-across-re-renders).
 
 **[Next step →](8_TAKE_A_LOOK_AT_WHAT_YOU_VE_BUILT.md)**

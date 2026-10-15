@@ -38,7 +38,7 @@ src/app/
 - `#root/` points to your project root.
 - `describe`, `it`, `expect`, `spyOn`, `click`, `$`, `$$`... are globals and need no import.
 - *Note:* With `includeApp` enabled, the generator creates a `*.test.js` file alongside every new component, view and service.
-- Refer to [testin-nutin docs](https://nutin.org/docs/testing) for details.
+- Refer to [testin-nutin docs](https://nutin.dev/docs/testing) for details.
 
 ## Run the tests
 
@@ -403,9 +403,9 @@ describe('Guards.requireTask', () => {
 
 ## Go further
 
-- [Write a test](https://nutin.org/docs/testing/write-a-test)
-- [What assertions are available?](https://nutin.org/docs/testing/what-assertions-are-available)
-- [Spy on methods](https://nutin.org/docs/testing/spy-on-methods)
-- [Mock core services](https://nutin.org/docs/testing/mock-core-services)
-- [Fake timers](https://nutin.org/docs/testing/fake-timers)
-- [Use test coverage](https://nutin.org/docs/testing/use-test-coverage)
+- [Write a test](https://nutin.dev/docs/testing/write-a-test)
+- [What assertions are available?](https://nutin.dev/docs/testing/what-assertions-are-available)
+- [Spy on methods](https://nutin.dev/docs/testing/spy-on-methods)
+- [Mock core services](https://nutin.dev/docs/testing/mock-core-services)
+- [Fake timers](https://nutin.dev/docs/testing/fake-timers)
+- [Use test coverage](https://nutin.dev/docs/testing/use-test-coverage)

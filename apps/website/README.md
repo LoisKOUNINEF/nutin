@@ -1,4 +1,4 @@
-# [nutin website](https://www.nutin.org)
+# [nutin website](https://www.nutin.dev)
 
 - [Docs](#resources)
 - [Helpers](#helpers)

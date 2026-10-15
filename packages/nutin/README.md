@@ -1,4 +1,4 @@
-# [Nutin](https://www.nutin.org)
+# [Nutin](https://www.nutin.dev)
 
 `The structure of a framework. The freedom of vanilla.`
 
@@ -48,4 +48,4 @@ Features: `docker` (Dockerfile, nginx config, `docker:build`/`docker:run` script
 
 ## Documentation
 
-- [Documentation](https://www.nutin.org/docs)
+- [Documentation](https://www.nutin.dev/docs)

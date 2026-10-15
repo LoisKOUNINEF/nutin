@@ -1,6 +1,6 @@
 # How to use a11y-elements?
 
-This guide describes how to use [a11y-elements](https://nutin.org/en/a11y-elements) in a Nutin application - bundled from npm, or loaded from a CDN - and how to use it inside Nutin components.
+This guide describes how to use [a11y-elements](https://nutin.dev/en/a11y-elements) in a Nutin application - bundled from npm, or loaded from a CDN - and how to use it inside Nutin components.
 
 a11y-elements is a set of framework-agnostic accessibility Custom Elements. They are Light DOM only, and bring behavior rather than a themed UI kit: you style real markup with your own CSS.
 
@@ -148,7 +148,7 @@ export class MenuComponent extends Component {
 
 Listeners pushed to `this.eventListeners` are removed along with the component's own.
 
-Using AlpineJS? Moved overlays also leave its `x-data` scopes: see [With a11y-elements](https://nutin.org/guides/alpinejs#with-a11y-elements) in the AlpineJS guide.
+Using AlpineJS? Moved overlays also leave its `x-data` scopes: see [With a11y-elements](https://nutin.dev/guides/alpinejs#with-a11y-elements) in the AlpineJS guide.
 
 `removeOverlaysWithin(host)` removes every overlay written anywhere inside `host`, even once it has moved to `<body>`, including the overlays of child components. A component or view that keeps children across re-renders (`keep` or `keepBy`) would remove the overlays of those kept children too. Call it on an element around your own overlays instead:
 
@@ -301,4 +301,4 @@ Every element also ships as a browser bundle, with no build step. Load the style
     new App();
     ```
 
-*Note:* If you're using Nutin's `docker` feature, you'll have to [add the CDN source to nginx CSP map](https://nutin.org/docs/options-and-features/use-docker-feature#adding-origins-in-csp-map), for both `script-src` and `style-src`. Scope it to the version's path (`https://cdn.jsdelivr.net/npm/a11y-elements@0.4.0/`).
+*Note:* If you're using Nutin's `docker` feature, you'll have to [add the CDN source to nginx CSP map](https://nutin.dev/docs/options-and-features/use-docker-feature#adding-origins-in-csp-map), for both `script-src` and `style-src`. Scope it to the version's path (`https://cdn.jsdelivr.net/npm/a11y-elements@0.4.0/`).
