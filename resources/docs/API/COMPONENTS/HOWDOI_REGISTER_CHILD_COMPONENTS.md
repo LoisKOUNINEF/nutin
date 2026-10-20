@@ -81,6 +81,20 @@ type CatalogItemConfig<T = any> = T extends object ? T & { index: number } : { v
 
 The third factory argument (`props`) is a shallow merge of the catalog config's own `props` and `defaults` fields; `defaults` win on a shared key.
 
+### Components used both in and out of a catalog
+
+A component can be mounted as a single child (no `index`) and from a catalog (with `index`). Type its data with `Nutin.CatalogItemBase` made optional:
+
+```ts
+type ProjectData = IProject & Partial<Nutin.CatalogItemBase>;
+
+const templateFn = (project: ProjectData) => html`
+  <article class="${project.index === undefined ? 'project--standalone' : ''}">${project.name}</article>
+`;
+```
+
+Avoid the union `IProject | Nutin.CatalogItemConfig<IProject>`: TypeScript doesn't allow reading `project.index` on it, since `IProject` has no `index`. `Nutin.CatalogItemConfig<IProject>` is still assignable to `ProjectData`.
+
 ## Keeping children across re-renders
 
 By default, a parent's re-render destroys and recreates every child, losing its DOM state (focus, scroll position, unsaved input). Give a child a stable identity to keep it instead.

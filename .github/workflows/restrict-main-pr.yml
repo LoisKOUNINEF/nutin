@@ -7,7 +7,7 @@ on:
 
 jobs:
   restrict-branch:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Ensure PR is from staging
         if: github.base_ref == 'main'

@@ -11,14 +11,14 @@ on:
 
 jobs:
   build-and-publish:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -30,7 +30,7 @@ jobs:
           fi
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: "24"
           cache: "npm"
@@ -51,10 +51,10 @@ jobs:
         run: echo "GITHUB_SHA=${{ github.sha }}" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -68,7 +68,7 @@ jobs:
 
   deploy:
     needs: build-and-publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       SERVICE_NAME: "website"
       STACK_NAME: "staging"
@@ -80,7 +80,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Ensure scripts are executable
         run: chmod -R +x .github/workflows/scripts/jobs/*.sh
@@ -98,7 +98,7 @@ jobs:
         run: .github/workflows/scripts/jobs/add-tag.sh
 
       - name: Copy updated stack file to VPS
-        uses: appleboy/scp-action@master
+        uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
@@ -109,7 +109,7 @@ jobs:
           target: "${{ env.PROJECT_LOWER }}"
 
       - name: Copy deployment scripts to VPS
-        uses: appleboy/scp-action@master
+        uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
@@ -121,7 +121,7 @@ jobs:
           strip_components: 3
 
       - name: Deploy to staging
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.2.5
         env:
           DOCKER_AUTH: ${{ secrets.DOCKER_AUTH }}
           REPO_LOWER: ${{ env.REPO_LOWER }}
