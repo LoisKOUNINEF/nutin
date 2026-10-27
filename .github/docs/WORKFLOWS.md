@@ -1,7 +1,8 @@
 # Workflows Docs
 
 - **`DOCKER_AUTH` GitHub Actions secret must be regenerated & updated when PAT changes** 
-    - generate with `echo -n "username:PAT" | base64`.
+    - generate with `printf '%s' 'username:PAT' | base64 | tr -d '\n'`.
+    - **must be a classic PAT with only the `read:packages` scope**: GHCR rejects pulls with a fine-grained PAT (`docker login` succeeds, every pull returns `denied`).
     - *note : generate PAT* : Profile Pic -> Settings -> Left sidebar : Developer Settings -> Personal Access Tokens.
 
 - Other secrets used across the deployment workflows: `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`, `SSH_PASS`, `SSH_PORT` (VPS access for `scp`/`ssh` steps).
@@ -29,7 +30,7 @@
 * Copy image tags from website-staging.yml file.
 * Deploy ( Docker Swarm / Traefik )
 * Removes old images (keep newest 3) from ghcr.io (website / tutorial).
-* Stop staging instance (website)
+* Stop staging instance (website), only if the production deploy succeeded
 
 `recreate-staging.yml` — a **separate** workflow, not a step of the production workflow above — deletes and recreates the `staging` branch. It's triggered via `workflow_run` once the `"CI/CD Website production"` workflow completes on `main`.
 
@@ -39,12 +40,12 @@
 
 - deploy.sh
 
-Top-level orchestrator: calls `stack-deploy.sh`, then `healthcheck.sh`, then `post-job.sh` in sequence.
+Top-level orchestrator: calls `stack-deploy.sh`, then `healthcheck.sh`, then `post-job.sh` in sequence. Exits 1 (failing the job) if `stack-deploy.sh` or `healthcheck.sh` fails.
 
 - docker-login.sh
 
 Writes `.docker/config.json` file and logs in to ghcr.io.           
-Uses `DOCKER_AUTH` GitHub secret, generated with `echo -n "username:PAT" | base64`. Must be re-generated when `PAT` changes.
+Uses `DOCKER_AUTH` GitHub secret (see top of this file). Strips CR/LF/spaces from it before writing the JSON.
 
 - docker-logout.sh
 
@@ -52,7 +53,8 @@ Logs out of ghcr.io, called as part of `post-job.sh`.
 
 - stack-deploy.sh
 
-Deploys the generated stack YAML (Docker Swarm).
+Moves the current .yml to `prev-<service>-<stack>.yml` (if any) and the new one in place, then pulls the images and deploys the stack YAML (Docker Swarm, `--with-registry-auth`).                  
+If the pull fails, restores the previous .yml files, logs out and exits 1 **before** deploying (no rollback).
 
 - replace-placeholders.sh
 
@@ -60,17 +62,20 @@ Replaces `image-placeholder` in new .yml file.
 
 * For staging : if image tag is default `:image-placeholder`, copies the corresponding image tag from `prev-<service>-staging.yml`.
 * For production: copies the image tags from `<service>-staging.yml`.
+* Does nothing if there's no placeholder or no origin file (first deployment); the pull then fails on the placeholder tag.
 
 - healthcheck.sh
 
 Polls Docker Swarm service replica counts (`$PROJECT_LOWER-$SERVICE_NAME-$STACK_NAME`) every 10s.                      
-Calls `rollback.sh` if not all replicas are healthy after **90 seconds**.
+Prints the last 3 tasks of an unhealthy service (`docker service ps --no-trunc`), as tasks that never started have no logs.                  
+Calls `rollback.sh` and exits 1 if not all replicas are healthy after **90 seconds**.
 
 - rollback.sh
 
 Called by `healthcheck.sh`.                  
 Archives .yml file associated with failed deployment in `failed/` folder, with timestamps. Removes the oldest archived files.             
 Renames `prev-"$SERVICE_NAME"-"$STACK_NAME".yml` to `"$SERVICE_NAME"-"$STACK_NAME".yml`. Deploys the previous version with it.                  
+On a first deployment (no `prev-` file), removes the failed stack instead.                  
 Calls `docker-logout.sh`.
 
 - post-job.sh

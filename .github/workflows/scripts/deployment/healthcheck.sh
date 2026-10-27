@@ -18,6 +18,8 @@ healthcheck() {
       echo "$service is healthy ($replicas)"
     else
       echo "$service is unhealthy ($replicas)"
+      # tasks that never started have no logs, their error is only in the task list
+      docker service ps --no-trunc --format "  {{.Name}} {{.CurrentState}} {{.Error}}" "$service" | head -n 3
       healthy=false
     fi
 
@@ -42,4 +44,5 @@ healthcheck() {
 script_dir="$(dirname "$0")"
 if ! healthcheck; then
   "$script_dir/rollback.sh"
+  exit 1
 fi

@@ -69,8 +69,7 @@ jobs:
           envs: DOCKER_AUTH,REPO_LOWER,PROJECT_LOWER,STACK_NAME,SERVICE_NAME
           script: |
             cd $PROJECT_LOWER
-            ./scripts/deployment/deploy.sh
-            ./scripts/deployment/remove-staging.sh
+            ./scripts/deployment/deploy.sh && ./scripts/deployment/remove-staging.sh
 
   delete-old-images:
     runs-on: ubuntu-24.04

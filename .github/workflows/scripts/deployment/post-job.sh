@@ -15,7 +15,7 @@ post_job() {
   yaml_read_only
 
   echo "Listing images:"
-  docker image ls | grep "ghcr.io/$REPO_LOWER"
+  docker image ls --filter "reference=ghcr.io/$REPO_LOWER-*" --format "table {{.Repository}}\t{{.Tag}}\t{{.CreatedSince}}" || true
 }
 
 post_job

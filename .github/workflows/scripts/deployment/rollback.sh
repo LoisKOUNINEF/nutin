@@ -1,13 +1,13 @@
 #!/bin/bash
 
 clean_archive() {
-  failed_files=$(find failed/failed_"$SERVICE_NAME"-"$STACK_NAME" -maxdepth 1 -type f -name 'failed_"$SERVICE_NAME"-"$STACK_NAME"' | wc -l)
+  failed_files=$(find failed/failed_"$SERVICE_NAME"-"$STACK_NAME" -maxdepth 1 -type f -name "failed_${SERVICE_NAME}-${STACK_NAME}*" | wc -l)
   
   if [ $failed_files -gt 10 ]; then
     echo "There are $failed_files failed files."
     echo "Removing the oldest 5...."
 
-    oldest=$(find failed/failed_"$SERVICE_NAME"-"$STACK_NAME" -maxdepth 1 -type f -name 'failed_"$SERVICE_NAME"-"$STACK_NAME"*[[:digit:]]*-[[:digit:]]*-[[:digit:]]*_[[:digit:]]*-[[:digit:]]*-[[:digit:]]*\.yml' -printf '%T@ %p\n' | sort -n | head -5 | cut -d' ' -f2)
+    oldest=$(find failed/failed_"$SERVICE_NAME"-"$STACK_NAME" -maxdepth 1 -type f -name "failed_${SERVICE_NAME}-${STACK_NAME}_*.yml" -printf '%T@ %p\n' | sort -n | head -5 | cut -d' ' -f2)
 
     for file in $oldest; do
       echo "Removing $file"
@@ -20,17 +20,23 @@ archive() {
   mkdir -p failed/failed_"$SERVICE_NAME"-"$STACK_NAME"
 
   echo "Archiving yaml file in failed/failed_"$SERVICE_NAME"-"$STACK_NAME"." 
-  mv "$SERVICE_NAME"-"$STACK_NAME".yml failed/failed_"$SERVICE_NAME"-"$STACK_NAME"/failed_"$SERVICE_NAME"-"$STACK_NAME"$(date +"%Y-%m-%d_%H-%M-%S")
+  mv "$SERVICE_NAME"-"$STACK_NAME".yml failed/failed_"$SERVICE_NAME"-"$STACK_NAME"/failed_"$SERVICE_NAME"-"$STACK_NAME"_$(date +"%Y-%m-%d_%H-%M-%S").yml
 
   clean_archive
 }
 
-deploy_previous() {  
+deploy_previous() {
+  if [ ! -f prev-"$SERVICE_NAME"-"$STACK_NAME".yml ]; then
+    echo "No previous version for "$SERVICE_NAME"-"$STACK_NAME", removing the failed stack..." >&2
+    docker stack rm "$PROJECT_LOWER"-"$SERVICE_NAME"-"$STACK_NAME"
+    return
+  fi
+
   echo "Rolling back to previous version for "$SERVICE_NAME"-"$STACK_NAME"..." >&2
 
   mv prev-"$SERVICE_NAME"-"$STACK_NAME".yml "$SERVICE_NAME"-"$STACK_NAME".yml
 
-  docker stack deploy -c "$SERVICE_NAME"-"$STACK_NAME".yml "$PROJECT_LOWER"-"$SERVICE_NAME"-"$STACK_NAME"
+  docker stack deploy --with-registry-auth -c "$SERVICE_NAME"-"$STACK_NAME".yml "$PROJECT_LOWER"-"$SERVICE_NAME"-"$STACK_NAME"
 }
 
 rollback() {
