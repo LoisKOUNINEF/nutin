@@ -155,7 +155,8 @@ Nutin's own hand-built test runner + jsdom - not Jest. Tests are plain JavaScrip
 
 - Matchers: `toBe`, `toEqual`, `toContain`, `toBeTruthy`/`toBeFalsy`, `toBeDefined`/`toBeUndefined`, `toBeInstanceOf`, `toHaveBeenCalled`/`toHaveBeenCalledWith`, `toBeLessThan`/`toBeGreaterThan`, `toThrow` — each has a `.not` counterpart.
 - `spyOn(obj, 'method')` returns `.calls`/`.callCount`/`.lastCall`, `.andCallFake(fn)`/`.andReturn(v)`, `.restore()` — unlike mocks, calls pass through by default.
-- `tools/testin-nutin/mocks/` has ready-made `MockEventBus`/`MockHttpClient`/`MockI18n`/`MockRouter` for constructor injection.
+- `tools/testin-nutin/mocks/` has ready-made `MockEventBus`/`MockHttpClient`/`MockI18n`/`MockRouter`.
+- `useEventBus(bus)` (from `core/index.js`) routes every `subscribe`/`once`/`emit`/`off` made through `AppEventBus` to `bus`, e.g. a `MockEventBus`: components' `listen()`, the `Navigation`/`Lifecycle` facades, the router, i18n and app services alike. `useEventBus(null)` restores the real bus. A subscription stays on the bus it was made on: install it before mounting or initializing (`beforeEach`), restore it after destroying (`afterEach`).
 - `useFakeTimers()`/`useRealTimers()`/`advanceTimersByTime(ms)`/`runAllTimers()` for time-dependent code; `flushPromises()` for pending promises.
 - `silenceConsole(method | methods, fn)` runs `fn` with those `console` methods muted (sync or async). Use it in any test that triggers an expected warning/error.
 - `$(selector)`/`$$(selector)` — `document.querySelector`/`querySelectorAll` (as an array).
