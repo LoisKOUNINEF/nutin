@@ -3,6 +3,7 @@ export * from './globals/register-test-globals.js';
 export * from './queue/test-discovery.js';
 export * from './queue/test-queue.js';
 export * from './printer.js';
+export * from './stale-build.js';
 export * from './coverage/collect-coverage.js';
 export * from './coverage/compute-coverage.js';
 export * from './coverage/write-uncovered-report.js';

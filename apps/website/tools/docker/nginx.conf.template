@@ -78,10 +78,39 @@ server {
     # STATIC ASSETS CACHING
     # ---------------------------
 
-    # Immutable cache for static assets
-    location ~* \.(js|css|png|jpg|jpeg|gif|avif|ico|svg|woff|woff2|ttf|eot)$ {
+    # Immutable cache for the files whose name holds a content hash: esbuild's chunks
+    # (^~: no regex location is tried for them), and bundle.<hash>.js / main.<hash>.css
+    # (hash-files.js). A changed file gets a new name. A regex with {} must be quoted.
+    location ^~ /chunks/ {
         expires 1y;
         add_header Cache-Control "public, immutable" always;
+        
+        # Security headers
+        add_header X-Frame-Options $frame_options always;
+        add_header X-Content-Type-Options $content_type_options always;
+        add_header X-XSS-Protection $xss_protection always;
+        add_header Referrer-Policy $referrer_policy always;
+        add_header Permissions-Policy $permissions_policy always;
+        add_header Content-Security-Policy $csp_policy always;
+    }
+
+    location ~* "\.[0-9a-f]{8}\.(js|css)$" {
+        expires 1y;
+        add_header Cache-Control "public, immutable" always;
+        
+        # Security headers
+        add_header X-Frame-Options $frame_options always;
+        add_header X-Content-Type-Options $content_type_options always;
+        add_header X-XSS-Protection $xss_protection always;
+        add_header Referrer-Policy $referrer_policy always;
+        add_header Permissions-Policy $permissions_policy always;
+        add_header Content-Security-Policy $csp_policy always;
+    }
+
+    # Every other static file keeps its name (public/, src/assets/): cached, but revalidated
+    # on each use (304 while its ETag matches), so a replaced file shows after a deploy.
+    location ~* \.(js|css|png|jpg|jpeg|gif|webp|avif|ico|svg|woff|woff2|ttf|otf|eot)$ {
+        add_header Cache-Control "no-cache" always;
         
         # Security headers
         add_header X-Frame-Options $frame_options always;

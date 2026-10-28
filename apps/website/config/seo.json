@@ -9,15 +9,17 @@
       "ogImage": "/assets/images/og-covers/og-cover-home.jpg"
     },
     {
-      "path": "/tutorial/:page?",
+      "path": "/tutorial/:slug?",
       "outputPath": "/tutorial",
+      "mockParams": {},
       "title": {"en": "1. Create your Nutin to-do application"},
       "description": {"en": "Build a basic CRUD application with Nutin in 20 minutes."},
       "ogImage": "/assets/images/og-covers/og-cover-tutorial.jpg"
     },
     {
-      "path": "/tutorial/:page?",
+      "path": "/tutorial/:slug?",
       "outputPath": "/tutorial/1-create-your-nutin-to-do-application",
+      "mockParams": {"slug": "1-create-your-nutin-to-do-application"},
       "title": {"en": "1. Create your Nutin to-do application"},
       "description": {"en": "Build a basic CRUD application with Nutin in 20 minutes."},
       "ogImage": "/assets/images/og-covers/og-cover-tutorial.jpg"
@@ -29,64 +31,73 @@
       "ogImage": "/assets/images/og-covers/og-cover-articles.jpg"
     },
     {
-      "path": "/articles/:page?",
+      "path": "/articles/:slug?",
       "outputPath": "/articles/how-much-frontend-framework-do-you-actually-need",
+      "mockParams": {"slug": "how-much-frontend-framework-do-you-actually-need"},
       "title": {"en": "How Much Frontend Framework Do You Actually Need?"},
       "description": {"en": "Discussing when to use a web framework and what alternatives exist."},
       "ogImage": "/assets/images/og-covers/og-cover-article-1.jpg"
     },
     {
-      "path": "/articles/:page?",
+      "path": "/articles/:slug?",
       "outputPath": "/articles/when-does-a-vanilla-javascript-application-need-structure",
+      "mockParams": {"slug": "when-does-a-vanilla-javascript-application-need-structure"},
       "title": {"en": "When Does a Vanilla JavaScript Application Need Structure?"},
       "description": {"en": "The signs that an app needs structure, and how to give it one."},
       "ogImage": "/assets/images/og-covers/og-cover-article-2.jpg"
     },
     {
-      "path": "/articles/:page?",
+      "path": "/articles/:slug?",
       "outputPath": "/articles/how-to-structure-a-small-spa",
+      "mockParams": {"slug": "how-to-structure-a-small-spa"},
       "title": {"en": "How to Structure a Small SPA"},
       "description": {"en": "How to Structure a Small SPA."},
       "ogImage": "/assets/images/og-covers/og-cover-article-3.jpg"
     },
     {
-      "path": "/articles/:page?",
+      "path": "/articles/:slug?",
       "outputPath": "/articles/direct-dom-manipulation-vs-virtual-dom-whats-the-difference",
+      "mockParams": {"slug": "direct-dom-manipulation-vs-virtual-dom-whats-the-difference"},
       "title": {"en": "Direct DOM Manipulation vs. Virtual DOM: What's the Difference?"},
       "description": {"en": "Describing what virtual DOMs are, when it is relevant to use it, and when direct DOM manipulation can be a good fit."},
       "ogImage": "/assets/images/og-covers/og-cover-article-4.jpg"
     },
     {
-      "path": "/articles/:page?",
+      "path": "/articles/:slug?",
       "outputPath": "/articles/faq",
+      "mockParams": {"slug": "faq"},
       "title": {"en": "FAQ"},
       "description": {"en": "Nutin FAQ."},
       "ogImage": "/assets/images/og-covers/og-cover-faq.jpg"
     },
     {
-      "path": "/articles/:page?",
+      "path": "/articles/:slug?",
       "outputPath": "/articles/why-nutin",
+      "mockParams": {"slug": "why-nutin"},
       "title": {"en": "Why Nutin?"},
       "description": {"en": "Explaining what Nutin is, what it offers, when to use it, and when not to use it."},
       "ogImage": "/assets/images/og-covers/og-cover-why-nutin.jpg"
     },
     {
-      "path": "/guides/:page?",
+      "path": "/guides/:slug?",
       "outputPath": "/guides/a11y-elements",
+      "mockParams": {"slug": "a11y-elements"},
       "title": {"en": "How to use a11y-elements?"},
       "description": {"en": "A guide on how to use a11y-elements package in a Nutin application, bundled from NPM, or loaded from a CDN, and how to use it inside Nutin components."},
       "ogImage": "/assets/images/og-covers/og-cover-guides-a11y.jpg"
     },
     {
-      "path": "/guides/:page?",
+      "path": "/guides/:slug?",
       "outputPath": "/guides/alpinejs",
+      "mockParams": {"slug": "alpinejs"},
       "title": {"en": "How to integrate AlpineJs?"},
       "description": {"en": "A guide on how to integrate AlpineJs in a Nutin application."},
-      "ogImage": "/assets/images/og-covers/og-cover-guides-alpinejs.jpg"
+      "ogImage": "/assets/images/og-covers/og-cover-guides-alpine.jpg"
     },
     {
-      "path": "/guides/:page?",
+      "path": "/guides/:slug?",
       "outputPath": "/guides/jest-vitest",
+      "mockParams": {"slug": "jest-vitest"},
       "title": {"en": "How to use Jest or Vitest for app tests?"},
       "description": {"en": "A guide on how to use Jest or Vitest to test a Nutin application."},
       "ogImage": "/assets/images/og-covers/og-cover-guides-jest.jpg"

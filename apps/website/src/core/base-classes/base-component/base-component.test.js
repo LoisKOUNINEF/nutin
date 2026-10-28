@@ -210,6 +210,98 @@ describe('BaseComponent', () => {
     expect(received).toBe(null);
   });
 
+  it('render() reports the component whose generateTemplate() threw, then rethrows', () => {
+    class Broken extends BaseComponent {
+      generateTemplate() { throw new RangeError('Invalid time value'); }
+    }
+    const component = new Broken({});
+    const error = spyOn(console, 'error').andCallFake(() => {});
+
+    expect(() => component.render()).toThrow('Invalid time value');
+
+    error.restore();
+    expect(error.calls[0][0]).toContain('Broken.generateTemplate() threw');
+    expect(error.calls[0][1]).toBeInstanceOf(RangeError);
+  });
+
+  it('render() reports only the child whose template threw, not its parents', () => {
+    class BrokenChild extends BaseComponent {
+      generateTemplate() { throw new Error('bad child'); }
+    }
+    class Parent extends BaseComponent {
+      generateTemplate() { return '<div data-component="child"></div>'; }
+      registerChildren() {
+        return [{ selector: 'child', factory: (el) => new BrokenChild({ mountTarget: el }) }];
+      }
+    }
+    const parent = new Parent({});
+    const error = spyOn(console, 'error').andCallFake(() => {});
+
+    expect(() => parent.render()).toThrow('bad child');
+
+    error.restore();
+    expect(error.callCount).toBe(1);
+    expect(error.calls[0][0]).toContain('BrokenChild.generateTemplate() threw');
+  });
+
+  it('isDestroyed is false until destroy() runs', () => {
+    const component = new TestComponent();
+    expect(component.isDestroyed).toBe(false);
+
+    component.destroy();
+
+    expect(component.isDestroyed).toBe(true);
+  });
+
+  it('render() after destroy() is ignored with a warning: no template, children or events', () => {
+    const parent = new KeepingParent();
+    parent.render();
+    parent.destroy();
+    const warn = spyOn(console, 'warn').andCallFake(() => {});
+
+    const result = parent.render();
+
+    warn.restore();
+    expect(result).toBe(parent.getElement());
+    expect(parent.created.length).toBe(1);
+    expect(warn.calls[0][0]).toContain('destroyed KeepingParent');
+  });
+
+  it('render() after destroy() binds no data-event listeners', () => {
+    let clicks = 0;
+    const component = new TestComponent({}, { template: '<button data-event="click:onClick">x</button>' });
+    component.onClick = () => { clicks++; };
+    component.render();
+    component.destroy();
+
+    silenceConsole('warn', () => component.render());
+    component.getElement().querySelector('button').click();
+
+    expect(clicks).toBe(0);
+    expect(component.eventListeners.length).toBe(0);
+    expect(component.calls.filter(c => c === 'onBeforeRender').length).toBe(1);
+  });
+
+  it('destroy() twice runs the hooks once', () => {
+    const component = new TestComponent();
+    component.destroy();
+    component.destroy();
+
+    expect(component.calls.filter(c => c === 'onBeforeDestroy').length).toBe(1);
+    expect(component.calls.filter(c => c === 'onAfterDestroy').length).toBe(1);
+  });
+
+  it('listen() after destroy() is ignored with a warning and does not subscribe', () => {
+    const component = new TestComponent();
+    component.destroy();
+    let received = false;
+
+    silenceConsole('warn', () => component.listen('user-login', () => { received = true; }));
+    AppEventBus.emit('user-login', {});
+
+    expect(received).toBe(false);
+  });
+
   it('listenToRenderEvents() triggers render() whenever one of the given events fires', () => {
     const component = new TestComponent();
     component.listenToRenderEvents(['user-login']);

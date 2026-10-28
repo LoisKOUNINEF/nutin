@@ -67,6 +67,26 @@ describe('View', () => {
     expect(view.getRouteParam('id')).toBe('1');
   });
 
+  it('setQueryParams/getQueryParams/getQueryParam/hasQueryParam manage query params', () => {
+    const view = new HomeView({ viewName: 'home' });
+    expect(view.hasQueryParam('tab')).toBe(false);
+    expect(view.getQueryParam('tab')).toBeUndefined();
+
+    view.setQueryParams({ tab: 'posts' });
+
+    expect(view.hasQueryParam('tab')).toBe(true);
+    expect(view.getQueryParam('tab')).toBe('posts');
+    expect(view.getQueryParams()).toEqual({ tab: 'posts' });
+  });
+
+  it('getQueryParams() returns a copy, not a live reference', () => {
+    const view = new HomeView({ viewName: 'home' });
+    view.setQueryParams({ tab: 'posts' });
+    const query = view.getQueryParams();
+    query.tab = 'mutated';
+    expect(view.getQueryParam('tab')).toBe('posts');
+  });
+
   it('onEnter and onExit are present as no-op hooks', () => {
     const view = new HomeView({ viewName: 'home' });
     expect(() => view.onEnter()).not.toThrow();

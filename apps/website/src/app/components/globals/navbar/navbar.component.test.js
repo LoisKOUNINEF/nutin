@@ -30,10 +30,10 @@ describe('NavbarComponent', () => {
     CONFIG.i18n = originalI18n;
   });
 
-  it('lists the four documentation sections in the docs dropdown', () => {
+  it('lists the five documentation sections in the docs dropdown', () => {
     const component = mount();
     const hrefs = [...document.querySelectorAll('#navbar-docs-dropdown [role="menuitem"]')].map((a) => a.getAttribute('href'));
-    expect(hrefs).toEqual(['/en/docs/api/', '/en/docs/options-and-features/', '/en/docs/testing/', '/en/docs/tools/']);
+    expect(hrefs).toEqual(['/en/docs/cli/', '/en/docs/api/', '/en/docs/options-and-features/', '/en/docs/testing/', '/en/docs/tools/']);
     component.destroy();
   });
 

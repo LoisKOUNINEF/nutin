@@ -3,6 +3,12 @@ import { Service } from "../../base-classes/service/service.js";
 // The payload is required unless the event declares none (`undefined` in its EventMap entry).
 type EventArgs<K extends Nutin.EventKey> = undefined extends Nutin.EventMap[K] ? [data?: Nutin.EventMap[K]] : [data: Nutin.EventMap[K]];
 
+// What useEventBus() accepts: the bus's public API, e.g. testin-nutin's MockEventBus.
+export type EventBusApi = Pick<EventBus, 'subscribe' | 'once' | 'emit' | 'off'>;
+
+// Set by useEventBus() (tests): the bus every call is routed to instead.
+let delegate: EventBusApi | null = null;
+
 export class EventBus extends Service<EventBus> {
   private _subscriptions: Nutin.Subscription[] = [];
 
@@ -19,6 +25,7 @@ export class EventBus extends Service<EventBus> {
     event: K,
     callback: (data: Nutin.EventMap[K]) => void
   ): void {
+    if (delegate && delegate !== this) return delegate.subscribe(event, callback);
     this.addHandler(event, callback, false);
   }
 
@@ -26,10 +33,12 @@ export class EventBus extends Service<EventBus> {
     event: K,
     callback: (data: Nutin.EventMap[K]) => void
   ): void {
+    if (delegate && delegate !== this) return delegate.once(event, callback);
     this.addHandler(event, callback, true);
   }
 
   public emit<K extends Nutin.EventKey>(event: K, ...[data]: EventArgs<K>): void {
+    if (delegate && delegate !== this) return delegate.emit(event, ...([data] as EventArgs<K>));
     const callbacks = this.handlers[event];
     if (!callbacks) return;
 
@@ -55,6 +64,7 @@ export class EventBus extends Service<EventBus> {
     event: K,
     callback?: (data: Nutin.EventMap[K]) => void
   ): void {
+    if (delegate && delegate !== this) return delegate.off(event, callback);
     const handlers = this.handlers[event];
     if (!handlers) return;
 
@@ -95,3 +105,13 @@ export class EventBus extends Service<EventBus> {
 }
 
 export const AppEventBus = /* @__PURE__ */ EventBus.getInstance();
+
+/**
+ * For tests: routes every subscribe/once/emit/off made through AppEventBus to `bus`, e.g.
+ * testin-nutin's MockEventBus. That covers components' `listen()`, the Navigation and Lifecycle
+ * facades, the router, i18n and app services alike. Pass null to restore the real bus.
+ * A subscription stays on the bus it was made on: set it before mounting, restore after destroying.
+ */
+export function useEventBus(bus: EventBusApi | null): void {
+  delegate = bus;
+}
