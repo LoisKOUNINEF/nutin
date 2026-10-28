@@ -12,9 +12,9 @@ export const Guards = {
   },
 
   /**
-   * Redirects when the route's task doesn't exist, e.g. after a reload: tasks only live in memory.
+   * Redirects when the URL's task (?task=<id>) doesn't exist, e.g. after a reload: tasks only live in memory.
    */
   requireTask: (redirectTo: string = '/'): Nutin.RouteGuard => {
-    return ({ id }) => id === undefined || taskService.getTask(+id) !== undefined || redirectTo;
+    return (_params, { task }) => task === undefined || taskService.getTask(+task) !== undefined || redirectTo;
   },
 };

@@ -64,7 +64,7 @@ describe('ViewRenderManager', () => {
     expect(exited).toBe(true);
   });
 
-  it('should set route params, render, call onEnter and emit view-mount when rendering a new view', () => {
+  it('should set route and query params, render, call onEnter and emit view-mount when rendering a new view', () => {
     const emitted = [];
     const emitSpy = spyOn(AppEventBus, 'emit');
     emitSpy.andCallFake((event, data) => emitted.push({ event, data }));
@@ -75,14 +75,16 @@ describe('ViewRenderManager', () => {
       viewName: 'HomeView',
       getElement: () => viewElement,
       setRouteParams: (params) => calls.push(['setRouteParams', params]),
+      setQueryParams: (query) => calls.push(['setQueryParams', query]),
       render: () => { calls.push(['render']); return viewElement; },
       onEnter: () => calls.push(['onEnter']),
     };
 
-    ViewRenderManager.renderNewView(view, { id: '42' });
+    ViewRenderManager.renderNewView(view, { id: '42' }, { tab: 'posts' });
 
     expect(calls).toEqual([
       ['setRouteParams', { id: '42' }],
+      ['setQueryParams', { tab: 'posts' }],
       ['render'],
       ['onEnter'],
     ]);
@@ -97,6 +99,7 @@ describe('ViewRenderManager', () => {
       viewName: 'HomeView',
       getElement: () => viewElement,
       setRouteParams: () => {},
+      setQueryParams: () => {},
       render: () => viewElement,
       onEnter: () => {},
     };
@@ -117,6 +120,7 @@ describe('ViewRenderManager', () => {
       viewName: 'HomeView',
       getElement: () => viewElement,
       setRouteParams: () => {},
+      setQueryParams: () => {},
       render: () => viewElement,
       onEnter: () => {},
     };

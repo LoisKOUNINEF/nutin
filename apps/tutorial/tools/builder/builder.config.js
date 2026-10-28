@@ -19,10 +19,11 @@ function validateConfig(config) {
 
 validateConfig(nutinConfig);
 
-// `build:prod` passes --prod rather than a NODE_ENV=production prefix, which Windows shells
-// don't understand. Every build step is a separate process that only inherits the env (see
-// runScript), so the flag is turned into NODE_ENV here, for them and for this process.
+// `build:prod` passes --prod rather than a NODE_ENV=production prefix, which Windows shells don't understand. 
+// Every build step is a separate process that only inherits the env , so the flag is turned into NODE_ENV here.
 if (process.argv.includes('--prod')) process.env.NODE_ENV = 'production';
+// `typecheck` (builder.js --typecheck): the same handoff, for compile-ts.js.
+if (process.argv.includes('--typecheck')) process.env.NUTIN_TYPECHECK = '1';
 
 const wellKnownNonSEORoutes = [
   '/400',
@@ -38,6 +39,7 @@ const wellKnownNonSEORoutes = [
 export const builderConfig = {
   ...nutinConfig.builder,
   isProd: process.env.NODE_ENV === 'production',
+  typecheckOnly: process.env.NUTIN_TYPECHECK === '1',
   i18n: nutinConfig.i18n,
   markdownSources: nutinConfig.markdownSources,
   tailwind: nutinConfig.tailwind,

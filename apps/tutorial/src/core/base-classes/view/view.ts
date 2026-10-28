@@ -3,6 +3,7 @@ import { BaseComponent } from '../base-component/base-component.js';
 export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComponent<T> {
   private _viewName: string;
   protected routeParams: Record<string, string> = {};
+  protected queryParams: Record<string, string> = {};
   private _template: Nutin.Template;
 
   constructor({
@@ -40,6 +41,23 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
 
   public hasRouteParam(key: string): boolean {
     return key in this.routeParams && this.routeParams[key] !== undefined;
+  }
+
+  // The URL's query string ("?tab=posts"), parsed: a repeated key keeps its last value.
+  public setQueryParams(params: Record<string, string>): void {
+    this.queryParams = { ...params };
+  }
+
+  public getQueryParams(): Record<string, string> {
+    return { ...this.queryParams };
+  }
+
+  public getQueryParam(key: string): string | undefined {
+    return this.queryParams[key];
+  }
+
+  public hasQueryParam(key: string): boolean {
+    return key in this.queryParams && this.queryParams[key] !== undefined;
   }
 
   // The page's title, read by the router after each navigation (document.title). Override it

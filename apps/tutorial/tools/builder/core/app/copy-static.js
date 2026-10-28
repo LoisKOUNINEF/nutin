@@ -17,7 +17,7 @@ async function copyStatic() {
   await fs.rm(PATHS.temp, { recursive: true, force: true });
   await ensureDir(PATHS.tempSource);
 
-  await copyFavicon();
+  await copyPublic();
   await copyConfig();
 
   for (const extension of extensions) {
@@ -35,7 +35,22 @@ async function copyStatic() {
     }
   }
 
+  // Whatever its type: fonts' licenses, an extension's _locales, .txt/.xml/.webmanifest files...
+  await copyTree(path.join(PATHS.source, 'assets'), path.join(PATHS.tempSource, 'assets'));
+
   if (builderConfig.isProd) await copyJsonFiles(PATHS.source, PATHS.tempSource);
+}
+
+// OS and git housekeeping files stay behind; other dotfiles and folders (.well-known/) are copied.
+const NOT_COPIED = new Set(['.DS_Store', 'Thumbs.db', '.gitkeep']);
+
+async function copyTree(src, dest) {
+  await fs.cp(src, dest, {
+    recursive: true,
+    filter: (file) => !NOT_COPIED.has(path.basename(file)),
+  }).catch((err) => {
+    if (err.code !== 'ENOENT') throw err;
+  });
 }
 
 async function ensureDir(dir) {
@@ -47,15 +62,13 @@ async function copyFile(src, dest) {
   await fs.copyFile(src, dest);
 }
 
-async function copyFavicon() {
-  const srcPath = path.resolve(path.join('public', 'favicon.ico'));
-  const destPath = path.join(PATHS.tempSource, 'favicon.ico');
-
+// public/'s files are served from the site's root, as they are (never hashed or bundled).
+async function copyPublic() {
+  await copyTree(path.resolve('public'), PATHS.tempSource);
   try {
-    await copyFile(srcPath, destPath);
-  } catch (err) {
-    if (err.code === 'ENOENT') print.warn('No favicon found at public/favicon.ico');
-    else errorExit(err, 'copy-static');
+    await fs.access(path.resolve('public', 'favicon.ico'));
+  } catch {
+    print.warn('No favicon found at public/favicon.ico');
   }
 }
 

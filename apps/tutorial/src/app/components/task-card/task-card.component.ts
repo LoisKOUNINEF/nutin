@@ -37,6 +37,6 @@ export class TaskCardComponent extends Component {
   }
 
   private _goToEdit(): void {
-    Navigation.navigateTo(`/tasks/${this.config.id}`)
+    Navigation.navigateTo(`/?task=${this.config.id}`)
   }
 }
