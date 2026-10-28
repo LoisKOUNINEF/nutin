@@ -27,7 +27,7 @@ pull_images() {
 }
 
 deploy_stack() {
-  docker stack deploy --with-registry-auth -c "$SERVICE_NAME"-"$STACK_NAME".yml "$PROJECT_LOWER"-"$SERVICE_NAME"-"$STACK_NAME"
+  docker stack deploy --with-registry-auth -c "$SERVICE_NAME"-"$STACK_NAME".yml "$APP_LOWER"-"$STACK_NAME"
 }
 
 stack_deploy() {

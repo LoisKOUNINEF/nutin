@@ -28,7 +28,7 @@ archive() {
 deploy_previous() {
   if [ ! -f prev-"$SERVICE_NAME"-"$STACK_NAME".yml ]; then
     echo "No previous version for "$SERVICE_NAME"-"$STACK_NAME", removing the failed stack..." >&2
-    docker stack rm "$PROJECT_LOWER"-"$SERVICE_NAME"-"$STACK_NAME"
+    docker stack rm "$APP_LOWER"-"$STACK_NAME"
     return
   fi
 
@@ -36,15 +36,34 @@ deploy_previous() {
 
   mv prev-"$SERVICE_NAME"-"$STACK_NAME".yml "$SERVICE_NAME"-"$STACK_NAME".yml
 
-  docker stack deploy --with-registry-auth -c "$SERVICE_NAME"-"$STACK_NAME".yml "$PROJECT_LOWER"-"$SERVICE_NAME"-"$STACK_NAME"
+  docker stack deploy --with-registry-auth -c "$SERVICE_NAME"-"$STACK_NAME".yml "$APP_LOWER"-"$STACK_NAME"
+}
+
+# DB=postgres: restores the backup deploy.sh made before this deployment (undoes its migrations)
+restore_database() {
+  local script_dir="$1"
+  local marker=".last-backup-$SERVICE_NAME-$STACK_NAME"
+
+  if [ ! -f "$marker" ]; then
+    echo "No backup made before this deployment, skipping database restore." >&2
+    return
+  fi
+
+  if ! BACKUP_FILE="$(cat "$marker")" "$script_dir/../db-backup/restore.sh"; then
+    echo "ERROR: Database restore failed! Restore $(cat "$marker") manually." >&2
+  fi
 }
 
 rollback() {
   local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-  echo "Stack $STACK_NAME failed to become healthy. The "$SERVICE_NAME"-"$STACK_NAME" live version for "$PROJECT_LOWER" website will be rolled back to previous stable version." >&2
+  echo "Stack $STACK_NAME failed to become healthy. The "$SERVICE_NAME"-"$STACK_NAME" live version for "$PROJECT_LOWER" will be rolled back to previous stable version." >&2
   echo "WARNING: Failed to deploy new $STACK_NAME version!" >&2
-  
+
+  if [ "$DB" = "postgres" ]; then
+    restore_database "$script_dir"
+  fi
+
   archive
   deploy_previous
 

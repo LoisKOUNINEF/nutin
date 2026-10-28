@@ -1,6 +1,6 @@
 services:
-  ${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}:
-    image: ghcr.io/${REPO_LOWER}-${SERVICE_NAME}:image-placeholder
+  ${APP_LOWER}-${STACK_NAME}:
+    image: ghcr.io/${IMAGE_LOWER}:image-placeholder
     networks:
       - traefik-public
       - default
@@ -25,20 +25,20 @@ services:
         window: 120s
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.rule=(Host(`${DOMAIN_NAME}`) || Host(`www.${DOMAIN_NAME}`)) && PathPrefix(`/`)"
-        - "traefik.http.routers.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.entrypoints=websecure"
-        - "traefik.http.routers.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.tls.certresolver=letsencrypt"
-        - "traefik.http.routers.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.service=${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}"
+        - "traefik.http.routers.${APP_LOWER}-${STACK_NAME}.rule=(Host(`${DOMAIN_NAME}`) || Host(`www.${DOMAIN_NAME}`)) && PathPrefix(`/`)"
+        - "traefik.http.routers.${APP_LOWER}-${STACK_NAME}.entrypoints=websecure"
+        - "traefik.http.routers.${APP_LOWER}-${STACK_NAME}.tls.certresolver=letsencrypt"
+        - "traefik.http.routers.${APP_LOWER}-${STACK_NAME}.service=${APP_LOWER}-${STACK_NAME}"
         - "traefik.http.middlewares.hsts-header.headers.stsSeconds=31536000"
         - "traefik.http.middlewares.hsts-header.headers.stsIncludeSubdomains=true"
         - "traefik.http.middlewares.hsts-header.headers.stsPreload=true"
         # www.<domain> is only served to redirect it (301) to <domain>, so pages exist on one host.
         # "$$" escapes "$" from docker stack's interpolation, so Traefik gets its capture groups as "$" + "{1}".
-        - "traefik.http.middlewares.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}-www.redirectregex.regex=^https://www\\.([^/]+)/(.*)"
-        - "traefik.http.middlewares.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}-www.redirectregex.replacement=https://$${1}/$${2}"
-        - "traefik.http.middlewares.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}-www.redirectregex.permanent=true"
-        - "traefik.http.routers.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.middlewares=hsts-header@swarm,${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}-www@swarm"
-        - "traefik.http.services.${PROJECT_LOWER}-${SERVICE_NAME}-${STACK_NAME}.loadbalancer.server.port=${CLIENT_PORT}"
+        - "traefik.http.middlewares.${APP_LOWER}-${STACK_NAME}-www.redirectregex.regex=^https://www\\.([^/]+)/(.*)"
+        - "traefik.http.middlewares.${APP_LOWER}-${STACK_NAME}-www.redirectregex.replacement=https://$${1}/$${2}"
+        - "traefik.http.middlewares.${APP_LOWER}-${STACK_NAME}-www.redirectregex.permanent=true"
+        - "traefik.http.routers.${APP_LOWER}-${STACK_NAME}.middlewares=hsts-header@swarm,${APP_LOWER}-${STACK_NAME}-www@swarm"
+        - "traefik.http.services.${APP_LOWER}-${STACK_NAME}.loadbalancer.server.port=${CLIENT_PORT}"
 
 networks:
   traefik-public:

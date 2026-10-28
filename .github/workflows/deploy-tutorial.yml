@@ -1,4 +1,4 @@
-name: CI/CD Tutorial
+name: CI/CD Tutorial production
 
 on:
   push:
@@ -28,20 +28,14 @@ jobs:
             exit 1
           fi
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: "24"
-          cache: "npm"
-
-      - name: Install all monorepo dependencies
-        run: npm ci
-
       - name: Ensure scripts are executable
         run: chmod +x .github/workflows/scripts/jobs/*.sh
 
       - name: Lowercase the repo name and project name
         run: .github/workflows/scripts/jobs/format-name.sh
+        env:
+          SERVICE_NAME: "tutorial"
+          APP_MODE: "monorepo"
 
       - name: Set Git SHA in env
         run: echo "GITHUB_SHA=${{ github.sha }}" >> $GITHUB_ENV
@@ -60,9 +54,15 @@ jobs:
         run: .github/workflows/scripts/jobs/build-and-publish.sh
         env:
           SERVICE_NAME: "tutorial"
+          DOCKERFILE: "apps/tutorial/tools/docker/Dockerfile"
           GITHUB_SHA: ${{ github.sha }}
 
   deploy:
+    # one deploy per app and stack at a time (a newer push replaces a pending one),
+    # the VPS lock in the deploy step serializes the other apps
+    concurrency:
+      group: deploy-${{ github.workflow }}
+      cancel-in-progress: false
     needs: build-and-publish
     runs-on: ubuntu-24.04
     env:
@@ -83,6 +83,9 @@ jobs:
 
       - name: Lowercase the repo name and project name
         run: .github/workflows/scripts/jobs/format-name.sh
+        env:
+          SERVICE_NAME: "tutorial"
+          APP_MODE: "monorepo"
 
       - name: Set Git SHA in env
         run: echo "GITHUB_SHA=${{ github.sha }}" >> $GITHUB_ENV
@@ -94,44 +97,80 @@ jobs:
         run: .github/workflows/scripts/jobs/add-tag.sh
 
       - name: Copy updated stack file to VPS
-        uses: appleboy/scp-action@v1.0.0
+        uses: appleboy/scp-action@ff85246acaad7bdce478db94a363cd2bf7c90345 # v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASS }}
           port: ${{ secrets.SSH_PORT }}
+          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
           source: "new-${{ env.SERVICE_NAME }}-${{ env.STACK_NAME }}.yml"
           target: "${{ env.PROJECT_LOWER }}"
 
       - name: Copy deployment scripts to VPS
-        uses: appleboy/scp-action@v1.0.0
+        uses: appleboy/scp-action@ff85246acaad7bdce478db94a363cd2bf7c90345 # v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASS }}
           port: ${{ secrets.SSH_PORT }}
+          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
           source: ".github/workflows/scripts/deployment/*.sh"
           target: "~/${{ env.PROJECT_LOWER }}/scripts"
           strip_components: 3
 
-      - name: Deploy tutorial app
-        uses: appleboy/ssh-action@v1.2.5
+      - name: Deploy to production
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         env:
           DOCKER_AUTH: ${{ secrets.DOCKER_AUTH }}
           REPO_LOWER: ${{ env.REPO_LOWER }}
           PROJECT_LOWER: ${{ env.PROJECT_LOWER }}
+          APP_LOWER: ${{ env.APP_LOWER }}
+          IMAGE_LOWER: ${{ env.IMAGE_LOWER }}
+          APP_SNAKE: ${{ env.APP_SNAKE }}
           STACK_NAME: ${{ env.STACK_NAME }}
           SERVICE_NAME: ${{ env.SERVICE_NAME }}
+          PIPELINE: "direct"
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASS }}
           port: ${{ secrets.SSH_PORT }}
-          envs: DOCKER_AUTH,REPO_LOWER,PROJECT_LOWER,STACK_NAME,SERVICE_NAME
+          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
+          envs: DOCKER_AUTH,REPO_LOWER,PROJECT_LOWER,APP_LOWER,IMAGE_LOWER,APP_SNAKE,STACK_NAME,SERVICE_NAME,PIPELINE
           script: |
             cd $PROJECT_LOWER
             chmod -R +x scripts/deployment/*.sh
-            ./scripts/deployment/deploy.sh
+            # serializes the deploys of every app on the VPS (they share ~/.docker/config.json)
+            flock -w 600 ~/.deploy.lock ./scripts/deployment/deploy.sh
+
+  delete-old-images:
+    runs-on: ubuntu-24.04
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Ensure scripts are executable
+        run: chmod +x .github/workflows/scripts/jobs/*.sh
+
+      - name: Lowercase the repo name and project name
+        run: .github/workflows/scripts/jobs/format-name.sh
+        env:
+          SERVICE_NAME: "tutorial"
+          APP_MODE: "monorepo"
+
+      - name: Delete old container images
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: ${{ env.APP_LOWER }}
+          package-type: 'container'
+          min-versions-to-keep: 3
+          token: ${{ secrets.GITHUB_TOKEN }}

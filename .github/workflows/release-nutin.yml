@@ -6,12 +6,12 @@ on:
       - "cli-v*"
 
 concurrency:
-  group: release
+  group: release-nutin
   cancel-in-progress: false
 
 jobs:
   publish:
-    name: Build & Publish Nutin Package
+    name: Build & Publish nutin Package
     runs-on: ubuntu-24.04
 
     permissions:
@@ -24,17 +24,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Ensure tag is on main
-        run: |
-#          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
-#            echo "❌ Tag $GITHUB_REF_NAME is not on main. Aborting publish to npm workflow."
-#            exit 1
-#          fi
-
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
           node-version: "24"
+          cache: "npm"
           registry-url: "https://registry.npmjs.org/"
 
       - name: Ensure tag matches package.json version
@@ -45,16 +39,13 @@ jobs:
             exit 1
           fi
 
-      # Publish from the package dir (same shape as a11y-elements' release.yml)
-      # rather than `--workspace` from the monorepo root.
+      - name: Install dependencies
+        run: npm ci
+
       - name: List package contents
         working-directory: packages/nutin
         run: npm pack --dry-run
 
       - name: Publish to npm
         working-directory: packages/nutin
-        # verbose: npm only logs *why* the OIDC token exchange failed at this level
-        run: |
-          echo "id-token request available: ${ACTIONS_ID_TOKEN_REQUEST_URL:+yes}"
-          npm -v
-          npm publish --access public --loglevel verbose
+        run: npm publish --access public

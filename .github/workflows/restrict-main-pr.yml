@@ -11,8 +11,11 @@ jobs:
     steps:
       - name: Ensure PR is from staging
         if: github.base_ref == 'main'
+        # the branch name is set by the PR author: passed as data, never pasted into the script
+        env:
+          HEAD_REF: ${{ github.head_ref }}
         run: |
-          if [ "${{ github.head_ref }}" != "staging" ]; then
+          if [ "$HEAD_REF" != "staging" ]; then
             echo "Pull requests to main must come from the staging branch!"
             exit 1
           fi

@@ -11,6 +11,11 @@ on:
 
 jobs:
   deploy:
+    # one deploy per app and stack at a time (a newer push replaces a pending one),
+    # the VPS lock in the deploy step serializes the other apps
+    concurrency:
+      group: deploy-${{ github.workflow }}
+      cancel-in-progress: false
     runs-on: ubuntu-24.04
     env:
       SERVICE_NAME: "website"
@@ -28,7 +33,7 @@ jobs:
       - name: Ensure tag is on main
         run: |
           if [ "$(git branch --contains $GITHUB_SHA | grep 'main')" = "" ]; then
-            echo "❌ Tag is not on main. Aborting nutin website deployment."
+            echo "❌ Tag is not on main. Aborting website deployment."
             exit 1
           fi
 
@@ -37,27 +42,34 @@ jobs:
 
       - name: Lowercase the repo name and project name
         run: .github/workflows/scripts/jobs/format-name.sh
+        env:
+          SERVICE_NAME: "website"
+          APP_MODE: "monorepo"
 
       - name: Generate new stack file
         run: .github/workflows/scripts/jobs/create-stack.sh
 
       - name: Copy stack file to VPS
-        uses: appleboy/scp-action@v1.0.0
+        uses: appleboy/scp-action@ff85246acaad7bdce478db94a363cd2bf7c90345 # v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASS }}
           port: ${{ secrets.SSH_PORT }}
+          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
           source: "new-${{ env.SERVICE_NAME }}-${{ env.STACK_NAME }}.yml"
           target: "${{ env.PROJECT_LOWER }}"
 
       - name: Deploy to production
-        uses: appleboy/ssh-action@v1.2.5
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         env:
           DOCKER_AUTH: ${{ secrets.DOCKER_AUTH }}
           REPO_LOWER: ${{ env.REPO_LOWER }}
           PROJECT_LOWER: ${{ env.PROJECT_LOWER }}
+          APP_LOWER: ${{ env.APP_LOWER }}
+          IMAGE_LOWER: ${{ env.IMAGE_LOWER }}
+          APP_SNAKE: ${{ env.APP_SNAKE }}
           STACK_NAME: ${{ env.STACK_NAME }}
           SERVICE_NAME: ${{ env.SERVICE_NAME }}
         with:
@@ -66,10 +78,12 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASS }}
           port: ${{ secrets.SSH_PORT }}
-          envs: DOCKER_AUTH,REPO_LOWER,PROJECT_LOWER,STACK_NAME,SERVICE_NAME
+          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
+          envs: DOCKER_AUTH,REPO_LOWER,PROJECT_LOWER,APP_LOWER,IMAGE_LOWER,APP_SNAKE,STACK_NAME,SERVICE_NAME
           script: |
             cd $PROJECT_LOWER
-            ./scripts/deployment/deploy.sh && ./scripts/deployment/remove-staging.sh
+            # serializes the deploys of every app on the VPS (they share ~/.docker/config.json)
+            flock -w 600 ~/.deploy.lock ./scripts/deployment/deploy.sh && ./scripts/deployment/remove-staging.sh
 
   delete-old-images:
     runs-on: ubuntu-24.04
@@ -78,9 +92,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    strategy:
-      matrix:
-        image-name: ["website", "tutorial"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -90,11 +101,14 @@ jobs:
 
       - name: Lowercase the repo name and project name
         run: .github/workflows/scripts/jobs/format-name.sh
+        env:
+          SERVICE_NAME: "website"
+          APP_MODE: "monorepo"
 
       - name: Delete old container images
         uses: actions/delete-package-versions@v5
         with:
-          package-name: ${{ env.PROJECT_LOWER }}-${{ matrix.image-name }}
+          package-name: ${{ env.APP_LOWER }}
           package-type: 'container'
           min-versions-to-keep: 3
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -3,7 +3,7 @@
 replace_placeholders() {
   echo "Checking for missing image tags to update"
 
-  if [ "$SERVICE_NAME" = "tutorial" ]; then
+  if [ "$PIPELINE" = "direct" ]; then
     origin="prev-${SERVICE_NAME}-production.yml"
   elif [ "$STACK_NAME" = "staging" ]; then
     origin="prev-${SERVICE_NAME}-staging.yml"
