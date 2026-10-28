@@ -228,13 +228,13 @@ describe('TaskCardComponent', () => {
     deleteSpy.restore();
   });
 
-  it('Edit navigates to the task route', () => {
+  it('Edit opens the task in the URL', () => {
     const navigateSpy = spyOn(Navigation, 'navigateTo').andCallFake(() => {});
     new TaskCardComponent(app, { id: 1, name: 'Buy milk' }).render();
 
     click($$('.task-action button')[0]);
 
-    expect(navigateSpy).toHaveBeenCalledWith('/tasks/1');
+    expect(navigateSpy).toHaveBeenCalledWith('/?task=1');
     navigateSpy.restore();
   });
 });
@@ -331,22 +331,22 @@ describe('TaskCatalogView', () => {
     expect($$('.task-card').length).toBe(2);
   });
 
-  it('does not render task inputs without an id', () => {
+  it('does not render task inputs without a task in the URL', () => {
     view.render();
 
     expect($('.task-inputs')).toBe(null);
   });
 
-  it('renders task inputs for the task in the route', () => {
-    // What the router does for /tasks/1
-    view.setRouteParams({ id: '1' });
+  it('renders task inputs for the task in the URL', () => {
+    // What the router does for /?task=1
+    view.setQueryParams({ task: '1' });
     view.render();
 
     expect($('.task-inputs #name').value).toBe('Task 2');
   });
 
   it('keeps unchanged cards and the form when it re-renders', () => {
-    view.setRouteParams({ id: '1' });
+    view.setQueryParams({ task: '1' });
     view.render();
     const [firstCard, secondCard] = $$('.task-card');
     const form = $('.task-inputs');
@@ -366,7 +366,7 @@ describe('TaskCatalogView', () => {
 
 ## Test the guard
 
-A guard is a function of the route's params, so call it directly:
+A guard is a function of the route's params and query params, so call it directly:
 
 ```js
 // src/app/guards.test.js
@@ -388,15 +388,15 @@ describe('Guards.requireTask', () => {
   });
 
   it('lets an existing task through', () => {
-    expect(Guards.requireTask()({ id: '0' })).toBe(true);
+    expect(Guards.requireTask()({}, { task: '0' })).toBe(true);
   });
 
   it('redirects when the task does not exist', () => {
-    expect(Guards.requireTask()({ id: '5' })).toBe('/');
+    expect(Guards.requireTask()({}, { task: '5' })).toBe('/');
   });
 
-  it('lets the route through without an id', () => {
-    expect(Guards.requireTask()({})).toBe(true);
+  it('lets the route through without a task', () => {
+    expect(Guards.requireTask()({}, {})).toBe(true);
   });
 });
 ```

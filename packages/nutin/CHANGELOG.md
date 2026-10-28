@@ -2,7 +2,7 @@
 
 ## 3.1.0
 
-### Feature
+### Features
 
 - **Browser extension projects: `create-nutin-app --extension [side-panel|popup]`.** Generates the app as a Chrome and Firefox extension: its UI is the side panel or the popup.
     - Generated files: `src/extension/manifest.json` (Manifest V3: name from the project, the side panel or popup, `storage` permission, placeholder icons in `src/assets/icons/`) and `src/extension/background.ts` (side panel: the toolbar button toggles it, with `setPanelBehavior` in Chrome and `sidebarAction.toggle()` in Firefox). `main.ts` mounts a root `AppComponent` into `#app` instead of starting the router, and `index.html` gets a `<title>`.
@@ -16,6 +16,7 @@
         - `lint:extension` runs Mozilla's `web-ext lint` on `dist/firefox` (`web-ext` is a devDependency). The scripts are made for CI: one `package:extension:<browser>` per job.
     - `src/app/services/chrome-api/chrome-api.service.ts`: storage (`local`/`sync`/`session`: get, set, remove, change events), the active tab's URL and tab changes, `openTab()` for http(s) pages only, and `browser()` (Chrome or Firefox). It reads `chrome` on every call.
     - Docs: [How do I create a browser extension?](https://www.nutin.dev/docs/cli/create-a-browser-extension) (loading and reloading, configuration, what ships, packaging, store submissions, `web-ext lint` warnings and a note for AMO reviewers).
+- **Query parameters, on every route, the default route (`/`) included.** The router parses the URL's query string (`/?tab=settings`) and hands it to the view before `render()`, alongside the route params, which stay separate. Views get `getQueryParams()`, `getQueryParam(key)` and `hasQueryParam(key)`, and the router gets `getQueryParams()` and `getQueryParam(key)`. Values are decoded, and a repeated key keeps its last value. Route guards receive them as a second argument: `(params, query)`. Default app bundle: +117 B gzip.
 
 ### Changes
 

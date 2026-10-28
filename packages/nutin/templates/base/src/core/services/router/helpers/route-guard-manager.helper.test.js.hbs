@@ -87,13 +87,23 @@ describe('RouteGuardsManager', () => {
     expect(receivedParams[0]).toEqual({ id: '42' });
   });
 
-  it('defaults params to an empty object when none are passed to processRouteGuards', async () => {
-    const receivedParams = [];
-    const guard = (params) => { receivedParams.push(params); return true; };
+  it('passes the query params through processRouteGuards to each guard, after the route params', async () => {
+    const received = [];
+    const guard = (params, query) => { received.push([params, query]); return true; };
+    const config = { view: mockViewConstructor, guards: [guard, guard] };
+
+    await RouteGuardsManager.processRouteGuards(config, { id: '42' }, { tab: 'posts' });
+
+    expect(received).toEqual([[{ id: '42' }, { tab: 'posts' }], [{ id: '42' }, { tab: 'posts' }]]);
+  });
+
+  it('defaults params and query to empty objects when none are passed to processRouteGuards', async () => {
+    const received = [];
+    const guard = (params, query) => { received.push([params, query]); return true; };
     const config = { view: mockViewConstructor, guards: [guard] };
 
     await RouteGuardsManager.processRouteGuards(config);
 
-    expect(receivedParams[0]).toEqual({});
+    expect(received[0]).toEqual([{}, {}]);
   });
 });

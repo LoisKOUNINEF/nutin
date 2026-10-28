@@ -1,6 +1,6 @@
 {
   "name": "@nutin/cli",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "The structure of a framework. The freedom of vanilla.",
   "preferGlobal": true,
   "main": "lib/index.mjs",
