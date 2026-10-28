@@ -54,7 +54,7 @@ export class TaskCatalogView extends View {
 
   /* ... */
 
-  onBeforeRender(): void {
+  override onBeforeRender(): void {
     this._tasks = taskService.tasks;
   }
 }

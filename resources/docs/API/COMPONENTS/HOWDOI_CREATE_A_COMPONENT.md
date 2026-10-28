@@ -44,7 +44,7 @@ export class GreetingComponent extends Component<HTMLDivElement, GreetingConfig>
 
 ```ts
 // in a parent component
-registerChildren(): Nutin.ComponentConfig[] {
+override registerChildren(): Nutin.ComponentConfig[] {
   return [
     {
       selector: 'my-greeting-selector',

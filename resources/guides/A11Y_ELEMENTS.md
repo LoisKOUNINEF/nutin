@@ -30,7 +30,7 @@ The builder splits every dynamic `import()` into its own chunk, which is only do
 
 ```ts
 // src/app/views/settings/settings.view.ts
-public onEnter(): void {
+public override onEnter(): void {
     void import('a11y-elements/overlays/modal');
 }
 ```

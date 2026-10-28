@@ -95,7 +95,7 @@ export class ProductCardComponent extends Component {
   }
 
   // Declares children mounted into the data-component / data-catalog placeholders below.
-  public registerChildren(): Nutin.ComponentConfig[] {
+  public override registerChildren(): Nutin.ComponentConfig[] {
     // Single child, matched to <div data-component="product-details">
     const detailsComponent = {
       selector: `product-details`,

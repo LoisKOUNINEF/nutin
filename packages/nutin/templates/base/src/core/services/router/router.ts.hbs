@@ -76,7 +76,7 @@ class Router extends Service<Router> {
     const routeMatch = this.matchRoute(normalizedPath);
 
     if (!routeMatch) {
-      await this.handleNotFound(normalizedPath, currentPath, mode, isStale, moveFocus);
+      await this.handleNotFound(normalizedPath, mode, isStale, moveFocus);
       return;
     }
 
@@ -100,7 +100,7 @@ class Router extends Service<Router> {
 
     // Must run before renderNewView(): a view's onEnter() may rewrite the URL via NavigationManager.replaceState(), 
     // which acts on whatever history entry is current. This ensures current before onEnter() fires.
-    NavigationManager.updateHistory(normalizedPath, currentPath, mode, hash, search);
+    NavigationManager.updateHistory(normalizedPath, mode, hash, search);
 
     this._currentView = ViewRenderManager.renderNewView(view, routeMatch.params);
 
@@ -185,7 +185,6 @@ class Router extends Service<Router> {
 
   private async handleNotFound(
     normalizedPath: string, 
-    currentPath: string, 
     mode: HistoryMode,
     isStale: () => boolean,
     moveFocus: boolean
@@ -206,7 +205,7 @@ class Router extends Service<Router> {
     this._currentView = ViewRenderManager.renderNewView(view, {});
 
     NavigationManager.updateDocumentTitle(this._currentView, '/404');
-    NavigationManager.updateHistory(normalizedPath, currentPath, mode);
+    NavigationManager.updateHistory(normalizedPath, mode);
     this.afterRender(moveFocus);
   }
 
@@ -218,11 +217,7 @@ class Router extends Service<Router> {
     mode: HistoryMode,
     moveFocus: boolean
   ): Promise<GuardResult | false> {
-    const guardResult = await RouteGuardsManager.processRouteGuards(
-      routeConfig, 
-      normalizedPath,
-      params
-    );
+    const guardResult = await RouteGuardsManager.processRouteGuards(routeConfig, params);
 
     if (!guardResult.allowed) {
       if (guardResult.redirectTo) {

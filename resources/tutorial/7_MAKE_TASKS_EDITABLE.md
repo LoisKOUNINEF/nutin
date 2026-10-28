@@ -149,7 +149,7 @@ import { TaskInputsComponent } from '../../components/task-inputs/task-inputs.co
 export class TaskCatalogView extends View {
     /* ... */
 
-    registerChildren(): Nutin.ComponentConfig[] {
+    override registerChildren(): Nutin.ComponentConfig[] {
         const taskCatalogChildren: Nutin.ComponentConfig[] = [ /* new-task, task-cards */ ];
 
         if (this.hasRouteParam('id')) {
@@ -190,7 +190,7 @@ import { Navigation } from '../../../core/index.js';
 export class TaskCardComponent extends Component {
     /* ... */
 
-    registerChildren(): Nutin.ComponentConfig[] {
+    override registerChildren(): Nutin.ComponentConfig[] {
         return [
             /* ... */
             {
@@ -237,7 +237,7 @@ Tell the view which children are the same as before:
 export class TaskCatalogView extends View {
     /* ... */
 
-    registerChildren(): Nutin.ComponentConfig[] {
+    override registerChildren(): Nutin.ComponentConfig[] {
         const taskCatalogChildren: Nutin.ComponentConfig[] = [
             /* new-task */
             ...this.createCatalogComponents({

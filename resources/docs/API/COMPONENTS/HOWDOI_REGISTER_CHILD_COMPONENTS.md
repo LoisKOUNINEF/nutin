@@ -5,7 +5,7 @@
 Override `registerChildren()` and match each entry's `selector` to a `data-component` mount point in your template:
 
 ```ts
-public registerChildren(): Nutin.ComponentConfig[] {
+public override registerChildren(): Nutin.ComponentConfig[] {
   return [
     { selector: 'user-card', factory: (el) => new UserCardComponent(el, { id: 1 }) },
   ];
@@ -36,7 +36,7 @@ Children without `keep` are destroyed and recreated on every render — see [Kee
 Use `createCatalogComponents()` instead of hand-writing one entry per item:
 
 ```ts
-public registerChildren(): Nutin.ComponentConfig[] {
+public override registerChildren(): Nutin.ComponentConfig[] {
   return [
     ...this.createCatalogComponents({
       items: this.users,           // array of objects or primitives
@@ -102,7 +102,7 @@ By default, a parent's re-render destroys and recreates every child, losing its 
 ### Single children: `keep`
 
 ```ts
-public registerChildren(): Nutin.ComponentConfig[] {
+public override registerChildren(): Nutin.ComponentConfig[] {
   return [
     { selector: 'search', keep: 'search', factory: (el) => new SearchComponent(el) },
   ];

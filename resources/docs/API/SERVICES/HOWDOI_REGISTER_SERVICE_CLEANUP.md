@@ -10,7 +10,7 @@ export class PollingService extends Service<PollingService> {
     this.registerCleanup(() => clearInterval(this._intervalId));
   }
 
-  protected onDestroy(): void {
+  protected override onDestroy(): void {
     // async/custom teardown logic goes here
   }
 }

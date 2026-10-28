@@ -30,7 +30,7 @@ export class TaskCatalogView extends View {
 
     constructor() { /* ... */ }
 
-    registerChildren(): Nutin.ComponentConfig[] {
+    override registerChildren(): Nutin.ComponentConfig[] {
         // One TaskCardComponent is created for each task.
         return this.createCatalogComponents({
             items: this._tasks,

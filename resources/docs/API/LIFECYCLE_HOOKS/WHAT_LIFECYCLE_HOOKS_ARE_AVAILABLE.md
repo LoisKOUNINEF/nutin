@@ -14,6 +14,8 @@ protected generateTemplate(): Nutin.Template { return ''; }    // Component/View
 public registerChildren(): Nutin.ComponentConfig[] { return []; }
 ```
 
+In a TypeScript project, mark each one you override with `override` (`protected override onAfterRender(): void`): new apps' `tsconfig.json` enables `noImplicitOverride`.
+
 `View` additionally exposes:
 
 ```ts

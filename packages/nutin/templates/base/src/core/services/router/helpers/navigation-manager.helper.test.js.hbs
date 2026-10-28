@@ -47,7 +47,7 @@ describe('NavigationManager', () => {
       expect(url).toBe('/about');
     };
 
-    NavigationManager.updateHistory('/about', '/home', 'push');
+    NavigationManager.updateHistory('/about', 'push');
     expect(called).toBe(true);
 
     window.history.pushState = originalPushState;
@@ -61,7 +61,7 @@ describe('NavigationManager', () => {
       called = true;
     };
 
-    NavigationManager.updateHistory('/about', '/home', 'none');
+    NavigationManager.updateHistory('/about', 'none');
 
     expect(called).toBe(false);
     window.history.pushState = originalPushState;
@@ -80,7 +80,7 @@ describe('NavigationManager', () => {
       replacedUrl = url;
     };
 
-    NavigationManager.updateHistory('/about', '/home', 'replace', 'team');
+    NavigationManager.updateHistory('/about', 'replace', 'team');
 
     window.history.pushState = originalPushState;
     window.history.replaceState = originalReplaceState;
@@ -289,7 +289,7 @@ describe('NavigationManager', () => {
       pushedUrl = url;
     };
 
-    NavigationManager.updateHistory('/list', '/home', 'push', 'top', '?page=2');
+    NavigationManager.updateHistory('/list', 'push', 'top', '?page=2');
 
     window.history.pushState = originalPushState;
     expect(pushedUrl).toBe('/list?page=2#top');

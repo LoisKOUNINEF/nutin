@@ -63,7 +63,6 @@ export function normalizePath(path: string): string {
 
 export function updateHistory(
   normalizedPath: string,
-  currentPath: string,
   mode: HistoryMode,
   hash?: string,
   search: string = ''

@@ -17,7 +17,7 @@ Params are URL-decoded (`/users/J%C3%B6rg` gives `id` = `Jörg`). Static segment
 
 ```ts
 export class PostView extends View {
-  protected onBeforeRender(): void {
+  protected override onBeforeRender(): void {
     const id = this.getRouteParam('id');
     // ...
   }

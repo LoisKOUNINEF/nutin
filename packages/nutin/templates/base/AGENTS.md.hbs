@@ -46,7 +46,7 @@ BaseComponent<T>     — render/destroy engine, data-* parsing, children
 - A re-render replaces the component's own nodes, which loses focus, a screen reader's position, `<details>` state and CSS transitions, and a replaced `aria-live` region may not announce. For a value that changes often (progress, counters, live-region messages, validation text), update the existing node in the handler (`this.element.querySelector(...)` + `textContent`/`setAttribute`) instead of calling `render()`. Values set this way are not escaped by `html`: use `textContent`, never `innerHTML`, and don't set URL attributes from data.
 - `destroy()`: unbinds events, unsubscribes bus listeners, destroys children, removes the element.
 - `Service`: direct `new` throws — always use `MyService.getInstance()` (or the exported const). Auto-binds all methods to the instance. `registerCleanup(fn)` callbacks run on `dispose()`, `MyService.destroy()` and `Service.destroyAll()` (tests, SSR) — nothing is torn down on page unload.
-- Overridable hooks (all no-op by default): `onBeforeRender`, `onAfterRender`, `onBeforeDestroy`, `onAfterDestroy`, `onKept`, `generateTemplate()`, `registerChildren()`. `View` adds router-only `onEnter()`/`onExit()`. `Component` itself uses `onBeforeRender` (applies `props.className`/`props.style`) and `onAfterRender` (fills `data-bind` fields): call `super.onBeforeRender()`/`super.onAfterRender()` when overriding them.
+- Overridable hooks (all no-op by default): `onBeforeRender`, `onAfterRender`, `onBeforeDestroy`, `onAfterDestroy`, `onKept`, `generateTemplate()`, `registerChildren()`.{{#if (eq lang "ts")}} Mark each override with `override` (`noImplicitOverride` is on).{{/if}} `View` adds router-only `onEnter()`/`onExit()`. `Component` itself uses `onBeforeRender` (applies `props.className`/`props.style`) and `onAfterRender` (fills `data-bind` fields): call `super.onBeforeRender()`/`super.onAfterRender()` when overriding them.
 
 ## Children components
 
@@ -78,10 +78,10 @@ Handlers are (re-)bound on every `render()`, not at build time. Always use priva
 <div data-event="event:_myFunction:@value,@id">
 ```
 ```ts
-private _myFunction(value: string, id: string) { doStuff() }
+private _myFunction(value: string, id: string) { doStuff(value, id) }
 ```
 
-{{#if (eq lang "ts")}}The build type-checks each handler name written in a template against the class: a missing one fails `tsc` at the template line, and handlers count as used for `noUnusedLocals` (on in this project). Names built with `${}` aren't checked. {{/if}}At runtime, a missing handler binds nothing and logs a `console.warn` in development.
+{{#if (eq lang "ts")}}The build type-checks each handler name written in a template against the class: a missing one fails `tsc` at the template line, and handlers count as used for `noUnusedLocals` (on in this project, with `noUnusedParameters`, `noImplicitOverride`, `noImplicitReturns` and `noFallthroughCasesInSwitch`: mark hook overrides with `override`, and prefix a parameter you deliberately don't read with `_`). Names built with `${}` aren't checked. {{/if}}At runtime, a missing handler binds nothing and logs a `console.warn` in development.
 
 One `data-event` per element, with one `event:handler`. To listen to several events on the same element (e.g. `pointerdown`/`pointerup`/`pointercancel`), or on `window`/`document`, add the listeners in `onAfterRender()` and push each `[target, eventName, listener]` onto `this.eventListeners`: they are then removed on the next render and on `destroy()`.
 
