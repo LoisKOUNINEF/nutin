@@ -2,7 +2,7 @@
 
 Dynamic rendering relies on events. You can also call `.render()` directly.
 
-You can also [use AlpineJS](#use-alpinejs).
+For a value that changes often (progress, counters, live-region messages, validation text), update the existing node in the handler (`this.element.querySelector(...)` + `textContent`/`setAttribute`) instead of calling `render()`. Values set this way are not escaped by `html`: use `textContent`, never `innerHTML`, and don't set URL attributes from data.
 
 ## Use unherited methods
 
