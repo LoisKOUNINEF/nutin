@@ -12,6 +12,9 @@ Requires Node.js 24 or later.
 
 - `{{packageManager}} run build`: build the application
 - `{{packageManager}} run build:prod`: build the application for production
+{{#if (eq lang "ts")}}
+- `{{packageManager}} run typecheck`: type-check the application without building it
+{{/if}}
 
 ## Getting started
 

@@ -87,11 +87,12 @@ export function getMarkdownScripts() {
 }
 
 export function getAllScripts(context) {
-  const { packageManager, docker, markdown } = context;
+  const { packageManager, docker, markdown, lang } = context;
 
   const baseScripts = {
     "build": "node tools/builder/builder.js",
     "build:prod": "node tools/builder/builder.js --prod",
+    ...(lang === 'js' ? {} : { "typecheck": "node tools/builder/builder.js --typecheck" }),
     "serve": `${packageManager} run build && node tools/dev/serve.js`,
     "serve:only": "node tools/dev/serve.js",
     "serve:prod": `${packageManager} run build:prod && node tools/dev/serve.js`,

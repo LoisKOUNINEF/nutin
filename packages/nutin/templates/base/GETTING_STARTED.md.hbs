@@ -58,6 +58,9 @@ import { Foo } from 'relative/path/to/foo.js';
 # Build
 {{packageManager}} run build      # build the application
 {{packageManager}} run build:prod # build the application for production
+{{#if (eq lang "ts")}}
+{{packageManager}} run typecheck  # type-check only, without building
+{{/if}}
 ```
 
 ## How do I generate components, views and services?

@@ -15,13 +15,13 @@ const BUILD_TSCONFIG = path.join(PATHS.temp, 'tsconfig.json');
 async function compileTS() {
   writeBuildTsconfig();
 
-  // Prod bundles straight from the merged .ts (see prod-bundle/esbuild.js), so tsc only
-  // type-checks there. Dev emits each .js next to its .ts, for the dev bundle and testin-nutin.
+  // Prod bundles straight from the merged .ts (see prod-bundle/esbuild.js). tsc only type-checks there. 
+  // Dev emits each .js next to its .ts, for the dev bundle and testin-nutin.
   const args = ['--project', BUILD_TSCONFIG, '--pretty', 'false'];
-  if (builderConfig.isProd) args.push('--noEmit');
+  if (builderConfig.isProd || builderConfig.typecheckOnly) args.push('--noEmit');
 
-  // data-event handlers are type-checked through references injected for tsc only, then
-  // removed from the .ts copies the prod bundle is built from (see handler-refs.js).
+  // data-event handlers are type-checked through references injected for tsc only,
+  // then removed from the .ts copies the prod bundle is built from (see handler-refs.js).
   const handlerRefs = await injectHandlerRefs();
   const { code, output } = await captureCommand('tsc', args);
   await stripHandlerRefs(handlerRefs);
