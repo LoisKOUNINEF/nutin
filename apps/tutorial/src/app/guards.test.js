@@ -16,14 +16,14 @@ describe('Guards.requireTask', () => {
   });
 
   it('lets an existing task through', () => {
-    expect(Guards.requireTask()({ id: '0' })).toBe(true);
+    expect(Guards.requireTask()({}, { task: '0' })).toBe(true);
   });
 
   it('redirects when the task does not exist', () => {
-    expect(Guards.requireTask()({ id: '5' })).toBe('/');
+    expect(Guards.requireTask()({}, { task: '5' })).toBe('/');
   });
 
-  it('lets the route through without an id', () => {
-    expect(Guards.requireTask()({})).toBe(true);
+  it('lets the route through without a task', () => {
+    expect(Guards.requireTask()({}, {})).toBe(true);
   });
 });

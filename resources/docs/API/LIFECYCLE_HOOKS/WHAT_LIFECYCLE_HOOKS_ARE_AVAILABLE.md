@@ -14,6 +14,8 @@ protected generateTemplate(): Nutin.Template { return ''; }    // Component/View
 public registerChildren(): Nutin.ComponentConfig[] { return []; }
 ```
 
+In a TypeScript project, mark each one you override with `override` (`protected override onAfterRender(): void`): new apps' `tsconfig.json` enables `noImplicitOverride`.
+
 `View` additionally exposes:
 
 ```ts
@@ -51,6 +53,16 @@ AppEventBus.off(...) for every bus subscription made via this.listen()
 ChildrenHelper.destroyChildren(...) — recursively destroy() every child
 element.remove()
 onAfterDestroy()
+```
+
+A second `destroy()` does nothing. After it, `isDestroyed` is `true`, and `render()` and `listen()` are ignored, with a warning in development. Without that, a render that arrives late (after an `await`, from a timer or a `window` listener) would build new children that nothing destroys, and their bus subscriptions would leak. Check `isDestroyed` before using the result of async work:
+
+```ts
+private async _save(): Promise<void> {
+  await this.store.save(this.values);
+  if (this.isDestroyed) return; // closed while saving
+  this.render();
+}
 ```
 
 - `onEnter()`/`onExit()`: 

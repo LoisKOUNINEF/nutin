@@ -30,7 +30,7 @@ The builder splits every dynamic `import()` into its own chunk, which is only do
 
 ```ts
 // src/app/views/settings/settings.view.ts
-public onEnter(): void {
+public override onEnter(): void {
     void import('a11y-elements/overlays/modal');
 }
 ```
@@ -82,7 +82,7 @@ Overlays (`<a11y-dropdown>`, `<a11y-modal>`, `<a11y-drawer>`, ...) move themselv
 So, for any content inside an overlay:
 
 - Translate text by interpolating `I18nService.translate` in the template, not with `data-i18n`.
-- Handle clicks by delegation on the overlay itself, not with `data-event`.
+- Handle events by delegation on the overlay itself, not with `data-event`. This covers clicks, and also `change`/`input` from form controls inside it (e.g. an `<a11y-radio-group>` in a drawer).
 - Look the overlay up by `id` in the whole `document`, not in `this.element`.
 - Remove it when the component is re-rendered or destroyed, with a11y-elements' `removeOverlaysWithin()`: it no longer lives inside the component's element.
 
@@ -176,6 +176,132 @@ Once moved, a dropdown is wrapped in a `.a11y-dropdown-wrapper` element labelled
 - **Never put `data-i18n` on an `<a11y-*>` element itself.** It sets the element's `textContent`, wiping out the markup the element builds.
 - **Open and close overlays through the `open` attribute** (`setAttribute('open', '')` / `removeAttribute('open')`), not the `.open` property. A property set before the element is defined shadows its accessor for good.
 - **`<a11y-floating>` has no `open`**: it's visible by default. Show and hide it through the `hidden` attribute (`removeAttribute('hidden')`), for the same reason.
+- **Safari and Tab.** With its default settings, Safari's Tab key skips native buttons, links, radios and checkboxes: only text fields are reached. An explicit `tabindex="0"` puts them back in the Tab order (Safari 17+). Set it on the controls you render, including the radios of an `<a11y-radio-group>`: a group with `tabindex="0"` on every radio is still a single Tab stop.
+
+    ```html
+    <button type="button" tabindex="0" data-event="click:save">Save</button>
+    ```
+
+    Inside an open dialog or drawer, the focus trap moves focus on every Tab press itself, so its own close button is reachable either way.
+
+## Sidebar on desktop, drawer on mobile
+
+A sidebar can become an `<a11y-drawer>` on small screens, opened by an `<a11y-floating>` button. Render the list twice from the same template: once inline, once in the drawer. CSS then shows one or the other, so nothing is moved or re-rendered on resize.
+
+```ts
+// src/app/main.ts
+import 'a11y-elements/components/radio-group';
+import 'a11y-elements/overlays/drawer';
+import 'a11y-elements/overlays/floating';
+```
+
+```ts
+// src/app/components/picker/picker.component.ts
+import { removeOverlaysWithin } from 'a11y-elements/core';
+import { Component, html, raw } from '../../../core/index.js';
+
+interface PickerConfig {
+    options: { value: string; label: string }[];
+    selected: string;
+}
+
+// `name` differs per copy: two radio groups sharing one would uncheck each other
+const renderGroup = (config: PickerConfig, copy: 'sidebar' | 'drawer') => html`
+    <a11y-radio-group aria-label="Options">
+        ${config.options.map((o) => html`<label>
+            <input type="radio" tabindex="0" name="picker-${copy}" value="${o.value}" ${o.value === config.selected ? raw('checked') : ''}>
+            ${o.label}
+        </label>`)}
+    </a11y-radio-group>`;
+
+const templateFn = (config: PickerConfig) => html`
+    <div class="picker__sidebar">${renderGroup(config, 'sidebar')}</div>
+    <a11y-drawer id="picker-drawer" edge="left">
+        <h2>Options</h2>
+        ${renderGroup(config, 'drawer')}
+    </a11y-drawer>
+    <a11y-floating id="picker-floating" position="bottom-left" controls="picker-drawer">
+        <button type="button" tabindex="0">Options</button>
+    </a11y-floating>
+`;
+
+export class PickerComponent extends Component<HTMLElement, PickerConfig> {
+    private drawer: HTMLElement | null = null;
+    private readonly desktop = window.matchMedia('(min-width: 769px)');
+    // An open drawer has no place on desktop, where the sidebar is shown
+    private readonly onDesktopChange = (e: MediaQueryListEvent) => { if (e.matches) this.closeDrawer(); };
+
+    constructor(mountTarget: HTMLElement, config: PickerConfig) {
+        super({ templateFn, mountTarget, config });
+        this.desktop.addEventListener('change', this.onDesktopChange);
+    }
+
+    protected override onBeforeRender(): void {
+        removeOverlaysWithin(this.element);
+        super.onBeforeRender();
+    }
+
+    protected override onAfterRender(): void {
+        this.drawer = document.getElementById('picker-drawer');
+        this.on(this.element, 'change', (e) => this.select(e));
+        if (this.drawer) {
+            this.on(this.drawer, 'change', (e) => this.select(e));
+            this.on(this.drawer, 'click', (e) => this.closeOnPointerPick(e as MouseEvent));
+        }
+        super.onAfterRender();
+    }
+
+    protected override onBeforeDestroy(): void {
+        this.desktop.removeEventListener('change', this.onDesktopChange);
+        removeOverlaysWithin(this.element);
+        super.onBeforeDestroy();
+    }
+
+    private on(target: EventTarget, type: string, listener: EventListener): void {
+        target.addEventListener(type, listener);
+        this.eventListeners.push([target, type, listener]);
+    }
+
+    private select(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        if (input.type !== 'radio' || !input.checked) return;
+        // Keep the other copy in sync without re-rendering (a render would rebuild the drawer)
+        for (const root of [this.element, this.drawer]) {
+            root?.querySelectorAll<HTMLInputElement>('input[type="radio"]')
+                .forEach((radio) => { radio.checked = radio.value === input.value; });
+        }
+        // ...apply input.value
+    }
+
+    // Arrow keys also check radios (with a click whose `detail` is 0): only close on pointer picks,
+    // so keyboard users can browse options and close with Escape or ×
+    private closeOnPointerPick(event: MouseEvent): void {
+        if (event.detail > 0 && (event.target as HTMLElement).closest('label')) this.closeDrawer();
+    }
+
+    private closeDrawer(): void {
+        this.drawer?.removeAttribute('open');
+    }
+}
+```
+
+```scss
+// src/app/components/picker/picker.component.scss
+// Same breakpoint as the matchMedia query in the component
+@media (max-width: 768px) {
+    .picker__sidebar { display: none; }
+}
+
+// The floating moves to <body>: target it by id, not through the component
+#picker-floating {
+    display: none;
+    @media (max-width: 768px) { display: flex; }
+}
+```
+
+- Use one id per instance (`picker-drawer-${id}`) if the component can be on the page twice, or once per view with different content.
+- Both copies are in the DOM, but the hidden sidebar (`display: none`) and the closed drawer are out of the Tab order and the accessibility tree, so only one is ever reached.
+- The drawer and floating live on `<body>`, outside the ancestors that carry your page's CSS variables. Give them their colors at `:root` (`--a11y-drawer-color-background`, …) or with an id selector.
 
 ## Make cards navigate with `<a11y-card-link>`
 

@@ -106,7 +106,7 @@ export class MarkdownView extends View {
 
   // The bare route (e.g. /content) renders the first page through the fallback above;
   // point the URL at that page so reloads and bookmarks match what is shown.
-  public onEnter(): void {
+  public override onEnter(): void {
     if (!this.isLanding && !this.getRouteParam('slug') && this.slug) {
       NavigationManager.replaceState(this.pageHref(this.slug));
     }
@@ -115,11 +115,11 @@ export class MarkdownView extends View {
     this.stopLanguageSync = onMarkdownLanguageChange(() => Navigation.reload());
   }
 
-  public onExit(): void {
+  public override onExit(): void {
     this.stopLanguageSync();
   }
 
-  public registerChildren(): Nutin.ComponentConfig[] {
+  public override registerChildren(): Nutin.ComponentConfig[] {
     const Nav = this.options.navComponent ?? MarkdownNavComponent;
     const Content = this.options.contentComponent ?? MarkdownContentComponent;
     const Landing = this.options.landingComponent ?? MarkdownLandingComponent;

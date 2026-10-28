@@ -17,6 +17,7 @@ export class FeatureContextBuilder {
       projectName: packageJson.name,
       packageManager,
       lang: meta.lang ?? 'ts',
+      extension: meta.extension ?? false,
       ciCommand: getCiCommand(packageManager),
       version: PACKAGE_VERSION,
       ...(meta.features ?? {}),

@@ -1,0 +1,65 @@
+#!/usr/bin/env node
+
+// Zips each browser's built extension (dist/<browser>) for its store, as
+// dist/<name>-<browser>-<version>.zip plus a .sha256. Runs after a prod build (see the
+// package:extension scripts); `--browser chrome|firefox` packages one.
+import fs from 'fs';
+import path from 'path';
+import crypto from 'crypto';
+import { spawnSync } from 'child_process';
+import config from '#root/nutin.config.js';
+import { print } from '../utils/index.js';
+import { archiveName, selectBrowsers, buildTimestamp, isPackaged, ExtensionError, reportError } from './helpers.js';
+
+const DIST = path.resolve('dist');
+
+function packageExtension() {
+  const pkg = JSON.parse(fs.readFileSync(path.resolve('package.json'), 'utf-8'));
+  // A dev build keeps the copied sources in dist/src, and its bundle is neither minified nor
+  // stripped of console calls: never a store package.
+  if (fs.existsSync(path.join(DIST, 'src', 'core'))) {
+    throw new ExtensionError('dist/ holds a dev build. Package from a prod build: "{{packageManager}} run package:extension".');
+  }
+  for (const browser of selectBrowsers(process.argv, config.extension.browsers)) {
+    zipForStore(pkg, browser);
+  }
+}
+
+// The store wants the extension's files at the ZIP's root. Reproducible: entries sorted, fixed
+// timestamps, no extra attributes, so the store upload matches a release's checksum.
+function zipForStore(pkg, browser) {
+  const source = path.join(DIST, browser);
+  if (!fs.existsSync(path.join(source, 'manifest.json'))) {
+    throw new ExtensionError(`No build found in dist/${browser}. Run "{{packageManager}} run build:prod" first.`);
+  }
+
+  const archive = path.join(DIST, archiveName(pkg, browser));
+  fs.rmSync(archive, { force: true });
+  const files = fs.readdirSync(source, { recursive: true, withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => path.relative(source, path.join(entry.parentPath, entry.name)).split(path.sep).join('/'))
+    .filter(isPackaged)
+    .sort();
+  const mtime = buildTimestamp(process.env.SOURCE_DATE_EPOCH);
+  files.forEach((file) => fs.utimesSync(path.join(source, file), mtime, mtime));
+
+  const result = spawnSync('zip', ['-X', '-D', '-q', archive, '-@'], {
+    cwd: source,
+    input: files.join('\n'),
+    stdio: ['pipe', 'inherit', 'inherit'],
+    env: { ...process.env, TZ: 'UTC' },
+  });
+  if (result.error || result.status !== 0) {
+    throw new ExtensionError(`Couldn't create ${path.relative(process.cwd(), archive)}: the "zip" command is needed (on Windows, use WSL). ${result.error?.message ?? ''}`);
+  }
+
+  const checksum = crypto.createHash('sha256').update(fs.readFileSync(archive)).digest('hex');
+  fs.writeFileSync(`${archive}.sha256`, `${checksum}  ${path.basename(archive)}\n`);
+  print.boldSuccess(`Store package: ${path.relative(process.cwd(), archive)} (${files.length} files, sha256 ${checksum})`);
+}
+
+try {
+  packageExtension();
+} catch (err) {
+  reportError(err, 'package-extension');
+}

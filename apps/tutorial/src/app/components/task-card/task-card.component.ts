@@ -9,7 +9,7 @@ export class TaskCardComponent extends Component {
     super({ templateFn, config, mountTarget });
   }
 
-  registerChildren(): Nutin.ComponentConfig[] {
+  override registerChildren(): Nutin.ComponentConfig[] {
     return [
       {
         selector: 'remove',
@@ -37,6 +37,6 @@ export class TaskCardComponent extends Component {
   }
 
   private _goToEdit(): void {
-    Navigation.navigateTo(`/tasks/${this.config.id}`)
+    Navigation.navigateTo(`/?task=${this.config.id}`)
   }
 }

@@ -10,19 +10,17 @@ export function getViewConstructor(routeConfig: Nutin.RouteConfig): Nutin.ViewFa
 
 export async function processRouteGuards(
   routeConfig: Nutin.RouteConfig,
-  targetPath: string,
-  params: Record<string, string> = {}
+  params: Record<string, string> = {},
+  query: Record<string, string> = {}
 ): Promise<GuardResult> {
   const guards = getRouteGuards(routeConfig);
-  const guardResult = await runGuards(guards, params);
+  const guardResult = await runGuards(guards, params, query);
 
   if (guardResult === false) {
-    // console.log(`Navigation to ${targetPath} blocked by route guard`);
     return { allowed: false };
   }
 
   if (typeof guardResult === 'string') {
-    // console.log(`Navigation to ${targetPath} redirected to ${guardResult} by route guard`);
     return { allowed: false, redirectTo: guardResult };
   }
 
@@ -36,14 +34,15 @@ function getRouteGuards(routeConfig: Nutin.RouteConfig): Nutin.RouteGuard[] {
 }
 
 /**
- * Runs all guards in sequence with route parameters and returns the result
+ * Runs all guards in sequence with route and query parameters and returns the result
  */
 async function runGuards(
   guards: Nutin.RouteGuard[], 
-  params: Record<string, string>
+  params: Record<string, string>,
+  query: Record<string, string>
 ): Promise<boolean | string> {
   for (const guard of guards) {
-    const result = await guard(params);
+    const result = await guard(params, query);
     if (result !== true) {
       return result; // false or redirect path
     }

@@ -22,6 +22,7 @@ export async function writeProjectMeta(projectPath, context) {
     version: context.version,
     packageManager: context.packageManager,
     lang: context.lang ?? 'ts',
+    extension: context.extension ?? false,
     features: extractFeatures(context),
   };
 

@@ -10,8 +10,8 @@ describe('pipes (registerPipes)', () => {
     silenceConsole('warn', () => registerPipes());
   });
 
-  it('currency formats a number as USD/en-US by default', () => {
-    const expected = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(1234.5);
+  it('currency formats a number as USD in the page\'s language by default', () => {
+    const expected = new Intl.NumberFormat('en', { style: 'currency', currency: 'USD' }).format(1234.5);
     expect(AppPipeRegistry.apply('currency', 1234.5)).toBe(expected);
   });
 
@@ -60,6 +60,60 @@ describe('pipes (registerPipes)', () => {
     });
     expect(AppPipeRegistry.apply('date', value, ['en-US', 'long', 'false'])).toBe(dateOnly);
     expect(AppPipeRegistry.apply('date', value, ['en-US', 'long', 'true'])).toBe(withTime);
+  });
+
+  it('date and currency default to the page\'s <html lang>, not the browser\'s language', () => {
+    const html = document.documentElement;
+    const previous = html.lang;
+    html.lang = 'fr';
+    const value = new Date(2026, 9, 28);
+    try {
+      const date = value.toLocaleString('fr', { year: 'numeric', month: 'long', day: 'numeric' });
+      const price = new Intl.NumberFormat('fr', { style: 'currency', currency: 'EUR' }).format(10);
+      expect(AppPipeRegistry.apply('date', value)).toBe(date);
+      // From a template, a skipped locale arrives as '' (date:,short).
+      expect(AppPipeRegistry.apply('date', value, ['', 'long'])).toBe(date);
+      expect(AppPipeRegistry.apply('currency', 10, ['EUR'])).toBe(price);
+    } finally {
+      html.lang = previous;
+    }
+  });
+
+  it('date falls back to "en" when the page has no lang', () => {
+    const html = document.documentElement;
+    const previous = html.lang;
+    html.lang = '';
+    const value = new Date(2026, 9, 28);
+    try {
+      expect(AppPipeRegistry.apply('date', value)).toBe(value.toLocaleString('en', { year: 'numeric', month: 'long', day: 'numeric' }));
+    } finally {
+      html.lang = previous;
+    }
+  });
+
+  it('date "numeric" follows the locale\'s order without a pattern', () => {
+    const value = new Date(2026, 9, 28);
+    expect(AppPipeRegistry.apply('date', value, ['en-US', 'numeric'])).toBe('10/28/2026');
+    expect(AppPipeRegistry.apply('date', value, ['fr-FR', 'numeric'])).toBe('28/10/2026');
+  });
+
+  it('date "numeric" formats a YYYY/YY/MM/DD pattern, zero-padded, with any separator', () => {
+    const value = new Date(2026, 2, 5);
+    expect(AppPipeRegistry.apply('date', value, ['en-US', 'numeric', 'false', 'DD/MM/YYYY'])).toBe('05/03/2026');
+    expect(AppPipeRegistry.apply('date', value, ['en-US', 'numeric', 'false', 'DD/MM/YY'])).toBe('05/03/26');
+    expect(AppPipeRegistry.apply('date', value, ['en-US', 'numeric', 'false', 'YYYY-MM-DD'])).toBe('2026-03-05');
+    expect(AppPipeRegistry.apply('date', value, ['en-US', 'numeric', 'false', 'DD.MM.YYYY'])).toBe('05.03.2026');
+  });
+
+  it('date "numeric" with a pattern appends the locale\'s time when the time flag is set', () => {
+    const value = new Date(2026, 9, 28, 9, 5);
+    const time = value.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    expect(AppPipeRegistry.apply('date', value, ['en-GB', 'numeric', 'true', 'YYYY-MM-DD'])).toBe(`2026-10-28, ${time}`);
+  });
+
+  it('date "numeric" ignores a pattern without any token and uses the locale\'s order', () => {
+    const value = new Date(2026, 9, 28);
+    expect(AppPipeRegistry.apply('date', value, ['en-US', 'numeric', 'false', 'nonsense'])).toBe('10/28/2026');
   });
 
   it('date warns and returns the raw stringified value for an invalid date', () => {

@@ -253,7 +253,7 @@ export class CounterComponent extends Component {
 
 ```ts
 // In the parent component or view
-public registerChildren(): Nutin.ComponentConfig[] {
+public override registerChildren(): Nutin.ComponentConfig[] {
     return [
         { selector: 'counter', keep: 'counter', factory: (el) => new CounterComponent(el) },
     ];

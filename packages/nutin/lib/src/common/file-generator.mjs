@@ -5,6 +5,7 @@ import { TemplateCompiler } from './template-compiler.mjs';
 import { print } from '../utils/print.mjs';
 import { FEATURES } from './feature-registry.mjs';
 import { toJsOutput } from './transpile-ts.mjs';
+import { NOT_IN_EXTENSIONS } from './extension.mjs';
 
 const fs = fsExtra.default;
 const __filename = fileURLToPath(import.meta.url);
@@ -28,6 +29,15 @@ const TS_ONLY_TEMPLATES = [
   path.join('tools', 'builder', 'core', 'app', 'handler-refs.test.js.hbs'),
 ];
 
+// Base templates an extension project doesn't get (see extension.mjs). Folder entries end with '/'.
+function isNotInExtensions(templatePath) {
+  const posixPath = templatePath.split(path.sep).join('/');
+  return NOT_IN_EXTENSIONS.some((entry) => (entry.endsWith('/')
+    ? posixPath.includes(`/base/${entry}`)
+    : posixPath.endsWith(`/base/${entry}`)
+  ));
+}
+
 export class FileGenerator {
   constructor() {
     this.compiler = new TemplateCompiler();
@@ -40,6 +50,12 @@ export class FileGenerator {
     await this.processTemplateDirectory(templateDir, projectPath, context);
 
     await this.processFeatureTemplates(projectPath, context, templatesRoot);
+
+    // The extension overlay: files only an extension project has (manifest, background worker...).
+    if (context.extension) {
+      print.info('Adding the browser extension files...');
+      await this.processTemplateDirectory(path.join(templatesRoot, 'extension'), projectPath, context);
+    }
   }
 
   getTemplatesRoot() {
@@ -59,6 +75,8 @@ export class FileGenerator {
       const templatePath = path.join(templateDir, entry.name);
 
       if (entry.isDirectory()) {
+        // A skipped folder isn't created empty either.
+        if (context.extension && isNotInExtensions(`${templatePath}${path.sep}`)) continue;
         const outputPath = path.join(outputDir, entry.name);
         await fs.ensureDir(outputPath);
         await this.processTemplateDirectory(templatePath, outputPath, context, options);
@@ -90,6 +108,9 @@ export class FileGenerator {
   async isRenderTemplateFile(templatePath, fileName, context) {
     const isJsOnly = context.lang === 'js';
     if (isJsOnly && TS_ONLY_TEMPLATES.some((template) => templatePath.endsWith(template))) {
+      return null;
+    }
+    if (context.extension && isNotInExtensions(templatePath)) {
       return null;
     }
 
@@ -153,6 +174,12 @@ export class FileGenerator {
       if (await fs.pathExists(featureDir)) {
         await this.collectTemplateDirectory(featureDir, featureDir, context, result);
       }
+    }
+
+    // Older template versions have no extension overlay.
+    const extensionDir = path.join(templatesRoot, 'extension');
+    if (context.extension && await fs.pathExists(extensionDir)) {
+      await this.collectTemplateDirectory(extensionDir, extensionDir, context, result);
     }
 
     return result;

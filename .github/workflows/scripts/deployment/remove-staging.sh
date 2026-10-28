@@ -1,7 +1,7 @@
 #!/bin/bash
 
-remove-staging-stack() {
-	docker stack rm $PROJECT_LOWER-$SERVICE_NAME-staging
+remove_staging_stack() {
+  docker stack rm "$APP_LOWER-staging"
 }
 
-remove-staging-stack
+remove_staging_stack

@@ -6,6 +6,7 @@ import { displaySuccessMessage } from './src/create-app/success-message.mjs';
 import { PACKAGE_VERSION } from './src/common/package-data.mjs';
 import { FEATURES, findFeatureByCli } from './src/common/feature-registry.mjs';
 import { PACKAGE_MANAGERS } from './src/common/package-json-helper.mjs';
+import { EXTENSION_SURFACES } from './src/common/extension.mjs';
 import { addFeatureToProject } from './src/add-feature/feature-adder.mjs';
 import { updateProject } from './src/update-app/project-updater.mjs';
 
@@ -19,6 +20,7 @@ export function createAppCommand(command) {
     // Restricted to known managers: the value ends up in shell commands and package.json scripts.
     .addOption(new Option('-p, --package-manager <manager>', 'Specify package manager').choices(PACKAGE_MANAGERS))
     .option('--js-only', 'Generate a plain JavaScript project (no TypeScript)')
+    .addOption(new Option('--extension [surface]', 'Generate a browser extension (Chrome and Firefox): the app is its side panel or popup; asked when omitted').choices(EXTENSION_SURFACES))
     .action(async (projectName, cliOptions) => {
       print.boldSuccess('\n🚀 Welcome to your new nutin app!\n');
       try {

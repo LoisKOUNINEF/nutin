@@ -90,22 +90,13 @@ export class TaskInputsComponent extends Component {
 }
 ```
 
-## Use dynamic routing for your tasks
+## Open a task from the URL
 
-### Register a dynamic route
-
-```ts
-// src/app/routes.ts
-export const appRoutes: Nutin.Routes = {
-    /* ... */
-    '/tasks/:id?': () => new TaskCatalogView(),
-    /* ... */
-}
-```
+The task being edited goes in the landing page's query string: `/?task=1`. There's no new route to add, `/` already shows the `TaskCatalogView`.
 
 ### Guard the route
 
-A route guard runs before the view is created, gets the route's params, and returns `true` to let the navigation through, or a path to redirect to.
+A route guard runs before the view is created, gets the route's params and query params, and returns `true` to let the navigation through, or a path to redirect to.
 
 Add one next to the generated `requireAuth` example:
 
@@ -117,13 +108,15 @@ export const Guards = {
     /* requireAuth ... */
 
     /**
-     * Redirects when the route's task doesn't exist, e.g. after a reload: tasks only live in memory.
+     * Redirects when the URL's task (?task=<id>) doesn't exist, e.g. after a reload: tasks only live in memory.
      */
     requireTask: (redirectTo: string = '/'): Nutin.RouteGuard => {
-        return ({ id }) => id === undefined || taskService.getTask(+id) !== undefined || redirectTo;
+        return (_params, { task }) => task === undefined || taskService.getTask(+task) !== undefined || redirectTo;
     },
 };
 ```
+
+`/` without a query string has no task to check, so the redirect can't loop.
 
 Then use the route's object form to attach it:
 
@@ -132,15 +125,14 @@ Then use the route's object form to attach it:
 import { Guards } from './guards.js';
 
 export const appRoutes: Nutin.Routes = {
-    /* ... */
-    '/tasks/:id?': { view: () => new TaskCatalogView(), guards: [Guards.requireTask()] },
+    '/': { view: () => new TaskCatalogView(), guards: [Guards.requireTask()] },
     /* ... */
 }
 ```
 
 See [Use route guards](https://nutin.dev/docs/api/use-route-guards).
 
-### Handle routeParams in the view
+### Read the query params in the view
 
 ```ts
 /* ... */
@@ -149,10 +141,10 @@ import { TaskInputsComponent } from '../../components/task-inputs/task-inputs.co
 export class TaskCatalogView extends View {
     /* ... */
 
-    registerChildren(): Nutin.ComponentConfig[] {
+    override registerChildren(): Nutin.ComponentConfig[] {
         const taskCatalogChildren: Nutin.ComponentConfig[] = [ /* new-task, task-cards */ ];
 
-        if (this.hasRouteParam('id')) {
+        if (this.hasQueryParam('task')) {
             taskCatalogChildren.push(...this.getTaskInputsChild());
         }
 
@@ -160,7 +152,7 @@ export class TaskCatalogView extends View {
     }
   
     private getTaskInputsChild(): Nutin.ComponentConfig[] {
-        const taskId = this.getRouteParam('id') || 0;
+        const taskId = this.getQueryParam('task') || 0;
         const task = taskService.getTask(+taskId);
         if (!task) return [];
 
@@ -181,7 +173,9 @@ export class TaskCatalogView extends View {
 </div>
 ```
 
-### Navigate to the route
+See [Query parameters](https://nutin.dev/docs/api/access-route-params#query-parameters).
+
+### Navigate to the task
 
 ```ts
 /* ... */
@@ -190,7 +184,7 @@ import { Navigation } from '../../../core/index.js';
 export class TaskCardComponent extends Component {
     /* ... */
 
-    registerChildren(): Nutin.ComponentConfig[] {
+    override registerChildren(): Nutin.ComponentConfig[] {
         return [
             /* ... */
             {
@@ -204,7 +198,7 @@ export class TaskCardComponent extends Component {
     }
 
     private _goToEdit(): void {
-        Navigation.navigateTo(`/tasks/${this.config.id}`)
+        Navigation.navigateTo(`/?task=${this.config.id}`)
     }
 }
 ```
@@ -237,7 +231,7 @@ Tell the view which children are the same as before:
 export class TaskCatalogView extends View {
     /* ... */
 
-    registerChildren(): Nutin.ComponentConfig[] {
+    override registerChildren(): Nutin.ComponentConfig[] {
         const taskCatalogChildren: Nutin.ComponentConfig[] = [
             /* new-task */
             ...this.createCatalogComponents({

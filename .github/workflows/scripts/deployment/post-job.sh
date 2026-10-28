@@ -12,10 +12,14 @@ post_job() {
   "$script_dir/remove-old-images.sh"
   "$script_dir/docker-logout.sh"
 
+  if [ "${SERVER_REPLICAS:-1}" -gt 1 ]; then
+    "$script_dir/scale-backend.sh"
+  fi
+
   yaml_read_only
 
   echo "Listing images:"
-  docker image ls | grep "ghcr.io/$REPO_LOWER"
+  docker image ls --filter "reference=ghcr.io/$IMAGE_LOWER*" --format "table {{.Repository}}\t{{.Tag}}\t{{.CreatedSince}}" || true
 }
 
 post_job

@@ -88,7 +88,7 @@ import { NewTaskComponent } from '../../components/new-task/new-task.component.j
 export class TaskCatalogView extends View {
     /* ... */
 
-    registerChildren(): Nutin.ComponentConfig[] {
+    override registerChildren(): Nutin.ComponentConfig[] {
         return [
             {
                 selector: 'new-task',

@@ -108,12 +108,15 @@ declare namespace Nutin {
   // Router
 
   /**
-   * Route guard function that receives route parameters and returns:
+   * Route guard function that receives route parameters and query parameters, and returns:
    * - true to allow navigation
    * - false to block it
    * - string to redirect to a different route
    */
-  type RouteGuard = (params: Record<string, string>) => boolean | string | Promise<boolean | string>;
+  type RouteGuard = (
+    params: Record<string, string>,
+    query: Record<string, string>
+  ) => boolean | string | Promise<boolean | string>;
 
   /**
    * Creates a route's view. Returning a Promise makes the route lazy: e.g.

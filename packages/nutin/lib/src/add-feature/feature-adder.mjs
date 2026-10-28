@@ -9,6 +9,7 @@ import { FeatureContextBuilder } from './feature-context-builder.mjs';
 import { updatePackageJson } from './package-json-updater.mjs';
 import { updateNutinConfig } from './nutin-config-updater.mjs';
 import { patchBaseTemplates } from './base-template-patcher.mjs';
+import { EXTENSION_INCOMPATIBLE_FEATURES } from '../common/extension.mjs';
 
 const fs = fsExtra.default;
 
@@ -28,6 +29,9 @@ export class FeatureAdder {
     await this.validateProject(projectPath);
 
     const meta = await readProjectMeta(projectPath);
+    if (meta?.extension && EXTENSION_INCOMPATIBLE_FEATURES[feature.key]) {
+      throw new Error(`${feature.key} can't be added to a browser extension project: ${EXTENSION_INCOMPATIBLE_FEATURES[feature.key]}.`);
+    }
     if (meta?.features?.[feature.key]) {
       print.gray(`${feature.key} is already enabled in this project — skipping.`);
       return;

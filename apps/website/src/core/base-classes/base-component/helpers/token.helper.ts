@@ -1,6 +1,6 @@
 // Tokens resolve to raw values: escaping happens at output, in html`` templates.
 function readInputValue(el: HTMLElement): string {
-  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return el.value;
+  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement) return el.value;
   if (el.hasAttribute('contenteditable')) return el.innerText;
   return '';
 }

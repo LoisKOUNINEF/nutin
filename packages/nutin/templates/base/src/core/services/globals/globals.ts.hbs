@@ -46,7 +46,7 @@ export class Globals extends Service<Globals> {
     });
   }
 
-  protected onDestroy(): void {
+  protected override onDestroy(): void {
     Object.values(this._mounted).forEach((instance) => instance.destroy?.());
     this._mounted = {};
     this._originalDisplay = {};

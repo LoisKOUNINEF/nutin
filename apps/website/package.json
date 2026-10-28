@@ -1,6 +1,6 @@
 {
   "name": "website",
-  "version": "2.0.3",
+  "version": "2.1.0",
   "private": true,
   "type": "module",
   "imports": {
@@ -9,6 +9,7 @@
   "scripts": {
     "build": "node tools/builder/builder.js",
     "build:prod": "node tools/builder/builder.js --prod",
+    "typecheck": "node tools/builder/builder.js --typecheck",
     "serve": "npm run build && node tools/dev/serve.js",
     "serve:only": "node tools/dev/serve.js",
     "serve:prod": "npm run build:prod && node tools/dev/serve.js",
@@ -31,6 +32,6 @@
     "tailwindcss": "^4.3.3"
   },
   "dependencies": {
-    "a11y-elements": "^0.4.0"
+    "a11y-elements": "^0.6.0"
   }
 }

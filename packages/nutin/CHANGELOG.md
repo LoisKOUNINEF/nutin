@@ -1,5 +1,41 @@
 # Changelog
 
+## 3.1.0
+
+### Features
+
+- **Browser extension projects: `create-nutin-app --extension [side-panel|popup]`.** Generates the app as a Chrome and Firefox extension: its UI is the side panel or the popup.
+    - Generated files: `src/extension/manifest.json` (Manifest V3: name from the project, the side panel or popup, `storage` permission, placeholder icons in `src/assets/icons/`) and `src/extension/background.ts` (side panel: the toolbar button toggles it, with `setPanelBehavior` in Chrome and `sidebarAction.toggle()` in Firefox). `main.ts` mounts a root `AppComponent` into `#app` instead of starting the router, and `index.html` gets a `<title>`.
+    - `nutin.config.js` gets an `extension` block (`browsers`, Firefox's `geckoId`).
+    - There are no `serve`/`dev` scripts. 
+    - `nutin-update` never updates `src/extension/`, like `src/app/`.
+    - The build writes one unpacked extension per browser listed in `extension.browsers`, in `dist/chrome` and `dist/firefox`, next to `dist/src`.
+    - Store packages: 
+        - `package:extension` (or `package:extension:chrome`/`:firefox`) runs a prod build and writes `dist/<name>-<browser>-<version>.zip` with its `.sha256`. The ZIPs are reproducible: sorted entries, timestamps from `SOURCE_DATE_EPOCH` or a fixed date. It needs the `zip` command, and refuses a dev build. 
+        - `validate:extension` checks each package before a release: the manifest's shape for its browser, every file it references, no source maps, compressed copies or sources, and the version against `package.json` (and `--tag vX.Y.Z`).
+        - `lint:extension` runs Mozilla's `web-ext lint` on `dist/firefox` (`web-ext` is a devDependency). The scripts are made for CI: one `package:extension:<browser>` per job.
+    - `src/app/services/chrome-api/chrome-api.service.ts`: storage (`local`/`sync`/`session`: get, set, remove, change events), the active tab's URL and tab changes, `openTab()` for http(s) pages only, and `browser()` (Chrome or Firefox). It reads `chrome` on every call.
+    - Docs: [How do I create a browser extension?](https://www.nutin.dev/docs/cli/create-a-browser-extension) (loading and reloading, configuration, what ships, packaging, store submissions, `web-ext lint` warnings and a note for AMO reviewers).
+- **Query parameters, on every route, the default route (`/`) included.** The router parses the URL's query string (`/?tab=settings`) and hands it to the view before `render()`, alongside the route params, which stay separate. Views get `getQueryParams()`, `getQueryParam(key)` and `hasQueryParam(key)`, and the router gets `getQueryParams()` and `getQueryParam(key)`. Values are decoded, and a repeated key keeps its last value. Route guards receive them as a second argument: `(params, query)`. Default app bundle: +117 B gzip.
+    - `NavigationManager.replaceState(path)` now keeps the current query string, as it already kept the hash. A view's `onEnter()` that rewrites the URL (such as the `markdown` feature's redirect from `/<id>` to its first page) used to drop it.
+
+### Changes
+
+- **Faster rendering.** The render sanitizer (`normal`/`strict`) checks the template's elements in a single flat pass instead of a recursive walk, with the same output. Render is ~30% faster on a 500-row list, and ~45% faster on a 3-element component. Default app bundle: +12 B gzip.
+- **`render()` after `destroy()` is ignored.** A late render (after an `await`, a timer, a pending `window` listener) used to rebuild the destroyed component's template and compose new children that nothing ever destroyed, so their event bus subscriptions leaked for the page's lifetime. Now `render()` and `listen()` on a destroyed component do nothing and warn in development, `destroy()` is idempotent, and the new read-only `isDestroyed` lets app code skip async work early.
+- `destroy()` now empties the component's `eventListeners` list along with removing the listeners, so a destroyed component no longer holds references to its DOM nodes and handlers.
+- **`useEventBus()`: `MockEventBus` now reaches components and services.** `useEventBus(bus)`: before, a mock created in a test saw none of them, since they all use the `AppEventBus` singleton. `AppEventBus` keeps its identity and type. New `EventBusApi` type. Default app bundle: +37 B gzip.
+- `@value` now reads `<select>` elements (it gave `''`, so a `change:_onPick:@value` handler got nothing and had to take `@target`).
+- **A template that throws now names its component.** When `generateTemplate()` throws during `render()`, a `console.error` gives the component's class name before the error is rethrown. Only the innermost failing component reports it. Default app bundle: +26 B gzip.
+- **`date` and `currency` pipes default to the page's language.** Without a locale argument (or with an empty one), they now use `<html lang>`, or `en` when it's empty. Pass a locale to keep the old output.
+- **New `numeric` date format, with an optional pattern.** `date:,numeric` gives the locale's numeric date (`10/28/2026` in `en-US`, `28/10/2026` in `fr-FR`). A 4th argument sets the order instead: `YYYY`, `YY`, `MM` and `DD`, zero-padded, with any separator (`date:,numeric,false,DD/MM/YYYY` → `15/03/2024`, `YYYY-MM-DD` → `2024-03-15`). The `time` flag (3rd argument) adds hour and minute in the locale's format.
+- **Stricter `tsconfig.json` for new apps:** `noUnusedParameters`, `noImplicitOverride`, `noImplicitReturns` and `noFallthroughCasesInSwitch` are on. Mark each hook you override with `override` (`protected override onAfterRender(): void`), and prefix a parameter you deliberately don't read with `_`.
+- **New `typecheck` script**: `builder.js --typecheck` copies the sources, merges the `.html` templates, then runs `tsc --noEmit` with the `data-event` handler references, and stops there: nothing is bundled and `dist/` is left as it is. Use it in CI. A plain `tsc --noEmit` doesn't see the merged templates, so it reports every template-only handler as unused under `noUnusedLocals`.
+- **The build copies all of `public/` and `src/assets/`.** `public/` used to contribute only `favicon.ico`, and `src/assets/` only binary files (images, fonts, media): a font's `LICENSE.txt`, a `robots.txt`, a `.well-known/` folder or a service worker had no way into `dist/src`. Both are now copied as they are, except `.DS_Store`, `Thumbs.db` and `.gitkeep`. Prod builds hash only `bundle.js` and `main.css`, so copied `.js`/`.css` files keep their names (before, any `.js`/`.css` file was renamed, which broke references to it).
+- **Docker: files without a hashed name are revalidated, not cached for a year.** The nginx config cached every `.js`, `.css`, image and font as `immutable` for a year, as if all of them had a content-hashed name. Only `bundle.<hash>.js`, `main.<hash>.css` and `chunks/` do. Those keep the one-year cache. Every other static file (from `src/assets/` and `public/`) is now sent with `Cache-Control: no-cache`: the browser keeps it, but checks it on each use (a `304` while it's unchanged), so a replaced image or script shows right after a deploy.
+- **testin-nutin warns about a stale build.** The app and framework tests run against `dist/`, so after a failed build (or an edit followed by `testin-nutin:only`) they tested the old code and could pass. The runner now warns, naming the file, when anything in `src/`, `config/`, or `nutin.config.js`, changed after the last successful build. Test files don't count.
+- Updated AGENTS.md.
+
 ## 3.0.0
 
 v3 is a major revision focused on security, performance and maintainability.

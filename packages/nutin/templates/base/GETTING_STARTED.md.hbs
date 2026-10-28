@@ -17,22 +17,39 @@
 src/
   app/    -- suggested layout: organize src/app however you like
     components/
+{{#if extension}}
+      app/        -- the root component
+{{/if}}
     services/
+{{#if extension}}
+      chrome-api/ -- the one place that touches chrome.*
+{{else}}
     views/
     routes.ts
+{{/if}}
     main.ts
   assets/
   core/   -- Nutin framework source
+{{#if extension}}
+  extension/ -- manifest.json and background.ts
+{{/if}}
   styles/
 
-tools/    -- build, development, generator and testing
+tools/    -- build, {{#unless extension}}development, {{/unless}}generator and testing
 
 nutin.config.js   -- options and configuration
 ```
 
+{{#if extension}}
+This project is a browser extension: its page is the {{#if (eq extension "popup")}}toolbar popup{{else}}side panel (Firefox: the sidebar){{/if}}, with no router. `main.ts` mounts the root component, `AppComponent`, which composes the page from its children.
+
+* Components **encapsulate UI behavior**
+* Services **handle application concerns** through shared instances
+{{else}}
 * Views **orchestrate application flow**
 * Components **encapsulate UI behavior**
 * Services **handle application concerns** through shared instances
+{{/if}}
 
 ### Imports
 
@@ -50,15 +67,31 @@ import { Foo } from 'relative/path/to/foo.js';
 ## How do I run my app?
 
 ```bash
+{{#unless extension}}
 # Development
 {{packageManager}} run serve # build and serve
 {{packageManager}} run dev   # build and serve with live reload
 {{packageManager}} run dev -- --port 3000 # serve on another port (default 9090; PORT=3000 also works)
 
+{{/unless}}
 # Build
 {{packageManager}} run build      # build the application
 {{packageManager}} run build:prod # build the application for production
+{{#if (eq lang "ts")}}
+{{packageManager}} run typecheck  # type-check only, without building
+{{/if}}
+{{#if extension}}
+
+# Package for the stores
+{{packageManager}} run package:extension  # prod build + dist/<name>-<browser>-<version>.zip
+{{packageManager}} run validate:extension # check the packages
+{{packageManager}} run lint:extension     # Mozilla's linter, on dist/firefox
+{{/if}}
 ```
+{{#if extension}}
+
+The build writes one unpacked extension per browser. Load `dist/chrome` with **Load unpacked** in `chrome://extensions` (Developer mode on), or `dist/firefox/manifest.json` with **Load Temporary Add-on…** in Firefox's `about:debugging`. After each build, reload the extension there, then reopen the {{#if (eq extension "popup")}}popup{{else}}side panel{{/if}}.
+{{/if}}
 
 ## How do I generate components, views and services?
 
@@ -95,7 +128,7 @@ export class ProductCardComponent extends Component {
   }
 
   // Declares children mounted into the data-component / data-catalog placeholders below.
-  public registerChildren(): Nutin.ComponentConfig[] {
+  public override registerChildren(): Nutin.ComponentConfig[] {
     // Single child, matched to <div data-component="product-details">
     const detailsComponent = {
       selector: `product-details`,

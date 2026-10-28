@@ -49,7 +49,7 @@ export class HttpClient extends Service<HttpClient> {
     this._responseInterceptors.push(fn);
   }
 
-  protected onDestroy(): void {
+  protected override onDestroy(): void {
     this._baseUrl = '';
     this._defaultHeaders = {};
     this._trustedAPIs = [];

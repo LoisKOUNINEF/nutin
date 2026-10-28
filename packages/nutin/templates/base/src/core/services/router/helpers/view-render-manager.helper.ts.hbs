@@ -16,12 +16,14 @@ export async function transitionOutCurrentView(currentView: View | null): Promis
 // available once its chunk has loaded.
 export function renderNewView(
   view: View,
-  params: Record<string, string> = {}
+  params: Record<string, string> = {},
+  query: Record<string, string> = {}
 ): View {
   clearStaleMountContent(view);
 
-  // Set route parameters before rendering
+  // Set route and query parameters before rendering
   view.setRouteParams(params);
+  view.setQueryParams(query);
 
   view.render();
   view.onEnter();

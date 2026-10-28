@@ -22,7 +22,7 @@ class PipeRegistry extends Service<PipeRegistry> {
     return pipe(value, ...args);
   }
 
-  protected onDestroy(): void {
+  protected override onDestroy(): void {
     this._pipes = {};
   }
 }

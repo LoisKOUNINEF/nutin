@@ -11,7 +11,7 @@ export default {
         folder: '../../resources/docs',
         routePrefix: 'docs',
         landing: { title: 'Documentation' },
-        hubFiles: ['API.md', 'OPTIONS_AND_FEATURES.md', 'TESTING.md', 'TOOLS.md'],
+        hubFiles: ['CLI.md', 'API.md', 'OPTIONS_AND_FEATURES.md', 'TESTING.md', 'TOOLS.md'],
         sectionInPath: true,
         prefixReplacements: [['HOWDOI_', ''], ['WHATARE_', 'what-are-'], ['WHATIS_', 'what-is-'], ['WHAT_', 'what-']],
       },
