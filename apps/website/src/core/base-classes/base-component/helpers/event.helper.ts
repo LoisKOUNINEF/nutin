@@ -57,6 +57,7 @@ export function destroyEvents(
   eventListeners.forEach(([target, event, listener]) => {
     target.removeEventListener(event, listener);
   });
+  eventListeners.length = 0;
 }
 
 function createBoundHandler(

@@ -80,7 +80,7 @@ import { TaskActionComponent } from '../task-action/task-action.component.js';
 export class TaskCardComponent extends Component {
     constructor(mountTarget: HTMLElement, config: ITask) { /* ... */ }
 
-    registerChildren(): Nutin.ComponentConfig[] {
+    override registerChildren(): Nutin.ComponentConfig[] {
         return [
             {
                 selector: 'remove',

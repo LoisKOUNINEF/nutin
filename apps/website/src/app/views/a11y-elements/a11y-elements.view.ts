@@ -20,14 +20,14 @@ export class A11yElementsView extends View {
 
   // Never invoked during SSR, so the elements are only defined client-side;
   // an unknown page is canonicalized to the index it renders.
-  public onEnter(): void {
+  public override onEnter(): void {
     void loadA11yElements();
     if (this.hasRouteParam('page') && this.page === 'index') {
       NavigationManager.replaceState('/a11y-elements');
     }
   }
 
-  public registerChildren(): Nutin.ComponentConfig[] {
+  public override registerChildren(): Nutin.ComponentConfig[] {
     return [{
       selector: 'a11y-elements-page',
       factory: (el) => {

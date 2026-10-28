@@ -16,9 +16,41 @@ working default implementation (e.g. `MockEventBus` really dispatches), which
 `mockReset()` keeps. `MockHttpClient`'s methods are bare: unconfigured, they
 return `undefined`.
 
-There's no auto-mocking or DI container — substitution is manual constructor
-injection, since the core event-bus facades and similar services take their
-dependency as a typed constructor param.
+There's no auto-mocking or DI container. `MockEventBus` can be installed
+globally: `useEventBus(mock)` (from `core/index.js`) routes every
+`subscribe`/`once`/`emit`/`off` made through `AppEventBus` to it, which covers
+components' `listen()`, the `Navigation`/`Lifecycle` facades, the router, i18n
+and your own services. `useEventBus(null)` restores the real bus. A
+subscription stays on the bus it was made on, so install the mock before
+mounting or initializing, and restore the real bus after destroying:
+
+```js
+import { useEventBus } from '#root/dist/src/core/index.js';
+import { MockEventBus } from '#root/tools/testin-nutin/mocks/mock-event-bus.js';
+
+describe('CartComponent', () => {
+  let bus;
+
+  beforeEach(() => {
+    bus = new MockEventBus();
+    useEventBus(bus);
+  });
+
+  afterEach(() => {
+    useEventBus(null);
+  });
+
+  it('subscribes to cart updates and unsubscribes on destroy', () => {
+    const cart = new CartComponent({});
+    expect(bus.handlers['cart-updated'].length).toBe(1);
+    cart.destroy();
+    expect(bus.handlers['cart-updated'].length).toBe(0);
+  });
+});
+```
+
+The other mocks are substituted by hand, through constructor injection where
+a class takes its dependency as a constructor param.
 
 | Mock | File | Mocks (see NUTIN.md) | Notable methods |
 |---|---|---|---|

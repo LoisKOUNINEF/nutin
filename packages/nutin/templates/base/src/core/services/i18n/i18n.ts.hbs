@@ -103,7 +103,7 @@ export class I18n extends Service<I18n> {
   }
 
   // Teardown keeps the saved preference: it belongs to the user, not to this instance.
-  protected onDestroy(): void | Promise<void> {
+  protected override onDestroy(): void | Promise<void> {
     this.dispose();
   }
 

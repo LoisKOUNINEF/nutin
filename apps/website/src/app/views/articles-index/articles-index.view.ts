@@ -10,11 +10,11 @@ export class ArticlesIndexView extends View {
   }
 
   // Client-only (never during SSR): the read-more cards are <a11y-card-link>.
-  public onEnter(): void {
+  public override onEnter(): void {
     void loadA11yCardLink();
   }
 
-  public registerChildren(): Nutin.ComponentConfig[] {
+  public override registerChildren(): Nutin.ComponentConfig[] {
     return [{
       selector: 'read-more',
       factory: (el) => new ReadMoreComponent(el)

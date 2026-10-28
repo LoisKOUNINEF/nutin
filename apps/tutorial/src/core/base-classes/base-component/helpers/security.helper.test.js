@@ -21,6 +21,18 @@ describe('SecurityHelper', () => {
     expect(SecurityHelper.sanitizeTemplate(template, 'trusted')).toBe(template);
   });
 
+  it('sanitizeTemplate strips every unsafe attribute and element, adjacent or nested ones included', () => {
+    const result = SecurityHelper.sanitizeTemplate(
+      '<div><a onclick="x()" onmouseover="x()" href="javascript:x()" srcdoc="x" title="t">a</a></div>'
+        + '<script>x()</script><style>a{}</style><b onload="x()"><i><u onfocus="x()">u</u></i></b>'
+        + '<template><p><template><img src="x" onerror="x()"></template></p></template>',
+      'normal'
+    );
+    expect(result).toBe(
+      '<div><a title="t">a</a></div><b><i><u>u</u></i></b><template><p><template><img src="x"></template></p></template>'
+    );
+  });
+
   it('sanitizeTemplate "normal" level strips <script> tags', () => {
     const result = SecurityHelper.sanitizeTemplate('<p>hi</p><script>alert(1)</script>', 'normal');
     expect(result).toBe('<p>hi</p>');

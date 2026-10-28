@@ -23,7 +23,7 @@ export class FooView extends View {
     super({ template, viewName: 'foo' });
   }
 
-  public registerChildren(): Nutin.ComponentConfig[] {
+  public override registerChildren(): Nutin.ComponentConfig[] {
     return []; // mount child components the same way as any other component — see the Components docs
   }
 }

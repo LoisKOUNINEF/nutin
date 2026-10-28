@@ -2,7 +2,7 @@
 
 docker_logout() {
   docker logout ghcr.io
-  rm ~/.docker/config.json
+  rm -f ~/.docker/config.json
 }
 
 docker_logout

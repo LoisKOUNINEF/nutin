@@ -16,6 +16,7 @@ export * as NavigationManager from './helpers/navigation-manager.helper.js';
 class Router extends Service<Router> {
   private _currentView: View | null = null;
   private _currentParams: Record<string, string> = {};
+  private _currentQuery: Record<string, string> = {};
   private onPopState = () => this.handlePopState();
   private onNavigate = (data: { path: string }) => this.navigate(data.path);
   private onReload = () => this.reload();
@@ -58,6 +59,15 @@ class Router extends Service<Router> {
     return this._currentParams[key];
   }
 
+  // The URL's query string, parsed: a repeated key keeps its last value.
+  public getQueryParams(): Record<string, string> {
+    return { ...this._currentQuery };
+  }
+
+  public getQueryParam(key: string): string | undefined {
+    return this._currentQuery[key];
+  }
+
   // Path, query and hash of the current URL, as navigate() takes them.
   private currentLocation(): string {
     return NavigationManager.getCurrentPath() + window.location.search + window.location.hash;
@@ -69,6 +79,7 @@ class Router extends Service<Router> {
     const [pathAndQuery = '', hash] = path.split('#');
     const [rawPath = '', query] = pathAndQuery.split('?');
     const search = query ? `?${query}` : '';
+    const queryParams = parseQuery(query);
     const normalizedPath = NavigationManager.normalizePath(rawPath);
     const currentPath = NavigationManager.getCurrentPath();
 
@@ -76,7 +87,7 @@ class Router extends Service<Router> {
     const routeMatch = this.matchRoute(normalizedPath);
 
     if (!routeMatch) {
-      await this.handleNotFound(normalizedPath, currentPath, mode, isStale, moveFocus);
+      await this.handleNotFound(normalizedPath, mode, isStale, moveFocus);
       return;
     }
 
@@ -84,6 +95,7 @@ class Router extends Service<Router> {
       normalizedPath,
       routeMatch.route,
       routeMatch.params,
+      queryParams,
       currentPath,
       mode,
       moveFocus
@@ -97,12 +109,13 @@ class Router extends Service<Router> {
 
     this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
     this._currentParams = routeMatch.params;
+    this._currentQuery = queryParams;
 
     // Must run before renderNewView(): a view's onEnter() may rewrite the URL via NavigationManager.replaceState(), 
     // which acts on whatever history entry is current. This ensures current before onEnter() fires.
-    NavigationManager.updateHistory(normalizedPath, currentPath, mode, hash, search);
+    NavigationManager.updateHistory(normalizedPath, mode, hash, search);
 
-    this._currentView = ViewRenderManager.renderNewView(view, routeMatch.params);
+    this._currentView = ViewRenderManager.renderNewView(view, routeMatch.params, this._currentQuery);
 
     NavigationManager.updateDocumentTitle(this._currentView, routeMatch.pattern);
     NavigationManager.scrollToHash(hash);
@@ -185,7 +198,6 @@ class Router extends Service<Router> {
 
   private async handleNotFound(
     normalizedPath: string, 
-    currentPath: string, 
     mode: HistoryMode,
     isStale: () => boolean,
     moveFocus: boolean
@@ -203,10 +215,11 @@ class Router extends Service<Router> {
 
     this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
     this._currentParams = {};
+    this._currentQuery = {};
     this._currentView = ViewRenderManager.renderNewView(view, {});
 
     NavigationManager.updateDocumentTitle(this._currentView, '/404');
-    NavigationManager.updateHistory(normalizedPath, currentPath, mode);
+    NavigationManager.updateHistory(normalizedPath, mode);
     this.afterRender(moveFocus);
   }
 
@@ -214,15 +227,12 @@ class Router extends Service<Router> {
     normalizedPath: string,
     routeConfig: Nutin.RouteConfig,
     params: Record<string, string>,
+    query: Record<string, string>,
     currentPath: string,
     mode: HistoryMode,
     moveFocus: boolean
   ): Promise<GuardResult | false> {
-    const guardResult = await RouteGuardsManager.processRouteGuards(
-      routeConfig, 
-      normalizedPath,
-      params
-    );
+    const guardResult = await RouteGuardsManager.processRouteGuards(routeConfig, params, query);
 
     if (!guardResult.allowed) {
       if (guardResult.redirectTo) {
@@ -238,6 +248,14 @@ class Router extends Service<Router> {
 
     return guardResult;
   }
+}
+
+function parseQuery(query: string = ''): Record<string, string> {
+  const params: Record<string, string> = {};
+  new URLSearchParams(query).forEach((value, key) => {
+    params[key] = value;
+  });
+  return params;
 }
 
 function isPromise<T>(value: T | Promise<T>): value is Promise<T> {

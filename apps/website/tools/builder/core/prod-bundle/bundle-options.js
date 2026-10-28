@@ -5,12 +5,19 @@ import { pathToFileURL } from 'url';
 // nutin.config.js keys only the tooling reads — never worth shipping to the browser.
 // markdownSources reaches the markdown feature's runtime through a define instead (see
 // sharedDefine), so it's only bundled where that code is.
-const TOOLING_ONLY_KEYS = ['builder', 'testinNutin', 'dockerPorts', 'markdownSources'];
+const TOOLING_ONLY_KEYS = ['builder', 'testinNutin', 'dockerPorts', 'markdownSources', 'extension'];
 
 const NUTIN_CONFIG_FILTER = /[\\/]nutin\.config\.js$/;
 const SEO_JSON_FILTER = /[\\/]seo\.json$/;
 const CORE_CONFIG_IMPORTER = /[\\/]core[\\/]config\.(ts|js)$/;
 const SLIM_SEO_NAMESPACE = 'nutin-slim-seo';
+
+// Dev builds: readable output with source maps, and console calls kept.
+export const DEV_OVERRIDES = {
+  minify: false,
+  sourcemap: true,
+  drop: [],
+};
 
 /**
  * esbuild `define`s shared by the client and SSR bundles. `globalThis.__NUTIN_I18N__`

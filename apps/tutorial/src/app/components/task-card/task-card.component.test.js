@@ -42,13 +42,13 @@ describe('TaskCardComponent', () => {
     deleteSpy.restore();
   });
 
-  it('Edit navigates to the task route', () => {
+  it('Edit opens the task in the URL', () => {
     const navigateSpy = spyOn(Navigation, 'navigateTo').andCallFake(() => {});
     new TaskCardComponent(app, { id: 1, name: 'Buy milk' }).render();
 
     click($$('.task-action button')[0]);
 
-    expect(navigateSpy).toHaveBeenCalledWith('/tasks/1');
+    expect(navigateSpy).toHaveBeenCalledWith('/?task=1');
     navigateSpy.restore();
   });
 });

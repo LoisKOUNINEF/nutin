@@ -13,4 +13,8 @@ The test environment loads the **built development output** (not bundled nor min
 
 `testin-nutin:watch` watches `src/` (and `tools/` with `includeTools`), including added and deleted files, and rebuilds before each run.
 
+The runner warns when a file in `src/` or `config/`, or `nutin.config.js`, changed after the last successful build.
+
+Test files themselves don't count.
+
 See [How do I write a test?](./HOWDOI_WRITE_A_TEST.md).

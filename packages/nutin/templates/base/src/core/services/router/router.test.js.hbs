@@ -9,6 +9,8 @@ function makeView(name) {
     calls,
     getElement: () => el,
     setRouteParams: (params) => calls.push(['setRouteParams', params]),
+    query: null,
+    setQueryParams(query) { this.query = query; },
     render: () => { calls.push(['render']); return el; },
     onEnter: () => calls.push(['onEnter']),
     onExit: () => calls.push(['onExit']),
@@ -138,6 +140,66 @@ describe('Router', () => {
     expect(window.location.pathname + window.location.search + window.location.hash).toBe('/users/J%C3%B6rg?tab=posts#top');
   });
 
+  it('navigate() parses the query string on the default route and passes it to the view', async () => {
+    const home = makeView('home');
+    const about = makeView('about');
+    router = AppRouter({ '/': () => home, '/about': () => about });
+    await flushPromises();
+    await router.navigate('/about');
+
+    await router.navigate('/?tab=settings&q=a%20b+c');
+
+    expect(home.query).toEqual({ tab: 'settings', q: 'a b c' });
+    expect(router.getQueryParams()).toEqual({ tab: 'settings', q: 'a b c' });
+    expect(router.getQueryParam('tab')).toBe('settings');
+    expect(router.getCurrentParams()).toEqual({});
+  });
+
+  it('navigate() keeps query params separate from route params, a repeated key keeping its last value', async () => {
+    const home = makeView('home');
+    const userView = makeView('user');
+    router = AppRouter({ '/': () => home, '/users/:id?': () => userView });
+    await flushPromises();
+
+    await router.navigate('/users/1?id=query&tag=a&tag=b#top');
+
+    expect(router.getCurrentParams()).toEqual({ id: '1' });
+    expect(router.getQueryParams()).toEqual({ id: 'query', tag: 'b' });
+  });
+
+  it('navigate() clears the query params on a navigation without a query string', async () => {
+    const home = makeView('home');
+    const about = makeView('about');
+    router = AppRouter({ '/': () => home, '/about': () => about });
+    await flushPromises();
+    await router.navigate('/?tab=settings');
+
+    await router.navigate('/about');
+
+    expect(about.query).toEqual({});
+    expect(router.getQueryParams()).toEqual({});
+  });
+
+  it('getQueryParams() returns a copy, not a live reference', async () => {
+    const home = makeView('home');
+    router = AppRouter({ '/': () => home });
+    await flushPromises();
+    await router.navigate('/?tab=settings');
+
+    router.getQueryParams().tab = 'mutated';
+
+    expect(router.getQueryParam('tab')).toBe('settings');
+  });
+
+  it('parses the query string on the first load', async () => {
+    window.history.pushState({}, '', '/?tab=settings');
+    const home = makeView('home');
+    router = AppRouter({ '/': () => home });
+    await flushPromises();
+
+    expect(home.query).toEqual({ tab: 'settings' });
+  });
+
   it('reload() keeps the current query string', async () => {
     const home = makeView('home');
     const list = makeView('list');
@@ -148,6 +210,7 @@ describe('Router', () => {
     await router.reload();
 
     expect(window.location.search).toBe('?page=2');
+    expect(router.getQueryParams()).toEqual({ page: '2' });
   });
 
   it('drops a navigation whose guard resolves after a newer navigation started', async () => {
@@ -181,6 +244,18 @@ describe('Router', () => {
     await router.navigate('/nope');
 
     expect(notFound.calls.some(c => c[0] === 'render')).toBe(true);
+  });
+
+  it('navigate() clears the query params when rendering the /404 route', async () => {
+    const home = makeView('home');
+    const notFound = makeView('not-found');
+    router = AppRouter({ '/': () => home, '/404': () => notFound });
+    await flushPromises();
+    await router.navigate('/?tab=settings');
+
+    await router.navigate('/nope?tab=settings');
+
+    expect(router.getQueryParams()).toEqual({});
   });
 
   it('navigate() logs an error and renders nothing when no route matches and there is no /404 route', async () => {
@@ -226,6 +301,26 @@ describe('Router', () => {
 
     expect(login.calls.some(c => c[0] === 'render')).toBe(true);
     expect(secret.calls.length).toBe(0);
+  });
+
+  it('navigate() passes the query params to the guards of the default route', async () => {
+    const home = makeView('home');
+    const login = makeView('login');
+    const received = [];
+    router = AppRouter({
+      '/': {
+        view: () => home,
+        guards: [(params, query) => { received.push([params, query]); return query.tab !== 'admin' || '/login'; }],
+      },
+      '/login': () => login,
+    });
+    await flushPromises();
+
+    await router.navigate('/?tab=admin');
+
+    expect(received[received.length - 1]).toEqual([{}, { tab: 'admin' }]);
+    expect(login.calls.some(c => c[0] === 'render')).toBe(true);
+    expect(window.location.pathname + window.location.search).toBe('/login');
   });
 
   it('navigate() pushes the redirect target when an in-app navigation is redirected by a guard', async () => {

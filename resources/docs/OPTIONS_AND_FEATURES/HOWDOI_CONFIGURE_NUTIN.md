@@ -15,9 +15,3 @@ The tooling-only keys (`builder`, `testinNutin`, `dockerPorts`, `markdownSources
 
 - `config/languages.json`: Configure supported languages and default language. *See [How do I use i18n](HOWDOI_USE_I18N.md)*
 - `config/seo.json`: Configure route paths to generate SEO files. *See [How do I use SEO files generation](HOWDOI_USE_SEO_FILE_GENERATION.md)*
-
-## What is the difference between options and features?
-
-Options can be toggled on and off in `nutin.config.js`
-
-Features are added with `nutin-add <feature>` and can only be removed manually. Only their configuration lives in `nutin.config.js`

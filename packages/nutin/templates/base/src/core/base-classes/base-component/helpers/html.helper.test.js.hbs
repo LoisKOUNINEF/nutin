@@ -299,6 +299,42 @@ describe('html', () => {
     expect(warnSpy.callCount).toBe(11);
   });
 
+  it('html gives the same result each time one template literal is called with new values', () => {
+    const warnSpy = spyOn(console, 'warn').andCallFake(() => {});
+    const link = (href, label, title) => html`<a href="${href}" title=${title}>${label}</a>`;
+    const results = [
+      String(link('/a', '<b>', 'x y')),
+      String(link('javascript:x', 'b', undefined)),
+      String(link('/c', html`<i>c</i>`, 't')),
+    ];
+    warnSpy.restore();
+
+    expect(results).toEqual([
+      '<a href="/a" title="x y">&lt;b&gt;</a>',
+      '<a href="about:invalid#nutin-blocked" title="">b</a>',
+      '<a href="/c" title="t"><i>c</i></a>',
+    ]);
+    expect(warnSpy.callCount).toBe(1);
+  });
+
+  it('html checks a URL built from several values with static text between them as one value', () => {
+    const warnSpy = spyOn(console, 'warn').andCallFake(() => {});
+    const url = (a, b, c) => html`<a href="${a}:${b}" title="${c}">x</a><a href="${c}">y</a>`;
+    const results = [
+      String(url('javascript', 'x', 'ok')),
+      String(url('https', '//example.com', '/ok')),
+      String(url('/p', 'javascript:x', 'javascript:x')),
+    ];
+    warnSpy.restore();
+
+    expect(results).toEqual([
+      '<a href="javascript:about:invalid#nutin-blocked" title="ok">x</a><a href="ok">y</a>',
+      '<a href="https://example.com" title="/ok">x</a><a href="/ok">y</a>',
+      '<a href="/p:javascript:x" title="javascript:x">x</a><a href="about:invalid#nutin-blocked">y</a>',
+    ]);
+    expect(warnSpy.callCount).toBe(2);
+  });
+
   it('a javascript: URL from data is blocked at the trusted level too', () => {
     const component = new TestComponent({
       config: { url: 'javascript:alert(1)' },

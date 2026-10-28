@@ -1,11 +1,16 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { PATHS, isBundledSource, isChunk } from '../app/paths.js';
-import { getFilesRecursive, errorExit } from '../../../utils/index.js';
+import { PATHS } from '../app/paths.js';
+import { errorExit } from '../../../utils/index.js';
+
+// What index.html references, the only file whose references are updated. Everything else keeps
+// its name: chunks are already hashed by esbuild, and files copied from public/ and src/assets/
+// (a service worker, a stylesheet linked by path...) must stay where they are.
+const HASHED_FILES = ['bundle.js', 'main.css'];
 
 function addHashToFiles(distDir) {
-  const files = getFilesRecursive(distDir, ['.js', '.css']).filter((file) => !isBundledSource(file) && !isChunk(file));
+  const files = HASHED_FILES.map((file) => path.join(distDir, file)).filter((file) => fs.existsSync(file));
 
   const fileMap = {}; // Track old → new filenames
 

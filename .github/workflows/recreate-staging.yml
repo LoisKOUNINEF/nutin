@@ -2,7 +2,8 @@ name: Delete and Recreate Staging Branch
 
 on:
   workflow_run:
-    workflows: ["CI/CD Website production"]
+    workflows:
+      - "CI/CD Website production"
     types:
       - completed
     branches:
@@ -10,13 +11,15 @@ on:
 
 jobs:
   update_staging:
-    runs-on: ubuntu-latest
+    # a failed production deploy leaves staging as it is
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
 
     permissions:
       contents: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 

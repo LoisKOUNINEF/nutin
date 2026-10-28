@@ -64,7 +64,6 @@ export function normalizePath(path: string): string {
 
 export function updateHistory(
   normalizedPath: string,
-  currentPath: string,
   mode: HistoryMode,
   hash?: string,
   search: string = ''
@@ -110,10 +109,9 @@ export function loadPage(url: string): void {
 
 // Rewrites the current history entry's URL to match content already rendered
 // (e.g. a route that fell back to a default sub-page) without adding a
-// new back/forward-navigable entry.
+// new back/forward-navigable entry. The current query string and hash are kept.
 export function replaceState(path: string): void {
-  const localizedPath = addLocalePrefix(path) + window.location.hash;
-  window.history.replaceState({}, '', localizedPath);
+  window.history.replaceState({}, '', localizedUrl(path, window.location.search, window.location.hash.slice(1)));
 }
 
 // Scrolls to the element matching `hash` (a bare fragment, no leading "#") if it

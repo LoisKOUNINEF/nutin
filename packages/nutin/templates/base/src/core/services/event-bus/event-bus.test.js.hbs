@@ -1,4 +1,6 @@
 import { EventBus } from '#root/dist/src/core/services/index.js'
+import { AppEventBus, BaseComponent, Navigation, useEventBus } from '#root/dist/src/core/index.js';
+import { MockEventBus } from '#root/tools/testin-nutin/mocks/mock-event-bus.js';
 
 describe('EventBus', () => {
   const eventBus = EventBus.getInstance();
@@ -215,5 +217,65 @@ describe('EventBus', () => {
     eventBus.emit('user-login', {});
 
     expect(called).toBe(true);
+  });
+});
+
+describe('useEventBus', () => {
+  let mock;
+
+  beforeEach(() => {
+    mock = new MockEventBus();
+    useEventBus(mock);
+  });
+
+  afterEach(() => {
+    useEventBus(null);
+    AppEventBus.cleanupEventListeners();
+  });
+
+  it('routes AppEventBus\'s subscribe, once, emit and off to the bus given', () => {
+    const received = [];
+    const callback = (data) => received.push(data);
+    AppEventBus.subscribe('navigate', callback);
+    AppEventBus.once('reload', callback);
+    AppEventBus.emit('navigate', { path: '/a' });
+    AppEventBus.off('navigate', callback);
+    AppEventBus.emit('navigate', { path: '/b' });
+
+    expect(mock.subscribe).toHaveBeenCalledWith('navigate', callback);
+    expect(mock.once).toHaveBeenCalledWith('reload', callback);
+    expect(mock.emit).toHaveBeenCalledWith('navigate', { path: '/a' });
+    expect(mock.off).toHaveBeenCalledWith('navigate', callback);
+    expect(received).toEqual([{ path: '/a' }]);
+    // Nothing reached the real bus.
+    expect(AppEventBus.handlers.navigate).toBeUndefined();
+  });
+
+  it('covers the facades and components\' listen(), which go through AppEventBus', () => {
+    Navigation.navigateTo('/about');
+    expect(mock.emit).toHaveBeenCalledWith('navigate', { path: '/about' });
+
+    class Listener extends BaseComponent {
+      constructor() {
+        super({});
+        this.listen('reload', () => {});
+      }
+      generateTemplate() {
+        return '';
+      }
+    }
+    const component = new Listener();
+    expect(mock.handlers.reload.length).toBe(1);
+    component.destroy();
+    expect(mock.handlers.reload.length).toBe(0);
+  });
+
+  it('restores the real bus with null', () => {
+    useEventBus(null);
+    let received = null;
+    AppEventBus.subscribe('navigate', (data) => { received = data; });
+    AppEventBus.emit('navigate', { path: '/real' });
+    expect(received).toEqual({ path: '/real' });
+    expect(mock.emit.calls.length).toBe(0);
   });
 });

@@ -24,7 +24,7 @@ export class MyView extends View {
 import { AppEventBus } from '../../../core/index.js';
 
 AppEventBus.subscribe('language-changed', (data) => console.log(data.lang));
-AppEventBus.once('language-changed', (data) => { /* fires once, then auto-unsubscribes */ });
+AppEventBus.once('language-changed', (data) => console.log('first change:', data.lang)); // fires once, then auto-unsubscribes
 AppEventBus.emit('language-changed', { lang: 'fr' });
 AppEventBus.off('language-changed', callback); // omit callback to remove ALL handlers for that event
 ```

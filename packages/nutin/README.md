@@ -27,6 +27,7 @@ npx @nutin/cli
 # options
 nutin-new my-app -p pnpm   # package manager (npm, yarn, pnpm or bun), asked otherwise
 nutin-new my-app --js-only # plain JavaScript project (TypeScript is the default)
+nutin-new my-app --extension side-panel # Chrome and Firefox extension: side-panel or popup, asked if omitted
 ```
 
 ## Update Nutin
@@ -44,7 +45,7 @@ Your project must be committed first (git repository, no changes or untracked fi
 nutin-add <feature>
 ```
 
-Features: `docker` (Dockerfile, nginx config, `docker:build`/`docker:run` scripts) and `markdown` (Markdown folders compiled into routed pages).
+Features: `docker` (Dockerfile, nginx config, `docker:build`/`docker:run` scripts) and `markdown` (Markdown folders compiled into routed pages). Neither can be added to a browser extension project.
 
 ## Documentation
 

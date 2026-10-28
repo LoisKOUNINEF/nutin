@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "{{projectName}}",
+  "description": "{{projectName}}, a browser extension built with Nutin.",
+  "version": "0.1.0",
+  "minimum_chrome_version": "116",
+  "icons": {
+    "16": "assets/icons/icon-16.png",
+    "32": "assets/icons/icon-32.png",
+    "48": "assets/icons/icon-48.png",
+    "128": "assets/icons/icon-128.png"
+  },
+  "action": {
+    "default_title": "{{projectName}}",
+{{#if (eq extension "popup")}}
+    "default_popup": "index.html",
+{{/if}}
+    "default_icon": {
+      "16": "assets/icons/icon-16.png",
+      "32": "assets/icons/icon-32.png"
+    }
+  },
+{{#if (eq extension "side-panel")}}
+  "side_panel": {
+    "default_path": "index.html"
+  },
+{{/if}}
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+{{#if (eq extension "side-panel")}}
+  "permissions": ["sidePanel", "storage"],
+  "commands": {
+    "_execute_action": {
+      "description": "Open {{projectName}}"
+    }
+  }
+{{else}}
+  "permissions": ["storage"]
+{{/if}}
+}

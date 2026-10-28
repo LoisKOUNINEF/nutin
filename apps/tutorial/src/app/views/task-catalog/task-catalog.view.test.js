@@ -26,22 +26,22 @@ describe('TaskCatalogView', () => {
     expect($$('.task-card').length).toBe(2);
   });
 
-  it('does not render task inputs without an id', () => {
+  it('does not render task inputs without a task in the URL', () => {
     view.render();
 
     expect($('.task-inputs')).toBe(null);
   });
 
-  it('renders task inputs for the task in the route', () => {
-    // What the router does for /tasks/1
-    view.setRouteParams({ id: '1' });
+  it('renders task inputs for the task in the URL', () => {
+    // What the router does for /?task=1
+    view.setQueryParams({ task: '1' });
     view.render();
 
     expect($('.task-inputs #name').value).toBe('Task 2');
   });
 
   it('keeps unchanged cards and the form when it re-renders', () => {
-    view.setRouteParams({ id: '1' });
+    view.setQueryParams({ task: '1' });
     view.render();
     const [firstCard, secondCard] = $$('.task-card');
     const form = $('.task-inputs');

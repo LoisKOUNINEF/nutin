@@ -6,6 +6,8 @@ title: Options and features
 
 ## Table of Contents
 
+- [What is the difference between options and features?](OPTIONS_AND_FEATURES/WHATIS_THE_DIFFERENCE_BETWEEN_OPTIONS_AND_FEATURES.md)
+
 ### Configuration
 
 - [How do I configure Nutin?](./OPTIONS_AND_FEATURES/HOWDOI_CONFIGURE_NUTIN.md)

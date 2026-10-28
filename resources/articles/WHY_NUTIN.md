@@ -32,7 +32,7 @@ Nutin provides a small set of explicit concepts, each with a clear responsibilit
 
 Rather than treating the framework as an opaque dependency, Nutin's framework code lives alongside your application, with its own tests.
 
-When an update modifies a file you've changed, Nutin merges the changes and leaves only conflicting edits for you to resolve. See [Updater](https://nutin.dev/docs/tools/updater).
+When an update modifies a file you've changed, Nutin merges the changes and leaves only conflicting edits for you to resolve. See [Updater](https://nutin.dev/docs/cli/updater).
 
 Your application owns its architecture. Nutin provides structure within it.
 

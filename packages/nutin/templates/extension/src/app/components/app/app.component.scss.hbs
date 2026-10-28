@@ -1,0 +1,13 @@
+.app {
+  padding: 1rem;
+  font-family: system-ui, sans-serif;
+{{#if (eq extension "popup")}}
+  // A popup is sized to its content: give it a width.
+  width: 20rem;
+{{/if}}
+}
+
+.app__title {
+  margin-top: 0;
+  font-size: 1.25rem;
+}

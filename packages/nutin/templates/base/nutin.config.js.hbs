@@ -1,8 +1,19 @@
 export default {
+{{#unless extension}}
   // Nutin options
   tailwind: false,         // Enable Tailwind CSS v4
   i18n: false,             // Enable i18n; configure languages in config/languages.json
   generateSEOFiles: false, // Generate per-route HTML, robots.txt and sitemap.xml; configure SEO data in config/seo.json
+{{/unless}}
+{{#if extension}}
+  // Browser extension ({{extension}}): the build writes one unpacked extension per browser, in dist/<browser>
+  extension: {
+    browsers: ['chrome', 'firefox'],
+    // Firefox's add-on id. storage.sync data and addons.mozilla.org tie to it: pick yours before
+    // the first release (e.g. "name@your-domain"), it can never change afterwards.
+    geckoId: '{{projectName}}@example.com',
+  },
+{{/if}}
 
   // Build pipeline
   builder: {

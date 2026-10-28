@@ -2,10 +2,12 @@
 
 Registered by `registerPipes()`, which must be called once at bootstrap (in `main.ts`, before the first render) — none of these names resolve until then.
 
+`currency` and `date` default to the page's language: `<html lang>` (i18n sets it to the current language), or `en` when it's empty. An empty locale argument keeps that default (`date:,short`).
+
 | Name | Signature | Behavior |
 |---|---|---|
-| `currency` | `(value, currency = 'USD', locale = 'en-US')` | `Intl.NumberFormat(locale, { style: 'currency', currency }).format(Number(value))` |
-| `date` | `(value, locale = navigator.language, format = 'long', time = false)` | Formats via `Intl`. `format` is `'short' \| 'long' \| 'time'`; an unrecognized value falls back to `'long'`. When `time` is `true` (or the string `"true"`), hour/minute are appended to `short`/`long`. An invalid date logs a warning and returns the value unchanged. |
+| `currency` | `(value, currency = 'USD', locale = page language)` | `Intl.NumberFormat(locale, { style: 'currency', currency }).format(Number(value))` |
+| `date` | `(value, locale = page language, format = 'long', time = false, pattern)` | Formats via `Intl`. `format` is `'short' \| 'long' \| 'numeric' \| 'time'`; an unrecognized value falls back to `'long'`. `numeric` gives the locale's numeric date (`10/28/2026` in `en-US`, `28/10/2026` in `fr-FR`), or follows `pattern` when given: `YYYY`, `YY`, `MM` and `DD` (zero-padded) in any order, with any separator (`DD/MM/YYYY`, `YYYY-MM-DD`, `DD.MM.YY`). When `time` is `true` (or the string `"true"`), hour/minute are appended to `short`/`long`/`numeric`. An invalid date logs a warning and returns the value unchanged. |
 | `number` | `(value, decimals = 0)` | `Number(value).toFixed(decimals)` |
 | `uppercase` | `(value)` | Uppercases the whole string |
 | `lowercase` | `(value)` | Lowercases the whole string |
@@ -18,6 +20,7 @@ Registered by `registerPipes()`, which must be called once at bootstrap (in `mai
 ```html
 <span data-pipe="date:en-US,short|uppercase">2024-03-15</span>
 <input data-pipe="currency:EUR,de-DE" data-pipe-source="1000">
+<time data-pipe="date:,numeric,false,DD/MM/YYYY">2024-03-15</time>  <!-- 15/03/2024 -->
 ```
 
 See [How do I use pipes?](./HOWDOI_USE_PIPES.md) for the full `data-pipe` syntax.

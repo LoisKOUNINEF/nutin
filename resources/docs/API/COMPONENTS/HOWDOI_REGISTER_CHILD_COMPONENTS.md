@@ -5,7 +5,7 @@
 Override `registerChildren()` and match each entry's `selector` to a `data-component` mount point in your template:
 
 ```ts
-public registerChildren(): Nutin.ComponentConfig[] {
+public override registerChildren(): Nutin.ComponentConfig[] {
   return [
     { selector: 'user-card', factory: (el) => new UserCardComponent(el, { id: 1 }) },
   ];
@@ -29,6 +29,21 @@ interface ComponentConfig {
 
 Each match's element is passed to `factory`, the returned component is rendered immediately, and tracked so `destroy()` can recursively tear it down later.
 
+The placeholder is **replaced** by the child's root element, and its attributes are copied onto it (`class` is merged, `data-component` is dropped). That lets the parent decide where the child sits:
+
+```html
+<!-- the child's root gets "card__footer", styled by the parent -->
+<div class="card__footer" data-component="actions"></div>
+```
+
+The selector may be interpolated, which replaces an `if` around two placeholders: list both children in `registerChildren()`, and only the one in the template mounts.
+
+```html
+<div data-component="${config.editing ? 'editor' : 'preview'}"></div>
+```
+
+For a child that sits inline, give it `tagName: 'span'` and `display: contents` on its root, so the root adds no box of its own.
+
 Children without `keep` are destroyed and recreated on every render — see [Keeping children across re-renders](#keeping-children-across-re-renders) to avoid that.
 
 ## Repeated children (catalogs)
@@ -36,7 +51,7 @@ Children without `keep` are destroyed and recreated on every render — see [Kee
 Use `createCatalogComponents()` instead of hand-writing one entry per item:
 
 ```ts
-public registerChildren(): Nutin.ComponentConfig[] {
+public override registerChildren(): Nutin.ComponentConfig[] {
   return [
     ...this.createCatalogComponents({
       items: this.users,           // array of objects or primitives
@@ -81,6 +96,20 @@ type CatalogItemConfig<T = any> = T extends object ? T & { index: number } : { v
 
 The third factory argument (`props`) is a shallow merge of the catalog config's own `props` and `defaults` fields; `defaults` win on a shared key.
 
+### Components used both in and out of a catalog
+
+A component can be mounted as a single child (no `index`) and from a catalog (with `index`). Type its data with `Nutin.CatalogItemBase` made optional:
+
+```ts
+type ProjectData = IProject & Partial<Nutin.CatalogItemBase>;
+
+const templateFn = (project: ProjectData) => html`
+  <article class="${project.index === undefined ? 'project--standalone' : ''}">${project.name}</article>
+`;
+```
+
+Avoid the union `IProject | Nutin.CatalogItemConfig<IProject>`: TypeScript doesn't allow reading `project.index` on it, since `IProject` has no `index`. `Nutin.CatalogItemConfig<IProject>` is still assignable to `ProjectData`.
+
 ## Keeping children across re-renders
 
 By default, a parent's re-render destroys and recreates every child, losing its DOM state (focus, scroll position, unsaved input). Give a child a stable identity to keep it instead.
@@ -88,7 +117,7 @@ By default, a parent's re-render destroys and recreates every child, losing its 
 ### Single children: `keep`
 
 ```ts
-public registerChildren(): Nutin.ComponentConfig[] {
+public override registerChildren(): Nutin.ComponentConfig[] {
   return [
     { selector: 'search', keep: 'search', factory: (el) => new SearchComponent(el) },
   ];
@@ -114,6 +143,20 @@ Choosing a `keep` value means the child owns its own updates: either put in it w
 ```
 
 An item is kept when its `keepBy` value is the same **and** it hasn't changed: the item is shallow-equal to the previous one (own properties compared with `Object.is`), and the catalog's `props`/`defaults` and `component` are unchanged.
+
+`props`/`defaults` are compared shallowly as well: the same values, by `Object.is`. A value that's a new object or function on every render recreates every item each time:
+
+```ts
+// Every render passes a new arrow function: no item is ever kept.
+props: { onPick: (id: string) => this._pick(id) },
+
+// The same function every render: unchanged items are kept.
+private readonly _onPick = (id: string) => this._pick(id);
+// ...
+props: { onPick: this._onPick },
+```
+
+The same goes for `component`: declare the item class at module level, not inside `registerChildren()`, or every render passes a new class and nothing is kept.
 
 Changed items are destroyed and recreated. Kept items follow reorders, insertions and removals; their wrapper's `data-index` is updated, but the child's own `config.index` stays the index it was created with.
 

@@ -16,6 +16,7 @@ export { html, raw, trustedRaw, SafeHtml } from './helpers/html.helper.js';
 export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
   private _children: ChildRegistry = ChildrenHelper.createRegistry();
   private _isRendering = false;
+  private _destroyed = false;
   protected element: T;
   protected eventListeners: Array<[EventTarget, string, EventListener]> = [];
   private _busSubscriptions: Array<[Nutin.EventKey, (data: any) => void]> = [];
@@ -36,11 +37,21 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
     return this.element;
   }
 
+  // A destroyed component can't render or subscribe again: check it before async work
+  public get isDestroyed(): boolean {
+    return this._destroyed;
+  }
+
   public registerChildren(): Nutin.ComponentConfig[] {
     return [];
   }
 
   public render(): HTMLElement {
+    // A late render (after an await, a timer...) would compose children nothing ever destroys.
+    if (this._destroyed) {
+      console.warn(`render() called on a destroyed ${this.constructor.name} - ignored. Check isDestroyed after async work.`);
+      return this.element;
+    }
     if (this._isRendering) return this.element;
     this._isRendering = true;
 
@@ -49,7 +60,7 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
       const preserved = PreservationHelper.preserve(ChildrenHelper.getKeepableElements(this._children));
       try {
         this.element.replaceChildren(
-          SecurityHelper.sanitizeToFragment(this.generateTemplate(), this.trustLevel)
+          SecurityHelper.sanitizeToFragment(this.templateOrReport(), this.trustLevel)
         );
         this.compose();
       } finally {
@@ -66,6 +77,8 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
   }
 
   public destroy(): void {
+    if (this._destroyed) return;
+    this._destroyed = true;
     this.onBeforeDestroy();
     EventHelper.destroyEvents(this.eventListeners);
     this._busSubscriptions.forEach(([event, callback]) => {
@@ -89,6 +102,15 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
     return '';
   }
 
+  private templateOrReport(): Nutin.Template {
+    try {
+      return this.generateTemplate();
+    } catch (error) {
+      console.error(`${this.constructor.name}.generateTemplate() threw - its render was aborted.`, error);
+      throw error;
+    }
+  }
+
   protected hydrate(): void {
     this.parseDataAttributes();
     DomHelper.cleanupOptionalContent(this.element);
@@ -105,7 +127,6 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
 
   protected autoBindEvents(): void {
     EventHelper.destroyEvents(this.eventListeners);
-    this.eventListeners.length = 0;
     EventHelper.bindEvents(this, this.element, this.eventListeners);
   }
 
@@ -121,6 +142,10 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
     event: K,
     callback: (data: Nutin.EventMap[K]) => void
   ): void {
+    if (this._destroyed) {
+      console.warn(`listen("${event}") called on a destroyed ${this.constructor.name} - ignored.`);
+      return;
+    }
     AppEventBus.subscribe(event, callback);
     this._busSubscriptions.push([event, callback]);
   }

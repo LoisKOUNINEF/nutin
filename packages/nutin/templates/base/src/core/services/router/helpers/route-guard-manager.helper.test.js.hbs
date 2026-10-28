@@ -18,20 +18,20 @@ describe('RouteGuardsManager', () => {
   });
 
   it('allows a function route config, which has no guards', async () => {
-    const result = await RouteGuardsManager.processRouteGuards(mockViewConstructor, '/');
+    const result = await RouteGuardsManager.processRouteGuards(mockViewConstructor);
     expect(result.allowed).toBe(true);
     expect(result.viewConstructor).toBe(mockViewConstructor);
   });
 
   it('allows an object route config without guards', async () => {
-    const result = await RouteGuardsManager.processRouteGuards({ view: mockViewConstructor }, '/');
+    const result = await RouteGuardsManager.processRouteGuards({ view: mockViewConstructor });
     expect(result.allowed).toBe(true);
   });
 
   it('runs every guard, sync or async, and allows when all return true', async () => {
     const calls = [];
     const guards = [() => { calls.push(1); return true; }, () => { calls.push(2); return Promise.resolve(true); }];
-    const result = await RouteGuardsManager.processRouteGuards({ view: mockViewConstructor, guards }, '/');
+    const result = await RouteGuardsManager.processRouteGuards({ view: mockViewConstructor, guards });
     expect(result.allowed).toBe(true);
     expect(calls).toEqual([1, 2]);
   });
@@ -39,7 +39,7 @@ describe('RouteGuardsManager', () => {
   it('stops at the first guard returning false', async () => {
     let ranAfter = false;
     const guards = [() => true, () => false, () => { ranAfter = true; return true; }];
-    const result = await RouteGuardsManager.processRouteGuards({ view: mockViewConstructor, guards }, '/');
+    const result = await RouteGuardsManager.processRouteGuards({ view: mockViewConstructor, guards });
     expect(result.allowed).toBe(false);
     expect(ranAfter).toBe(false);
   });
@@ -47,14 +47,14 @@ describe('RouteGuardsManager', () => {
   it('stops at the first guard returning a redirect', async () => {
     let ranAfter = false;
     const guards = [() => true, () => '/login', () => { ranAfter = true; return true; }];
-    const result = await RouteGuardsManager.processRouteGuards({ view: mockViewConstructor, guards }, '/');
+    const result = await RouteGuardsManager.processRouteGuards({ view: mockViewConstructor, guards });
     expect(result.redirectTo).toBe('/login');
     expect(ranAfter).toBe(false);
   });
 
   it('should return allowed false when guard returns false in processRouteGuards', async () => {
     const config = { view: mockViewConstructor, guards: [() => false] };
-    const result = await RouteGuardsManager.processRouteGuards(config, '/test');
+    const result = await RouteGuardsManager.processRouteGuards(config);
     expect(result.allowed).toBe(false);
     expect(result.redirectTo).toBeUndefined();
     expect(result.viewConstructor).toBeUndefined();
@@ -62,7 +62,7 @@ describe('RouteGuardsManager', () => {
 
   it('should return redirectTo when guard returns a string in processRouteGuards', async () => {
     const config = { view: mockViewConstructor, guards: [() => '/login'] };
-    const result = await RouteGuardsManager.processRouteGuards(config, '/private');
+    const result = await RouteGuardsManager.processRouteGuards(config);
     expect(result.allowed).toBe(false);
     expect(result.redirectTo).toBe('/login');
     expect(result.viewConstructor).toBeUndefined();
@@ -70,7 +70,7 @@ describe('RouteGuardsManager', () => {
 
   it('should return allowed true and viewConstructor when guards pass in processRouteGuards', async () => {
     const config = { view: mockViewConstructor, guards: [() => true] };
-    const result = await RouteGuardsManager.processRouteGuards(config, '/dashboard');
+    const result = await RouteGuardsManager.processRouteGuards(config);
     expect(result.allowed).toBe(true);
     expect(typeof result.viewConstructor).toBe('function');
     expect(result.redirectTo).toBeUndefined();
@@ -81,19 +81,29 @@ describe('RouteGuardsManager', () => {
     const guard = (params) => { receivedParams.push(params); return true; };
     const config = { view: mockViewConstructor, guards: [guard] };
 
-    await RouteGuardsManager.processRouteGuards(config, '/users/42', { id: '42' });
+    await RouteGuardsManager.processRouteGuards(config, { id: '42' });
 
     expect(receivedParams.length).toBe(1);
     expect(receivedParams[0]).toEqual({ id: '42' });
   });
 
-  it('defaults params to an empty object when none are passed to processRouteGuards', async () => {
-    const receivedParams = [];
-    const guard = (params) => { receivedParams.push(params); return true; };
+  it('passes the query params through processRouteGuards to each guard, after the route params', async () => {
+    const received = [];
+    const guard = (params, query) => { received.push([params, query]); return true; };
+    const config = { view: mockViewConstructor, guards: [guard, guard] };
+
+    await RouteGuardsManager.processRouteGuards(config, { id: '42' }, { tab: 'posts' });
+
+    expect(received).toEqual([[{ id: '42' }, { tab: 'posts' }], [{ id: '42' }, { tab: 'posts' }]]);
+  });
+
+  it('defaults params and query to empty objects when none are passed to processRouteGuards', async () => {
+    const received = [];
+    const guard = (params, query) => { received.push([params, query]); return true; };
     const config = { view: mockViewConstructor, guards: [guard] };
 
-    await RouteGuardsManager.processRouteGuards(config, '/dashboard');
+    await RouteGuardsManager.processRouteGuards(config);
 
-    expect(receivedParams[0]).toEqual({});
+    expect(received[0]).toEqual([{}, {}]);
   });
 });

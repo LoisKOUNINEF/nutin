@@ -163,43 +163,34 @@ function templateContent(el: Element): DocumentFragment | null {
 }
 
 function sanitizeNode(root: ParentNode, trustLevel: Nutin.TrustLevel): void {
-  // Snapshot children before mutating — removing an element from a live
-  // collection while iterating it would skip its next sibling.
-  const children = Array.from(root.children);
-
-  for (const el of children) {
+  // Snapshot first: removing an element while walking a live list would skip the next one.
+  // Descendants of a removed element are still visited, which is harmless.
+  for (const el of Array.from(root.querySelectorAll('*'))) {
     const tag = el.localName.toLowerCase();
 
-    if (STRIPPED_TAGS.has(tag)) {
-      el.remove();
-      continue;
-    }
-    if (trustLevel === 'strict' && STRICT_STRIPPED_TAGS.has(tag)) {
-      el.remove();
-      continue;
-    }
-    if (animatesUrlAttribute(el)) {
+    if (STRIPPED_TAGS.has(tag)
+      || (trustLevel === 'strict' && STRICT_STRIPPED_TAGS.has(tag))
+      || animatesUrlAttribute(el)) {
       el.remove();
       continue;
     }
 
-    for (const attr of Array.from(el.attributes)) {
+    const attrs = el.attributes;
+    // Backwards, so a removal doesn't shift the attributes still to check.
+    for (let i = attrs.length - 1; i >= 0; i--) {
+      const attr = attrs[i]!;
       const name = attr.name.toLowerCase();
       // srcdoc is parsed as a same-origin document: escaped markup in it is decoded and runs.
-      if (name.startsWith('on') || name === 'srcdoc') {
-        el.removeAttribute(attr.name);
-        continue;
-      }
-      if (URL_ATTRS.has(name) && isDangerousUrl(attr.value, trustLevel)) {
-        el.removeAttribute(attr.name);
-        continue;
-      }
-      if (FRAME_TAGS.has(tag) && FRAME_URL_ATTRS.has(name) && isDangerousUrl(attr.value, 'strict')) {
+      if ((name.startsWith('on') || name === 'srcdoc')
+        || (URL_ATTRS.has(name) && isDangerousUrl(attr.value, trustLevel))
+        || (FRAME_TAGS.has(tag) && FRAME_URL_ATTRS.has(name) && isDangerousUrl(attr.value, 'strict'))) {
         el.removeAttribute(attr.name);
       }
     }
 
-    sanitizeNode(templateContent(el) ?? el, trustLevel);
+    // querySelectorAll() doesn't look into <template> content.
+    const content = templateContent(el);
+    if (content) sanitizeNode(content, trustLevel);
   }
 }
 

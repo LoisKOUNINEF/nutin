@@ -18,6 +18,8 @@ const FULLY_EXCLUDED_PATTERNS = [
   /^config\/[^/]+\.json$/,
   /^src\/app(\/|$)/,
   /^src\/assets(\/|$)/,
+  // Extension projects: the manifest and the background script are starters, like src/app.
+  /^src\/extension(\/|$)/,
 ];
 
 // Like FULLY_EXCLUDED_PATTERNS, but only for files that already existed before this

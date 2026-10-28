@@ -14,11 +14,11 @@ export class TaskCatalogView extends View {
     this.listenToRenderEvents(['task-event']);
   }
 
-  onBeforeRender(): void {
+  override onBeforeRender(): void {
     this._tasks = taskService.tasks;
   }
 
-  registerChildren(): Nutin.ComponentConfig[] {
+  override registerChildren(): Nutin.ComponentConfig[] {
     // One TaskCardComponent is created for each task.
     const taskCatalogChildren: Nutin.ComponentConfig[] = [
       {
@@ -36,7 +36,7 @@ export class TaskCatalogView extends View {
       }),
     ];
 
-    if (this.hasRouteParam('id')) {
+    if (this.hasQueryParam('task')) {
       taskCatalogChildren.push(...this.getTaskInputsChild());
     }
 
@@ -44,7 +44,7 @@ export class TaskCatalogView extends View {
   }
 
   private getTaskInputsChild(): Nutin.ComponentConfig[] {
-    const taskId = this.getRouteParam('id') || 0;
+    const taskId = this.getQueryParam('task') || 0;
     const task = taskService.getTask(+taskId);
     if (!task) return [];
 

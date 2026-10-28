@@ -1,4 +1,4 @@
-# Updater
+# How do I update a Nutin project?
 
 Nutin's source lives in your project, so updating Nutin means updating files you may have edited. `nutin-update` updates them without overwriting your changes.
 
@@ -51,6 +51,7 @@ A summary is printed before anything is written.
 - `src/app/**`: your application.
 - `src/assets/**`.
 - `config/*.json`.
+- `src/extension/**` (browser extension projects): the manifest and the background script.
 - `src/styles/**`: existing files are kept; only files new in this version are added.
 
 `package.json` and `tsconfig.json` aren't written by `nutin-update` either. The summary lists each `package.json` script and `devDependencies` entry, and each `tsconfig.json` option, that differs from what this Nutin version generates, so you can apply what you need by hand. `engines.node` isn't checked: see the changelog.

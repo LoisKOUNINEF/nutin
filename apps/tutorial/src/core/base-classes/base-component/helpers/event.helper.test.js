@@ -154,7 +154,7 @@ describe('EventHelper', () => {
     expect(box.checked).toBe(true);
   });
 
-  it('destroyEvents removes every tracked listener', () => {
+  it('destroyEvents removes every tracked listener and empties the list', () => {
     container.innerHTML = '<button data-event="click:handleClick"></button>';
     const button = container.querySelector('button');
     let callCount = 0;
@@ -165,5 +165,6 @@ describe('EventHelper', () => {
 
     click(button);
     expect(callCount).toBe(0);
+    expect(eventListeners.length).toBe(0);
   });
 });

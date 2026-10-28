@@ -1,0 +1,51 @@
+#!/usr/bin/env node
+
+// Checks a packaged extension before it's released: its manifest, the store ZIP's contents and
+// that the versions agree. Runs after package-extension.js, on dist/<browser> and its ZIP;
+// `--browser chrome|firefox` checks one, `--tag vX.Y.Z` also checks a release tag.
+import fs from 'fs';
+import path from 'path';
+import { spawnSync } from 'child_process';
+import config from '#root/nutin.config.js';
+import { print } from '../utils/index.js';
+import { archiveName, selectBrowsers, checkManifest, checkContents, checkVersions, ExtensionError, reportError } from './helpers.js';
+
+const DIST = path.resolve('dist');
+
+function validateExtension() {
+  const pkg = JSON.parse(fs.readFileSync(path.resolve('package.json'), 'utf-8'));
+  const tagIndex = process.argv.indexOf('--tag');
+  const tag = tagIndex === -1 ? undefined : process.argv[tagIndex + 1];
+  const failures = [];
+
+  for (const browser of selectBrowsers(process.argv, config.extension.browsers)) {
+    const archive = path.join(DIST, archiveName(pkg, browser));
+    if (!fs.existsSync(archive)) {
+      throw new ExtensionError(`No package found at ${path.relative(process.cwd(), archive)}. Run "{{packageManager}} run package:extension" first.`);
+    }
+    const manifest = JSON.parse(fs.readFileSync(path.join(DIST, browser, 'manifest.json'), 'utf-8'));
+    const entries = listEntries(archive);
+    const errors = [
+      ...checkManifest(manifest, entries, { browser, geckoId: config.extension.geckoId }),
+      ...checkContents(entries),
+      ...checkVersions(manifest, pkg.version, tag),
+    ];
+    if (errors.length) failures.push(`${path.basename(archive)} isn't releasable:\n  - ${errors.join('\n  - ')}`);
+    else print.boldSuccess(`${path.basename(archive)}: manifest, contents and versions OK (${entries.length} files)`);
+  }
+  if (failures.length) throw new ExtensionError(failures.join('\n'));
+}
+
+function listEntries(archive) {
+  const result = spawnSync('unzip', ['-Z1', archive], { encoding: 'utf-8' });
+  if (result.error || result.status !== 0) {
+    throw new ExtensionError(`Couldn't list ${path.basename(archive)}: the "unzip" command is needed. ${result.error?.message ?? result.stderr}`);
+  }
+  return result.stdout.split('\n').filter((entry) => entry && !entry.endsWith('/'));
+}
+
+try {
+  validateExtension();
+} catch (err) {
+  reportError(err, 'validate-extension');
+}

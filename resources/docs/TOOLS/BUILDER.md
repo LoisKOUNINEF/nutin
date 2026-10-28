@@ -8,13 +8,18 @@
 
 # Build application for production
 <pm> run build:prod
+
+# Type-check only (TypeScript projects), without building
+<pm> run typecheck
 ```
+
+`typecheck` runs the steps `tsc` needs and nothing else: copy the files into `dist-build`, merge the HTML templates, then `tsc --noEmit` with the `data-event` handler references (see "Compile TypeScript" below). `dist/` is left as it is, and `dist-build` is removed when the check passes (a failed check leaves it, like a failed build; the next run clears it). It exits with `tsc`'s errors and a non-zero code otherwise. Use it in CI rather than a plain `tsc --noEmit`, which doesn't see the merged templates and reports every handler used only in a template as unused (`noUnusedLocals`).
 
 ## Steps
 
 ### Setup
 
-- Copy files in temporary `dist-build` directory
+- Copy files in temporary `dist-build` directory: the sources, every file in `public/` (served from the site's root) and every file under `src/assets/`, whatever their type. `.DS_Store`, `Thumbs.db` and `.gitkeep` files are left out. Don't use `app/`, `core/`, `config/` or (in an extension) `extension/` as top-level folders in `public/`: those names hold the copied sources, which production builds and extension packages leave out.
 - *with the markdown feature:* compile the `markdownSources` folders into `/generated/*.json` manifests
 
 ### Base steps
@@ -30,10 +35,14 @@
 
 ### Production-only steps
 
-- Hash files (except `chunks/`, whose names esbuild already hashes, and the copied `src/app`/`src/core` sources)
+- Hash `bundle.js` and `main.css`, the two files `index.html` references (`chunks/` names are already hashed by esbuild; files copied from `public/` and `src/assets/` keep their names)
 - *with generateSEOFiles option enabled:* Generate static `.html` files for routes configured in `config/seo.json`
 - Compress files in Gzip (`.gz`) and Brotli (`.br`) formats, last, so prerendered pages, `index.html`, `sitemap.xml` and `robots.txt` are compressed too (the copied sources aren't)
 - Remove unused folders and `nutin.config.js`.
+
+### Browser extension projects
+
+- *with `--extension`:* after esbuild (and hashing, in production), write one unpacked extension per browser in `extension.browsers` into `dist/<browser>`: the built page and assets (without the copied sources), `background.js` (bundled from `src/extension/background.ts` with `builder.esbuild`'s settings) and `manifest.json` (version from `package.json`, Firefox's derived from Chrome's). Nothing is compressed. See [How do I create a browser extension?](../CLI/HOWDOI_CREATE_A_BROWSER_EXTENSION.md)
 
 ### Final step
 
