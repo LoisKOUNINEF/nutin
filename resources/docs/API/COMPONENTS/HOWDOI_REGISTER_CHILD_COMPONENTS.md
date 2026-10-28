@@ -29,6 +29,21 @@ interface ComponentConfig {
 
 Each match's element is passed to `factory`, the returned component is rendered immediately, and tracked so `destroy()` can recursively tear it down later.
 
+The placeholder is **replaced** by the child's root element, and its attributes are copied onto it (`class` is merged, `data-component` is dropped). That lets the parent decide where the child sits:
+
+```html
+<!-- the child's root gets "card__footer", styled by the parent -->
+<div class="card__footer" data-component="actions"></div>
+```
+
+The selector may be interpolated, which replaces an `if` around two placeholders: list both children in `registerChildren()`, and only the one in the template mounts.
+
+```html
+<div data-component="${config.editing ? 'editor' : 'preview'}"></div>
+```
+
+For a child that sits inline, give it `tagName: 'span'` and `display: contents` on its root, so the root adds no box of its own.
+
 Children without `keep` are destroyed and recreated on every render — see [Keeping children across re-renders](#keeping-children-across-re-renders) to avoid that.
 
 ## Repeated children (catalogs)
@@ -128,6 +143,20 @@ Choosing a `keep` value means the child owns its own updates: either put in it w
 ```
 
 An item is kept when its `keepBy` value is the same **and** it hasn't changed: the item is shallow-equal to the previous one (own properties compared with `Object.is`), and the catalog's `props`/`defaults` and `component` are unchanged.
+
+`props`/`defaults` are compared shallowly as well: the same values, by `Object.is`. A value that's a new object or function on every render recreates every item each time:
+
+```ts
+// Every render passes a new arrow function: no item is ever kept.
+props: { onPick: (id: string) => this._pick(id) },
+
+// The same function every render: unchanged items are kept.
+private readonly _onPick = (id: string) => this._pick(id);
+// ...
+props: { onPick: this._onPick },
+```
+
+The same goes for `component`: declare the item class at module level, not inside `registerChildren()`, or every render passes a new class and nothing is kept.
 
 Changed items are destroyed and recreated. Kept items follow reorders, insertions and removals; their wrapper's `data-index` is updated, but the child's own `config.index` stays the index it was created with.
 

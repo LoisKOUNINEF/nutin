@@ -55,6 +55,16 @@ element.remove()
 onAfterDestroy()
 ```
 
+A second `destroy()` does nothing. After it, `isDestroyed` is `true`, and `render()` and `listen()` are ignored, with a warning in development. Without that, a render that arrives late (after an `await`, from a timer or a `window` listener) would build new children that nothing destroys, and their bus subscriptions would leak. Check `isDestroyed` before using the result of async work:
+
+```ts
+private async _save(): Promise<void> {
+  await this.store.save(this.values);
+  if (this.isDestroyed) return; // closed while saving
+  this.render();
+}
+```
+
 - `onEnter()`/`onExit()`: 
 
 These are called **only by the router**, never by `render()`/`destroy()` — they fire on navigation, not on every re-render. In the full navigation sequence: 
