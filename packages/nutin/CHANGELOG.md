@@ -5,6 +5,8 @@
 ### Changes
 
 - **Faster rendering.** The render sanitizer (`normal`/`strict`) checks the template's elements in a single flat pass instead of a recursive walk, with the same output. Render is ~30% faster on a 500-row list, and ~45% faster on a 3-element component. Default app bundle: +12 B gzip.
+- **`render()` after `destroy()` is ignored.** A late render (after an `await`, a timer, a pending `window` listener) used to rebuild the destroyed component's template and compose new children that nothing ever destroyed, so their event bus subscriptions leaked for the page's lifetime. Now `render()` and `listen()` on a destroyed component do nothing and warn in development, `destroy()` is idempotent, and the new read-only `isDestroyed` lets app code skip async work early.
+- `destroy()` now empties the component's `eventListeners` list along with removing the listeners (`EventHelper.destroyEvents()` clears the array it's given), so a destroyed component no longer holds references to its DOM nodes and handlers.
 - Updated AGENTS.md
 
 ## 3.0.0
