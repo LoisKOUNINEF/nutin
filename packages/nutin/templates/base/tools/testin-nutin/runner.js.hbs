@@ -2,7 +2,7 @@ import path from 'path';
 import {
   registerTestGlobals, getTestFiles, runQueuedTests, setCurrentTestFile, print,
   startCoverage, stopCoverage, buildCoverageReport, printCoverageReport, maybeWriteUncoveredReport,
-  writeSummaryReport, setupJsdom, teardownJsdom,
+  writeSummaryReport, setupJsdom, teardownJsdom, findChangedSinceBuild,
 } from './core/index.js';
 import config from '#root/nutin.config.js';
 
@@ -73,6 +73,12 @@ async function runCoverage(testResults) {
 }
 
 async function runTests() {
+  // Only the app and framework tests run against dist/: the tools tests run from source.
+  const changedSinceBuild = (config.testinNutin.includeApp || config.testinNutin.includeFramework) && findChangedSinceBuild();
+  if (changedSinceBuild) {
+    print.boldWarn(`⚠ ${changedSinceBuild} changed after the last successful build: these tests run against the old build in dist/. Rebuild ("{{packageManager}} run build"), or use "{{packageManager}} run testin-nutin".\n`);
+  }
+
   if (verboseEnabled) print.head('Test suites :');
 
   if (coverageEnabled) await startCoverage();
