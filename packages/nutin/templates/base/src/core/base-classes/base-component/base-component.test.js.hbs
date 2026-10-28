@@ -210,6 +210,40 @@ describe('BaseComponent', () => {
     expect(received).toBe(null);
   });
 
+  it('render() reports the component whose generateTemplate() threw, then rethrows', () => {
+    class Broken extends BaseComponent {
+      generateTemplate() { throw new RangeError('Invalid time value'); }
+    }
+    const component = new Broken({});
+    const error = spyOn(console, 'error').andCallFake(() => {});
+
+    expect(() => component.render()).toThrow('Invalid time value');
+
+    error.restore();
+    expect(error.calls[0][0]).toContain('Broken.generateTemplate() threw');
+    expect(error.calls[0][1]).toBeInstanceOf(RangeError);
+  });
+
+  it('render() reports only the child whose template threw, not its parents', () => {
+    class BrokenChild extends BaseComponent {
+      generateTemplate() { throw new Error('bad child'); }
+    }
+    class Parent extends BaseComponent {
+      generateTemplate() { return '<div data-component="child"></div>'; }
+      registerChildren() {
+        return [{ selector: 'child', factory: (el) => new BrokenChild({ mountTarget: el }) }];
+      }
+    }
+    const parent = new Parent({});
+    const error = spyOn(console, 'error').andCallFake(() => {});
+
+    expect(() => parent.render()).toThrow('bad child');
+
+    error.restore();
+    expect(error.callCount).toBe(1);
+    expect(error.calls[0][0]).toContain('BrokenChild.generateTemplate() threw');
+  });
+
   it('isDestroyed is false until destroy() runs', () => {
     const component = new TestComponent();
     expect(component.isDestroyed).toBe(false);

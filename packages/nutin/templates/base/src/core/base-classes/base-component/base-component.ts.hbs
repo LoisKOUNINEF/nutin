@@ -60,7 +60,7 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
       const preserved = PreservationHelper.preserve(ChildrenHelper.getKeepableElements(this._children));
       try {
         this.element.replaceChildren(
-          SecurityHelper.sanitizeToFragment(this.generateTemplate(), this.trustLevel)
+          SecurityHelper.sanitizeToFragment(this.templateOrReport(), this.trustLevel)
         );
         this.compose();
       } finally {
@@ -100,6 +100,15 @@ export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
 
   protected generateTemplate(): Nutin.Template {
     return '';
+  }
+
+  private templateOrReport(): Nutin.Template {
+    try {
+      return this.generateTemplate();
+    } catch (error) {
+      console.error(`${this.constructor.name}.generateTemplate() threw - its render was aborted.`, error);
+      throw error;
+    }
   }
 
   protected hydrate(): void {
