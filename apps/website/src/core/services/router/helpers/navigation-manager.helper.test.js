@@ -121,6 +121,21 @@ describe('NavigationManager', () => {
     }
   });
 
+  it('replaceState preserves the query string', () => {
+    const originalReplaceState = window.history.replaceState;
+    window.history.pushState({}, '', '/section?tab=api#some-heading');
+    let replaceArgs = null;
+    window.history.replaceState = (state, title, url) => { replaceArgs = url; };
+
+    try {
+      NavigationManager.replaceState('/section/first-page');
+      expect(replaceArgs).toBe('/section/first-page?tab=api#some-heading');
+    } finally {
+      window.history.replaceState = originalReplaceState;
+      window.history.pushState({}, '', '/');
+    }
+  });
+
   it('should return current path from location', () => {
     // This test assumes a DOM-like environment
     const currentPath = window.location.pathname;

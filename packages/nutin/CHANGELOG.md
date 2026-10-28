@@ -17,6 +17,7 @@
     - `src/app/services/chrome-api/chrome-api.service.ts`: storage (`local`/`sync`/`session`: get, set, remove, change events), the active tab's URL and tab changes, `openTab()` for http(s) pages only, and `browser()` (Chrome or Firefox). It reads `chrome` on every call.
     - Docs: [How do I create a browser extension?](https://www.nutin.dev/docs/cli/create-a-browser-extension) (loading and reloading, configuration, what ships, packaging, store submissions, `web-ext lint` warnings and a note for AMO reviewers).
 - **Query parameters, on every route, the default route (`/`) included.** The router parses the URL's query string (`/?tab=settings`) and hands it to the view before `render()`, alongside the route params, which stay separate. Views get `getQueryParams()`, `getQueryParam(key)` and `hasQueryParam(key)`, and the router gets `getQueryParams()` and `getQueryParam(key)`. Values are decoded, and a repeated key keeps its last value. Route guards receive them as a second argument: `(params, query)`. Default app bundle: +117 B gzip.
+    - `NavigationManager.replaceState(path)` now keeps the current query string, as it already kept the hash. A view's `onEnter()` that rewrites the URL (such as the `markdown` feature's redirect from `/<id>` to its first page) used to drop it.
 
 ### Changes
 
