@@ -25,7 +25,7 @@ Each comma-separated arg after the handler name is resolved per-token. A comma i
 | Token | Resolves to |
 |---|---|
 | `@id` / `@class` / `@name` / `@tag` | the matching element property |
-| `@value` | the input/textarea `.value`, or a `contenteditable` element's `.innerText` |
+| `@value` | the input/textarea/select `.value`, or a `contenteditable` element's `.innerText` |
 | `@checked` / `@selected` | boolean |
 | `@textContent` / `@innerText` / `@html` | the matching element property |
 | `@event` | the raw `Event` object |

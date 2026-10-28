@@ -8,6 +8,7 @@
 - **`render()` after `destroy()` is ignored.** A late render (after an `await`, a timer, a pending `window` listener) used to rebuild the destroyed component's template and compose new children that nothing ever destroyed, so their event bus subscriptions leaked for the page's lifetime. Now `render()` and `listen()` on a destroyed component do nothing and warn in development, `destroy()` is idempotent, and the new read-only `isDestroyed` lets app code skip async work early.
 - `destroy()` now empties the component's `eventListeners` list along with removing the listeners (`EventHelper.destroyEvents()` clears the array it's given), so a destroyed component no longer holds references to its DOM nodes and handlers.
 - **`useEventBus()`: `MockEventBus` now reaches components and services.** `useEventBus(bus)` (from `core/index`) routes every `subscribe`/`once`/`emit`/`off` made through `AppEventBus` to `bus`, e.g. testin-nutin's `MockEventBus`: components' `listen()`, the `Navigation`/`Lifecycle` facades, the router, i18n and app services alike. `useEventBus(null)` restores the real bus. Before, a mock created in a test saw none of them, since they all use the `AppEventBus` singleton. `AppEventBus` keeps its identity and type. New `EventBusApi` type. Default app bundle: +37 B gzip.
+- `@value` now reads `<select>` elements (it gave `''`, so a `change:_onPick:@value` handler got nothing and had to take `@target`).
 - Updated AGENTS.md
 
 ## 3.0.0

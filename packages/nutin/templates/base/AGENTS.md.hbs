@@ -90,7 +90,7 @@ Tokens:
 - Event: `@event`, `@target`, `@x`/`@y` (`clientX`/`clientY`), `@key`, `@code`.
 - String/number literals (quoted literals may contain commas).
 
-`@value` reads `<input>`/`<textarea>` (and `innerText` of a `contenteditable` element) only — it is `''` on a `<select>`: take `@target` and read its `.value`. Custom tokens: `TokenHelper.registerCustomToken('@name', (el, event) => …)` / `registerPrefixedToken('@prefix:', (suffix, el) => …)` (global, from core). Token values are raw (not HTML-escaped): escaping happens when they are rendered through an `html` template.
+`@value` reads `<input>`/`<textarea>`/`<select>` (and `innerText` of a `contenteditable` element). Custom tokens: `TokenHelper.registerCustomToken('@name', (el, event) => …)` / `registerPrefixedToken('@prefix:', (suffix, el) => …)` (global, from core). Token values are raw (not HTML-escaped): escaping happens when they are rendered through an `html` template.
 
 Only defaults that leave the page are cancelled: link clicks (`<a href>`, unless modified, e.g. ctrl+click), form `submit` and submit-button clicks inside a form. Other events keep their default (typing, checking a box); take `@event` and call `preventDefault()` yourself if needed. A component only binds its own `data-event`/`data-bind`/`data-i18n` elements, not those inside nested child components.
 

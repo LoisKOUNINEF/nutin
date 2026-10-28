@@ -58,6 +58,13 @@ describe('TokenHelper', () => {
     expect(TokenHelper.resolve('@value', el, makeEvent())).toBe('<b>bold</b>');
   });
 
+  it('@value resolves the selected option\'s value of a select', () => {
+    const el = document.createElement('select');
+    el.innerHTML = '<option value="a">A</option><option value="b">B</option>';
+    el.value = 'b';
+    expect(TokenHelper.resolve('@value', el, makeEvent())).toBe('b');
+  });
+
   it('@value resolves innerText for contenteditable elements', () => {
     const el = document.createElement('div');
     el.setAttribute('contenteditable', 'true');
