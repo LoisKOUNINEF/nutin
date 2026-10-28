@@ -60,12 +60,20 @@ if (builderConfig.i18n) runScript(path.join(scriptsDir, 'i18n', 'build-i18n.js')
 
 runScript(path.join(scriptsDir, 'prod-bundle', 'esbuild.js'), 'Running esbuild...');
 
+{{#if extension}}
+if (builderConfig.isProd) runScript(path.join(scriptsDir, 'prod-bundle', 'hash-files.js'), 'Hashing files...');
+
+// One unpacked extension per browser, from dist-build/src (which stays, for testin-nutin). Not
+// compressed: the browser reads the plain files, so .gz/.br copies would only bloat the package.
+runScript(path.join(scriptsDir, 'extension', 'build-extension.js'), 'Building the browser extension...');
+{{else}}
 if (builderConfig.isProd) {
   runScript(path.join(scriptsDir, 'prod-bundle', 'hash-files.js'), 'Hashing files...');
   if (builderConfig.generateSEO) runScript(path.join(scriptsDir, 'seo', 'generate-seo-files.js'), 'Generating SEO Files...');
   // Last, so the prerendered SEO pages, sitemap.xml and robots.txt get compressed too.
   runScript(path.join(scriptsDir, 'prod-bundle', 'compress-files.js'), 'Compressing files...');
 }
+{{/if}}
 
 runScript(path.join(scriptsDir, 'finalize-build.js'), 'Finalizing build...');
 

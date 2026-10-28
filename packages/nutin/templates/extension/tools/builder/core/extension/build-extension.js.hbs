@@ -1,0 +1,57 @@
+import fs from 'fs';
+import path from 'path';
+import esbuild from 'esbuild';
+import { errorExit } from '../../../utils/index.js';
+import { PATHS } from '../app/paths.js';
+import { builderConfig } from '../../builder.config.js';
+import { sharedDefine, DEV_OVERRIDES } from '../prod-bundle/bundle-options.js';
+import { BROWSER_TARGETS, buildManifest } from './manifest.js';
+
+const SOURCE = path.join(PATHS.source, 'extension');
+const WORKER_SOURCE = path.join(SOURCE, 'background.{{#if (eq lang "js")}}js{{else}}ts{{/if}}');
+// dist-build/src's copied sources: they only feed the bundles. config/ and nutin.config.js are
+// there in dev, for testin-nutin.
+const NOT_SHIPPED = new Set(['app', 'core', 'extension', 'config', 'nutin.config.js']);
+
+// Each browser's unpacked extension goes next to dist-build/src, so finalize-build.js moves it to
+// dist/<browser>. dist/src stays as built: testin-nutin runs against it.
+async function buildExtension() {
+  const source = JSON.parse(fs.readFileSync(path.join(SOURCE, 'manifest.json'), 'utf-8'));
+  const { version } = JSON.parse(fs.readFileSync(path.resolve('package.json'), 'utf-8'));
+  const { browsers, geckoId } = builderConfig.extension;
+
+  for (const browser of browsers) {
+    const output = path.join(PATHS.temp, browser);
+    fs.rmSync(output, { recursive: true, force: true });
+    fs.cpSync(PATHS.tempSource, output, {
+      recursive: true,
+      filter: (file) => !NOT_SHIPPED.has(path.relative(PATHS.tempSource, file).split(path.sep)[0]),
+    });
+
+    if (fs.existsSync(WORKER_SOURCE)) await bundleWorker(browser, output);
+
+    const manifest = buildManifest(source, { browser, version, geckoId });
+    fs.writeFileSync(path.join(output, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
+  }
+}
+
+// A separate bundle: the builder's own only covers main.ts. Same esbuild settings (drop, minify...),
+// for this browser's version.
+async function bundleWorker(browser, output) {
+  await esbuild.build({
+    ...builderConfig.esbuild,
+    ...(builderConfig.isProd ? {} : DEV_OVERRIDES),
+    entryPoints: [WORKER_SOURCE],
+    outfile: path.join(output, 'background.js'),
+    bundle: true,
+    format: 'esm',
+    platform: 'browser',
+    target: [BROWSER_TARGETS[browser]],
+    legalComments: 'none',
+    define: sharedDefine(builderConfig),
+  });
+}
+
+buildExtension().catch((err) => {
+  errorExit(err, 'build-extension');
+});

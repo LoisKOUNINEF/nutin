@@ -9,8 +9,11 @@ src/
   app/            application code (components, views, services)
   core/           Nutin framework internals — see "Nutin" section before editing
   styles/         project-level Sass
+{{#if extension}}
+  extension/      browser extension: manifest.json (Chrome's) and background.ts
+{{/if}}
 config/           i18n (languages.json) and SEO configuration
-tools/            builder, dev server, generator, testin-nutin runner, docker (optional)
+tools/            builder, {{#unless extension}}dev server, {{/unless}}generator, testin-nutin runner, docker (optional)
 nutin.config.js   build/feature config — see below
 .nutin-meta.json  Nutin version, package manager, enabled features (source of truth for what's installed)
 ```
@@ -18,7 +21,11 @@ nutin.config.js   build/feature config — see below
 ## Conventions
 
 - Favor small, composable components.
+{{#if extension}}
+- This is a browser extension ({{extension}}): no router and no views. `main.ts` mounts `AppComponent` (`src/app/components/app/`); build the page from its child components. See "Browser extension".
+{{else}}
 - One `View` = one route.
+{{/if}}
 - Import framework code from the `core/index.js` barrel — do not deep-import into `core/`. App elements have no barrels: import them by file path.
 {{#if (eq lang "ts")}}
 - Framework types (`Nutin.ComponentConfig`, `Nutin.ComponentOptions`, `Nutin.CatalogConfig`, `Nutin.Template`, `Nutin.Routes`, `Nutin.RouteGuard`, `Nutin.RequestConfig`, …) live in the global `Nutin` namespace declared in `core/internals.d.ts` — use them without importing. App events extend it in `src/app/globals.d.ts` (`declare namespace Nutin { interface AppEventMap { … } }`).
@@ -27,13 +34,28 @@ nutin.config.js   build/feature config — see below
 
 ## Commands
 
+{{#unless extension}}
 - Serve: `{{packageManager}} run serve` (build + serve), `{{packageManager}} run serve:prod` (prod build + serve), `{{packageManager}} run serve:only` (no rebuild), `{{packageManager}} run dev` (watch mode, reloads the page after each rebuild). Port defaults to 9090; override with `-- --port <n>` or `PORT=<n>`.
+{{/unless}}
 - Build: `{{packageManager}} run build` (dev) or `{{packageManager}} run build:prod` (production). Opt-in dependencies (Tailwind, `markdown`) are only installed automatically in an interactive terminal; elsewhere pass `-- -y` (or set `NUTIN_ASSUME_YES`).
 {{#if (eq lang "ts")}}- Type check only: `{{packageManager}} run typecheck` (`tsc --noEmit` on the merged templates; `dist/` is left as it is). Use it in CI instead of a plain `tsc --noEmit`, which reports every template-only `data-event` handler as unused.
+{{/if}}{{#if extension}}- Extension: `{{packageManager}} run build` writes `dist/chrome` and `dist/firefox` (load them unpacked). `{{packageManager}} run package:extension` (or `:chrome`/`:firefox`) runs a prod build and writes the store ZIPs `dist/<name>-<browser>-<version>.zip` + `.sha256` (needs the `zip` command); `{{packageManager}} run validate:extension` checks them (`-- --tag vX.Y.Z` on a release); `{{packageManager}} run lint:extension` runs `web-ext lint` on `dist/firefox`.
 {{/if}}- Generate: `{{packageManager}} run generate ELEMENT ELEMENT_NAME` (`ELEMENT` = `component`/`view`/`service`; `ELEMENT_NAME` may be a nested path, generated in `src/app/<path>/`; fails if that folder already exists and isn't empty).
 - Test: `{{packageManager}} run testin-nutin` (build + run), `{{packageManager}} run testin-nutin:only` (no rebuild: it warns when sources changed after the last successful build, e.g. after a failed one), `{{packageManager}} run testin-nutin:watch`, `{{packageManager}} run testin-nutin:coverage`, `{{packageManager}} run testin-nutin:verbose`.
 - Update Nutin: `nutin-update` refuses to run unless the project is committed (no changes, no untracked files; `--allow-dirty` skips the check). Files edited here that also changed upstream are merged three-way; overlapping edits get `diff3` conflict markers, and the project won't build, nor will `nutin-update` run again, until they're resolved (listed in `.nutin-meta.json`'s `unmergedFiles` and `NUTIN-UPDATE-REPORT.md`).
 
+{{#if extension}}
+## Browser extension
+
+- Surface: {{#if (eq extension "popup")}}the toolbar popup (`action.default_popup`){{else}}Chrome's side panel / Firefox's sidebar (`side_panel`, turned into `sidebar_action` for Firefox){{/if}}. The page is `chrome-extension://<id>/index.html` and never changes: don't add `AppRouter`, `routes.ts` or views. To show other screens, switch child components (`data-component="${config.screen}"`).
+- Use `chrome.*` only through `src/app/services/chrome-api/chrome-api.service.ts` (`chromeApiService`); add a method there for each new API. It reads `chrome` on every call, so tests can install a fake first (testin-nutin has one: `tools/testin-nutin/mocks/fake-chrome.js`, `installFakeChrome({ url })` / `uninstallFakeChrome()`). `chrome.*` calls can reject (extension reloaded under an open page, storage quota): report the error in the page.
+- `src/extension/manifest.json` is Chrome's; the build writes `dist/<browser>/manifest.json`, with `version` from `package.json`; Firefox's manifest is derived from Chrome's, with `extension.geckoId` from `nutin.config.js` (permanent once released). Keep permissions minimal: reading the active tab's URL needs `"tabs"`.
+- Files the extension needs (icons, `_locales/`, fonts and their licenses) go in `public/` (copied to the root) or `src/assets/`. Bundle everything: no remote scripts or fonts.
+- `src/extension/background.ts` is bundled separately with `builder.esbuild`'s settings (its `console` calls are dropped in prod). Firefox runs it as a background script, Chrome as a service worker: no DOM, and no state kept between events.
+- No dev server: `chrome.*` doesn't exist on an `http://` page. After a build, reload the extension (`chrome://extensions`, or `about:debugging` in Firefox) and reopen the {{#if (eq extension "popup")}}popup{{else}}panel{{/if}}.
+- `i18n` and `generateSEOFiles` must stay off (the build refuses them).
+
+{{/if}}
 ## Base classes
 
 ```

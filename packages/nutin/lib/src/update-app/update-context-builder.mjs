@@ -14,6 +14,7 @@ export class UpdateContextBuilder {
       projectName: packageJson.name,
       packageManager,
       lang: meta.lang ?? 'ts',
+      extension: meta.extension ?? false,
       ...meta.features,
       ciCommand: getCiCommand(packageManager),
     };

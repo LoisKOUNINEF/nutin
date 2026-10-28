@@ -86,8 +86,21 @@ export function getMarkdownScripts() {
   };
 }
 
+// Names the ../workflows extension CI calls: package:extension:<browser>, lint:extension.
+export function getExtensionScripts() {
+  const prodBuild = 'node tools/builder/builder.js --prod';
+  const packageScript = 'node tools/extension/package-extension.js';
+  return {
+    "package:extension": `${prodBuild} && ${packageScript}`,
+    "package:extension:chrome": `${prodBuild} && ${packageScript} --browser chrome`,
+    "package:extension:firefox": `${prodBuild} && ${packageScript} --browser firefox`,
+    "validate:extension": "node tools/extension/validate-extension.js",
+    "lint:extension": "web-ext lint --source-dir dist/firefox",
+  };
+}
+
 export function getAllScripts(context) {
-  const { packageManager, docker, markdown, lang } = context;
+  const { packageManager, docker, markdown, lang, extension } = context;
 
   const baseScripts = {
     "build": "node tools/builder/builder.js",
@@ -106,6 +119,13 @@ export function getAllScripts(context) {
   };
 
   let scripts = { ...baseScripts };
+
+  // An extension page needs the browser's extension APIs (chrome.*): served over HTTP it can't
+  // work, so there's no dev server. Build, then reload the extension in the browser.
+  if (extension) {
+    ['serve', 'serve:only', 'serve:prod', 'dev'].forEach((name) => delete scripts[name]);
+    scripts = { ...scripts, ...getExtensionScripts() };
+  }
 
   if (docker) scripts = { ...scripts, ...getDockerScripts() };
   if (markdown) scripts = { ...scripts, ...getMarkdownScripts() };

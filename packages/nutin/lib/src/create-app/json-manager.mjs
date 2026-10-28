@@ -7,20 +7,20 @@ const fs = fsExtra.default;
 export class JsonManager {
   async generateJsonFiles(projectPath, context) {
     await this.generatePackageJson(projectPath, context);
-    if (context.lang !== 'js') await this.generateTsconfigJson(projectPath);
+    if (context.lang !== 'js') await this.generateTsconfigJson(projectPath, context);
   }
 
   async generatePackageJson(projectPath, context) {
     await fs.writeJSON(path.join(projectPath, 'package.json'), this.buildPackageJson(context), { spaces: 2 });
   }
 
-  async generateTsconfigJson(projectPath) {
-    await fs.writeJSON(path.join(projectPath, 'tsconfig.json'), this.buildTsconfigJson(), { spaces: 2 });
+  async generateTsconfigJson(projectPath, context) {
+    await fs.writeJSON(path.join(projectPath, 'tsconfig.json'), this.buildTsconfigJson(context), { spaces: 2 });
   }
 
   // Also used by nutin-update to compare an existing project's files with the current defaults.
   buildPackageJson(context) {
-    const { projectName, lang } = context;
+    const { projectName, lang, extension } = context;
 
     const devDependencies = {
       "chokidar": "^5.0.0",
@@ -29,7 +29,12 @@ export class JsonManager {
       "jsdom": "^30.1.1",
       "linkedom": "^0.18.13",
       "sass": "^1.89.0",
-      ...(lang === 'js' ? {} : { "typescript": "^7.0.2" })
+      ...(lang === 'js' ? {} : { "typescript": "^7.0.2" }),
+      // chrome.* types: Firefox implements the same namespace for most of it.
+      ...(extension && lang !== 'js' ? { "@types/chrome": "^0.3.7" } : {}),
+      // Mozilla's linter and signing tool (lint:extension, and the release workflow). Exact: a
+      // new linter version can fail a release that passed the day before.
+      ...(extension ? { "web-ext": "10.8.0" } : {})
     };
 
     const scripts = getAllScripts(context);
@@ -49,7 +54,8 @@ export class JsonManager {
     };
   }
 
-  buildTsconfigJson() {
+  buildTsconfigJson(context = {}) {
+    const { extension } = context;
     return {
       "compilerOptions": {
         "target": "ESNext",
@@ -71,9 +77,11 @@ export class JsonManager {
         "lib": ["es2022", "DOM"],
         "removeComments": true,
         "resolveJsonModule": true,
+        // Listing types turns off the automatic inclusion of every other @types package.
+        ...(extension ? { "types": ["chrome"] } : {}),
         "typeRoots": ["src/types", "node_modules/@types"]
       },
-      "include": ["src/app", "src/core"],
+      "include": ["src/app", "src/core", ...(extension ? ["src/extension"] : [])],
       "exclude": ["node_modules"]
     };
   }

@@ -3,7 +3,7 @@ import path from 'path';
 import { errorExit } from '../../../utils/index.js';
 import { PATHS } from '../app/paths.js';
 import { builderConfig } from '../../builder.config.js';
-import { sharedDefine, slimConfigPlugin } from './bundle-options.js';
+import { sharedDefine, slimConfigPlugin, DEV_OVERRIDES } from './bundle-options.js';
 
 {{#if (eq lang "js")}}
 // Bundles the copied .js sources; in dev they're also kept on disk for testin-nutin.
@@ -13,12 +13,6 @@ const ENTRY_FILE = path.join(PATHS.tempApp, 'main.js');
 // dev bundles tsc's emitted .js, which is kept on disk for testin-nutin.
 const ENTRY_FILE = path.join(PATHS.tempApp, builderConfig.isProd ? 'main.ts' : 'main.js');
 {{/if}}
-
-const DEV_OVERRIDES = {
-  minify: false,
-  sourcemap: true,
-  drop: [],
-};
 
 async function build() {
   await esbuild.build({

@@ -15,7 +15,33 @@ function validateConfig(config) {
   if (!config.builder.esbuild || typeof config.builder.esbuild !== 'object') {
     errorExit(new Error('nutin.config.js is missing the required "builder.esbuild" object.'), 'builder.config');
   }
+{{#if extension}}
+  validateExtensionConfig(config);
+{{/if}}
 }
+{{#if extension}}
+
+const EXTENSION_BROWSERS = ['chrome', 'firefox'];
+
+// An extension page is chrome-extension://<id>/index.html: no /<lang>/ URL prefixes, and nothing
+// to prerender or index.
+function validateExtensionConfig(config) {
+  const { extension } = config;
+  const browsers = extension?.browsers;
+  if (!Array.isArray(browsers) || !browsers.length || browsers.some((browser) => !EXTENSION_BROWSERS.includes(browser))) {
+    errorExit(new Error(`nutin.config.js "extension.browsers" must list one or more of: ${EXTENSION_BROWSERS.join(', ')}.`), 'builder.config');
+  }
+  if (browsers.includes('firefox') && !extension.geckoId) {
+    errorExit(new Error('nutin.config.js "extension.geckoId" is required to build for Firefox (e.g. "name@your-domain").'), 'builder.config');
+  }
+  if (config.i18n) {
+    errorExit(new Error('"i18n" can\'t be on in an extension: it puts the language in the URL (/<lang>/...), which an extension page doesn\'t have.'), 'builder.config');
+  }
+  if (config.generateSEOFiles) {
+    errorExit(new Error('"generateSEOFiles" can\'t be on in an extension: there are no routes to prerender, and no site to index.'), 'builder.config');
+  }
+}
+{{/if}}
 
 validateConfig(nutinConfig);
 
@@ -44,5 +70,8 @@ export const builderConfig = {
   markdownSources: nutinConfig.markdownSources,
   tailwind: nutinConfig.tailwind,
   generateSEO: nutinConfig.generateSEOFiles,
+{{#if extension}}
+  extension: nutinConfig.extension,
+{{/if}}
   WELL_KNOWN_NON_SEO_ROUTES: wellKnownNonSEORoutes,
 };

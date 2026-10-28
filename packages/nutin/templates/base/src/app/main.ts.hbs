@@ -1,3 +1,16 @@
+{{#if extension}}
+import { initI18n, registerPipes } from '../core/index.js';
+import { AppComponent } from './components/app/app.component.js';
+
+// The extension page has no router: it only ever shows index.html (as chrome-extension://<id>/index.html,
+// which no route would match). One root component, mounted into <main id="app">.
+class App {
+  constructor() {
+    registerPipes();
+    new AppComponent('#app').render();
+  }
+}
+{{else}}
 import { AppRouter, initI18n, registerPipes } from '../core/index.js';
 import { appRoutes } from './routes.js';
 
@@ -7,6 +20,7 @@ class App {
     AppRouter(appRoutes);
   }
 }
+{{/if}}
 
 document.addEventListener('DOMContentLoaded', async () => {
   await initI18n();

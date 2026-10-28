@@ -4,9 +4,13 @@
 
 Requires Node.js 24 or later.
 
+{{#if extension}}
+- `{{packageManager}} run build`: build the extension into `dist/chrome` and `dist/firefox`, then reload it in the browser (load it once: **Load unpacked** in `chrome://extensions`, **Load Temporary Add-on…** in Firefox's `about:debugging`)
+{{else}}
 - `{{packageManager}} run serve`: build and serve
 - `{{packageManager}} run dev`: build and serve with live reload
 - Both serve on port 9090 by default. Pass `-- --port 3000` (or set `PORT=3000`) to change it
+{{/if}}
 
 ## Build
 
@@ -14,6 +18,11 @@ Requires Node.js 24 or later.
 - `{{packageManager}} run build:prod`: build the application for production
 {{#if (eq lang "ts")}}
 - `{{packageManager}} run typecheck`: type-check the application without building it
+{{/if}}
+{{#if extension}}
+- `{{packageManager}} run package:extension`: prod build, then the store ZIPs (`dist/<name>-<browser>-<version>.zip`)
+- `{{packageManager}} run validate:extension`: check the ZIPs before a release
+- `{{packageManager}} run lint:extension`: run Mozilla's `web-ext lint` on `dist/firefox`
 {{/if}}
 
 ## Getting started

@@ -44,7 +44,7 @@ export async function findJsonDrift(projectPath, context) {
   if (context.lang !== 'js') {
     const tsconfig = await readJsonIfExists(path.join(projectPath, 'tsconfig.json'));
     if (tsconfig) {
-      const generated = jsonManager.buildTsconfigJson();
+      const generated = jsonManager.buildTsconfigJson(context);
       drift.push(...compareEntries('tsconfig.json', 'compilerOptions', tsconfig.compilerOptions, generated.compilerOptions));
       drift.push(...compareEntries('tsconfig.json', null, { include: tsconfig.include, exclude: tsconfig.exclude }, { include: generated.include, exclude: generated.exclude }));
     }
