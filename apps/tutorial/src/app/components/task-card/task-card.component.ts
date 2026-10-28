@@ -9,7 +9,7 @@ export class TaskCardComponent extends Component {
     super({ templateFn, config, mountTarget });
   }
 
-  registerChildren(): Nutin.ComponentConfig[] {
+  override registerChildren(): Nutin.ComponentConfig[] {
     return [
       {
         selector: 'remove',

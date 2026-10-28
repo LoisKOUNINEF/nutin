@@ -14,11 +14,11 @@ export class TaskCatalogView extends View {
     this.listenToRenderEvents(['task-event']);
   }
 
-  onBeforeRender(): void {
+  override onBeforeRender(): void {
     this._tasks = taskService.tasks;
   }
 
-  registerChildren(): Nutin.ComponentConfig[] {
+  override registerChildren(): Nutin.ComponentConfig[] {
     // One TaskCardComponent is created for each task.
     const taskCatalogChildren: Nutin.ComponentConfig[] = [
       {

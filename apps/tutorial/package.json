@@ -10,6 +10,7 @@
   "scripts": {
     "build": "node tools/builder/builder.js",
     "build:prod": "node tools/builder/builder.js --prod",
+    "typecheck": "node tools/builder/builder.js --typecheck",
     "serve": "npm run build && node tools/dev/serve.js",
     "serve:only": "node tools/dev/serve.js",
     "serve:prod": "npm run build:prod && node tools/dev/serve.js",
