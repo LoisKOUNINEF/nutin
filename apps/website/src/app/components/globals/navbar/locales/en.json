@@ -4,6 +4,7 @@
 	"tutorial": "Tutorial",
 	"changelog": "Changelog",
 	"guides": "Guides",
+	"docs-cli": "CLI",
 	"docs-api": "API",
 	"docs-options": "Options and features",
 	"docs-testing": "Testing toolkit",

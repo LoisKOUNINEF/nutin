@@ -16,6 +16,7 @@ Nutin is deliberately pragmatic and focused, with no runtime dependencies.
 
 ## 📄 Docs
 
+- **[CLI](resources/docs/CLI.md)**: installing Nutin, creating apps and extensions, adding features, updating.
 - **[API](resources/docs/API.md)**: Nutin core functionalities APIs.
 - **[Options and features](resources/docs/OPTIONS_AND_FEATURES.md)**: Tailwind CSS, i18n...
 - **[Testing](resources/docs/TESTING.md)**: Built-in testing toolkit - used to test Nutin and available for application tests.
