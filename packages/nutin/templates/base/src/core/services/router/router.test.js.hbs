@@ -1,4 +1,4 @@
-import { AppRouter, Navigation, I18nService } from '#root/dist/src/core/services/index.js';
+import { AppEventBus, AppRouter, Navigation, I18nService } from '#root/dist/src/core/services/index.js';
 import { CONFIG } from '#root/dist/src/core/config.js';
 
 function makeView(name) {
@@ -465,6 +465,68 @@ describe('Router', () => {
     expect(setLangSpy).toHaveBeenCalledWith('fr');
 
     setLangSpy.restore();
+    I18nService['_currentLanguage'] = 'en';
+  });
+
+  it('leaves a popstate that only changes the hash to the browser: no re-render, focus kept', async () => {
+    const home = makeFocusableView('home');
+    router = AppRouter({ '/': () => home });
+    await flushPromises();
+    const renders = () => home.calls.filter((c) => c[0] === 'render').length;
+    const before = renders();
+    const button = document.createElement('button');
+    document.body.appendChild(button);
+    button.focus();
+
+    window.history.pushState({}, '', '/#section');
+    window.dispatchEvent(new window.PopStateEvent('popstate'));
+    await flushPromises();
+    window.history.pushState({}, '', '/');
+    window.dispatchEvent(new window.PopStateEvent('popstate'));
+    await flushPromises();
+
+    expect(renders()).toBe(before);
+    expect(document.activeElement).toBe(button);
+    button.remove();
+    home.cleanup();
+  });
+
+  it('still re-renders on a popstate that changes the query string of the same path', async () => {
+    const home = makeView('home');
+    router = AppRouter({ '/': () => home });
+    await flushPromises();
+    const renders = () => home.calls.filter((c) => c[0] === 'render').length;
+    const before = renders();
+
+    window.history.pushState({}, '', '/?tab=2#section');
+    window.dispatchEvent(new window.PopStateEvent('popstate'));
+    await flushPromises();
+
+    expect(renders()).toBe(before + 1);
+    expect(home.query).toEqual({ tab: '2' });
+  });
+
+  it('leaves a hash-only popstate to the browser after a language change moved the URL to the new locale', async () => {
+    CONFIG.i18n = true;
+    I18nService['_LANGUAGES'] = ['en', 'fr'];
+    I18nService['_currentLanguage'] = 'en';
+    window.history.pushState({}, '', '/en');
+
+    const home = makeView('home');
+    router = AppRouter({ '/': () => home });
+    await flushPromises();
+    const renders = () => home.calls.filter((c) => c[0] === 'render').length;
+    const before = renders();
+
+    I18nService['_currentLanguage'] = 'fr';
+    AppEventBus.emit('language-changed', { lang: 'fr' });
+    expect(window.location.pathname).toBe('/fr');
+
+    window.history.pushState({}, '', '/fr#section');
+    window.dispatchEvent(new window.PopStateEvent('popstate'));
+    await flushPromises();
+
+    expect(renders()).toBe(before);
     I18nService['_currentLanguage'] = 'en';
   });
 

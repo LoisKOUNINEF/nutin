@@ -36,6 +36,12 @@ body {
     --a11y-progress-color-text-muted: var(--text-muted);
     --a11y-skeleton-color-surface: var(--disabled-bg);
     --a11y-spinner-color: var(--primary);
+    --a11y-tabs-color-border: var(--border);
+    --a11y-tabs-color-disabled: var(--disabled-text);
+    --a11y-tabs-color-focus: var(--primary);
+    --a11y-tabs-color-selected: var(--primary);
+    --a11y-tabs-color-text: var(--text-muted);
+    --a11y-tabs-color-text-hover: var(--text);
 
     @each $control in checkbox, radio-group, switch, select, input, textarea, file-input {
         --a11y-#{$control}-color-background: var(--background);
@@ -147,6 +153,25 @@ body {
     }
 }
 
+.a11y-demo__subheading {
+    padding-top: map.get($spacings, large);
+    margin-bottom: map.get($spacings, small);
+    font-size: 1.1rem;
+}
+
+.a11y-demo__tabs {
+    width: 100%;
+}
+
+.a11y-demo__values {
+    margin: 0;
+    font-family: monospace;
+    white-space: pre-wrap;
+    &:empty {
+        display: none;
+    }
+}
+
 .a11y-demo__skeletons {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -244,9 +269,43 @@ body {
     background: var(--background);
 }
 
-// The site's `:root button { color: inherit }` outranks a11y-elements' class selector.
+// The site's `:root button { color: inherit }` outranks a11y-elements' class selectors.
 button.a11y-floating-launcher {
     color: var(--a11y-floating-launcher-color-text);
+}
+
+// Only the resting color: the library's hover, selected and disabled rules
+// (two classes/attributes) still outrank this one.
+button.a11y-tabs__tab {
+    color: var(--a11y-tabs-color-text);
+}
+
+// confirmDialog()'s buttons: the library's own styles are layered and
+// zero-specificity (it leaves them to the app), so the site's button reset wins.
+// Top-level: the confirm modal portals to <body>.
+.a11y-confirm .a11y-modal-buttons button {
+    padding: map.get($spacings, small) map.get($spacings, medium);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+    &:hover {
+        background: color-mix(in srgb, var(--text), transparent 90%);
+    }
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+    &.a11y-confirm__confirm--danger {
+        border-color: var(--error);
+        color: var(--error);
+        &:hover {
+            background: var(--error);
+            color: var(--background);
+        }
+    }
 }
 
 .a11y-demo__picture {

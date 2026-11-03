@@ -31,3 +31,9 @@ export function loadA11yFloating(): Promise<unknown> {
 export function loadA11yCardLink(): Promise<unknown> {
   return import('a11y-elements/components/card-link');
 }
+
+// confirmDialog() for the overlays demo. Same module as the modal's define
+// entry, already in the chunk loadA11yElements() fetched.
+export function loadConfirmDialog(): Promise<typeof import('a11y-elements/overlays/modal')> {
+  return import('a11y-elements/overlays/modal');
+}
