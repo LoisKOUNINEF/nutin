@@ -13,6 +13,10 @@ import { CONFIG } from '../../config.js';
 // centralized export
 export * as NavigationManager from './helpers/navigation-manager.helper.js';
 
+function currentPathAndQuery(): string {
+  return window.location.pathname + window.location.search;
+}
+
 class Router extends Service<Router> {
   private _currentView: View | null = null;
   private _currentParams: Record<string, string> = {};
@@ -26,6 +30,9 @@ class Router extends Service<Router> {
   private _navId = 0;
   // False until the first view is rendered: the first load leaves focus to the browser.
   private _hasRendered = false;
+  // Path and query string of the URL the current view was rendered for (after its onEnter()
+  // rewrites): a popstate back to it, with only the hash changed, has nothing to render.
+  private _renderedUrl: string | null = null;
 
   constructor(private routes: Nutin.Routes) {
     super();
@@ -149,6 +156,7 @@ class Router extends Service<Router> {
   private afterRender(moveFocus: boolean): void {
     if (moveFocus && this._currentView) NavigationManager.focusView(this._currentView);
     this._hasRendered = true;
+    this._renderedUrl = currentPathAndQuery();
   }
 
   private initializeEventListeners(): void {
@@ -164,13 +172,21 @@ class Router extends Service<Router> {
   }
 
   private initializeI18nEvents(): void {
-    const onLangChanged = () => NavigationManager.updateLocaleInUrl();
+    // The view stays, under its new locale's URL.
+    const onLangChanged = () => {
+      NavigationManager.updateLocaleInUrl();
+      if (this._renderedUrl !== null) this._renderedUrl = currentPathAndQuery();
+    };
     AppEventBus.subscribe('language-changed', onLangChanged);
     const unsubOnLang = () => AppEventBus.off('language-changed', onLangChanged);
     this._busSubscriptions.push(unsubOnLang);    
   }
 
   private async handlePopState(): Promise<void> {
+    // Back/forward across a same-page link: only the hash changed, and the view is already this
+    // URL's. Left to the browser, as without a router: it restores the scroll position, and the
+    // view isn't rebuilt (focus stays, no re-render cost).
+    if (this._currentView && currentPathAndQuery() === this._renderedUrl) return;
     if (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n) {
       const newLocale = NavigationManager.getCurrentLocale();
       if (newLocale && newLocale !== I18nService.currentLanguage) {

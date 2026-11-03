@@ -201,4 +201,53 @@ describe('A11yDemoOverlaysComponent', () => {
       useRealTimers();
     }
   });
+
+  it('toggles the modal non-dismissible live from its switch, and closes it from Close either way', () => {
+    const component = mount();
+    const modal = document.getElementById('a11y-demo-modal');
+    const input = modal.querySelector('[data-a11y-demo-non-dismissible]');
+    modal.setAttribute('open', '');
+
+    input.checked = true;
+    input.dispatchEvent(new window.Event('change', { bubbles: true }));
+    expect(modal.hasAttribute('non-dismissible')).toBe(true);
+
+    input.checked = false;
+    input.dispatchEvent(new window.Event('change', { bubbles: true }));
+    expect(modal.hasAttribute('non-dismissible')).toBe(false);
+
+    input.checked = true;
+    input.dispatchEvent(new window.Event('change', { bubbles: true }));
+    modal.querySelector('[data-a11y-demo-close]').click();
+    expect(modal.hasAttribute('open')).toBe(false);
+    component.destroy();
+  });
+
+  it('removes the tooltip inside the modal once portaled to <body>, on destroy', () => {
+    const component = mount();
+    const tooltip = document.getElementById('a11y-demo-modal-tooltip');
+    expect(tooltip.getAttribute('anchor')).toBe('a11y-demo-modal-tooltip-anchor');
+    document.body.appendChild(tooltip);
+    component.destroy();
+    expect(document.getElementById('a11y-demo-modal-tooltip')).toBeFalsy();
+  });
+
+  it('reports the help launcher onClose reason through the snackbar', () => {
+    const component = mount();
+    const calls = [];
+    document.getElementById('a11y-demo-snackbar').notify = (message) => calls.push(message);
+    const help = document.getElementById('a11y-demo-floating-help');
+    expect(help.hasAttribute('dismissible')).toBe(true);
+
+    help.onClose('collapse');
+    help.onClose('dismiss');
+    expect(calls).toEqual([t('floating-closed-collapse'), t('floating-closed-dismiss')]);
+    component.destroy();
+  });
+
+  it('names the popover with its label attribute', () => {
+    const component = mount();
+    expect(document.getElementById('a11y-demo-popover').getAttribute('label')).toBe(t('popover-label'));
+    component.destroy();
+  });
 });

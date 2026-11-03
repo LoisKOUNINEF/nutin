@@ -94,7 +94,7 @@
     <a11y-floating id="a11y-demo-floating-bubble" class="a11y-demo__bubble" position="bottom-left" label="${translate('floating-bubble-label')}" dismissible hide-on-scroll hidden>
       <p>${translate('floating-bubble-text')}</p>
     </a11y-floating>
-    <a11y-floating id="a11y-demo-floating-help" expandable label="${translate('floating-help-label')}" hidden>
+    <a11y-floating id="a11y-demo-floating-help" expandable dismissible label="${translate('floating-help-label')}" hidden>
       <h2>${translate('floating-help-title')}</h2>
       <p>${translate('floating-help-body')}</p>
       <button type="button" class="a11y-demo__button" data-a11y-demo-close>${translate('floating-help-close')}</button>
@@ -111,9 +111,22 @@
       <h2>${translate('modal-title')}</h2>
       <p>${translate('modal-body')}</p>
       <a11y-switch label="${translate('modal-switch')}">
-        <input type="checkbox" name="a11y-demo-modal-switch">
+        <input type="checkbox" name="a11y-demo-modal-non-dismissible" data-a11y-demo-non-dismissible>
       </a11y-switch>
+      <p>
+        <button type="button" class="a11y-demo__button" id="a11y-demo-modal-tooltip-anchor">${translate('modal-tooltip-anchor')}</button>
+      </p>
+      <a11y-tooltip id="a11y-demo-modal-tooltip" anchor="a11y-demo-modal-tooltip-anchor">${translate('modal-tooltip-text')}</a11y-tooltip>
+      <p>
+        <button type="button" class="a11y-demo__button" data-a11y-demo-close>${translate('modal-close')}</button>
+      </p>
     </a11y-modal>
+
+    <h3 class="a11y-demo__subheading"><code>confirmDialog()</code></h3>
+    <p data-i18n="a11y-demo-overlays.confirm-desc"></p>
+    <div class="a11y-demo__stage">
+      <button type="button" class="a11y-demo__button" data-event="click:askConfirm" data-i18n="a11y-demo-overlays.confirm-open"></button>
+    </div>
   </section>
 
   <section class="a11y-demo__section">
@@ -133,7 +146,7 @@
     <div class="a11y-demo__stage">
       <button type="button" class="a11y-demo__button" id="a11y-demo-popover-anchor" data-event="click:toggleOverlay:a11y-demo-popover" data-i18n="a11y-demo-overlays.popover-open"></button>
     </div>
-    <a11y-popover id="a11y-demo-popover" anchor="a11y-demo-popover-anchor" interactive>
+    <a11y-popover id="a11y-demo-popover" anchor="a11y-demo-popover-anchor" label="${translate('popover-label')}" interactive>
       <p>${translate('popover-body')}</p>
       <button type="button" class="a11y-demo__button" data-a11y-demo-close>${translate('popover-close')}</button>
     </a11y-popover>

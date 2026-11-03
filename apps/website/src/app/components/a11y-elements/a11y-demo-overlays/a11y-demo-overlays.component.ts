@@ -1,7 +1,8 @@
-import type { FloatingElement } from 'a11y-elements/overlays/floating/element';
+import type { FloatingCloseReason, FloatingElement } from 'a11y-elements/overlays/floating/element';
 import type { NotificationBannerElement, NotificationBannerType } from 'a11y-elements/overlays/notification-banner/element';
 import type { NotifyOptions, SnackbarElement, SnackbarType } from 'a11y-elements/overlays/snackbar/element';
 import { Component, I18nService, Navigation, html } from '../../../../core/index.js';
+import { loadConfirmDialog } from '../../../helpers/a11y-elements/load-a11y-elements.helper.js';
 
 // Every overlay portals itself to <body> as soon as its chunk defines it
 // — possibly during this component's own render, before data-i18n/data-event
@@ -24,6 +25,7 @@ const OVERLAY_IDS = [
   'a11y-demo-floating-bubble',
   'a11y-demo-floating-help',
   'a11y-demo-modal',
+  'a11y-demo-modal-tooltip',
   'a11y-demo-banner',
   'a11y-demo-popover',
   'a11y-demo-snackbar',
@@ -56,6 +58,17 @@ export class A11yDemoOverlaysComponent extends Component {
       overlay.addEventListener('click', onClick);
       this.eventListeners.push([overlay, 'click', onClick]);
     }
+
+    const modal = this.overlay('a11y-demo-modal');
+    if (modal) {
+      const onChange = (event: Event) => this.onModalChange(modal, event);
+      modal.addEventListener('change', onChange);
+      this.eventListeners.push([modal, 'change', onChange]);
+    }
+
+    // A plain callback field, kept when set before the element is upgraded.
+    const help = this.overlay('a11y-demo-floating-help') as FloatingElement | null;
+    if (help) help.onClose = (reason: FloatingCloseReason) => this.notify(translate(`floating-closed-${reason}`));
     super.onAfterRender();
   }
 
@@ -86,6 +99,27 @@ export class A11yDemoOverlaysComponent extends Component {
 
     const item = target.closest('[role="menuitem"]');
     if (item && item.getAttribute('aria-disabled') !== 'true') this.notify(`${translate('menu-selected')} ${item.textContent?.trim() ?? ''}`);
+  }
+
+  // The modal's switch toggles non-dismissible while it's open: since 0.7.0 the
+  // attribute applies live (the × button comes and goes).
+  private onModalChange(modal: HTMLElement, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.matches('[data-a11y-demo-non-dismissible]')) modal.toggleAttribute('non-dismissible', input.checked);
+  }
+
+  // Resolves true only from the confirm button; every other close is false.
+  private async askConfirm(): Promise<void> {
+    const { confirmDialog } = await loadConfirmDialog();
+    const confirmed = await confirmDialog({
+      title: translate('confirm-title'),
+      message: translate('confirm-message'),
+      confirmLabel: translate('confirm-confirm'),
+      cancelLabel: translate('confirm-cancel'),
+      danger: true,
+    });
+    // After a navigation away, the snackbar is gone and notify() does nothing.
+    this.notify(translate(confirmed ? 'confirm-confirmed' : 'confirm-cancelled'), { type: confirmed ? 'success' : 'info' });
   }
 
   private _navigateTo(href: string): void {

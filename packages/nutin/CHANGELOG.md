@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.1.1
+
+### Changes
+
+- **Back/forward across a same-page link no longer re-renders the view.** When a popstate only changes the URL's `#hash` (path and query string unchanged), the router leaves it to the browser, as without a router: the scroll position is restored and focus stays where it was. Before, the view was torn down and rebuilt, the page scrolled to the top and focus moved to the `<h1>`. On a ~1,700-node Markdown page that rebuild took 30–125 ms, with 50–70 ms long tasks, on a fast desktop. A change of locale prefix or query string still re-renders. Default app bundle: +43 B gzip.
+- New apps get `chokidar` 6 (was 5). On macOS and Windows it watches with one native recursive watcher instead of one per watched file and directory: the dev watcher is ready in about half the time. Existing apps keep their version, and the tools work with both.
+
 ## 3.1.0
 
 ### Features

@@ -23,7 +23,7 @@ export class JsonManager {
     const { projectName, lang, extension } = context;
 
     const devDependencies = {
-      "chokidar": "^5.0.0",
+      "chokidar": "^6.0.0",
       "esbuild": "^0.28.2",
       "html-minifier-terser": "^7.2.0",
       "jsdom": "^30.1.1",
