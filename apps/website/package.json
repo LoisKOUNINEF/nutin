@@ -1,6 +1,6 @@
 {
   "name": "website",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "private": true,
   "type": "module",
   "imports": {
@@ -32,6 +32,6 @@
     "tailwindcss": "^4.3.3"
   },
   "dependencies": {
-    "a11y-elements": "^0.6.0"
+    "a11y-elements": "^0.7.0"
   }
 }
