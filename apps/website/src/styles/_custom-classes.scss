@@ -60,20 +60,5 @@
     mask-size: contain;
     mask-repeat: no-repeat;
   	transform: translateY(2px);
-		transition: ease-in-out .2s;
   }
-  &:hover {
-  	&::after {
-  		transform: translateY(0);
-  		scale: 1.2;
-  	}
-  }
-  @media(hover:none) {
-	  &:hover {
-	  	&::after {
-	  		transform: translateY(2px);
-	  		scale: 1;
-	  	}
-	  }
-	}
 }

@@ -100,14 +100,8 @@
 .card-link {
   cursor: pointer;
   transition: ease-in-out .2s;
-  svg {
-    transition: ease-in-out .2s;
-  }
   &:hover {
     border-color: var(--primary);
-    svg {
-      scale: 1.1;
-    }
   }
 }
 
