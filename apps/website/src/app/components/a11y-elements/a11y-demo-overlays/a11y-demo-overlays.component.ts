@@ -43,6 +43,7 @@ const BLOCKING_LOADER_DURATION = 2500;
 export class A11yDemoOverlaysComponent extends Component {
   private overlays: HTMLElement[] = [];
   private blockingLoaderTimer: ReturnType<typeof setTimeout> | null = null;
+  private destroyed = false;
 
   constructor(mountTarget: HTMLElement) {
     super({templateFn, mountTarget});
@@ -76,10 +77,20 @@ export class A11yDemoOverlaysComponent extends Component {
   // them. Removing one runs its own teardown (hides it, releases focus trap
   // and scroll lock), and a later visit creates fresh ones.
   protected override onBeforeDestroy(): void {
+    this.destroyed = true;
     if (this.blockingLoaderTimer) clearTimeout(this.blockingLoaderTimer);
-    (this.overlay('a11y-demo-banner') as NotificationBannerElement | null)?.dismissAll?.();
-    this.overlays.forEach((overlay) => overlay.remove());
+    // Released first, so an onClose run during teardown (the banner's, from
+    // dismissAll(); the help launcher's, collapsed on removal) finds no
+    // snackbar to notify (no toast, no auto-dismiss timer outliving the page).
+    const banner = this.banner();
+    const overlays = this.overlays;
     this.overlays = [];
+    banner?.dismissAll?.();
+    overlays.forEach((overlay) => overlay.remove());
+    // confirmDialog() creates its modal in <body>, outside OVERLAY_IDS. Left open,
+    // a browser Back keeps it over the next page, which it inerts. Removing it
+    // resolves it false; askConfirm's notify() then finds no snackbar.
+    document.querySelectorAll('a11y-modal.a11y-confirm').forEach((modal) => modal.remove());
     super.onBeforeDestroy();
   }
 
@@ -111,6 +122,7 @@ export class A11yDemoOverlaysComponent extends Component {
   // Resolves true only from the confirm button; every other close is false.
   private async askConfirm(): Promise<void> {
     const { confirmDialog } = await loadConfirmDialog();
+    if (this.destroyed) return; // left the page while the chunk loaded
     const confirmed = await confirmDialog({
       title: translate('confirm-title'),
       message: translate('confirm-message'),
@@ -163,7 +175,29 @@ export class A11yDemoOverlaysComponent extends Component {
     });
   }
 
+  private banner(): NotificationBannerElement | null {
+    return this.overlay('a11y-demo-banner') as NotificationBannerElement | null;
+  }
+
   private showBanner(type: NotificationBannerType): void {
-    (this.overlay('a11y-demo-banner') as NotificationBannerElement | null)?.show?.(translate(`banner-${type}`), { type });
+    this.banner()?.show?.(translate(`banner-${type}`), { type });
+  }
+
+  // The action button also dismisses the item, which would call onClose too:
+  // each demo sets only one of the two callbacks.
+  private showBannerWithAction(): void {
+    this.banner()?.show?.(translate('banner-update'), {
+      actionText: translate('banner-reload'),
+      onAction: () => this.notify(translate('banner-reloaded'), { type: 'success' }),
+    });
+  }
+
+  // Called however the item goes away. On leaving the page, dismissAll() runs it
+  // too, but the snackbar is released by then, so it notifies nothing.
+  private showBannerWithClose(): void {
+    this.banner()?.show?.(translate('banner-cookies'), {
+      type: 'warning',
+      onClose: () => this.notify(translate('banner-closed')),
+    });
   }
 }
