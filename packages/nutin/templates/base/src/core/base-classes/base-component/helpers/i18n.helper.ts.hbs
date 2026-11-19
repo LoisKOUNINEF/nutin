@@ -1,12 +1,13 @@
 import { I18nService } from '../../../services/i18n/i18n.js';
 import { CONFIG } from '../../../config.js';
 import * as DomHelper from './dom.helper.js';
+import * as SafeDom from './safe-dom.helper.js';
 
 export function parseI18nAttributes(element: HTMLElement): void {
-  element.querySelectorAll('[data-i18n]').forEach(el => {
+  SafeDom.querySelectorAllOf(element, '[data-i18n]').forEach(el => {
     // Nested components translate their own content.
     if (DomHelper.isInsideNestedComponent(el, element)) return;
-    const key = el.getAttribute('data-i18n')!;
+    const key = SafeDom.getAttr(el, 'data-i18n')!;
     setTranslatedContent(el, key);
   });
   localizeLinks(element);
@@ -17,11 +18,11 @@ export function parseI18nAttributes(element: HTMLElement): void {
 // don't point at an unlocalized duplicate. The router strips the prefix again on navigation.
 function localizeLinks(element: HTMLElement): void {
   if (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n) {
-    element.querySelectorAll('a[href]').forEach(el => {
+    SafeDom.querySelectorAllOf(element, 'a[href]').forEach(el => {
       // Nested components localize their own links.
       if (DomHelper.isInsideNestedComponent(el, element)) return;
-      const localized = localizedHref(el.getAttribute('href')!);
-      if (localized !== null) el.setAttribute('href', localized);
+      const localized = localizedHref(SafeDom.getAttr(el, 'href')!);
+      if (localized !== null) SafeDom.setAttr(el, 'href', localized);
     });
   }
 }
@@ -49,12 +50,12 @@ function setTranslatedContent(
   // With i18n off, apply translate()'s own no-translation fallback without
   // referencing I18nService, so prod builds can drop the service entirely.
   const text = (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n)
-    ? I18nService.translate(key, el.textContent)
-    : el.textContent || key;
+    ? I18nService.translate(key, SafeDom.textOf(el))
+    : SafeDom.textOf(el) || key;
 
   if (el instanceof HTMLInputElement) {
     el.placeholder = text;
   } else {
-    el.textContent = text;
+    SafeDom.setText(el, text);
   }
 }

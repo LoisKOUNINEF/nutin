@@ -204,4 +204,27 @@ describe('TokenHelper', () => {
     TokenHelper.registerPrefixedToken('@upper:', (suffix) => suffix.toUpperCase());
     expect(TokenHelper.resolve('@upper:hi', document.createElement('div'), makeEvent())).toBe('HI');
   });
+
+  it('resolves @id, @name, @class, @tag, @textContent, @html, @attr: and @dataset: of a form past controls that shadow them', () => {
+    const form = document.createElement('form');
+    form.id = 'f';
+    form.setAttribute('name', 'signup');
+    form.className = 'c';
+    form.setAttribute('data-step', '2');
+    form.setAttribute('action', '/go');
+    form.innerHTML = '<span>t</span>';
+    // In a browser, controls with these names shadow the form's own properties.
+    const control = document.createElement('input');
+    ['id', 'name', 'className', 'tagName', 'textContent', 'innerHTML', 'getAttribute', 'dataset']
+      .forEach((name) => Object.defineProperty(form, name, { configurable: true, value: control }));
+
+    expect(TokenHelper.resolve('@id', form, makeEvent())).toBe('f');
+    expect(TokenHelper.resolve('@name', form, makeEvent())).toBe('signup');
+    expect(TokenHelper.resolve('@class', form, makeEvent())).toBe('c');
+    expect(TokenHelper.resolve('@tag', form, makeEvent())).toBe('FORM');
+    expect(TokenHelper.resolve('@textContent', form, makeEvent())).toBe('t');
+    expect(TokenHelper.resolve('@html', form, makeEvent())).toBe('<span>t</span>');
+    expect(TokenHelper.resolve('@attr:action', form, makeEvent())).toBe('/go');
+    expect(TokenHelper.resolve('@dataset:step', form, makeEvent())).toBe('2');
+  });
 });

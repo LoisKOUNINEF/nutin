@@ -17,6 +17,7 @@ A handler name the component doesn't have is caught twice:
 
 - **At build time (TypeScript):** the build checks every handler named in a component's or view's template against its class, so `data-event="click:_svae"` fails `tsc` at the template's line (`Property '_svae' does not exist … Did you mean '_save'?`). The same check makes template-only handlers count as used, so `noUnusedLocals` doesn't flag them. A handler inherited from a parent class must be `protected`, not `private`. Values built with `${}` aren't checked.
 - **At runtime:** the attribute binds nothing and a `console.warn` names the component and the missing method (dropped from production builds, like every `console` call). This is the only check in JavaScript projects.
+- **Note**: Linters will mark the methods used in an external HTML template (`example.component.html`) as unused. Use `// @ts-ignore: function is used in HTML template.` to silence it.
 
 ## Resolving arguments
 

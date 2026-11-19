@@ -249,4 +249,14 @@ describe('DomHelper', () => {
       delete Element.prototype.moveBefore;
     }
   });
+
+  it('isInsideNestedComponent terminates when a form control named parentElement shadows the form\'s parent', () => {
+    // A browser makes form.parentElement the <input name="parentElement">, whose parent is the
+    // form again: a walk through the shadowed property never ends. jsdom needs it by hand.
+    container.innerHTML = '<form><input name="parentElement"><button>go</button></form>';
+    const form = container.querySelector('form');
+    Object.defineProperty(form, 'parentElement', { configurable: true, value: form.querySelector('input') });
+
+    expect(DomHelper.isInsideNestedComponent(form.querySelector('button'), container)).toBe(false);
+  });
 });

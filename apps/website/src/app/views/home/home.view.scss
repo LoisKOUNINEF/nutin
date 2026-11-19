@@ -156,7 +156,7 @@
 
 .home__snippet {
     font-size: map.get($font-sizes, 'large');
-    padding-top: map.get($spacings, 'large');
+    padding: map.get($spacings, 'large') 0;
     min-width: 100%;
     // Overrides for prism-tomorrow's dark-theme token colours
     .token.comment {
@@ -239,14 +239,10 @@
         cursor: pointer;
         transition: ease-in-out .2s;
         svg {
-            transition: ease-in-out .2s;
             stroke: var(--text);
         }
         &:hover {
             border-color: var(--primary);
-            svg {
-            scale: 1.1;
-            }
         }
     }
     .card-title {

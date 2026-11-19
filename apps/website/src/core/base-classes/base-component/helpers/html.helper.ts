@@ -9,12 +9,12 @@ export class SafeHtml {
   ) {}
 
   public toString(): string {
-    // Fallback for String(): inline each raw with its bindings stripped.
+    // Fallback for String(): inline each raw with its bindings and clobbering names stripped.
     // The render path (sanitizeToFragment) resolves placeholders as nodes instead.
     let out = this.value;
     this.raws.forEach((source, token) => {
       // A replacer function: a string would expand `$&`, `$'`, ... found in the source.
-      out = out.replace(SafeHtml.placeholder(token), () => SecurityHelper.stripBindings(source));
+      out = out.replace(SafeHtml.placeholder(token), () => SecurityHelper.stripRawMarkup(source));
     });
     return out;
   }

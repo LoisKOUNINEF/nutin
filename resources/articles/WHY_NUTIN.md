@@ -4,11 +4,11 @@ ogImage: /assets/images/og-covers/og-cover-articles.jpg
 
 # Why Nutin?
 
-## A powerful platform
+The web platform already provides powerful primitives for building web applications. What it doesn't provide is an architecture for organizing an application as it grows.
 
-The web platform already provides powerful primitives for building web applications.
+Nutin doesn't exist because the web needed another way to render a button.
 
-What it doesn't provide is an architecture for organizing an application as it grows.
+It exists because there is a middle ground between writing every piece of application infrastructure yourself and adopting a large framework. Because needing structure doesn't necessarily mean needing an entirely different way to build.
 
 ## Nutin's concepts
 
@@ -25,16 +25,6 @@ Nutin provides a small set of explicit concepts, each with a clear responsibilit
 * **[Tooling](https://nutin.dev/docs/tools)**: a generator, a dev server with live reload, and a builder (code splitting, minification, compression).
 * **[Options](https://nutin.dev/docs/options-and-features)**: Tailwind CSS, i18n and SEO file generation.
 * **[Features](https://nutin.dev/docs/options-and-features)**: Docker and Markdown.
-
-## Your application owns Nutin
-
-**The framework should remain subordinate to the application**.
-
-Rather than treating the framework as an opaque dependency, Nutin's framework code lives alongside your application, with its own tests.
-
-When an update modifies a file you've changed, Nutin merges the changes and leaves only conflicting edits for you to resolve. See [Updater](https://nutin.dev/docs/cli/updater).
-
-Your application owns its architecture. Nutin provides structure within it.
 
 ## When to use Nutin?
 

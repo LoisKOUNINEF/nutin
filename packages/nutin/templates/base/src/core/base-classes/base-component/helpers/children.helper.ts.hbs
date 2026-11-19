@@ -1,3 +1,4 @@
+import * as SafeDom from './safe-dom.helper.js';
 import type { BaseComponent } from '../base-component.js';
 import * as DomHelper from './dom.helper.js';
 
@@ -49,7 +50,7 @@ export function addChildren(
   // Every kept child moves before any new one renders, so move targets are
   // prepared once rather than after each DOM change.
   const kept = placements.filter(({ kept }) => kept);
-  kept.forEach(({ kept, placeholder }) => DomHelper.prepareMoveTarget(placeholder.parentNode, kept!.instance.getElement()));
+  kept.forEach(({ kept, placeholder }) => DomHelper.prepareMoveTarget(SafeDom.parentNodeOf(placeholder), kept!.instance.getElement()));
   kept.forEach(placement => keep(placement, registry));
   placements.filter(({ kept }) => !kept).forEach(placement => create(placement, registry));
 }
@@ -75,7 +76,7 @@ function matchPlaceholders(
   const seen = new Set<string>();
 
   configs.forEach(config => {
-    element.querySelectorAll(`[data-component="${config.selector}"]`).forEach((placeholder, occurrence) => {
+    SafeDom.querySelectorAllOf(element, `[data-component="${config.selector}"]`).forEach((placeholder, occurrence) => {
       if (!(placeholder instanceof HTMLElement)) return;
       const id = getId(config, occurrence, seen);
       const previous = id === undefined ? undefined : registry.keepable.get(id);

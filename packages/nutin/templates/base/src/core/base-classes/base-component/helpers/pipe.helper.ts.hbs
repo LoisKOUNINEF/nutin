@@ -1,17 +1,18 @@
 import { AppPipeRegistry } from '../../../services/pipe-registry/pipe-registry.js';
 import * as DomHelper from './dom.helper.js';
+import * as SafeDom from './safe-dom.helper.js';
 
 export function parsePipeAttributes(element: HTMLElement): void {
-  element.querySelectorAll('[data-pipe]').forEach(el => {
+  SafeDom.querySelectorAllOf(element, '[data-pipe]').forEach(el => {
     // Nested components pipe their own content; piping it again here would
     // apply every pipe twice.
     if (DomHelper.isInsideNestedComponent(el, element)) return;
 
-    const pipeRaw = el.getAttribute('data-pipe');
+    const pipeRaw = SafeDom.getAttr(el, 'data-pipe');
     if (!pipeRaw) return;
 
     const pipes = pipeRaw.split('|').map(s => s.trim());
-    const sourceAttr = el.getAttribute('data-pipe-source');
+    const sourceAttr = SafeDom.getAttr(el, 'data-pipe-source');
 
     processPipes(el, pipes, sourceAttr);
   });
@@ -27,7 +28,7 @@ function processPipes(
   if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
     value = sourceAttr !== null ? sourceAttr : el.value;
   } else {
-    value = sourceAttr !== null ? sourceAttr : el.textContent || '';
+    value = sourceAttr !== null ? sourceAttr : SafeDom.textOf(el) || '';
   }
 
   for (const pipe of pipes) {
@@ -45,6 +46,6 @@ function processPipes(
   if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
     el.value = value;
   } else {
-    el.textContent = value;
+    SafeDom.setText(el, value);
   }
 }

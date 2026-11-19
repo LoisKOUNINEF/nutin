@@ -1,10 +1,8 @@
 # [Nutin](https://www.nutin.dev)
 
-`The structure of a framework. The freedom of vanilla.`
+`Framework structure. Vanilla freedom.`
 
 Nutin provides the structure and tooling you'd expect from a framework, while keeping the underlying web platform visible and giving you code ownership.
-
-Nutin is deliberately pragmatic and lightweight, with no runtime dependencies.
 
 ## Install
 
@@ -27,8 +25,18 @@ npx @nutin/cli
 # options
 nutin-new my-app -p pnpm   # package manager (npm, yarn, pnpm or bun), asked otherwise
 nutin-new my-app --js-only # plain JavaScript project (TypeScript is the default)
-nutin-new my-app --extension side-panel # Chrome and Firefox extension: side-panel or popup, asked if omitted
+nutin-new my-app --extension # Chrome and Firefox extension
 ```
+
+## Add Feature
+
+```bash
+nutin-add <feature>
+```
+
+- `docker` (Dockerfile, nginx config, `docker:build`/`docker:run` scripts)
+- `markdown` (Markdown folders compiled into routed pages).
+- Cannot be used if the project is a browser extension (`nutin-new --extension`)
 
 ## Update Nutin
 
@@ -37,15 +45,10 @@ nutin-new my-app --extension side-panel # Chrome and Firefox extension: side-pan
 nutin-update
 ```
 
-Your project must be committed first (git repository, no changes or untracked files), so an update can always be undone; `--allow-dirty` skips that check. Files you edited are merged three-way with `git merge-file`. Overlapping edits get conflict markers: the project won't build, and `nutin-update` won't run again, until they're resolved. `NUTIN-UPDATE-REPORT.md` lists merged and conflicting files.
-
-## Add Feature
-
-```bash
-nutin-add <feature>
-```
-
-Features: `docker` (Dockerfile, nginx config, `docker:build`/`docker:run` scripts) and `markdown` (Markdown folders compiled into routed pages). Neither can be added to a browser extension project.
+- Your project must be committed first (`--allow-dirty` to skip), so an update can always be undone.
+- Files you edited are merged three-way with `git merge-file`.
+- Overlapping edits get conflict markers: the project won't build, and `nutin-update` won't run again, until they're resolved.
+- `NUTIN-UPDATE-REPORT.md` lists merged and conflicting files.
 
 ## Documentation
 

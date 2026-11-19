@@ -1,17 +1,18 @@
 import type { BaseComponent } from '../base-component.js';
 import * as DomHelper from './dom.helper.js';
 import * as TokenHelper from './token.helper.js';
+import * as SafeDom from './safe-dom.helper.js';
 
 export function bindEvents(
   component: BaseComponent,
   element: HTMLElement,
   eventListeners: Array<[EventTarget, string, EventListener]>
 ): void {
-  element.querySelectorAll('[data-event]').forEach(el => {
+  SafeDom.querySelectorAllOf(element, '[data-event]').forEach(el => {
     // A nested component binds its own data-event elements to its own methods.
     if (DomHelper.isInsideNestedComponent(el, element)) return;
 
-    const [eventName, handlerName, ...argParts] = el.getAttribute('data-event')!.split(':');
+    const [eventName, handlerName, ...argParts] = SafeDom.getAttr(el, 'data-event')!.split(':');
     const argsString = argParts.length ? argParts.join(':') : '';
 
     if (!handlerName || !eventName) return;
@@ -20,7 +21,7 @@ export function bindEvents(
 
     if (typeof handler !== 'function') {
       // TypeScript builds already fail on a handler the class doesn't have (see handler-refs.js).
-      console.warn(`data-event="${el.getAttribute('data-event')}": ${component.constructor.name} has no method "${handlerName}".`);
+      console.warn(`data-event="${SafeDom.getAttr(el, 'data-event')}": ${component.constructor.name} has no method "${handlerName}".`);
       return;
     }
 
@@ -55,7 +56,7 @@ export function destroyEvents(
   eventListeners: Array<[EventTarget, string, EventListener]>
 ): void {
   eventListeners.forEach(([target, event, listener]) => {
-    target.removeEventListener(event, listener);
+    SafeDom.removeListener(target, event, listener);
   });
   eventListeners.length = 0;
 }
@@ -79,7 +80,7 @@ function createBoundHandler(
 // Lets a real <a href> fall through to native browser behavior (open in new tab, etc.)
 // on a modified or non-primary click, instead of always intercepting via preventDefault.
 function isModifiedAnchorClick(el: Element, event: Event): boolean {
-  if (event.type !== 'click' || el.tagName !== 'A' || !el.getAttribute('href')) return false;
+  if (event.type !== 'click' || SafeDom.tagNameOf(el) !== 'A' || !SafeDom.getAttr(el, 'href')) return false;
 
   const mouseEvent = event as MouseEvent;
   return mouseEvent.ctrlKey || mouseEvent.metaKey || mouseEvent.shiftKey || mouseEvent.altKey || mouseEvent.button !== 0;
@@ -90,7 +91,7 @@ function isModifiedAnchorClick(el: Element, event: Event): boolean {
 function isNavigationDefault(el: Element, event: Event): boolean {
   if (event.type === 'submit') return true;
   if (event.type !== 'click') return false;
-  if (el.tagName === 'A') return el.hasAttribute('href');
+  if (SafeDom.tagNameOf(el) === 'A') return SafeDom.hasAttr(el, 'href');
   return (el instanceof HTMLButtonElement || el instanceof HTMLInputElement)
     && el.type === 'submit'
     && el.form !== null;
@@ -102,6 +103,6 @@ function addEvent(
   listener: EventListener,
   eventListeners: Array<[EventTarget, string, EventListener]>
 ): void {
-  target.addEventListener(event, listener);
+  SafeDom.addListener(target, event, listener);
   eventListeners.push([target, event, listener]);
 }

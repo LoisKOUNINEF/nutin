@@ -1,10 +1,11 @@
 import type { KeepableComponentConfig } from './children.helper.js';
+import * as SafeDom from './safe-dom.helper.js';
 
 export function generateCatalog(config: Nutin.CatalogConfig, scope: Element = document.documentElement): Nutin.ComponentConfig[] {
   if (!config.items || config.items.length < 1) return [];
 
   const componentConfigs: Nutin.ComponentConfig[] = [];
-  const containers = scope.querySelectorAll(`[data-catalog="${config.selector}"]`);
+  const containers = SafeDom.querySelectorAllOf(scope, `[data-catalog="${config.selector}"]`);
 
   containers.forEach((container) => {
     if (!container || !(container instanceof HTMLElement)) return;
@@ -15,7 +16,8 @@ export function generateCatalog(config: Nutin.CatalogConfig, scope: Element = do
 }
 
 function getComponentConfigItems(config: Nutin.CatalogConfig, container: HTMLElement): Nutin.ComponentConfig[] {
-  container.innerHTML = '';
+  // SafeDom: a container that is a <form> may hold a control named innerHTML/appendChild.
+  SafeDom.assign(container, 'innerHTML', '');
   const componentConfigs: Nutin.ComponentConfig[] = [];
   for (let i = 0; i < config.items.length; i++) {
     createElements(i, config, container);
@@ -25,12 +27,12 @@ function getComponentConfigItems(config: Nutin.CatalogConfig, container: HTMLEle
 }
 
 function createElements(index: number, config: Nutin.CatalogConfig, container: HTMLElement): void {
-  const wrapper = document.createElement(config.elementTag || 'div');
-  const el = document.createElement('div');
+  const wrapper = SafeDom.createElementIn(document, config.elementTag || 'div');
+  const el = SafeDom.createElementIn(document, 'div');
   wrapper.appendChild(el);
   el.setAttribute('data-component', `${config.elementName}-${index}`);
   wrapper.dataset.index = String(index);
-  container?.appendChild(wrapper);
+  if (container) SafeDom.invoke(container, 'appendChild', wrapper);
 }
 
 function pushConfig(index: number, componentConfigs: Nutin.ComponentConfig[], config: Nutin.CatalogConfig): void {
