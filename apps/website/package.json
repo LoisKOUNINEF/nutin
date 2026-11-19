@@ -32,6 +32,6 @@
     "tailwindcss": "^4.3.3"
   },
   "dependencies": {
-    "a11y-elements": "^0.7.0"
+    "a11y-elements": "^1.0.0"
   }
 }
