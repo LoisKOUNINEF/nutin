@@ -144,7 +144,7 @@ Before submitting, check the extension on a real, non-temporary install. The too
 
 - `UNSUPPORTED_API`: `sidePanel.setPanelBehavior`. It's Chrome-only, and the background script only calls it when `chrome.sidePanel` exists.
 - A warning that `data_collection_permissions` needs a newer Firefox for Android than `strict_min_version`.
-- `UNSAFE_VAR_ASSIGNMENT` ("Unsafe assignment to innerHTML"): 5 of them come from Nutin's sanitizer (`src/core/base-classes/base-component/helpers/security.helper.ts`: `sanitizeToFragment()`, `sanitizeTemplate()`, `sanitizeAttributes()`, `stripBindings()`, `parseInContext()`).
+- `UNSAFE_VAR_ASSIGNMENT` ("Unsafe assignment to innerHTML"): 6 of them come from Nutin's sanitizer (`src/core/base-classes/base-component/helpers/security.helper.ts`: `sanitizeToFragment()`, `sanitizeTemplate()`, `sanitizeAttributes()`, `stripBindings()`, `stripRawMarkup()`, `parseInContext()`).
 
 An AMO reviewer may ask about the `innerHTML` warnings. This note, pasted into **Notes to reviewers**, usually answers it (adapt the data sources and the dependencies to your extension):
 

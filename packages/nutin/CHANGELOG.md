@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.1.2
+
+### Security
+
+- **`raw()` sanitizer bypass through DOM clobbering, fixed.** In a browser, a `<form>`'s named controls shadow the form's own properties: in `<form onclick="…" action="javascript:…"><input name="attributes"></form>`, `form.attributes` is the `<input>`. The sanitizer read `attributes` straight off each element, so it saw no attributes on such a form, and its event handlers and `javascript:` action were kept at `normal` and `strict`. Confirmed in Chromium: the handlers ran. Every app that passes markup an attacker can influence to `raw()` was exposed, unless that markup went through DOMPurify first or a Content-Security-Policy blocks inline handlers. The unit tests run in jsdom, which doesn't shadow form properties, so they never saw it.
+    - The sanitizer and every helper that reads rendered elements (events, tokens, i18n, pipes, data binding, catalogs, children, focus/scroll preservation) now read a form's or the document's properties from their prototypes, which named controls can't shadow. This is the new `safe-dom.helper.ts`. A control named `localName`, `removeAttribute`, `querySelectorAll` or `childNodes` used to make rendering throw or drop `raw()` content. A control named `parentElement` sent the nested-component check into an endless loop, which froze the tab. Tokens such as `@name`, `@id` and `@attr:` returned the `<input>` instead of a string.
+    - `raw()` content now loses any `id`/`name` that names a `document` or `<form>` property, or starts with `__NUTIN`. Before, `raw('<img name="createElement">')` replaced `document.createElement`, and every later render threw. Your own templates keep their names (`name="title"` still works). New `SecurityHelper.stripClobberingNamesFrom(root)` and `stripRawMarkup(markup)`.
+
 ## 3.1.1
 
 ### Changes
