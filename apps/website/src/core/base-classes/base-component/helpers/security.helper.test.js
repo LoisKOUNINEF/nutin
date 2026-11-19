@@ -404,3 +404,79 @@ describe('SecurityHelper', () => {
     }
   });
 });
+
+// linkedom (the SEO prerender's DOM) parses a <template>'s markup into the template's own
+// children and serializes those for innerHTML/outerHTML; its content is a separate copy.
+// Cleaning only the content would return, and prerender, the original markup.
+describe('SecurityHelper with templates whose markup lives in their children (linkedom)', () => {
+  function withLinkedomTemplates(fn) {
+    const inner = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+    Object.defineProperty(HTMLTemplateElement.prototype, 'innerHTML', {
+      configurable: true,
+      get() {
+        const box = document.createElement('div');
+        box.append(...Array.from(this.childNodes, (node) => node.cloneNode(true)));
+        return inner.get.call(box);
+      },
+      set(value) {
+        const parsed = document.createElement('template');
+        inner.set.call(parsed, value);
+        this.replaceChildren(...parsed.content.childNodes);
+      },
+    });
+    try {
+      return fn();
+    } finally {
+      delete HTMLTemplateElement.prototype.innerHTML;
+    }
+  }
+
+  it('the hook puts parsed markup in the template itself, like linkedom', () => {
+    withLinkedomTemplates(() => {
+      const holder = document.createElement('template');
+      holder.innerHTML = '<b onclick="x()">b</b>';
+      expect(holder.childNodes.length).toBe(1);
+      expect(holder.content.childNodes.length).toBe(0);
+      expect(holder.innerHTML).toBe('<b onclick="x()">b</b>');
+    });
+  });
+
+  it('sanitizeTemplate strips unsafe elements and attributes', () => {
+    const result = withLinkedomTemplates(() => SecurityHelper.sanitizeTemplate(
+      '<p onclick="x()">hi</p><script>x()</script><a href="javascript:x()">a</a><template><img src="x" onerror="x()"></template>',
+      'normal'
+    ));
+    expect(result).toBe('<p>hi</p><a>a</a><template><img src="x"></template>');
+  });
+
+  it('sanitizeTemplate resolves and sanitizes raw() content', () => {
+    const result = withLinkedomTemplates(() => SecurityHelper.sanitizeTemplate(
+      html`<div>${raw('<img src="a.png" onerror="x()" name="createElement" data-event="click:_x">')}</div>`,
+      'normal'
+    ));
+    expect(result).toBe('<div><img src="a.png"></div>');
+  });
+
+  it('stripBindings and stripRawMarkup strip the markup they return', () => {
+    withLinkedomTemplates(() => {
+      expect(SecurityHelper.stripBindings('<i data-event="click:_x" id="createElement">i</i>')).toBe('<i id="createElement">i</i>');
+      expect(SecurityHelper.stripRawMarkup('<i data-event="click:_x" id="createElement">i</i>')).toBe('<i>i</i>');
+    });
+  });
+
+  it("stripBindingsFrom and stripClobberingNamesFrom reach a nested template's own children", () => {
+    const root = document.createElement('div');
+    const template = document.createElement('template');
+    const img = document.createElement('img');
+    img.setAttribute('data-event', 'click:_x');
+    img.setAttribute('name', 'body');
+    template.appendChild(img);
+    root.appendChild(template);
+
+    SecurityHelper.stripBindingsFrom(root);
+    SecurityHelper.stripClobberingNamesFrom(root);
+
+    expect(img.hasAttribute('data-event')).toBe(false);
+    expect(img.hasAttribute('name')).toBe(false);
+  });
+});

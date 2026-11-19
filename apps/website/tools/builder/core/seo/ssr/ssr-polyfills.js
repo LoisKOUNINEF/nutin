@@ -52,7 +52,91 @@ function createMemoryStorage() {
   };
 }
 
+// Accessors the DOM spec defines on these exact prototypes. Clobbering-proof code (e.g.
+// a11y-elements' sanitizer) reads them with `Object.getOwnPropertyDescriptor(proto, name).get`,
+// often at module load, then calls that getter on any node. linkedom doesn't match the spec here:
+// - some live on a mixin below the named prototype (`children` on ParentNode): no own getter;
+// - some are per-instance data (`nodeType`, `localName`, `parentNode`), on no prototype at all;
+// - Node.prototype has base-class stubs (`childNodes` → empty, `firstChild` → null, …) that
+//   Element/CharacterData override: called on a real element, they return nothing.
+// Each one becomes a getter that dispatches to what `node[name]` would actually resolve to.
+// SSR only: jsdom (used by the tests) and browsers already define them this way.
+const SPEC_ACCESSORS = {
+  Node: [
+    'nodeType', 'nodeName', 'ownerDocument', 'parentNode', 'parentElement', 'childNodes',
+    'firstChild', 'lastChild', 'previousSibling', 'nextSibling', 'textContent',
+  ],
+  Element: ['children', 'attributes', 'localName', 'namespaceURI', 'tagName', 'firstElementChild', 'nextElementSibling'],
+  DocumentFragment: ['children'],
+  HTMLTemplateElement: ['content'],
+};
+
+const SPEC_ACCESSOR_TAG = Symbol.for('nutin.ssr.specAccessor');
+
+function findDescriptor(proto, name) {
+  for (let p = proto; p; p = Object.getPrototypeOf(p)) {
+    const desc = Object.getOwnPropertyDescriptor(p, name);
+    if (desc) return desc;
+  }
+  return undefined;
+}
+
+// The accessor of the most-derived class between the node and `proto` (excluded), if any.
+function derivedAccessor(node, proto, name) {
+  for (let p = Object.getPrototypeOf(node); p && p !== proto; p = Object.getPrototypeOf(p)) {
+    const desc = Object.getOwnPropertyDescriptor(p, name);
+    if (desc && (desc.get || desc.set)) return desc;
+  }
+  return undefined;
+}
+
+function defineDispatchingAccessor(proto, name) {
+  // What the prototype resolved to before: its own getter or stub, a mixin's getter, or nothing.
+  const fallback = findDescriptor(proto, name);
+  const get = function () {
+    const derived = derivedAccessor(this, proto, name);
+    if (derived?.get) return derived.get.call(this);
+    const own = Object.getOwnPropertyDescriptor(this, name);
+    if (own && 'value' in own) return own.value;
+    return fallback?.get ? fallback.get.call(this) : fallback?.value;
+  };
+  get[SPEC_ACCESSOR_TAG] = true;
+  Object.defineProperty(proto, name, {
+    configurable: true,
+    enumerable: fallback?.enumerable ?? true,
+    get,
+    set(value) {
+      const accessor = derivedAccessor(this, proto, name) ?? (fallback?.get || fallback?.set ? fallback : undefined);
+      if (accessor?.set) return accessor.set.call(this, value);
+      // Getter-only, as before this was installed (and as in a browser's strict code).
+      if (accessor) throw new TypeError(`Cannot set property ${name} of ${this}, which has only a getter`);
+      // Per-instance data (linkedom's constructor runs `this.nodeType = …`): keep it on the node.
+      Object.defineProperty(this, name, { value, writable: true, enumerable: true, configurable: true });
+    },
+  });
+}
+
+/**
+ * Makes the SSR window's DOM prototypes carry the accessors the spec puts on them, so code
+ * that reads `Object.getOwnPropertyDescriptor(Element.prototype, 'children').get` works.
+ * Idempotent: linkedom's classes are shared by every window it creates.
+ */
+export function installSpecAccessors(window) {
+  for (const [ctorName, names] of Object.entries(SPEC_ACCESSORS)) {
+    const proto = window[ctorName]?.prototype;
+    if (!proto) continue;
+    for (const name of names) {
+      const current = Object.getOwnPropertyDescriptor(proto, name);
+      if (current?.get?.[SPEC_ACCESSOR_TAG]) continue;
+      if (current && !current.configurable) continue;
+      defineDispatchingAccessor(proto, name);
+    }
+  }
+}
+
 export function installGlobals(window, { lang, mockFetch = {}, localesDir, staticDir } = {}) {
+  // Before anything imports the bundle: its modules may read these getters as they load.
+  installSpecAccessors(window);
   for (const key of Object.getOwnPropertyNames(window)) {
     setGlobal(globalThis, key, window[key]);
   }
