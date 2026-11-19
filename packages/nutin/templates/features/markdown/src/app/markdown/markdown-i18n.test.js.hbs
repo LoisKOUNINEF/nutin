@@ -1,4 +1,4 @@
-import nutinConfig from '#root/dist/nutin.config.js';
+import { CONFIG } from '#root/dist/src/core/config.js';
 import { I18nService } from '#root/dist/src/core/index.js';
 import { markdownLanguage, markdownText, onMarkdownLanguageChange } from '#root/dist/src/app/markdown/markdown-i18n.js';
 
@@ -23,9 +23,9 @@ describe('markdown-i18n', () => {
     expect(markdownLanguage()).toBe(null);
   });
 
-  it('markdownLanguage follows nutin.config.js "i18n" when the builder define is missing', () => {
+  it('markdownLanguage follows CONFIG.i18n (nutin.config.js "i18n") when the builder define is missing', () => {
     delete globalThis.__NUTIN_I18N__;
-    expect(markdownLanguage()).toBe(nutinConfig.i18n ? I18nService.currentLanguage : null);
+    expect(markdownLanguage()).toBe(CONFIG.i18n ? I18nService.currentLanguage : null);
   });
 
   it('markdownText translates a "markdown." key with i18n, passing the fallback', () => {

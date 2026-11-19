@@ -4,6 +4,7 @@ import path from "path";
 import { allFormats, getLastWord, print, errorExit } from "../utils/index.js";
 import fs from "fs";
 import { generateFile, generateLocalesJson } from "./handle-file.js";
+import { I18N_ENABLED } from "../utils/languages.js";
 import { serviceTemplate, componentTemplate, viewTemplate, htmlTemplate, scssTemplate, testTemplate } from "./templates/index.js";
 import nutinConfig from "../../nutin.config.js";
 
@@ -86,7 +87,7 @@ async function generateTest({ targetPath, name, suffix }) {
 }
 
 async function generateLocales({ targetPath, name, isView }) {
-  if (nutinConfig.i18n) generateLocalesJson({ targetPath, name, isView });
+  if (I18N_ENABLED) generateLocalesJson({ targetPath, name, isView });
 }
 
 function showUsageAndExit(message) {

@@ -50,11 +50,13 @@ export class TemplateDiffer {
     this.fileGenerator = new FileGenerator();
   }
 
-  async diff(projectPath, oldTemplatesRoot, oldContext, newContext) {
+  // prepareMerge(relPath, { actual, base, next }) → { actual, base }: a migration's in-memory rewrite
+  // of a text file (yours, and the old version as merge base) before it's compared and merged.
+  async diff(projectPath, oldTemplatesRoot, oldContext, newContext, { prepareMerge = null } = {}) {
     const newTemplatesRoot = this.fileGenerator.getTemplatesRoot();
 
     const [oldTree, newTree] = await Promise.all([
-      this.fileGenerator.collectTemplateTree(oldTemplatesRoot, oldContext),
+      this.fileGenerator.collectTemplateTree(oldTemplatesRoot, oldContext, { includeExtensionExclusions: true }),
       this.fileGenerator.collectTemplateTree(newTemplatesRoot, newContext),
     ]);
 
@@ -109,15 +111,21 @@ export class TemplateDiffer {
         continue;
       }
 
-      const actualContent = oldEntry.isBinary
+      const diskContent = oldEntry.isBinary
         ? await fs.readFile(outputPath)
         : await fs.readFile(outputPath, 'utf8');
+      const { actual: actualContent, base: baseContent } = prepareMerge && !oldEntry.isBinary && !newEntry.isBinary
+        ? prepareMerge(toPosixPath(relPath), { actual: diskContent, base: oldEntry.content, next: newEntry.content })
+        : { actual: diskContent, base: oldEntry.content };
 
-      if (contentEquals(actualContent, oldEntry.content)) {
+      if (contentEquals(actualContent, baseContent)) {
         toUpdate.push({ relPath, newEntry });
       } else if (!contentEquals(actualContent, newEntry.content)) {
         // Differs from both baselines: a real conflict, merged from the old baseline at apply time.
-        conflicts.push({ relPath, actualContent, baseContent: oldEntry.content, newEntry });
+        conflicts.push({ relPath, actualContent, baseContent, newEntry });
+      } else if (!contentEquals(actualContent, diskContent)) {
+        // Only the rewrite made it the new version: the file on disk still needs it.
+        toUpdate.push({ relPath, newEntry });
       }
     }
 

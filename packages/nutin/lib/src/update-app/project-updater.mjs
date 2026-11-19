@@ -14,6 +14,7 @@ import { isGitAvailable, getWorkingTreeStatus } from '../common/git.mjs';
 import { UpdateContextBuilder } from './update-context-builder.mjs';
 import { TemplateDiffer } from './template-differ.mjs';
 import { findJsonDrift } from './json-drift.mjs';
+import { detectI18nMigration, prepareConfigForMerge, applyI18nMigration, NUTIN_CONFIG_FILE } from './i18n-migration.mjs';
 
 const fs = fsExtra.default;
 
@@ -114,15 +115,20 @@ export class ProjectUpdater {
 
   async computeChangeSet(projectPath, meta, oldTemplatesRoot) {
     const { oldContext, newContext } = await this.contextBuilder.buildContexts(projectPath, meta);
-    const changeSet = await this.differ.diff(projectPath, oldTemplatesRoot, oldContext, newContext);
-    return { ...changeSet, jsonDrift: await findJsonDrift(projectPath, newContext) };
+    // config/languages.json → nutin.config.js "i18n": see i18n-migration.mjs.
+    const i18nMigration = await detectI18nMigration(projectPath);
+    const prepareMerge = i18nMigration
+      ? (relPath, contents) => (relPath === NUTIN_CONFIG_FILE ? prepareConfigForMerge(contents) : contents)
+      : null;
+    const changeSet = await this.differ.diff(projectPath, oldTemplatesRoot, oldContext, newContext, { prepareMerge });
+    return { ...changeSet, jsonDrift: await findJsonDrift(projectPath, newContext), i18nMigration };
   }
 
   async applyChangeSet(projectPath, meta, changeSet, { yes, gitStatus = null }) {
-    const { toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated, jsonDrift } = changeSet;
-    printUpdateSummary({ toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated, jsonDrift });
+    const { toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated, jsonDrift, i18nMigration = null } = changeSet;
+    printUpdateSummary({ toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated, jsonDrift, i18nMigration });
 
-    if (toUpdate.length === 0 && toAdd.length === 0 && conflicts.length === 0) {
+    if (toUpdate.length === 0 && toAdd.length === 0 && conflicts.length === 0 && !i18nMigration) {
       print.boldSuccess('\n✅ Nothing to update.');
       await updateProjectMeta(projectPath, { version: packageVersion });
       return;
@@ -141,7 +147,7 @@ export class ProjectUpdater {
       );
     }
 
-    if (!yes && (toUpdate.length > 0 || toAdd.length > 0 || toMerge.length > 0)) {
+    if (!yes && (toUpdate.length > 0 || toAdd.length > 0 || toMerge.length > 0 || i18nMigration)) {
       if (!process.stdin.isTTY) {
         print.warn('\n⚠️ Non-interactive shell detected — skipping the confirmation prompt.');
         print.boldInfo('Re-run with --yes to apply these updates automatically. No files were changed.');
@@ -171,8 +177,16 @@ export class ProjectUpdater {
 
     const { merged, conflicted } = await this.mergeEditedFiles(projectPath, meta, toMerge);
 
-    if (merged.length > 0 || conflicted.length > 0 || binaryConflicts.length > 0) {
-      await writeUpdateReport(projectPath, { merged, conflicted, binaryConflicts }, meta.version, packageVersion);
+    const manualSteps = [];
+    if (i18nMigration) {
+      const configConflicted = conflicted.some(({ relPath }) => relPath === NUTIN_CONFIG_FILE);
+      const { messages, manualStep } = await applyI18nMigration(projectPath, i18nMigration, { conflicted: configConflicted });
+      messages.forEach((message) => print.info(message));
+      if (manualStep) manualSteps.push(manualStep);
+    }
+
+    if (merged.length > 0 || conflicted.length > 0 || binaryConflicts.length > 0 || manualSteps.length > 0) {
+      await writeUpdateReport(projectPath, { merged, conflicted, binaryConflicts, manualSteps }, meta.version, packageVersion);
     }
 
     await updateProjectMeta(projectPath, {
@@ -185,6 +199,10 @@ export class ProjectUpdater {
     }
     if (binaryConflicts.length > 0) {
       print.boldError(`\n⚠️  ${binaryConflicts.length} binary file(s) you modified were left as they are — see ${REPORT_FILE_NAME}`);
+    }
+    if (manualSteps.length > 0) {
+      print.boldError(`\n⚠️  To do by hand (also in ${REPORT_FILE_NAME}):`);
+      manualSteps.forEach((step) => print.boldError(`    - ${step}`));
     }
     if (conflicted.length > 0) {
       print.boldError(

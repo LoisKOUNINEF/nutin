@@ -8,7 +8,7 @@ export function localeRedirects({ i18n, languages, defaultLanguage }) {
 
   [defaultLanguage, ...languages].forEach((lang) => {
     if (typeof lang !== 'string' || !LANGUAGE_CODE.test(lang)) {
-      throw new Error(`config/languages.json: invalid language code ${JSON.stringify(lang)} — use letters, digits and "-" only (e.g. "en", "pt-BR").`);
+      throw new Error(`nutin.config.js "i18n": invalid language code ${JSON.stringify(lang)} — use letters, digits and "-" only (e.g. "en", "pt-BR").`);
     }
   });
 
