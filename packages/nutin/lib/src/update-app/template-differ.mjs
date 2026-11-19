@@ -50,9 +50,11 @@ export class TemplateDiffer {
     this.fileGenerator = new FileGenerator();
   }
 
-  // prepareMerge(relPath, { actual, base, next }) → { actual, base }: a migration's in-memory rewrite
-  // of a text file (yours, and the old version as merge base) before it's compared and merged.
-  async diff(projectPath, oldTemplatesRoot, oldContext, newContext, { prepareMerge = null } = {}) {
+  // prepare(relPath, { actual, base, next }) → { actual, base }: a text file as it's compared and
+  // merged (yours, and the old version as merge base), rewritten so a line nutin changes on its own
+  // (a version number, a migrated option) neither counts as your edit nor conflicts with yours
+  // around it. The file on disk isn't touched. See merge-preparers.mjs.
+  async diff(projectPath, oldTemplatesRoot, oldContext, newContext, { prepare = null } = {}) {
     const newTemplatesRoot = this.fileGenerator.getTemplatesRoot();
 
     const [oldTree, newTree] = await Promise.all([
@@ -61,6 +63,8 @@ export class TemplateDiffer {
     ]);
 
     excludeUserOwnedPaths(oldTree, newTree);
+    // Files nutin generates (either version), user-owned ones aside: posix paths.
+    const generatedPaths = new Set([...oldTree.keys(), ...newTree.keys()].map(toPosixPath));
 
     const toUpdate = [];
     const toAdd = [];
@@ -114,8 +118,8 @@ export class TemplateDiffer {
       const diskContent = oldEntry.isBinary
         ? await fs.readFile(outputPath)
         : await fs.readFile(outputPath, 'utf8');
-      const { actual: actualContent, base: baseContent } = prepareMerge && !oldEntry.isBinary && !newEntry.isBinary
-        ? prepareMerge(toPosixPath(relPath), { actual: diskContent, base: oldEntry.content, next: newEntry.content })
+      const { actual: actualContent, base: baseContent } = prepare && !oldEntry.isBinary && !newEntry.isBinary
+        ? prepare(toPosixPath(relPath), { actual: diskContent, base: oldEntry.content, next: newEntry.content })
         : { actual: diskContent, base: oldEntry.content };
 
       if (contentEquals(actualContent, baseContent)) {
@@ -129,6 +133,6 @@ export class TemplateDiffer {
       }
     }
 
-    return { toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated };
+    return { toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated, generatedPaths };
   }
 }

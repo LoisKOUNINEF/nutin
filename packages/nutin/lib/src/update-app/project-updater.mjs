@@ -14,7 +14,8 @@ import { isGitAvailable, getWorkingTreeStatus } from '../common/git.mjs';
 import { UpdateContextBuilder } from './update-context-builder.mjs';
 import { TemplateDiffer } from './template-differ.mjs';
 import { findJsonDrift } from './json-drift.mjs';
-import { detectI18nMigration, prepareConfigForMerge, applyI18nMigration, NUTIN_CONFIG_FILE } from './i18n-migration.mjs';
+import { detectI18nMigration, findI18nReferences, applyI18nMigration, NUTIN_CONFIG_FILE } from './i18n-migration.mjs';
+import { buildMergePreparer } from './merge-preparers.mjs';
 
 const fs = fsExtra.default;
 
@@ -117,10 +118,10 @@ export class ProjectUpdater {
     const { oldContext, newContext } = await this.contextBuilder.buildContexts(projectPath, meta);
     // config/languages.json → nutin.config.js "i18n": see i18n-migration.mjs.
     const i18nMigration = await detectI18nMigration(projectPath);
-    const prepareMerge = i18nMigration
-      ? (relPath, contents) => (relPath === NUTIN_CONFIG_FILE ? prepareConfigForMerge(contents) : contents)
-      : null;
-    const changeSet = await this.differ.diff(projectPath, oldTemplatesRoot, oldContext, newContext, { prepareMerge });
+    const prepare = buildMergePreparer({ i18nMigration });
+    const { generatedPaths, ...changeSet } = await this.differ.diff(projectPath, oldTemplatesRoot, oldContext, newContext, { prepare });
+    // Your files only: nutin's own still mention languages.json until this update rewrites them.
+    if (i18nMigration) Object.assign(i18nMigration, await findI18nReferences(projectPath, generatedPaths));
     return { ...changeSet, jsonDrift: await findJsonDrift(projectPath, newContext), i18nMigration };
   }
 
@@ -154,12 +155,11 @@ export class ProjectUpdater {
         return;
       }
 
-      const merges = toMerge.length > 0 ? ` and merge ${toMerge.length} file(s) you edited` : '';
       const { proceed } = await inquirer.prompt([
         {
           type: 'confirm',
           name: 'proceed',
-          message: `\nApply ${toUpdate.length + toAdd.length} file update(s)${merges}?`,
+          message: `\n${confirmationMessage({ fileCount: toUpdate.length + toAdd.length, mergeCount: toMerge.length, i18nMigration })}`,
           default: true,
         },
       ]);
@@ -180,9 +180,9 @@ export class ProjectUpdater {
     const manualSteps = [];
     if (i18nMigration) {
       const configConflicted = conflicted.some(({ relPath }) => relPath === NUTIN_CONFIG_FILE);
-      const { messages, manualStep } = await applyI18nMigration(projectPath, i18nMigration, { conflicted: configConflicted });
+      const { messages, manualSteps: steps } = await applyI18nMigration(projectPath, i18nMigration, { conflicted: configConflicted });
       messages.forEach((message) => print.info(message));
-      if (manualStep) manualSteps.push(manualStep);
+      manualSteps.push(...steps);
     }
 
     if (merged.length > 0 || conflicted.length > 0 || binaryConflicts.length > 0 || manualSteps.length > 0) {
@@ -260,6 +260,17 @@ export class ProjectUpdater {
 
     return { merged, conflicted };
   }
+}
+
+// "Apply 3 file update(s), merge 1 file(s) you edited and migrate config/languages.json?"
+export function confirmationMessage({ fileCount, mergeCount, i18nMigration }) {
+  const actions = [
+    fileCount > 0 && `apply ${fileCount} file update(s)`,
+    mergeCount > 0 && `merge ${mergeCount} file(s) you edited`,
+    i18nMigration && 'migrate config/languages.json',
+  ].filter(Boolean);
+  const text = actions.length > 1 ? `${actions.slice(0, -1).join(', ')} and ${actions.at(-1)}` : actions[0] ?? 'apply 0 file update(s)';
+  return `${text[0].toUpperCase()}${text.slice(1)}?`;
 }
 
 export const projectUpdater = new ProjectUpdater();
