@@ -18,7 +18,7 @@ Things escalated quickly.
 
 More and more branches, with so many leaves. A tree that big, I wouldn't know how to nurture on my own.
 
-At that moment, I asked myself a question I don't ask often enough: *"WTF am I doing?"*
+At that moment, I asked myself a question I probably should ask more often: *"WTF am I doing?"*
 
 Or, in that specific case: *"WTF am I **building**?"*
 
@@ -104,18 +104,6 @@ This taught me how to distinguish between abstractions that solve recurring prob
 
 **Nutin should only grow when real problems give it a reason to grow.**
 
-## Why Nutin exists
-
-Nutin doesn't exist because the web needed another way to render a button.
-
-It exists because there is a middle ground between writing every piece of application infrastructure yourself and adopting a large framework.
-
-Needing structure doesn't necessarily mean needing an entirely different way to build.
-
-Nutin started because I wanted to build an application without a frontend framework.
-
-It grew because the application presented real problems.
-
-It became too complicated because solving problems can become a problem of its own.
+Nutin's origin story is in fact pretty classic: it started because I wanted to build an application without a frontend framework, it grew because I built more than one, it became too complicated because solving problems can become a problem of its own.
 
 I now know that sometimes the best way to move a project forward is to remove things.

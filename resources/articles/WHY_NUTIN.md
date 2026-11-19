@@ -4,9 +4,11 @@ ogImage: /assets/images/og-covers/og-cover-articles.jpg
 
 # Why Nutin?
 
-The web platform already provides powerful primitives for building web applications.
+The web platform already provides powerful primitives for building web applications. What it doesn't provide is an architecture for organizing an application as it grows.
 
-What it doesn't provide is an architecture for organizing an application as it grows.
+Nutin doesn't exist because the web needed another way to render a button.
+
+It exists because there is a middle ground between writing every piece of application infrastructure yourself and adopting a large framework. Because needing structure doesn't necessarily mean needing an entirely different way to build.
 
 ## Nutin's concepts
 
