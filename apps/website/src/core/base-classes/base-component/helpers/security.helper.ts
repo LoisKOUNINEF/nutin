@@ -1,5 +1,7 @@
 // Compared against localName, so SVG/MathML elements of the same name are caught too.
 // style/link restyle the whole page, base moves every relative URL, meta can refresh/navigate.
+import * as SafeDom from './safe-dom.helper.js';
+
 const STRIPPED_TAGS = new Set(['script', 'style', 'link', 'base', 'meta']);
 const STRICT_STRIPPED_TAGS = new Set(['iframe', 'object', 'embed', 'frame']);
 
@@ -40,7 +42,7 @@ export function sanitizeTemplate(value: unknown, trustLevel: Nutin.TrustLevel = 
   if (value === null || value === undefined) return '';
   if (trustLevel === 'trusted' && !rawsOf(value)) return String(value);
 
-  const holder = document.createElement('template');
+  const holder = newTemplate();
   holder.content.append(sanitizeToFragment(value, trustLevel));
   return holder.innerHTML;
 }
@@ -61,7 +63,7 @@ export function escapeHtml(value: unknown): string {
 // A SafeHtml from html`` may carry raw() sources behind placeholders: each is parsed once,
 // in its real parent context, stripped of bindings and sanitized as nodes, then put in place.
 export function sanitizeToFragment(value: unknown, trustLevel: Nutin.TrustLevel = 'normal'): DocumentFragment {
-  const holder = document.createElement('template');
+  const holder = newTemplate();
   const raws = rawsOf(value);
   holder.innerHTML = value === null || value === undefined ? '' : raws ? (value as { value: string }).value : String(value);
   if (trustLevel !== 'trusted') sanitizeNode(holder.content, trustLevel);
@@ -72,7 +74,7 @@ export function sanitizeToFragment(value: unknown, trustLevel: Nutin.TrustLevel 
 // raw() in attribute position (`<a ${raw('aria-current="page"')}>`): rebuilt from the parsed
 // attributes, minus event handlers, srcdoc, bindings and script URLs.
 export function sanitizeAttributes(source: string): string {
-  const holder = document.createElement('template');
+  const holder = newTemplate();
   holder.innerHTML = `<span ${source}></span>`;
   // An unterminated quote makes the parser drop the whole tag: nothing to keep.
   const el = holder.content.firstElementChild;
@@ -90,9 +92,19 @@ export function isScriptUrl(name: string, value: string): boolean {
 }
 
 export function stripBindings(markup: string): string {
-  const holder = document.createElement('template');
+  const holder = newTemplate();
   holder.innerHTML = markup;
   stripBindingsFrom(holder.content);
+  return holder.innerHTML;
+}
+
+// What every raw() source loses, at every trust level: binding attributes and clobbering names.
+// String form, for SafeHtml.toString(); rendering does the same on nodes (resolveRaws).
+export function stripRawMarkup(markup: string): string {
+  const holder = newTemplate();
+  holder.innerHTML = markup;
+  stripBindingsFrom(holder.content);
+  stripClobberingNamesFrom(holder.content);
   return holder.innerHTML;
 }
 
@@ -100,13 +112,44 @@ export function stripBindings(markup: string): string {
 // prerendered page (the app re-renders it), so its binding attributes are dead weight.
 export function stripBindingsFrom(root: ParentNode): void {
   const selector = BINDING_ATTRS.map((attr) => `[${attr}]`).join(',');
-  root.querySelectorAll(selector).forEach((el) => {
-    BINDING_ATTRS.forEach((attr) => el.removeAttribute(attr));
+  SafeDom.querySelectorAllOf(root, selector).forEach((el) => {
+    BINDING_ATTRS.forEach((attr) => SafeDom.removeAttr(el, attr));
   });
-  root.querySelectorAll('template').forEach((el) => {
-    const content = templateContent(el);
+  SafeDom.querySelectorAllOf(root, 'template').forEach((el) => {
+    const content = SafeDom.templateContentOf(el);
     if (content) stripBindingsFrom(content);
   });
+}
+
+// An id/name that names a document or form property shadows it once inserted:
+// <img name="createElement"> replaces document.createElement for the whole app, and
+// <input name="parentElement"> replaces its form's parentElement. Only raw() markup loses
+// them: an author's own name="title" or name="action" field is legitimate.
+// __NUTIN* ids would shadow Nutin's globals through window's named access.
+export function stripClobberingNamesFrom(root: ParentNode): void {
+  SafeDom.querySelectorAllOf(root, '[id],[name]').forEach((el) => {
+    ['id', 'name'].forEach((attr) => {
+      const value = SafeDom.getAttr(el, attr);
+      if (value !== null && isClobberingName(value)) SafeDom.removeAttr(el, attr);
+    });
+  });
+  SafeDom.querySelectorAllOf(root, 'template').forEach((el) => {
+    const content = SafeDom.templateContentOf(el);
+    if (content) stripClobberingNamesFrom(content);
+  });
+}
+
+let formProbe: HTMLFormElement | null = null;
+
+function isClobberingName(value: string): boolean {
+  if (value === '') return false;
+  // A fresh form, so its own named controls can't add names; re-created for another realm's document.
+  if (!formProbe || formProbe.ownerDocument !== document) formProbe = SafeDom.createElementIn(document, 'form');
+  return value in document || value in formProbe || value.startsWith('__NUTIN');
+}
+
+function newTemplate(): HTMLTemplateElement {
+  return SafeDom.createElementIn(document, 'template');
 }
 
 function rawsOf(value: unknown): ReadonlyMap<string, string> | null {
@@ -117,19 +160,20 @@ function rawsOf(value: unknown): ReadonlyMap<string, string> | null {
 function resolveRaws(root: ParentNode, raws: ReadonlyMap<string, string>, trustLevel: Nutin.TrustLevel): void {
   // Snapshot first: content put in place is never searched for placeholders again.
   for (const placeholder of collectPlaceholders(root)) {
-    const source = raws.get(placeholder.getAttribute('data-nutin-raw') ?? '');
-    const parsed = parseInContext(source ?? '', placeholder.parentNode);
+    const source = raws.get(SafeDom.getAttr(placeholder, 'data-nutin-raw') ?? '');
+    const parsed = parseInContext(source ?? '', SafeDom.parentNodeOf(placeholder));
     if (trustLevel !== 'trusted') sanitizeNode(parsed, trustLevel);
     stripBindingsFrom(parsed);
-    placeholder.replaceWith(...Array.from(parsed.childNodes));
+    stripClobberingNamesFrom(parsed);
+    SafeDom.replaceNode(placeholder, ...Array.from(SafeDom.childNodesOf(parsed as Node)));
   }
 }
 
 function collectPlaceholders(root: ParentNode): Element[] {
   const found: Element[] = [];
-  root.querySelectorAll('template').forEach((el) => {
-    if (el.hasAttribute('data-nutin-raw')) found.push(el);
-    const content = templateContent(el);
+  SafeDom.querySelectorAllOf(root, 'template').forEach((el) => {
+    if (SafeDom.hasAttr(el, 'data-nutin-raw')) found.push(el);
+    const content = SafeDom.templateContentOf(el);
     if (content) found.push(...collectPlaceholders(content));
   });
   return found;
@@ -139,10 +183,10 @@ function collectPlaceholders(root: ParentNode): Element[] {
 // element like the placeholder's parent as context so <svg>/<math>/<table> content parses as
 // it will once inserted.
 function parseInContext(source: string, parent: Node | null): ParentNode {
-  const holder = document.createElement('template');
-  const parentEl = parent && parent.nodeType === 1 ? (parent as Element) : null;
-  if (parentEl && !templateContent(parentEl)) {
-    const context = holder.content.ownerDocument.createElementNS(parentEl.namespaceURI, parentEl.localName);
+  const holder = newTemplate();
+  const parentEl = parent && SafeDom.prop<number>(parent, 'nodeType') === 1 ? (parent as Element) : null;
+  if (parentEl && !SafeDom.templateContentOf(parentEl)) {
+    const context = holder.content.ownerDocument.createElementNS(SafeDom.namespaceOf(parentEl), SafeDom.localNameOf(parentEl));
     context.innerHTML = source;
     return context;
   }
@@ -156,26 +200,22 @@ function isAllowedRawAttribute(name: string, value: string): boolean {
   return !isScriptUrl(name, value);
 }
 
-// Only an HTML <template> has a content fragment; <svg><template> is a plain element.
-function templateContent(el: Element): DocumentFragment | null {
-  const content = (el as HTMLTemplateElement).content;
-  return content && typeof content.querySelectorAll === 'function' ? content : null;
-}
-
 function sanitizeNode(root: ParentNode, trustLevel: Nutin.TrustLevel): void {
   // Snapshot first: removing an element while walking a live list would skip the next one.
   // Descendants of a removed element are still visited, which is harmless.
-  for (const el of Array.from(root.querySelectorAll('*'))) {
-    const tag = el.localName.toLowerCase();
+  // Every read goes through SafeDom: a <form>'s controls can shadow attributes, localName,
+  // removeAttribute, ... (<form onclick=…><input name="attributes"> would hide its handler).
+  for (const el of SafeDom.querySelectorAllOf(root, '*')) {
+    const tag = SafeDom.localNameOf(el).toLowerCase();
 
     if (STRIPPED_TAGS.has(tag)
       || (trustLevel === 'strict' && STRICT_STRIPPED_TAGS.has(tag))
-      || animatesUrlAttribute(el)) {
-      el.remove();
+      || animatesUrlAttribute(el, tag)) {
+      SafeDom.removeNode(el);
       continue;
     }
 
-    const attrs = el.attributes;
+    const attrs = SafeDom.attributesOf(el);
     // Backwards, so a removal doesn't shift the attributes still to check.
     for (let i = attrs.length - 1; i >= 0; i--) {
       const attr = attrs[i]!;
@@ -184,19 +224,19 @@ function sanitizeNode(root: ParentNode, trustLevel: Nutin.TrustLevel): void {
       if ((name.startsWith('on') || name === 'srcdoc')
         || (URL_ATTRS.has(name) && isDangerousUrl(attr.value, trustLevel))
         || (FRAME_TAGS.has(tag) && FRAME_URL_ATTRS.has(name) && isDangerousUrl(attr.value, 'strict'))) {
-        el.removeAttribute(attr.name);
+        SafeDom.removeAttr(el, attr.name);
       }
     }
 
     // querySelectorAll() doesn't look into <template> content.
-    const content = templateContent(el);
+    const content = SafeDom.templateContentOf(el);
     if (content) sanitizeNode(content, trustLevel);
   }
 }
 
-function animatesUrlAttribute(el: Element): boolean {
-  if (!ATTR_ANIMATION_TAGS.has(el.localName.toLowerCase())) return false;
-  const target = (el.getAttribute('attributeName') ?? '').trim().toLowerCase();
+function animatesUrlAttribute(el: Element, tag: string): boolean {
+  if (!ATTR_ANIMATION_TAGS.has(tag)) return false;
+  const target = (SafeDom.getAttr(el, 'attributeName') ?? '').trim().toLowerCase();
   return URL_ATTRS.has(target) || URL_ATTRS.has(target.replace(/^xlink:/, ''));
 }
 
