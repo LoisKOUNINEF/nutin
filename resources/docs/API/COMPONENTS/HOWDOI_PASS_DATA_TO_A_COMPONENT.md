@@ -16,6 +16,8 @@ export class GreetingComponent extends Component {
 
 On every render, `config` is merged under `defaults`, then every key listed in `normalizeKeys` is coerced back to `''` if the *original* `config` value was `undefined`/`null` — **even if `defaults` supplied a value for that same key**. In other words, a key in `normalizeKeys` always ends up as `''` (not the default) when the caller didn't pass it. Only list a key in `normalizeKeys` if you want that behavior; otherwise omit it and let `defaults` fill the gap.
 
+- **Note**: Linters will mark `templateFn()` variables as unused if you use an external HTML template (`example.component.html`). Use `// @ts-ignore: variable(s) are used in HTML template.` to silence it.
+
 ## `props` + `data-bind` — two-way field binding
 
 ```ts
