@@ -1,3 +1,4 @@
+import * as SafeDom from './safe-dom.helper.js';
 import * as DomHelper from './dom.helper.js';
 
 type SelectionDirection = 'forward' | 'backward' | 'none';
@@ -35,14 +36,15 @@ export function restore(state: PreservedState): void {
   state.parking?.remove();
   state.scroll.forEach(({ element, top, left }) => {
     if (!element.isConnected) return;
-    if (element.scrollTop !== top) element.scrollTop = top;
-    if (element.scrollLeft !== left) element.scrollLeft = left;
+    const current = SafeDom.scrollOf(element);
+    if (current.top !== top) SafeDom.assign(element, 'scrollTop', top);
+    if (current.left !== left) SafeDom.assign(element, 'scrollLeft', left);
   });
   restoreFocus(state.focus);
 }
 
 function captureFocus(elements: HTMLElement[]): FocusState | null {
-  const active = document.activeElement;
+  const active = SafeDom.prop<Element | null>(document, 'activeElement');
   if (!(active instanceof HTMLElement)) return null;
   if (!elements.some(element => element.contains(active))) return null;
 
@@ -61,21 +63,20 @@ function captureFocus(elements: HTMLElement[]): FocusState | null {
 function captureScroll(elements: HTMLElement[]): ScrollState[] {
   const scrolled: ScrollState[] = [];
   elements.forEach(root => {
-    [root, ...Array.from(root.querySelectorAll('*'))].forEach(element => {
-      if (element.scrollTop || element.scrollLeft) {
-        scrolled.push({ element, top: element.scrollTop, left: element.scrollLeft });
-      }
+    [root, ...SafeDom.querySelectorAllOf(root, '*')].forEach(element => {
+      const { top, left } = SafeDom.scrollOf(element);
+      if (top || left) scrolled.push({ element, top, left });
     });
   });
   return scrolled;
 }
 
 function park(elements: HTMLElement[]): HTMLElement | null {
-  const body = document.body;
+  const body = SafeDom.prop<HTMLElement | null>(document, 'body');
   const connected = elements.filter(element => element.isConnected);
   if (!body || !connected.length || !DomHelper.canMoveBefore(body, connected[0]!)) return null;
 
-  const parking = document.createElement('div');
+  const parking = SafeDom.createElementIn(document, 'div');
   body.appendChild(parking);
   DomHelper.prepareMoveTarget(parking, connected[0]!);
   connected.forEach(element => DomHelper.moveBefore(parking, element, null));
@@ -86,7 +87,7 @@ function restoreFocus(focus: FocusState | null): void {
   if (!focus || !focus.element.isConnected) return;
   const { element, selection } = focus;
 
-  if (document.activeElement !== element) element.focus({ preventScroll: true });
+  if (SafeDom.prop<Element | null>(document, 'activeElement') !== element) element.focus({ preventScroll: true });
   if (selection && (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement)) {
     element.setSelectionRange(...selection);
   }

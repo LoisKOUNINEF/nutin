@@ -167,4 +167,27 @@ describe('EventHelper', () => {
     expect(callCount).toBe(0);
     expect(eventListeners.length).toBe(0);
   });
+
+  it('binds and cancels a form submit when the form\'s controls shadow getAttribute, tagName and addEventListener', () => {
+    container.innerHTML = '<form data-event="submit:save:@attr:data-event"><input name="getAttribute"><button>go</button></form>';
+    const form = container.querySelector('form');
+    // In a browser, controls with these names shadow the form's own methods.
+    const control = form.querySelector('input');
+    // (Not hasAttribute: jsdom's own selector engine calls it on the instance.)
+    ['getAttribute', 'tagName', 'addEventListener', 'removeEventListener', 'parentElement']
+      .forEach((name) => Object.defineProperty(form, name, { configurable: true, value: control }));
+
+    let saved = null;
+    const component = { save(arg) { saved = arg; } };
+    EventHelper.bindEvents(component, container, eventListeners);
+    const submit = new window.Event('submit', { cancelable: true });
+    form.dispatchEvent(submit);
+
+    expect(saved).toBe('submit:save:@attr:data-event');
+    expect(submit.defaultPrevented).toBe(true);
+    EventHelper.destroyEvents(eventListeners);
+    form.dispatchEvent(new window.Event('submit', { cancelable: true }));
+    expect(saved).toBe('submit:save:@attr:data-event');
+    expect(eventListeners.length).toBe(0);
+  });
 });

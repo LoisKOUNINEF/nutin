@@ -134,6 +134,70 @@ describe('A11yDemoOverlaysComponent', () => {
     expect(dismissed).toBe(1);
   });
 
+  it('shows a banner with an action and one with onClose, both reporting through the snackbar', () => {
+    const component = mount();
+    const shown = [];
+    const notified = [];
+    document.getElementById('a11y-demo-banner').show = (message, options) => shown.push([message, options]);
+    document.getElementById('a11y-demo-snackbar').notify = (message, options) => notified.push([message, options]);
+
+    component.element.querySelector('[data-event="click:showBannerWithAction"]').click();
+    const [actionMessage, actionOptions] = shown[0];
+    expect(actionMessage).toBe(t('banner-update'));
+    expect(actionOptions.actionText).toBe(t('banner-reload'));
+    expect(actionOptions.onClose).toBeUndefined();
+    actionOptions.onAction();
+    expect(notified[0]).toEqual([t('banner-reloaded'), { type: 'success' }]);
+
+    component.element.querySelector('[data-event="click:showBannerWithClose"]').click();
+    const [closeMessage, closeOptions] = shown[1];
+    expect(closeMessage).toBe(t('banner-cookies'));
+    expect(closeOptions.type).toBe('warning');
+    expect(closeOptions.onAction).toBeUndefined();
+    closeOptions.onClose();
+    expect(notified[1]).toEqual([t('banner-closed'), undefined]);
+    component.destroy();
+  });
+
+  it("doesn't notify from the onClose banner when dismissAll() runs it on destroy", () => {
+    const component = mount();
+    const banner = document.getElementById('a11y-demo-banner');
+    const notified = [];
+    let onClose;
+    banner.show = (message, options) => { onClose = options.onClose; };
+    banner.dismissAll = () => onClose?.();
+    document.getElementById('a11y-demo-snackbar').notify = (message) => notified.push(message);
+
+    component.element.querySelector('[data-event="click:showBannerWithClose"]').click();
+    component.destroy();
+    expect(typeof onClose).toBe('function');
+    expect(notified).toEqual([]);
+  });
+
+  it("doesn't notify from the help launcher's onClose when its removal collapses it on destroy", () => {
+    const component = mount();
+    const help = document.getElementById('a11y-demo-floating-help');
+    const notified = [];
+    document.getElementById('a11y-demo-snackbar').notify = (message) => notified.push(message);
+    // Removed while expanded, the upgraded element calls onClose('collapse') synchronously.
+    const remove = help.remove.bind(help);
+    help.remove = () => { help.onClose('collapse'); remove(); };
+
+    component.destroy();
+    expect(notified).toEqual([]);
+  });
+
+  it('removes a pending confirmDialog() modal on destroy', () => {
+    const component = mount();
+    // confirmDialog() appends its modal to <body>, outside the component's overlays.
+    const confirm = document.createElement('a11y-modal');
+    confirm.className = 'a11y-confirm';
+    document.body.appendChild(confirm);
+
+    component.destroy();
+    expect(confirm.isConnected).toBe(false);
+  });
+
   it('notifies the selected menu item, but not a disabled one', () => {
     const component = mount();
     const calls = [];

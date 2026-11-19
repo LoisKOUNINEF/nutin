@@ -1,4 +1,5 @@
 import * as SecurityHelper from "./security.helper.js";
+import * as SafeDom from "./safe-dom.helper.js";
 
 interface DomElementConfig {
   target: Element | null;
@@ -18,11 +19,13 @@ export function markComponentRoot(element: HTMLElement): void {
 }
 
 // True when `el` lives inside another component's root below `root`.
+// SafeDom: a <form> holding <input name="parentElement"> would otherwise send this walk
+// back down to the input, and from there to the form again, forever.
 export function isInsideNestedComponent(el: Element, root: Element): boolean {
-  let current = el.parentElement;
+  let current = SafeDom.parentElementOf(el);
   while (current && current !== root) {
     if (componentRoots.has(current)) return true;
-    current = current.parentElement;
+    current = SafeDom.parentElementOf(current);
   }
   return false;
 }
@@ -100,12 +103,12 @@ export function cleanupOptionalContent(root: ParentNode = document): void {
       return !el.getAttribute("src");
     }
 
-    const content = el.textContent?.trim();
+    const content = SafeDom.textOf(el)?.trim();
     return !content || content === "undefined" || content === "null";
   };
 
   const isValueUndefined = (el: HTMLElement): boolean => {
-    const value = el.getAttribute("data-optional");
+    const value = SafeDom.getAttr(el, "data-optional");
     /*
     A bare/empty data-optional (getAttribute returns "") is a plain marker and
     defers entirely to isEmpty(el) below rather than forcing removal itself.
@@ -120,9 +123,9 @@ export function cleanupOptionalContent(root: ParentNode = document): void {
     );
   }
 
-  root.querySelectorAll<HTMLElement>("[data-optional]").forEach(el => {
-    if (isValueUndefined(el) || isEmpty(el)) el.remove();
-    el.removeAttribute("data-optional");
+  SafeDom.querySelectorAllOf<HTMLElement>(root, "[data-optional]").forEach(el => {
+    if (isValueUndefined(el) || isEmpty(el)) SafeDom.removeNode(el);
+    SafeDom.removeAttr(el, "data-optional");
   });
 }
 
@@ -144,10 +147,10 @@ function appendOrReplace(config: DomElementConfig) {
 // Carries placeholder attributes (class, id, aria-*, data-*...) onto the mounted
 // element. data-component is skipped so an ancestor's child lookup can't re-match it.
 function copyAttributes(from: HTMLElement, to: HTMLElement): void {
-  Array.from(from.attributes).forEach(attr => {
+  Array.from(SafeDom.attributesOf(from)).forEach(attr => {
     if (attr.name === 'data-component') return;
     if (attr.name === 'class') {
-      to.classList.add(...Array.from(from.classList));
+      to.classList.add(...Array.from(SafeDom.prop<DOMTokenList>(from, 'classList')));
       return;
     }
     to.setAttribute(attr.name, attr.value);

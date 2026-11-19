@@ -64,6 +64,15 @@ tbody > tr:last-of-type {
 	    --#{$name}: #{$value};
 	  }
 	}
+	// Default to dark when the OS prefers it, before ThemeToggler adds a class,
+	// so dark-mode users don't see a flash of the light theme on first load.
+	@media (prefers-color-scheme: dark) {
+		body:not(.light-theme) {
+			@each $name, $value in $dark-theme {
+				--#{$name}: #{$value};
+			}
+		}
+	}
 	body {
 		background-color: var(--background);
 	  color: var(--text);

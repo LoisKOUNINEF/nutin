@@ -27,11 +27,7 @@
     "minor": "npm version minor -m 'CI/CD: Bump version to %s'",
     "major": "npm version major -m 'CI/CD: Bump version to %s'"
   },
-  "devDependencies": {
-    "@tailwindcss/cli": "^4.3.3",
-    "tailwindcss": "^4.3.3"
-  },
   "dependencies": {
-    "a11y-elements": "^0.7.0"
+    "a11y-elements": "^1.0.0"
   }
 }

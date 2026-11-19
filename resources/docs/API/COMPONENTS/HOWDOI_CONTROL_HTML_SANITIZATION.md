@@ -21,7 +21,7 @@ const templateFn = (tasks: ITask[]) => html`<ul>${tasks.map((task) => html`<li>$
 
 - `null`, `undefined` and `false` render as nothing, so `${done && html`<span>Done</span>`}` works.
 - An unquoted attribute value is quoted for you: `html`<div title=${x}>`` renders `title="…"`, so a value with spaces can't add attributes. Quote your attributes anyway.
-- `raw()` inserts markup unescaped, e.g. rich text from a CMS. At render it's parsed where it sits (inside `<svg>`, `<table>`, … too), Nutin's binding attributes (`data-event`, `data-component`, `data-catalog`, `data-bind`, `data-i18n`, `data-pipe`, `data-pipe-source`) are removed from it, and it's sanitized at the component's `trustLevel` (below). So the markup can't call your component's methods or mount children:
+- `raw()` inserts markup unescaped, e.g. rich text from a CMS. At render it's parsed where it sits (inside `<svg>`, `<table>`, … too), Nutin's binding attributes (`data-event`, `data-component`, `data-catalog`, `data-bind`, `data-i18n`, `data-pipe`, `data-pipe-source`) are removed from it, and it's sanitized at the component's `trustLevel` (below). So the markup can't call your component's methods or mount children. It also loses any `id` or `name` that names a property of `document` or of a `<form>` (`createElement`, `body`, `cookie`, `title`, `action`, `attributes`, `parentElement`, …) or starts with `__NUTIN`. Once inserted, such a name would shadow that property ("DOM clobbering"): `<img name="createElement">` replaces `document.createElement` for the whole page. Your own template keeps its names, so a `name="title"` field still works:
 
 ```ts
 const templateFn = (post: IPost) => html`<article>${raw(post.bodyHtml)}</article>`;
@@ -118,6 +118,7 @@ It returns `''` for `null`/`undefined` and stringifies other values first. Don't
 - `sanitizeToFragment(value, trustLevel?)` — sanitizes a template and returns its nodes, ready to insert (what `render()` does). `sanitizeTemplate(value, trustLevel?)` returns the sanitized markup as a string.
 - `isScriptUrl(name, value)` — whether `value` makes the URL attribute `name` (`href`, `src`, …) a `javascript:` URL.
 - `stripBindings(markup)` / `stripBindingsFrom(root)` — remove Nutin's binding attributes (`data-event`, `data-component`, `data-bind`, …) from a string, or in place from a DOM tree.
+- `stripClobberingNamesFrom(root)` — removes, in place, the `id`/`name` values that would shadow a `document` or `<form>` property. `stripRawMarkup(markup)` does both steps on a string, like `raw()`.
 
 ## Token values are raw
 
