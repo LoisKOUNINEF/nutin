@@ -1,5 +1,23 @@
 # Changelog
 
+## 3.1.3
+
+### Security
+
+- **SEO prerendering shipped a nested `<template>`'s content unsanitized.**
+    - The sanitizer, `stripBindingsFrom()` and `stripClobberingNamesFrom()` now also clean a template's own children. In browsers and jsdom, a parsed template has none, so their output is unchanged.
+    - The string forms had the same problem during prerendering, and are fixed.
+
+### Changes
+
+- **SEO prerendering no longer crashes on libraries that read DOM getters off their prototypes.**
+    - The SSR polyfills (`tools/builder/core/seo/ssr/ssr-polyfills.js`, new `installSpecAccessors(window)`) now give each of these prototypes an accessor that resolves as `node[name]` would:
+        - `Node`: `nodeType`, `nodeName`, `ownerDocument`, `parentNode`, `parentElement`, `childNodes`, `firstChild`, `lastChild`, `previousSibling`, `nextSibling`, `textContent`
+        - `Element`: `children`, `attributes`, `localName`, `namespaceURI`, `tagName`, `firstElementChild`, `nextElementSibling`
+        - `DocumentFragment`: `children`
+        - `HTMLTemplateElement`: `content`
+    - It also covers the case that failed silently: linkedom's `Node.prototype` getters for `childNodes`, `firstChild`, `nextSibling` and `textContent`.
+
 ## 3.1.2
 
 ### Security
