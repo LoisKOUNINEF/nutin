@@ -4,7 +4,7 @@ import { print, ensureDeps, errorExit } from '../../../utils/index.js';
 import { PATHS } from '../app/paths.js';
 import { builderConfig } from '../../builder.config.js';
 import nutinConfig from '../../../../nutin.config.js';
-import { LANGUAGES, DEFAULT_LANGUAGE } from '../../../utils/languages.js';
+import { I18N_ENABLED, LANGUAGES, DEFAULT_LANGUAGE } from '../../../utils/languages.js';
 import { compileLanguages, normalizeSource, MarkdownCompileError } from './markdown-compiler.js';
 
 // Compiles every `markdownSources.sourceFolders` entry of nutin.config.js into
@@ -47,7 +47,7 @@ try {
     seenIds.set(source.id, source.folder);
   }
 
-  const languageOptions = { i18n: Boolean(nutinConfig.i18n), languages: LANGUAGES, defaultLanguage: DEFAULT_LANGUAGE };
+  const languageOptions = { i18n: I18N_ENABLED, languages: LANGUAGES, defaultLanguage: DEFAULT_LANGUAGE };
 
   for (const source of sources) {
     const { manifests, warnings } = compileLanguages(source, { Marked, matter, root }, languageOptions);

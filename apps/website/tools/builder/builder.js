@@ -27,6 +27,10 @@ if (builderConfig.typecheckOnly) {
 
 print.boldHead(`\nStarting build...`);
 
+if (builderConfig.i18nListsNoLanguage) {
+  print.warn('nutin.config.js "i18n: true" lists no language: building for English only. List them instead, the default first: i18n: [\'en\', ...].');
+}
+
 // runScript forwards env vars but not argv, so -y/--yes (auto-install an opt-in
 // feature's missing dependencies, see utils/ensure-deps.js) is passed through the env.
 if (process.argv.includes('-y') || process.argv.includes('--yes')) process.env.NUTIN_ASSUME_YES = '1';

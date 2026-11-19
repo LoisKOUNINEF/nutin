@@ -61,8 +61,7 @@ export function buildRobotsTxt(seoConfig, { i18n = false, languages = [] } = {})
 export function generateRobotsTxt() {
   const seoConfigPath = path.join(PATHS.temp, 'config', 'seo.json');
   const seoConfig = JSON.parse(fs.readFileSync(seoConfigPath, 'utf-8'));
-  const languagesConfigPath = path.join(PATHS.temp, 'config', 'languages.json');
-  const { languages } = JSON.parse(fs.readFileSync(languagesConfigPath, 'utf-8'));
+  const { languages } = builderConfig;
 
   const outputPath = path.join(PATHS.tempSource, 'robots.txt');
   fs.writeFileSync(outputPath, buildRobotsTxt(seoConfig, { i18n: builderConfig.i18n, languages }), 'utf-8');
