@@ -1,4 +1,5 @@
 import * as SecurityHelper from '#root/dist/src/core/base-classes/base-component/helpers/security.helper.js';
+import { html, raw } from '#root/dist/src/core/base-classes/base-component/helpers/html.helper.js';
 
 describe('SecurityHelper', () => {
   it('sanitizeTemplate returns an empty string for null and undefined', () => {
@@ -268,5 +269,138 @@ describe('SecurityHelper', () => {
 
   it('escapeHtml stringifies non-string values before escaping', () => {
     expect(SecurityHelper.escapeHtml(123)).toBe('123');
+  });
+
+  // DOM clobbering: in a browser, a <form>'s named controls shadow its built-in properties
+  // (<form><input name="attributes"> makes form.attributes the <input>). jsdom doesn't
+  // implement that, so parsing is hooked to shadow them the way a browser would.
+  // Through the prototypes: the forms being shadowed are walked again.
+  const find = (root, selector) => Array.from(
+    (root instanceof DocumentFragment ? DocumentFragment : Element).prototype.querySelectorAll.call(root, selector)
+  );
+
+  function shadowControlsOf(form) {
+    find(form, '[name]').forEach((control) => {
+      Object.defineProperty(form, control.getAttribute('name'), { configurable: true, value: control });
+    });
+  }
+
+  function shadowFormControls(root) {
+    find(root, 'form').forEach(shadowControlsOf);
+    find(root, 'template').forEach((el) => shadowFormControls(el.content));
+  }
+
+  function withClobberingParser(fn) {
+    const inner = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+    const hooked = {
+      configurable: true,
+      get() { return inner.get.call(this); },
+      set(value) {
+        inner.set.call(this, value);
+        // A <template>, or the element raw() is parsed in (parseInContext), a <form> included.
+        if (this instanceof HTMLFormElement) shadowControlsOf(this);
+        shadowFormControls(this instanceof HTMLTemplateElement ? this.content : this);
+      },
+    };
+    Object.defineProperty(HTMLElement.prototype, 'innerHTML', hooked);
+    try {
+      return fn();
+    } finally {
+      delete HTMLElement.prototype.innerHTML;
+    }
+  }
+
+  it('the clobbering parser hook shadows form properties like a browser does', () => {
+    withClobberingParser(() => {
+      const holder = document.createElement('template');
+      holder.innerHTML = '<form><input name="attributes"></form>';
+      const form = holder.content.firstElementChild;
+      expect(form.attributes instanceof HTMLInputElement).toBe(true);
+    });
+  });
+
+  ['normal', 'strict'].forEach((level) => {
+    it(`sanitizeTemplate "${level}" strips a form's handlers and javascript: action when a control is named "attributes"`, () => {
+      const result = withClobberingParser(() => SecurityHelper.sanitizeTemplate(
+        '<form onclick="x()" onsubmit="x()" action="javascript:x()"><input name="attributes"><button>go</button></form>',
+        level
+      ));
+      expect(result).toBe('<form><input name="attributes"><button>go</button></form>');
+    });
+  });
+
+  // localName is covered in safe-dom.helper.test.js: shadowing it here breaks jsdom's own selector engine.
+  it('sanitizeTemplate does not throw and still sanitizes when a form control is named removeAttribute or content', () => {
+    const result = withClobberingParser(() => SecurityHelper.sanitizeTemplate(
+      '<form onclick="x()"><input name="removeAttribute"></form>'
+        + '<form onclick="x()"><input name="content"><img src="x" onerror="x()"></form>',
+      'normal'
+    ));
+    expect(result).toBe(
+      '<form><input name="removeAttribute"></form><form><input name="content"><img src="x"></form>'
+    );
+  });
+
+  it('sanitizeTemplate strips handlers from a clobbered form inside <template> content', () => {
+    const result = withClobberingParser(() => SecurityHelper.sanitizeTemplate(
+      '<template><form onclick="x()"><input name="attributes"></form></template>',
+      'normal'
+    ));
+    expect(result).toBe('<template><form><input name="attributes"></form></template>');
+  });
+
+  // raw() markup goes through the same sanitizeNode; its later [id],[name] lookups would make
+  // jsdom's own selector engine read the shadowed `attributes`, which a browser never does.
+  it('sanitizeToFragment keeps raw() content placed inside an author <form> whose raw controls shadow querySelectorAll/childNodes', () => {
+    const fragment = withClobberingParser(() => SecurityHelper.sanitizeToFragment(
+      html`<form>${raw('<input name="querySelectorAll"><input name="childNodes"><b onclick="x()">b</b>')}</form>`,
+      'normal'
+    ));
+    expect(fragment.firstElementChild.innerHTML).toBe('<input><input><b>b</b>');
+  });
+
+  it('sanitizeToFragment drops raw() ids and names that would shadow document or form properties', () => {
+    const fragment = SecurityHelper.sanitizeToFragment(
+      html`<div>${raw('<img name="createElement" src="a.png"><a id="cookie" name="body">a</a><input name="parentElement"><input name="email" id="email-field"><b id="__NUTIN_I18N__">b</b>')}</div>`,
+      'normal'
+    );
+    expect(fragment.firstElementChild.innerHTML).toBe(
+      '<img src="a.png"><a>a</a><input><input name="email" id="email-field"><b>b</b>'
+    );
+  });
+
+  it('clobbering names are dropped from raw() at "trusted" too, and inside its <template> content', () => {
+    const fragment = SecurityHelper.sanitizeToFragment(
+      html`<div>${raw('<template><img name="body"></template><form name="title"></form>')}</div>`,
+      'trusted'
+    );
+    const div = fragment.firstElementChild;
+    expect(div.querySelector('template').innerHTML).toBe('<img>');
+    expect(div.querySelector('form').hasAttribute('name')).toBe(false);
+  });
+
+  it("the author's own template keeps names like title or action", () => {
+    const fragment = SecurityHelper.sanitizeToFragment(html`<form><input name="title"><input name="action" id="body"></form>`, 'normal');
+    expect(fragment.firstElementChild.innerHTML).toBe('<input name="title"><input name="action" id="body">');
+  });
+
+  it('String(raw()) drops clobbering names like the render path', () => {
+    expect(String(html`<p>${raw('<img name="createElement" data-event="click:_x"><i id="ok">i</i>')}</p>`))
+      .toBe('<p><img><i id="ok">i</i></p>');
+  });
+
+  it('stripRawMarkup strips bindings and clobbering names', () => {
+    expect(SecurityHelper.stripRawMarkup('<a data-event="click:_x" name="forms" href="/x">a</a>')).toBe('<a href="/x">a</a>');
+  });
+
+  it('sanitizeToFragment still works once document.createElement is shadowed', () => {
+    const shadow = document.createElement('img');
+    Object.defineProperty(document, 'createElement', { configurable: true, value: shadow });
+    try {
+      const fragment = SecurityHelper.sanitizeToFragment('<p onclick="x()">p</p>', 'normal');
+      expect(fragment.firstChild.outerHTML).toBe('<p>p</p>');
+    } finally {
+      delete document.createElement;
+    }
   });
 });
