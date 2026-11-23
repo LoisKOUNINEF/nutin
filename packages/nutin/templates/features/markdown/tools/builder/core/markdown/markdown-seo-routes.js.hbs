@@ -3,7 +3,7 @@ import path from 'path';
 import { print, errorExit } from '../../../utils/index.js';
 import { PATHS } from '../app/paths.js';
 import nutinConfig from '../../../../nutin.config.js';
-import { LANGUAGES, DEFAULT_LANGUAGE } from '../../../utils/languages.js';
+import { I18N_ENABLED, LANGUAGES, DEFAULT_LANGUAGE } from '../../../utils/languages.js';
 import { normalizeSource } from './markdown-compiler.js';
 
 // The app route each source is served on — keep in sync with src/app/markdown/markdown-routes.ts.
@@ -131,7 +131,7 @@ export function markdownSeoRoutes() {
   if (cached) return cached;
 
   const sources = readSources();
-  const languages = nutinConfig.i18n ? LANGUAGES : null;
+  const languages = I18N_ENABLED ? LANGUAGES : null;
   const readManifest = (fileName) => {
     const manifestPath = path.join(PATHS.tempSource, 'generated', fileName);
     try {

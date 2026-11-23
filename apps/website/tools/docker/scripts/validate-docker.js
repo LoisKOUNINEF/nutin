@@ -1,7 +1,8 @@
-import fs from 'fs';
 import path from 'path';
 import { errorExit } from '../../utils/index.js';
 import nutinConfig from '../../../nutin.config.js';
+// Imported directly, not via the utils barrel: it validates nutin.config.js "i18n" on load.
+import { I18N_ENABLED, LANGUAGES, DEFAULT_LANGUAGE } from '../../utils/languages.js';
 import { validateDockerPorts } from './docker-ports.js';
 import { renderFromTemplate } from './render-docker-template.js';
 import { markdownSourcesCopy } from './markdown-sources-copy.js';
@@ -13,11 +14,7 @@ const ROOT_REDIRECT_PLACEHOLDER = '__ROOT_REDIRECT_PLACEHOLDER__';
 const MARKDOWN_SOURCES_PLACEHOLDER = '__MARKDOWN_SOURCES_PLACEHOLDER__';
 
 function rootRedirect() {
-  if (!nutinConfig.i18n) return '';
-
-  const languagesConfigPath = path.join(process.cwd(), 'config', 'languages.json');
-  const { languages, defaultLanguage } = JSON.parse(fs.readFileSync(languagesConfigPath, 'utf-8'));
-  return localeRedirects({ i18n: true, languages, defaultLanguage });
+  return localeRedirects({ i18n: I18N_ENABLED, languages: LANGUAGES, defaultLanguage: DEFAULT_LANGUAGE });
 }
 
 async function validateDocker() {

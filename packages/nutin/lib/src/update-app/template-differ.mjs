@@ -50,15 +50,21 @@ export class TemplateDiffer {
     this.fileGenerator = new FileGenerator();
   }
 
-  async diff(projectPath, oldTemplatesRoot, oldContext, newContext) {
+  // prepare(relPath, { actual, base, next }) → { actual, base }: a text file as it's compared and
+  // merged (yours, and the old version as merge base), rewritten so a line nutin changes on its own
+  // (a version number, a migrated option) neither counts as your edit nor conflicts with yours
+  // around it. The file on disk isn't touched. See merge-preparers.mjs.
+  async diff(projectPath, oldTemplatesRoot, oldContext, newContext, { prepare = null } = {}) {
     const newTemplatesRoot = this.fileGenerator.getTemplatesRoot();
 
     const [oldTree, newTree] = await Promise.all([
-      this.fileGenerator.collectTemplateTree(oldTemplatesRoot, oldContext),
+      this.fileGenerator.collectTemplateTree(oldTemplatesRoot, oldContext, { includeExtensionExclusions: true }),
       this.fileGenerator.collectTemplateTree(newTemplatesRoot, newContext),
     ]);
 
     excludeUserOwnedPaths(oldTree, newTree);
+    // Files nutin generates (either version), user-owned ones aside: posix paths.
+    const generatedPaths = new Set([...oldTree.keys(), ...newTree.keys()].map(toPosixPath));
 
     const toUpdate = [];
     const toAdd = [];
@@ -109,18 +115,24 @@ export class TemplateDiffer {
         continue;
       }
 
-      const actualContent = oldEntry.isBinary
+      const diskContent = oldEntry.isBinary
         ? await fs.readFile(outputPath)
         : await fs.readFile(outputPath, 'utf8');
+      const { actual: actualContent, base: baseContent } = prepare && !oldEntry.isBinary && !newEntry.isBinary
+        ? prepare(toPosixPath(relPath), { actual: diskContent, base: oldEntry.content, next: newEntry.content })
+        : { actual: diskContent, base: oldEntry.content };
 
-      if (contentEquals(actualContent, oldEntry.content)) {
+      if (contentEquals(actualContent, baseContent)) {
         toUpdate.push({ relPath, newEntry });
       } else if (!contentEquals(actualContent, newEntry.content)) {
         // Differs from both baselines: a real conflict, merged from the old baseline at apply time.
-        conflicts.push({ relPath, actualContent, baseContent: oldEntry.content, newEntry });
+        conflicts.push({ relPath, actualContent, baseContent, newEntry });
+      } else if (!contentEquals(actualContent, diskContent)) {
+        // Only the rewrite made it the new version: the file on disk still needs it.
+        toUpdate.push({ relPath, newEntry });
       }
     }
 
-    return { toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated };
+    return { toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated, generatedPaths };
   }
 }

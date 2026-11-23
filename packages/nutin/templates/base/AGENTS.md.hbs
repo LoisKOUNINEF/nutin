@@ -7,12 +7,16 @@ This project was generated with Nutin {{version}}.
 ```
 src/
   app/            application code (components, views, services)
+  assets/         images, fonts, … — copied as they are into dist/src/assets
   core/           Nutin framework internals — see "Nutin" section before editing
   styles/         project-level Sass
 {{#if extension}}
   extension/      browser extension: manifest.json (Chrome's) and background.ts
 {{/if}}
-config/           i18n (languages.json) and SEO configuration
+{{#unless extension}}
+config/           SEO configuration (seo.json)
+{{/unless}}
+public/           copied as it is to the root of dist/src (favicon, robots.txt, .well-known/, …)
 tools/            builder, {{#unless extension}}dev server, {{/unless}}generator, testin-nutin runner, docker (optional)
 nutin.config.js   build/feature config — see below
 .nutin-meta.json  Nutin version, package manager, enabled features (source of truth for what's installed)
@@ -31,6 +35,7 @@ nutin.config.js   build/feature config — see below
 - Framework types (`Nutin.ComponentConfig`, `Nutin.ComponentOptions`, `Nutin.CatalogConfig`, `Nutin.Template`, `Nutin.Routes`, `Nutin.RouteGuard`, `Nutin.RequestConfig`, …) live in the global `Nutin` namespace declared in `core/internals.d.ts` — use them without importing. App events extend it in `src/app/globals.d.ts` (`declare namespace Nutin { interface AppEventMap { … } }`).
 {{/if}}
 - `src/app/` layout is free; `components/`, `views/`, `services/` is the default suggestion.
+- Each dynamic `import()` becomes its own chunk, fetched the first time it runs. Prod builds only give hashed names to `bundle.js`, `main.css` and `chunks/`: files from `public/` and `src/assets/` keep theirs.
 
 ## Commands
 
@@ -50,10 +55,10 @@ nutin.config.js   build/feature config — see below
 - Surface: {{#if (eq extension "popup")}}the toolbar popup (`action.default_popup`){{else}}Chrome's side panel / Firefox's sidebar (`side_panel`, turned into `sidebar_action` for Firefox){{/if}}. The page is `chrome-extension://<id>/index.html` and never changes: don't add `AppRouter`, `routes.ts` or views. To show other screens, switch child components (`data-component="${config.screen}"`).
 - Use `chrome.*` only through `src/app/services/chrome-api/chrome-api.service.ts` (`chromeApiService`); add a method there for each new API. It reads `chrome` on every call, so tests can install a fake first (testin-nutin has one: `tools/testin-nutin/mocks/fake-chrome.js`, `installFakeChrome({ url })` / `uninstallFakeChrome()`). `chrome.*` calls can reject (extension reloaded under an open page, storage quota): report the error in the page.
 - `src/extension/manifest.json` is Chrome's; the build writes `dist/<browser>/manifest.json`, with `version` from `package.json`; Firefox's manifest is derived from Chrome's, with `extension.geckoId` from `nutin.config.js` (permanent once released). Keep permissions minimal: reading the active tab's URL needs `"tabs"`.
-- Files the extension needs (icons, `_locales/`, fonts and their licenses) go in `public/` (copied to the root) or `src/assets/`. Bundle everything: no remote scripts or fonts.
+- Files the extension needs (icons, `_locales/`, fonts and their licenses) go in `public/` or `src/assets/` (see "Architecture"). Bundle everything: no remote scripts or fonts.
 - `src/extension/background.ts` is bundled separately with `builder.esbuild`'s settings (its `console` calls are dropped in prod). Firefox runs it as a background script, Chrome as a service worker: no DOM, and no state kept between events.
 - No dev server: `chrome.*` doesn't exist on an `http://` page. After a build, reload the extension (`chrome://extensions`, or `about:debugging` in Firefox) and reopen the {{#if (eq extension "popup")}}popup{{else}}panel{{/if}}.
-- `i18n` and `generateSEOFiles` must stay off (the build refuses them).
+- `i18n` and `generateSEOFiles` must stay off (the build refuses them; `i18n: []` is off).
 
 {{/if}}
 ## Base classes
@@ -124,10 +129,29 @@ Only defaults that leave the page are cancelled: link clicks (`<a href>`, unless
 - `AppEventBus` — `subscribe`/`once`/`emit`/`off`.{{#if (eq lang "ts")}} Declare app events in `src/app/globals.d.ts`'s `Nutin.AppEventMap`: `emit()` requires the declared payload, and an event declared `undefined` takes none.{{/if}} Inside a component, prefer `this.listen(event, cb)` (auto-unsubscribes on `destroy()`) or `this.listenToRenderEvents([event1, event2, ...])` (re-runs `this.render()` whenever any of the given events fire) over calling the bus directly. Typed facades — each `on*` subscriber returns a closure you call directly to unsubscribe (`const off = Navigation.onNavigate(cb); ...; off();`), no need to keep the original callback reference around for `off()`:
   - `Navigation` — `navigateTo(path)`/`onNavigate`, `reload()`/`onReload`.
   - `Lifecycle` — `viewMount(viewName)`/`onViewMount`, `viewUnmount(viewName)`/`onViewUnmount`, plus generic `beforeRender`/`afterRender`/`beforeDestroy`/`afterDestroy`.
-- `AppRouter(routes)` — call once in `main.ts` (optional: without it, mount components into any element with `new X(el).render()`; the build then skips the `routes` and `#app` checks, unless `generateSEOFiles` is on; a mount target that isn't found logs a `console.error` in development; testin-nutin's framework tests still mount into `#app`, see "Testing"); routes support `:param`/`:param?`, per-route guards, and lazy views: a factory returning `import('./views/x/x.view.js').then((m) => new m.XView())` loads the view on first visit (import it by its own file, not through a barrel{{#if (eq lang "ts")}}; factory type: global `Nutin.ViewFactory`{{/if}}). Keep `/` and `/404` eager. After each in-app navigation (not the first load or `Navigation.reload()`), focus moves to the view's `<h1>`, else the `<h1>` in `<main>`, else the view element, with `document.title` announced in a polite live region in that last case only (a focused heading is read by screen readers). Give each view an `<h1>`. `document.title` comes from `View.documentTitle()` if overridden, else `config/seo.json`'s title (with `generateSEOFiles`), the `<viewName>.title` translation, then `viewName`.
+{{#unless extension}}
+- `AppRouter(routes)` — call once in `main.ts` (optional: without it, mount components into any element with `new X(el).render()`; the build then skips the `routes` and `#app` checks, unless `generateSEOFiles` is on; a mount target that isn't found logs a `console.error` in development; testin-nutin's framework tests still mount into `#app`, see "Testing"). Routes support `:param`/`:param?`, per-route guards and lazy views:
+  - Route params (`/users/:id`): in the view, `this.getRouteParam('id')`, `getRouteParams()`, `hasRouteParam(key)`. Values are URL-decoded.
+  - Query params (`?tab=settings`), on every route, `/` included: in the view, `this.getQueryParam('tab')`, `getQueryParams()`, `hasQueryParam(key)`. Values are decoded, and a repeated key keeps its last value. They are kept apart from route params. From anywhere else: `AppRouter`'s `getQueryParams()`/`getQueryParam(key)` and `getCurrentParams()`/`getParam(key)`.
+  - Both are set on the view before its `render()`, so `generateTemplate()` can read them. `onEnter()` runs after the first render.
+  - Guards: `{ view, guards: [(params, query) => …] }`{{#if (eq lang "ts")}} (`Nutin.RouteGuard`){{/if}}, return `true` to allow, `false` to block, or a path to redirect to (or a Promise of one of them).
+  - `Navigation.navigateTo(path)` takes a query and a hash (`/search?q=x#results`). A change of path or query re-renders the view, while a back/forward that only changes the `#hash` doesn't (the browser scrolls). To rewrite the URL from `onEnter()` without a navigation, use `NavigationManager.replaceState(path)`: it keeps the current query and hash.
+  - Lazy views: a factory returning `import('./views/x/x.view.js').then((m) => new m.XView())` loads the view on first visit (import it by its own file, not through a barrel{{#if (eq lang "ts")}}; factory type: global `Nutin.ViewFactory`{{/if}}). If the chunk fails to load (often a deploy replaced it), the router does a full page load of the target URL. Keep `/` and `/404` eager.
+  - Focus: after each in-app navigation (not the first load or `Navigation.reload()`), focus moves to the view's `<h1>`, else the `<h1>` in `<main>`, else the view element, with `document.title` announced in a polite live region in that last case only (a focused heading is read by screen readers). Give each view an `<h1>`.
+  - `document.title` comes from `View.documentTitle()` if overridden, else `config/seo.json`'s title (with `generateSEOFiles`), the `<viewName>.title` translation, then `viewName`.
+{{/unless}}
 - `registerGlobals({ before?, after? })` — each entry is `{ component, id }` (a bare class, constructed internally); mounts them outside `<main id="app">` (`before`/`after` control placement relative to it), stamping each root element with `id`. `hideGlobals(ids)`/`revealGlobals(ids)` (same module) toggle visibility by those ids from any component or view. Call once in `main.ts`.
-- `AppHttpClient` — `get/post/put/patch/delete<T>(endpoint, data?, config?)`; non-OK responses throw `HttpError`. Relative endpoints resolve against the page origin; a subclass with a base URL rejects endpoints leaving it. Build paths from values with ``path`/users/${id}` `` (encoded `/` and `\` in paths are rejected unless the API is in the `trustedAPIs` option). FormData/Blob bodies are sent as-is; 204 → `undefined`.
-- `I18nService` — `translate(key, fallback?)`, `setCurrentLanguage(lang)`; language list comes from `config/languages.json`. `initI18n()` (same module) loads the translations when `i18n` is enabled and does nothing otherwise; `main.ts` awaits it before starting the app. With `i18n: false`, prod builds drop the i18n code unless app code references `I18nService`.
+- `AppHttpClient` — `get<T>(endpoint, config?)`, `delete<T>(endpoint, config?)`, `post/put/patch<T>(endpoint, data?, config?)`; non-OK responses throw `HttpError` (from core).
+  - `config`{{#if (eq lang "ts")}} (`Nutin.RequestConfig`){{/if}}: `queryParams` (`{ page: 2, tag: ['a', 'b'] }` → `?page=2&tag=a&tag=b`; `null`/`undefined` values are left out; build URLs this way rather than by concatenating a query string), `headers`, `timeout` (ms), `signal`, and `credentials`/`cache`/`referrerPolicy`/`redirect`, passed to `fetch` as-is.
+  - For an API with its own base URL or headers, subclass it: `class ApiClient extends HttpClient` (constructor `(baseUrl, defaultHeaders, { trustedAPIs })`), used through `ApiClient.getInstance(…)`. Relative endpoints resolve against the page origin, or against the base URL, which rejects endpoints leaving it. Build paths from values with ``path`/users/${id}` `` (encoded `/` and `\` in paths are rejected unless the API is in the `trustedAPIs` option).
+  - A followed redirect that ends outside the base URL (or the requested origin) throws. Custom headers (e.g. `X-Api-Key`, unlike `Authorization`) are forwarded on cross-origin redirects: pass `redirect: 'error'` to APIs using them.
+  - FormData/Blob/`URLSearchParams` bodies are sent as-is, and `Content-Type: application/json` is only set for JSON bodies. 204/205 and empty bodies → `undefined`; `application/json` and `+json` responses are parsed.
+  - `addRequestInterceptor((url, options) => …)` / `addResponseInterceptor((response) => …)`: each response interceptor gets its own clone, so reading its body is safe.
+{{#unless extension}}
+- `I18nService` — `translate(key, fallback?)`, `setCurrentLanguage(lang)`, `onLanguageChange(cb)` (returns its unsubscribe function), `getTranslationObject(key)`, `currentLanguage`/`defaultLanguage`/`languages`. The language list comes from `nutin.config.js`'s `i18n` (the first language is the default). `initI18n()` (same module) loads the translations when `i18n` is enabled and does nothing otherwise; `main.ts` awaits it before starting the app. With `i18n: []` (or `false`), prod builds drop the i18n code unless app code references `I18nService`.
+  - Translations live next to the element that uses them, in `<folder>/locales/<lang>.json`, and are keyed by the folder's name: `src/app/components/my-card/locales/en.json`'s `"title"` is `my-card.title` (`data-i18n="my-card.title"`). Two folders with the same name anywhere under `src/app/` fail the build. Lookup order: the current language, the default language, the element's own text, then the key itself.
+  - Links: write root-relative `href`s without the language prefix (`<a href="/docs">`). With i18n on, the current `/<lang>` prefix and a trailing slash are added at render (`/en/docs/`), and `Navigation.navigateTo()` strips them again. External, relative and file links (`/files/guide.pdf`) are left as written.
+{{/unless}}
 - `AppPipeRegistry` — `register(name, fn)` / `apply(name, value, args)`; backs `data-pipe`.
 
 ## Styling
@@ -155,19 +179,18 @@ Add your own with `AppPipeRegistry.register(name, (value, ...args) => string)`; 
 ### `nutin.config.js`
 
 Central options/tools config (see the inline comments for details):
-- `i18n`, `tailwind`, `generateSEOFiles` — top-level feature toggles.
+- `i18n` — the language codes, the default first (`['en', 'fr']`); `[]` disables i18n. `true` still works but means English only (the build warns).
+- `tailwind`, `generateSEOFiles` — top-level feature toggles.
 - `dockerPorts`, `markdownSources` — options of the `docker`/`markdown` features, only present once added with `nutin-add <feature>`.
 - `builder.{sass.paths, esbuild}` — build pipeline behavior.
 - `testinNutin.{includeFramework, includeTools, includeApp, jsdomOptions}` — test discovery/environment.
 
+{{#unless extension}}
 ### `config/seo.json`
 
 Consumed by builder (production only) to generate static HTML per route. Unused if `nutin.config.js -> generateSEOFiles` is disabled. Dynamic routes (`/blog/:slug`) are written at their real URL from `mockParams` (or `outputPath`). Route guards run first, as an anonymous visitor: a route they block or redirect isn't prerendered nor listed in `sitemap.xml`.
 
-### `config/languages.json`
-
-Consumed by i18nService and builder. Unused if i18n is disabled.
-
+{{/unless}}
 ## Security
 
 Write every template with the `html` tag (`import { html, raw } from` core): `templateFn = (task) => html\`<li>${task.name}</li>\``. Every `${}` is HTML-escaped, whatever the data's source (input, HTTP, localStorage). Nested `html` results are inserted as-is, and arrays are inserted item by item (no `.join('')`). For lists, use `createCatalogComponents()` (see "Children components") rather than mapping items to markup in the template: each item becomes a child component with its own events and state, kept across renders with `keepBy`. Unquoted attribute values (`title=${x}`) are quoted automatically. A plain value in tag position (`<input ${x}>`) is filtered like `raw()` there: plain attributes stay, handlers, bindings and script URLs are dropped. Wrap HTML you want rendered in `raw()`: it's parsed in place at render (works inside `<svg>`/`<table>`) and loses Nutin's binding attributes (`data-event`, `data-component`, `data-catalog`, `data-bind`, `data-i18n`, `data-pipe*`). `trustedRaw()` keeps them, for markup you wrote yourself (e.g. compiled Markdown). An untagged template literal escapes nothing, and the build warns about each one containing `${}`.
@@ -179,7 +202,7 @@ Every `render()` also sanitizes the template (`SecurityHelper.sanitizeToFragment
 Nutin's own hand-built test runner + jsdom - not Jest. Tests are plain JavaScript (`*.test.js` importing the compiled `#root/dist/...` output){{#if (eq lang "ts")}}, so they aren't type-checked{{/if}}. `describe`/`it` only (**no `test()` alias**), `beforeAll`/`beforeEach`/`afterEach`/`afterAll` (one of each per suite, no stacking - anywhere inside the `describe` statement, not top-level). `it.todo(name)` lists a pending test. All globals — no imports needed in test files.
 
 - Matchers: `toBe`, `toEqual`, `toContain`, `toBeTruthy`/`toBeFalsy`, `toBeDefined`/`toBeUndefined`, `toBeInstanceOf`, `toHaveBeenCalled`/`toHaveBeenCalledWith`, `toBeLessThan`/`toBeGreaterThan`, `toThrow` — each has a `.not` counterpart.
-- `spyOn(obj, 'method')` returns `.calls`/`.callCount`/`.lastCall`, `.andCallFake(fn)`/`.andReturn(v)`, `.restore()` — unlike mocks, calls pass through by default.
+- `spyOn(obj, 'method')` returns `.calls`/`.callCount`/`.lastCall`, `.andCallFake(fn)`/`.andReturn(v)`, `.restore()` — unlike mocks, calls pass through by default. Core helpers exported as namespaces (`NavigationManager`, `SecurityHelper`, `TokenHelper`) are read-only modules and can't be spied on: spy on what they call (e.g. `window.history.replaceState`) or check the effect.
 - `tools/testin-nutin/mocks/` has ready-made `MockEventBus`/`MockHttpClient`/`MockI18n`/`MockRouter`.
 - `useEventBus(bus)` (from `core/index.js`) routes every `subscribe`/`once`/`emit`/`off` made through `AppEventBus` to `bus`, e.g. a `MockEventBus`: components' `listen()`, the `Navigation`/`Lifecycle` facades, the router, i18n and app services alike. `useEventBus(null)` restores the real bus. A subscription stays on the bus it was made on: install it before mounting or initializing (`beforeEach`), restore it after destroying (`afterEach`).
 - `useFakeTimers()`/`useRealTimers()`/`advanceTimersByTime(ms)`/`runAllTimers()` for time-dependent code; `flushPromises()` for pending promises.

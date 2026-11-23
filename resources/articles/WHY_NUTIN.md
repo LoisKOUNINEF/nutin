@@ -1,5 +1,5 @@
 ---
-ogImage: /assets/images/og-covers/og-cover-articles.jpg
+ogImage: /assets/images/og-covers/og-cover-why-nutin.jpg
 ---
 
 # Why Nutin?
@@ -8,7 +8,7 @@ The web platform already provides powerful primitives for building web applicati
 
 Nutin doesn't exist because the web needed another way to render a button.
 
-It exists because there is a middle ground between writing every piece of application infrastructure yourself and adopting a large framework. Because needing structure doesn't necessarily mean needing an entirely different way to build.
+It exists because there is a middle ground between writing every piece of application infrastructure yourself and adopting a large framework.
 
 ## Nutin's concepts
 
@@ -35,16 +35,15 @@ Nutin is a good fit when you:
 * want framework code and abstractions to remain visible and editable;
 * prefer a small set of explicit concepts over a larger framework ecosystem.
 
-This can include internal tools, dashboards, CRUD applications, documentation and content sites, and other small-to-medium applications. Without the router, Nutin can also be a guest on someone else's page (a widget, a browser extension's popup...).
+This can include internal tools, dashboards, CRUD applications, documentation and content sites, and other small-to-medium applications. Nutin can also be a guest on someone else's page (a widget, a browser extension's popup...).
 
 ## When not to use Nutin?
 
 Nutin is not a good fit if:
 
 * your project depends heavily on a mature ecosystem of framework-specific libraries or UI components;
-* your team benefits from the conventions and tooling of an established framework ecosystem;
 * much of your UI depends on fine-grained state that changes often: Nutin has no reactive state and no DOM diffing;
-* you need routing inside an embedded widget.
+* your team benefits from the conventions and tooling of an established framework ecosystem.
 
 ## More about Nutin
 
@@ -55,3 +54,7 @@ If you're interested in how Nutin evolved and the thinking behind its design, re
 ### FAQ
 
 See the [FAQ](https://nutin.dev/articles/faq).
+
+### Support
+
+If you enjoy using Nutin, consider supporting its development on [Ko-fi](https://ko-fi.com/loiskouninef).

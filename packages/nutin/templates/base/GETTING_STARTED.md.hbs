@@ -193,13 +193,15 @@ Defining both an inline template and an external `.html` file, or neither, fails
 
 This is where you can:
 
-- Toggle options ([Tailwind CSS](https://www.nutin.dev/docs/options-and-features/use-tailwind-css), [i18n](https://www.nutin.dev/docs/options-and-features/use-i18n), [SEO file generation](https://www.nutin.dev/docs/options-and-features/use-seo-file-generation)). 
+- Toggle options ([Tailwind CSS](https://www.nutin.dev/docs/options-and-features/use-tailwind-css), [SEO file generation](https://www.nutin.dev/docs/options-and-features/use-seo-file-generation)).
+- List your languages to enable [i18n](https://www.nutin.dev/docs/options-and-features/use-i18n): `i18n: ['en', 'fr']`, the default first (`[]` disables it).
 - Configure the builder and the built-in testing toolkit.
 
+{{#unless extension}}
 ### Specialized files
 
 - `config/seo.json` - with `generateSEOFiles` enabled. Register your routes' description, title and ogImage here.
-- `config/languages.json` - with `i18n` enabled. Register supported languages here.
+{{/unless}}
 
 ## Styling
 

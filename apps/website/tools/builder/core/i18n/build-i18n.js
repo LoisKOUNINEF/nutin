@@ -2,6 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { getFilesRecursive, print, errorExit } from '../../../utils/index.js';
 import { PATHS } from '../app/paths.js';
+// Imported directly, not via the utils barrel: it reads nutin.config.js "i18n" on load.
+import { LANGUAGES } from '../../../utils/languages.js';
 
 const destDir = path.join(PATHS.tempSource, 'locales');
 
@@ -13,7 +15,8 @@ function findLocaleFiles() {
     const fileName = path.basename(file);
     const locale = fileName.replace('.json', '');
 
-    if (/^[a-z]{2}(-[A-Z]{2})?$/.test(locale)) {
+    // <lang>.json for each language in nutin.config.js "i18n" (any code it accepts: es-419, zh-Hant...).
+    if (LANGUAGES.includes(locale)) {
       if (!localeFileMap[locale]) localeFileMap[locale] = [];
       localeFileMap[locale].push(file);
     }

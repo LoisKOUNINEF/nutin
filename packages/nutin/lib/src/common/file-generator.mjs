@@ -105,12 +105,14 @@ export class FileGenerator {
     }
   }
 
-  async isRenderTemplateFile(templatePath, fileName, context) {
+  // options.includeExtensionExclusions: render the templates NOT_IN_EXTENSIONS lists anyway (see
+  // collectTemplateTree).
+  async isRenderTemplateFile(templatePath, fileName, context, options = {}) {
     const isJsOnly = context.lang === 'js';
     if (isJsOnly && TS_ONLY_TEMPLATES.some((template) => templatePath.endsWith(template))) {
       return null;
     }
-    if (context.extension && isNotInExtensions(templatePath)) {
+    if (context.extension && !options.includeExtensionExclusions && isNotInExtensions(templatePath)) {
       return null;
     }
 
@@ -158,12 +160,15 @@ export class FileGenerator {
     await fs.writeFile(outputPath, rendered.content);
   }
 
-  async collectTemplateTree(templatesRoot, context) {
+  // options.includeExtensionExclusions: for an older version's tree. NOT_IN_EXTENSIONS is this CLI's
+  // list, and an older version may have generated what it now leaves out: kept in that tree,
+  // nutin-update reports such files (when they're on disk) as no longer generated.
+  async collectTemplateTree(templatesRoot, context, options = {}) {
     const result = new Map();
 
     const baseDir = path.join(templatesRoot, 'base');
     if (await fs.pathExists(baseDir)) {
-      await this.collectTemplateDirectory(baseDir, baseDir, context, result);
+      await this.collectTemplateDirectory(baseDir, baseDir, context, result, options);
     }
 
     const featuresDir = path.join(templatesRoot, 'features');
@@ -172,20 +177,20 @@ export class FileGenerator {
 
       const featureDir = path.join(featuresDir, feature.key);
       if (await fs.pathExists(featureDir)) {
-        await this.collectTemplateDirectory(featureDir, featureDir, context, result);
+        await this.collectTemplateDirectory(featureDir, featureDir, context, result, options);
       }
     }
 
     // Older template versions have no extension overlay.
     const extensionDir = path.join(templatesRoot, 'extension');
     if (context.extension && await fs.pathExists(extensionDir)) {
-      await this.collectTemplateDirectory(extensionDir, extensionDir, context, result);
+      await this.collectTemplateDirectory(extensionDir, extensionDir, context, result, options);
     }
 
     return result;
   }
 
-  async collectTemplateDirectory(dir, baseDir, context, result) {
+  async collectTemplateDirectory(dir, baseDir, context, result, options = {}) {
     const entries = await fs.readdir(dir, { withFileTypes: true });
 
     for (const entry of entries) {
@@ -194,9 +199,9 @@ export class FileGenerator {
       const entryPath = path.join(dir, entry.name);
 
       if (entry.isDirectory()) {
-        await this.collectTemplateDirectory(entryPath, baseDir, context, result);
+        await this.collectTemplateDirectory(entryPath, baseDir, context, result, options);
       } else {
-        const rendered = await this.isRenderTemplateFile(entryPath, entry.name, context);
+        const rendered = await this.isRenderTemplateFile(entryPath, entry.name, context, options);
         if (!rendered) continue;
 
         const relativeDir = path.relative(baseDir, dir);

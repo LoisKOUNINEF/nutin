@@ -39,6 +39,10 @@ export async function findJsonDrift(projectPath, context) {
     for (const section of PACKAGE_JSON_SECTIONS) {
       drift.push(...compareEntries('package.json', section, packageJson[section], generated[section]));
     }
+    for (const name of jsonManager.retiredDevDependencies(context)) {
+      const yours = packageJson.devDependencies?.[name];
+      if (yours !== undefined) drift.push({ file: 'package.json', key: `devDependencies.${name}`, yours, nutin: undefined, retired: true });
+    }
   }
 
   if (context.lang !== 'js') {
