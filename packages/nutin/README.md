@@ -36,7 +36,7 @@ nutin-add <feature>
 
 - `docker` (Dockerfile, nginx config, `docker:build`/`docker:run` scripts)
 - `markdown` (Markdown folders compiled into routed pages).
-- Cannot be used if the project is a browser extension (`nutin-new --extension`)
+- Cannot be used in a browser extension (`nutin-new --extension`)
 
 ## Update Nutin
 
@@ -53,3 +53,7 @@ nutin-update
 ## Documentation
 
 - [Documentation](https://www.nutin.dev/docs)
+
+## Support
+
+If you enjoy using Nutin, consider supporting its development via [Ko-fi](https://ko-fi.com/loiskouninef)
