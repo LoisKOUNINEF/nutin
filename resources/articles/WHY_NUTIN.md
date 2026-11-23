@@ -57,4 +57,4 @@ See the [FAQ](https://nutin.dev/articles/faq).
 
 ### Support
 
-If you enjoy using Nutin, consider supporting its development via [Ko-fi](https://ko-fi.com/loiskouninef).
+If you enjoy using Nutin, consider supporting its development on [Ko-fi](https://ko-fi.com/loiskouninef).
