@@ -17,6 +17,11 @@
     }
 }
 
+.a11y-elements-links {
+    display: flex;
+    gap: 1rem;
+}
+
 // a11y-elements retheme: its --a11y-<component>-<token> custom properties
 // mapped onto the site's theme variables, so the demos follow light/dark mode.
 // On body, not :root: the dark theme overrides the site variables on

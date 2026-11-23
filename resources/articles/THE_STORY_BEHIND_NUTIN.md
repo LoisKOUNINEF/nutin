@@ -1,5 +1,5 @@
 ---
-ogImage: /assets/images/og-covers/og-cover-articles.jpg
+ogImage: /assets/images/og-covers/og-cover-why-nutin.jpg
 ---
 
 # The story behind Nutin
