@@ -51,7 +51,7 @@ export default {
 **See [How do I use i18n](HOWDOI_USE_I18N.md)** to help you enable i18n in your project.
 
 ```json
-// With i18n enabled and, in this example, `config/languages.json` listing `en`+`fr`
+// With i18n enabled, in this example with `i18n: ['en', 'fr']` in nutin.config.js
 {
   "baseUrl": "https://my-nutin-app.com",
   "disallowBots": [],

@@ -2,15 +2,12 @@
 
 ## 3.1.3
 
-### Security
-
-- **SEO prerendering shipped a nested `<template>`'s content unsanitized.**
-    - The sanitizer, `stripBindingsFrom()` and `stripClobberingNamesFrom()` now also clean a template's own children. In browsers and jsdom, a parsed template has none, so their output is unchanged.
-    - The string forms had the same problem during prerendering, and are fixed.
-
 ### Changes
 
-- **SEO prerendering no longer crashes on libraries that read DOM getters off their prototypes.**
+- **SEO prerendering**:
+    - The sanitizer, `stripBindingsFrom()` and `stripClobberingNamesFrom()` now also clean a template's own children. In browsers and jsdom, a parsed template has none, so their output is unchanged.
+    - The string forms had the same problem during prerendering, and are fixed.
+    - No longer crashes on libraries that read DOM getters off their prototypes.
     - The SSR polyfills (`tools/builder/core/seo/ssr/ssr-polyfills.js`, new `installSpecAccessors(window)`) now give each of these prototypes an accessor that resolves as `node[name]` would:
         - `Node`: `nodeType`, `nodeName`, `ownerDocument`, `parentNode`, `parentElement`, `childNodes`, `firstChild`, `lastChild`, `previousSibling`, `nextSibling`, `textContent`
         - `Element`: `children`, `attributes`, `localName`, `namespaceURI`, `tagName`, `firstElementChild`, `nextElementSibling`
@@ -18,40 +15,21 @@
         - `HTMLTemplateElement`: `content`
     - It also covers the case that failed silently: linkedom's `Node.prototype` getters for `childNodes`, `firstChild`, `nextSibling` and `textContent`.
 
-### i18n languages move to `nutin.config.js`
-
-- **`config/languages.json` is gone: `i18n` in `nutin.config.js` now lists the languages.**
+- **i18n**: `i18n` in `nutin.config.js` now lists the languages.
     - `i18n: ['en', 'fr']` turns i18n on, the first language being the default. `i18n: []` turns it off, and is the default for new projects.
     - `i18n: true` and `i18n: false` still work. `true` lists no language, so it means English only, and the build warns about it.
-    - The build refuses any other value, an invalid language code (letters, digits and `-` only) and a language listed twice.
-    - Locale files are bundled for every listed language, whatever its code (`es-419`, `zh-Hant`...). The build used to skip any code other than `xx` or `xx-XX`.
-- Every tool now reads the languages from one place (`tools/utils/languages.js`: `resolveI18n()`, `I18N_ENABLED`, `LANGUAGES`, `DEFAULT_LANGUAGE`): the builder, the SEO files, the generator, and the docker and markdown features.
-- **`nutin-update` migrates existing projects.** The update summary says what it will do, and the confirmation asks for it.
-    - `i18n: true` becomes the `config/languages.json` list, the default language first. `i18n: false` becomes `[]`, and the update prints the dropped list. A list you already wrote is kept. With no `i18n` option at all (an extension), the file is just deleted.
-    - Then `config/languages.json` is deleted.
-    - Your `i18n:` line is read whatever its form: as the last key without a comma, with a `//` or `/* */` comment, or with a quoted key. An untouched `nutin.config.js` is a plain update, and edits on the lines around `i18n` (`tailwind: true`...) merge without a conflict.
-    - Language codes that aren't valid are skipped and reported, never written to `nutin.config.js`.
-    - `config/languages.json` is kept, with the step to do by hand listed in `NUTIN-UPDATE-REPORT.md` (new "Steps to do by hand" section), when:
-        - your `i18n` is an expression, or spans several lines;
-        - `nutin.config.js` ends up with conflict markers (the suggested value is `[]` if i18n was off);
-        - one of your files still reads `languages.json`: anywhere in the project, except `node_modules`, the build output and the files nutin generates.
-    - If `nutin.config.js` ends up with conflict markers, your value is still put back on its `i18n:` line, and the manual step tells you to check it.
-    - Files of yours that read `nutinConfig.i18n` directly, like an older markdown feature's `src/app/markdown/markdown-i18n.ts`, are listed with a manual step: `[]` (i18n off) is truthy, so they should use `CONFIG.i18n`.
-    - Removing the `i18n:` line yourself merges cleanly (i18n is then off), and blank entries in `languages.json` are ignored.
+    - **`nutin-update` migrates existing projects.** The update summary says what it will do, and the confirmation asks for it. `i18n: true` becomes the `config/languages.json` list, the default language first. `i18n: false` becomes `[]`, and the update prints the dropped list. A list you already wrote is kept. With no `i18n` option at all (an extension), then `config/languages.json` is deleted.
 
-### nutin-update
+- **`nutin-update`**: **An `AGENTS.md` that only differs by its "generated with Nutin X" line no longer counts as edited by you.** It's updated in place. When you did edit it, the new version line merges without a conflict, even with your edits right next to it.
 
-- **An `AGENTS.md` that only differs by its "generated with Nutin X" line no longer counts as edited by you.** It's updated in place. When you did edit it, the new version line merges without a conflict, even with your edits right next to it.
-
-### Browser extensions ship less dead code
-
-- **New extension projects no longer get the tools their build never runs:**
-    - `tools/builder/core/seo/` (SEO pages, `robots.txt`, `sitemap.xml`, and their prerendering in `ssr/`), with the `linkedom` devDependency;
-    - `tools/builder/core/i18n/` (the build refuses i18n in an extension);
-    - `tools/builder/core/prod-bundle/compress-files.js` (an extension isn't compressed);
-    - `config/seo.json`: it only gave the router's page titles, with `generateSEOFiles`. `src/core/config.ts` doesn't import it in an extension, and `document.title` keeps its fallbacks (`View.documentTitle()`, the `<viewName>.title` translation, then `viewName`).
-- The builder now runs without a `config/` folder.
-- **Existing extension projects:** `nutin-update` lists those files as no longer generated and leaves them in place, along with `config/seo.json`: you can delete them. It also reports `linkedom` as no longer needed in `package.json` (`devDependencies.linkedom: yours "^0.18.13", nutin (no longer needed)`), without removing it.
+- **Browser extension projects**:
+    - New extension projects no longer get the tools their build never runs:
+        - `tools/builder/core/seo/`, with the `linkedom` devDependency;
+        - `tools/builder/core/i18n/`;
+        - `tools/builder/core/prod-bundle/compress-files.js`;
+        - `config/seo.json`.
+    - The builder now runs without a `config/` folder.
+    - **Existing extension projects:** `nutin-update` lists those files as no longer generated and leaves them in place, along with `config/seo.json`: you can delete them. It also reports `linkedom` as no longer needed, without removing it.
 
 ## 3.1.2
 
