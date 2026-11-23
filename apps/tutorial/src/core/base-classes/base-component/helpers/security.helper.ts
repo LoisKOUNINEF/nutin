@@ -42,9 +42,7 @@ export function sanitizeTemplate(value: unknown, trustLevel: Nutin.TrustLevel = 
   if (value === null || value === undefined) return '';
   if (trustLevel === 'trusted' && !rawsOf(value)) return String(value);
 
-  const holder = newTemplate();
-  holder.content.append(sanitizeToFragment(value, trustLevel));
-  return holder.innerHTML;
+  return sanitizedHolder(value, trustLevel).innerHTML;
 }
 
 export function escapeHtml(value: unknown): string {
@@ -63,12 +61,19 @@ export function escapeHtml(value: unknown): string {
 // A SafeHtml from html`` may carry raw() sources behind placeholders: each is parsed once,
 // in its real parent context, stripped of bindings and sanitized as nodes, then put in place.
 export function sanitizeToFragment(value: unknown, trustLevel: Nutin.TrustLevel = 'normal'): DocumentFragment {
+  return sanitizedHolder(value, trustLevel).content;
+}
+
+// Parsed and sanitized in a <template>: its content for the render path, its innerHTML for the string form.
+function sanitizedHolder(value: unknown, trustLevel: Nutin.TrustLevel): HTMLTemplateElement {
   const holder = newTemplate();
   const raws = rawsOf(value);
   holder.innerHTML = value === null || value === undefined ? '' : raws ? (value as { value: string }).value : String(value);
-  if (trustLevel !== 'trusted') sanitizeNode(holder.content, trustLevel);
-  if (raws) resolveRaws(holder.content, raws, trustLevel);
-  return holder.content;
+  for (const root of templateRootsOf(holder)) {
+    if (trustLevel !== 'trusted') sanitizeNode(root, trustLevel);
+    if (raws) resolveRaws(root, raws, trustLevel);
+  }
+  return holder;
 }
 
 // raw() in attribute position (`<a ${raw('aria-current="page"')}>`): rebuilt from the parsed
@@ -94,7 +99,7 @@ export function isScriptUrl(name: string, value: string): boolean {
 export function stripBindings(markup: string): string {
   const holder = newTemplate();
   holder.innerHTML = markup;
-  stripBindingsFrom(holder.content);
+  templateRootsOf(holder).forEach(stripBindingsFrom);
   return holder.innerHTML;
 }
 
@@ -103,8 +108,10 @@ export function stripBindings(markup: string): string {
 export function stripRawMarkup(markup: string): string {
   const holder = newTemplate();
   holder.innerHTML = markup;
-  stripBindingsFrom(holder.content);
-  stripClobberingNamesFrom(holder.content);
+  templateRootsOf(holder).forEach((root) => {
+    stripBindingsFrom(root);
+    stripClobberingNamesFrom(root);
+  });
   return holder.innerHTML;
 }
 
@@ -115,10 +122,7 @@ export function stripBindingsFrom(root: ParentNode): void {
   SafeDom.querySelectorAllOf(root, selector).forEach((el) => {
     BINDING_ATTRS.forEach((attr) => SafeDom.removeAttr(el, attr));
   });
-  SafeDom.querySelectorAllOf(root, 'template').forEach((el) => {
-    const content = SafeDom.templateContentOf(el);
-    if (content) stripBindingsFrom(content);
-  });
+  SafeDom.querySelectorAllOf(root, 'template').forEach((el) => templateRootsOf(el).forEach(stripBindingsFrom));
 }
 
 // An id/name that names a document or form property shadows it once inserted:
@@ -133,10 +137,7 @@ export function stripClobberingNamesFrom(root: ParentNode): void {
       if (value !== null && isClobberingName(value)) SafeDom.removeAttr(el, attr);
     });
   });
-  SafeDom.querySelectorAllOf(root, 'template').forEach((el) => {
-    const content = SafeDom.templateContentOf(el);
-    if (content) stripClobberingNamesFrom(content);
-  });
+  SafeDom.querySelectorAllOf(root, 'template').forEach((el) => templateRootsOf(el).forEach(stripClobberingNamesFrom));
 }
 
 let formProbe: HTMLFormElement | null = null;
@@ -150,6 +151,17 @@ function isClobberingName(value: string): boolean {
 
 function newTemplate(): HTMLTemplateElement {
   return SafeDom.createElementIn(document, 'template');
+}
+
+// Where a <template>'s nodes are: its content, plus its own children in a DOM that doesn't
+// follow the spec there. linkedom (SEO prerendering) parses a template's markup into its
+// children, serializes those for innerHTML/outerHTML, and fills content with a copy on first
+// read: cleaning only the content would ship the original. Browsers and jsdom give a parsed
+// template no children, so for them this is the content alone. [] for a non-template.
+function templateRootsOf(el: Element): ParentNode[] {
+  const content = SafeDom.templateContentOf(el);
+  if (!content) return [];
+  return SafeDom.childNodesOf(el).length > 0 ? [content, el] : [content];
 }
 
 function rawsOf(value: unknown): ReadonlyMap<string, string> | null {
@@ -173,8 +185,7 @@ function collectPlaceholders(root: ParentNode): Element[] {
   const found: Element[] = [];
   SafeDom.querySelectorAllOf(root, 'template').forEach((el) => {
     if (SafeDom.hasAttr(el, 'data-nutin-raw')) found.push(el);
-    const content = SafeDom.templateContentOf(el);
-    if (content) found.push(...collectPlaceholders(content));
+    templateRootsOf(el).forEach((inner) => found.push(...collectPlaceholders(inner)));
   });
   return found;
 }
@@ -228,9 +239,8 @@ function sanitizeNode(root: ParentNode, trustLevel: Nutin.TrustLevel): void {
       }
     }
 
-    // querySelectorAll() doesn't look into <template> content.
-    const content = SafeDom.templateContentOf(el);
-    if (content) sanitizeNode(content, trustLevel);
+    // querySelectorAll() doesn't look into <template> content (nor, in linkedom, its children).
+    templateRootsOf(el).forEach((inner) => sanitizeNode(inner, trustLevel));
   }
 }
 

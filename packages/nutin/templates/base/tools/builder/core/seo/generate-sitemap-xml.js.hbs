@@ -47,8 +47,7 @@ export function generateSitemapXml(skippedSuffixes = new Set()) {
   const seoConfig = JSON.parse(fs.readFileSync(seoConfigPath, 'utf-8'));
   const baseUrl = seoConfig.baseUrl.replace(/\/$/, '');
 
-  const languagesConfigPath = path.join(PATHS.temp, 'config', 'languages.json');
-  const { languages } = JSON.parse(fs.readFileSync(languagesConfigPath, 'utf-8'));
+  const { languages } = builderConfig;
 
   const urls = collectUrls(baseUrl, resolveSeoRoutes(seoConfig), languages, { skippedSuffixes });
   const xml = buildSitemapXml(urls);

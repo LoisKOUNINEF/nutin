@@ -56,6 +56,12 @@ tbody > tr:last-of-type {
 // Global styles
 :root {
   font-size: clamp(16px, 0.909rem + 0.455vw, 19px);
+  // Scroll on the root, not on body: a11y-elements' scroll lock sets
+  // overflow:hidden on <html>, which would otherwise stop body's overflow from
+  // propagating to the viewport and make body its own scroll container.
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
 	@each $name, $value in $light-theme {
     --#{$name}: #{$value};
   }
@@ -83,9 +89,6 @@ tbody > tr:last-of-type {
 		font-family: $primary-font;
 	  display: flex; 
 	  flex-direction: column;
-  	overflow-y: scroll;
-  	overflow-x: hidden;
-  	scrollbar-gutter: stable;
 	}
 
 	main {

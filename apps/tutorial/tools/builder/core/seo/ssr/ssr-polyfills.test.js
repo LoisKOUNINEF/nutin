@@ -1,7 +1,8 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { resolveFetch } from './ssr-polyfills.js';
+import { parseHTML } from 'linkedom';
+import { installSpecAccessors, resolveFetch } from './ssr-polyfills.js';
 
 describe('resolveFetch (SSR fetch shim)', () => {
   let staticDir;
@@ -44,5 +45,92 @@ describe('resolveFetch (SSR fetch shim)', () => {
   it('still throws for an unknown endpoint', async () => {
     await expect(() => resolveFetch('/api/users', { staticDir })).toThrow('Unexpected fetch');
     await expect(() => resolveFetch('https://api.test/users', { staticDir })).toThrow('Unexpected fetch');
+  });
+});
+
+describe('installSpecAccessors (SSR linkedom window)', () => {
+  const getter = (window, ctorName, name) => Object.getOwnPropertyDescriptor(window[ctorName].prototype, name).get;
+
+  it('exposes spec getters on the prototypes clobbering-proof code reads them from', () => {
+    const { window } = parseHTML('<!doctype html><html><body><form><input name="children"></form></body></html>');
+    installSpecAccessors(window);
+    const form = window.document.querySelector('form');
+
+    expect(getter(window, 'Element', 'children').call(form).length).toBe(1);
+    expect(getter(window, 'Element', 'localName').call(form)).toBe('form');
+    expect(getter(window, 'Element', 'namespaceURI').call(form)).toBe('http://www.w3.org/1999/xhtml');
+    expect(getter(window, 'Node', 'nodeType').call(window.document.createTextNode('x'))).toBe(3);
+    expect(getter(window, 'DocumentFragment', 'children').call(window.document.createDocumentFragment()).length).toBe(0);
+  });
+
+  it("dispatches Node.prototype's base-class stubs to the node's real accessor", () => {
+    const { window } = parseHTML('<!doctype html><html><body><div><a></a><b></b>t</div></body></html>');
+    installSpecAccessors(window);
+    const div = window.document.querySelector('div');
+    const [a, b, text] = div.childNodes;
+
+    expect(getter(window, 'Node', 'childNodes').call(div).length).toBe(3);
+    expect(getter(window, 'Node', 'firstChild').call(div)).toBe(a);
+    expect(getter(window, 'Node', 'lastChild').call(div)).toBe(text);
+    expect(getter(window, 'Node', 'nextSibling').call(a)).toBe(b);
+    expect(getter(window, 'Node', 'previousSibling').call(b)).toBe(a);
+    expect(getter(window, 'Node', 'textContent').call(div)).toBe('t');
+    expect(getter(window, 'Node', 'parentNode').call(a)).toBe(div);
+    expect(getter(window, 'Node', 'parentElement').call(a)).toBe(div);
+    expect(getter(window, 'Node', 'ownerDocument').call(div)).toBe(window.document);
+    expect(getter(window, 'Element', 'firstElementChild').call(div)).toBe(a);
+    expect(getter(window, 'Element', 'nextElementSibling').call(a)).toBe(b);
+  });
+
+  it("reads a <template>'s content through the prototype getters", () => {
+    const { window } = parseHTML('<!doctype html><html><body><template><i>z</i></template></body></html>');
+    installSpecAccessors(window);
+    const content = getter(window, 'HTMLTemplateElement', 'content').call(window.document.querySelector('template'));
+
+    expect(getter(window, 'Node', 'childNodes').call(content).length).toBe(1);
+    expect(getter(window, 'DocumentFragment', 'children').call(content).length).toBe(1);
+  });
+
+  it('writes through the derived setter', () => {
+    const { window } = parseHTML('<!doctype html><html><body><div>old</div></body></html>');
+    installSpecAccessors(window);
+    const div = window.document.querySelector('div');
+
+    Object.getOwnPropertyDescriptor(window.Node.prototype, 'textContent').set.call(div, 'new');
+
+    expect(div.innerHTML).toBe('new');
+  });
+
+  it('is idempotent (linkedom shares its classes between windows)', () => {
+    const { window } = parseHTML('<!doctype html><html><body><div><a></a></div></body></html>');
+    installSpecAccessors(window);
+    const before = getter(window, 'Node', 'childNodes');
+    installSpecAccessors(parseHTML('<!doctype html><html><body></body></html>').window);
+
+    expect(getter(window, 'Node', 'childNodes')).toBe(before);
+    expect(before.call(window.document.querySelector('div')).length).toBe(1);
+  });
+
+  it('leaves newly created nodes working', () => {
+    const { window } = parseHTML('<!doctype html><html><body></body></html>');
+    installSpecAccessors(window);
+    const div = window.document.createElement('div');
+
+    div.textContent = 'hi';
+    div.append(window.document.createElement('span'));
+
+    expect(div.nodeType).toBe(1);
+    expect(div.localName).toBe('div');
+    expect(div.tagName).toBe('DIV');
+    expect(div.childNodes.length).toBe(2);
+    expect(div.cloneNode(true).outerHTML).toBe('<div>hi<span></span></div>');
+  });
+
+  it('keeps getter-only properties read-only', () => {
+    const { window } = parseHTML('<!doctype html><html><body><div></div></body></html>');
+    installSpecAccessors(window);
+    const div = window.document.querySelector('div');
+
+    expect(() => { div.children = []; }).toThrow('only a getter');
   });
 });

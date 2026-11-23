@@ -32,4 +32,8 @@ Nutin is deliberately pragmatic and focused, with no runtime dependencies.
 - [Contributing Guide](CONTRIBUTING.md)
 - [Security Policy](SECURITY.md)
 - [Report a Bug](../../issues/new?template=bug_report.yml)
-- [Request a Feature](../../issues/new?template=feature_request.yml)                           
+- [Request a Feature](../../issues/new?template=feature_request.yml)
+
+## Support
+
+If you enjoy using Nutin, consider supporting its development on [Ko-fi](https://ko-fi.com/loiskouninef)

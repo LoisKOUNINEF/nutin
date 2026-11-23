@@ -27,7 +27,8 @@ export class JsonManager {
       "esbuild": "^0.28.2",
       "html-minifier-terser": "^7.2.0",
       "jsdom": "^30.1.1",
-      "linkedom": "^0.18.13",
+      // SEO prerendering's DOM, which extensions don't have.
+      ...(extension ? {} : { "linkedom": "^0.18.13" }),
       "sass": "^1.89.0",
       ...(lang === 'js' ? {} : { "typescript": "^7.0.2" }),
       // chrome.* types: Firefox implements the same namespace for most of it.
@@ -52,6 +53,13 @@ export class JsonManager {
         "node": ">=24"
       }
     };
+  }
+
+  // devDependencies older nutin versions generated for this kind of project and this one no longer
+  // does. nutin-update reports them (it never edits package.json).
+  retiredDevDependencies(context = {}) {
+    // Only SEO prerendering used it, and extensions have none.
+    return context.extension ? ['linkedom'] : [];
   }
 
   buildTsconfigJson(context = {}) {

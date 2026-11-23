@@ -2,25 +2,20 @@
 
 ## Enable option
 
+List the supported languages in `nutin.config.js`. The first one is the default language:
+
 ```js
 // nutin.config.js
 export default {
-  i18n: true,
+  i18n: ['en', 'fr'], // the default language first; [] disables i18n
 }
 ```
 
-## Configuration file
+- New projects start with `i18n: []`: i18n is off.
+- Language codes use letters, digits and `-` only (e.g. `en`, `pt-BR`), each listed once. The build refuses any other value.
+- `i18n: true` and `i18n: false` still work. `true` lists no language, so it means English only, and the build warns about it.
 
-```json
-// `config/languages.json` 
-{
-  "languages": [
-    "en"
-    // add / remove supported languages here
-  ],
-  "defaultLanguage": "en" // must match one entry in "languages"
-}
-```
+Projects from before this option took a list had a `config/languages.json` file (`languages` and `defaultLanguage`). `nutin-update` moves its list into `i18n`, the default language first, then deletes the file.
 
 ## Usage
 

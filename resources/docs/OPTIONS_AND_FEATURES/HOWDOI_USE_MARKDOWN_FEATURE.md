@@ -289,7 +289,7 @@ Check every folder without building the app:
 
 ## Translate pages (i18n)
 
-With `i18n: true` (see [How do I use i18n?](HOWDOI_USE_I18N.md)), put each language's pages in a subfolder named after it, with the same file names (or frontmatter `slug`) in every language:
+With i18n on (`i18n: ['en', 'fr']`, see [How do I use i18n?](HOWDOI_USE_I18N.md)), put each language's pages in a subfolder named after it, with the same file names (or frontmatter `slug`) in every language:
 
 ```text
 markdown-content/
@@ -300,11 +300,11 @@ markdown-content/
     getting-started.md
 ```
 
-- The default language (`config/languages.json`) defines the pages, their order and sections: a translation only translates them. A page or section that exists only in a translation fails the build.
+- The default language (the first in `i18n`) defines the pages, their order and sections: a translation only translates them. A page or section that exists only in a translation fails the build.
 - A page without a translation shows its default-language version, and the build lists those pages in a warning. Links from a translation to an untranslated page work the same way.
 - Hub files go in each language folder, with the same file names. Their titles, descriptions and `### Group` headings are translated by position.
 - Pages are served at `/<lang>/<routePrefix>/<slug>`, and links in compiled pages and the navigation carry the language. Switching language reloads the current page in the new one.
-- A folder without language subfolders serves the same pages in every language. With `i18n: false`, a localized folder only compiles its default language.
+- A folder without language subfolders serves the same pages in every language. With i18n off (`i18n: []`), a localized folder only compiles its default language.
 
 The feature's own texts ("On this page", "Nothing here yet.", "This page couldn't be loaded.", the navigation's label) are translated from `src/app/markdown/locales/<lang>.json` (keys `onThisPage`, `empty`, `loadError`, `pages`). Only `en.json` ships; add a file per language, otherwise the English text is shown.
 

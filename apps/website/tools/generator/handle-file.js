@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { print } from '../utils/index.js';
-// Imported directly, not via the utils barrel: it reads config/languages.json on load.
+// Imported directly, not via the utils barrel: it reads nutin.config.js "i18n" on load.
 import { LANGUAGES } from '../utils/languages.js';
 import { localeTemplate } from './templates/index.js';
 

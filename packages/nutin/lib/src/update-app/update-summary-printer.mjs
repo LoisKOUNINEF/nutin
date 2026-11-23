@@ -1,8 +1,9 @@
 import { print } from '../utils/print.mjs';
+import { describeI18nMigration } from './i18n-migration.mjs';
 
 const describeValue = (value) => (value === undefined ? '(missing)' : JSON.stringify(value));
 
-export function printUpdateSummary({ toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated, jsonDrift = [] }) {
+export function printUpdateSummary({ toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated, jsonDrift = [], i18nMigration = null }) {
   print.section('\nSummary:');
   print.info(`  ${toUpdate.length} file(s) will be updated (untouched since generation)`);
   print.info(`  ${toAdd.length} new file(s) will be added`);
@@ -21,10 +22,14 @@ export function printUpdateSummary({ toUpdate, toAdd, conflicts, unknown, remove
     print.section(`  ${removedByUser.length} file(s) nutin used to generate but you removed — not recreated:`);
     removedByUser.forEach(({ relPath }) => print.section(`    - ${relPath}`));
   }
+  if (i18nMigration) {
+    const configMerged = conflicts.some(({ relPath }) => relPath.split(/[\\/]/).join('/') === 'nutin.config.js');
+    print.info(`  ${describeI18nMigration(i18nMigration, { configMerged })}`);
+  }
   if (jsonDrift.length > 0) {
     print.section(`  ${jsonDrift.length} package.json/tsconfig.json value(s) differ from what this nutin version generates — never changed automatically, apply by hand if wanted:`);
-    jsonDrift.forEach(({ file, key, yours, nutin }) =>
-      print.section(`    - ${file} ${key}: yours ${describeValue(yours)}, nutin ${describeValue(nutin)}`)
+    jsonDrift.forEach(({ file, key, yours, nutin, retired }) =>
+      print.section(`    - ${file} ${key}: yours ${describeValue(yours)}, nutin ${retired ? '(no longer needed)' : describeValue(nutin)}`)
     );
   }
 }

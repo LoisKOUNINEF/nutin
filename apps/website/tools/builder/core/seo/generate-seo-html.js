@@ -113,8 +113,7 @@ export async function generateSeoHtml() {
   const seoConfig = JSON.parse(fs.readFileSync(seoConfigPath, 'utf-8'));
   const baseUrl = seoConfig.baseUrl.replace(/\/$/, '');
 
-  const languagesConfigPath = path.join(PATHS.temp, 'config', 'languages.json');
-  const { languages, defaultLanguage } = JSON.parse(fs.readFileSync(languagesConfigPath, 'utf-8'));
+  const { languages, defaultLanguage } = builderConfig;
 
   if (builderConfig.i18n) {
     const { fallbacks, missing, noLocalization } = collectI18nSeoIssues(seoConfig.routes, languages, defaultLanguage);
@@ -146,7 +145,7 @@ export async function generateSeoHtml() {
       errorExit(
         `config/seo.json is missing required content:\n${lines}\n\n` +
         `Add these keys under the matching route's "title"/"description" in config/seo.json. ` +
-        `Configured languages (config/languages.json): ${languages.join(', ')}.`
+        `Configured languages (nutin.config.js "i18n"): ${languages.join(', ')}.`
         , 'generate-seo-html'
       );
     }

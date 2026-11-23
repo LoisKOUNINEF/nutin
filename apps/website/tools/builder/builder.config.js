@@ -1,6 +1,8 @@
 import process from 'process';
 import nutinConfig from '../../nutin.config.js';
 import { errorExit } from '../utils/index.js';
+// Validates "i18n" on load (an invalid value stops the build there).
+import { I18N_ENABLED, LANGUAGES, DEFAULT_LANGUAGE, I18N_LISTS_NO_LANGUAGE } from '../utils/languages.js';
 
 function validateConfig(config) {
   if (!config || typeof config !== 'object') {
@@ -40,7 +42,11 @@ export const builderConfig = {
   ...nutinConfig.builder,
   isProd: process.env.NODE_ENV === 'production',
   typecheckOnly: process.env.NUTIN_TYPECHECK === '1',
-  i18n: nutinConfig.i18n,
+  // "i18n" resolved (see utils/languages.js): `i18n: []` is off, though an empty array is truthy.
+  i18n: I18N_ENABLED,
+  languages: LANGUAGES,
+  defaultLanguage: DEFAULT_LANGUAGE,
+  i18nListsNoLanguage: I18N_LISTS_NO_LANGUAGE,
   markdownSources: nutinConfig.markdownSources,
   tailwind: nutinConfig.tailwind,
   generateSEO: nutinConfig.generateSEOFiles,

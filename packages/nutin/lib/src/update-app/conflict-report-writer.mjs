@@ -9,7 +9,7 @@ const list = (items, describe = ({ relPath }) => `\`${relPath}\``) => items.map(
 
 // Lists the files you edited that this update touched. No diffs: merged files hold both versions'
 // changes, and overlaps are marked in the files themselves.
-export async function writeUpdateReport(projectPath, { merged, conflicted, binaryConflicts }, oldVersion, newVersion) {
+export async function writeUpdateReport(projectPath, { merged, conflicted, binaryConflicts, manualSteps = [] }, oldVersion, newVersion) {
   const sections = [
     `# nutin-update report\n\nUpdate from nutin v${oldVersion} to v${newVersion}. These files had changes of yours and changes in the new nutin version.`,
   ];
@@ -29,6 +29,13 @@ export async function writeUpdateReport(projectPath, { merged, conflicted, binar
     sections.push(
       '## Merged automatically\n\nYour edits and the new version\'s changes didn\'t overlap, so both were kept. Review them.\n\n' +
       list(merged),
+    );
+  }
+
+  if (manualSteps.length > 0) {
+    sections.push(
+      '## Steps to do by hand\n\nThe update couldn\'t do these itself.\n\n' +
+      manualSteps.map((step) => `- ${step}`).join('\n'),
     );
   }
 
