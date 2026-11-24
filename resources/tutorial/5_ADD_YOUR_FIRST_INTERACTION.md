@@ -1,3 +1,8 @@
+---
+description: "Nutin's first app tutorial."
+ogImage: /assets/images/og-covers/og-cover-tutorial.jpg
+---
+
 # 5. Add your first interaction
 
 ## Let the service create tasks

@@ -1,3 +1,8 @@
+---
+description: "Nutin's first app tutorial."
+ogImage: /assets/images/og-covers/og-cover-tutorial.jpg
+---
+
 # 3. See your tasks
 
 ## Generate the view

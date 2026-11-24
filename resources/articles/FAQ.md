@@ -1,6 +1,6 @@
 ---
 description: "Answers to common questions about Nutin: application size, virtual DOM, other libraries, and how it compares with htmx, Lit and shadcn/ui."
-ogImage: /assets/images/og-covers/og-cover-articles.jpg
+ogImage: /assets/images/og-covers/og-cover-faq.jpg
 ---
 
 # FAQ
@@ -8,7 +8,7 @@ ogImage: /assets/images/og-covers/og-cover-articles.jpg
 <details>
 <summary style="color:var(--primary);font-size:1.2rem;padding:.5rem;">How big is a Nutin application?</summary>
 <div style="padding-left:1rem;">
-<p>A freshly generated application, built for production with the default options, ships about <strong>30 KB of minified JavaScript, about 10 KB gzipped (9 KB with Brotli)</strong>.</p>
+<p>A freshly generated application, built for production with the default options, ships <strong>29 KB of minified JavaScript, 10.5 KB gzipped and 9.5 KB with Brotli</strong>.</p>
 
 <p>Nutin also has no runtime dependencies.</p>
 </div>

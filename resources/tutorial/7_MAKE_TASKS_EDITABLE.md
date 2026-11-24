@@ -1,3 +1,8 @@
+---
+description: "Nutin's first app tutorial."
+ogImage: /assets/images/og-covers/og-cover-tutorial.jpg
+---
+
 # 7. Make tasks editable
 
 ## Let the service update tasks

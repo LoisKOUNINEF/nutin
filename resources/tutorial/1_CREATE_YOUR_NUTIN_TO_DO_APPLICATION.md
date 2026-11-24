@@ -1,3 +1,8 @@
+---
+description: "Nutin's first app tutorial."
+ogImage: /assets/images/og-covers/og-cover-tutorial.jpg
+---
+
 # 1. Create your Nutin to-do application
 
 We are going to build a basic CRUD application in the form of a to-do list.

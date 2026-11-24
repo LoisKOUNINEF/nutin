@@ -1,3 +1,8 @@
+---
+description: "A guide on how to use the a11y-elements package (a set of framework-agnostic accessibility Custom Elements) in a Nutin application."
+ogImage: /assets/images/og-covers/og-cover-guides-a11y.jpg
+---
+
 # How to use a11y-elements?
 
 This guide describes how to use [a11y-elements](https://nutin.dev/en/a11y-elements) in a Nutin application - bundled from npm, or loaded from a CDN - and how to use it inside Nutin components.

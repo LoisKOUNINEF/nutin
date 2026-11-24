@@ -1,3 +1,8 @@
+---
+description: "A guide on how to use Jest or Vitest to test a Nutin application."
+ogImage: /assets/images/og-covers/og-cover-guides-jest.jpg
+---
+
 # How to use Jest or Vitest for app tests?
 
 [testin-nutin](https://nutin.dev/docs/testing) and another runner can live side by side: testin-nutin keeps testing the framework (`src/core`) and `tools/`, and Jest or Vitest runs your app's tests.

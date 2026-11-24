@@ -1,3 +1,8 @@
+---
+description: "Nutin's first app tutorial."
+ogImage: /assets/images/og-covers/og-cover-tutorial.jpg
+---
+
 # 8. Take a look at what you've built
 
 You built a **working CRUD application**. Tasks can be created, updated, and deleted.

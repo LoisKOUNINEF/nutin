@@ -1,4 +1,5 @@
 ---
+description: "Presents the Nutin framework: purpose, concepts, limitations."
 ogImage: /assets/images/og-covers/og-cover-why-nutin.jpg
 ---
 

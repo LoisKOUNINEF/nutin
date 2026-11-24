@@ -1,3 +1,8 @@
+---
+description: "A guide on how to use AlpineJs in a Nutin application."
+ogImage: /assets/images/og-covers/og-cover-guides-alpine.jpg
+---
+
 # How to integrate AlpineJS?
 
 This guide describes two ways to load [AlpineJS](https://alpinejs.dev) into a Nutin application - bundled from npm, or loaded from a CDN - and three ways to use it alongside Nutin.

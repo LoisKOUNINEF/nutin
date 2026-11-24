@@ -1,3 +1,8 @@
+---
+description: "Nutin's first app tutorial: how to use testin-nutin, the built-in testing toolkit."
+ogImage: /assets/images/og-covers/og-cover-tutorial.jpg
+---
+
 # Test your app with testin-nutin
 
 Every Nutin application ships with **testin-nutin**, a built-in testing toolkit.
