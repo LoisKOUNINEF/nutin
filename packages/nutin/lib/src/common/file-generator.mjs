@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url';
 import * as fsExtra from 'fs-extra';
 import { TemplateCompiler } from './template-compiler.mjs';
 import { print } from '../utils/print.mjs';
+import { isDebug } from '../utils/errors.mjs';
 import { FEATURES } from './feature-registry.mjs';
 import { toJsOutput } from './transpile-ts.mjs';
 import { NOT_IN_EXTENSIONS } from './extension.mjs';
@@ -27,6 +28,9 @@ const TS_ONLY_TEMPLATES = [
   path.join('tools', 'builder', 'core', 'app', 'compile-ts.js.hbs'),
   path.join('tools', 'builder', 'core', 'app', 'handler-refs.js.hbs'),
   path.join('tools', 'builder', 'core', 'app', 'handler-refs.test.js.hbs'),
+  // Only compile-ts imports it.
+  path.join('tools', 'builder', 'core', 'app', 'ts-errors.js.hbs'),
+  path.join('tools', 'builder', 'core', 'app', 'ts-errors.test.js.hbs'),
 ];
 
 // Base templates an extension project doesn't get (see extension.mjs). Folder entries end with '/'.
@@ -153,7 +157,9 @@ export class FileGenerator {
     const outputPath = path.join(outputDir, rendered.outputFileName);
 
     if (options.skipExisting && await fs.pathExists(outputPath)) {
-      print.gray(`Skipped (already exists): ${path.relative(outputDir, outputPath)}`);
+      // Collected for one summary line (options.skipped); listed one by one with --debug.
+      options.skipped?.push(outputPath);
+      if (isDebug()) print.gray(`Skipped (already exists): ${outputPath}`);
       return;
     }
 

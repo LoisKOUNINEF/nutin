@@ -8,10 +8,10 @@ export function printUpdateSummary({ toUpdate, toAdd, conflicts, unknown, remove
   print.info(`  ${toUpdate.length} file(s) will be updated (untouched since generation)`);
   print.info(`  ${toAdd.length} new file(s) will be added`);
   if (conflicts.length > 0) {
-    print.boldError(`  ${conflicts.length} file(s) you edited will be merged with the new version`);
+    print.section(`  ${conflicts.length} file(s) you edited will be merged with the new version`);
   }
   if (noLongerGenerated.length > 0) {
-    print.boldError(`  ${noLongerGenerated.length} file(s) nutin no longer generates — left in place, review manually:`);
+    print.warn(`  ${noLongerGenerated.length} file(s) nutin no longer generates — left in place, review manually:`);
     noLongerGenerated.forEach(({ relPath }) => print.section(`    - ${relPath}`));
   }
   if (unknown.length > 0) {
@@ -27,7 +27,8 @@ export function printUpdateSummary({ toUpdate, toAdd, conflicts, unknown, remove
     print.info(`  ${describeI18nMigration(i18nMigration, { configMerged })}`);
   }
   if (jsonDrift.length > 0) {
-    print.section(`  ${jsonDrift.length} package.json/tsconfig.json value(s) differ from what this nutin version generates — never changed automatically, apply by hand if wanted:`);
+    const files = [...new Set(jsonDrift.map(({ file }) => file))].join('/');
+    print.section(`  ${jsonDrift.length} ${files} value(s) differ from what this nutin version generates — never changed automatically, apply by hand if wanted:`);
     jsonDrift.forEach(({ file, key, yours, nutin, retired }) =>
       print.section(`    - ${file} ${key}: yours ${describeValue(yours)}, nutin ${retired ? '(no longer needed)' : describeValue(nutin)}`)
     );

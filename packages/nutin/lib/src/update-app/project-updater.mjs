@@ -2,7 +2,8 @@ import path from 'path';
 import * as fsExtra from 'fs-extra';
 import inquirer from 'inquirer';
 import { print } from '../utils/print.mjs';
-import { PACKAGE_VERSION as packageVersion, META_FILE_NAME } from '../common/package-data.mjs';
+import { UserError } from '../utils/errors.mjs';
+import { PACKAGE_VERSION as packageVersion, META_FILE_NAME, CHANGELOG_URL } from '../common/package-data.mjs';
 import { readProjectMeta, updateProjectMeta } from '../common/project-meta.mjs';
 import { fetchOldTemplates } from './fetch-old-templates.mjs';
 import { parseVersion, compareVersions } from './version-compare.mjs';
@@ -31,6 +32,7 @@ export class ProjectUpdater {
     const { yes = false, from, allowDirty = false } = options;
     // Read before anything here writes .nutin-meta.json (bootstrap, resolved conflicts), so only your
     // own changes count. Enforced right before the first file write.
+    await this.assertNutinProject(projectPath);
     const gitStatus = allowDirty ? null : await getWorkingTreeStatus(projectPath);
     const meta = await this.resolveMeta(projectPath);
     await this.assertNoConflictMarkers(projectPath, meta);
@@ -53,6 +55,16 @@ export class ProjectUpdater {
     }
   }
 
+  // Checked before anything else, the bootstrap prompt included: outside a project, it would ask
+  // questions about a project that isn't there, then fail on the missing package.json.
+  async assertNutinProject(projectPath) {
+    for (const file of ['package.json', 'nutin.config.js']) {
+      if (!(await fs.pathExists(path.join(projectPath, file)))) {
+        throw new UserError(`Not a nutin project: no ${file} in ${projectPath}.`, { hint: 'Run nutin-update from the root folder of the project.' });
+      }
+    }
+  }
+
   async resolveMeta(projectPath) {
     const meta = (await readProjectMeta(projectPath)) ?? (await bootstrapProjectMeta(projectPath));
     this.assertValidVersion(meta.version);
@@ -65,8 +77,8 @@ export class ProjectUpdater {
   // an untrusted clone.
   assertValidVersion(version) {
     if (typeof version !== 'string' || !/^\d+\.\d+\.\d+$/.test(version)) {
-      throw new Error(
-        `${META_FILE_NAME} has an invalid version "${version}" — expected a version in major.minor.patch format, e.g. "1.3.1". ` +
+      throw new UserError(
+        `${META_FILE_NAME} has an invalid version "${version}" — expected a version in major.minor.patch format, e.g. "${packageVersion}". ` +
         `Fix or delete ${META_FILE_NAME} and try again.`,
       );
     }
@@ -83,7 +95,7 @@ export class ProjectUpdater {
       if (await hasConflictMarkers(path.join(projectPath, relPath))) stillMarked.push(relPath);
     }
     if (stillMarked.length > 0) {
-      throw new Error(
+      throw new UserError(
         `${stillMarked.length} file(s) still have conflict markers from the last update — the project won't build until ` +
         `they're resolved. Search for "${CONFLICT_MARKER}", merge, then run nutin-update again:\n` +
         stillMarked.map((relPath) => `  - ${relPath}`).join('\n'),
@@ -101,15 +113,15 @@ export class ProjectUpdater {
   assertUpdatable(meta) {
     const comparison = compareVersions(meta.version, packageVersion);
     if (comparison > 0) {
-      throw new Error(
+      throw new UserError(
         `This project records nutin v${meta.version}, but the installed CLI is v${packageVersion}. ` +
         'Install the latest nutin with "npm i -g @nutin/cli" before running nutin-update.',
       );
     }
     if (parseVersion(meta.version).major !== parseVersion(packageVersion).major) {
-      throw new Error(
+      throw new UserError(
         `nutin-update only handles minor/patch updates. Project is on v${meta.version}, installed CLI is ` +
-        `v${packageVersion} — that's a major version change. Please migrate manually (see the changelog).`,
+        `v${packageVersion} — that's a major version change. Migrate by hand, following the changelog: ${CHANGELOG_URL}`,
       );
     }
   }
@@ -142,7 +154,7 @@ export class ProjectUpdater {
     if (gitStatus) this.assertPristine(gitStatus);
 
     if (toMerge.length > 0 && !(await isGitAvailable())) {
-      throw new Error(
+      throw new UserError(
         `nutin-update needs git to merge the ${toMerge.length} file(s) you edited, but git was not found. ` +
         'Install git and run nutin-update again. No files were changed.',
       );
@@ -198,11 +210,11 @@ export class ProjectUpdater {
       print.info(`\n${merged.length} file(s) you edited were merged with the new version — review them (listed in ${REPORT_FILE_NAME}).`);
     }
     if (binaryConflicts.length > 0) {
-      print.boldError(`\n⚠️  ${binaryConflicts.length} binary file(s) you modified were left as they are — see ${REPORT_FILE_NAME}`);
+      print.warn(`\n⚠️  ${binaryConflicts.length} binary file(s) you modified were left as they are — see ${REPORT_FILE_NAME}.`);
     }
     if (manualSteps.length > 0) {
-      print.boldError(`\n⚠️  To do by hand (also in ${REPORT_FILE_NAME}):`);
-      manualSteps.forEach((step) => print.boldError(`    - ${step}`));
+      print.warn(`\n⚠️  To do by hand (also in ${REPORT_FILE_NAME}):`);
+      manualSteps.forEach((step) => print.warn(`    - ${step}`));
     }
     if (conflicted.length > 0) {
       print.boldError(
@@ -213,7 +225,7 @@ export class ProjectUpdater {
     }
     if (gitStatus) {
       print.info(`\nTo undo this update, run from the project folder: ${UNDO_COMMAND}`);
-      print.info(`Important: this will also remove any untracked folder.`);
+      print.warn('It also removes the untracked files and folders in the project folder.');
     }
 
     print.boldSuccess(`\n✅ Updated to nutin v${packageVersion}.`);
@@ -223,16 +235,16 @@ export class ProjectUpdater {
   // project folder, so checkout + clean only reverts what the update wrote. --allow-dirty skips this.
   assertPristine({ repo, gitFound, changes }) {
     if (!gitFound) {
-      throw new Error('git was not found: nutin-update uses it to make the update undoable. Install git, or pass --allow-dirty. No files were changed.');
+      throw new UserError('git was not found: nutin-update uses it to make the update undoable. Install git, or pass --allow-dirty. No files were changed.');
     }
     if (!repo) {
-      throw new Error(
+      throw new UserError(
         'This project isn\'t in a git repository, so the update couldn\'t be undone. Run "git init" and commit, ' +
         'or pass --allow-dirty. No files were changed.',
       );
     }
     if (changes.length > 0) {
-      throw new Error(
+      throw new UserError(
         'Commit or stash your changes first (untracked files included), so the update can be undone with git, ' +
         `or pass --allow-dirty. No files were changed:\n${changes.map((line) => `    ${line}`).join('\n')}`,
       );

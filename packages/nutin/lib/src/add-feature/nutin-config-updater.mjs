@@ -12,7 +12,7 @@ const FEATURE_CONFIGS = {
   docker: {
     key: 'dockerPorts',
     lines: '  dockerPorts: [9090],     // Ports the Docker container exposes/listens on — edit as needed\n',
-    added: 'Added "dockerPorts" to nutin.config.js — edit it if you need different port(s).',
+    added: 'Added "dockerPorts" to nutin.config.js: edit it if you need other ports.',
     manual: 'add "dockerPorts: [9090]" to it manually before building.',
   },
   markdown: {
@@ -21,7 +21,7 @@ const FEATURE_CONFIGS = {
       '  markdownSources: {       // Markdown folders compiled to /generated/<name>.json at build time\n' +
       "    sourceFolders: ['markdown-content'], // folder paths, or { folder, hubFiles, routePrefix, sectionInPath, prefixReplacements, seo }\n" +
       '  },\n',
-    added: 'Added "markdownSources" to nutin.config.js — add your own folders to "sourceFolders".',
+    added: 'Added "markdownSources" to nutin.config.js.',
     manual: 'add "markdownSources: { sourceFolders: [\'markdown-content\'] }" to it manually.',
   },
 };
@@ -34,7 +34,7 @@ export async function updateNutinConfig(projectPath, feature) {
   const content = await fs.readFile(configPath, 'utf-8');
 
   if (new RegExp(`${featureConfig.key}\\s*:`).test(content)) {
-    print.info(`Kept existing "${featureConfig.key}" value in nutin.config.js`);
+    print.info(`Kept your existing "${featureConfig.key}" in nutin.config.js.`);
     return;
   }
 
@@ -51,5 +51,5 @@ export async function updateNutinConfig(projectPath, feature) {
   }
 
   await fs.writeFile(configPath, updated);
-  print.warn(featureConfig.added);
+  print.info(featureConfig.added);
 }

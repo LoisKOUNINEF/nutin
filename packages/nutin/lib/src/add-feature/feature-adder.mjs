@@ -10,6 +10,8 @@ import { updatePackageJson } from './package-json-updater.mjs';
 import { updateNutinConfig } from './nutin-config-updater.mjs';
 import { patchBaseTemplates } from './base-template-patcher.mjs';
 import { EXTENSION_INCOMPATIBLE_FEATURES } from '../common/extension.mjs';
+import { runScriptCommand } from '../common/package-json-helper.mjs';
+import { UserError, isDebug } from '../utils/errors.mjs';
 
 const fs = fsExtra.default;
 
@@ -20,17 +22,16 @@ export class FeatureAdder {
   }
 
   async addFeatureToProject(featureKey) {
+    // The command (index.mjs) validates what the user typed: an unknown key here is a bug in the caller.
     const feature = FEATURES.find((candidate) => candidate.key === featureKey);
-    if (!feature) {
-      throw new Error(`Unknown feature: ${featureKey}`);
-    }
+    if (!feature) throw new Error(`Unknown feature: ${featureKey}`);
 
     const projectPath = process.cwd();
     await this.validateProject(projectPath);
 
     const meta = await readProjectMeta(projectPath);
     if (meta?.extension && EXTENSION_INCOMPATIBLE_FEATURES[feature.key]) {
-      throw new Error(`${feature.key} can't be added to a browser extension project: ${EXTENSION_INCOMPATIBLE_FEATURES[feature.key]}.`);
+      throw new UserError(`${feature.key} can't be added to a browser extension project: ${EXTENSION_INCOMPATIBLE_FEATURES[feature.key]}.`);
     }
     if (meta?.features?.[feature.key]) {
       print.gray(`${feature.key} is already enabled in this project — skipping.`);
@@ -51,17 +52,21 @@ export class FeatureAdder {
   async validateProject(projectPath) {
     const packageJsonPath = path.join(projectPath, 'package.json');
     if (!(await fs.pathExists(packageJsonPath))) {
-      throw new Error(`No package.json found in ${projectPath} — run this from a nutin project's root.`);
+      throw new UserError(`No package.json found in ${projectPath}.`, { hint: 'Run this from the root folder of a nutin project.' });
     }
     if (!(await fs.pathExists(path.join(projectPath, 'nutin.config.js')))) {
-      throw new Error(`No nutin.config.js file found in ${projectPath} — is this a nutin project?`);
+      throw new UserError(`No nutin.config.js found in ${projectPath}: this isn't a nutin project.`, { hint: 'Run this from the root folder of a nutin project.' });
     }
   }
 
   async applyFeatureTemplate(projectPath, feature, context) {
     const featureTemplateDir = path.join(this.fileGenerator.getTemplatesRoot(), 'features', feature.key);
 
-    await this.fileGenerator.processTemplateDirectory(featureTemplateDir, projectPath, context, { skipExisting: true });
+    const skipped = [];
+    await this.fileGenerator.processTemplateDirectory(featureTemplateDir, projectPath, context, { skipExisting: true, skipped });
+    if (skipped.length > 0) {
+      print.gray(`Kept ${skipped.length} file(s) that already exist${isDebug() ? '' : ' (--debug lists them)'}.`);
+    }
 
     await updatePackageJson(projectPath, feature);
     await updateNutinConfig(projectPath, feature);
@@ -79,14 +84,17 @@ export class FeatureAdder {
   }
 
   printNextSteps(feature, context) {
+    const pm = context.packageManager;
     if (feature.key === 'docker') {
       print.info('\nNext steps:');
-      print.gray('  Edit dockerPorts in nutin.config.js.');
+      print.gray(`  1. Build the image with "${runScriptCommand(pm, 'docker:build')}", then start it with "${runScriptCommand(pm, 'docker:run')}".`);
+      print.gray(`  2. "${runScriptCommand(pm, 'docker:run', '--help')}" lists their flags (detached run, tags...).`);
     }
     if (feature.key === 'markdown') {
       print.info('\nNext steps:');
-      print.gray('  1. List your Markdown folders in nutin.config.js "markdownSources.sourceFolders" — each one is served at /<folder name>. (Start with the generated default markdown-content).');
-      print.gray(`  2. Run "${context.packageManager} run build" — you will be asked to install marked and gray-matter (pass "-- -y" to accept non-interactively).`);  
+      print.gray('  1. List your Markdown folders in nutin.config.js "markdownSources.sourceFolders": each one is served at /<folder name>. Start from the generated "markdown-content" folder.');
+      print.gray(`  2. Run "${runScriptCommand(pm, 'build')}": it asks to install marked and gray-matter ("${runScriptCommand(pm, 'build', '-y')}" installs them without asking).`);
+      print.gray(`  3. "${runScriptCommand(pm, 'markdown:check')}" checks the Markdown folders without building.`);
     }
   }
 }
@@ -95,4 +103,17 @@ export const featureAdder = new FeatureAdder();
 
 export async function addFeatureToProject(featureKey) {
   return featureAdder.addFeatureToProject(featureKey);
+}
+
+// nutin-add all: every feature the project can have (an extension can't have any of them).
+export async function addAllFeatures() {
+  const meta = await readProjectMeta(process.cwd());
+  const features = FEATURES.filter((feature) => !(meta?.extension && EXTENSION_INCOMPATIBLE_FEATURES[feature.key]));
+  if (features.length === 0) {
+    print.gray('No feature can be added to a browser extension project: there is nothing to do.');
+    return;
+  }
+  for (const feature of features) {
+    await featureAdder.addFeatureToProject(feature.key);
+  }
 }

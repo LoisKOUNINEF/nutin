@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
+import { reportError } from '../lib/src/utils/errors.mjs';
 import { Command } from 'commander';
 import { addFeatureCommand } from '../lib/index.mjs';
 
 addFeatureCommand(new Command()).parseAsync(process.argv).catch((err) => {
-  console.error(err instanceof Error ? err.message : err);
-  process.exitCode = 1;
+  process.exitCode = reportError('Error', err);
 });

@@ -5,7 +5,9 @@ import { print } from '../utils/print.mjs';
 import { FEATURES } from './feature-registry.mjs';
 import { detectPackageManager } from './package-json-helper.mjs';
 import { writeProjectMeta } from './project-meta.mjs';
-import { META_FILE_NAME } from './package-data.mjs';
+import { META_FILE_NAME, PACKAGE_VERSION } from './package-data.mjs';
+import { EXTENSION_INCOMPATIBLE_FEATURES } from './extension.mjs';
+import { UserError } from '../utils/errors.mjs';
 
 const fs = fsExtra.default;
 
@@ -18,14 +20,25 @@ async function detectLang(projectPath) {
   return hasMainJs && !hasMainTs ? 'js' : 'ts';
 }
 
+// A browser extension project has src/extension/manifest.json; its surface shows in it
+// (action.default_popup for the popup, side_panel otherwise). false for a web app.
+async function detectExtension(projectPath) {
+  const manifestPath = path.join(projectPath, 'src', 'extension', 'manifest.json');
+  if (!(await fs.pathExists(manifestPath))) return false;
+  const manifest = await fs.readFile(manifestPath, 'utf-8');
+  return manifest.includes('default_popup') ? 'popup' : 'side-panel';
+}
+
 export async function bootstrapProjectMeta(projectPath) {
   // inquirer can't prompt without a TTY: it throws on a closed stdin and waits forever on an open pipe.
   if (!process.stdin.isTTY) {
-    throw new Error(
-      `No ${META_FILE_NAME} found for this project, and this shell is non-interactive, so it can't be reconstructed. ` +
-      `Run this command again in a terminal to answer a couple of questions, or create ${META_FILE_NAME} yourself, e.g. ` +
-      `{ "version": "1.3.1", "packageManager": "npm", "lang": "ts", "features": { "docker": false, "markdown": false } } ` +
-      `("lang": "js" for a --js-only project)`
+    throw new UserError(
+      `No ${META_FILE_NAME} found for this project, and this shell is non-interactive, so it can't be reconstructed.`,
+      {
+        hint: `Run this command again in a terminal to answer a couple of questions, or create ${META_FILE_NAME} yourself, e.g. ` +
+          `{ "version": "${PACKAGE_VERSION}", "packageManager": "npm", "lang": "ts", "extension": false, "features": { "docker": false, "markdown": false } } ` +
+          '("lang": "js" for a --js-only project, "extension": "popup" or "side-panel" for a browser extension).',
+      },
     );
   }
 
@@ -36,17 +49,20 @@ export async function bootstrapProjectMeta(projectPath) {
     {
       type: 'input',
       name: 'version',
-      message: 'Which nutin version was this project originally created with (e.g. 1.3.1)?',
-      validate: (input) => /^\d+\.\d+\.\d+$/.test(input.trim()) || 'Enter a version like 1.3.1',
+      message: `Which nutin version was this project last created or updated with (e.g. ${PACKAGE_VERSION})?`,
+      validate: (input) => /^\d+\.\d+\.\d+$/.test(input.trim()) || `Enter a version like ${PACKAGE_VERSION}.`,
     },
   ]);
 
-  const { features } = await inquirer.prompt([
+  const extension = await detectExtension(projectPath);
+  // An extension can't have any of the optional features: nothing to ask.
+  const featureChoices = FEATURES.filter((feature) => !(extension && EXTENSION_INCOMPATIBLE_FEATURES[feature.key]));
+  const { features } = featureChoices.length === 0 ? { features: [] } : await inquirer.prompt([
     {
       type: 'checkbox',
       name: 'features',
       message: 'Which optional features does this project have?',
-      choices: FEATURES.map((feature) => ({ name: feature.key, value: feature.key })),
+      choices: featureChoices.map((feature) => ({ name: feature.key, value: feature.key })),
     },
   ]);
 
@@ -54,6 +70,7 @@ export async function bootstrapProjectMeta(projectPath) {
   const lang = await detectLang(projectPath);
   const flags = Object.fromEntries(FEATURES.map((f) => [f.key, features.includes(f.key)]));
 
-  print.gray(`Detected ${lang === 'js' ? 'a JavaScript' : 'a TypeScript'} project using ${packageManager} — edit ${META_FILE_NAME} if that's wrong.`);
-  return writeProjectMeta(projectPath, { version: version.trim(), packageManager, lang, ...flags });
+  const kind = `${lang === 'js' ? 'a JavaScript' : 'a TypeScript'} ${extension ? `browser extension (${extension})` : 'project'}`;
+  print.gray(`Detected ${kind} using ${packageManager} — edit ${META_FILE_NAME} if that's wrong.`);
+  return writeProjectMeta(projectPath, { version: version.trim(), packageManager, lang, extension, ...flags });
 }

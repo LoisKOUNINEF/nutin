@@ -35,13 +35,13 @@ export async function updatePackageJson(projectPath, feature) {
   const scripts = featureScripts[feature.key]();
 
   const scriptsResult = mergeAdditive(packageJson.scripts ?? {}, scripts);
-  packageJson.scripts = scriptsResult.merged;
-
-  await fs.writeJSON(packageJsonPath, packageJson, { spaces: 2 });
-
   const skipped = scriptsResult.skipped;
   if (skipped.length > 0) {
-    print.info(`Kept existing package.json values for: ${skipped.join(', ')}`);
+    print.info(`Kept your existing package.json scripts: ${skipped.join(', ')}.`);
   }
-  print.info('Updated package.json');
+  if (skipped.length === Object.keys(scripts).length) return;
+
+  packageJson.scripts = scriptsResult.merged;
+  await fs.writeJSON(packageJsonPath, packageJson, { spaces: 2 });
+  print.info('Updated package.json.');
 }

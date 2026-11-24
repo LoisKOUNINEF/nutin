@@ -1,36 +1,55 @@
-export const chalk = {
-  green: (s) => `\x1b[32m${s}\x1b[0m`,
-  red: (s) => `\x1b[31m${s}\x1b[0m`,
-  blue: (s) => `\x1b[34m${s}\x1b[0m`,
-  yellow: (s) => `\x1b[33m${s}\x1b[0m`,
-  cyan: (s) => `\x1b[36m${s}\x1b[0m`,
-  purple: (s) => `\x1b[35m${s}\x1b[0m`,
-  gray: (s) => `\x1b[90m${s}\x1b[0m`,
-  boldGreen: (s) => `\x1b[1;32m${s}\x1b[0m`,
-  boldRed: (s) => `\x1b[1;31m${s}\x1b[0m`,
-  boldBlue: (s) => `\x1b[1;34m${s}\x1b[0m`,
-  boldYellow: (s) => `\x1b[1;33m${s}\x1b[0m`,
-  boldCyan: (s) => `\x1b[1;36m${s}\x1b[0m`,
-  boldPurple: (s) => `\x1b[1;35m${s}\x1b[0m`,
-  boldGray: (s) => `\x1b[1;90m${s}\x1b[0m`,
+// ANSI styles, only when the stream is a terminal: piped output and CI logs get plain text.
+// NO_COLOR (https://no-color.org) turns them off; FORCE_COLOR wins over both: "0" off, any other value on.
+const STYLES = {
+  green: '32',
+  red: '31',
+  blue: '34',
+  yellow: '33',
+  cyan: '36',
+  purple: '35',
+  gray: '90',
+  boldGreen: '1;32',
+  boldRed: '1;31',
+  boldBlue: '1;34',
+  boldYellow: '1;33',
+  boldCyan: '1;36',
+  boldPurple: '1;35',
+  boldGray: '1;90',
 };
 
-export const print = {
-  head: (s) => console.info(`${chalk.purple(s)}`),  
-  boldHead : (s) => console.info(`${chalk.boldPurple(s)}`),
-  section: (s) => console.info(`${chalk.yellow(s)}`),
-  boldSection: (s) => console.info(`${chalk.boldYellow(s)}`),
-  info: (s) => console.info(`${chalk.green(s)}`),
-  boldInfo: (s) => console.info(`${chalk.boldGreen(s)}`),
-  success: (s) => console.log(`${chalk.cyan(s)}`),
-  boldSuccess: (s) => console.log(`${chalk.boldCyan(s)}`),
-  gray: (s) => console.info(`${chalk.gray(s)}`),
-  boldGray: (s) => console.info(`${chalk.boldGray(s)}`),
-  blue: (s) => console.info(`${chalk.blue(s)}`),
-  boldBlue: (s) => console.info(`${chalk.boldBlue(s)}`),
-  error: (s) => console.error(`${chalk.red(s)}`),
-  boldError: (s) => console.error(`${chalk.boldRed(s)}`),
-  grayError: (s) => console.error(`${chalk.boldGray(s)}`),
-  warn: (s) => console.warn(`${chalk.yellow(s)}`),
-  debug: (s) => console.debug(`${chalk.gray(s)}`),
+export function useColor(stream, env = process.env) {
+  // FORCE_COLOR=0 (or false) turns them off, as in Node and supports-color; any other value on.
+  if (env.FORCE_COLOR !== undefined) return env.FORCE_COLOR !== '0' && env.FORCE_COLOR !== 'false';
+  if (env.NO_COLOR !== undefined && env.NO_COLOR !== '') return false;
+  return Boolean(stream?.isTTY);
 }
+
+function paint(style, s, stream) {
+  return useColor(stream) ? `\x1b[${STYLES[style]}m${s}\x1b[0m` : String(s);
+}
+
+// For text built inline; styled for stdout.
+export const chalk = Object.fromEntries(Object.keys(STYLES).map((style) => [style, (s) => paint(style, s, process.stdout)]));
+
+const out = (style, method = 'info') => (s) => console[method](paint(style, s, process.stdout));
+const err = (style, method = 'error') => (s) => console[method](paint(style, s, process.stderr));
+
+export const print = {
+  head: out('purple'),
+  boldHead: out('boldPurple'),
+  section: out('yellow'),
+  boldSection: out('boldYellow'),
+  info: out('green'),
+  boldInfo: out('boldGreen'),
+  success: out('cyan', 'log'),
+  boldSuccess: out('boldCyan', 'log'),
+  gray: out('gray'),
+  boldGray: out('boldGray'),
+  blue: out('blue'),
+  boldBlue: out('boldBlue'),
+  error: err('red'),
+  boldError: err('boldRed'),
+  grayError: err('gray'),
+  warn: err('yellow', 'warn'),
+  debug: out('gray', 'debug'),
+};

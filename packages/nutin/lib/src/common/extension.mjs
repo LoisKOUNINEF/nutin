@@ -16,6 +16,8 @@ export const NOT_IN_EXTENSIONS = [
   'tools/builder/core/seo/', // SEO pages, robots.txt, sitemap.xml and their prerendering (ssr/)
   'tools/builder/core/i18n/', // locale bundling
   'tools/builder/core/prod-bundle/compress-files.js.hbs', // .gz/.br copies
+  'tools/builder/core/prod-bundle/hash-data-files.js.hbs', // hashed locales/markdown URLs, for nginx's cache
+  'tools/builder/core/app/validate-routes.js.hbs', // no routes (route-keys.js stays: validate-html uses it)
 ];
 
 // Features that can't be added to an extension project, and why.

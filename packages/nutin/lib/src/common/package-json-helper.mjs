@@ -1,11 +1,19 @@
 import { promiseExec } from '../utils/promise-exec-alias.mjs';
 import { print } from '../utils/print.mjs';
+import { UserError } from '../utils/errors.mjs';
 import * as fsExtra from 'fs-extra';
 import * as path from 'path';
 
 const fs = fsExtra.default;
 
 export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm', 'bun'];
+
+// How to run a package.json script with flags: npm needs "--" before them (without it, npm reads
+// e.g. -y or -d as its own options); yarn, pnpm and bun pass them on as they are.
+export function runScriptCommand(packageManager, script, flags = '') {
+  if (!flags) return `${packageManager} run ${script}`;
+  return packageManager === 'npm' ? `npm run ${script} -- ${flags}` : `${packageManager} run ${script} ${flags}`;
+}
 
 export async function detectPackageManager(projectPath) {
   if (await fs.pathExists(path.join(projectPath, 'pnpm-lock.yaml'))) return 'pnpm';
@@ -42,7 +50,10 @@ export async function installDependencies(projectPath, packageManager) {
 
     if (err.stdout) print.gray(err.stdout);
     if (err.stderr) print.error(err.stderr);
-    throw new Error(`${installCommand} failed (see output above for the real cause).`);
+    const folder = path.basename(projectPath);
+    throw new UserError(`"${installCommand}" failed: see the output above for the cause.`, {
+      hint: `The project was created in "${folder}": once the cause is fixed, run "cd ${folder}" then "${installCommand}".`,
+    });
   }
 }
 

@@ -1,6 +1,7 @@
 import path from 'path';
 import * as fsExtra from 'fs-extra';
 import { print } from '../utils/print.mjs';
+import { UserError } from '../utils/errors.mjs';
 import { initializeGit } from './git-manager.mjs';
 import { installDependencies } from '../common/package-json-helper.mjs';
 import { FileGenerator } from '../common/file-generator.mjs';
@@ -29,7 +30,7 @@ export class ProjectGenerator {
 
   async validateProjectPath(projectPath, projectName) {
     if (await fs.pathExists(projectPath)) {
-      throw new Error(`Directory ${projectName} already exists`);
+      throw new UserError(`The folder "${projectName}" already exists.`, { hint: 'Choose another project name, or remove the folder.' });
     }
   }
 

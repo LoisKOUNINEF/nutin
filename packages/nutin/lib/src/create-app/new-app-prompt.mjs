@@ -2,6 +2,7 @@ import inquirer from 'inquirer';
 import { defaults } from './context-builder.mjs';
 import { PACKAGE_MANAGERS } from '../common/package-json-helper.mjs';
 import { EXTENSION_SURFACES } from '../common/extension.mjs';
+import { UserError } from '../utils/errors.mjs';
 
 export async function newAppPrompt(initialName, cliOptions = {}) {
 
@@ -20,7 +21,7 @@ export async function newAppPrompt(initialName, cliOptions = {}) {
   } else {
     const validationResult = validateProjectName(projectName);
     if (validationResult !== true) {
-      throw new Error(validationResult);
+      throw new UserError(`Invalid project name "${projectName}". ${validationResult}`);
     }
   }
 
@@ -65,9 +66,9 @@ export async function newAppPrompt(initialName, cliOptions = {}) {
 }
 
 function validateProjectName(input) {
-  if (!input.trim()) return 'Project name is required';
+  if (!input.trim()) return 'A project name is required.';
   if (!/^[a-z0-9-_]+$/.test(input)) {
-    return 'Use only lowercase letters, numbers, hyphens, and underscores';
+    return 'Use only lowercase letters, numbers, hyphens and underscores.';
   }
   return true;
 }
