@@ -194,13 +194,13 @@ class Router extends Service<Router> {
     this.#busSubscriptions.push(unsubOnLang);    
   }
 
-  // An import() the app doesn't catch (a component's lazy module), failing because its file is
-  // gone: the same recovery as a lazy route, a full page load of the current URL, once. A caught
-  // import() error is the app's to handle; the error still reaches the console either way.
+  // An import() the app doesn't catch, failing because its file is gone:
+  // a full page load of the current URL, once per URL for the session (see reloadOnce()).
+  // A caught import() error is the app's to handle; the error still reaches the console either way.
   #handleUnhandledRejection(event: PromiseRejectionEvent): void {
     if (!NavigationManager.isModuleLoadError(event.reason)) return;
     const { pathname, search, hash } = window.location;
-    NavigationManager.reloadOnce(pathname + search + hash, event.reason, 'a module');
+    NavigationManager.reloadOnce(pathname + search + hash, event.reason, 'a module', true);
   }
 
   async #handlePopState(): Promise<void> {

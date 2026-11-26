@@ -89,8 +89,9 @@
 
 - **Tabs left open across a deploy no longer hit 404s on the previous build's files:**
     - Translations and Markdown manifests fall back to their plain URL when their content-hashed copy is gone.
-    - An uncaught `import()` that can't fetch one of the app's own chunks now gets the same recovery as a lazy route: one full page load of the current URL.
+    - An uncaught `import()` that can't fetch one of the app's own chunks now gets the same recovery as a lazy route: one full page load of the current URL. A failure at the same URL afterwards only logs, however late: Safari's error doesn't name the module, so a third-party one can't be told apart.
     - Neither page load happens while the browser is offline, which also applies to lazy routes. Before, a lazy route could reload into the browser's offline page.
+    - Neither happens either when `sessionStorage` doesn't keep the record of the last reload (blocked, or accepting writes without keeping them), lazy routes included.
 
 - **Router:**
     - Routes: the build now warns when `src/app/routes.ts` has no `'/404'` route. Without one, an unknown URL renders a blank page, and an in-app link to one does nothing. It's a warning, not an error: if a `/404` is spread in from another file, the build doesn't see it.

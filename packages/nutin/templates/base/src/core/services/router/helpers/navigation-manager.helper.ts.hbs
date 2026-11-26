@@ -10,7 +10,7 @@ export type HistoryMode = 'push' | 'replace' | 'none';
 const ANNOUNCE_DELAY = 100;
 
 // See reloadOnce().
-const RELOAD_KEY = 'nutin:failed-view-load';
+const RELOAD_KEY = 'nutin:failed-load';
 const RELOAD_WINDOW = 10_000;
 
 // How browsers reject an import() whose file is gone or unreachable (Chrome|Firefox|Safari).
@@ -90,20 +90,25 @@ export function recoverFromFailedViewLoad(url: string, error: unknown): void {
   reloadOnce(url, error, 'the view');
 }
 
-// Code failed to load:
-// A full page load of `url` fetches the new build.
-//  It happens once per URL within RELOAD_WINDOW (recorded in sessionStorage),
-// so code that keeps failing (or a broken chunk) can't reload forever.
-// The error is logged and the current page stays.
-// Offline, or without sessionStorage, it only logs: a reload would only trade the page for an error page.
-export function reloadOnce(url: string, error: unknown, what: string): void {
+// Code failed to load: a full page load of `url` fetches the new build.
+// The last reload is recorded in sessionStorage, so code that keeps failing (or a broken chunk)
+// can't reload forever. The same URL again only logs, and the current page stays:
+// - within RELOAD_WINDOW (a lazy route's view: a later deploy can recover it again).
+// - however late with oncePerSession (an import() nothing caught: Safari names no module in its error,
+//   so a third-party one can't be told apart, and may fail again on every click).
+// Offline, or when sessionStorage throws or doesn't keep the record, it only logs:
+// a reload would trade the page for an error page, or could repeat with nothing to stop it.
+export function reloadOnce(url: string, error: unknown, what: string, oncePerSession = false): void {
   console.error(`[router] Failed to load ${what} for "${url}".`, error);
   if (navigator.onLine === false) return;
   try {
-    const last = JSON.parse(sessionStorage.getItem(RELOAD_KEY) ?? 'null') as { url?: string; at?: number } | null;
+    const last = JSON.parse(sessionStorage.getItem(RELOAD_KEY) ?? 'null') as { url?: string; at: number } | null;
     const now = Date.now();
-    if (last?.url === url && typeof last.at === 'number' && now - last.at < RELOAD_WINDOW) return;
-    sessionStorage.setItem(RELOAD_KEY, JSON.stringify({ url, at: now }));
+    if (last?.url === url && (oncePerSession || now - last.at < RELOAD_WINDOW)) return;
+    const record = JSON.stringify({ url, at: now });
+    sessionStorage.setItem(RELOAD_KEY, record);
+    // Read back: storage that accepts a write without keeping it couldn't stop the next reload.
+    if (sessionStorage.getItem(RELOAD_KEY) !== record) return;
   } catch {
     return;
   }

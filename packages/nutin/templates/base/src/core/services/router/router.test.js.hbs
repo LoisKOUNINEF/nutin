@@ -937,7 +937,7 @@ describe('Router', () => {
   it('reloads the current URL once when an uncaught import() fails to load one of the app\'s chunks, and only for that', async () => {
     // As above: the sessionStorage record shows the full page load was attempted, and for which URL.
     sessionStorage.clear();
-    const record = () => JSON.parse(sessionStorage.getItem('nutin:failed-view-load') ?? 'null');
+    const record = () => JSON.parse(sessionStorage.getItem('nutin:failed-load') ?? 'null');
     const reject = (reason) => {
       const event = new window.Event('unhandledrejection');
       event.reason = reason;
@@ -958,6 +958,11 @@ describe('Router', () => {
         reject(new TypeError(`Failed to fetch dynamically imported module: ${window.location.origin}/chunks/a-1.js`));
         expect(record().url).toBe('/?tab=2#top');
 
+        // Once per URL for the session: a later failure there (Safari's message names no module,
+        // so it may be a third-party one) only logs.
+        reject(new TypeError('Importing a module script failed.'));
+        expect(record().url).toBe('/?tab=2#top');
+
         // Removed with the router's other listeners.
         sessionStorage.clear();
         router.removeEventListeners();
@@ -974,7 +979,7 @@ describe('Router', () => {
     // right before it, in sessionStorage, shows it was attempted, and for which URL.
     sessionStorage.clear();
     const home = makeView('home');
-    const record = () => JSON.parse(sessionStorage.getItem('nutin:failed-view-load') ?? 'null');
+    const record = () => JSON.parse(sessionStorage.getItem('nutin:failed-load') ?? 'null');
     try {
       router = AppRouter({ '/': () => home, '/docs': () => Promise.reject(new TypeError('Failed to fetch dynamically imported module')) });
       await flushPromises();
