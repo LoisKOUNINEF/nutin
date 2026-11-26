@@ -181,21 +181,42 @@ describe('EventBus', () => {
     expect(regularCalls).toBe(2);
   });
 
-  it('with the same callback subscribed and once()d, one emit calls it twice and removes both, in either order', () => {
+  it('with the same callback subscribed and once()d, one emit calls it twice and only the once() goes, in either order', () => {
     let calls = 0;
     const callback = () => { calls++; };
     eventBus.subscribe('user-login', callback);
     eventBus.once('user-login', callback);
     eventBus.emit('user-login', {});
     eventBus.emit('user-login', {});
-    expect(calls).toBe(2);
+    expect(calls).toBe(3);
 
     calls = 0;
     eventBus.once('notification', callback);
     eventBus.subscribe('notification', callback);
     eventBus.emit('notification', {});
     eventBus.emit('notification', {});
-    expect(calls).toBe(2);
+    expect(calls).toBe(3);
+  });
+
+  it('calls a once() handler once even when it, or a handler after it, emits the same event', () => {
+    let onceCalls = 0;
+    eventBus.once('notification', () => {
+      onceCalls++;
+      eventBus.emit('notification', {});
+    });
+    eventBus.emit('notification', {});
+    expect(onceCalls).toBe(1);
+
+    onceCalls = 0;
+    let nested = false;
+    eventBus.subscribe('user-login', () => {
+      if (nested) return;
+      nested = true;
+      eventBus.emit('user-login', {});
+    });
+    eventBus.once('user-login', () => { onceCalls++; });
+    eventBus.emit('user-login', {});
+    expect(onceCalls).toBe(1);
   });
 
   it('dispatches to the handlers subscribed when emit() started, even if one unsubscribes another', () => {

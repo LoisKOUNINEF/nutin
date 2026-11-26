@@ -129,6 +129,10 @@
     - The previous version's templates are fetched from a temporary folder, so a project's own `.npmrc` can no longer point `npm pack` at another registry. `~/.npmrc`, the global npmrc and `npm_config_*` environment variables still apply.
     - A `packageManager` other than `npm`, `yarn`, `pnpm` or `bun` is ignored.
 
+- **`AppEventBus.once()` handlers run once:**
+    - A `once()` handler that emits its own event, or one emitted by a handler before it, is no longer called again. Emitting its own event from inside it used to recurse until the call stack overflowed, each overflow caught and logged as a failing listener.
+    - A `subscribe()` of the same callback to the same event now stays. It was removed with it.
+
 - **A `raw()` returned directly from `generateTemplate()` now renders.** It rendered nothing. It is now parsed in place, stripped of binding attributes and sanitized at `trustLevel`, like a `raw()` between elements. `raw()` now returns a plain `SafeHtml` (the internal `RawHtml` class is gone).
 
 ## 3.1.3

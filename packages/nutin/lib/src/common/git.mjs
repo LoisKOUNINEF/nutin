@@ -41,11 +41,18 @@ export function printUndoHint(what) {
   print.warn('It also removes the untracked files and folders in the project folder.');
 }
 
-// subject: what must be undoable: getWorkingTreeStatus()'s porcelain lines.
+// Porcelain lines dirtyTreeError() lists; the rest are counted.
+const MAX_LISTED_CHANGES = 20;
+
+// subject: what must be undoable. changes: getWorkingTreeStatus()'s porcelain lines, listed so the
+// user sees what to commit or stash (the first MAX_LISTED_CHANGES of them).
 export function dirtyTreeError(subject, changes) {
+  const listed = changes.slice(0, MAX_LISTED_CHANGES).map((line) => `    ${line}`);
+  const more = changes.length - listed.length;
+  if (more > 0) listed.push(`    …and ${more} more (git status lists them all)`);
   return new UserError(
     `Commit or stash your changes first (untracked files included), so ${subject} can be undone with git, ` +
-    `or pass --allow-dirty.\nNo files were changed.\n${changes.length} changes pending.`,
+    `or pass --allow-dirty. No files were changed. ${changes.length} change(s) pending:\n${listed.join('\n')}`,
   );
 }
 
