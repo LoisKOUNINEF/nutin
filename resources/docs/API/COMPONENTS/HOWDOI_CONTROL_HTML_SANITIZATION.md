@@ -38,6 +38,7 @@ const templateFn = (page: IPage) => html`<article>${trustedRaw(page.html)}</arti
 Where `raw()` sits decides how it's handled:
 
 - Between elements: complete markup, as above. Half an element (an unclosed `<div>`) gets closed by the parser.
+- Returned directly from `generateTemplate()` (or as a `nutinIf` branch returned there): like between elements.
 - Inside a tag (`<input ${raw('checked')}>`): attributes only. Event handlers, `srcdoc`, binding attributes and `javascript:` URLs are dropped.
 - Inside an attribute value: escaped like any other value.
 - Inside `<textarea>` or `<title>`, which only hold text: inserted as text, the way `innerHTML` would put it there. Entities are decoded and tags show as written, and `raw('</textarea>…')` can't close the element.

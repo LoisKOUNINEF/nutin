@@ -6,8 +6,26 @@ You can override it when a template needs more than a single expression.
 
 ## When to use it
 
-- The markup branches or is assembled conditionally
+- The template is assembled step by step (several early returns, loops over computed parts)
 - The template needs instance state rather than only the `config` argument a `templateFn` receives.
+
+For markup that only branches, `nutinIf()` keeps the if/else in the template itself, `.html` files included, with no override:
+
+```ts
+import { html, nutinIf } from '../../../core/index.js';
+
+const templateFn = (config: AvatarConfig) => html`
+  ${nutinIf(Boolean(config.src), () => html`<img class="avatar__img" src="${config.src}" alt="${config.alt}">`)
+    .nutinElse(html`<span class="avatar__initials" aria-hidden="true">${config.initials}</span>`)}
+`;
+```
+
+- A branch is a plain string, an `html` result, `raw()`, `trustedRaw()`, or a thunk returning one. It behaves exactly as if written in place of the call: a plain string is escaped inside `html`, but is markup when `nutinIf` is returned directly from `generateTemplate()`.
+- Only the branch taken is called and rendered: pass a thunk (`() => html\`…\``) for a branch that is costly to build or reads data that may be missing. The untaken branch's `data-component` children are never mounted.
+- Without `.nutinElse()`, a false condition renders nothing.
+- Else-if: pass a thunk as the else, `nutinIf(a, x).nutinElse(() => nutinIf(b, y).nutinElse(z))`.
+- The condition must be a `boolean`. With `&&`, `${items.length && html\`…\`}` renders `0` for an empty list; `nutinIf(items.length > 0, …)` can't. A non-boolean condition warns in development.
+- In a component whose template is a `.html` file, keep the `nutinIf` import in its code file even though the editor reports it as unused.
 
 ## In a `Component`
 
@@ -47,7 +65,7 @@ export class AvatarComponent extends Component<HTMLDivElement, AvatarConfig> {
 }
 ```
 
-- Attributes that depend on optional flags can be nested `html` fragments. `false` renders nothing, and `raw()` marks a fixed attribute as markup:
+- Attributes that depend on optional flags can be nested `html` fragments. A false `nutinIf` renders nothing, and `raw()` marks a fixed attribute as markup:
 
 ```ts
 protected override generateTemplate(): Nutin.Template {
@@ -55,10 +73,10 @@ protected override generateTemplate(): Nutin.Template {
 
   return html`<input
     type="checkbox"
-    ${id && html`id="${id}"`}
-    ${name && html`name="${name}"`}
-    ${checked && raw('checked')}
-    ${disabled && raw('disabled')}
+    ${nutinIf(Boolean(id), () => html`id="${id}"`)}
+    ${nutinIf(Boolean(name), () => html`name="${name}"`)}
+    ${nutinIf(Boolean(checked), raw('checked'))}
+    ${nutinIf(Boolean(disabled), raw('disabled'))}
   >`;
 }
 ```

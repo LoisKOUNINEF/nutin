@@ -2,6 +2,12 @@
 
 ## 3.1.4
 
+### Features
+
+- **`nutinIf(condition, branch)` and `.nutinElse(branch)`:** If/else in templates, exported from core.
+    - `${nutinIf(user.isAdmin, () => html`<div data-component="admin"></div>`).nutinElse(html`<p>Read-only</p>`)}`. Without `.nutinElse()`, a false condition renders nothing.
+    - `data-optional` stays, for emptiness after hydration. See [How do I remove empty elements?](https://www.nutin.dev/docs/api/remove-empty-elements) and [How do I generate a template?](https://www.nutin.dev/docs/api/generate-a-template).
+
 ### Changes
 
 - **Smaller default bundle:**
@@ -102,6 +108,8 @@
     - An invalid version is quoted in the error message: control characters and terminal escape codes show as text instead of reaching the terminal, and a non-string value no longer reads like a valid one.
     - The previous version's templates are fetched from a temporary folder, so a project's own `.npmrc` can no longer point `npm pack` at another registry. `~/.npmrc`, the global npmrc and `npm_config_*` environment variables still apply.
     - A `packageManager` other than `npm`, `yarn`, `pnpm` or `bun` is ignored.
+
+- **A `raw()` returned directly from `generateTemplate()` now renders.** It rendered nothing. It is now parsed in place, stripped of binding attributes and sanitized at `trustLevel`, like a `raw()` between elements. `raw()` now returns a plain `SafeHtml` (the internal `RawHtml` class is gone).
 
 ## 3.1.3
 

@@ -1,4 +1,4 @@
-import { BaseComponent, AppEventBus, AppPipeRegistry } from '#root/dist/src/core/index.js';
+import { BaseComponent, AppEventBus, AppPipeRegistry, html, nutinIf } from '#root/dist/src/core/index.js';
 
 class TestComponent extends BaseComponent {
   constructor(options = {}, hooks = {}) {
@@ -728,5 +728,19 @@ describe('BaseComponent', () => {
     } finally {
       delete Element.prototype.moveBefore;
     }
+  });
+
+  it('render() never creates the child placeholder of a nutinIf branch that is not taken', () => {
+    const log = [];
+    const parent = new LoggingParent(log, {
+      template: html`${nutinIf(true, () => html`<div data-component="a"></div>`).nutinElse(html`<div data-component="b"></div>`)}`,
+    });
+
+    parent.render();
+
+    expect(parent.children.map((child) => child.name)).toEqual(['a']);
+    expect(log).toContain('a:render');
+    expect(log).not.toContain('b:render');
+    parent.destroy();
   });
 });
