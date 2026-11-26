@@ -149,7 +149,9 @@ server {
     # Exact match: it must win over the i18n unprefixed-path redirect (a regex location).
     location = /health {
         access_log off;
-        add_header Content-Type text/plain always;
+        # The type of `return`'s body. add_header would send a second Content-Type,
+        # after nginx's own application/octet-stream.
+        default_type text/plain;
         add_header Cache-Control "no-store" always;
         return 200 "healthy\n";
     }
