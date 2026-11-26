@@ -37,12 +37,15 @@ nutin-add <feature>
 - `docker` (Dockerfile, nginx config, `docker:build`/`docker:run` scripts)
 - `markdown` (Markdown folders compiled into routed pages).
 - Cannot be used in a browser extension (`nutin-new --extension`)
+- Your project must be committed first (`--allow-dirty` to skip), so a feature can be undone. Outside git it asks for confirmation (`-y` to skip the prompt).
+- `--dry-run` lists the files it would create or modify, without writing anything.
 
 ## Update Nutin
 
 ```bash
 # update to latest version while preserving your changes
 nutin-update
+nutin-update --dry-run # show what would change, and which files would get conflict markers, without writing anything
 ```
 
 - Your project must be committed first (`--allow-dirty` to skip), so an update can always be undone.

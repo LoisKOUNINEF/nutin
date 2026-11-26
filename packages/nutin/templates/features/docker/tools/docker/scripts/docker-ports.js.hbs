@@ -31,11 +31,7 @@ export function validateDockerPorts(rawPorts) {
     }
 
     if (port > MAX_PORT) {
-      throw new Error(`nutin.config.js: "dockerPorts[${i}]": use a registered port between ${MIN_PORT} and ${MAX_PORT}.`);
-    }
-
-    if (port < MIN_PORT || port > MAX_PORT) {
-      throw new Error(`nutin.config.js: "dockerPorts[${i}]" (${port}) is outside of port range (${MIN_PORT} / ${MAX_PORT} .`);
+      throw new Error(`nutin.config.js: "dockerPorts[${i}]" (${port}) is above the registered ports — use a port between ${MIN_PORT} and ${MAX_PORT}.`);
     }
 
     if (seen.has(port)) {

@@ -7,12 +7,17 @@ describe('localeRedirects', () => {
 
   it('redirects "/" to the default language', () => {
     const conf = localeRedirects({ i18n: true, languages: ['en', 'fr'], defaultLanguage: 'fr' });
-    expect(conf).toContain('location = / {\n        return 301 /fr/$is_args$args;\n    }');
+    expect(conf).toContain('location = / {\n        add_header Cache-Control "public, max-age=3600" always;\n        return 301 /fr/$is_args$args;\n    }');
   });
 
   it('redirects unprefixed, extensionless paths with the raw request URI', () => {
     const conf = localeRedirects({ i18n: true, languages: ['en', 'fr'], defaultLanguage: 'en' });
-    expect(conf).toContain('location ~ ^/(?!(?:en|fr)(?:/|$))[^.]*$ {\n        return 301 /en$request_uri;\n    }');
+    expect(conf).toContain('location ~ ^/(?!(?:en|fr)(?:/|$))[^.]*$ {\n        add_header Cache-Control "public, max-age=3600" always;\n        return 301 /en$request_uri;\n    }');
+  });
+
+  it('lets browsers and CDNs keep each redirect for an hour, not indefinitely', () => {
+    const conf = localeRedirects({ i18n: true, languages: ['en', 'fr'], defaultLanguage: 'en' });
+    expect(conf.split('add_header Cache-Control "public, max-age=3600" always;').length).toBe(3);
   });
 
   it('only matches unprefixed, extensionless paths', () => {

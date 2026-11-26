@@ -1,7 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { renderFromTemplate } from './render-docker-template.js';
+import { renderTemplate, renderFromTemplate } from './render-docker-template.js';
 
 describe('renderFromTemplate', () => {
   let tmpDir;
@@ -38,6 +38,23 @@ describe('renderFromTemplate', () => {
 
     const output = fs.readFileSync(path.join(tmpDir, 'Dockerfile'), 'utf-8');
     expect(output).toBe('ARG PORT="8080 8081 3000"\nCMD wget http://127.0.0.1:8080/health\n');
+  });
+
+  it('renderTemplate returns the substituted content without writing the output file', async () => {
+    fs.writeFileSync(path.join(tmpDir, 'nginx.conf.template'), '__PORTS_PLACEHOLDER__;\n');
+
+    const content = await renderTemplate(tmpDir, 'nginx.conf.template', [['__PORTS_PLACEHOLDER__', 'listen 8080;']]);
+
+    expect(content).toBe('listen 8080;;\n');
+    expect(fs.existsSync(path.join(tmpDir, 'nginx.conf'))).toBeFalsy();
+  });
+
+  it('renderTemplate checks the tokens like renderFromTemplate', async () => {
+    fs.writeFileSync(path.join(tmpDir, 'nginx.conf.template'), 'listen 9090;\n');
+
+    await expect(() =>
+      renderTemplate(tmpDir, 'nginx.conf.template', [['__PORTS_PLACEHOLDER__', 'listen 8080;']])
+    ).toThrow('__PORTS_PLACEHOLDER__');
   });
 
   it('throws when the template file does not exist', async () => {

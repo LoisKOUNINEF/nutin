@@ -5,7 +5,7 @@
 ### Changes
 
 - **Smaller default bundle:**
-    - A new app's `bundle.js` is now 29 KB *(minified)* / 10.5 KB *(gzip)* / 9.5 KB *(brotli)*, down from 34 KB / 11.5 KB / 10.5 KB.
+    - A new app's `bundle.js` is now 28 KB *(minified)* / 10 KB *(gzip)* / 9 KB *(brotli)*, down from 34 KB / 11.5 KB / 10.5 KB.
     - The `es2020` target no longer turns each class field into a helper call. Browsers: Safari 15, Chrome 84, Firefox 90 or later. **To support older browsers**, list the features to lower for your target in the new, optional `builder.esbuild.lowerClassFeatures` of `nutin.config.js` (e.g. `['class-field', 'class-private-field', 'class-private-method']`). See the [Builder](https://www.nutin.dev/docs/tools/builder) docs.
     - core's private members are now `#private`. TypeScript `private` names were bundled in full; `#private` ones are minified. `#private` members drop the `_` prefix. Tests or JS code that still read one now read `undefined`, so test through the public API instead. See [How do I spy on methods?](https://www.nutin.dev/docs/testing/spy-on-methods).
     - `Lifecycle` is now a set of module functions. It is exported with the same `Lifecycle` namespace, so APIs are unchanged. A test can no longer `spyOn(Lifecycle, '…')` (it throws). Spy on `AppEventBus.emit` or subscribe instead. See [How do I spy on methods?](https://www.nutin.dev/docs/testing/spy-on-methods).
@@ -20,9 +20,12 @@
     - `mountElement()` appends or replaces directly, instead of passing an options object.
     - `Navigation` calls `AppEventBus` directly, instead of through a bus it kept in a private field. It's still an object, so tests can `spyOn(Navigation, 'navigateTo')`, and `useEventBus()` still redirects it.
     - In prod bundles, a template that throws is no longer wrapped for its report. `render()` reports the component whose `generateTemplate()` threw with a `console.error`.
+    - Built-in pipes are opt-in. A new app's `main.ts` no longer calls `registerPipes()`: the call is there, commented out, with a link to the docs. Each pipe is now its own export (`datePipe`, `currencyPipe`, `uppercasePipe`…); register only the ones you use. `registerPipes()` still registers them all. See [What pipes are available?](https://www.nutin.dev/docs/api/what-pipes-are-available).
 
 - **`docker` feature:**
     - Docker scripts: `docker:build` and `docker:run` now take flags. `--help` lists them. With npm, pass them after `--`: `npm run docker:run -- -d`. Ports stay in `nutin.config.js`: `dockerPorts`. `-p`/`--publish` are refused.
+    - New `--dry-run` flag for `docker:build` and `docker:run`: prints the docker command without running it. `docker:build --dry-run` checks the Docker configuration (ports...). `docker:run --dry-run` with a taken container name warns instead of stopping. New `tools/utils/dry-run.js`.
+    - `docker:build`, `docker:run` and `generate` ignore a leading `--`. pnpm passes it on to the script, so npm's form (`pnpm run docker:run -- -d`) was refused with "Unexpected argument".
     - New defaults for `docker:run`: the container is named after the project, and a foreground run is removed when it stops. If the name is already taken, `docker:run` says how to free it.
     - Scoped package names now work.
     - nginx caching: changed translations and Markdown pages now show right after a deploy. Production builds now write a content-hashed copy of `/locales/*.json` and `/generated/*.json` (new `tools/builder/core/prod-bundle/hash-data-files.js`).
@@ -34,6 +37,26 @@
         - The i18n redirects are cached for an hour instead of indefinitely.
         - `nutin-update` never changes `src/app/`, so an updated project's `MarkdownManifest` keeps fetching the plain `/generated/*.json`. The file is kept next to its hashed copy, and is now revalidated. To use the cached copy, wrap the URL in `MarkdownManifest.urlFor()` with `dataFileUrl()`.
 
+- **`nutin-update --dry-run`:** shows what the update would do, without writing anything
+
+- **`nutin-add` can be undone with git, like `nutin-update`:**
+    - Before writing anything, it checks that the repo is clean: no changes and no untracked files. When feature have been added, it prints the undo command `git checkout -- . && git clean -fd`.
+    - Without git, or outside a git repository, it warns and asks to confirm. `-y`/`--yes` adds without asking; without it, a non-interactive shell changes nothing.
+    - New `--allow-dirty` flag to add with uncommitted changes.
+    - `nutin-add all` checks once, and prints the undo command once.
+    - New `--dry-run` flag: lists every file adding the feature would create or modify, without writing anything. Files that can't be patched automatically are reported with the change to apply by hand, as in a real run. `nutin-add all --dry-run` shows each feature on top of the ones before it. It never stops on uncommitted changes or asks for confirmation: it says when a real run would stop.
+
+- **`generate --dry-run`:** lists the files `generate` would create, without writing anything.
+
+- **testin-nutin:**
+    - `test()` is now an alias of `it()`.
+    - Skip tests with `it.skip` / `test.skip`, or a whole suite with `describe.skip`. The report lists each skipped test (`SKIPPED: …`), and the summary and `coverage/summary.md` show `⏭ Skipped: N` when there are any.
+    - Run only some tests with `it.only` / `test.only`, or a whole suite with `describe.only`. A `.only` anywhere in the run skips every other test: those are counted as skipped but not listed. The summary then warns `⚠️ .only is active`, so a `.only` left in a file is noticed.
+    - Skip beats only: an `it.only` in a `describe.skip` is skipped. A `describe()` nested in a `describe.skip` / `describe.only` takes its parent's mode.
+    - New `testinNutin.isolate` in `nutin.config.js` (default `[]`): test files (path substrings) that each run in their own worker thread, with their own modules and one jsdom window for their import and all their suites. Use it for custom elements. Each isolated file loads jsdom again (a few hundred milliseconds; the workers run in parallel). See [How do I write a test?](https://www.nutin.dev/docs/testing/write-a-test). New `tools/testin-nutin/core/queue/run-isolated.js` and `isolated-file.js`.
+
+- **Dependencies:** new apps get `jsdom` 31, `sass` 1.108, `linkedom` 0.18.15. Extensions get `@types/chrome` 0.3.8. The markdown feature installs `marked` 18.3, and Tailwind CSS installs `tailwindcss` and `@tailwindcss/cli` 4.3.5. *Note: Since sass 1.92, declarations written after a nested rule are emitted after it, in source order, like native CSS nesting.*
+
 ### Fixes
 
 - **Tabs left open across a deploy no longer hit 404s on the previous build's files:**
@@ -41,11 +64,24 @@
     - An uncaught `import()` that can't fetch one of the app's own chunks now gets the same recovery as a lazy route: one full page load of the current URL.
     - Neither page load happens while the browser is offline, which also applies to lazy routes. Before, a lazy route could reload into the browser's offline page.
 
-- **Routes:** the build now warns when `src/app/routes.ts` has no `'/404'` route. Without one, an unknown URL renders a blank page, and an in-app link to one does nothing. It's a warning, not an error: if a `/404` is spread in from another file, the build doesn't see it.
+- **Router:**
+    - Routes: the build now warns when `src/app/routes.ts` has no `'/404'` route. Without one, an unknown URL renders a blank page, and an in-app link to one does nothing. It's a warning, not an error: if a `/404` is spread in from another file, the build doesn't see it.
+    - The 404 page keeps the whole URL that was asked for. The query string and hash used to be dropped from the address bar.
+    - The first 404 load no longer adds a history entry.
+    - A guard that returns `'/404'` now renders the `/404` view at the guarded URL, instead of redirecting to `/404`. A direct visit to `/404` still renders it.
+    - While the `/404` view is shown, the router adds `<meta name="robots" content="noindex">` to `<head>` and removes it on the next matched route. The server answers unknown URLs with the app (HTTP 200), so without it crawlers could index 404 pages. A robots tag of your own in `index.html` is left alone. *Note: adding known routes in `nginx.config.template` has been evaluated and dropped: costs/benefits ratio was too low.*
 
 - **testin-nutin:**
     - A test that leaves a `console` method stubbed can no longer hide the report. The runner now captures the console methods when it starts, and puts them back before printing the report (new `tools/testin-nutin/core/real-console.js`). [How do I spy on methods?](https://www.nutin.dev/docs/testing/spy-on-methods) shows the pattern.
     -  A test filter that matches no file fails instead of passing with 0 tests. Coverage with nothing measured no longer also reports "No uncovered code found".
+    - Failure traces: a failing test, hook or test file that fails to load now prints the error's message and the trace through the test and the code it called. A thrown non-`Error` prints as a string. New `tools/testin-nutin/core/clean-stack.js` does the trimming.
+
+- **Kept children keep more state in browsers without `Element.moveBefore()` (Safari):** a kept child is still detached and re-inserted there. Besides focus, caret and scroll, `base-component/helpers/preservation.helper.ts` now also restores:
+    - Running and paused CSS animations, which continue from where they were instead of restarting.
+    - A text selection inside the child (plain text or `contenteditable`).
+    - Open popovers, which closed when the child left the document. Reopening them fires their `beforetoggle` / `toggle` events.
+
+    Iframes still reload, custom elements are still disconnected and reconnected, and CSS transitions and modal dialogs still don't survive. Only `moveBefore()` keeps those. Browsers that support it are unchanged.
 
 - **Clearer messages from the build, dev, generator, docker and test tools:**
     - Stack traces: an expected error prints its message only. A real bug keeps its stack.
@@ -55,6 +91,17 @@
     - Fixed or gated messages.
     - Less noise: the dev loop no longer repeats "For production, use …" on every rebuild.
     - Runtime errors (dev builds) are prefixed and name what failed.
+
+- **`GETTING_STARTED.md` for browser extension projects:**
+    - It no longer describes what an extension doesn't have: views and their generator, `Navigation`, `config/seo.json`, and the i18n and SEO options (the build refuses both). The component example opens a tab through `chromeApiService` instead of navigating.
+    - New "Browser extension" section: the manifest and its permissions, `chromeApiService`, the background script, files the manifest references, debugging, and a link to [How do I create a browser extension?](https://www.nutin.dev/docs/cli/create-a-browser-extension). Options covers the `extension` block (`browsers`, `geckoId`) and Tailwind; Testing covers `fake-chrome.js`.
+    - Every project: the table of contents links now reach their sections, and `--js-only` projects see `.js` file names (`main.js`, generated files).
+
+- **`nutin-update` trusts `.nutin-meta.json` and the project's npm config less:**
+    - The version check runs again right before `npm pack`, so no caller can reach the shell command with an unchecked version.
+    - An invalid version is quoted in the error message: control characters and terminal escape codes show as text instead of reaching the terminal, and a non-string value (e.g. `["3.1.3"]`) no longer reads like a valid one.
+    - The previous version's templates are fetched from a temporary folder, so a project's own `.npmrc` can no longer point `npm pack` at another registry. `~/.npmrc`, the global npmrc and `npm_config_*` environment variables still apply.
+    - A `packageManager` other than `npm`, `yarn`, `pnpm` or `bun` is ignored: the package manager is detected from the lockfile, as when it's missing.
 
 ## 3.1.3
 

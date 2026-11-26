@@ -8,8 +8,8 @@ import { I18N_ENABLED, LANGUAGES, DEFAULT_LANGUAGE } from '../../../utils/langua
 import { compileLanguages, normalizeSource, MarkdownCompileError } from './markdown-compiler.js';
 
 // Compiles every `markdownSources.sourceFolders` entry of nutin.config.js into
-// dist/generated/<routePrefix>.json — or, with i18n, <routePrefix>.<lang>.json per language —
-// fetched at runtime by a MarkdownManifest.
+// dist-build/src/generated/<routePrefix>.json (served as /generated/…).
+// With i18n, <routePrefix>.<lang>.json per language, fetched at runtime by a MarkdownManifest.
 // `--check` (the "markdown:check" script) compiles everything but writes nothing.
 
 const isCheck = process.argv.includes('--check');
@@ -22,7 +22,7 @@ if (!Array.isArray(sourceFolders)) {
 await ensureDeps({
   feature: 'Markdown (markdownSources)',
   deps: [
-    { name: 'marked', version: '^18.0.14' },
+    { name: 'marked', version: '^18.3.0' },
     { name: 'gray-matter', version: '^4.0.3' },
   ],
   isProd: builderConfig.isProd,

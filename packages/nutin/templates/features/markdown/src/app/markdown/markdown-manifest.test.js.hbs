@@ -78,6 +78,22 @@ describe('MarkdownManifest', () => {
     expect(manifest.loadFailed).toBe(false);
   });
 
+  it('loads its content-hashed copy in prod builds, and the plain file once that copy is gone (a tab from before a deploy)', async () => {
+    globalThis.__NUTIN_DATA_FILES__ = JSON.stringify({ '/generated/docs.json': '/generated/docs.0123abcd.json' });
+    try {
+      mockFetch(notFound(), ok(MANIFEST));
+      const manifest = new MarkdownManifest({ id: 'docs', sectionInPath: true }, noLanguage);
+      await manifest.load();
+
+      expect(calls).toEqual(['/generated/docs.0123abcd.json', '/generated/docs.json']);
+      expect(manifest.loadFailed).toBe(false);
+      expect(manifest.hasPages).toBe(true);
+      expect(manifest.url).toBe('/generated/docs.json');
+    } finally {
+      delete globalThis.__NUTIN_DATA_FILES__;
+    }
+  });
+
   it('with a language, fetches /generated/<id>.<lang>.json and reads the current language', async () => {
     const page = (title) => ({ sections: [{ id: 'index', title: 'x', description: '', pages: ['a'] }], pages: { a: { slug: 'a', title, section: 'index' } } });
     mockFetch(ok(page('Hello')), ok(page('Bonjour')));

@@ -29,8 +29,8 @@ describe('validateDockerPorts', () => {
   });
 
   it('throws for ephemeral ports at or above 49152', () => {
-    expect(() => validateDockerPorts([49152])).toThrow('use a registered port');
-    expect(() => validateDockerPorts([60000])).toThrow('use a registered port');
+    expect(() => validateDockerPorts([49152])).toThrow('"dockerPorts[0]" (49152) is above the registered ports');
+    expect(() => validateDockerPorts([60000])).toThrow('use a port between 1024 and 49151');
   });
 
   it('throws for duplicate ports', () => {

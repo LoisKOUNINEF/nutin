@@ -1,9 +1,9 @@
 import { readFile, writeFile } from 'fs/promises';
 import path from 'path';
 
-export async function renderFromTemplate(dockerDir, templateName, outputName, replacements) {
+// The template with its placeholders substituted, without writing it (docker:build --dry-run).
+export async function renderTemplate(dockerDir, templateName, replacements) {
   const templatePath = path.join(dockerDir, templateName);
-  const outputPath = path.join(dockerDir, outputName);
 
   let content;
   try {
@@ -21,5 +21,10 @@ export async function renderFromTemplate(dockerDir, templateName, outputName, re
     content = content.replace(placeholder, value);
   }
 
-  await writeFile(outputPath, content);
+  return content;
+}
+
+export async function renderFromTemplate(dockerDir, templateName, outputName, replacements) {
+  const content = await renderTemplate(dockerDir, templateName, replacements);
+  await writeFile(path.join(dockerDir, outputName), content);
 }
