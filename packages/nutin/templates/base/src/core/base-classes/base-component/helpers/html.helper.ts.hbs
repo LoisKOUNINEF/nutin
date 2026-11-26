@@ -193,7 +193,17 @@ const resolveBranch = (branch: Branch): Nutin.Template => (typeof branch === 'fu
 // Returned directly from generateTemplate() (or through String()), it renders as the branch itself would.
 class ConditionalHtml extends SafeHtml {
   constructor(public readonly condition: boolean, public readonly result: Nutin.Template | Nutin.Template[]) {
-    super(...topLevel(result));
+    super('');
+    // Its top-level value and raws are built on first read only:
+    // inside html`` (the usual case) they never are, since the result is interpolated in place.
+    // Built eagerly, a nutinFor's markup would be built once more for each level of nesting.
+    // Own accessors: they replace the fields SafeHtml set.
+    let built: [string, ReadonlyMap<string, string>] | undefined;
+    const build = () => (built ??= topLevel(result));
+    Object.defineProperties(this, {
+      value: { get: () => build()[0] },
+      raws: { get: () => build()[1] },
+    });
   }
 
   // Returns itself when the condition holds: it renders exactly as its branch would,

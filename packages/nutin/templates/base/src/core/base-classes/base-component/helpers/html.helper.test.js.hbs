@@ -704,6 +704,24 @@ describe('html', () => {
     expect(renderedHtml(() => nutinFor(['a', 'b'], li))).toBe('<li>0:a</li><li>1:b</li>');
   });
 
+  it('nutinFor interpolates each item once, nested or not, inline or returned directly', () => {
+    let reads = 0;
+    // Interpolated as text: each read of its string form is one interpolation of the item.
+    const counted = () => ({ toString: () => { reads++; return 'x'; } });
+
+    expect(String(html`<ul>${nutinFor([1, 2], counted)}</ul>`)).toBe('<ul>xx</ul>');
+    expect(reads).toBe(2);
+
+    reads = 0;
+    const nested = html`<ul>${nutinFor([1, 2], () => html`<li>${nutinFor([1, 2], () => nutinFor([1], counted))}</li>`)}</ul>`;
+    expect(String(nested)).toBe('<ul><li>xx</li><li>xx</li></ul>');
+    expect(reads).toBe(4);
+
+    reads = 0;
+    expect(renderedHtml(() => nutinFor([1, 2], counted))).toBe('xx');
+    expect(reads).toBe(2);
+  });
+
   it('nutinFor renders empty for an empty list, null and undefined, or the else branch', () => {
     const li = (item) => html`<li>${item}</li>`;
 

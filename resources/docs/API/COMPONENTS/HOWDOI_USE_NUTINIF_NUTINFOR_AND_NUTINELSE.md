@@ -64,6 +64,7 @@ For lists, `nutinFor()` maps items to markup, with the same [`.nutinElse()`](#nu
 - The markup is exactly what you write, with no wrappers, so `<option>`s, table rows and `<dt>`/`<dd>` pairs work as they are.
 - `data-event` in items binds to the component's own handlers. Pass the item's id with `@dataset:` (`data-id="${item.id}"` + `click:_pick:@dataset:id`).
 - The items are rebuilt on every render. For items with their own state, or that must survive a re-render, use a catalog: see [Catalog or nutinFor?](./HOWDOI_REGISTER_CHILD_COMPONENTS.md#catalog-or-nutinfor).
+- Each item's markup is built once, nested `nutinFor`s included: the top-level markup of a `nutinIf`/`nutinFor` is only built when it's returned directly from `generateTemplate()`.
 
 ### What `nutinFor` adds over `.map()`
 
