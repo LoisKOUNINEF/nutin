@@ -755,6 +755,39 @@ describe('Router', () => {
     expect(window.location.pathname).toBe('/fast');
   });
 
+  it('reloads the current URL once when an uncaught import() fails to load its file, and only for that', async () => {
+    // As above: the sessionStorage record shows the full page load was attempted, and for which URL.
+    sessionStorage.clear();
+    const record = () => JSON.parse(sessionStorage.getItem('nutin:failed-view-load') ?? 'null');
+    const reject = (reason) => {
+      const event = new window.Event('unhandledrejection');
+      event.reason = reason;
+      window.dispatchEvent(event);
+    };
+    try {
+      router = AppRouter({ '/': () => makeView('home') });
+      await flushPromises();
+      window.history.pushState({}, '', '/?tab=2#top');
+
+      await silenceConsole('error', async () => {
+        reject(new Error('not a module load'));
+        reject(new TypeError('x is not a function'));
+        expect(record()).toBe(null);
+
+        reject(new TypeError('Failed to fetch dynamically imported module: /chunks/a-1.js'));
+        expect(record().url).toBe('/?tab=2#top');
+
+        // Removed with the router's other listeners.
+        sessionStorage.clear();
+        router.removeEventListeners();
+        reject(new TypeError('Importing a module script failed.'));
+        expect(record()).toBe(null);
+      });
+    } finally {
+      sessionStorage.clear();
+    }
+  });
+
   it('falls back to a full page load of the target URL when a lazy view fails to load', async () => {
     // The full page load itself (location.assign) is a no-op in jsdom: the record written
     // right before it, in sessionStorage, shows it was attempted, and for which URL.

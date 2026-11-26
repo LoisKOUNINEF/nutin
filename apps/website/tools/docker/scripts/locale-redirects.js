@@ -1,6 +1,8 @@
 // Language codes end up in an nginx regex and redirect target: letters, digits and "-" only (e.g. "pt-BR").
 const LANGUAGE_CODE = /^[A-Za-z0-9-]+$/;
 
+const REDIRECT_CACHE = 'add_header Cache-Control "public, max-age=3600" always;';
+
 // Only i18n builds serve every page under a language prefix — without it, "/" and every
 // other path are real pages, and nothing is redirected.
 export function localeRedirects({ i18n, languages, defaultLanguage }) {
@@ -16,12 +18,16 @@ export function localeRedirects({ i18n, languages, defaultLanguage }) {
   // language instead of a 200 SPA shell that duplicates the real page. Paths with a "."
   // (robots.txt, sitemap.xml, assets) are left to the other locations. $request_uri is
   // the raw request (query included): the decoded $uri could inject headers via %0D%0A.
+  // Browsers and CDNs keep a 301 without Cache-Control indefinitely: an hour lets a change
+  // of default language reach everyone.
   return [
     `location = / {`,
+    `        ${REDIRECT_CACHE}`,
     `        return 301 /${defaultLanguage}/$is_args$args;`,
     `    }`,
     ``,
     `    location ~ ^/(?!(?:${languages.join('|')})(?:/|$))[^.]*$ {`,
+    `        ${REDIRECT_CACHE}`,
     `        return 301 /${defaultLanguage}$request_uri;`,
     `    }`,
   ].join('\n');

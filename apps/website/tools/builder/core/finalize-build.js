@@ -18,9 +18,10 @@ function writeBuildStamp() {
   fs.writeFileSync(path.join(PATHS.temp, '.build-time'), `${new Date().toISOString()}\n`);
 }
 
-// Only used during the build: compile-ts's tsconfig and merge-templates' template map.
+// Only used during the build: compile-ts's tsconfig, merge-templates' template map and the
+// data files map the bundles' define was built from (prod-bundle/data-files.js).
 function removeBuildFiles() {
-  ['tsconfig.json', '.template-map.json'].forEach((file) => fs.rmSync(path.join(PATHS.temp, file), { force: true }));
+  ['tsconfig.json', '.template-map.json', 'data-files.json'].forEach((file) => fs.rmSync(path.join(PATHS.temp, file), { force: true }));
 }
 
 function removeFoldersAfterBundle() {

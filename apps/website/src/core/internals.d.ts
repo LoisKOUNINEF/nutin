@@ -208,3 +208,7 @@ declare namespace Nutin {
 // Set by the builder's esbuild `define` so prod bundles can drop i18n code when it's
 // disabled; undefined in tests and tsc output, which fall back to CONFIG.i18n.
 declare var __NUTIN_I18N__: boolean | undefined;
+
+// Set by the builder's esbuild `define` (tools/builder/core/prod-bundle/bundle-options.js): the
+// runtime JSON files' content-hashed URLs, as JSON, `{}` in dev. Undefined in tests and tsc output.
+declare var __NUTIN_DATA_FILES__: string | undefined;

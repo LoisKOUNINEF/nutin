@@ -24,14 +24,17 @@ export const DEV_OVERRIDES = {
  * lets esbuild fold core's i18n guards to a constant and drop the i18n code when it's off.
  * `globalThis.__NUTIN_MARKDOWN_SOURCES__` (the markdown feature's source folders) is only
  * emitted where code reads it, so an app without that code ships none of it.
+ * `globalThis.__NUTIN_DATA_FILES__`: the runtime JSON files' content-hashed URLs (data-files.js),
+ * `{}` in dev builds, read by core's dataFileUrl().
  */
-export function sharedDefine({ isProd, i18n, markdownSources }) {
+export function sharedDefine({ isProd, i18n, markdownSources, dataFiles = {} }) {
   return {
     'process.env.NODE_ENV': isProd ? '"production"' : '"development"',
     'globalThis.__NUTIN_I18N__': JSON.stringify(Boolean(i18n)),
     // A JSON *string* literal: esbuild inlines and folds it (`define ?? fallback`), while
     // an array define is hoisted into a variable and keeps the fallback code around.
     'globalThis.__NUTIN_MARKDOWN_SOURCES__': JSON.stringify(JSON.stringify(markdownSources?.sourceFolders ?? [])),
+    'globalThis.__NUTIN_DATA_FILES__': JSON.stringify(JSON.stringify(dataFiles)),
   };
 }
 

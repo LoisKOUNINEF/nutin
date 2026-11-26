@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import crypto from 'crypto';
 import { PATHS } from '../app/paths.js';
 import { errorExit } from '../../../utils/index.js';
+import { hashFile } from './content-hash.js';
 
 // What index.html references, the only file whose references are updated. Everything else keeps
 // its name: chunks are already hashed by esbuild, and files copied from public/ and src/assets/
@@ -32,11 +32,6 @@ function addHashToFiles(distDir) {
   });
 
   updateHtmlReferences(path.join(distDir, 'index.html'), fileMap);
-}
-
-function hashFile(filePath) {
-  const content = fs.readFileSync(filePath);
-  return crypto.createHash('sha256').update(content).digest('hex').substring(0, 8);
 }
 
 function escapeRegExp(str) {

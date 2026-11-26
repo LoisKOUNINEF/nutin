@@ -1,17 +1,25 @@
 import { sharedDefine, slimNutinConfig, slimSeoConfig, isPlainData } from './bundle-options.js';
 
 describe('bundle-options', () => {
-  it('sharedDefine sets NODE_ENV, the i18n flag and the markdown sources from the build config', () => {
+  it('sharedDefine sets NODE_ENV, the i18n flag, the markdown sources and an empty data files map from the build config', () => {
     expect(sharedDefine({ isProd: true, i18n: false })).toEqual({
       'process.env.NODE_ENV': '"production"',
       'globalThis.__NUTIN_I18N__': 'false',
       'globalThis.__NUTIN_MARKDOWN_SOURCES__': JSON.stringify('[]'),
+      'globalThis.__NUTIN_DATA_FILES__': JSON.stringify('{}'),
     });
     expect(sharedDefine({ isProd: false, i18n: true, markdownSources: { sourceFolders: ['docs', { folder: 'x', seo: false }] } })).toEqual({
       'process.env.NODE_ENV': '"development"',
       'globalThis.__NUTIN_I18N__': 'true',
       'globalThis.__NUTIN_MARKDOWN_SOURCES__': JSON.stringify('["docs",{"folder":"x","seo":false}]'),
+      'globalThis.__NUTIN_DATA_FILES__': JSON.stringify('{}'),
     });
+  });
+
+  it('sharedDefine passes the data files map as a JSON string', () => {
+    const dataFiles = { '/locales/en.json': '/locales/en.0123abcd.json' };
+    expect(sharedDefine({ isProd: true, i18n: true, dataFiles })['globalThis.__NUTIN_DATA_FILES__'])
+      .toBe(JSON.stringify(JSON.stringify(dataFiles)));
   });
 
   it('slimNutinConfig drops tooling-only keys and keeps everything app code may read', () => {

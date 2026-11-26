@@ -274,6 +274,17 @@ describe('i18n module', async () => {
     errSpy.restore();
   });
 
+  it('loads the translations from the plain file when their content-hashed copy is gone (a tab from before a deploy)', async () => {
+    globalThis.__NUTIN_DATA_FILES__ = JSON.stringify({ '/locales/fr.json': '/locales/fr.0123abcd.json' });
+    fetchMock.mockError('/locales/fr.0123abcd.json', 404);
+    try {
+      await I18nService.setCurrentLanguage('fr');
+      expect(I18nService.translate('home.title')).toBe('Mon App');
+    } finally {
+      delete globalThis.__NUTIN_DATA_FILES__;
+    }
+  });
+
   it('onDestroy clears translations but keeps the saved language preference', async () => {
     await I18nService.setCurrentLanguage('fr');
     expect(I18nService.translate('home.title')).toBe('Mon App');

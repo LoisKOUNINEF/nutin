@@ -1,3 +1,4 @@
+import { fetchDataFile } from '../../core/index.js';
 import { markdownLanguage } from './markdown-i18n.js';
 
 export interface IMarkdownHeading {
@@ -108,7 +109,8 @@ export class MarkdownManifest {
   private async fetchManifest(lang: string): Promise<void> {
     const url = this.urlFor(lang);
     try {
-      const response = await fetch(url);
+      // Its content-hashed copy in prod builds, else this URL (see core's fetchDataFile).
+      const response = await fetchDataFile(url);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       this._data.set(lang, await response.json());
       this._failed.delete(lang);

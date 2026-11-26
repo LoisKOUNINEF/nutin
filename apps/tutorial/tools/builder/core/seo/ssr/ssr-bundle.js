@@ -5,6 +5,7 @@ import { pathToFileURL } from 'url';
 import { PATHS } from '../../app/paths.js';
 import { builderConfig } from '../../../builder.config.js';
 import { sharedDefine } from '../../prod-bundle/bundle-options.js';
+import { readDataFilesMap } from '../../prod-bundle/data-files.js';
 
 const SSR_DIR = path.join(PATHS.temp, '.ssr');
 const ENTRY_FILE = path.join(PATHS.tempApp, '__ssr-entry.ts');
@@ -36,7 +37,8 @@ export async function buildSsrBundle() {
       loader: {
         '.json': 'json',
       },
-      define: sharedDefine({ ...builderConfig, isProd: true }),
+      // The same data files map as the client bundle, so prerendering fetches the same URLs.
+      define: sharedDefine({ ...builderConfig, isProd: true, dataFiles: readDataFilesMap() }),
       entryPoints: [ENTRY_FILE],
       outfile: OUT_FILE,
       keepNames: true,

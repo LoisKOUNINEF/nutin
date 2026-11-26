@@ -1,4 +1,4 @@
-import { findDuplicateRouteKeys } from './route-keys.js';
+import { findDuplicateRouteKeys, hasRouteKey } from './route-keys.js';
 
 const TS = { loader: 'ts', sourcefile: 'routes.ts' };
 
@@ -66,5 +66,35 @@ describe('findDuplicateRouteKeys', () => {
 
   it('rejects when the source does not parse', async () => {
     await expect(() => findDuplicateRouteKeys('export const appRoutes = {', TS)).toThrow();
+  });
+});
+
+describe('hasRouteKey', () => {
+  it('finds the key in each of its forms, TypeScript syntax included', async () => {
+    const forms = [
+      "export const appRoutes: Nutin.Routes = { '/': () => new HomeView() as any, '/404': () => new NotFoundView() };",
+      'export const appRoutes = { "/404": () => new NotFoundView() };',
+      "export const appRoutes = { ['/404']: () => new NotFoundView() };",
+      "export const appRoutes = {\n  '/404': () => new NotFoundView(),\n};",
+    ];
+    for (const source of forms) {
+      expect(await hasRouteKey(source, '/404', TS)).toBe(true);
+    }
+  });
+
+  it('ignores a commented-out key, and the path used as a value', async () => {
+    const commented = "export const appRoutes = {\n  '/': () => new HomeView(),\n  // '/404': () => new NotFoundView(),\n};";
+    const values = [
+      "const fallback = flag ? '/404' : '/';",
+      "export const appRoutes = { '/a': { view: () => new A(), guards: [() => '/404'] }, '/b': { redirectTo: '/404' } };",
+    ].join('\n');
+
+    expect(await hasRouteKey(commented, '/404', TS)).toBe(false);
+    expect(await hasRouteKey(values, '/404', TS)).toBe(false);
+  });
+
+  it('returns false without the key, and matches it exactly', async () => {
+    expect(await hasRouteKey("export const appRoutes = { '/': () => new HomeView() };", '/404', TS)).toBe(false);
+    expect(await hasRouteKey("export const appRoutes = { '/4040': () => new A() };", '/404', TS)).toBe(false);
   });
 });

@@ -22,6 +22,7 @@ class Router extends Service<Router> {
   private _currentParams: Record<string, string> = {};
   private _currentQuery: Record<string, string> = {};
   private onPopState = () => this.handlePopState();
+  private onUnhandledRejection = (event: PromiseRejectionEvent) => this.handleUnhandledRejection(event);
   private onNavigate = (data: { path: string }) => this.navigate(data.path);
   private onReload = () => this.reload();
   private _busSubscriptions: Array<() => void> = [];
@@ -47,6 +48,7 @@ class Router extends Service<Router> {
     });
     this._busSubscriptions = [];
     window.removeEventListener('popstate', this.onPopState);
+    window.removeEventListener('unhandledrejection', this.onUnhandledRejection);
   }
 
   // Re-renders the current page, so focus isn't moved (see focusView()).
@@ -168,6 +170,7 @@ class Router extends Service<Router> {
 
   private initializeNavigationEvents(): void {
     window.addEventListener('popstate', this.onPopState);
+    window.addEventListener('unhandledrejection', this.onUnhandledRejection);
     const unsubOnNav = Navigation.onNavigate(this.onNavigate);
     const unsubOnReload = Navigation.onReload(this.onReload);
     this._busSubscriptions.push(unsubOnNav, unsubOnReload); 
@@ -182,6 +185,15 @@ class Router extends Service<Router> {
     AppEventBus.subscribe('language-changed', onLangChanged);
     const unsubOnLang = () => AppEventBus.off('language-changed', onLangChanged);
     this._busSubscriptions.push(unsubOnLang);    
+  }
+
+  // An import() the app doesn't catch (a component's lazy module), failing because its file is
+  // gone: the same recovery as a lazy route, a full page load of the current URL, once. A caught
+  // import() error is the app's to handle; the error still reaches the console either way.
+  private handleUnhandledRejection(event: PromiseRejectionEvent): void {
+    if (!NavigationManager.isModuleLoadError(event.reason)) return;
+    const { pathname, search, hash } = window.location;
+    NavigationManager.reloadOnce(pathname + search + hash, event.reason, 'a module');
   }
 
   private async handlePopState(): Promise<void> {

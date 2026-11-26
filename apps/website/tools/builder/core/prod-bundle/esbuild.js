@@ -4,6 +4,7 @@ import { errorExit } from '../../../utils/index.js';
 import { PATHS } from '../app/paths.js';
 import { builderConfig } from '../../builder.config.js';
 import { sharedDefine, slimConfigPlugin, DEV_OVERRIDES } from './bundle-options.js';
+import { readDataFilesMap } from './data-files.js';
 
 // Prod bundles straight from the copied .ts sources (tsc runs --noEmit there);
 // dev bundles tsc's emitted .js, which is kept on disk for testin-nutin.
@@ -19,7 +20,7 @@ async function build() {
     loader: {
       '.json': 'json',
     },
-    define: sharedDefine(builderConfig),
+    define: sharedDefine({ ...builderConfig, dataFiles: readDataFilesMap() }),
     plugins: [slimConfigPlugin({ generateSEO: builderConfig.generateSEO })],
     // Code splitting: each dynamic import() becomes a chunk in chunks/, only fetched
     // the first time it runs. The entry still comes out as bundle.js (see add-tags.js).

@@ -63,7 +63,13 @@ server {
     # SPA routing: serve index.html for unknown paths
     location / {
         try_files $uri $uri/ /index.html;
-        
+
+        # Every file that keeps its name and no other location matches (.json, .xml, .txt,
+        # .webmanifest, .map...): revalidated on each use (304 while its ETag matches), so
+        # neither a browser nor a CDN guesses a lifetime from Last-Modified and keeps a stale
+        # copy for hours after a deploy. The SPA shell itself gets the .html location's headers.
+        add_header Cache-Control "no-cache" always;
+
         # Security headers
         add_header X-Frame-Options $frame_options always;
         add_header X-Content-Type-Options $content_type_options always;
@@ -78,11 +84,12 @@ server {
     # ---------------------------
 
     # Immutable cache for the files whose name holds a content hash: esbuild's chunks
-    # (^~: no regex location is tried for them), and bundle.<hash>.js / main.<hash>.css
-    # (hash-files.js). A changed file gets a new name. A regex with {} must be quoted.
+    # (^~: no regex location is tried for them), bundle.<hash>.js / main.<hash>.css
+    # (hash-files.js) and the copies of the locales and markdown manifests the app fetches,
+    # <name>.<hash>.json (hash-data-files.js). A changed file gets a new name. A regex with
+    # {} must be quoted. One Cache-Control header: `expires` would add a second one.
     location ^~ /chunks/ {
-        expires 1y;
-        add_header Cache-Control "public, immutable" always;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
         
         # Security headers
         add_header X-Frame-Options $frame_options always;
@@ -93,9 +100,8 @@ server {
         add_header Content-Security-Policy $csp_policy always;
     }
 
-    location ~* "\.[0-9a-f]{8}\.(js|css)$" {
-        expires 1y;
-        add_header Cache-Control "public, immutable" always;
+    location ~* "\.[0-9a-f]{8}\.(js|css|json)$" {
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
         
         # Security headers
         add_header X-Frame-Options $frame_options always;
@@ -120,11 +126,11 @@ server {
         add_header Content-Security-Policy $csp_policy always;
     }
 
-    # No caching for HTML files (SPA shell)
+    # HTML (the SPA shell and the prerendered pages): revalidated on every load, so a deploy
+    # shows at once, while an unchanged page is a 304 and can still be restored from the
+    # back/forward cache (which `no-store` would rule out).
     location ~* \.html$ {
-        expires -1;
-        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
-        add_header Pragma "no-cache" always;
+        add_header Cache-Control "no-cache" always;
         
         # Security headers
         add_header X-Frame-Options $frame_options always;
@@ -159,8 +165,7 @@ server {
     location = /404.html {
         internal;
         try_files /404.html =404;
-        expires -1;
-        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+        add_header Cache-Control "no-cache" always;
         
         # Security headers
         add_header X-Frame-Options $frame_options always;

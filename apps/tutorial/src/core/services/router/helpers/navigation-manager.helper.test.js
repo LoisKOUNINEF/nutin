@@ -471,7 +471,8 @@ describe('NavigationManager', () => {
     const { view, element } = mountView('<h1 style="color: red">Title</h1>');
     const h1 = element.querySelector('h1');
     NavigationManager.focusView(view);
-    expect(h1.style.outline).toBe('none');
+    // jsdom 31 expands the shorthand (outline reads "medium", outlineStyle "none"); jsdom 30 doesn't.
+    expect(h1.style.outlineStyle || h1.style.outline).toBe('none');
 
     h1.blur();
     expect(h1.hasAttribute('tabindex')).toBe(false);
@@ -521,5 +522,42 @@ describe('NavigationManager', () => {
     expect(regions[0].textContent).toBe('');
     await afterAnnounceDelay();
     expect(regions[0].textContent).toBe('Same');
+  });
+  it('isModuleLoadError recognizes each browser\'s failed import() and nothing else', () => {
+    expect(NavigationManager.isModuleLoadError(new TypeError('Failed to fetch dynamically imported module: https://a.test/chunks/x.js'))).toBe(true);
+    expect(NavigationManager.isModuleLoadError(new TypeError('error loading dynamically imported module: https://a.test/chunks/x.js'))).toBe(true);
+    expect(NavigationManager.isModuleLoadError(new TypeError('Importing a module script failed.'))).toBe(true);
+    expect(NavigationManager.isModuleLoadError(new TypeError('x is not a function'))).toBe(false);
+    expect(NavigationManager.isModuleLoadError(new Error('Failed to fetch dynamically imported module'))).toBe(false);
+    expect(NavigationManager.isModuleLoadError('Importing a module script failed.')).toBe(false);
+    expect(NavigationManager.isModuleLoadError(undefined)).toBe(false);
+  });
+
+  it('reloadOnce reloads a URL once within its window, and never offline', async () => {
+    // The full page load (location.assign) is a no-op in jsdom: the sessionStorage record written
+    // right before it shows it was attempted.
+    sessionStorage.clear();
+    const record = () => JSON.parse(sessionStorage.getItem('nutin:failed-view-load') ?? 'null');
+    try {
+      await silenceConsole('error', async () => {
+        Object.defineProperty(navigator, 'onLine', { configurable: true, value: false });
+        NavigationManager.reloadOnce('/a', new Error('x'), 'a module');
+        expect(record()).toBe(null);
+        delete navigator.onLine;
+
+        NavigationManager.reloadOnce('/a', new Error('x'), 'a module');
+        const first = record();
+        expect(first.url).toBe('/a');
+
+        NavigationManager.reloadOnce('/a', new Error('x'), 'a module');
+        expect(record().at).toBe(first.at);
+
+        NavigationManager.reloadOnce('/b', new Error('x'), 'a module');
+        expect(record().url).toBe('/b');
+      });
+    } finally {
+      delete navigator.onLine;
+      sessionStorage.clear();
+    }
   });
 });

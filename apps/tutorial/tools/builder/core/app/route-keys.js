@@ -17,3 +17,15 @@ export async function findDuplicateRouteKeys(source, { loader, sourcefile }) {
 
   return [...duplicates].map(([key, line]) => ({ key, line }));
 }
+
+/**
+ * Whether the file defines `key` as an object key ('/404': …, "/404": …, ['/404']: …). Checked on
+ * esbuild's output: comments are gone, and every form is printed as "<key>" in a key position
+ * (after "{" or ","), so a value like redirectTo: '/404' or a ternary doesn't count.
+ * A heuristic: a route defined in another file and spread into appRoutes isn't seen.
+ */
+export async function hasRouteKey(source, key, { loader, sourcefile }) {
+  const { code } = await esbuild.transform(source, { loader, sourcefile });
+  const quoted = JSON.stringify(key).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`[{,]\\s*\\[?\\s*${quoted}\\s*\\]?\\s*:`).test(code);
+}

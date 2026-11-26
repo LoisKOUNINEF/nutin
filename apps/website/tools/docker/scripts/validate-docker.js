@@ -1,3 +1,4 @@
+import fs from 'fs';
 import path from 'path';
 import { errorExit } from '../../utils/index.js';
 import nutinConfig from '../../../nutin.config.js';

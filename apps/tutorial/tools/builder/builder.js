@@ -50,6 +50,10 @@ if (builderConfig.tailwind) runScript(path.join(scriptsDir, 'styles', 'tailwind.
 
 if (builderConfig.i18n) runScript(path.join(scriptsDir, 'i18n', 'build-i18n.js'), 'Combining locales...');
 
+// After every runtime JSON file is written (locales, markdown manifests), before the bundles
+// that get their hashed URLs through esbuild's define.
+if (builderConfig.isProd) runScript(path.join(scriptsDir, 'prod-bundle', 'hash-data-files.js'), 'Hashing data files...');
+
 runScript(path.join(scriptsDir, 'prod-bundle', 'esbuild.js'), 'Running esbuild...');
 
 if (builderConfig.isProd) {

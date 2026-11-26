@@ -2,6 +2,7 @@ import { DEFAULT_LANGUAGE, LANGUAGES } from './languages.js';
 import { AppEventBus } from '../event-bus/event-bus.js';
 import { Service } from '../../base-classes/service/service.js';
 import { CONFIG } from '../../config.js';
+import { fetchDataFile } from '../data-files/data-files.js';
 
 export class I18n extends Service<I18n> {
   private readonly _DEFAULT_LANGUAGE: Nutin.Language = DEFAULT_LANGUAGE;
@@ -48,7 +49,7 @@ export class I18n extends Service<I18n> {
 
   public async loadTranslations(lang: Nutin.Language): Promise<void> {
     try {
-      const response = await fetch(`/locales/${lang}.json`);
+      const response = await fetchDataFile(`/locales/${lang}.json`);
       
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       
@@ -139,7 +140,7 @@ export class I18n extends Service<I18n> {
 
   private async loadDefaultTranslations(): Promise<void> {
     try {
-      const response = await fetch(`/locales/${this._DEFAULT_LANGUAGE}.json`);
+      const response = await fetchDataFile(`/locales/${this._DEFAULT_LANGUAGE}.json`);
       
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       

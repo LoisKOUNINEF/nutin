@@ -10,9 +10,12 @@ export type HistoryMode = 'push' | 'replace' | 'none';
 // Long enough for screen readers to notice the live region's content change.
 const ANNOUNCE_DELAY = 100;
 
-// See recoverFromFailedViewLoad().
+// See reloadOnce().
 const RELOAD_KEY = 'nutin:failed-view-load';
 const RELOAD_WINDOW = 10_000;
+
+// How browsers reject an import() whose file is gone or unreachable (Chrome, Firefox, Safari).
+const MODULE_LOAD_ERROR = /Failed to fetch dynamically imported module|error loading dynamically imported module|Importing a module script failed/;
 
 /**
  * Navigation - handles path normalization and history management
@@ -84,13 +87,19 @@ export function localizedUrl(normalizedPath: string, search: string = '', hash?:
   return addLocalePrefix(normalizedPath) + search + (hash ? `#${hash}` : '');
 }
 
-// A lazy route's view failed to load: usually a deploy replaced the chunks while this tab
-// was open, or the network dropped. A full page load of the target URL fetches the new
-// build. It happens once per URL within RELOAD_WINDOW (recorded in sessionStorage), so a
-// view that keeps failing (or a broken chunk) can't reload forever: the error is logged
-// and the current page stays. Without sessionStorage, it only logs.
+// A lazy route's view failed to load: see reloadOnce().
 export function recoverFromFailedViewLoad(url: string, error: unknown): void {
-  console.error(`[router] Failed to load the view for "${url}".`, error);
+  reloadOnce(url, error, 'the view');
+}
+
+// Code failed to load: usually a deploy replaced the chunks while this tab was open, or the
+// network dropped. A full page load of `url` fetches the new build. It happens once per URL
+// within RELOAD_WINDOW (recorded in sessionStorage), so code that keeps failing (or a broken
+// chunk) can't reload forever: the error is logged and the current page stays. Offline, or
+// without sessionStorage, it only logs: a reload would only trade the page for an error page.
+export function reloadOnce(url: string, error: unknown, what: string): void {
+  console.error(`[router] Failed to load ${what} for "${url}".`, error);
+  if (navigator.onLine === false) return;
   try {
     const last = JSON.parse(sessionStorage.getItem(RELOAD_KEY) ?? 'null') as { url?: string; at?: number } | null;
     const now = Date.now();
@@ -100,6 +109,12 @@ export function recoverFromFailedViewLoad(url: string, error: unknown): void {
     return;
   }
   loadPage(url);
+}
+
+// An import() that failed because its file couldn't be fetched, as opposed to an error thrown
+// by the module's own code.
+export function isModuleLoadError(reason: unknown): boolean {
+  return reason instanceof TypeError && MODULE_LOAD_ERROR.test(reason.message);
 }
 
 // A full (non-SPA) page load.
