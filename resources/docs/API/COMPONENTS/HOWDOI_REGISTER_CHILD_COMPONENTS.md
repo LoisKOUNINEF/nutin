@@ -165,7 +165,7 @@ Without `keepBy`, the catalog is fully rebuilt on every render.
 ### What a kept child goes through
 
 - No `onBeforeRender`/`onAfterRender`, no destroy hooks: it wasn't rendered or destroyed. Its own `onKept()` hook is called instead, once it's back in place.
-- Its element never leaves the document where `Element.moveBefore()` is supported: iframes don't reload, CSS animations keep running, custom elements get no `disconnectedCallback`, focus and scroll stay. Where it isn't (Safari), the element is detached and re-inserted: focus, caret, scroll and input values are restored, but iframes reload, animations restart and custom elements are disconnected and reconnected.
+- Its element never leaves the document where `Element.moveBefore()` is supported: iframes don't reload, CSS animations keep running, custom elements get no `disconnectedCallback`, focus and scroll stay. Where it isn't (Safari), the element is detached and re-inserted. Focus, caret, text selection, scroll, input values, CSS animation progress and open popovers are restored. Iframes reload, CSS transitions restart, modal dialogs close and custom elements are disconnected and reconnected.
 - Attributes from its placeholder (`class`, `id`...) are copied only when it's created — a kept child doesn't pick up placeholder attribute changes.
 - Only the child is kept: the parent's own markup around it, including a `data-catalog` container, is rebuilt as usual. To keep a scrollable list's scroll position, make the scrolling element part of a kept child.
 

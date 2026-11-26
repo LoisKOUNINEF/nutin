@@ -10,7 +10,7 @@ import { Guards } from './guards.js';
 export const appRoutes: Nutin.Routes = {
   '/': () => new HomeView(),                                          // plain-function form
   '/admin': { view: () => new AdminView(), guards: [Guards.requireAuth()] }, // guarded form
-  '/404': () => new NotFoundView(),                                   // required — see below
+  '/404': () => new NotFoundView(),                                   // recommended — see below
 };
 ```
 
@@ -57,9 +57,16 @@ export const appRoutes: Nutin.Routes = {
 - **Import the view by its own file, never through a barrel** (`views/index.ts`, `components/index.ts`). A static import anywhere in the app, even of a barrel re-exporting it, puts a file back in the main bundle. The same goes for the components a lazy view uses: import them by their file in the view, so they follow it into its chunk.
 - **Keep the first page eager.** A lazy home page costs an extra request before anything renders. You should also keep `/404` eager.
 - **Navigation:** guards run first, then the chunk loads. The current view stays on screen until the new one is ready. If another navigation starts meanwhile, the slower one is dropped.
-- **Failed loads:** if the chunk can't be loaded (typically a deploy replaced the chunks while a tab was open, or the network dropped), the error is logged and the browser does a full page load of the target URL, which fetches the current build. If the same URL fails again within 10 seconds, it's only logged, so a broken chunk can't reload forever.
+- **Failed loads:** if the chunk can't be loaded (typically a deploy replaced the chunks while a tab was open, or the network dropped), the error is logged and the browser does a full page load of the target URL, which fetches the current build. If the same URL fails again within 10 seconds, or the browser is offline, it's only logged, so a broken chunk can't reload forever.
+- **Other `import()` calls** (a component loading a module on demand) get the same recovery when their file can't be fetched and your code doesn't catch the error: a full page load of the current URL. To handle the failure yourself (a fallback, a retry button), `catch` it: the router then leaves it alone.
 - **SEO pages:** with `generateSEOFiles`, lazy routes are prerendered like the others.
 
-## Important: `/404` is required
+## A `/404` route (recommended)
 
-A `'/404'` entry must exist in your route table. If no route matches the current path and `/404` isn't defined, the router logs `console.error('No 404 route defined')` and renders nothing — always include a not-found route.
+When no route matches the current path, the router renders the `'/404'` route: the user gets a clear page, under the URL they asked for, with focus and the page title handled like any other navigation. The generated app includes one (`NotFoundView`). The Markdown feature's guards also redirect an unknown page to `/404`.
+
+Without a `/404` route, the router logs `No 404 route defined` and renders nothing:
+- **An in-app link to an unknown path** does nothing: the current page and URL stay. Production builds drop `console` calls, so there's no sign of it.
+- **An unknown URL loaded directly** (a typo, an old bookmark, an external link) shows a blank page.
+
+`build` warns when `src/app/routes.ts` has no `'/404'` key. It doesn't stop the build: a `/404` route defined in another file and spread into `appRoutes` can't be seen, so ignore the warning in that case.

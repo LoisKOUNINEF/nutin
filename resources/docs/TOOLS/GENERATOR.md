@@ -4,11 +4,13 @@
 
 ```bash
 <pm> run generate TYPE PATH/TO/NAME
+<pm> run generate TYPE PATH/TO/NAME --dry-run
 ```
 
 - `type` is a string (`component` || `view` || `service`).
 - `path` is a target path (relative to `src/app/`) where files will be created; the script normalizes / extracts the last word to derive the `name`. 
 - You choose the structure — new projects suggest `components/`, `views/` and `services/`, but any layout works.
+- `--dry-run` lists the files it would create, without writing anything. It runs the same checks as a real run, so it stops in the same cases. With npm, it works with or without `--`.
 
 ## Files generated
 

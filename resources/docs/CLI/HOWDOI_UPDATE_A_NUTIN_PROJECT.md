@@ -13,6 +13,21 @@ nutin-update
 - `-y`, `--yes`: apply the updates without the confirmation prompt. Required in a non-interactive shell (e.g. CI); without it, nothing is changed.
 - `--from <path>`: use a local `templates/` directory as the old baseline instead of fetching it from npm.
 - `--allow-dirty`: update even when the project has uncommitted changes or untracked files, or isn't in a git repository. The update then can't simply be undone with git.
+- `--dry-run`: show what the update would do, without writing anything. See [Previewing an update](#previewing-an-update).
+
+### Previewing an update
+
+```bash
+nutin-update --dry-run
+```
+
+It runs the update without writing anything, and prints:
+
+- The summary, as in a real run.
+- Which files you edited would merge cleanly, and which would get conflict markers. The merges run in a temporary folder, so this needs git, as a real run does.
+- Every file it would create, modify or delete, `.nutin-meta.json` and `NUTIN-UPDATE-REPORT.md` included.
+
+It doesn't ask for confirmation, and it runs even with uncommitted changes: it says when a real run would stop. The old version is still downloaded from npm, unless `--from` is given.
 
 ### Undoing an update
 

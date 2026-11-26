@@ -61,7 +61,7 @@ plus a global `branches/functions/lines %` summary line.
 ### Files output
 
 - `coverage/summary.md` is written **unconditionally** on every coverage run
-that produces a non-empty report — the test summary (pass/fail/todo/total/time,
+that produces a non-empty report: the test summary (pass/fail/skipped/todo/total/time,
 same numbers `printSummary` already prints for every run), the per-file
 table, and the global percentages (plus the threshold), all
 persisted as a standing artifact.

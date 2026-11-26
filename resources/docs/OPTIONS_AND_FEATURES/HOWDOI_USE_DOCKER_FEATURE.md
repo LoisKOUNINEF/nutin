@@ -21,6 +21,45 @@ nutin-add docker
 <pm> run docker:run
 ```
 
+`docker:build` builds `<project>:latest`. `docker:run` runs it in the foreground on every port of `dockerPorts`: Ctrl+C stops it, and the container is removed. Both accept flags, listed by `--help`.
+
+**With npm, put `--` before the flags** (`npm run docker:run -- -d`): without it, npm takes `-d` as its own `--loglevel` shorthand. pnpm, yarn and bun pass them through (`pnpm run docker:run -d`), with or without `--`. `--dry-run` also works with npm without `--`.
+
+`docker:build` flags:
+
+| Flag | Effect |
+|---|---|
+| `--no-cache` | Build without the layer cache |
+| `--pull` | Pull newer versions of the base images (`node`, `alpine`) |
+| `--platform <os/arch>` | Target platform, e.g. `linux/amd64` for a server when building on Apple silicon |
+| `-t, --tag <tag>` | Also tag the image `<project>:<tag>`. `<project>:latest` is always set. Repeatable |
+| `--build-arg <KEY=VALUE>` | Set a Dockerfile `ARG`: `NODE_VERSION`, `ALPINE_VERSION`. Repeatable |
+| `--progress <mode>` | Build output: `auto`, `plain`, `tty`, `quiet`, `rawjson` |
+| `--dry-run` | Print the `docker build` command without running it. The Docker configuration is still checked, but `Dockerfile` and `nginx.conf` aren't rewritten |
+
+`docker:run` flags:
+
+| Flag | Effect |
+|---|---|
+| `-d, --detach` | Run in the background, then print how to follow its logs and stop it |
+| `--name <name>` | Container name. Defaults to the project's (`@acme/site` → `acme-site`) |
+| `--rm` | Remove the container when it stops: already the default in the foreground |
+| `--restart <policy>` | `no`, `always`, `unless-stopped`, `on-failure[:N]`. Can't be combined with `--rm` |
+| `-t, --tag <tag>` | Image tag to run. Defaults to `latest` |
+| `--platform <os/arch>` | Platform of the image to run, when it was built for several |
+| `--dry-run` | Print the `docker run` command without running it. A container name that's already taken is a warning instead of an error |
+
+Ports aren't flags: they come from `dockerPorts` (see below), and `-p`/`--publish` are refused.
+
+```bash
+npm run docker:build -- --tag 1.2.0 --platform linux/amd64
+npm run docker:run -- -d --tag 1.2.0   # background, named after the project
+docker logs -f <project>
+docker stop <project> && docker rm <project>
+```
+
+A detached container is kept after it stops (unless `--rm` is passed): `docker:run` refuses to start another with the same name until it's removed, or given another `--name`.
+
 ## Configure ports
 
 Container port(s) are configured via `nutin.config.js`'s `dockerPorts` (`number[]`):
@@ -124,6 +163,28 @@ brotli_static on; # serves .br files if present
 - *Reminder: when you use `add_header` in a child location block, it replaces ALL headers from the parent context rather than merging them.*
 
 You need to repeat the security headers in each location block that uses add_header. 
+
+### Caching
+
+Every response says how long it may be cached, so a deploy shows at once, even in a browser that visited before:
+
+| Files | `Cache-Control` | Why |
+|---|---|---|
+| `/chunks/*`, `bundle.<hash>.js`, `main.<hash>.css`, `/locales/<lang>.<hash>.json`, `/generated/<id>.<hash>.json` | `public, max-age=31536000, immutable` | Their name holds a hash of their content: a changed file gets a new name |
+| HTML (the SPA shell, prerendered pages, `404.html`) | `no-cache` | Revalidated on every load: a `304` while unchanged |
+| Every other file (`public/`, `src/assets/`, `sitemap.xml`, `robots.txt`, plain `/locales/<lang>.json`...) | `no-cache` | Its name never changes, so it's revalidated on each use |
+| i18n redirects (`/` → `/en/`) | `public, max-age=3600` | A change of default language reaches everyone within an hour |
+
+The app fetches its translations and Markdown manifests from their hashed copies: the production build writes `<name>.<hash>.json` next to each one, and the bundle maps the plain URL to it. An unchanged file keeps its hash across deploys, so it stays cached.
+
+A file with no `Cache-Control` at all lets browsers and CDNs guess a lifetime from its `Last-Modified` date, often hours. A `location` you add should set one.
+
+**Behind a CDN or caching proxy**:
+- Let it respect the origin's headers: nothing else is needed, and hashed files never need purging.
+- If it overrides them (an edge TTL, a "cache everything" rule), purge the HTML and the unhashed files on every deploy.
+- Traefik doesn't cache by default: nothing to do.
+
+A tab left open across a deploy may request a hashed file the new image no longer has: see [Tabs left open across a deploy](../TOOLS/BUILDER.md#tabs-left-open-across-a-deploy).
 
 ## Compression
 

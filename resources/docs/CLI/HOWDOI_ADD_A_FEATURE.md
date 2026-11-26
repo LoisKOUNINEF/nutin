@@ -23,7 +23,29 @@ A feature can only be removed by hand once it's added. See [What is the differen
 4. **Updates the Nutin files that change with the feature** (e.g. `tools/builder/builder.js` gets the markdown build step). Your own edits to those files are kept. When a change can't be placed automatically, it's printed as a patch to apply by hand.
 5. **Records the feature in `.nutin-meta.json`,** so `nutin-update` updates its files too. Adding a feature that's already there does nothing.
 
-Commit before adding a feature: the changes are easy to review, and to undo.
+## Undoing a feature
+
+Before writing anything, `nutin-add` checks that the project folder is committed: no changes and no untracked files. Otherwise it lists them and stops; commit or stash them first. So the changes are easy to review, and to undo. From the project folder:
+
+```bash
+git checkout -- . && git clean -fd
+```
+
+Only the project folder is checked, so a project inside a larger repository isn't blocked by changes elsewhere in it.
+
+- Without [git](https://git-scm.com), or outside a git repository, `nutin-add` warns that the change can't be undone with git and asks to confirm.
+- `-y`, `--yes`: add without asking. Required in a non-interactive shell (e.g. CI); without it, nothing is changed.
+- `--allow-dirty`: add even when the project has uncommitted changes or untracked files. Without git, or outside a git repository, it still asks: pass `-y` too.
+
+## Previewing a feature
+
+```bash
+nutin-add markdown --dry-run
+```
+
+It lists every file adding the feature would create or modify, without writing anything. A change to a Nutin file that can't be placed automatically is printed as a patch, as in a real run. With `nutin-add all --dry-run`, each feature is shown on top of the ones before it.
+
+It doesn't ask for confirmation, and it runs even with uncommitted changes: it says when a real run would stop.
 
 ## Dependencies
 
