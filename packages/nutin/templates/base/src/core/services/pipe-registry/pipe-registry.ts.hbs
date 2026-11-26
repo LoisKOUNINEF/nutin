@@ -6,6 +6,12 @@ class PipeRegistry extends Service<PipeRegistry> {
   constructor() { super(); }
 
   public register(name: string, fn: Nutin.PipeFunction): void {
+    // Dev only (prod bundles drop it): a name like "toString" is found on Object.prototype,
+    // so it would be refused below as "already exists", and data-pipe would call the built-in.
+    if (!globalThis.__NUTIN_PROD__ && name in Object.prototype) {
+      console.warn(`Pipe "${name}" can't be registered: it's a built-in object member's name. Pick another name.`);
+      return;
+    }
     if(this.#pipes[name]) {
       console.warn(`Pipe "${name}" already exists - skipping.`);
       return;

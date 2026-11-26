@@ -31,6 +31,19 @@ describe('PipeRegistry', () => {
 		}
 	});
 
+	it('register() refuses a built-in object member\'s name with a warning that says so (development)', () => {
+		const warnSpy = spyOn(console, 'warn').andCallFake(() => {});
+		try {
+			AppPipeRegistry.register('toString', () => 'mine');
+			AppPipeRegistry.register('__proto__', () => 'mine');
+
+			expect(warnSpy.callCount).toBe(2);
+			expect(warnSpy.calls.every(([message]) => message.includes('built-in object member'))).toBe(true);
+		} finally {
+			warnSpy.restore();
+		}
+	});
+
 	it('apply() warns and returns the raw value when the pipe is not registered', () => {
 		const warnSpy = spyOn(console, 'warn').andCallFake(() => {});
 		try {

@@ -20,3 +20,4 @@ See [What pipes are available?](./WHAT_PIPES_ARE_AVAILABLE.md) for the built-in 
 ## Important
 
 - An empty `data-pipe` attribute is a no-op.
+- **Pipe names come from your templates, not from data.** Data can't add a `data-pipe` attribute (it is stripped from `raw()` and from attributes interpolated in a tag), but a value you interpolate into one is read as pipe names. With a name from a URL, a form or an API, as in `data-pipe="${format}"`, a value like `valueOf` or `__proto__` reaches a built-in object member instead of a pipe: the pipe step throws, and the component is left without its event bindings. Map the value to a known pipe instead.

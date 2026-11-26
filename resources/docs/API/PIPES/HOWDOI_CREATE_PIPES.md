@@ -24,4 +24,5 @@ AppPipeRegistry.apply(name: string, value: any, args?: string[]): string
 ## Important
 
 - **Name collision**: if `name` is already registered, `register()` logs `console.warn('Pipe "${name}" already exists - skipping.')` and keeps the *original* implementation — the new one is silently discarded. Register order matters; the framework's built-ins register first if you call `registerPipes()` before your own registrations.
+- **Reserved names**: names of built-in object members (`toString`, `valueOf`, `constructor`, `hasOwnProperty`, `__proto__`…) can't be pipe names. In development, `register()` refuses them with a warning; pick another name.
 - **Unregistered name**: calling an unregistered pipe (via `data-pipe` or `AppPipeRegistry.apply`) logs `console.warn('Pipe "${name}" not found.')` and returns the input value **unchanged**, not an error and not an empty string.
