@@ -323,7 +323,7 @@ export class PickerComponent extends Component<HTMLElement, PickerConfig> {
 ```
 
 ```ts
-private navigateTo(href: string): void {
+protected navigateTo(href: string): void {
     Navigation.navigateTo(href);
 }
 ```

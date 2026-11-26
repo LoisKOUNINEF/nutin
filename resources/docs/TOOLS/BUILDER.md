@@ -13,7 +13,7 @@
 <pm> run typecheck
 ```
 
-`typecheck` runs the steps `tsc` needs and nothing else: copy the files into `dist-build`, merge the HTML templates, then `tsc --noEmit` with the `data-event` handler references (see "Compile TypeScript" below). `dist/` is left as it is, and `dist-build` is removed when the check passes (a failed check leaves it, like a failed build; the next run clears it). It exits with `tsc`'s errors and a non-zero code otherwise. Use it in CI rather than a plain `tsc --noEmit`, which doesn't see the merged templates and reports every handler used only in a template as unused (`noUnusedLocals`).
+`typecheck` runs the steps `tsc` needs and nothing else: copy the files into `dist-build`, merge the HTML templates, then `tsc --noEmit` with the `data-event` handler references (see "Compile TypeScript" below). `dist/` is left as it is, and `dist-build` is removed when the check passes (a failed check leaves it, like a failed build; the next run clears it). It exits with `tsc`'s errors and a non-zero code otherwise. Use it in CI rather than a plain `tsc --noEmit`, which doesn't see the merged templates and reports every `private` handler used only in a template as unused (`noUnusedLocals`; declare handlers `protected`).
 
 ## Steps
 

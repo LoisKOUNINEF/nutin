@@ -5,7 +5,7 @@ Import the exported singleton **const**, not the class:
 ```ts
 import { ThemeTogglerService } from '../../services/theme-toggler/theme-toggler.service.js';
 
-private _handleToggle(): void {
+protected _handleToggle(): void {
   ThemeTogglerService.toggleTheme();
 }
 ```

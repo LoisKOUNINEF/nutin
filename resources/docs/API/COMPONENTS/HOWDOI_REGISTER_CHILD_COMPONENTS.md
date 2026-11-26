@@ -48,7 +48,7 @@ Children without `keep` are destroyed and recreated on every render — see [Kee
 
 ## Catalog or nutinFor?
 
-A list doesn't always need child components. `nutinFor()` writes the items' markup in the parent's template (see [How do I generate a template?](./HOWDOI_GENERATE_A_TEMPLATE.md)):
+A list doesn't always need child components. `nutinFor()` writes the items' markup in the parent's template (see [How do I use `nutinIf`, `nutinFor` and `nutinElse`?](./HOWDOI_USE_NUTINIF_NUTINFOR_AND_NUTINELSE.md)):
 
 | | Catalog | `nutinFor` |
 |---|---|---|
@@ -185,6 +185,59 @@ Without `keepBy`, the catalog is fully rebuilt on every render.
 - Its element never leaves the document where `Element.moveBefore()` is supported: iframes don't reload, CSS animations keep running, custom elements get no `disconnectedCallback`, focus and scroll stay. Where it isn't (Safari), the element is detached and re-inserted. Focus, caret, text selection, scroll, input values, CSS animation progress and open popovers are restored. Iframes reload, CSS transitions restart, modal dialogs close and custom elements are disconnected and reconnected.
 - Attributes from its placeholder (`class`, `id`...) are copied only when it's created — a kept child doesn't pick up placeholder attribute changes.
 - Only the child is kept: the parent's own markup around it, including a `data-catalog` container, is rebuilt as usual. To keep a scrollable list's scroll position, make the scrolling element part of a kept child.
+
+## Calling into children
+
+A parent can call a public method on its children: patch one catalog item instead of re-rendering the whole list, collect state the items own (unsaved input for a "Save all"), or focus and scroll to one. Look the instances up instead of `querySelector`-ing into their DOM:
+
+```ts
+import { getChildComponents, getCatalogComponents } from '../../../core/index.js';
+```
+
+### Children of a class: `getChildComponents()`
+
+```ts
+// Every PanelComponent child, typed as PanelComponent[]
+getChildComponents(this, PanelComponent).forEach(panel => panel.paint(state));
+```
+
+It returns the parent's children that are instances of that class, subclasses included, in DOM order: several for a placeholder repeated in `nutinFor` items, and catalog items of that class too (use `getCatalogComponents()` for those).
+
+To tell apart two placeholders of the same class, give them an attribute: it's copied onto the child's root.
+
+```html
+<div class="sidebar" data-component="sidebar-panel"></div>
+<div class="main" data-component="main-panel"></div>
+```
+
+```ts
+const sidebar = getChildComponents(this, PanelComponent).find(panel => panel.getElement().matches('.sidebar'));
+```
+
+Declare the class at module level: a class defined inside `registerChildren()` is a new class on every render, and no child is ever an instance of the one you pass.
+
+### Catalog items: `getCatalogComponents()`
+
+```ts
+// The items of [data-catalog="tasks"], in DOM order
+const cards = getCatalogComponents<TaskCardComponent>(this, 'tasks');
+cards[i].paint(row);
+
+// One item by id
+const card = getCatalogComponents<TaskCardComponent>(this, 'tasks')[this.tasks.findIndex(task => task.id === id)];
+```
+
+- With one container, `cards[i]` is `items[i]`. Several containers with the same selector come one after the other, each with every item.
+- A `findIndex` of `-1` gives `undefined`.
+- The type is an unchecked cast, as for a single child kept from its factory. In JavaScript, cast it with `/** @type {TaskCardComponent[]} */ (getCatalogComponents(this, 'tasks'))`.
+- With `keepBy`, a kept item's own `config.index` is the index it was created with (see [Catalogs: `keepBy`](#catalogs-keepby)). Map back to the data by position, never by `config.index`.
+
+### When to call them
+
+- Both read the DOM on each call: call them where you need them (`onAfterRender()`, a `data-event` handler, a public method of the parent), and don't keep the result across renders. After a re-render, a recreated child is a new instance, and the old one has `isDestroyed`.
+- In `onBeforeRender()`, they return the previous render's children. From a child's constructor or render, while the parent is mounting its children, they return only part of them.
+- Children of nested components are skipped: a grandchild is reached through its own parent.
+- Use them for transient work: patches, reads, focus. Data still goes through `items` and `render()`. A patch that the parent's data doesn't hold is lost when that item is recreated.
 
 ## Important
 

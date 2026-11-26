@@ -34,7 +34,7 @@ export class GreetingComponent extends Component<HTMLDivElement, GreetingConfig>
     });
   }
 
-  private _sayHi(): void {
+  protected _sayHi(): void {
     console.log('hi', this.config.name);
   }
 }

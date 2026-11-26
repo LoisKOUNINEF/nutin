@@ -3,7 +3,7 @@
 ```ts
 import { Navigation } from '../../../core/index.js';
 
-private _handleHome(): void {
+protected _handleHome(): void {
   Navigation.navigateTo('/');
 }
 ```

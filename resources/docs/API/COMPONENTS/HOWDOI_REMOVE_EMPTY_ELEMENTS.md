@@ -32,15 +32,4 @@ Only relevant when Check 1 doesn't already force removal:
 | `<audio>` / `<video>` / `<source>` | the `src` **attribute** is missing (checked as an attribute, not the resolved property) |
 | anything else | trimmed `textContent` is empty, or literally `"undefined"` or `"null"` |
 
-## data-optional or nutinIf?
-
-- **`data-optional`** is for emptiness that is only known *after hydration*: text produced by `data-i18n`/`data-pipe`, an `<input>`'s resulting value, an `<img>` whose `src` ends up empty. The element is rendered, its children are mounted, then it's removed if empty.
-- **`nutinIf`** is for a decision made from data before render: either/or markup, a boolean flag, which child placeholder to render. The untaken branch is never rendered, so the children in it never mount. See [How do I generate a template?](./HOWDOI_GENERATE_A_TEMPLATE.md).
-
-```html
-<!-- Decided from data: nutinIf -->
-${nutinIf(user.isAdmin, () => html`<div data-component="admin-panel"></div>`).nutinElse(html`<p>Read-only</p>`)}
-
-<!-- Only empty once translated: data-optional -->
-<p data-optional data-i18n="promo-banner"></p>
-```
+To decide from data before render instead, see [data-optional or nutinIf?](./HOWDOI_USE_NUTINIF_NUTINFOR_AND_NUTINELSE.md#data-optional-or-nutinif).

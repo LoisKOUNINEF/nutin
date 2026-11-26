@@ -50,7 +50,7 @@ const templateFn = () => html`__TEMPLATE_PLACEHOLDER__`;
 
 export class NewTaskComponent extends Component {
     /* ... */
-    private _newTask(): void {
+    protected _newTask(): void {
         taskService.createTask();
     }
 }

@@ -42,7 +42,7 @@ export class TaskInputsComponent extends Component {
     this._task = config;
   }
 
-  private _editTask(field: keyof ITask, value: string): void { 
+  protected _editTask(field: keyof ITask, value: string): void { 
     this._task = { ...this._task, [field]: value };
     taskService.updateTask(this._task);
   }

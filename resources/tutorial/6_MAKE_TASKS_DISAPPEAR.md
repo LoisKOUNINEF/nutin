@@ -37,7 +37,7 @@ export interface ITaskActionConfig {
 const templateFn = (config: ITaskActionConfig) => html`__TEMPLATE_PLACEHOLDER__`;
 
 export class TaskActionComponent extends Component {
-    private _callback: () => void;
+    protected _callback: () => void;
 
     constructor(
         mountTarget: HTMLElement,
