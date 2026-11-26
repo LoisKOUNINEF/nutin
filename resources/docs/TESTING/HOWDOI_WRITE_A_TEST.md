@@ -59,13 +59,18 @@ that was current when it was first imported. In any other window its elements st
 plain, un-upgraded elements (no properties or methods). The tests then pass or fail
 depending on which file loads the package first.
 
-List those test files in `testinNutin.isolate` (`nutin.config.js`):
+List those test files in `testinNutin.isolate.files` (`nutin.config.js`):
 
 ```js
 testinNutin: {
-  isolate: ['views/game/', 'views/bonus/'],
+  isolate: {
+    loadTimeout: 30,
+    files: ['views/game/', 'views/bonus/'],
+  },
 }
 ```
+
+The files alone work too: `isolate: ['views/game/', 'views/bonus/']`, and `loadTimeout` is optional.
 
 Each matching file runs in its own worker thread, with its own modules and one jsdom
 window. The window is shared by the file's import and all its suites. Between suites,
@@ -74,3 +79,4 @@ Its results, `.only` and coverage count with the rest of the run.
 
 Each isolated file loads jsdom again, which adds a few hundred milliseconds.
 The workers run in parallel, but keep the list to the files that need it.
+A file that hasn't loaded after `isolate.loadTimeout` seconds (30 by default) is reported as failed to load.

@@ -4,6 +4,11 @@ import { formatError } from '../clean-stack.js';
 
 const WORKER_ENTRY = new URL('./isolated-file.js', import.meta.url);
 
+// How long a worker may take to import its file, in ms (testinNutin.isolate.loadTimeout, in seconds).
+// One that never finishes (a top-level await still pending, on a request or a timer that keeps the worker alive)
+// would hold every other file's run, which waits for them all to load.
+export const LOAD_TIMEOUT = 30_000;
+
 const emptyRun = () => ({ results: [], todo: 0, skipped: 0, passed: 0, failed: 0, coverage: [] });
 
 /**
@@ -13,9 +18,11 @@ const emptyRun = () => ({ results: [], todo: 0, skipped: 0, passed: 0, failed: 0
  * - loaded: resolves to [{ file, hasOnly, loadError }], loadError being null or a trace.
  * - run(onlyActive): runs their tests, and resolves to their results.
  * coverageDirs: the dirs whose coverage the workers collect, or null for none.
+ * loadTimeout: ms a worker may take to import its file; past it, it's stopped and its file
+ * reported as one that failed to load.
  */
-export function startIsolatedFiles(files, { coverageDirs = null } = {}) {
-  const workers = files.map((file) => startWorker(file, coverageDirs));
+export function startIsolatedFiles(files, { coverageDirs = null, loadTimeout = LOAD_TIMEOUT } = {}) {
+  const workers = files.map((file) => startWorker(file, coverageDirs, loadTimeout));
 
   return {
     loaded: Promise.all(workers.map((worker) => worker.loaded)),
@@ -23,7 +30,7 @@ export function startIsolatedFiles(files, { coverageDirs = null } = {}) {
   };
 }
 
-function startWorker(file, coverageDirs) {
+function startWorker(file, coverageDirs, loadTimeout) {
   const displayFile = path.relative(process.cwd(), file);
   // Forwarded so that --verbose applies in the worker too.
   const worker = new Worker(WORKER_ENTRY, {
@@ -53,8 +60,19 @@ function startWorker(file, coverageDirs) {
     state = 'done';
   };
 
+  const loadTimer = setTimeout(() => {
+    if (state !== 'loading') return;
+    fail(`It didn't finish loading within ${loadTimeout / 1000} s (a top-level await still pending?), so its worker was stopped. To give it longer, raise testinNutin.isolate.loadTimeout in nutin.config.js.`);
+    worker.terminate();
+  }, loadTimeout);
+  // Never what keeps the runner alive.
+  loadTimer.unref();
+
   worker.on('message', (message) => {
     if (message.type === 'loaded') {
+      // Too late: the load timeout already reported it.
+      if (state !== 'loading') return;
+      clearTimeout(loadTimer);
       state = 'loaded';
       resolveLoaded({ file, hasOnly: message.hasOnly, loadError: message.loadError });
     } else if (message.type === 'done') {
@@ -66,6 +84,7 @@ function startWorker(file, coverageDirs) {
   });
   worker.on('error', (err) => fail(formatError(err)));
   worker.on('exit', (code) => {
+    clearTimeout(loadTimer);
     if (finished) {
       state = 'done';
       resolveDone(finished);

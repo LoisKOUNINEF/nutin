@@ -39,7 +39,10 @@ export default {
     includeFramework: true,  // Test Nutin source: src/core
     includeTools: false,     // Test tools/ (builder, testin-nutin, etc.)
     includeApp: false,       // Include application tests: src/app
-    isolate: [],             // Test files (path substrings) that each run in their own worker and jsdom window
+    isolate: {
+      loadTimeout: 30,       // Seconds each isolated file may take to load before it's reported as failed
+      files: [],             // Test files (path substrings) that each run in their own worker and jsdom window
+    },
 
     coverage: {
       enabled: false,        // Include coverage in the normal test command

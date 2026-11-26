@@ -24,6 +24,9 @@ const FIXTURES = {
     });
   `,
   'broken.test.js': `throw new Error('broken fixture');`,
+  // Its import never finishes: a top-level await still pending while a timer keeps the worker alive
+  // (without one, Node ends the worker with exit code 13 instead).
+  'hangs.test.mjs': `setInterval(() => {}, 1000); await new Promise(() => {}); describe('Never', () => { it('runs', () => {}); });`,
   'only.test.js': `
     describe.only('Only', () => { it('runs', () => {}); });
     describe('Plain', () => { it('is left out', () => { throw new Error('ran'); }); });
@@ -51,6 +54,7 @@ const statuses = (run) => run.results.map(({ name, status }) => `${name}:${statu
 // Started together in beforeAll: each worker loads jsdom, which takes most of the time.
 let withoutOnly;
 let withOnly;
+let hanging;
 
 describe('startIsolatedFiles', () => {
   beforeAll(() => {
@@ -58,6 +62,7 @@ describe('startIsolatedFiles', () => {
     Object.entries(FIXTURES).forEach(([name, source]) => fs.writeFileSync(fixture(name), source));
     withoutOnly = startIsolatedFiles(['realm.test.js', 'broken.test.js'].map(fixture));
     withOnly = startIsolatedFiles([fixture('only.test.js')]);
+    hanging = startIsolatedFiles([fixture('hangs.test.mjs')], { loadTimeout: 1000 });
   });
 
   afterAll(() => {
@@ -79,6 +84,16 @@ describe('startIsolatedFiles', () => {
     ]);
     expect([broken.passed, broken.failed]).toEqual([0, 0]);
     expect(realm.coverage).toEqual([]);
+  });
+
+  it('stops a worker whose file doesn\'t finish loading in time, and reports it as a load error', async () => {
+    const [loaded] = await hanging.loaded;
+    expect(loaded.file).toBe(fixture('hangs.test.mjs'));
+    expect(loaded.hasOnly).toBe(false);
+    expect(loaded.loadError).toContain('didn\'t finish loading within 1 s');
+
+    const [run] = await hanging.run(false);
+    expect([run.passed, run.failed, run.results.length]).toEqual([0, 0, 0]);
   });
 
   it('applies .only, skip beating only, nested suites included', async () => {

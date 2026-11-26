@@ -48,11 +48,40 @@ if (fileFilters.length) {
   }
 }
 
-// testinNutin.isolate: these files each run in their own worker and jsdom window.
-const isolatePatterns = config.testinNutin.isolate ?? [];
+// testinNutin.isolate: these files each run in their own worker and jsdom window,
+// each with loadTimeout seconds to import its file (see core/queue/run-isolated.js).
+// An array is the files alone, with the default loadTimeout.
+const isolateConfig = config.testinNutin.isolate ?? {};
+const isolate = Array.isArray(isolateConfig) ? { files: isolateConfig } : isolateConfig;
+const isolateError = findIsolateError(isolate);
+if (isolateError) {
+  print.boldError(`\nnutin.config.js testinNutin.isolate ${isolateError}`);
+  process.exit(1);
+}
+const isolatePatterns = isolate.files ?? [];
+const isolateLoadTimeout = isolate.loadTimeout === undefined ? undefined : isolate.loadTimeout * 1000;
 const isIsolated = (file) => isolatePatterns.some(pattern => file.includes(pattern));
 const isolatedFiles = testFiles.filter(isIsolated);
 const inProcessFiles = testFiles.filter(file => !isIsolated(file));
+
+// What's wrong with testinNutin.isolate (once an array is read as its files), or null.
+function findIsolateError(isolate) {
+  if (typeof isolate !== 'object') {
+    return 'must be an array of path substrings, or an object: { loadTimeout: 30, files: [...] }.';
+  }
+
+  const { files, loadTimeout } = isolate;
+  if (files !== undefined && !Array.isArray(files)) {
+    return 'files must be an array of path substrings.';
+  }
+
+  const isValidTimeout = typeof loadTimeout === 'number' && loadTimeout > 0;
+  if (loadTimeout !== undefined && !isValidTimeout) {
+    return 'loadTimeout must be a number of seconds above 0.';
+  }
+
+  return null;
+}
 
 async function loadTestFile(file) {
   setCurrentTestFile(file);
@@ -97,7 +126,7 @@ async function runTests() {
   if (coverageEnabled) await startCoverage();
 
   // Started first, so that the workers load jsdom while the files below are imported.
-  const isolated = startIsolatedFiles(isolatedFiles, { coverageDirs: coverageEnabled ? coverageDirs : null });
+  const isolated = startIsolatedFiles(isolatedFiles, { coverageDirs: coverageEnabled ? coverageDirs : null, loadTimeout: isolateLoadTimeout });
 
   // One DOM for importing every file (module-level code may use it); each suite
   // then runs in a fresh one (see executeQueue).

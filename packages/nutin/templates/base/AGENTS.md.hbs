@@ -193,7 +193,7 @@ Central options/tools config (see the inline comments for details):
 - `tailwind`, `generateSEOFiles` — top-level feature toggles.
 {{/if}}- `dockerPorts`, `markdownSources` — options of the `docker`/`markdown` features, only present once added with `nutin-add <feature>`.
 - `builder.{sass.paths, esbuild}` — build pipeline behavior.
-- `testinNutin.{includeFramework, includeTools, includeApp, isolate, jsdomOptions}` — test discovery/environment (`isolate`: test files run each in their own worker and jsdom window, e.g. for custom elements).
+- `testinNutin.{includeFramework, includeTools, includeApp, isolate, jsdomOptions}` — test discovery/environment (`isolate.files`: test files run each in their own worker and jsdom window, e.g. for custom elements; `isolate.loadTimeout`: seconds each may take to load; an array is the files alone).
 
 {{#unless extension}}
 ### `config/seo.json`
