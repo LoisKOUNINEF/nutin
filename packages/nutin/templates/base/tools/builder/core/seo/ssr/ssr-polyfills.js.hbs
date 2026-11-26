@@ -116,6 +116,19 @@ function defineDispatchingAccessor(proto, name) {
 }
 
 /**
+ * Document methods linkedom doesn't implement but core calls.
+ * - getSelection(): kept children capture and restore the text selection (preservation.helper).
+ *   SSR has no selection, so it returns null.
+ * Defined on the document's prototype: core reads document methods from the prototype chain,
+ * where a named element can't shadow them (safe-dom.helper). Idempotent, like installSpecAccessors().
+ */
+export function installDocumentStubs(window) {
+  const proto = Object.getPrototypeOf(window.document);
+  if (!proto || 'getSelection' in proto) return;
+  Object.defineProperty(proto, 'getSelection', { value: () => null, writable: true, configurable: true });
+}
+
+/**
  * Makes the SSR window's DOM prototypes carry the accessors the spec puts on them, so code
  * that reads `Object.getOwnPropertyDescriptor(Element.prototype, 'children').get` works.
  * Idempotent: linkedom's classes are shared by every window it creates.
@@ -136,6 +149,7 @@ export function installSpecAccessors(window) {
 export function installGlobals(window, { lang, mockFetch = {}, localesDir, staticDir } = {}) {
   // Before anything imports the bundle: its modules may read these getters as they load.
   installSpecAccessors(window);
+  installDocumentStubs(window);
   for (const key of Object.getOwnPropertyNames(window)) {
     setGlobal(globalThis, key, window[key]);
   }

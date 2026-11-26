@@ -2,7 +2,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { parseHTML } from 'linkedom';
-import { installSpecAccessors, resolveFetch } from './ssr-polyfills.js';
+import { installDocumentStubs, installSpecAccessors, resolveFetch } from './ssr-polyfills.js';
 
 describe('resolveFetch (SSR fetch shim)', () => {
   let staticDir;
@@ -149,5 +149,33 @@ describe('installSpecAccessors (SSR linkedom window)', () => {
     const div = window.document.querySelector('div');
 
     expect(() => { div.children = []; }).toThrow('only a getter');
+  });
+});
+
+describe('installDocumentStubs (SSR linkedom window)', () => {
+  // Where core finds a document method: the prototype chain, never the document itself (safe-dom.helper).
+  const fromPrototypes = (target, key) => {
+    for (let proto = Object.getPrototypeOf(target); proto; proto = Object.getPrototypeOf(proto)) {
+      const descriptor = Object.getOwnPropertyDescriptor(proto, key);
+      if (descriptor) return descriptor.value;
+    }
+    return undefined;
+  };
+
+  it('gives the document a getSelection() on its prototype chain that returns null', () => {
+    const { window } = parseHTML('<!doctype html><html><body><img name="getSelection"></body></html>');
+    installDocumentStubs(window);
+
+    expect(typeof fromPrototypes(window.document, 'getSelection')).toBe('function');
+    expect(fromPrototypes(window.document, 'getSelection').call(window.document)).toBe(null);
+  });
+
+  it('is idempotent (linkedom shares its classes between windows)', () => {
+    const { window } = parseHTML('<!doctype html><html><body></body></html>');
+    installDocumentStubs(window);
+    const before = fromPrototypes(window.document, 'getSelection');
+    installDocumentStubs(parseHTML('<!doctype html><html><body></body></html>').window);
+
+    expect(fromPrototypes(window.document, 'getSelection')).toBe(before);
   });
 });
