@@ -1,2 +1,6 @@
 @import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/utilities.css" layer(utilities);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+/* Only the app's own files are scanned for class names.
+   Add an @source for any other folder that uses Tailwind classes. */
+@source "../app";
+@source "../index.html";

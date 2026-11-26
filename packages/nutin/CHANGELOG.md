@@ -5,7 +5,7 @@
 ### Changes
 
 - **Smaller default bundle:**
-    - A new app's `bundle.js` is now 28 KB *(minified)* / 10 KB *(gzip)* / 9 KB *(brotli)*, down from 34 KB / 11.5 KB / 10.5 KB.
+    - A new app's `bundle.js` is now 29 KB *(minified)* / 10.5 KB *(gzip)* / 9.5 KB *(brotli)*, down from 34 KB / 11.5 KB / 10.5 KB.
     - The `es2020` target no longer turns each class field into a helper call. Browsers: Safari 15, Chrome 84, Firefox 90 or later. **To support older browsers**, list the features to lower for your target in the new, optional `builder.esbuild.lowerClassFeatures` of `nutin.config.js` (e.g. `['class-field', 'class-private-field', 'class-private-method']`). See the [Builder](https://www.nutin.dev/docs/tools/builder) docs.
     - core's private members are now `#private`. TypeScript `private` names were bundled in full; `#private` ones are minified. `#private` members drop the `_` prefix. Tests or JS code that still read one now read `undefined`, so test through the public API instead. See [How do I spy on methods?](https://www.nutin.dev/docs/testing/spy-on-methods).
     - `Lifecycle` is now a set of module functions. It is exported with the same `Lifecycle` namespace, so APIs are unchanged. A test can no longer `spyOn(Lifecycle, '…')` (it throws). Spy on `AppEventBus.emit` or subscribe instead. See [How do I spy on methods?](https://www.nutin.dev/docs/testing/spy-on-methods).
@@ -46,6 +46,11 @@
     - `nutin-add all` checks once, and prints the undo command once.
     - New `--dry-run` flag: lists every file adding the feature would create or modify, without writing anything. Files that can't be patched automatically are reported with the change to apply by hand, as in a real run. `nutin-add all --dry-run` shows each feature on top of the ones before it. It never stops on uncommitted changes or asks for confirmation: it says when a real run would stop.
 
+- **Tailwind CSS:**
+    - Now only scans your app. `src/styles/tailwind.css` turns off Tailwind's automatic source detection and lists `src/app` and `src/index.html`. `src/core` and `tools/` no longer add unused utilities.
+    - With the `markdown` feature, the build also scans each `markdownSources` folder, so HTML blocks in Markdown pages can use Tailwind classes.
+    - To use Tailwind classes elsewhere, add an `@source "rel/to/path";` line to `src/styles/tailwind.css`.
+
 - **`generate --dry-run`:** lists the files `generate` would create, without writing anything.
 
 - **testin-nutin:**
@@ -81,7 +86,7 @@
     - A text selection inside the child (plain text or `contenteditable`).
     - Open popovers, which closed when the child left the document. Reopening them fires their `beforetoggle` / `toggle` events.
 
-    Iframes still reload, custom elements are still disconnected and reconnected, and CSS transitions and modal dialogs still don't survive. Only `moveBefore()` keeps those. Browsers that support it are unchanged.
+    Iframes still reload, custom elements are still disconnected and reconnected, and CSS transitions and modal dialogs still don't survive. Only `moveBefore()` keeps those, so browsers that support it are unchanged.
 
 - **Clearer messages from the build, dev, generator, docker and test tools:**
     - Stack traces: an expected error prints its message only. A real bug keeps its stack.
@@ -92,16 +97,11 @@
     - Less noise: the dev loop no longer repeats "For production, use …" on every rebuild.
     - Runtime errors (dev builds) are prefixed and name what failed.
 
-- **`GETTING_STARTED.md` for browser extension projects:**
-    - It no longer describes what an extension doesn't have: views and their generator, `Navigation`, `config/seo.json`, and the i18n and SEO options (the build refuses both). The component example opens a tab through `chromeApiService` instead of navigating.
-    - New "Browser extension" section: the manifest and its permissions, `chromeApiService`, the background script, files the manifest references, debugging, and a link to [How do I create a browser extension?](https://www.nutin.dev/docs/cli/create-a-browser-extension). Options covers the `extension` block (`browsers`, `geckoId`) and Tailwind; Testing covers `fake-chrome.js`.
-    - Every project: the table of contents links now reach their sections, and `--js-only` projects see `.js` file names (`main.js`, generated files).
-
 - **`nutin-update` trusts `.nutin-meta.json` and the project's npm config less:**
     - The version check runs again right before `npm pack`, so no caller can reach the shell command with an unchecked version.
-    - An invalid version is quoted in the error message: control characters and terminal escape codes show as text instead of reaching the terminal, and a non-string value (e.g. `["3.1.3"]`) no longer reads like a valid one.
+    - An invalid version is quoted in the error message: control characters and terminal escape codes show as text instead of reaching the terminal, and a non-string value no longer reads like a valid one.
     - The previous version's templates are fetched from a temporary folder, so a project's own `.npmrc` can no longer point `npm pack` at another registry. `~/.npmrc`, the global npmrc and `npm_config_*` environment variables still apply.
-    - A `packageManager` other than `npm`, `yarn`, `pnpm` or `bun` is ignored: the package manager is detected from the lockfile, as when it's missing.
+    - A `packageManager` other than `npm`, `yarn`, `pnpm` or `bun` is ignored.
 
 ## 3.1.3
 

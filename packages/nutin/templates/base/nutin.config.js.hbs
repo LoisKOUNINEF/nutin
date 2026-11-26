@@ -1,11 +1,12 @@
 export default {
-{{#unless extension}}
   // Nutin options
   tailwind: false,         // Enable Tailwind CSS v4
+{{#unless extension}}
   i18n: [],                // Supported languages, default first (`['en', 'fr']`). `[]` means disabled.
   generateSEOFiles: false, // Generate per-route HTML, robots.txt and sitemap.xml; configure SEO data in config/seo.json
 {{/unless}}
 {{#if extension}}
+
   // Browser extension ({{extension}}): the build writes one unpacked extension per browser, in dist/<browser>
   extension: {
     browsers: ['chrome', 'firefox'],

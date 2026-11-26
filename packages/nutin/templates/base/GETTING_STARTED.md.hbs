@@ -243,7 +243,7 @@ This is where you can:
 
 {{#if extension}}
 - Set the `extension` block: `browsers` lists the browsers to build for; `geckoId` is Firefox's add-on id. `storage.sync` data and addons.mozilla.org are tied to it, so pick yours before the first release (e.g. `name@your-domain`): it can never change afterwards.
-- Turn on [Tailwind CSS](https://www.nutin.dev/docs/options-and-features/use-tailwind-css) by adding `tailwind: true`.
+- Turn on [Tailwind CSS](https://www.nutin.dev/docs/options-and-features/use-tailwind-css) by setting `tailwind: true`. The CSS ships in the extension, and Tailwind v4's browser baseline (Chrome 111, Firefox 128) is below the manifest's minimums.
 - Configure the builder and the built-in testing toolkit.
 
 The build refuses `i18n` and `generateSEOFiles`: i18n puts the language in the URL (`/<lang>/...`), and SEO files prerender routes, neither of which an extension page has.
@@ -263,7 +263,7 @@ The build refuses `i18n` and `generateSEOFiles`: i18n puts the language in the U
 
 - Nutin uses SASS (`.scss` syntax, compatible with plain CSS) as its default styling solution.
 
-- Tailwind CSS v4 is also supported as an optional utility-first CSS layer.
+- Tailwind CSS v4 is also supported as an optional utility-first CSS layer. See [How do I use Tailwind CSS?](https://www.nutin.dev/docs/options-and-features/use-tailwind-css)
 
 **Note:** Installing Tailwind CSS dependencies may print `npm warn install-scripts`. This is expected with npm 12's default install-script allowlisting and is safe to ignore.
 

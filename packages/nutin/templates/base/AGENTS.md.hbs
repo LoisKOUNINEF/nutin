@@ -42,7 +42,7 @@ nutin.config.js   build/feature config — see below
 {{#unless extension}}
 - Serve: `{{packageManager}} run serve` (build + serve), `{{packageManager}} run serve:prod` (prod build + serve), `{{packageManager}} run serve:only` (no rebuild), `{{packageManager}} run dev` (watch mode, reloads the page after each rebuild). Port defaults to 9090; override with `-- --port <n>` or `PORT=<n>`.
 {{/unless}}
-- Build: `{{packageManager}} run build` (dev) or `{{packageManager}} run build:prod` (production). Opt-in dependencies (Tailwind, `markdown`) are only installed automatically in an interactive terminal; elsewhere pass `-- -y` (or set `NUTIN_ASSUME_YES`).
+- Build: `{{packageManager}} run build` (dev) or `{{packageManager}} run build:prod` (production). Opt-in dependencies (Tailwind, `markdown`) are installed after a prompt in an interactive terminal (`-- -y` skips it). Outside one, a dev build installs them only with `-- -y` (or `NUTIN_ASSUME_YES`), and a prod build never does: install them first (CI, Docker).
 {{#if (eq lang "ts")}}- Type check only: `{{packageManager}} run typecheck` (`tsc --noEmit` on the merged templates; `dist/` is left as it is). Use it in CI instead of a plain `tsc --noEmit`, which reports every template-only `data-event` handler as unused.
 {{/if}}{{#if extension}}- Extension: `{{packageManager}} run build` writes `dist/chrome` and `dist/firefox` (load them unpacked). `{{packageManager}} run package:extension` (or `:chrome`/`:firefox`) runs a prod build and writes the store ZIPs `dist/<name>-<browser>-<version>.zip` + `.sha256` (needs the `zip` command); `{{packageManager}} run validate:extension` checks them (`-- --tag vX.Y.Z` on a release); `{{packageManager}} run lint:extension` runs `web-ext lint` on `dist/firefox`.
 {{/if}}- Generate: `{{packageManager}} run generate ELEMENT ELEMENT_NAME` (`ELEMENT` = `component`/`view`/`service`; `ELEMENT_NAME` may be a nested path, generated in `src/app/<path>/`; fails if that folder already exists and isn't empty; `--dry-run` lists the files without writing them).
@@ -157,7 +157,7 @@ Only defaults that leave the page are cancelled: link clicks (`<a href>`, unless
 
 ## Styling
 
-- Sass is the primary styling system; Tailwind is optional (`nutin.config.js`'s `tailwind` flag).
+- Sass is the primary styling system; Tailwind is optional (`nutin.config.js`'s `tailwind` flag). It scans `src/app`, `src/index.html` and the `markdownSources` folders for class names: a class used anywhere else needs an `@source` in `src/styles/tailwind.css`.
 - Naming convention: `.my-element__my-class`.
 - How it's compiled (`tools/builder/core/styles/sass.js`): `src/styles/main.scss` first, then every non-partial `.scss` under `src/app/` compiled **on its own** and appended in directory-walk order. So:
   - Shared variables, mixins and functions go in a partial in a Sass load path (`builder.sass.paths`, default `src/styles/base/`, e.g. `@use "variables";`). Keep those partials CSS-free: each file that `@use`s one emits its CSS again.
@@ -180,9 +180,11 @@ Add your own with `AppPipeRegistry.register(name, (value, ...args) => string)`; 
 ### `nutin.config.js`
 
 Central options/tools config (see the inline comments for details):
-- `i18n` — the language codes, the default first (`['en', 'fr']`); `[]` disables i18n. `true` still works but means English only (the build warns).
+{{#if extension}}- `tailwind` — top-level feature toggle (styles the extension's pages).
+- `extension.{browsers, geckoId}` — the browsers to build for, and Firefox's add-on id.
+{{else}}- `i18n` — the language codes, the default first (`['en', 'fr']`); `[]` disables i18n. `true` still works but means English only (the build warns).
 - `tailwind`, `generateSEOFiles` — top-level feature toggles.
-- `dockerPorts`, `markdownSources` — options of the `docker`/`markdown` features, only present once added with `nutin-add <feature>`.
+{{/if}}- `dockerPorts`, `markdownSources` — options of the `docker`/`markdown` features, only present once added with `nutin-add <feature>`.
 - `builder.{sass.paths, esbuild}` — build pipeline behavior.
 - `testinNutin.{includeFramework, includeTools, includeApp, isolate, jsdomOptions}` — test discovery/environment (`isolate`: test files run each in their own worker and jsdom window, e.g. for custom elements).
 

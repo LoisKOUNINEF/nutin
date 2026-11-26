@@ -1,0 +1,28 @@
+import fs from 'fs';
+import path from 'path';
+
+// HTML blocks in Markdown pages can use Tailwind classes too:
+// each markdownSources folder is scanned, so adding or renaming one needs no @source in tailwind.css.
+// An invalid entry is skipped here: the markdown step reports it.
+export function markdownSourceLines(sourceFolders, root) {
+  if (!Array.isArray(sourceFolders)) return [];
+  return sourceFolders
+    .map((entry) => (typeof entry === 'string' ? entry : entry?.folder))
+    .filter((folder) => typeof folder === 'string' && folder)
+    .map((folder) => `@source ${JSON.stringify(toCssPath(path.resolve(root, folder)))};`);
+}
+
+// Forward slashes: a Windows path's backslashes would be read as CSS escapes.
+export function toCssPath(file) {
+  return file.split(path.sep).join('/');
+}
+
+// Writes the Tailwind input for a build with Markdown folders:
+// a wrapper that imports tailwind.css and adds their @source lines.
+// Returns its path, or null without folders.
+export function writeMarkdownTailwindInput({ source, wrapper, sourceFolders, root }) {
+  const lines = markdownSourceLines(sourceFolders, root);
+  if (!lines.length) return null;
+  fs.writeFileSync(wrapper, [`@import ${JSON.stringify(toCssPath(source))};`, ...lines, ''].join('\n'));
+  return wrapper;
+}

@@ -35,9 +35,26 @@ function assumeYes() {
 }
 
 /**
- * Makes sure an opt-in feature's devDependencies are installed before its build step
- * imports them. Prod builds never install. Dev builds ask on a TTY; elsewhere (CI, the
- * dev watcher) they only install with -y/--yes, never silently.
+ * Whether missing opt-in deps are installed: 'install', 'prompt' (ask first) or 'refuse'.
+ * A production build only installs from an interactive terminal, so -y doesn't apply there.
+ * A dev build also installs with -y/--yes outside a terminal.
+ */
+export function installDecision({ isProd, tty, yes }) {
+  if (!tty && (isProd || !yes)) return 'refuse';
+  return yes ? 'install' : 'prompt';
+}
+
+// The install's environment: without NODE_ENV, which a prod build sets (builder.config.js).
+// Under NODE_ENV=production, npm, pnpm and yarn skip devDependencies:
+// "install -D" would then remove the project's devDependencies instead of adding the missing ones.
+export function installEnv(env) {
+  const { NODE_ENV: _nodeEnv, ...rest } = env;
+  return rest;
+}
+
+/**
+ * Makes sure an opt-in feature's devDependencies are installed before its build step imports them.
+ * See installDecision for when it installs.
  */
 export async function ensureDeps({ feature, deps, isProd, origin }) {
   const missing = deps.filter((dep) => !isInstalled(dep.name));
@@ -46,9 +63,10 @@ export async function ensureDeps({ feature, deps, isProd, origin }) {
   const packageManager = detectPackageManager();
   const [command, args] = getDevInstallArgs(packageManager, missing);
   const installCommand = [command, ...args].join(' ');
+  const decision = installDecision({ isProd, tty: Boolean(process.stdin.isTTY), yes: assumeYes() });
 
-  if (isProd) {
-    errorExit(`${feature} is enabled but its dependencies are missing.\nRun "${installCommand}" before rebuilding.`, origin);
+  if (isProd && decision === 'refuse') {
+    errorExit(`${feature} is enabled but its dependencies are missing.\nRun "${installCommand}" before rebuilding (a production build outside an interactive terminal doesn't install packages).`, origin);
   }
 
   print.warn(`${feature} is enabled but its dependencies are missing.`);
@@ -56,10 +74,10 @@ export async function ensureDeps({ feature, deps, isProd, origin }) {
   missing.forEach((dep) => print.gray(`  - ${dep.name}@${dep.version}`));
 
   let shouldInstall;
-  if (assumeYes()) {
+  if (decision === 'install') {
     print.gray(`-y/--yes passed. Installing automatically: ${installCommand}`);
     shouldInstall = true;
-  } else if (process.stdin.isTTY) {
+  } else if (decision === 'prompt') {
     shouldInstall = await promptBoolean('Install them now?');
   } else {
     // The dev watcher (NUTIN_WATCH) runs its builds without a terminal, and no flag reaches them.
@@ -75,7 +93,7 @@ export async function ensureDeps({ feature, deps, isProd, origin }) {
   }
 
   try {
-    await runCommand(command, args);
+    await runCommand(command, args, { env: installEnv(process.env) });
   } catch (err) {
     errorExit(err, `${origin}-install`);
   }

@@ -1,0 +1,45 @@
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import { markdownSourceLines, toCssPath, writeMarkdownTailwindInput } from './markdown-tailwind-sources.js';
+
+describe('markdown-tailwind-sources', () => {
+  it('markdownSourceLines adds one @source per markdownSources folder, resolved from the root', () => {
+    const root = path.resolve('/project');
+    const docs = toCssPath(path.resolve(root, 'docs'));
+    const blog = toCssPath(path.resolve(root, 'content/blog'));
+
+    expect(markdownSourceLines(['docs', { folder: 'content/blog', seo: false }], root)).toEqual([
+      `@source "${docs}";`,
+      `@source "${blog}";`,
+    ]);
+  });
+
+  it('markdownSourceLines skips a missing list and invalid entries', () => {
+    expect(markdownSourceLines(undefined, '/project')).toEqual([]);
+    expect(markdownSourceLines([], '/project')).toEqual([]);
+    expect(markdownSourceLines([42, null, {}, ''], '/project')).toEqual([]);
+  });
+
+  it('toCssPath uses forward slashes', () => {
+    expect(toCssPath(['a', 'b', 'c.css'].join(path.sep))).toBe('a/b/c.css');
+  });
+
+  it('writeMarkdownTailwindInput writes a wrapper importing tailwind.css, or returns null without folders', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nutin-tw-'));
+    try {
+      const source = path.join(dir, 'src', 'styles', 'tailwind.css');
+      const wrapper = path.join(dir, 'tailwind-input.css');
+
+      expect(writeMarkdownTailwindInput({ source, wrapper, sourceFolders: [], root: dir })).toBe(null);
+      expect(fs.existsSync(wrapper)).toBeFalsy();
+
+      expect(writeMarkdownTailwindInput({ source, wrapper, sourceFolders: ['docs'], root: dir })).toBe(wrapper);
+      expect(fs.readFileSync(wrapper, 'utf8')).toBe(
+        `@import "${toCssPath(source)}";\n@source "${toCssPath(path.join(dir, 'docs'))}";\n`
+      );
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
