@@ -11,7 +11,7 @@ import * as SecurityHelper from './helpers/security.helper.js';
 
 export * as SecurityHelper from './helpers/security.helper.js';
 export * as TokenHelper from './helpers/token.helper.js';
-export { html, raw, trustedRaw, nutinIf, SafeHtml } from './helpers/html.helper.js';
+export { html, raw, trustedRaw, nutinIf, nutinFor, SafeHtml } from './helpers/html.helper.js';
 
 export abstract class BaseComponent<T extends HTMLElement = HTMLElement> {
   #children: ChildRegistry = ChildrenHelper.createRegistry();

@@ -44,9 +44,12 @@ export interface PreservedState {
 // - restored once they're back in place.
 // - Iframes, custom element callbacks and transitions can't be: only moveBefore() keeps those.
 export function preserve(elements: HTMLElement[]): PreservedState {
+  // No kept children (most renders, and every first render): nothing to capture. This also keeps
+  // document.getSelection() and the other reads out of renders that keep nothing, like SSR's.
+  if (!elements.length) return untouched(null);
   // Parked elements keep all their state; only detached ones need restoring.
   const parking = park(elements);
-  if (parking) return { focus: null, scroll: [], animations: [], selection: null, popovers: [], parking };
+  if (parking) return untouched(parking);
 
   const focus = captureFocus(elements);
   return {
@@ -58,6 +61,10 @@ export function preserve(elements: HTMLElement[]): PreservedState {
     popovers: capturePopovers(elements),
     parking: null,
   };
+}
+
+function untouched(parking: HTMLElement | null): PreservedState {
+  return { focus: null, scroll: [], animations: [], selection: null, popovers: [], parking };
 }
 
 export function restore(state: PreservedState): void {

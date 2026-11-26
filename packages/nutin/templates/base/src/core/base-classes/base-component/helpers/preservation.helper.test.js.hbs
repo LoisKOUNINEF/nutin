@@ -56,6 +56,41 @@ describe('PreservationHelper', () => {
     expect(document.activeElement).not.toBe(child.querySelector('input'));
   });
 
+  it('preserves nothing for no elements, without reading the document (SSR has no getSelection)', () => {
+    const proto = Document.prototype;
+    const descriptor = Object.getOwnPropertyDescriptor(proto, 'getSelection');
+    let state;
+    try {
+      delete proto.getSelection;
+      state = PreservationHelper.preserve([]);
+      PreservationHelper.restore(state);
+    } finally {
+      Object.defineProperty(proto, 'getSelection', descriptor);
+    }
+
+    expect(state).toEqual({ focus: null, scroll: [], animations: [], selection: null, popovers: [], parking: null });
+  });
+
+  it('still captures the selection when there are elements to preserve', () => {
+    const proto = Document.prototype;
+    const original = proto.getSelection;
+    let calls = 0;
+    proto.getSelection = function (...args) {
+      calls++;
+      return original.apply(this, args);
+    };
+    try {
+      const child = document.createElement('div');
+      container.appendChild(child);
+      PreservationHelper.preserve([]);
+      PreservationHelper.preserve([child]);
+    } finally {
+      proto.getSelection = original;
+    }
+
+    expect(calls).toBe(1);
+  });
+
   it('does not park anything when Element.moveBefore is unavailable', () => {
     const child = document.createElement('div');
     container.appendChild(child);

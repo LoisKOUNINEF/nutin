@@ -46,6 +46,23 @@ For a child that sits inline, give it `tagName: 'span'` and `display: contents` 
 
 Children without `keep` are destroyed and recreated on every render — see [Keeping children across re-renders](#keeping-children-across-re-renders) to avoid that.
 
+## Catalog or nutinFor?
+
+A list doesn't always need child components. `nutinFor()` writes the items' markup in the parent's template (see [How do I generate a template?](./HOWDOI_GENERATE_A_TEMPLATE.md)):
+
+| | Catalog | `nutinFor` |
+|---|---|---|
+| Each item is | a child component, with its own lifecycle | markup in the parent's template |
+| Events | bound to the item's component | bound to the parent's handlers (`@dataset:` for the item's id) |
+| Across a parent re-render | kept with `keepBy` (focus, scroll, typed input) | rebuilt, like the rest of the template |
+| DOM shape | a wrapper (`elementTag`) and the component root per item | exactly the markup written |
+| Empty state | an empty container | `.nutinElse(…)` |
+
+- **`nutinFor`** for display lists whose interactions the parent handles: links, nav, breadcrumbs, tags, `<option>`s, table rows, a table of contents.
+- **A catalog** when an item has its own behaviour or state (inputs, toggles, async work), or must survive a parent re-render.
+
+**Important:** A `data-component` placeholder inside `nutinFor` items mounts one child per item, all from the same factory. A `keep` on it is matched by position, so reordering the list hands a kept child to another item: **use a catalog's `keepBy` for that**.
+
 ## Repeated children (catalogs)
 
 Use `createCatalogComponents()` instead of hand-writing one entry per item:
@@ -174,3 +191,4 @@ Without `keepBy`, the catalog is fully rebuilt on every render.
 - A `data-component` or `data-catalog` container whose `selector` doesn't match renders nothing, silently — **check for typos in `selector`/`elementName` first**.
 - Without `keep`/`keepBy`, `registerChildren()`/`createCatalogComponents()` re-run on every render with no diffing: a catalog container is wiped and fully rebuilt each time, and any DOM state local to a child (scroll position, focus, unsaved input) is lost on re-render.
 - A `keep` value repeated for the same selector in one render logs a warning; the duplicate is recreated on every render.
+- A `data-component` placeholder inside `nutinFor` items mounts one child per item, all from the same factory. A `keep` on it is matched by position, so reordering the list hands a kept child to another item: **use a catalog's `keepBy` for that**.

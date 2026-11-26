@@ -6,7 +6,11 @@
 
 - **`nutinIf(condition, branch)` and `.nutinElse(branch)`:** If/else in templates, exported from core.
     - `${nutinIf(user.isAdmin, () => html`<div data-component="admin"></div>`).nutinElse(html`<p>Read-only</p>`)}`. Without `.nutinElse()`, a false condition renders nothing.
-    - `data-optional` stays, for emptiness after hydration. See [How do I remove empty elements?](https://www.nutin.dev/docs/api/remove-empty-elements) and [How do I generate a template?](https://www.nutin.dev/docs/api/generate-a-template).
+    - `data-optional` stays, for emptiness after hydration.
+
+- **`nutinFor(items, render)` and `.nutinElse(branch)`:** Lists of markup in templates, exported from core.
+    - `${nutinFor(task.tags, (tag) => html`<li>${tag}</li>`).nutinElse(html`<li>No tags</li>`)}`. `items` is any iterable; `null`/`undefined` are empty.
+    - Catalogs stay for items with their own behaviour or state, or kept across renders. See [Catalog or nutinFor?](https://www.nutin.dev/docs/api/register-child-components#catalog-or-nutinfor).
 
 ### Changes
 
@@ -93,6 +97,8 @@
     - Open popovers, which closed when the child left the document. Reopening them fires their `beforetoggle` / `toggle` events.
 
     Iframes still reload, custom elements are still disconnected and reconnected, and CSS transitions and modal dialogs still don't survive. Only `moveBefore()` keeps those, so browsers that support it are unchanged.
+
+    A render that keeps no child (every first render, and SSR's) captures nothing. For the renders that do, SSR gives linkedom's document a `getSelection()` that returns `null` (new `installDocumentStubs()` in `tools/builder/core/seo/ssr/ssr-polyfills.js`).
 
 - **Clearer messages from the build, dev, generator, docker and test tools:**
     - Stack traces: an expected error prints its message only. A real bug keeps its stack.

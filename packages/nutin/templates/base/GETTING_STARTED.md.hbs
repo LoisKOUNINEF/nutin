@@ -152,6 +152,8 @@ components/
 ```
 
 ```ts
+import { nutinIf, Navigation, Component } from '../../../core/index.js';
+
 // The component's .html template is injected here.
 const templateFn = (product: Product) => html`__TEMPLATE_PLACEHOLDER__`;
 
@@ -214,7 +216,10 @@ export class ProductCardComponent extends Component {
   class="product-card"
 >
   <h2 class="product-card__name">${product.name}</h2>
-  <div data-component="product-details"></div>
+  <!-- if/else in template: nutinIf(condition, branch).nutinElse(branch) -->
+  ${nutinIf(product.available, () => html`<div data-component="product-details"></div>`)
+    .nutinElse('Out of stock')
+  }
   <div data-catalog="product-tags"></div>
 </div>
 ```

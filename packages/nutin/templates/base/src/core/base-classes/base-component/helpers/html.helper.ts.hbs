@@ -187,17 +187,19 @@ type Branch = Nutin.Template | (() => Nutin.Template);
 
 const resolveBranch = (branch: Branch): Nutin.Template => (typeof branch === 'function' ? branch() : branch);
 
-// nutinIf()'s result: the taken branch, or '' when the condition is false and no nutinElse() follows.
+// nutinIf()/nutinFor()'s result: the taken branch (nutinFor: the items' templates),
+// or '' when the condition is false and no nutinElse() follows.
 // Inside html`` it is unwrapped (see isConditional()), so the branch gets exactly its inline treatment.
 // Returned directly from generateTemplate() (or through String()), it renders as the branch itself would.
 class ConditionalHtml extends SafeHtml {
-  constructor(public readonly condition: boolean, public readonly result: Nutin.Template) {
+  constructor(public readonly condition: boolean, public readonly result: Nutin.Template | Nutin.Template[]) {
     super(...topLevel(result));
   }
 
-  // Returns the taken branch itself, so it behaves exactly as if written in place.
+  // Returns itself when the condition holds: it renders exactly as its branch would,
+  // inline and at the top level, where a bare nutinFor array would be stringified with commas.
   public nutinElse(branch: Branch): Nutin.Template {
-    return this.condition ? this.result : resolveBranch(branch);
+    return this.condition ? this : resolveBranch(branch);
   }
 }
 
@@ -210,6 +212,46 @@ export function nutinIf(condition: boolean, branch: Branch): ConditionalHtml {
     console.warn(`nutinIf() expects a boolean condition, got ${typeof condition} - e.g. use count > 0, not count.`);
   }
   return new ConditionalHtml(condition, condition ? resolveBranch(branch) : '');
+}
+
+// A list of markup in a template, rendered as an array in a ${} hole would be:
+// `${nutinFor(task.tags, (tag) => html`<li>${tag}</li>`).nutinElse(html`<li>No tags</li>`)}`.
+// items: any iterable (Set, Map entries, generator, NodeList); null/undefined are empty.
+// The else branch, rendered for an empty list, follows nutinIf's rules.
+// For items with their own state or events, or kept across renders (keepBy), use a catalog.
+export function nutinFor<T>(
+  items: Iterable<T> | null | undefined,
+  render: (item: T, index: number) => Nutin.Template
+): ConditionalHtml {
+  const list = toList(items);
+  // The define folds this in prod bundles: only list.map(render) is left.
+  return new ConditionalHtml(list.length > 0, list.map(globalThis.__NUTIN_PROD__ ? render : checkedRender(render)));
+}
+
+function toList<T>(items: Iterable<T> | null | undefined): T[] {
+  if (items === null || items === undefined) return [];
+  if (Array.isArray(items)) return items;
+  // A string is iterable, but char by char is never what a template wants.
+  if (typeof items !== 'string' && typeof (items as Partial<Iterable<T>>)[Symbol.iterator] === 'function') {
+    return Array.from(items);
+  }
+  if (!globalThis.__NUTIN_PROD__) {
+    console.warn(`nutinFor() expects an array or iterable, got ${typeof items} - it renders nothing.`);
+  }
+  return [];
+}
+
+// Dev only: a render callback that returns undefined (a forgotten `return`) renders nothing silently.
+function checkedRender<T>(render: (item: T, index: number) => Nutin.Template) {
+  let warned = false;
+  return (item: T, index: number): Nutin.Template => {
+    const out = render(item, index);
+    if (out === undefined && !warned) {
+      warned = true;
+      console.warn(`nutinFor() render returned undefined for item ${index} - did it forget a return?`);
+    }
+    return out;
+  };
 }
 
 // The value/raws a branch renders with at the top level:

@@ -1,4 +1,4 @@
-import { BaseComponent, AppEventBus, AppPipeRegistry, html, nutinIf } from '#root/dist/src/core/index.js';
+import { BaseComponent, AppEventBus, AppPipeRegistry, html, nutinIf, nutinFor } from '#root/dist/src/core/index.js';
 
 class TestComponent extends BaseComponent {
   constructor(options = {}, hooks = {}) {
@@ -741,6 +741,21 @@ describe('BaseComponent', () => {
     expect(parent.children.map((child) => child.name)).toEqual(['a']);
     expect(log).toContain('a:render');
     expect(log).not.toContain('b:render');
+    parent.destroy();
+  });
+
+  it('render() mounts one child per data-component placeholder in nutinFor items, with the same factory', () => {
+    const log = [];
+    const parent = new LoggingParent(log, {
+      template: html`<ul>${nutinFor(['x', 'y', 'z'], (item) => html`<li data-item="${item}"><div data-component="a"></div></li>`)}</ul>`,
+    });
+
+    parent.render();
+
+    expect(parent.children.length).toBe(3);
+    expect(parent.children.every((child) => child.name === 'a')).toBe(true);
+    expect(Array.from(parent.getElement().querySelectorAll('li'), (li) => li.querySelector('input.a') !== null))
+      .toEqual([true, true, true]);
     parent.destroy();
   });
 });
