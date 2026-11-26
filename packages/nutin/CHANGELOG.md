@@ -1,16 +1,28 @@
 # Changelog
 
-## 3.1.4
+## 3.2.0
 
 ### Features
 
 - **`nutinIf(condition, branch)` and `.nutinElse(branch)`:** If/else in templates, exported from core.
     - `${nutinIf(user.isAdmin, () => html`<div data-component="admin"></div>`).nutinElse(html`<p>Read-only</p>`)}`. Without `.nutinElse()`, a false condition renders nothing.
     - `data-optional` stays, for emptiness after hydration.
+    - See [How do I use `nutinIf`, `nutinFor` and `nutinElse`?](https://www.nutin.dev/docs/api/use-nutinif-nutinfor-and-nutinelse).
 
 - **`nutinFor(items, render)` and `.nutinElse(branch)`:** Lists of markup in templates, exported from core.
-    - `${nutinFor(task.tags, (tag) => html`<li>${tag}</li>`).nutinElse(html`<li>No tags</li>`)}`. `items` is any iterable; `null`/`undefined` are empty.
+    - `${nutinFor(task.tags, (tag) => html`<li>${tag}</li>`).nutinElse(html`<li>No tags</li>`)}`. `items` is any iterable; `null`/`undefined` are empty. See [How do I use `nutinIf`, `nutinFor` and `nutinElse`?](https://www.nutin.dev/docs/api/use-nutinif-nutinfor-and-nutinelse#nutinfor).
     - Catalogs stay for items with their own behaviour or state, or kept across renders. See [Catalog or nutinFor?](https://www.nutin.dev/docs/api/register-child-components#catalog-or-nutinfor).
+
+- **`getCatalogComponents(parent, selector)`:** The instances of a catalog's items, exported from core.
+    - `getCatalogComponents<TaskCardComponent>(this, 'tasks')[i].paint(row)` patches one item without re-rendering the parent.
+    - Read from the DOM on each call: call it again after each render instead of keeping the result.
+    - With one `[data-catalog]` container, `result[i]` is `items[i]`; several containers come one after the other.
+    - To find one item by id: `getCatalogComponents(this, 'tasks')[this.tasks.findIndex(task => task.id === id)]`.
+
+- **`getChildComponents(parent, ComponentClass)`:** The parent's children that are instances of a class, exported from core, typed from the class.
+    - `getChildComponents(this, PanelComponent).forEach(panel => panel.paint(state))`. In DOM order: several for a placeholder repeated in `nutinFor` items. Children of nested components are skipped.
+    - To tell apart two placeholders of the same class, match the attributes copied from them: `.find(panel => panel.getElement().matches('.sidebar'))`.
+    - Use `getCatalogComponents()` for catalogs.
 
 ### Changes
 
@@ -28,6 +40,7 @@
     - No seo.json title lookup without `generateSEOFiles`. The new `globalThis.__NUTIN_SEO__` lets esbuild drop it, like `__NUTIN_I18N__` for i18n.
     - All the builder's defines are now documented: what each one is, which bundles get it, and how to guard code with one. See [Builder](https://www.nutin.dev/docs/tools/builder).
     - `mountElement()` appends or replaces directly, instead of passing an options object.
+    - Component roots are now kept in a `WeakMap` from root element to instance (`dom.helper.ts`), instead of a `WeakSet`.
     - `Navigation` calls `AppEventBus` directly, instead of through a bus it kept in a private field. It's still an object, so tests can `spyOn(Navigation, 'navigateTo')`, and `useEventBus()` still redirects it.
     - In prod bundles, a template that throws is no longer wrapped for its report. `render()` reports the component whose `generateTemplate()` threw with a `console.error`.
     - Built-in pipes are opt-in. A new app's `main.ts` no longer calls `registerPipes()`: the call is there, commented out, with a link to the docs. Each pipe is now its own export (`datePipe`, `currencyPipe`, `uppercasePipe`…); register only the ones you use. `registerPipes()` still registers them all. See [What pipes are available?](https://www.nutin.dev/docs/api/what-pipes-are-available).
