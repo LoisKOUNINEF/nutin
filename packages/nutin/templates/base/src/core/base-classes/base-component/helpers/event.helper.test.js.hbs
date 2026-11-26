@@ -98,7 +98,7 @@ describe('EventHelper', () => {
 
   it('skips data-event elements inside a nested component root, which binds its own', () => {
     container.innerHTML = '<button class="own" data-event="click:toggle"></button><div class="child"><button class="nested" data-event="click:toggle"></button></div>';
-    DomHelper.markComponentRoot(container.querySelector('.child'));
+    DomHelper.markComponentRoot(container.querySelector('.child'), {});
     let calls = 0;
     const component = { toggle() { calls++; } };
 

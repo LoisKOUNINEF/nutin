@@ -82,7 +82,7 @@ describe('I18nHelper', () => {
   it('skips elements inside a nested component root, which translates its own content', () => {
     I18nService.translate = (key) => `[${key}]`;
     container.innerHTML = '<span class="own" data-i18n="a"></span><div class="child"><span class="nested" data-i18n="b">b</span></div>';
-    DomHelper.markComponentRoot(container.querySelector('.child'));
+    DomHelper.markComponentRoot(container.querySelector('.child'), {});
 
     I18nHelper.parseI18nAttributes(container);
 
@@ -113,7 +113,7 @@ describe('I18nHelper', () => {
 
   it('leaves links inside a nested component root, which localizes its own', () => {
     container.innerHTML = '<div class="child"><a href="/docs"></a></div>';
-    DomHelper.markComponentRoot(container.querySelector('.child'));
+    DomHelper.markComponentRoot(container.querySelector('.child'), {});
 
     I18nHelper.parseI18nAttributes(container);
 

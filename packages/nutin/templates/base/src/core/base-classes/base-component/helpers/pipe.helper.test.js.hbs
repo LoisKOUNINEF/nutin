@@ -90,7 +90,7 @@ describe('PipeHelper', () => {
 
   it('skips elements inside a nested component root, which pipes its own content', () => {
     container.innerHTML = '<span class="own" data-pipe="upper">a</span><div class="child"><span class="nested" data-pipe="upper">b</span></div>';
-    DomHelper.markComponentRoot(container.querySelector('.child'));
+    DomHelper.markComponentRoot(container.querySelector('.child'), {});
 
     PipeHelper.parsePipeAttributes(container);
 

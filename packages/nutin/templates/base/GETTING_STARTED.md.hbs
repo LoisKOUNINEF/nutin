@@ -152,7 +152,7 @@ components/
 ```
 
 ```ts
-import { nutinIf, Navigation, Component } from '../../../core/index.js';
+import { nutinFor, Navigation, Component } from '../../../core/index.js';
 
 // The component's .html template is injected here.
 const templateFn = (product: Product) => html`__TEMPLATE_PLACEHOLDER__`;
@@ -190,14 +190,14 @@ export class ProductCardComponent extends Component {
     ];
   }
 
-  // Referenced by the data-event attribute in the template.
+  // Referenced by the data-event attribute in the template. protected, not private: the editor would flag it as unused.
 {{#if extension}}
   // chrome.* goes through chromeApiService (src/app/services/chrome-api/).
-  private _openProductPage(url: string): void {
+  protected _openProductPage(url: string): void {
     void chromeApiService.openTab(url);
   }
 {{else}}
-  private _goToProductPage(productId: string): void {
+  protected _goToProductPage(productId: string): void {
     Navigation.navigateTo(`/product/${productId}`);
   }
 {{/if}}
@@ -220,6 +220,10 @@ export class ProductCardComponent extends Component {
   ${nutinIf(product.available, () => html`<div data-component="product-details"></div>`)
     .nutinElse('Out of stock')
   }
+  <!-- use nutinFor() when an item doesn't have its own behaviour or state -->
+  ${nutinFor(product.tags, (tag) => html`<li>${tag}</li>`)
+    .nutinElse('No tags')
+  }
   <div data-catalog="product-tags"></div>
 </div>
 ```
@@ -234,8 +238,13 @@ export class ProductCardComponent extends Component {
 }
 ```
 
-A template can also be written directly inline (skip the `.html` file and the placeholder). 
+`nutinIf` provides conditional rendering and `nutinFor` iterable rendering.
+Both support an optional `.nutinElse()` for fallback content. See [How do I use `nutinIf`, `nutinFor` and `nutinElse`?](https://www.nutin.dev/docs/api/use-nutinif-nutinfor-and-nutinelse).
+Native JavaScript expressions and array methods remain fully supported.
 
+A template can also be written directly inline (skip the `.html` file and the placeholder).
+{{#if (eq lang "ts")}}The editor then sees what the template's `${}` uses (imports, parameters, helpers).
+{{/if}}
 Defining both an inline template and an external `.html` file, or neither, fails the build.
 
 ## Options and configuration

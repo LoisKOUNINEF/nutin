@@ -148,3 +148,17 @@ function shallowEqual(a: unknown, b: unknown): boolean {
   return aKeys.length === Object.keys(bRecord).length
     && aKeys.every(key => Object.prototype.hasOwnProperty.call(bRecord, key) && Object.is(aRecord[key], bRecord[key]));
 }
+
+// parent's child components that are instances of `type` (its subclasses included), in DOM order:
+// several for a placeholder repeated in nutinFor items, and catalog items of that class too.
+// Children of nested components are skipped. Read from the DOM on each call,
+// so don't keep the result across renders.
+export function getChildComponents<C extends BaseComponent>(parent: BaseComponent, type: abstract new (...args: any[]) => C): C[] {
+  const root = parent.getElement();
+  const children: C[] = [];
+  SafeDom.querySelectorAllOf(root, '*').forEach(el => {
+    const component = DomHelper.getComponentOf(el);
+    if (component instanceof type && !DomHelper.isInsideNestedComponent(el, root)) children.push(component);
+  });
+  return children;
+}

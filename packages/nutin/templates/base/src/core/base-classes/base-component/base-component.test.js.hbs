@@ -1,4 +1,5 @@
 import { BaseComponent, AppEventBus, AppPipeRegistry, html, nutinIf, nutinFor } from '#root/dist/src/core/index.js';
+import * as DomHelper from '#root/dist/src/core/base-classes/base-component/helpers/dom.helper.js';
 
 class TestComponent extends BaseComponent {
   constructor(options = {}, hooks = {}) {
@@ -136,6 +137,11 @@ describe('BaseComponent', () => {
   it('mounts its element into the default "#app" target on construction', () => {
     const component = new TestComponent();
     expect(app.contains(component.getElement())).toBe(true);
+  });
+
+  it('registers its root element as mapped to itself', () => {
+    const component = new TestComponent();
+    expect(DomHelper.getComponentOf(component.getElement())).toBe(component);
   });
 
   it('creates the element with the given tagName', () => {

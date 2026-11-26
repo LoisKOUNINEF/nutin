@@ -211,11 +211,22 @@ describe('DomHelper', () => {
   it('isInsideNestedComponent is true only below another component root inside the given root', () => {
     container.innerHTML = '<p class="own"></p><div class="child"><p class="nested"></p></div>';
     const child = container.querySelector('.child');
-    DomHelper.markComponentRoot(child);
+    DomHelper.markComponentRoot(child, {});
 
     expect(DomHelper.isInsideNestedComponent(container.querySelector('.own'), container)).toBe(false);
     expect(DomHelper.isInsideNestedComponent(child, container)).toBe(false);
     expect(DomHelper.isInsideNestedComponent(container.querySelector('.nested'), container)).toBe(true);
+  });
+
+  it('getComponentOf returns the instance a root was marked with, and undefined for any other element', () => {
+    container.innerHTML = '<div class="child"><p class="nested"></p></div>';
+    const child = container.querySelector('.child');
+    const instance = {};
+    DomHelper.markComponentRoot(child, instance);
+
+    expect(DomHelper.getComponentOf(child)).toBe(instance);
+    expect(DomHelper.getComponentOf(container.querySelector('.nested'))).toBeUndefined();
+    expect(DomHelper.getComponentOf(container)).toBeUndefined();
   });
 
   it('replacePlaceholder swaps the placeholder for the element', () => {

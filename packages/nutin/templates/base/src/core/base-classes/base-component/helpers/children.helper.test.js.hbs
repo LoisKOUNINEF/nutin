@@ -1,5 +1,5 @@
 import * as ChildrenHelper from '#root/dist/src/core/base-classes/base-component/helpers/children.helper.js';
-import { BaseComponent } from '#root/dist/src/core/index.js';
+import { BaseComponent, getChildComponents, html, nutinFor } from '#root/dist/src/core/index.js';
 
 class Widget extends BaseComponent {
   constructor(options) {
@@ -381,5 +381,148 @@ describe('ChildrenHelper', () => {
     } finally {
       delete proto.moveBefore;
     }
+  });
+
+  describe('getChildComponents', () => {
+    class Other extends BaseComponent {}
+    class SpecialWidget extends Widget {}
+
+    class Parent extends BaseComponent {
+      constructor(mountTarget, { template, children }) {
+        super({ mountTarget });
+        this.template = template;
+        this.children = children;
+      }
+      generateTemplate() { return this.template; }
+      registerChildren() { return this.children(this); }
+    }
+    const child = (selector, Type = Widget, keep) => ({ selector, keep, factory: (el) => new Type({ mountTarget: el }) });
+
+    it('returns the children of the given class, and [] when there is none', () => {
+      const parent = new Parent(element, {
+        template: '<div data-component="widget"></div><div data-component="other"></div>',
+        children: () => [child('widget'), child('other', Other)],
+      });
+      parent.render();
+
+      const widgets = getChildComponents(parent, Widget);
+      const others = getChildComponents(parent, Other);
+
+      expect(widgets.length).toBe(1);
+      expect(widgets[0]).toBeInstanceOf(Widget);
+      expect(others.length).toBe(1);
+      expect(others[0]).not.toBe(widgets[0]);
+      expect(getChildComponents(parent, SpecialWidget)).toEqual([]);
+      parent.destroy();
+    });
+
+    it('returns children of subclasses for a base class', () => {
+      const parent = new Parent(element, {
+        template: '<div data-component="widget"></div><div data-component="special"></div>',
+        children: () => [child('widget'), child('special', SpecialWidget)],
+      });
+      parent.render();
+
+      expect(getChildComponents(parent, Widget).length).toBe(2);
+      expect(getChildComponents(parent, SpecialWidget).length).toBe(1);
+      expect(getChildComponents(parent, BaseComponent).length).toBe(2);
+      parent.destroy();
+    });
+
+    it('returns two placeholders of the same class in DOM order, told apart by the attributes copied from them', () => {
+      const parent = new Parent(element, {
+        template: '<div class="main" data-component="main"></div><div class="side" data-component="side"></div>',
+        children: () => [child('side'), child('main')],
+      });
+      parent.render();
+
+      const widgets = getChildComponents(parent, Widget);
+
+      expect(widgets.map(widget => widget.getElement().className)).toEqual(['main', 'side']);
+      expect(widgets.find(widget => widget.getElement().matches('.side'))).toBe(widgets[1]);
+      parent.destroy();
+    });
+
+    it('returns one instance per placeholder repeated in nutinFor items, in DOM order', () => {
+      const parent = new Parent(element, {
+        template: html`<ul>${nutinFor(['x', 'y', 'z'], (item) => html`<li data-item="${item}"><div data-component="widget"></div></li>`)}</ul>`,
+        children: () => [child('widget')],
+      });
+      parent.render();
+
+      const widgets = getChildComponents(parent, Widget);
+
+      expect(widgets.map(widget => widget.getElement().parentElement.dataset.item)).toEqual(['x', 'y', 'z']);
+      expect(new Set(widgets).size).toBe(3);
+      parent.destroy();
+    });
+
+    it('includes catalog items of that class', () => {
+      const parent = new Parent(element, {
+        template: '<div data-component="widget"></div><ul data-catalog="list"></ul>',
+        children: (self) => [child('widget'), ...self.createCatalogComponents({
+          items: [{ id: 1 }, { id: 2 }], selector: 'list', elementName: 'item', component: class extends Widget {
+            constructor(el) { super({ mountTarget: el }); }
+          },
+        })],
+      });
+      parent.render();
+
+      expect(getChildComponents(parent, Widget).length).toBe(3);
+      parent.destroy();
+    });
+
+    it('returns the kept instance after a re-render, and a new one for a child without keep', () => {
+      const parent = new Parent(element, {
+        template: '<div data-component="widget"></div><div data-component="other"></div>',
+        children: () => [child('widget', Widget, 'w'), child('other', Other)],
+      });
+      parent.render();
+      const [kept] = getChildComponents(parent, Widget);
+      const [rebuilt] = getChildComponents(parent, Other);
+
+      parent.render();
+
+      expect(getChildComponents(parent, Widget)[0]).toBe(kept);
+      expect(getChildComponents(parent, Other)[0]).not.toBe(rebuilt);
+      expect(rebuilt.isDestroyed).toBe(true);
+      parent.destroy();
+    });
+
+    it('skips the children of nested components', () => {
+      const parent = new Parent(element, {
+        template: '<div data-component="widget"></div><div data-component="host"></div>',
+        children: () => [child('widget'), {
+          selector: 'host',
+          factory: (el) => new Parent(el, { template: '<div data-component="widget"></div>', children: () => [child('widget')] }),
+        }],
+      });
+      parent.render();
+      const [host] = getChildComponents(parent, Parent);
+      const [inner] = getChildComponents(host, Widget);
+
+      const widgets = getChildComponents(parent, Widget);
+
+      expect(inner).toBeInstanceOf(Widget);
+      expect(widgets.length).toBe(1);
+      expect(widgets.includes(inner)).toBe(false);
+      parent.destroy();
+    });
+
+    it('returns [] once the placeholder is gone from the template', () => {
+      const parent = new Parent(element, {
+        template: '<div data-component="widget"></div>',
+        children: () => [child('widget')],
+      });
+      parent.render();
+      const [first] = getChildComponents(parent, Widget);
+
+      parent.template = '<p>no widget</p>';
+      parent.render();
+
+      expect(getChildComponents(parent, Widget)).toEqual([]);
+      expect(first.isDestroyed).toBe(true);
+      parent.destroy();
+    });
   });
 });

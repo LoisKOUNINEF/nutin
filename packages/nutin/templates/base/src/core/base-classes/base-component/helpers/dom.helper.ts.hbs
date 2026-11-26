@@ -1,20 +1,26 @@
 import * as SecurityHelper from "./security.helper.js";
 import * as SafeDom from "./safe-dom.helper.js";
+import type { BaseComponent } from "../base-component.js";
 
 // Element.moveBefore() isn't in TypeScript's DOM lib yet.
 type MovableParent = ParentNode & { moveBefore?: (node: Node, child: Node | null) => void };
 
-// Root element of every component instance, so a parent can tell its own
-// nodes apart from the ones nested components own.
-const componentRoots = new WeakSet<Element>();
+// Root element of every component instance, mapped to that instance,
+// so a parent can tell its own nodes apart from the ones nested components own,
+// and reach a child's instance from its root.
+const componentRoots = new WeakMap<Element, BaseComponent>();
 
-export function markComponentRoot(element: HTMLElement): void {
-  componentRoots.add(element);
+export function markComponentRoot(element: HTMLElement, instance: BaseComponent): void {
+  componentRoots.set(element, instance);
+}
+
+export function getComponentOf(element: Element): BaseComponent | undefined {
+  return componentRoots.get(element);
 }
 
 // True when `el` lives inside another component's root below `root`.
-// SafeDom: a <form> holding <input name="parentElement"> would otherwise send this walk
-// back down to the input, and from there to the form again, forever.
+// SafeDom: a <form> holding <input name="parentElement"> otherwise send this walk back down to the input,
+// and from there to the form again, forever.
 export function isInsideNestedComponent(el: Element, root: Element): boolean {
   let current = SafeDom.parentElementOf(el);
   while (current && current !== root) {

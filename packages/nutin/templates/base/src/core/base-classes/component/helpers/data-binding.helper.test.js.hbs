@@ -76,7 +76,7 @@ describe('DataBindingHelper', () => {
 
   it('skips fields inside a nested component root in both directions', () => {
     container.innerHTML = '<input class="own" data-bind="name"><div class="child"><input class="nested" data-bind="name" value="child"></div>';
-    DomHelper.markComponentRoot(container.querySelector('.child'));
+    DomHelper.markComponentRoot(container.querySelector('.child'), {});
 
     DataBindingHelper.applyDataBindings(container, { name: 'Ada' });
 

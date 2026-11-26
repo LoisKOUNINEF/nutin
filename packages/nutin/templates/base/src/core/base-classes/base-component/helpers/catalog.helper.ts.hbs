@@ -1,5 +1,8 @@
 import type { KeepableComponentConfig } from './children.helper.js';
+import type { BaseComponent } from '../base-component.js';
+import type { Component } from '../../component/component.js';
 import * as SafeDom from './safe-dom.helper.js';
+import * as DomHelper from './dom.helper.js';
 
 export function generateCatalog(config: Nutin.CatalogConfig, scope: Element = document.documentElement): Nutin.ComponentConfig[] {
   if (!config.items || config.items.length < 1) return [];
@@ -61,4 +64,23 @@ function getConfigWithIndex(config: Nutin.CatalogConfig, index: number): Nutin.C
   return (item && typeof item === 'object')
     ? { ...(item as object), index: index }
     : { value: item, index: index };    
+}
+
+// The instances of the catalog items in parent's [data-catalog="selector"] containers, in DOM order:
+// with one container, result[i] is items[i]; several containers come one after the other.
+// Read from the DOM on each call, so don't keep the result across renders.
+// SafeDom: a <form> container or wrapper may hold a control named children/firstElementChild.
+export function getCatalogComponents<C extends BaseComponent = Component>(parent: BaseComponent, selector: string): C[] {
+  const root = parent.getElement();
+  const components: C[] = [];
+  SafeDom.querySelectorAllOf(root, `[data-catalog="${selector}"]`).forEach(container => {
+    if (DomHelper.isInsideNestedComponent(container, root)) return;
+    Array.from(SafeDom.prop<HTMLCollection>(container, 'children')).forEach(wrapper => {
+      const itemRoot = SafeDom.prop<Element | null>(wrapper, 'firstElementChild');
+      // Skips what isn't an item: an empty catalog's leftover template content, an unmounted placeholder.
+      const component = itemRoot && DomHelper.getComponentOf(itemRoot);
+      if (component) components.push(component as C);
+    });
+  });
+  return components;
 }
