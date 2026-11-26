@@ -1,17 +1,51 @@
-import { sharedDefine, slimNutinConfig, slimSeoConfig, isPlainData } from './bundle-options.js';
+import { sharedDefine, slimNutinConfig, slimSeoConfig, isPlainData, NATIVE_CLASS_FEATURES, classFeatureSupport, clientDefine } from './bundle-options.js';
 
 describe('bundle-options', () => {
-  it('sharedDefine sets NODE_ENV, the i18n flag and the markdown sources from the build config', () => {
+  it('classFeatureSupport marks every native class feature as supported by default', () => {
+    const all = Object.fromEntries(NATIVE_CLASS_FEATURES.map((feature) => [feature, true]));
+    expect(NATIVE_CLASS_FEATURES.length).toBe(9);
+    expect(classFeatureSupport()).toEqual(all);
+    expect(classFeatureSupport([])).toEqual(all);
+  });
+
+  it('classFeatureSupport leaves the lowered features out, for the target to decide', () => {
+    const support = classFeatureSupport(['class-field', 'class-private-method']);
+    expect('class-field' in support).toBe(false);
+    expect('class-private-method' in support).toBe(false);
+    expect(Object.keys(support).length).toBe(7);
+    expect(support['class-private-field']).toBe(true);
+  });
+
+  it('sharedDefine sets NODE_ENV, the i18n and SEO flags, the markdown sources and an empty data files map from the build config', () => {
     expect(sharedDefine({ isProd: true, i18n: false })).toEqual({
       'process.env.NODE_ENV': '"production"',
       'globalThis.__NUTIN_I18N__': 'false',
+      'globalThis.__NUTIN_SEO__': 'false',
       'globalThis.__NUTIN_MARKDOWN_SOURCES__': JSON.stringify('[]'),
+      'globalThis.__NUTIN_DATA_FILES__': JSON.stringify('{}'),
     });
-    expect(sharedDefine({ isProd: false, i18n: true, markdownSources: { sourceFolders: ['docs', { folder: 'x', seo: false }] } })).toEqual({
+    expect(sharedDefine({ isProd: false, i18n: true, generateSEO: true, markdownSources: { sourceFolders: ['docs', { folder: 'x', seo: false }] } })).toEqual({
       'process.env.NODE_ENV': '"development"',
       'globalThis.__NUTIN_I18N__': 'true',
+      'globalThis.__NUTIN_SEO__': 'true',
       'globalThis.__NUTIN_MARKDOWN_SOURCES__': JSON.stringify('["docs",{"folder":"x","seo":false}]'),
+      'globalThis.__NUTIN_DATA_FILES__': JSON.stringify('{}'),
     });
+  });
+
+  it('clientDefine adds the prod flag to sharedDefine, which the SSR bundle does not get', () => {
+    expect(clientDefine({ isProd: true, i18n: false })).toEqual({
+      ...sharedDefine({ isProd: true, i18n: false }),
+      'globalThis.__NUTIN_PROD__': 'true',
+    });
+    expect(clientDefine({ isProd: false, i18n: false })['globalThis.__NUTIN_PROD__']).toBe('false');
+    expect('globalThis.__NUTIN_PROD__' in sharedDefine({ isProd: true, i18n: false })).toBe(false);
+  });
+
+  it('sharedDefine passes the data files map as a JSON string', () => {
+    const dataFiles = { '/locales/en.json': '/locales/en.0123abcd.json' };
+    expect(sharedDefine({ isProd: true, i18n: true, dataFiles })['globalThis.__NUTIN_DATA_FILES__'])
+      .toBe(JSON.stringify(JSON.stringify(dataFiles)));
   });
 
   it('slimNutinConfig drops tooling-only keys and keeps everything app code may read', () => {

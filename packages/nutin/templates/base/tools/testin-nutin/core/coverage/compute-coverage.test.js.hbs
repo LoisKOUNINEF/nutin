@@ -71,4 +71,46 @@ describe('computeFileCoverage', () => {
     const { uncoveredFunctions } = computeFileCoverage(scriptResult, sourceText);
     expect(uncoveredFunctions).toEqual([{ name: 'constructor', line: 2 }]);
   });
+
+  // V8's ranges for this source, as reported by one isolate that called outer(true) and
+  // another that called outer(false): each lists only the branch it didn't take.
+  const mergeSource = "export function outer(flag) {\n  function innerNeverCalled() { return 1; }\n  if (flag) { return 'a'; }\n  return 'b';\n}\n";
+  const script = (outer, inner = []) => ({
+    functions: [
+      { functionName: '', ranges: [{ startOffset: 0, endOffset: 118, count: 1 }] },
+      { functionName: 'outer', ranges: outer.map(([startOffset, endOffset, count]) => ({ startOffset, endOffset, count })) },
+      ...inner,
+    ],
+  });
+  const innerNeverCalled = { functionName: 'innerNeverCalled', ranges: [{ startOffset: 32, endOffset: 73, count: 0 }] };
+  const calledWithTrue = script([[7, 117, 1], [101, 116, 0]], [innerNeverCalled]);
+  const calledWithFalse = script([[7, 117, 1], [86, 101, 0]], [innerNeverCalled]);
+  const notCalled = script([[7, 117, 0]]);
+
+  it('merges isolates: a branch one isolate omits is covered if its offset ran there', () => {
+    expect(mergeSource.length).toBe(118);
+    const merged = computeFileCoverage([calledWithTrue, calledWithFalse], mergeSource);
+    expect(merged.totalBranches).toBe(2);
+    expect(merged.coveredBranches).toBe(2);
+    expect(merged.uncoveredLines).toEqual([2]);
+  });
+
+  it('merges isolates: a function is covered when it ran in any of them', () => {
+    const merged = computeFileCoverage([notCalled, calledWithTrue], mergeSource);
+    expect(merged.totalFunctions).toBe(2);
+    expect(merged.coveredFunctions).toBe(1);
+    expect(merged.uncoveredFunctions).toEqual([{ name: 'innerNeverCalled', line: 2 }]);
+    // outer(false) never ran: its branch stays uncovered.
+    expect(merged.uncoveredBranches).toEqual([3]);
+  });
+
+  it('merges isolates: nothing ran in any of them', () => {
+    const merged = computeFileCoverage([notCalled, notCalled], mergeSource);
+    expect(merged.coveredLines).toBe(1); // only the export line, at module level
+    expect(merged.coveredFunctions).toBe(0);
+  });
+
+  it('gives a single entry passed in an array the same result', () => {
+    expect(computeFileCoverage([calledWithTrue], mergeSource)).toEqual(computeFileCoverage(calledWithTrue, mergeSource));
+  });
 });

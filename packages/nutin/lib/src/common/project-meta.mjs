@@ -1,9 +1,7 @@
 import path from 'path';
-import * as fsExtra from 'fs-extra';
 import { FEATURES } from './feature-registry.mjs';
 import { META_FILE_NAME } from './package-data.mjs';
-
-const fs = fsExtra.default;
+import { realWriter } from './project-writer.mjs';
 
 function metaPath(projectPath) {
   return path.join(projectPath, META_FILE_NAME);
@@ -17,7 +15,8 @@ function extractFeatures(context) {
   return features;
 }
 
-export async function writeProjectMeta(projectPath, context) {
+// writer: see project-writer.mjs (a dry run records the write instead).
+export async function writeProjectMeta(projectPath, context, writer = realWriter) {
   const meta = {
     version: context.version,
     packageManager: context.packageManager,
@@ -26,20 +25,20 @@ export async function writeProjectMeta(projectPath, context) {
     features: extractFeatures(context),
   };
 
-  await fs.writeJSON(metaPath(projectPath), meta, { spaces: 2 });
+  await writer.writeJSON(metaPath(projectPath), meta);
   return meta;
 }
 
-export async function readProjectMeta(projectPath) {
+export async function readProjectMeta(projectPath, writer = realWriter) {
   const file = metaPath(projectPath);
-  if (!(await fs.pathExists(file))) {
+  if (!(await writer.pathExists(file))) {
     return null;
   }
-  return fs.readJSON(file);
+  return writer.readJSON(file);
 }
 
-export async function updateProjectMeta(projectPath, patch) {
-  const existing = (await readProjectMeta(projectPath)) ?? {};
+export async function updateProjectMeta(projectPath, patch, writer = realWriter) {
+  const existing = (await readProjectMeta(projectPath, writer)) ?? {};
 
   const merged = {
     ...existing,
@@ -50,6 +49,6 @@ export async function updateProjectMeta(projectPath, patch) {
     },
   };
 
-  await fs.writeJSON(metaPath(projectPath), merged, { spaces: 2 });
+  await writer.writeJSON(metaPath(projectPath), merged);
   return merged;
 }

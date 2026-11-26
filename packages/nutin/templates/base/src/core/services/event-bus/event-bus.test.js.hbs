@@ -68,13 +68,15 @@ describe('EventBus', () => {
   });
 
   it('should handle unsubscribing non-existent handler', () => {
-    const handler1 = () => {};
+    let calls = 0;
+    const handler1 = () => { calls++; };
     const handler2 = () => {};
       
     eventBus.subscribe('test-event', handler1);
       
     eventBus.off('test-event', handler2);
-    expect(eventBus.handlers['test-event'].length).toBe(1);
+    eventBus.emit('test-event');
+    expect(calls).toBe(1);
   });
 
   it('should handle unsubscribing from non-existent event', () => {
@@ -102,22 +104,16 @@ describe('EventBus', () => {
     eventBus.emit('non-existent-event', { data: 'test' });      
   });
 
-  it('should track subscriptions correctly', () => {      
-    eventBus.subscribe('user-login', () => {});
-    eventBus.subscribe('notification', () => {});
-      
-    expect(eventBus._subscriptions.length).toBe(2);
-  });
   it('should cleanup event listeners', () => {
-      
-    eventBus.subscribe('user-login', () => {});
-    eventBus.subscribe('notification', () => {});
-      
-    expect(eventBus._subscriptions.length).toBe(2);
-      
+    let calls = 0;
+    eventBus.subscribe('user-login', () => { calls++; });
+    eventBus.subscribe('notification', () => { calls++; });
+
     eventBus.cleanupEventListeners();
-      
-    expect(eventBus._subscriptions.length).toBe(0);
+    eventBus.emit('user-login', {});
+    eventBus.emit('notification', {});
+
+    expect(calls).toBe(0);
   });
   it('should reset specific service instance', () => {
     const instance1 = EventBus.getInstance();    
@@ -148,18 +144,26 @@ describe('EventBus', () => {
     expect(callCount).toBe(1);
   });
 
-  it('should auto-unsubscribe a once() handler from _subscriptions after it fires', () => {
-    eventBus.once('user-login', () => {});
-    expect(eventBus._subscriptions.length).toBe(1);
-
+  it('should forget a once() subscription after it fires, so a later subscribe() of the same callback stays', () => {
+    let calls = 0;
+    const callback = () => { calls++; };
+    eventBus.once('user-login', callback);
     eventBus.emit('user-login', {});
-    expect(eventBus._subscriptions.length).toBe(0);
+
+    // A leftover once() record would make this emit remove the regular subscription.
+    eventBus.subscribe('user-login', callback);
+    eventBus.emit('user-login', {});
+    eventBus.emit('user-login', {});
+
+    expect(calls).toBe(3);
   });
 
   it('should not remove a once() subscription before it has fired', () => {
-    eventBus.once('user-login', () => {});
+    let calls = 0;
+    eventBus.once('user-login', () => { calls++; });
     eventBus.emit('notification', {});
-    expect(eventBus._subscriptions.length).toBe(1);
+    eventBus.emit('user-login', {});
+    expect(calls).toBe(1);
   });
 
   it('should let a once() handler and a regular subscriber on the same event coexist', () => {
@@ -177,22 +181,55 @@ describe('EventBus', () => {
     expect(regularCalls).toBe(2);
   });
 
+  it('with the same callback subscribed and once()d, one emit calls it twice and removes both, in either order', () => {
+    let calls = 0;
+    const callback = () => { calls++; };
+    eventBus.subscribe('user-login', callback);
+    eventBus.once('user-login', callback);
+    eventBus.emit('user-login', {});
+    eventBus.emit('user-login', {});
+    expect(calls).toBe(2);
+
+    calls = 0;
+    eventBus.once('notification', callback);
+    eventBus.subscribe('notification', callback);
+    eventBus.emit('notification', {});
+    eventBus.emit('notification', {});
+    expect(calls).toBe(2);
+  });
+
+  it('dispatches to the handlers subscribed when emit() started, even if one unsubscribes another', () => {
+    const calls = [];
+    const second = () => calls.push('second');
+    eventBus.subscribe('notification', () => {
+      calls.push('first');
+      eventBus.off('notification', second);
+      eventBus.subscribe('notification', () => calls.push('late'));
+    });
+    eventBus.subscribe('notification', second);
+
+    eventBus.emit('notification', {});
+    expect(calls).toEqual(['first', 'second']);
+  });
+
   it('keeps dispatching to the other listeners when one throws, and still removes a throwing once() handler', () => {
-    const errSpy = spyOn(console, 'error');
-    errSpy.andCallFake(() => {});
-    let received = 0;
-    let onceCalls = 0;
+    const errSpy = spyOn(console, 'error').andCallFake(() => {});
+    try {
+      let received = 0;
+      let onceCalls = 0;
 
-    eventBus.once('notification', () => { onceCalls++; throw new Error('boom'); });
-    eventBus.subscribe('notification', () => { received++; });
+      eventBus.once('notification', () => { onceCalls++; throw new Error('boom'); });
+      eventBus.subscribe('notification', () => { received++; });
 
-    eventBus.emit('notification', {});
-    eventBus.emit('notification', {});
+      eventBus.emit('notification', {});
+      eventBus.emit('notification', {});
 
-    expect(onceCalls).toBe(1);
-    expect(received).toBe(2);
-    expect(errSpy.callCount).toBe(1);
-    errSpy.restore();
+      expect(onceCalls).toBe(1);
+      expect(received).toBe(2);
+      expect(errSpy.callCount).toBe(1);
+    } finally {
+      errSpy.restore();
+    }
   });
 
   it('off(event) with no callback removes every handler for that event', () => {
@@ -206,7 +243,6 @@ describe('EventBus', () => {
 
     expect(callsA).toBe(0);
     expect(callsB).toBe(0);
-    expect(eventBus.handlers['notification']).toBeUndefined();
   });
 
   it('off(event) with no callback does not affect other events', () => {
@@ -237,6 +273,7 @@ describe('useEventBus', () => {
     const received = [];
     const callback = (data) => received.push(data);
     AppEventBus.subscribe('navigate', callback);
+    AppEventBus.subscribe('test-delegation', callback);
     AppEventBus.once('reload', callback);
     AppEventBus.emit('navigate', { path: '/a' });
     AppEventBus.off('navigate', callback);
@@ -248,7 +285,9 @@ describe('useEventBus', () => {
     expect(mock.off).toHaveBeenCalledWith('navigate', callback);
     expect(received).toEqual([{ path: '/a' }]);
     // Nothing reached the real bus.
-    expect(AppEventBus.handlers.navigate).toBeUndefined();
+    useEventBus(null);
+    AppEventBus.emit('test-delegation', 'real bus');
+    expect(received).toEqual([{ path: '/a' }]);
   });
 
   it('covers the facades and components\' listen(), which go through AppEventBus', () => {

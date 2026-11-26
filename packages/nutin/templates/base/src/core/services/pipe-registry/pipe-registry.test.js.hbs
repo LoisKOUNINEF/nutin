@@ -17,29 +17,30 @@ describe('PipeRegistry', () => {
 	});
 
 	it('register() keeps the original implementation when the name is already registered', () => {
-		const warnSpy = spyOn(console, 'warn');
-		warnSpy.andCallFake(() => {});
+		const warnSpy = spyOn(console, 'warn').andCallFake(() => {});
+		try {
+			AppPipeRegistry.register('dup-test', () => 'first');
 
-		AppPipeRegistry.register('dup-test', () => 'first');
+			AppPipeRegistry.register('dup-test', () => 'second');
 
-		AppPipeRegistry.register('dup-test', () => 'second');
+			expect(AppPipeRegistry.apply('dup-test', 'ignored')).toBe('first');
 
-		expect(AppPipeRegistry.apply('dup-test', 'ignored')).toBe('first');
-
-		expect(warnSpy.callCount).toBe(1);
-		warnSpy.restore();
+			expect(warnSpy.callCount).toBe(1);
+		} finally {
+			warnSpy.restore();
+		}
 	});
 
 	it('apply() warns and returns the raw value when the pipe is not registered', () => {
-		const warnSpy = spyOn(console, 'warn');
-		warnSpy.andCallFake(() => {});
+		const warnSpy = spyOn(console, 'warn').andCallFake(() => {});
+		try {
+			const result = AppPipeRegistry.apply('does-not-exist', 'raw-value');
 
-		const result = AppPipeRegistry.apply('does-not-exist', 'raw-value');
-
-		expect(result).toBe('raw-value');
-		expect(warnSpy.callCount).toBe(1);
-
-		warnSpy.restore();
+			expect(result).toBe('raw-value');
+			expect(warnSpy.callCount).toBe(1);
+		} finally {
+			warnSpy.restore();
+		}
 	});
 
 	it('onDestroy() clears all registered pipes', () => {
@@ -48,19 +49,19 @@ describe('PipeRegistry', () => {
 
 		AppPipeRegistry.onDestroy();
 
-		const warnSpy = spyOn(console, 'warn');
-		warnSpy.andCallFake(() => {});
-
-		expect(AppPipeRegistry.apply('clear-test', 'x')).toBe('x');
-		expect(warnSpy.callCount).toBe(1);
-
-		warnSpy.restore();
-
-		// AppPipeRegistry is a process-wide singleton shared by every test suite,
-		// so destroying it here would otherwise leak into every suite that runs
-		// afterward and relies on the app's pipes already being registered. Silenced
-		// since this can legitimately re-hit an "already exists" warning per pipe if
-		// some other suite re-registers them again later in the run.
-		silenceConsole('warn', () => registerPipes());
+		const warnSpy = spyOn(console, 'warn').andCallFake(() => {});
+		try {
+			expect(AppPipeRegistry.apply('clear-test', 'x')).toBe('x');
+			expect(warnSpy.callCount).toBe(1);
+		} finally {
+			warnSpy.restore();
+			// AppPipeRegistry is a process-wide singleton shared by every test suite,
+			// so destroying it here would otherwise leak into every suite that runs
+			// afterward and relies on the app's pipes already being registered (even
+			// when an assertion above failed). Silenced since this can legitimately
+			// re-hit an "already exists" warning per pipe if some other suite
+			// re-registers them again later in the run.
+			silenceConsole('warn', () => registerPipes());
+		}
 	});
 });

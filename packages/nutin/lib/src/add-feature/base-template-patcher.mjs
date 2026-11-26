@@ -2,13 +2,14 @@ import path from 'path';
 import * as fsExtra from 'fs-extra';
 import * as Diff from 'diff';
 import { print } from '../utils/print.mjs';
+import { realWriter } from '../common/project-writer.mjs';
 
 const fs = fsExtra.default;
 
-// Base templates may carry `{{#if <featureKey>}}` blocks (e.g. the markdown build step in
-// builder.js.hbs). New projects render them with the feature off; this brings an existing
-// project's files in line once the feature is added, by rendering each gated template
-// without and with the feature and applying the difference as a patch.
+// Base templates may carry `{{#if <featureKey>}}` blocks.
+// New projects render them with the feature off.
+// This brings an existing project's files in line once the feature is added,
+// by rendering each gated template with and without the feature and applying the difference as a patch.
 // Unrelated user edits to the file are kept.
 function gatesOnFeature(source, featureKey) {
   return new RegExp(`\\{\\{[#^]?(if|unless)\\s+${featureKey}\\b`).test(source);
@@ -51,8 +52,8 @@ function findBlock(lines, block, from = 0) {
   return -1;
 }
 
-// Start of the shortest run of anchor lines (1 to 3, taken from the side next to the
-// inserted block) that appears exactly once in the file and isn't only blank lines, or -1.
+// Start of the shortest run of anchor lines that appears exactly once in the file
+// and isn't only blank lines, or -1.
 function findUniqueAnchor(lines, anchor, side) {
   for (let size = 1; size <= anchor.length; size++) {
     const block = side === 'previous' ? anchor.slice(-size) : anchor.slice(0, size);
@@ -64,11 +65,11 @@ function findUniqueAnchor(lines, anchor, side) {
   return -1;
 }
 
-// Fallback for files the user changed around the insertion points (e.g. routes added to
-// routes.ts): each missing block goes right after the unchanged lines that preceded it in
-// the template, or right before the ones that followed it, wherever those lines are unique
-// in the file. Returns the patched content, the unchanged content when every block is
-// already there, or null when a block can't be placed.
+// Fallback for files the user changed around the insertion points:
+// each missing block goes right after the unchanged lines that preceded it in the template,
+// or right before the ones that followed it, wherever those lines are unique in the file.
+// Returns the patched content, the unchanged content when every block is already there,
+// or null when a block can't be placed.
 function applyInsertions(current, insertions) {
   const lines = toLines(current);
   const missing = insertions.filter((insertion) => findBlock(lines, insertion.lines) === -1);
@@ -88,7 +89,7 @@ function applyInsertions(current, insertions) {
   return lines.join('\n') + (current.endsWith('\n') ? '\n' : '');
 }
 
-export async function patchBaseTemplates(projectPath, feature, context, fileGenerator) {
+export async function patchBaseTemplates(projectPath, feature, context, fileGenerator, writer = realWriter) {
   const baseDir = path.join(fileGenerator.getTemplatesRoot(), 'base');
   const templates = await findGatedTemplates(baseDir, feature.key);
 
@@ -102,7 +103,7 @@ export async function patchBaseTemplates(projectPath, feature, context, fileGene
     const targetPath = path.join(projectPath, relativePath);
     const patch = Diff.createPatch(relativePath, before.content, after.content);
 
-    const current = (await fs.pathExists(targetPath)) ? await fs.readFile(targetPath, 'utf8') : null;
+    const current = (await writer.pathExists(targetPath)) ? await writer.readFile(targetPath, 'utf8') : null;
 
     if (current !== null) {
       if (current === after.content || Diff.applyPatch(current, Diff.reversePatch(Diff.parsePatch(patch)[0])) !== false) {
@@ -112,8 +113,8 @@ export async function patchBaseTemplates(projectPath, feature, context, fileGene
 
       const patched = Diff.applyPatch(current, patch);
       if (patched !== false) {
-        await fs.writeFile(targetPath, patched);
-        print.info(`Updated ${relativePath}`);
+        await writer.writeFile(targetPath, patched);
+        writer.info(`Updated ${relativePath}`);
         continue;
       }
 
@@ -124,8 +125,8 @@ export async function patchBaseTemplates(projectPath, feature, context, fileGene
         continue;
       }
       if (inserted) {
-        await fs.writeFile(targetPath, inserted);
-        print.info(`Updated ${relativePath}`);
+        await writer.writeFile(targetPath, inserted);
+        writer.info(`Updated ${relativePath}`);
         continue;
       }
     }

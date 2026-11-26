@@ -1,15 +1,14 @@
 import path from 'path';
-import * as fsExtra from 'fs-extra';
 import { CONFLICT_MARKER } from './three-way-merge.mjs';
-
-const fs = fsExtra.default;
+import { realWriter } from '../common/project-writer.mjs';
 export const REPORT_FILE_NAME = 'NUTIN-UPDATE-REPORT.md';
 
 const list = (items, describe = ({ relPath }) => `\`${relPath}\``) => items.map((item) => `- ${describe(item)}`).join('\n');
 
-// Lists the files you edited that this update touched. No diffs: merged files hold both versions'
-// changes, and overlaps are marked in the files themselves.
-export async function writeUpdateReport(projectPath, { merged, conflicted, binaryConflicts, manualSteps = [] }, oldVersion, newVersion) {
+// Lists the files you edited that this update touched.
+// No diffs: merged files hold both versions' changes.
+// Overlaps are marked in the files themselves.
+export async function writeUpdateReport(projectPath, { merged, conflicted, binaryConflicts, manualSteps = [] }, oldVersion, newVersion, writer = realWriter) {
   const sections = [
     `# nutin-update report\n\nUpdate from nutin v${oldVersion} to v${newVersion}. These files had changes of yours and changes in the new nutin version.`,
   ];
@@ -46,5 +45,5 @@ export async function writeUpdateReport(projectPath, { merged, conflicted, binar
     );
   }
 
-  await fs.writeFile(path.join(projectPath, REPORT_FILE_NAME), sections.join('\n\n') + '\n');
+  await writer.writeFile(path.join(projectPath, REPORT_FILE_NAME), sections.join('\n\n') + '\n');
 }

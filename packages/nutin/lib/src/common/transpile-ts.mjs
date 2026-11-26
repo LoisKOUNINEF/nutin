@@ -1,8 +1,7 @@
-// JS-only projects: the templates stay TypeScript-authored, and each rendered .ts file is
-// transpiled here at generation time. typescript is imported lazily so TS projects never load it.
-// Its version is pinned in package.json: nutin-update re-transpiles the old baseline and compares
-// it to the user's files, so any output change between versions would read as a user edit.
-// This pin is the CLI's own: generated apps install their own TypeScript (7.x) for tsc.
+// JS-only projects: the templates stay TypeScript-authored.
+// Each rendered .ts file is transpiled here at generation time.
+// typescript is imported lazily so TS projects never load it.
+// Generated TS apps install their own TypeScript (7.x) for tsc.
 let tsModule;
 
 async function loadTypeScript() {
@@ -10,8 +9,8 @@ async function loadTypeScript() {
   return tsModule;
 }
 
-// TypeScript's printer drops blank lines and indents by 4. Blank lines survive as marker
-// comments, which are turned back into blank lines after transpiling.
+// TypeScript's printer drops blank lines and indents by 4.
+// Blank lines survive as marker comments, which are turned back into blank lines after transpiling.
 const BLANK_LINE_MARKER = '//__NUTIN_BLANK_LINE__';
 const BLANK_LINE_MARKER_LINE = /^[ \t]*\/\/__NUTIN_BLANK_LINE__[ \t]*$/;
 
@@ -32,8 +31,7 @@ function restoreBlankLines(output) {
     .replace(/\n*$/, '\n');
 }
 
-// Template literal bodies are emitted verbatim (already 2-space), so lines starting inside
-// one are left alone.
+// Template literal bodies are emitted verbatim, so lines starting inside one are left alone.
 function getTemplateLiteralRanges(ts, code) {
   const sourceFile = ts.createSourceFile('output.js', code, ts.ScriptTarget.Latest, true);
   const ranges = [];
@@ -69,9 +67,8 @@ function reindent(ts, code) {
 }
 
 /**
- * Returns `{ outputFileName, content }` with a `.js` name and transpiled content,
- * `null` for ambient `.d.ts` files (type-only, nothing to emit), or the input unchanged
- * for any other file.
+ * Returns `{ outputFileName, content }` with a `.js` name and transpiled content.
+ * `null` for ambient `.d.ts` files, or the input unchanged for any other file.
  */
 export async function toJsOutput(outputFileName, content) {
   if (outputFileName.endsWith('.d.ts')) return null;

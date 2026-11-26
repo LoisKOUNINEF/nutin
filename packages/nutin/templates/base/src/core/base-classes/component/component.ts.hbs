@@ -5,9 +5,9 @@ import * as DataBindingHelper from './helpers/data-binding.helper.js';
 export abstract class Component<T extends HTMLElement = HTMLElement, K = any> extends BaseComponent<T> {
   protected config: K;
   protected props: Nutin.ComponentProps;
-  private _templateFn: (config?: K) => Nutin.Template;
-  private _normalizeKeys: (keyof K)[];
-  private _defaults: Partial<K>;
+  #templateFn: (config?: K) => Nutin.Template;
+  #normalizeKeys: (keyof K)[];
+  #defaults: Partial<K>;
 
   constructor({
     templateFn = () => '',
@@ -23,9 +23,9 @@ export abstract class Component<T extends HTMLElement = HTMLElement, K = any> ex
 
     this.config = ConfigHelper.setConfigValue(config, normalizeKeys);
     this.props = props;
-    this._templateFn = templateFn;
-    this._normalizeKeys = normalizeKeys as (keyof K)[];
-    this._defaults = defaults;
+    this.#templateFn = templateFn;
+    this.#normalizeKeys = normalizeKeys as (keyof K)[];
+    this.#defaults = defaults;
   }
 
   public getValues(): Record<string, string> {
@@ -35,21 +35,21 @@ export abstract class Component<T extends HTMLElement = HTMLElement, K = any> ex
   protected override generateTemplate(): Nutin.Template {
     return ConfigHelper.createNormalizedTemplate({
       config: this.config,
-      defaults: this._defaults,
-      normalizeKeys: this._normalizeKeys,
-      templateFn: this._templateFn,
+      defaults: this.#defaults,
+      normalizeKeys: this.#normalizeKeys,
+      templateFn: this.#templateFn,
     });
   }
 
   protected override onBeforeRender(): void {
-    this.applyProps();
+    this.#applyProps();
   }
 
   protected override onAfterRender(): void {
-    this.applyDataBindings();
+    this.#applyDataBindings();
   }
 
-  private applyProps(): void {
+  #applyProps(): void {
     if (this.props.className) {
       this.element.classList.add(...this.props.className.split(/\s+/).filter(Boolean));
     }
@@ -58,7 +58,7 @@ export abstract class Component<T extends HTMLElement = HTMLElement, K = any> ex
     }
   }
 
-  private applyDataBindings(): void {
+  #applyDataBindings(): void {
     DataBindingHelper.applyDataBindings(this.element, this.props);
   }
 }

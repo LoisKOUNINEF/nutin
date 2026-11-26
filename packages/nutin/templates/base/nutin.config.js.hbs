@@ -9,8 +9,8 @@ export default {
   // Browser extension ({{extension}}): the build writes one unpacked extension per browser, in dist/<browser>
   extension: {
     browsers: ['chrome', 'firefox'],
-    // Firefox's add-on id. storage.sync data and addons.mozilla.org tie to it: pick yours before
-    // the first release (e.g. "name@your-domain"), it can never change afterwards.
+    // Firefox's add-on id. storage.sync data and addons.mozilla.org tie to it:
+    // pick yours before the first release (e.g. "name@your-domain"), it can never change afterwards.
     geckoId: '{{projectName}}@example.com',
   },
 {{/if}}
@@ -35,9 +35,10 @@ export default {
   // Testing toolkit
   // `{{packageManager}} run testin-nutin`
   testinNutin: {
-    includeFramework: true,  // Test Nutin source - src/core
+    includeFramework: true,  // Test Nutin source: src/core
     includeTools: false,     // Test tools/ (builder, testin-nutin, etc.)
-    includeApp: false,       // Include application tests
+    includeApp: false,       // Include application tests: src/app
+    isolate: [],             // Test files (path substrings) that each run in their own worker and jsdom window
 
     coverage: {
       enabled: false,        // Include coverage in the normal test command

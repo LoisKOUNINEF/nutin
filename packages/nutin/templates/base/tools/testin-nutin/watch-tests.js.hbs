@@ -10,6 +10,9 @@ const COMMAND = '{{packageManager}} run testin-nutin';
 const watched = ['src'];
 if (config.testinNutin.includeTools) watched.push('tools');
 
+// The runs below are captured by exec() but printed to this terminal: keep their colours.
+if (process.stdout.isTTY) process.env.FORCE_COLOR ??= '1';
+
 const watcher = chokidar.watch(watched, {
   ignored: /(^|[/\\])\../,
   persistent: true,
@@ -32,7 +35,7 @@ function runTests() {
     if (stdout) process.stdout.write(stdout);
     if (stderr) process.stderr.write(stderr);
     if (err) print.boldError(`\nTest run failed: ${err.message}`);
-    print.boldHead('Watching for test changes...');
+    print.boldHead(`Watching ${watched.join(' and ')} for changes...`);
     isRunning = false;
 
     // A change arrived mid-run — run again instead of dropping it.
@@ -58,5 +61,5 @@ watcher.on('all', (event, filePath) => {
 });
 
 watcher.on('ready', () => {
-  print.boldHead('Watching for test changes...');
+  print.boldHead(`Watching ${watched.join(' and ')} for changes...`);
 });

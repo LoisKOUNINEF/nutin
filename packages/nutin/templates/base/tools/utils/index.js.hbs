@@ -8,3 +8,4 @@ export * from './error-exit.js';
 export * from './build-lock.js';
 export * from './resolve-port.js';
 export * from './ensure-deps.js';
+export * from './dry-run.js';

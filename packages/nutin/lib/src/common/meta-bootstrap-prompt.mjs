@@ -11,8 +11,7 @@ import { UserError } from '../utils/errors.mjs';
 
 const fs = fsExtra.default;
 
-// `--js-only` apps have src/app/main.js and no main.ts. Projects from before JS-only
-// support are all TypeScript, so anything else counts as 'ts'.
+// `--js-only` apps have src/app/main.js and no main.ts.
 async function detectLang(projectPath) {
   const appDir = path.join(projectPath, 'src', 'app');
   const hasMainJs = await fs.pathExists(path.join(appDir, 'main.js'));
@@ -20,8 +19,7 @@ async function detectLang(projectPath) {
   return hasMainJs && !hasMainTs ? 'js' : 'ts';
 }
 
-// A browser extension project has src/extension/manifest.json; its surface shows in it
-// (action.default_popup for the popup, side_panel otherwise). false for a web app.
+// A browser extension project has src/extension/manifest.json. false for a web app.
 async function detectExtension(projectPath) {
   const manifestPath = path.join(projectPath, 'src', 'extension', 'manifest.json');
   if (!(await fs.pathExists(manifestPath))) return false;
@@ -29,7 +27,8 @@ async function detectExtension(projectPath) {
   return manifest.includes('default_popup') ? 'popup' : 'side-panel';
 }
 
-export async function bootstrapProjectMeta(projectPath) {
+// writer: see project-writer.mjs (a dry run asks the same questions, and records the write).
+export async function bootstrapProjectMeta(projectPath, writer) {
   // inquirer can't prompt without a TTY: it throws on a closed stdin and waits forever on an open pipe.
   if (!process.stdin.isTTY) {
     throw new UserError(
@@ -55,7 +54,7 @@ export async function bootstrapProjectMeta(projectPath) {
   ]);
 
   const extension = await detectExtension(projectPath);
-  // An extension can't have any of the optional features: nothing to ask.
+  // Features an extension can't have: nothing to ask.
   const featureChoices = FEATURES.filter((feature) => !(extension && EXTENSION_INCOMPATIBLE_FEATURES[feature.key]));
   const { features } = featureChoices.length === 0 ? { features: [] } : await inquirer.prompt([
     {
@@ -72,5 +71,5 @@ export async function bootstrapProjectMeta(projectPath) {
 
   const kind = `${lang === 'js' ? 'a JavaScript' : 'a TypeScript'} ${extension ? `browser extension (${extension})` : 'project'}`;
   print.gray(`Detected ${kind} using ${packageManager} — edit ${META_FILE_NAME} if that's wrong.`);
-  return writeProjectMeta(projectPath, { version: version.trim(), packageManager, lang, extension, ...flags });
+  return writeProjectMeta(projectPath, { version: version.trim(), packageManager, lang, extension, ...flags }, writer);
 }

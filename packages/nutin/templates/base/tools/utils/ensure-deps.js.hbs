@@ -24,6 +24,11 @@ export function getDevInstallArgs(packageManager, deps) {
     : [packageManager, ['add', '-D', ...pkgList]];
 }
 
+// npm reads flags given without "--" as its own: "npm run build -- -y", but "pnpm run build -y".
+export function buildWithYes(packageManager) {
+  return packageManager === 'npm' ? 'npm run build -- -y' : `${packageManager} run build -y`;
+}
+
 // builder.js forwards -y/--yes through the env, since runScript doesn't forward argv.
 function assumeYes() {
   return process.env.NUTIN_ASSUME_YES === '1' || process.argv.includes('-y') || process.argv.includes('--yes');
@@ -38,7 +43,8 @@ export async function ensureDeps({ feature, deps, isProd, origin }) {
   const missing = deps.filter((dep) => !isInstalled(dep.name));
   if (!missing.length) return;
 
-  const [command, args] = getDevInstallArgs(detectPackageManager(), missing);
+  const packageManager = detectPackageManager();
+  const [command, args] = getDevInstallArgs(packageManager, missing);
   const installCommand = [command, ...args].join(' ');
 
   if (isProd) {
@@ -56,11 +62,15 @@ export async function ensureDeps({ feature, deps, isProd, origin }) {
   } else if (process.stdin.isTTY) {
     shouldInstall = await promptBoolean('Install them now?');
   } else {
-    errorExit(`Non-interactive shell detected. Run "${installCommand}", or rebuild with "-- -y" to install automatically.`, origin);
+    // The dev watcher (NUTIN_WATCH) runs its builds without a terminal, and no flag reaches them.
+    const retry = process.env.NUTIN_WATCH === '1'
+      ? 'then restart the dev server'
+      : `or build with "${buildWithYes(packageManager)}" to install them automatically`;
+    errorExit(`They can't be installed from a non-interactive shell. Run "${installCommand}", ${retry}.`, origin);
   }
 
   if (!shouldInstall) {
-    print.boldError(`Aborting. Run manually: ${installCommand}`);
+    print.boldError(`Aborting. Install them with "${installCommand}".`);
     process.exit(1);
   }
 

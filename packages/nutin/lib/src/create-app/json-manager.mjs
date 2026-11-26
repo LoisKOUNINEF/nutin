@@ -26,15 +26,15 @@ export class JsonManager {
       "chokidar": "^6.0.0",
       "esbuild": "^0.28.2",
       "html-minifier-terser": "^7.2.0",
-      "jsdom": "^30.1.1",
+      "jsdom": "^31.0.1",
       // SEO prerendering's DOM, which extensions don't have.
-      ...(extension ? {} : { "linkedom": "^0.18.13" }),
-      "sass": "^1.89.0",
+      ...(extension ? {} : { "linkedom": "^0.18.15" }),
+      "sass": "^1.108.2",
       ...(lang === 'js' ? {} : { "typescript": "^7.0.2" }),
       // chrome.* types: Firefox implements the same namespace for most of it.
-      ...(extension && lang !== 'js' ? { "@types/chrome": "^0.3.7" } : {}),
-      // Mozilla's linter and signing tool (lint:extension, and the release workflow). Exact: a
-      // new linter version can fail a release that passed the day before.
+      ...(extension && lang !== 'js' ? { "@types/chrome": "^0.3.8" } : {}),
+      // Mozilla's linter and signing tool (lint:extension, and the release workflow).
+      // Exact: a new linter version can fail a release.
       ...(extension ? { "web-ext": "10.8.0" } : {})
     };
 
@@ -55,8 +55,8 @@ export class JsonManager {
     };
   }
 
-  // devDependencies older nutin versions generated for this kind of project and this one no longer
-  // does. nutin-update reports them (it never edits package.json).
+  // devDependencies older nutin versions generated for this kind of project and this one no longer does.
+  // nutin-update reports them (it never edits package.json).
   retiredDevDependencies(context = {}) {
     // Only SEO prerendering used it, and extensions have none.
     return context.extension ? ['linkedom'] : [];

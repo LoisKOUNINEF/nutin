@@ -16,7 +16,16 @@ describe('View', () => {
   });
 
   it('throws when viewName is omitted', () => {
-    expect(() => new HomeView({})).toThrow();
+    expect(() => new HomeView({})).toThrow('View requires a viewName.');
+  });
+
+  it('throws a short message in prod bundles (globalThis.__NUTIN_PROD__)', () => {
+    globalThis.__NUTIN_PROD__ = true;
+    try {
+      expect(() => new HomeView({})).toThrow('viewName');
+    } finally {
+      delete globalThis.__NUTIN_PROD__;
+    }
   });
 
   it('throws when viewName is an empty string', () => {

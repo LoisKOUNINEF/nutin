@@ -10,12 +10,13 @@ import { builderConfig } from './builder.config.js';
 import { PATHS } from './core/app/paths.js';
 {{/unless}}
 
-// Must happen before copy-static.js wipes/recreates dist-build — a second build
-// starting mid-run (a manual build, another dev watcher instance, ...) would
-// otherwise race it. See tools/utils/build-lock.js.
+// Must happen before copy-static.js wipes/recreates dist-build.
+// A second build starting mid-run would otherwise race it. See tools/utils/build-lock.js.
 await acquireBuildLock();
 
 const scriptsDir = path.join(process.cwd(), 'tools', 'builder', 'core');
+// --debug: every error's stack (tools/utils/error-exit.js), in every step, through the env too.
+if (process.argv.includes('--debug')) process.env.NUTIN_DEBUG = '1';
 {{#unless (eq lang "js")}}
 
 // `typecheck`: only what tsc needs (the merged templates, the handler references) and tsc --noEmit.
@@ -24,7 +25,7 @@ if (builderConfig.typecheckOnly) {
   print.boldHead(`\nType-checking...`);
   runScript(path.join(scriptsDir, 'app', 'copy-static.js'), 'Copying files...');
   runScript(path.join(scriptsDir, 'html-templates', 'process-html-templates.js'), 'Processing HTML templates...');
-  runScript(path.join(scriptsDir, 'app', 'compile-ts.js'), 'Compiling TypeScript...');
+  runScript(path.join(scriptsDir, 'app', 'compile-ts.js'), 'Checking types...');
   fs.rmSync(PATHS.temp, { recursive: true, force: true });
   print.boldSuccess(`\nNo type errors.\n`);
   process.exit(0);
@@ -37,8 +38,7 @@ if (builderConfig.i18nListsNoLanguage) {
   print.warn('nutin.config.js "i18n: true" lists no language: building for English only. List them instead, the default first: i18n: [\'en\', ...].');
 }
 
-// runScript forwards env vars but not argv, so -y/--yes (auto-install an opt-in
-// feature's missing dependencies, see utils/ensure-deps.js) is passed through the env.
+// runScript forwards env vars but not argv, so -y/--yes is passed through the env.
 if (process.argv.includes('-y') || process.argv.includes('--yes')) process.env.NUTIN_ASSUME_YES = '1';
 
 runScript(path.join(scriptsDir, 'app', 'copy-static.js'), 'Copying files...');
@@ -48,7 +48,9 @@ runScript(path.join(scriptsDir, 'markdown', 'generate-markdown-pages.js'), 'Comp
 {{/if}}
 
 runScript(path.join(scriptsDir, 'html-index', 'validate-html.js'), 'Processing index.html...');
+{{#unless extension}}
 runScript(path.join(scriptsDir, 'app', 'validate-routes.js'), 'Validating app routes...');
+{{/unless}}
 
 runScript(path.join(scriptsDir, 'html-templates', 'process-html-templates.js'), 'Processing HTML templates...');
 {{#unless (eq lang "js")}}
@@ -61,14 +63,19 @@ runScript(path.join(scriptsDir, 'styles', 'sass.js'), 'Compiling styles...');
 if (builderConfig.tailwind) runScript(path.join(scriptsDir, 'styles', 'tailwind.js'), 'Compiling Tailwind CSS...');
 
 if (builderConfig.i18n) runScript(path.join(scriptsDir, 'i18n', 'build-i18n.js'), 'Combining locales...');
+{{#unless extension}}
+
+// After every runtime JSON file is written, before the bundles that get their hashed URLs.
+if (builderConfig.isProd) runScript(path.join(scriptsDir, 'prod-bundle', 'hash-data-files.js'), 'Hashing data files...');
+{{/unless}}
 
 runScript(path.join(scriptsDir, 'prod-bundle', 'esbuild.js'), 'Running esbuild...');
 
 {{#if extension}}
 if (builderConfig.isProd) runScript(path.join(scriptsDir, 'prod-bundle', 'hash-files.js'), 'Hashing files...');
 
-// One unpacked extension per browser, from dist-build/src (which stays, for testin-nutin). Not
-// compressed: the browser reads the plain files, so .gz/.br copies would only bloat the package.
+// One unpacked extension per browser, from dist-build/src.
+// Not compressed: the browser reads the plain files, so .gz/.br copies would only bloat the package.
 runScript(path.join(scriptsDir, 'extension', 'build-extension.js'), 'Building the browser extension...');
 {{else}}
 if (builderConfig.isProd) {
@@ -83,4 +90,5 @@ runScript(path.join(scriptsDir, 'finalize-build.js'), 'Finalizing build...');
 
 print.boldSuccess(`\nBuild successful!\n`);
 
-if (!builderConfig.isProd) print.info('For production, use "{{packageManager}} run build:prod"');
+// Not on every rebuild of the dev loop (tools/dev sets NUTIN_WATCH).
+if (!builderConfig.isProd && process.env.NUTIN_WATCH !== '1') print.info('For production, use "{{packageManager}} run build:prod".');

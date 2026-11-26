@@ -1,3 +1,4 @@
+export * from './data-files/data-files.js';
 export * from './event-bus/index.js';
 export * from './globals/globals.js';
 export * from './http-client/http-client.js';

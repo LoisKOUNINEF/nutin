@@ -5,6 +5,7 @@ import { print } from '../../../utils/index.js';
 import config from '#root/nutin.config.js';
 
 let currentDom = null;
+let initialDocument = null;
 const nativeGlobalKeys = new Set(Object.getOwnPropertyNames(global));
 
 export function setupJsdom(htmlPath = 'dist/src/index.html') {
@@ -25,6 +26,10 @@ export function setupJsdom(htmlPath = 'dist/src/index.html') {
   });
 
   currentDom = dom;
+  initialDocument = {
+    head: dom.window.document.head.innerHTML,
+    body: dom.window.document.body.innerHTML,
+  };
 
   global.window = dom.window;
   global.document = dom.window.document;
@@ -89,6 +94,7 @@ export function teardownJsdom() {
   }
 
   currentDom = null;
+  initialDocument = null;
 
   delete global.window;
   delete global.document;
@@ -100,6 +106,19 @@ export function resetDom() {
 
   document.body.innerHTML = '';
   document.head.innerHTML = '<meta charset="UTF-8">';
+
+  if (global.localStorage) {
+    localStorage.clear();
+  }
+}
+
+// Puts back the document as setupJsdom() loaded it (index.html, with its #app), in the same window:
+// suites of an isolated file share one (see executeQueue's windowPerSuite).
+export function restoreDocument() {
+  if (!global.document || !initialDocument) return;
+
+  document.head.innerHTML = initialDocument.head;
+  document.body.innerHTML = initialDocument.body;
 
   if (global.localStorage) {
     localStorage.clear();

@@ -7,6 +7,8 @@ import config from '#root/nutin.config.js';
 const REPORT_PATH = path.join('coverage', 'uncovered.md');
 
 export async function maybeWriteUncoveredReport(report) {
+  // Nothing measured (printCoverageReport() has warned): "no uncovered code" would read as full coverage.
+  if (!report.length) return;
   const uncovered = report.filter(r => r.uncoveredLines.length || r.uncoveredBranches.length || r.uncoveredFunctions.length);
   if (!uncovered.length) {
     print.info('🎉 No uncovered code found.\n');

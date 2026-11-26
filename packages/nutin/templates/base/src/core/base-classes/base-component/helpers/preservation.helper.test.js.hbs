@@ -176,4 +176,248 @@ describe('PreservationHelper', () => {
       delete Element.prototype.moveBefore;
     }
   });
+  it('parks without capturing anything else when moveBefore is available', () => {
+    Element.prototype.moveBefore = function (node, child) {
+      this.insertBefore(node, child);
+    };
+
+    let state;
+    try {
+      const child = document.createElement('div');
+      container.appendChild(child);
+
+      state = PreservationHelper.preserve([child]);
+
+      expect(state.animations).toEqual([]);
+      expect(state.selection).toBe(null);
+      expect(state.popovers).toEqual([]);
+    } finally {
+      state?.parking?.remove();
+      delete Element.prototype.moveBefore;
+    }
+  });
+
+  // jsdom has no Web Animations API: fake CSSAnimation objects stand in for the browser's.
+  function fakeAnimation(target, animationName, currentTime, playState = 'running') {
+    return {
+      animationName,
+      currentTime,
+      playState,
+      effect: { target, pseudoElement: null },
+      pauseCalls: 0,
+      pause() { this.pauseCalls++; },
+    };
+  }
+
+  it('carries CSS animation progress over to the animations recreated on re-insertion', () => {
+    const child = document.createElement('div');
+    child.innerHTML = '<span></span>';
+    container.appendChild(child);
+    const span = child.querySelector('span');
+    const before = [
+      fakeAnimation(child, 'spin', 1200),
+      fakeAnimation(span, 'pulse', 300, 'paused'),
+      // Its animation-name changed in the meantime: nothing to carry it over to.
+      fakeAnimation(span, 'fade', 800),
+      fakeAnimation(span, 'idle-one', null, 'idle'),
+      { currentTime: 50, playState: 'running', effect: { target: span, pseudoElement: null } },
+    ];
+    const after = {
+      spin: fakeAnimation(child, 'spin', 0),
+      pulse: fakeAnimation(span, 'pulse', 0),
+      other: fakeAnimation(span, 'other', 0),
+    };
+    child.getAnimations = (options) => options?.subtree ? before : [after.spin];
+    span.getAnimations = () => [after.other, after.pulse];
+
+    const state = PreservationHelper.preserve([child]);
+    child.remove();
+    container.appendChild(child);
+    PreservationHelper.restore(state);
+
+    expect(state.animations.length).toBe(3);
+    expect(after.spin.currentTime).toBe(1200);
+    expect(after.spin.pauseCalls).toBe(0);
+    expect(after.pulse.currentTime).toBe(300);
+    expect(after.pulse.pauseCalls).toBe(1);
+    expect(after.other.currentTime).toBe(0);
+  });
+
+  it('skips pseudo-element animations and animations of elements no longer in the document', () => {
+    const child = document.createElement('div');
+    container.appendChild(child);
+    const pseudo = fakeAnimation(child, 'glow', 100);
+    pseudo.effect.pseudoElement = '::before';
+    const recreated = fakeAnimation(child, 'spin', 0);
+    child.getAnimations = (options) => options?.subtree ? [pseudo, fakeAnimation(child, 'spin', 500)] : [recreated];
+
+    const state = PreservationHelper.preserve([child]);
+    child.remove();
+    PreservationHelper.restore(state);
+
+    expect(state.animations.length).toBe(1);
+    expect(recreated.currentTime).toBe(0);
+  });
+
+  it('captures no animations where the Web Animations API is missing', () => {
+    const child = document.createElement('div');
+    container.appendChild(child);
+
+    const state = PreservationHelper.preserve([child]);
+
+    expect(state.animations).toEqual([]);
+  });
+
+  it('restores a text selection inside a detached element', () => {
+    const child = document.createElement('div');
+    child.innerHTML = '<p>hello world</p>';
+    container.appendChild(child);
+    const text = child.querySelector('p').firstChild;
+    document.getSelection().setBaseAndExtent(text, 2, text, 7);
+
+    const state = PreservationHelper.preserve([child]);
+    child.remove();
+    container.appendChild(child);
+    document.getSelection().removeAllRanges();
+    PreservationHelper.restore(state);
+
+    const selection = document.getSelection();
+    expect(selection.anchorNode).toBe(text);
+    expect(selection.anchorOffset).toBe(2);
+    expect(selection.focusNode).toBe(text);
+    expect(selection.focusOffset).toBe(7);
+    selection.removeAllRanges();
+  });
+
+  it('ignores a text selection that reaches outside the preserved elements', () => {
+    const child = document.createElement('div');
+    child.textContent = 'inside';
+    const outside = document.createElement('p');
+    outside.textContent = 'outside';
+    container.append(child, outside);
+    document.getSelection().setBaseAndExtent(child.firstChild, 1, outside.firstChild, 3);
+
+    const state = PreservationHelper.preserve([child]);
+
+    expect(state.selection).toBe(null);
+    document.getSelection().removeAllRanges();
+  });
+
+  it('leaves a focused text field\'s selection to the focus state', () => {
+    const child = document.createElement('div');
+    child.innerHTML = '<input value="hello">';
+    container.appendChild(child);
+    const input = child.querySelector('input');
+    input.focus();
+    input.setSelectionRange(1, 3);
+    document.getSelection().setBaseAndExtent(child, 0, child, 1);
+
+    const state = PreservationHelper.preserve([child]);
+
+    expect(state.focus.selection).toEqual([1, 3, input.selectionDirection]);
+    expect(state.selection).toBe(null);
+    document.getSelection().removeAllRanges();
+  });
+
+  it('does not restore a text selection whose nodes are no longer in the document', () => {
+    const child = document.createElement('div');
+    child.textContent = 'hello';
+    container.appendChild(child);
+    document.getSelection().setBaseAndExtent(child.firstChild, 0, child.firstChild, 3);
+
+    const text = child.firstChild;
+
+    const state = PreservationHelper.preserve([child]);
+    child.remove();
+    PreservationHelper.restore(state);
+
+    // The range was moved to where the element was, and stays there.
+    expect(document.getSelection().anchorNode).not.toBe(text);
+    document.getSelection().removeAllRanges();
+  });
+
+  it('swallows a selection offset that no longer fits its node', () => {
+    const child = document.createElement('div');
+    child.textContent = 'hello';
+    container.appendChild(child);
+    const text = child.firstChild;
+    document.getSelection().setBaseAndExtent(text, 1, text, 5);
+
+    const state = PreservationHelper.preserve([child]);
+    text.data = 'hi';
+
+    expect(() => PreservationHelper.restore(state)).not.toThrow();
+    document.getSelection().removeAllRanges();
+  });
+
+  // jsdom doesn't implement popovers: :popover-open and showPopover() are stubbed per element.
+  function fakePopover(element, open) {
+    element.setAttribute('popover', '');
+    element.showCalls = 0;
+    element.matches = (selector) => selector === ':popover-open' ? open : HTMLElement.prototype.matches.call(element, selector);
+    element.showPopover = () => { element.showCalls++; open = true; };
+    return { close: () => { open = false; } };
+  }
+
+  it('reopens popovers that were open before the element was detached', () => {
+    const child = document.createElement('div');
+    child.innerHTML = '<div class="open"></div><div class="closed"></div>';
+    container.appendChild(child);
+    const open = child.querySelector('.open');
+    const closed = child.querySelector('.closed');
+    const openPopover = fakePopover(open, true);
+    fakePopover(closed, false);
+
+    const state = PreservationHelper.preserve([child]);
+    child.remove();
+    openPopover.close();
+    container.appendChild(child);
+    PreservationHelper.restore(state);
+
+    expect(state.popovers).toEqual([open]);
+    expect(open.showCalls).toBe(1);
+    expect(closed.showCalls).toBe(0);
+  });
+
+  it('does not reopen a popover that is still open or no longer in the document', () => {
+    const child = document.createElement('div');
+    child.innerHTML = '<div class="a"></div>';
+    container.appendChild(child);
+    const stillOpen = child.querySelector('.a');
+    fakePopover(stillOpen, true);
+    const gone = document.createElement('div');
+    container.appendChild(gone);
+    const gonePopover = fakePopover(gone, true);
+
+    const state = PreservationHelper.preserve([child, gone]);
+    gone.remove();
+    gonePopover.close();
+    PreservationHelper.restore(state);
+
+    expect(stillOpen.showCalls).toBe(0);
+    expect(gone.showCalls).toBe(0);
+  });
+
+  it('swallows a popover that refuses to show again', () => {
+    const child = document.createElement('div');
+    container.appendChild(child);
+    const popover = fakePopover(child, true);
+
+    const state = PreservationHelper.preserve([child]);
+    popover.close();
+    child.showPopover = () => { throw new Error('NotSupportedError'); };
+
+    expect(() => PreservationHelper.restore(state)).not.toThrow();
+  });
+
+  it('captures no popovers where :popover-open is an unknown selector', () => {
+    const child = document.createElement('div');
+    child.setAttribute('popover', '');
+    container.appendChild(child);
+    child.matches = () => { throw new SyntaxError('unknown pseudo-class'); };
+
+    const state = PreservationHelper.preserve([child]);
+
+    expect(state.popovers).toEqual([]);
+  });
 });

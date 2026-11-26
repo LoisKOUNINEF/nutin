@@ -2,7 +2,8 @@ import path from 'path';
 import {
   registerTestGlobals, getTestFiles, runQueuedTests, setCurrentTestFile, print,
   startCoverage, stopCoverage, buildCoverageReport, printCoverageReport, maybeWriteUncoveredReport,
-  writeSummaryReport, setupJsdom, teardownJsdom, findChangedSinceBuild,
+  writeSummaryReport, setupJsdom, teardownJsdom, findChangedSinceBuild, formatError, hasOnlyTests,
+  startIsolatedFiles,
 } from './core/index.js';
 import config from '#root/nutin.config.js';
 
@@ -40,15 +41,27 @@ let testFiles = origins.flatMap(
 
 if (fileFilters.length) {
   testFiles = testFiles.filter(file => fileFilters.some(f => file.includes(f)));
+  // A typo in a filter would otherwise pass with 0 tests.
+  if (testFiles.length === 0) {
+    print.boldError(`\nNo test file matches ${fileFilters.map((f) => `"${f}"`).join(', ')}.`);
+    process.exit(1);
+  }
 }
+
+// testinNutin.isolate: these files each run in their own worker and jsdom window.
+const isolatePatterns = config.testinNutin.isolate ?? [];
+const isIsolated = (file) => isolatePatterns.some(pattern => file.includes(pattern));
+const isolatedFiles = testFiles.filter(isIsolated);
+const inProcessFiles = testFiles.filter(file => !isIsolated(file));
 
 async function loadTestFile(file) {
   setCurrentTestFile(file);
   await import(file);
 }
 
-async function runCoverage(testResults) {
-  let scopedResults = await stopCoverage(coverageDirs);
+async function runCoverage(testResults, isolatedCoverage) {
+  // The same file may have run in the main thread and in workers: buildCoverageReport merges them.
+  let scopedResults = [...await stopCoverage(coverageDirs), ...isolatedCoverage];
   if (fileFilters.length) {
     scopedResults = scopedResults.filter(({ filePath }) => fileFilters.some(f => filePath.includes(f)));
   }
@@ -79,33 +92,48 @@ async function runTests() {
     print.boldWarn(`⚠ ${changedSinceBuild} changed after the last successful build: these tests run against the old build in dist/. Rebuild ("{{packageManager}} run build"), or use "{{packageManager}} run testin-nutin".\n`);
   }
 
-  if (verboseEnabled) print.head('Test suites :');
+  if (verboseEnabled) print.head('Test suites:');
 
   if (coverageEnabled) await startCoverage();
 
+  // Started first, so that the workers load jsdom while the files below are imported.
+  const isolated = startIsolatedFiles(isolatedFiles, { coverageDirs: coverageEnabled ? coverageDirs : null });
+
   // One DOM for importing every file (module-level code may use it); each suite
-  // then runs in a fresh one (see runQueuedTests).
+  // then runs in a fresh one (see executeQueue).
   let loadFailures = 0;
+  const reportLoadFailure = (file, trace) => {
+    loadFailures++;
+    print.boldError(`✗ ${file} failed to load:`);
+    print.grayError(trace);
+  };
   setupJsdom();
-  for (const file of testFiles) {
+  for (const file of inProcessFiles) {
     try {
       await loadTestFile(file);
     } catch (error) {
-      loadFailures++;
-      print.boldError(`✗ ${file} failed to load:`);
-      print.grayError(error.stack);
+      reportLoadFailure(file, formatError(error));
     }
   }
   teardownJsdom();
 
-  const testResults = await runQueuedTests();
+  const isolatedLoads = await isolated.loaded;
+  isolatedLoads
+    .filter(({ loadError }) => loadError)
+    .forEach(({ file, loadError }) => reportLoadFailure(file, loadError));
+
+  // A .only anywhere in the run skips every test not marked .only.
+  const onlyActive = hasOnlyTests() || isolatedLoads.some(({ hasOnly }) => hasOnly);
+  // The workers run their tests while the in-process ones run.
+  const isolatedRuns = isolated.run(onlyActive);
+  const testResults = await runQueuedTests({ onlyActive, extraRuns: isolatedRuns });
 
   if (loadFailures > 0) {
     print.boldError(`✗ ${loadFailures} test file(s) failed to load — see errors above.\n`);
   }
   if (testResults.failed > 0 || loadFailures > 0) process.exitCode = 1;
 
-  if (coverageEnabled) await runCoverage(testResults);
+  if (coverageEnabled) await runCoverage(testResults, (await isolatedRuns).flatMap(run => run.coverage));
 }
 
 runTests().catch((err) => {

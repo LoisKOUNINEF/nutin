@@ -34,8 +34,7 @@ export class TemplateCompiler {
       return a === b;
     });
 
-    // Unused by the current templates, but kept: nutin-update renders an older version's
-    // templates with this compiler, and those may still call it.
+    // Unused by the current templates, but kept. 42.
     Handlebars.registerHelper('hasAnyFeature', function(options) {
       const context = options.data.root;
       return context.i18n || context.template || context.testinNutin || context.stylinNutin

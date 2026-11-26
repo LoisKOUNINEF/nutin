@@ -1,5 +1,6 @@
 import path from 'path';
 import * as fsExtra from 'fs-extra';
+import { realWriter } from '../common/project-writer.mjs';
 
 const fs = fsExtra.default;
 
@@ -18,8 +19,7 @@ const I18N_KEY_RE = /^[ \t]*['"]?i18n['"]?[ \t]*:/m;
 // expressions are read whole.
 const I18N_LINE_RE = /^([ \t]*['"]?i18n['"]?[ \t]*:[ \t]*)(.*?)([ \t]*)(,?)([ \t]*)((?:\/\/|\/\*)[^\n]*)?$/m;
 
-// Where your code may still read languages.json, or nutin.config.js "i18n" as a boolean: the whole
-// project, but for these folders and the files nutin generates (this update rewrites them).
+// Where code may still read languages.json, or nutin.config.js "i18n" as a boolean (this update rewrites them).
 const SKIPPED_DIRS = new Set(['node_modules', 'dist', 'dist-build', '.git', 'coverage']);
 const SCANNED_EXTENSIONS = new Set(['.ts', '.mts', '.cts', '.tsx', '.js', '.mjs', '.cjs', '.jsx', '.html', '.json']);
 // The default import of nutin.config.js (`import nutinConfig from '../../nutin.config.js'`).
@@ -35,8 +35,8 @@ function languagesPath(projectPath) {
   return path.join(projectPath, ...LANGUAGES_FILE.split('/'));
 }
 
-// The default language first, then the others. Codes that aren't valid (or not strings) are set
-// aside in `invalid`: never written to nutin.config.js.
+// The default language first, then the others.
+// Codes that aren't valid (or not strings) are set aside in `invalid`: never written to nutin.config.js.
 export function languagesFromFile({ languages, defaultLanguage } = {}) {
   // Missing or blank entries aren't codes at all: dropped without a word, as before.
   const candidates = [defaultLanguage, ...(Array.isArray(languages) ? languages : [])]
@@ -60,8 +60,8 @@ function isBalanced(text) {
   return stack.length === 0;
 }
 
-// { line, value, kind }: kind is 'true', 'false', 'list', 'expression', 'absent' (no i18n key)
-// or 'unparsable' (a key this can't read: a value spread over several lines, ...).
+// { line, value, kind }
+// kind is 'true', 'false', 'list', 'expression', 'absent' (no i18n key) or 'unparsable'
 export function readI18nLine(content) {
   if (!I18N_KEY_RE.test(content)) return { line: null, value: null, kind: 'absent' };
   const match = content.match(I18N_LINE_RE);
@@ -92,9 +92,9 @@ export function setI18nValue(content, literal) {
 }
 
 /**
- * Your files that still read config/languages.json (`referencedBy`), or nutin.config.js "i18n" as if
- * it were a boolean (`readsI18nOption`: an empty list, [], is truthy). generatedPaths: the files
- * nutin generates (posix paths), skipped: this update rewrites them.
+ * Files that still read config/languages.json (`referencedBy`), or nutin.config.js "i18n"
+ * as if it were a boolean.
+ * generatedPaths: the files nutin generates (posix paths), skipped: this update rewrites them.
  */
 export async function findI18nReferences(projectPath, generatedPaths = new Set()) {
   const referencedBy = [];
@@ -119,8 +119,8 @@ export async function findI18nReferences(projectPath, generatedPaths = new Set()
 }
 
 /**
- * What to migrate, or null when the project has no config/languages.json. Read before anything is
- * written: the value restored after the merge is this one.
+ * What to migrate, or null when the project has no config/languages.json.
+ * Read before anything is written: the value restored after the merge is this one.
  * { languages, invalid, kind, value }; the updater adds findI18nReferences()'s lists.
  */
 export async function detectI18nMigration(projectPath) {
@@ -141,12 +141,13 @@ export async function detectI18nMigration(projectPath) {
 }
 
 /**
- * nutin.config.js as the update compares and merges it: the new template's `i18n:` line in place of
- * your line and of the old template's. Nothing on that line is then a change, on either side: an
- * untouched file is a plain update, and your edits around it (`tailwind: true`...) merge without
- * a conflict. applyI18nMigration puts your value back afterwards. If you removed the line, only the
- * base gets the new one: your removal then merges cleanly. A line this can't read is left alone (it
- * then merges like any other edit).
+ * nutin.config.js as the update compares and merges it:
+ * the new template's `i18n:` line in place of the existing line and of the old template's.
+ * Nothing on that line is then a change, on either side: an untouched file is a plain update,
+ * and edits around it (`tailwind: true`...) merge without a conflict.
+ * applyI18nMigration puts the value back afterwards.
+ * If the line was removed, only the base gets the new one: removal then merges cleanly.
+ * A line this can't read is left alone, then merges like any other edit.
  */
 export function prepareConfigForMerge({ actual, base, next }) {
   const yours = readI18nLine(actual);
@@ -163,7 +164,7 @@ function listLiteral(migration) {
   return toI18nLiteral(migration.languages.length > 0 ? migration.languages : ['en']);
 }
 
-// The value nutin.config.js gets: the list when i18n was on, [] when off, your own otherwise.
+// The value nutin.config.js gets: the list when i18n was on, [] when off, the existing otherwise.
 function targetValue(migration) {
   switch (migration.kind) {
     case 'true': return listLiteral(migration);
@@ -178,8 +179,8 @@ function deletesFile(migration) {
   return !['expression', 'unparsable'].includes(migration.kind) && migration.referencedBy.length === 0;
 }
 
-// One line for the update summary: what the migration will do. configMerged: nutin.config.js is
-// among the files to merge, so it may end up with conflict markers (nothing is then changed).
+// One line for the update summary: what the migration will do.
+// configMerged: nutin.config.js is among the files to merge, so it may end up with conflict markers.
 export function describeI18nMigration(migration, { configMerged = false } = {}) {
   const target = targetValue(migration);
   const action = {
@@ -201,7 +202,7 @@ export function describeI18nMigration(migration, { configMerged = false } = {}) 
   return `${LANGUAGES_FILE} → nutin.config.js "i18n": ${action}; ${file}${condition}${invalid}${readers}`;
 }
 
-// The value to give "i18n" by hand: yours when you wrote a list or an expression.
+// The value to give "i18n" by hand: the existing one(s) when there's a list or an expression.
 function suggestion(migration) {
   if (migration.kind === 'unparsable') return `${listLiteral(migration)} (or [] if i18n is off)`;
   return targetValue(migration) ?? '[]';
@@ -209,8 +210,7 @@ function suggestion(migration) {
 
 const CONFLICT_MARKER_RE = /^(<<<<<<<|\|\|\|\|\|\|\||=======|>>>>>>>)/m;
 
-// The `i18n:` line outside any conflict hunk, when there's exactly one in the file: the one both
-// sides agree on, safe to set.
+// The `i18n:` line outside any conflict hunk, when there's exactly one in the file: safe to set.
 function hasSingleSettableLine(content) {
   const lines = content.split('\n');
   let inHunk = false;
@@ -227,14 +227,15 @@ function hasSingleSettableLine(content) {
 }
 
 /**
- * Runs once the update is written. Returns { messages, manualSteps }. Puts the value detected before
- * the update in the new `i18n:` line, then deletes config/languages.json, unless:
+ * Runs once the update is written. Returns { messages, manualSteps }.
+ * Puts the value detected before the update in the new `i18n:` line,
+ * then deletes config/languages.json, unless:
  * - nutin.config.js has conflict markers, or no readable `i18n:` line after the merge;
- * - your value is an expression, or couldn't be read;
+ * - the value is an expression, or couldn't be read;
  * - app code still reads languages.json.
  * In those cases the file is kept, and manualSteps says what to do.
  */
-export async function applyI18nMigration(projectPath, migration, { conflicted = false } = {}) {
+export async function applyI18nMigration(projectPath, migration, { conflicted = false, writer = realWriter } = {}) {
   const configPath = path.join(projectPath, NUTIN_CONFIG_FILE);
   const messages = [];
   const manualSteps = [];
@@ -255,9 +256,9 @@ export async function applyI18nMigration(projectPath, migration, { conflicted = 
     // Your value isn't lost in a conflicted file: put back on the line both sides agree on, if any.
     const target = targetValue(migration);
     if (conflicted && target !== null) {
-      const content = (await fs.pathExists(configPath)) ? await fs.readFile(configPath, 'utf8') : '';
+      const content = (await writer.pathExists(configPath)) ? await writer.readFile(configPath, 'utf8') : '';
       if (hasSingleSettableLine(content)) {
-        await fs.writeFile(configPath, setI18nValue(content, target));
+        await writer.writeFile(configPath, setI18nValue(content, target));
         messages.push(`${NUTIN_CONFIG_FILE}: "i18n" is set to ${target}; resolve its conflict markers.`);
         manualSteps.push(`${NUTIN_CONFIG_FILE} has conflict markers: once they're resolved, check that "i18n" is still ${target}, ${deleteStep}`);
         return { messages, manualSteps };
@@ -270,12 +271,12 @@ export async function applyI18nMigration(projectPath, migration, { conflicted = 
 
   const target = targetValue(migration);
   if (target !== null) {
-    const content = (await fs.pathExists(configPath)) ? await fs.readFile(configPath, 'utf8') : '';
+    const content = (await writer.pathExists(configPath)) ? await writer.readFile(configPath, 'utf8') : '';
     if (['absent', 'unparsable'].includes(readI18nLine(content).kind)) {
       manualSteps.push(`${NUTIN_CONFIG_FILE} has no "i18n:" line the update can read after merging: set "i18n" to ${target}, ${deleteStep}`);
       return { messages, manualSteps };
     }
-    await fs.writeFile(configPath, setI18nValue(content, target));
+    await writer.writeFile(configPath, setI18nValue(content, target));
     messages.push(['list', 'expression'].includes(migration.kind)
       ? `${NUTIN_CONFIG_FILE}: kept your "i18n": ${target}.`
       : `${NUTIN_CONFIG_FILE}: "i18n" is now ${target}${migration.kind === 'true' ? ` (from ${LANGUAGES_FILE})` : ''}.`);
@@ -292,7 +293,7 @@ export async function applyI18nMigration(projectPath, migration, { conflicted = 
       `(src/core/services/i18n/languages.js) or nutin.config.js "i18n" instead, ${deleteStep}`,
     );
   } else {
-    await fs.remove(languagesPath(projectPath));
+    await writer.remove(languagesPath(projectPath));
     messages.push(migration.kind === 'absent'
       ? `Deleted ${LANGUAGES_FILE}: nutin no longer reads it (languages are listed in ${NUTIN_CONFIG_FILE} "i18n").`
       : `Deleted ${LANGUAGES_FILE}: the languages are now listed in ${NUTIN_CONFIG_FILE} "i18n".`);

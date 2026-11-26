@@ -3,9 +3,14 @@
 ## Table of contents
 
 - [Project structure](#project-structure)
-- [How do I run my app?](#running-your-app)
-- [How do I generate components, views and services?](#generate-components-views-and-services)
-- [What does a typical component look like?](#a-typical-component)
+- [How do I run my app?](#how-do-i-run-my-app)
+{{#if extension}}
+- [Browser extension](#browser-extension)
+- [How do I generate components and services?](#how-do-i-generate-components-and-services)
+{{else}}
+- [How do I generate components, views and services?](#how-do-i-generate-components-views-and-services)
+{{/if}}
+- [What does a typical component look like?](#what-does-a-typical-component-look-like)
 - [Options and configuration](#options-and-configuration)
 - [Styling](#styling)
 - [Testing](#testing)
@@ -27,11 +32,11 @@ src/
     views/
     routes.ts
 {{/if}}
-    main.ts
+    main.{{lang}}
   assets/
   core/   -- Nutin framework source
 {{#if extension}}
-  extension/ -- manifest.json and background.ts
+  extension/ -- manifest.json and background.{{lang}}
 {{/if}}
   styles/
 
@@ -41,7 +46,7 @@ nutin.config.js   -- options and configuration
 ```
 
 {{#if extension}}
-This project is a browser extension: its page is the {{#if (eq extension "popup")}}toolbar popup{{else}}side panel (Firefox: the sidebar){{/if}}, with no router. `main.ts` mounts the root component, `AppComponent`, which composes the page from its children.
+This project is a browser extension: its page is the {{#if (eq extension "popup")}}toolbar popup{{else}}side panel (Firefox: the sidebar){{/if}}, with no router. `main.{{lang}}` mounts the root component, `AppComponent`, which composes the page from its children.
 
 * Components **encapsulate UI behavior**
 * Services **handle application concerns** through shared instances
@@ -61,7 +66,7 @@ import { Foo } from 'relative/path/to/foo.js';
 
 - Use Nutin's code barrel file (`src/core/index.js`) to import Nutin's modules.
 {{#if (eq lang "ts")}}
-- Nutin's types (`Nutin.ComponentConfig`, `Nutin.Routes`, `Nutin.Template`, …) live in the global `Nutin` namespace declared in `src/core/internals.d.ts`: no import needed.
+- Nutin's types (`Nutin.ComponentConfig`, {{#unless extension}}`Nutin.Routes`, {{/unless}}`Nutin.Template`, …) live in the global `Nutin` namespace declared in `src/core/internals.d.ts`: no import needed.
 {{/if}}
 
 ## How do I run my app?
@@ -92,17 +97,48 @@ import { Foo } from 'relative/path/to/foo.js';
 
 The build writes one unpacked extension per browser. Load `dist/chrome` with **Load unpacked** in `chrome://extensions` (Developer mode on), or `dist/firefox/manifest.json` with **Load Temporary Add-on…** in Firefox's `about:debugging`. After each build, reload the extension there, then reopen the {{#if (eq extension "popup")}}popup{{else}}side panel{{/if}}.
 {{/if}}
+{{#if extension}}
+
+## Browser extension
+
+- **The manifest:** `src/extension/manifest.json` is Chrome's; the build derives Firefox's from it, and sets `version` from `package.json`. Edit the name, description, icons and permissions there. It only asks for `storage`{{#if (eq extension "side-panel")}} and `sidePanel`{{/if}}: add what your extension uses, and nothing more, since each permission needs a justification in the stores. Reading the active tab's URL needs `"tabs"`.
+- **The extension APIs:** use `chrome.*` only through `src/app/services/chrome-api/chrome-api.service.{{lang}}`, and add a method there for each new API:
+
+  ```ts
+  const { theme } = await chromeApiService.storageGet('sync', ['theme']);
+  const off = chromeApiService.onStorageChanged((changes) => { /* ... */ });
+  ```
+
+  Its calls can fail (the extension was reloaded under an open {{#if (eq extension "popup")}}popup{{else}}panel{{/if}}, storage is over its quota): show the error in the page rather than leaving it blank.
+- **The background script:** `src/extension/background.{{lang}}` is bundled on its own. Chrome runs it as a service worker, Firefox as a background script: no DOM, and no state kept between events.
+- **Files the manifest references** (icons, `_locales/`) go in `public/` or `src/assets/`. Bundle everything: no remote scripts or fonts.
+- **Debugging:** right-click inside the {{#if (eq extension "popup")}}popup{{else}}side panel{{/if}} and pick **Inspect**. For the background script, use the "service worker" link on the extension's card in `chrome://extensions`, or **Inspect** in Firefox's `about:debugging`.
+
+What ships, packaging, store submissions, `web-ext lint` warnings and limits: [How do I create a browser extension?](https://www.nutin.dev/docs/cli/create-a-browser-extension)
+
+## How do I generate components and services?
+{{else}}
 
 ## How do I generate components, views and services?
+{{/if}}
 
 Elements are generated in `src/app/<path>/`, so you choose the project structure. The generator stops if the target folder already exists and isn't empty.
 
 ```bash
+{{#if extension}}
+{{packageManager}} run generate <component|service> PATH/TO/ELEMENT_NAME
+{{else}}
 {{packageManager}} run generate <component|view|service> PATH/TO/ELEMENT_NAME
+{{/if}}
 
 # Examples
-{{packageManager}} run generate component components/hello-world # generates src/app/components/hello-world/hello-world.component.ts|html|scss
-{{packageManager}} run generate view user/dashboard # generates src/app/user/dashboard/dashboard.view.ts|html|scss
+{{packageManager}} run generate component components/hello-world # generates src/app/components/hello-world/hello-world.component.{{lang}}|html|scss
+{{#if extension}}
+{{packageManager}} run generate service services/settings # generates src/app/services/settings/settings.service.{{lang}}
+{{else}}
+{{packageManager}} run generate view user/dashboard # generates src/app/user/dashboard/dashboard.view.{{lang}}|html|scss
+{{/if}}
+{{packageManager}} run generate component components/hello-world --dry-run # lists the files it would generate, without writing them
 ```
 
 ## What does a typical component look like?
@@ -153,16 +189,28 @@ export class ProductCardComponent extends Component {
   }
 
   // Referenced by the data-event attribute in the template.
+{{#if extension}}
+  // chrome.* goes through chromeApiService (src/app/services/chrome-api/).
+  private _openProductPage(url: string): void {
+    void chromeApiService.openTab(url);
+  }
+{{else}}
   private _goToProductPage(productId: string): void {
     Navigation.navigateTo(`/product/${productId}`);
   }
+{{/if}}
 }
 ```
 
 ```html
 <div
+{{#if extension}}
+  data-product-url="${product.url}"
+  data-event="click:_openProductPage:@dataset:productUrl"
+{{else}}
   data-product-id="${product.id}"
   data-event="click:_goToProductPage:@dataset:productId"
+{{/if}}
   class="product-card"
 >
   <h2 class="product-card__name">${product.name}</h2>
@@ -193,11 +241,19 @@ Defining both an inline template and an external `.html` file, or neither, fails
 
 This is where you can:
 
+{{#if extension}}
+- Set the `extension` block: `browsers` lists the browsers to build for; `geckoId` is Firefox's add-on id. `storage.sync` data and addons.mozilla.org are tied to it, so pick yours before the first release (e.g. `name@your-domain`): it can never change afterwards.
+- Turn on [Tailwind CSS](https://www.nutin.dev/docs/options-and-features/use-tailwind-css) by adding `tailwind: true`.
+- Configure the builder and the built-in testing toolkit.
+
+The build refuses `i18n` and `generateSEOFiles`: i18n puts the language in the URL (`/<lang>/...`), and SEO files prerender routes, neither of which an extension page has.
+{{else}}
 - Toggle options ([Tailwind CSS](https://www.nutin.dev/docs/options-and-features/use-tailwind-css), [SEO file generation](https://www.nutin.dev/docs/options-and-features/use-seo-file-generation)).
 - List your languages to enable [i18n](https://www.nutin.dev/docs/options-and-features/use-i18n): `i18n: ['en', 'fr']`, the default first (`[]` disables it).
 - Configure the builder and the built-in testing toolkit.
-
+{{/if}}
 {{#unless extension}}
+
 ### Specialized files
 
 - `config/seo.json` - with `generateSEOFiles` enabled. Register your routes' description, title and ogImage here.
@@ -235,9 +291,16 @@ testinNutin: {
 ```js
 import { MyModule } from '#root/dist/src/path/to/my-module.js';
 ```
+{{#if extension}}
+
+There's no `chrome` in tests: `tools/testin-nutin/mocks/fake-chrome.js` is a stand-in for the APIs `chromeApiService` wraps. Call `installFakeChrome({ url })` before each test, and `uninstallFakeChrome()` after.
+{{/if}}
 
 ## Go further
 
+{{#if extension}}
+- [How do I create a browser extension?](https://www.nutin.dev/docs/cli/create-a-browser-extension)
+{{/if}}
 - [Documentation](https://www.nutin.dev/docs)
 - [First app tutorial](https://www.nutin.dev/tutorial)
 - [Nutin website](https://www.nutin.dev)

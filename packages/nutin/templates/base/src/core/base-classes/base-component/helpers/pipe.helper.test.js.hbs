@@ -76,16 +76,16 @@ describe('PipeHelper', () => {
   });
 
   it('warns and skips a pipe segment that resolves to an empty name, continuing the rest of the chain', () => {
-    const warnSpy = spyOn(console, 'warn');
-    warnSpy.andCallFake(() => {});
+    const warnSpy = spyOn(console, 'warn').andCallFake(() => {});
+    try {
+      container.innerHTML = '<span data-pipe=":arg|upper">hi</span>';
+      PipeHelper.parsePipeAttributes(container);
 
-    container.innerHTML = '<span data-pipe=":arg|upper">hi</span>';
-    PipeHelper.parsePipeAttributes(container);
-
-    expect(container.querySelector('span').textContent).toBe('HI');
-    expect(warnSpy.callCount).toBe(1);
-
-    warnSpy.restore();
+      expect(container.querySelector('span').textContent).toBe('HI');
+      expect(warnSpy.callCount).toBe(1);
+    } finally {
+      warnSpy.restore();
+    }
   });
 
   it('skips elements inside a nested component root, which pipes its own content', () => {

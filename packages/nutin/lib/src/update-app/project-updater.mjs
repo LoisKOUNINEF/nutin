@@ -6,21 +6,20 @@ import { UserError } from '../utils/errors.mjs';
 import { PACKAGE_VERSION as packageVersion, META_FILE_NAME, CHANGELOG_URL } from '../common/package-data.mjs';
 import { readProjectMeta, updateProjectMeta } from '../common/project-meta.mjs';
 import { fetchOldTemplates } from './fetch-old-templates.mjs';
-import { parseVersion, compareVersions } from './version-compare.mjs';
+import { parseVersion, compareVersions, assertValidVersion } from './version-compare.mjs';
 import { bootstrapProjectMeta } from '../common/meta-bootstrap-prompt.mjs';
 import { printUpdateSummary } from './update-summary-printer.mjs';
 import { writeUpdateReport, REPORT_FILE_NAME } from './conflict-report-writer.mjs';
 import { mergeFile, hasConflictMarkers, CONFLICT_MARKER } from './three-way-merge.mjs';
-import { isGitAvailable, getWorkingTreeStatus } from '../common/git.mjs';
+import { isGitAvailable, getWorkingTreeStatus, printUndoHint, dirtyTreeError } from '../common/git.mjs';
 import { UpdateContextBuilder } from './update-context-builder.mjs';
 import { TemplateDiffer } from './template-differ.mjs';
 import { findJsonDrift } from './json-drift.mjs';
 import { detectI18nMigration, findI18nReferences, applyI18nMigration, NUTIN_CONFIG_FILE } from './i18n-migration.mjs';
 import { buildMergePreparer } from './merge-preparers.mjs';
+import { createProjectWriter } from '../common/project-writer.mjs';
 
 const fs = fsExtra.default;
-
-const UNDO_COMMAND = 'git checkout -- . && git clean -fd';
 
 export class ProjectUpdater {
   constructor() {
@@ -29,27 +28,30 @@ export class ProjectUpdater {
   }
 
   async updateProject(projectPath, options = {}) {
-    const { yes = false, from, allowDirty = false } = options;
-    // Read before anything here writes .nutin-meta.json (bootstrap, resolved conflicts), so only your
-    // own changes count. Enforced right before the first file write.
+    const { yes = false, from, allowDirty = false, dryRun = false } = options;
+    // --dry-run runs the same code: every write goes through the writer, which only records it.
+    const writer = createProjectWriter({ dryRun });
+    // Read before anything here writes .nutin-meta.json, so only user's own changes count.
+    // Enforced right before the first file write.
     await this.assertNutinProject(projectPath);
     const gitStatus = allowDirty ? null : await getWorkingTreeStatus(projectPath);
-    const meta = await this.resolveMeta(projectPath);
-    await this.assertNoConflictMarkers(projectPath, meta);
+    const meta = await this.resolveMeta(projectPath, writer);
+    await this.assertNoConflictMarkers(projectPath, meta, writer);
 
     if (this.isUpToDate(meta)) {
       print.boldSuccess(`✅ Already up to date (nutin v${packageVersion}).`);
+      if (dryRun) writer.printPlan(projectPath);
       return;
     }
     this.assertUpdatable(meta);
 
-    print.boldHead(`\n🔄 Updating ${projectPath} from nutin v${meta.version} to v${packageVersion}...\n`);
+    print.boldHead(`\n🔄 ${dryRun ? 'Dry run: updating' : 'Updating'} ${projectPath} from nutin v${meta.version} to v${packageVersion}...\n`);
 
     const { templatesRoot: oldTemplatesRoot, cleanup } = await fetchOldTemplates(meta.version, { from });
 
     try {
       const changeSet = await this.computeChangeSet(projectPath, meta, oldTemplatesRoot);
-      await this.applyChangeSet(projectPath, meta, changeSet, { yes, gitStatus });
+      await this.applyChangeSet(projectPath, meta, changeSet, { yes, gitStatus, writer });
     } finally {
       await cleanup();
     }
@@ -65,28 +67,16 @@ export class ProjectUpdater {
     }
   }
 
-  async resolveMeta(projectPath) {
-    const meta = (await readProjectMeta(projectPath)) ?? (await bootstrapProjectMeta(projectPath));
-    this.assertValidVersion(meta.version);
+  async resolveMeta(projectPath, writer) {
+    const meta = (await readProjectMeta(projectPath, writer)) ?? (await bootstrapProjectMeta(projectPath, writer));
+    assertValidVersion(meta.version);
     return meta;
   }
 
-  // meta.version ends up interpolated into a shell command in fetchOldTemplates
-  // (npm pack), so it must be strictly numeric before anything downstream uses it —
-  // .nutin-meta.json is a plain project file that could be hand-edited or come from
-  // an untrusted clone.
-  assertValidVersion(version) {
-    if (typeof version !== 'string' || !/^\d+\.\d+\.\d+$/.test(version)) {
-      throw new UserError(
-        `${META_FILE_NAME} has an invalid version "${version}" — expected a version in major.minor.patch format, e.g. "${packageVersion}". ` +
-        `Fix or delete ${META_FILE_NAME} and try again.`,
-      );
-    }
-  }
-
-  // Files the last update left with conflict markers (meta.unmergedFiles): nothing is updated until
-  // they're resolved, so a merge never runs on top of markers and a re-run still reports them.
-  async assertNoConflictMarkers(projectPath, meta) {
+  // Files the last update left with conflict markers (meta.unmergedFiles).
+  // Nothing is updated until they're resolved, so a merge never runs on top of markers.
+  // A re-run still reports them.
+  async assertNoConflictMarkers(projectPath, meta, writer) {
     const unmerged = meta.unmergedFiles ?? [];
     if (unmerged.length === 0) return;
 
@@ -102,7 +92,7 @@ export class ProjectUpdater {
       );
     }
 
-    await updateProjectMeta(projectPath, { unmergedFiles: [] });
+    await updateProjectMeta(projectPath, { unmergedFiles: [] }, writer);
     print.info('Conflict markers from the last update are resolved.');
   }
 
@@ -132,18 +122,20 @@ export class ProjectUpdater {
     const i18nMigration = await detectI18nMigration(projectPath);
     const prepare = buildMergePreparer({ i18nMigration });
     const { generatedPaths, ...changeSet } = await this.differ.diff(projectPath, oldTemplatesRoot, oldContext, newContext, { prepare });
-    // Your files only: nutin's own still mention languages.json until this update rewrites them.
+    // User-modified files only: nutin's own still mention languages.json until this update rewrites them.
     if (i18nMigration) Object.assign(i18nMigration, await findI18nReferences(projectPath, generatedPaths));
     return { ...changeSet, jsonDrift: await findJsonDrift(projectPath, newContext), i18nMigration };
   }
 
-  async applyChangeSet(projectPath, meta, changeSet, { yes, gitStatus = null }) {
+  async applyChangeSet(projectPath, meta, changeSet, { yes, gitStatus = null, writer = createProjectWriter() }) {
+    const { dryRun } = writer;
     const { toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated, jsonDrift, i18nMigration = null } = changeSet;
     printUpdateSummary({ toUpdate, toAdd, conflicts, unknown, removedByUser, noLongerGenerated, jsonDrift, i18nMigration });
 
     if (toUpdate.length === 0 && toAdd.length === 0 && conflicts.length === 0 && !i18nMigration) {
       print.boldSuccess('\n✅ Nothing to update.');
-      await updateProjectMeta(projectPath, { version: packageVersion });
+      await updateProjectMeta(projectPath, { version: packageVersion }, writer);
+      if (dryRun) writer.printPlan(projectPath);
       return;
     }
 
@@ -151,16 +143,29 @@ export class ProjectUpdater {
     const toMerge = conflicts.filter(({ newEntry, actualContent }) => !newEntry.isBinary && !Buffer.isBuffer(actualContent));
     const binaryConflicts = conflicts.filter((conflict) => !toMerge.includes(conflict));
 
-    if (gitStatus) this.assertPristine(gitStatus);
-
-    if (toMerge.length > 0 && !(await isGitAvailable())) {
-      throw new UserError(
-        `nutin-update needs git to merge the ${toMerge.length} file(s) you edited, but git was not found. ` +
-        'Install git and run nutin-update again. No files were changed.',
-      );
+    // A dry run goes on, to show the rest of what the update would do.
+    if (gitStatus) {
+      try {
+        this.assertPristine(gitStatus);
+      } catch (error) {
+        if (!dryRun) throw error;
+        print.warn(`\n⚠️  A real run would stop here: ${error.message}`);
+      }
     }
 
-    if (!yes && (toUpdate.length > 0 || toAdd.length > 0 || toMerge.length > 0 || i18nMigration)) {
+    // Edited files a dry run can't preview, for want of git.
+    let unpreviewed = [];
+    if (toMerge.length > 0 && !(await isGitAvailable())) {
+      if (!dryRun) {
+        throw new UserError(
+          `nutin-update needs git to merge the ${toMerge.length} file(s) you edited, but git was not found. ` +
+          'Install git and run nutin-update again. No files were changed.',
+        );
+      }
+      unpreviewed = toMerge.splice(0);
+    }
+
+    if (!yes && !dryRun && (toUpdate.length > 0 || toAdd.length > 0 || toMerge.length > 0 || i18nMigration)) {
       if (!process.stdin.isTTY) {
         print.warn('\n⚠️ Non-interactive shell detected — skipping the confirmation prompt.');
         print.boldInfo('Re-run with --yes to apply these updates automatically. No files were changed.');
@@ -182,29 +187,33 @@ export class ProjectUpdater {
     }
 
     for (const { relPath, newEntry } of [...toUpdate, ...toAdd]) {
-      const outputPath = path.join(projectPath, relPath);
-      await fs.ensureDir(path.dirname(outputPath));
-      await fs.writeFile(outputPath, newEntry.content);
+      await writer.writeFile(path.join(projectPath, relPath), newEntry.content);
     }
 
-    const { merged, conflicted } = await this.mergeEditedFiles(projectPath, meta, toMerge);
+    const { merged, conflicted } = await this.mergeEditedFiles(projectPath, meta, toMerge, writer);
 
     const manualSteps = [];
     if (i18nMigration) {
       const configConflicted = conflicted.some(({ relPath }) => relPath === NUTIN_CONFIG_FILE);
-      const { messages, manualSteps: steps } = await applyI18nMigration(projectPath, i18nMigration, { conflicted: configConflicted });
-      messages.forEach((message) => print.info(message));
+      const { messages, manualSteps: steps } = await applyI18nMigration(projectPath, i18nMigration, { conflicted: configConflicted, writer });
+      messages.forEach((message) => writer.info(message));
       manualSteps.push(...steps);
     }
 
     if (merged.length > 0 || conflicted.length > 0 || binaryConflicts.length > 0 || manualSteps.length > 0) {
-      await writeUpdateReport(projectPath, { merged, conflicted, binaryConflicts, manualSteps }, meta.version, packageVersion);
+      await writeUpdateReport(projectPath, { merged, conflicted, binaryConflicts, manualSteps }, meta.version, packageVersion, writer);
     }
 
     await updateProjectMeta(projectPath, {
       version: packageVersion,
       unmergedFiles: conflicted.map(({ relPath }) => relPath),
-    });
+    }, writer);
+
+    if (dryRun) {
+      printDryRunResult({ merged, conflicted, unpreviewed, binaryConflicts, manualSteps });
+      writer.printPlan(projectPath);
+      return;
+    }
 
     if (merged.length > 0) {
       print.info(`\n${merged.length} file(s) you edited were merged with the new version — review them (listed in ${REPORT_FILE_NAME}).`);
@@ -223,16 +232,14 @@ export class ProjectUpdater {
       );
       conflicted.forEach(({ relPath }) => print.boldError(`    - ${relPath}`));
     }
-    if (gitStatus) {
-      print.info(`\nTo undo this update, run from the project folder: ${UNDO_COMMAND}`);
-      print.warn('It also removes the untracked files and folders in the project folder.');
-    }
+    if (gitStatus) printUndoHint('update');
 
     print.boldSuccess(`\n✅ Updated to nutin v${packageVersion}.`);
   }
 
-  // The update must be undoable with git: no uncommitted changes and no untracked files in the
-  // project folder, so checkout + clean only reverts what the update wrote. --allow-dirty skips this.
+  // The update must be undoable with git: no uncommitted changes and no untracked files in the project folder,
+  // so checkout + clean only reverts what the update wrote.
+  // --allow-dirty skips this.
   assertPristine({ repo, gitFound, changes }) {
     if (!gitFound) {
       throw new UserError('git was not found: nutin-update uses it to make the update undoable. Install git, or pass --allow-dirty. No files were changed.');
@@ -244,16 +251,13 @@ export class ProjectUpdater {
       );
     }
     if (changes.length > 0) {
-      throw new UserError(
-        'Commit or stash your changes first (untracked files included), so the update can be undone with git, ' +
-        `or pass --allow-dirty. No files were changed:\n${changes.map((line) => `    ${line}`).join('\n')}`,
-      );
+      throw dirtyTreeError('the update', changes);
     }
   }
 
-  // Three-way merge of each file you edited: the old nutin version is the base, so your edits and
+  // Three-way merge of each file user edited: the old nutin version is the base, so edits and
   // nutin's changes are both kept, and only overlapping edits get conflict markers.
-  async mergeEditedFiles(projectPath, meta, toMerge) {
+  async mergeEditedFiles(projectPath, meta, toMerge, writer) {
     const merged = [];
     const conflicted = [];
     const labels = { base: `nutin v${meta.version}`, theirs: `nutin v${packageVersion}` };
@@ -265,7 +269,7 @@ export class ProjectUpdater {
         theirs: newEntry.content,
         labels,
       });
-      await fs.writeFile(path.join(projectPath, relPath), content);
+      await writer.writeFile(path.join(projectPath, relPath), content);
       if (conflictCount > 0) conflicted.push({ relPath, conflictCount });
       else merged.push({ relPath });
     }
@@ -274,7 +278,30 @@ export class ProjectUpdater {
   }
 }
 
-// "Apply 3 file update(s), merge 1 file(s) you edited and migrate config/languages.json?"
+// What a real run would report once done, as --dry-run found it: the merges ran, in a temporary folder.
+function printDryRunResult({ merged, conflicted, unpreviewed, binaryConflicts, manualSteps }) {
+  if (merged.length > 0) {
+    print.info(`\n${merged.length} file(s) you edited would merge cleanly with the new version:`);
+    merged.forEach(({ relPath }) => print.section(`    - ${relPath}`));
+  }
+  if (unpreviewed.length > 0) {
+    print.warn(`\n⚠️  ${unpreviewed.length} file(s) you edited would be merged, but git was not found, so the merge can't be previewed (a real run needs git):`);
+    unpreviewed.forEach(({ relPath }) => print.warn(`    - ${relPath}`));
+  }
+  if (binaryConflicts.length > 0) {
+    print.warn(`\n⚠️  ${binaryConflicts.length} binary file(s) you modified would be left as they are:`);
+    binaryConflicts.forEach(({ relPath }) => print.warn(`    - ${relPath}`));
+  }
+  if (manualSteps.length > 0) {
+    print.warn('\n⚠️  To do by hand after the update:');
+    manualSteps.forEach((step) => print.warn(`    - ${step}`));
+  }
+  if (conflicted.length > 0) {
+    print.boldError(`\n⚠️  ${conflicted.length} file(s) would get conflict markers (your edits and nutin's overlap):`);
+    conflicted.forEach(({ relPath, conflictCount }) => print.boldError(`    - ${relPath} (${conflictCount} conflict${conflictCount > 1 ? 's' : ''})`));
+  }
+}
+
 export function confirmationMessage({ fileCount, mergeCount, i18nMigration }) {
   const actions = [
     fileCount > 0 && `apply ${fileCount} file update(s)`,

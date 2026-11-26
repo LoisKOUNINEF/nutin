@@ -1,6 +1,6 @@
 import { Lifecycle, AppEventBus } from '#root/dist/src/core/index.js';
 
-describe('LifecycleFacade (Lifecycle)', () => {
+describe('Lifecycle', () => {
   afterEach(() => {
     AppEventBus.cleanupEventListeners();
   });

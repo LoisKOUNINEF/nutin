@@ -1,7 +1,8 @@
 import { print } from './print.mjs';
 
-// An expected failure (bad input, a project in the wrong state, a command that failed): shown as
-// its message and an optional hint, without a stack. Any other error is a bug, and keeps its stack.
+// An expected failure (bad input, a project in the wrong state, a command that failed):
+// shown as its message and an optional hint, without a stack.
+// Any other error is a bug, and keeps its stack.
 export class UserError extends Error {
   constructor(message, { hint, cause } = {}) {
     super(message, cause ? { cause } : undefined);

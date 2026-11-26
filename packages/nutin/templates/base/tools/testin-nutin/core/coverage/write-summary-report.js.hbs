@@ -28,8 +28,9 @@ function buildMarkdown(report, globals, testResults) {
   const threshold = config.testinNutin.coverage?.threshold;
   const thresholdLine = typeof threshold === 'number' ? `\n- Threshold: ${threshold}%` : '';
 
-  const { todo, passed, failed, elapsedTime } = testResults;
+  const { todo, skipped, passed, failed, elapsedTime } = testResults;
   const total = passed + failed;
+  const skippedLine = skipped > 0 ? `\n- ⏭ Skipped: ${skipped}` : '';
   const todoLine = todo > 0 ? `\n- ⚠️ To do: ${todo}` : '';
 
   return `# Coverage Summary
@@ -39,7 +40,7 @@ function buildMarkdown(report, globals, testResults) {
 - ✓ ${passed} passed
 - ✗ ${failed} failed
 - 📖 ${total} total
-- ⌚️ Time: ${elapsedTime.toFixed(2)}ms${todoLine}
+- ⌚️ Time: ${elapsedTime.toFixed(2)}ms${skippedLine}${todoLine}
 
 | File | Lines % | Functions % | Branches % |
 |---|---|---|---|

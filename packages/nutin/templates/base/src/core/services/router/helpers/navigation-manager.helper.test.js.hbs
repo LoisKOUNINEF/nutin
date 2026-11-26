@@ -472,7 +472,8 @@ describe('NavigationManager', () => {
     const { view, element } = mountView('<h1 style="color: red">Title</h1>');
     const h1 = element.querySelector('h1');
     NavigationManager.focusView(view);
-    expect(h1.style.outline).toBe('none');
+    // jsdom 31 expands the shorthand (outline reads "medium", outlineStyle "none"); jsdom 30 doesn't.
+    expect(h1.style.outlineStyle || h1.style.outline).toBe('none');
 
     h1.blur();
     expect(h1.hasAttribute('tabindex')).toBe(false);
@@ -508,6 +509,12 @@ describe('NavigationManager', () => {
     const region = document.querySelector('[data-nutin-announcer]');
     expect(region.getAttribute('role')).toBe('status');
     expect(region.getAttribute('aria-live')).toBe('polite');
+    // Visually hidden (jsdom drops clip-path: Chrome checks it).
+    expect(region.style.position).toBe('absolute');
+    expect(region.style.width).toBe('1px');
+    expect(region.style.height).toBe('1px');
+    expect(region.style.overflow).toBe('hidden');
+    expect(region.style.whiteSpace).toBe('nowrap');
     advanceTimersByTime(ANNOUNCE_DELAY - 1);
     expect(region.textContent).toBe('');
     advanceTimersByTime(1);
@@ -526,5 +533,72 @@ describe('NavigationManager', () => {
     expect(regions[0].textContent).toBe('');
     advanceTimersByTime(ANNOUNCE_DELAY);
     expect(regions[0].textContent).toBe('Same');
+  });
+  it('isModuleLoadError recognizes each browser\'s failed import() of the app\'s own chunks and nothing else', () => {
+    const origin = window.location.origin;
+    expect(NavigationManager.isModuleLoadError(new TypeError(`Failed to fetch dynamically imported module: ${origin}/chunks/x-AB12.js`))).toBe(true);
+    expect(NavigationManager.isModuleLoadError(new TypeError(`error loading dynamically imported module: ${origin}/chunks/x-AB12.js.`))).toBe(true);
+    // Safari doesn't name the module: assumed to be one of the app's chunks.
+    expect(NavigationManager.isModuleLoadError(new TypeError('Importing a module script failed.'))).toBe(true);
+    // A third-party module (ad blocker, CSP, CDN outage), or a same-origin file outside chunks/: not the app's to reload.
+    expect(NavigationManager.isModuleLoadError(new TypeError('Failed to fetch dynamically imported module: https://cdn.example.com/widget.js'))).toBe(false);
+    expect(NavigationManager.isModuleLoadError(new TypeError('Failed to fetch dynamically imported module: https://cdn.example.com/chunks/x.js'))).toBe(false);
+    expect(NavigationManager.isModuleLoadError(new TypeError(`Failed to fetch dynamically imported module: ${origin}/vendor/x.js`))).toBe(false);
+    expect(NavigationManager.isModuleLoadError(new TypeError('x is not a function'))).toBe(false);
+    expect(NavigationManager.isModuleLoadError(new Error('Failed to fetch dynamically imported module'))).toBe(false);
+    expect(NavigationManager.isModuleLoadError('Importing a module script failed.')).toBe(false);
+    expect(NavigationManager.isModuleLoadError(undefined)).toBe(false);
+  });
+
+  it('reloadOnce reloads a URL once within its window, and never offline', async () => {
+    // The full page load (location.assign) is a no-op in jsdom: the sessionStorage record written
+    // right before it shows it was attempted.
+    sessionStorage.clear();
+    const record = () => JSON.parse(sessionStorage.getItem('nutin:failed-view-load') ?? 'null');
+    try {
+      await silenceConsole('error', async () => {
+        Object.defineProperty(navigator, 'onLine', { configurable: true, value: false });
+        NavigationManager.reloadOnce('/a', new Error('x'), 'a module');
+        expect(record()).toBe(null);
+        delete navigator.onLine;
+
+        NavigationManager.reloadOnce('/a', new Error('x'), 'a module');
+        const first = record();
+        expect(first.url).toBe('/a');
+
+        NavigationManager.reloadOnce('/a', new Error('x'), 'a module');
+        expect(record().at).toBe(first.at);
+
+        NavigationManager.reloadOnce('/b', new Error('x'), 'a module');
+        expect(record().url).toBe('/b');
+      });
+    } finally {
+      delete navigator.onLine;
+      sessionStorage.clear();
+    }
+  });
+
+  it('setNoIndex adds one robots noindex tag, and removes only its own', () => {
+    const own = () => document.head.querySelectorAll('meta[data-nutin-noindex]');
+    const authorTag = document.createElement('meta');
+    authorTag.setAttribute('name', 'robots');
+    authorTag.setAttribute('content', 'noarchive');
+    document.head.appendChild(authorTag);
+    try {
+      NavigationManager.setNoIndex(true);
+      NavigationManager.setNoIndex(true);
+
+      expect(own().length).toBe(1);
+      expect(own()[0].getAttribute('name')).toBe('robots');
+      expect(own()[0].getAttribute('content')).toBe('noindex');
+
+      NavigationManager.setNoIndex(false);
+
+      expect(own().length).toBe(0);
+      expect(authorTag.isConnected).toBe(true);
+    } finally {
+      authorTag.remove();
+      NavigationManager.setNoIndex(false);
+    }
   });
 });

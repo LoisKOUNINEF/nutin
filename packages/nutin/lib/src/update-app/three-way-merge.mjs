@@ -7,8 +7,8 @@ const fs = fsExtra.default;
 
 export const CONFLICT_MARKER = '<<<<<<< yours';
 
-// Merges nutin's changes (base -> theirs) into your file with `git merge-file`, which needs the git
-// binary but no repository. Overlapping edits get diff3 markers: yours, the old nutin version, the new one.
+// Merges nutin's changes (base -> theirs) into user file with `git merge-file`, which needs the git
+// binary but no repository. Overlapping edits get diff3 markers: user's, the old nutin version, the new one.
 export async function mergeFile({ base, yours, theirs, labels }) {
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nutin-merge-'));
   try {

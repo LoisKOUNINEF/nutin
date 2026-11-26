@@ -3,19 +3,20 @@
  * Supports constructor parameters for initialization.
  */
 export abstract class Service<T extends Service<T>> {
-  private static _instances = new Map<Function, Service<any>>();
-  private static _instantiating = new Set<Function>();
-  private _cleanupCallbacks: (() => void)[] = [];
+  static #instances = new Map<Function, Service<any>>();
+  static #instantiating = new Set<Function>();
+  #cleanupCallbacks: (() => void)[] = [];
 
   constructor() {
     const constructor = this.constructor as new (...args: any[]) => T;
 
-    if (!Service._instantiating.has(constructor)) {
-      throw new Error(
-        `${constructor.name} is a Service. Use ${constructor.name}.getInstance() instead.`
-      );
+    if (!Service.#instantiating.has(constructor)) {
+      // Prod bundles: a short message (class names are minified there anyway).
+      throw new Error(globalThis.__NUTIN_PROD__
+        ? 'Use getInstance()'
+        : `${constructor.name} is a Service. Use ${constructor.name}.getInstance() instead.`);
     }
-    this.autoBindMethods();
+    this.#autoBindMethods();
   }
 
   /**
@@ -27,40 +28,37 @@ export abstract class Service<T extends Service<T>> {
     this: C,
     ...args: ConstructorParameters<C> | []
   ): InstanceType<C> {
-    const alreadyExists = Service._instances.has(this);
+    const alreadyExists = Service.#instances.has(this);
 
     if (alreadyExists && args.length > 0) {
-      throw new Error(
-        `${this.name} is already initialized. ` +
-        `getInstance() was called with arguments on an existing instance, ` +
-        `which would silently ignore them. ` +
-        `Call getInstance() without arguments to retrieve the existing instance.`
-      );
+      throw new Error(globalThis.__NUTIN_PROD__
+        ? 'Already initialized'
+        : `${this.name} is already initialized: call getInstance() without arguments.`);
     }
 
     if (!alreadyExists) {
-      Service._instantiating.add(this);
-      Service._instances.set(this, new this(...args));
-      Service._instantiating.delete(this);
+      Service.#instantiating.add(this);
+      Service.#instances.set(this, new this(...args));
+      Service.#instantiating.delete(this);
     }
 
-    return Service._instances.get(this) as InstanceType<C>;
+    return Service.#instances.get(this) as InstanceType<C>;
   }
 
   public static hasInstance<T extends Service<T>>(
     constructor: new (...args: any[]) => T
   ): boolean {
-    return Service._instances.has(constructor);
+    return Service.#instances.has(constructor);
   }
 
   public static async destroy<T extends Service<T>>(
     this: new (...args: any[]) => T
   ): Promise<void> {
-    const instance = Service._instances.get(this);
+    const instance = Service.#instances.get(this);
     if (instance) {
       await instance.onDestroy();
-      instance.runCleanup();
-      Service._instances.delete(this);
+      instance.#runCleanup();
+      Service.#instances.delete(this);
     }
   }
 
@@ -68,26 +66,26 @@ export abstract class Service<T extends Service<T>> {
   // `beforeunload` left a page restored from the back/forward cache (or kept after a
   // cancelled "Leave site?" prompt) with every service already disposed.
   public dispose = (): void => {
-    this.runCleanup();
-    Service._instances.delete(this.constructor);
+    this.#runCleanup();
+    Service.#instances.delete(this.constructor);
   };
 
   public static async destroyAll(): Promise<void> {
-    const instances = Array.from(Service._instances.values());
+    const instances = Array.from(Service.#instances.values());
 
     await Promise.all(instances.map(instance => instance.onDestroy()));
-    instances.forEach(instance => instance.runCleanup());
-    Service._instances.clear();
-    Service._instantiating.clear();
+    instances.forEach(instance => instance.#runCleanup());
+    Service.#instances.clear();
+    Service.#instantiating.clear();
   }
 
   protected registerCleanup(callback: () => void): void {
-    this._cleanupCallbacks.push(callback);
+    this.#cleanupCallbacks.push(callback);
   }
 
-  private runCleanup(): void {
-    const callbacks = this._cleanupCallbacks;
-    this._cleanupCallbacks = [];
+  #runCleanup(): void {
+    const callbacks = this.#cleanupCallbacks;
+    this.#cleanupCallbacks = [];
     callbacks.forEach(fn => fn());
   }
 
@@ -96,7 +94,7 @@ export abstract class Service<T extends Service<T>> {
    */
   protected onDestroy(): void {}
 
-  private autoBindMethods(): void {
+  #autoBindMethods(): void {
     let proto = Object.getPrototypeOf(this);
 
     while (proto && proto !== Service.prototype) {
@@ -124,14 +122,14 @@ export abstract class Service<T extends Service<T>> {
   public static testingReset<T extends Service<T>>(
     this: new (...args: any[]) => T
   ): void {
-    Service._instances.delete(this);
+    Service.#instances.delete(this);
   }
 
   /**
    * Resets all Service instances without cleanup.
    */
   public static testingResetAll(): void {
-    Service._instances.clear();
-    Service._instantiating.clear();
+    Service.#instances.clear();
+    Service.#instantiating.clear();
   }
 }

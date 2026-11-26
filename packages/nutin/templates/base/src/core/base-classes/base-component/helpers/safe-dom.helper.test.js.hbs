@@ -111,6 +111,18 @@ describe('SafeDom', () => {
     const { form } = formShadowing(['innerHTML']);
     SafeDom.assign(form, 'innerHTML', '');
     expect(form.childNodes.length).toBe(0);
-    expect(() => SafeDom.invoke(form, 'noSuchMethod')).toThrow();
+    expect(() => SafeDom.invoke(form, 'noSuchMethod')).toThrow('No built-in method "noSuchMethod".');
+    expect(() => SafeDom.assign(form, 'noSuchSetter', 1)).toThrow('No built-in setter for "noSuchSetter".');
+  });
+
+  it('throws only the property name in prod bundles (globalThis.__NUTIN_PROD__)', () => {
+    const { form } = formShadowing([]);
+    globalThis.__NUTIN_PROD__ = true;
+    try {
+      expect(() => SafeDom.invoke(form, 'noSuchMethod')).toThrow('noSuchMethod');
+      expect(() => SafeDom.assign(form, 'noSuchSetter', 1)).toThrow('noSuchSetter');
+    } finally {
+      delete globalThis.__NUTIN_PROD__;
+    }
   });
 });

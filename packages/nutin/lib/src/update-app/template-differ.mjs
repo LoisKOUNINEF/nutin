@@ -12,8 +12,8 @@ function contentEquals(a, b) {
 }
 
 // Paths the user is expected to hand-edit right after `create-app`.
-// Their generated content is just placeholder/starter scaffolding, so nutin-update must never rewrite
-// or conflict-flag them.
+// Their generated content is just placeholder/starter scaffolding.
+// nutin-update must never rewrite or conflict-flag them.
 const FULLY_EXCLUDED_PATTERNS = [
   /^config\/[^/]+\.json$/,
   /^src\/app(\/|$)/,
@@ -22,8 +22,8 @@ const FULLY_EXCLUDED_PATTERNS = [
   /^src\/extension(\/|$)/,
 ];
 
-// Like FULLY_EXCLUDED_PATTERNS, but only for files that already existed before this
-// update. A brand new file introduced by a newer template version should still be added.
+// Like FULLY_EXCLUDED_PATTERNS, but only for files that already existed before this update.
+// A brand new file introduced by a newer template version should still be added.
 const ADD_ONLY_PATTERNS = [
   /^src\/styles(\/|$)/,
 ];
@@ -51,8 +51,8 @@ export class TemplateDiffer {
   }
 
   // prepare(relPath, { actual, base, next }) → { actual, base }: a text file as it's compared and
-  // merged (yours, and the old version as merge base), rewritten so a line nutin changes on its own
-  // (a version number, a migrated option) neither counts as your edit nor conflicts with yours
+  // merged (user's, and the old version as merge base), rewritten so a line nutin changes on its own
+  // (a version number, a migrated option) neither counts as a user edit nor conflicts with theirs
   // around it. The file on disk isn't touched. See merge-preparers.mjs.
   async diff(projectPath, oldTemplatesRoot, oldContext, newContext, { prepare = null } = {}) {
     const newTemplatesRoot = this.fileGenerator.getTemplatesRoot();

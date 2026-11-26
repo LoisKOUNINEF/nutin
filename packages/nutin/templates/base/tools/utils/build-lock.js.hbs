@@ -1,12 +1,13 @@
 import * as fs from 'fs';
 import path from 'path';
 import { print } from './print.js';
+import { errorExit } from './error-exit.js';
 
 // Guards the whole build pipeline against concurrent invocations — e.g. a manual
-// `{{packageManager}} run build` running alongside the dev watcher's auto-rebuild, or (as actually
-// happened) multiple orphaned watcher.js processes each kicking off their own build.
-// copy-static.js starts every run by wiping and recreating dist-build; two builds
-// doing that at once corrupt each other's output (missing/non-empty dist-build,
+// `{{packageManager}} run build` running alongside the dev watcher's auto-rebuild,
+// or multiple orphaned watcher.js processes each kicking off their own build.
+// copy-static.js starts every run by wiping and recreating dist-build;
+// two builds doing that at once corrupt each other's output (missing/non-empty dist-build,
 // merge-templates.js "has both an inline and external template" conflicts, etc).
 const LOCK_DIR = path.resolve('.build-lock');
 const STALE_MS = 5 * 60 * 1000; // a full build takes seconds — anything older is a dead leftover
@@ -35,7 +36,7 @@ function isStale() {
   return isHolderDead();
 }
 
-// A build killed hard (kill -9, a crash) never releases — free the lock right away
+// A build killed hard (kill -9, a crash) never releases: free the lock right away
 // when the pid that wrote it is gone instead of waiting out STALE_MS.
 function isHolderDead() {
   let pid;
@@ -79,15 +80,20 @@ export async function acquireBuildLock() {
     }
 
     if (Date.now() - start > MAX_WAIT_MS) {
-      throw new Error(`Timed out waiting for the build lock (${LOCK_DIR}) held by another process.`);
+      // Reported like any other build error, not as an unhandled rejection.
+      errorExit(
+        `Timed out waiting for another build to finish (lock: ${LOCK_DIR}). ` +
+        `If no other build is running, delete the "${path.basename(LOCK_DIR)}" folder and build again.`,
+        'build-lock'
+      );
     }
 
     await sleep(POLL_MS);
   }
 
   process.on('exit', release);
-  // 'exit' doesn't fire when a signal terminates the process (Ctrl-C, dev-serve's
-  // group kill), so release explicitly there too, then exit the way the signal would have.
+  // 'exit' doesn't fire when a signal terminates the process (Ctrl-C, dev-serve's group kill),
+  // so release explicitly there too, then exit the way the signal would have.
   for (const [signal, code] of [['SIGINT', 130], ['SIGTERM', 143], ['SIGHUP', 129]]) {
     process.once(signal, () => {
       release();

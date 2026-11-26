@@ -45,7 +45,7 @@ nutin.config.js   build/feature config — see below
 - Build: `{{packageManager}} run build` (dev) or `{{packageManager}} run build:prod` (production). Opt-in dependencies (Tailwind, `markdown`) are only installed automatically in an interactive terminal; elsewhere pass `-- -y` (or set `NUTIN_ASSUME_YES`).
 {{#if (eq lang "ts")}}- Type check only: `{{packageManager}} run typecheck` (`tsc --noEmit` on the merged templates; `dist/` is left as it is). Use it in CI instead of a plain `tsc --noEmit`, which reports every template-only `data-event` handler as unused.
 {{/if}}{{#if extension}}- Extension: `{{packageManager}} run build` writes `dist/chrome` and `dist/firefox` (load them unpacked). `{{packageManager}} run package:extension` (or `:chrome`/`:firefox`) runs a prod build and writes the store ZIPs `dist/<name>-<browser>-<version>.zip` + `.sha256` (needs the `zip` command); `{{packageManager}} run validate:extension` checks them (`-- --tag vX.Y.Z` on a release); `{{packageManager}} run lint:extension` runs `web-ext lint` on `dist/firefox`.
-{{/if}}- Generate: `{{packageManager}} run generate ELEMENT ELEMENT_NAME` (`ELEMENT` = `component`/`view`/`service`; `ELEMENT_NAME` may be a nested path, generated in `src/app/<path>/`; fails if that folder already exists and isn't empty).
+{{/if}}- Generate: `{{packageManager}} run generate ELEMENT ELEMENT_NAME` (`ELEMENT` = `component`/`view`/`service`; `ELEMENT_NAME` may be a nested path, generated in `src/app/<path>/`; fails if that folder already exists and isn't empty; `--dry-run` lists the files without writing them).
 - Test: `{{packageManager}} run testin-nutin` (build + run), `{{packageManager}} run testin-nutin:only` (no rebuild: it warns when sources changed after the last successful build, e.g. after a failed one), `{{packageManager}} run testin-nutin:watch`, `{{packageManager}} run testin-nutin:coverage`, `{{packageManager}} run testin-nutin:verbose`.
 - Update Nutin: `nutin-update` refuses to run unless the project is committed (no changes, no untracked files; `--allow-dirty` skips the check). Files edited here that also changed upstream are merged three-way; overlapping edits get `diff3` conflict markers, and the project won't build, nor will `nutin-update` run again, until they're resolved (listed in `.nutin-meta.json`'s `unmergedFiles` and `NUTIN-UPDATE-REPORT.md`).
 
@@ -134,9 +134,10 @@ Only defaults that leave the page are cancelled: link clicks (`<a href>`, unless
   - Route params (`/users/:id`): in the view, `this.getRouteParam('id')`, `getRouteParams()`, `hasRouteParam(key)`. Values are URL-decoded.
   - Query params (`?tab=settings`), on every route, `/` included: in the view, `this.getQueryParam('tab')`, `getQueryParams()`, `hasQueryParam(key)`. Values are decoded, and a repeated key keeps its last value. They are kept apart from route params. From anywhere else: `AppRouter`'s `getQueryParams()`/`getQueryParam(key)` and `getCurrentParams()`/`getParam(key)`.
   - Both are set on the view before its `render()`, so `generateTemplate()` can read them. `onEnter()` runs after the first render.
-  - Guards: `{ view, guards: [(params, query) => …] }`{{#if (eq lang "ts")}} (`Nutin.RouteGuard`){{/if}}, return `true` to allow, `false` to block, or a path to redirect to (or a Promise of one of them).
+  - Guards: `{ view, guards: [(params, query) => …] }`{{#if (eq lang "ts")}} (`Nutin.RouteGuard`){{/if}}, return `true` to allow, `false` to block, or a path to redirect to (or a Promise of one of them). `'/404'` isn't a redirect: the `/404` view renders at the guarded URL, as for a URL that matches no route.
   - `Navigation.navigateTo(path)` takes a query and a hash (`/search?q=x#results`). A change of path or query re-renders the view, while a back/forward that only changes the `#hash` doesn't (the browser scrolls). To rewrite the URL from `onEnter()` without a navigation, use `NavigationManager.replaceState(path)`: it keeps the current query and hash.
   - Lazy views: a factory returning `import('./views/x/x.view.js').then((m) => new m.XView())` loads the view on first visit (import it by its own file, not through a barrel{{#if (eq lang "ts")}}; factory type: global `Nutin.ViewFactory`{{/if}}). If the chunk fails to load (often a deploy replaced it), the router does a full page load of the target URL. Keep `/` and `/404` eager.
+  - `/404`: rendered when no route matches. Keep it: without one, an unknown URL loaded directly shows a blank page and an in-app link to one does nothing. `build` warns when `src/app/routes.{{#if (eq lang "js")}}js{{else}}ts{{/if}}` has no `'/404'` key; ignore it only if `appRoutes` gets `/404` from another file (spread in), which the check can't see.
   - Focus: after each in-app navigation (not the first load or `Navigation.reload()`), focus moves to the view's `<h1>`, else the `<h1>` in `<main>`, else the view element, with `document.title` announced in a polite live region in that last case only (a focused heading is read by screen readers). Give each view an `<h1>`.
   - `document.title` comes from `View.documentTitle()` if overridden, else `config/seo.json`'s title (with `generateSEOFiles`), the `<viewName>.title` translation, then `viewName`.
 {{/unless}}
@@ -166,7 +167,7 @@ Only defaults that leave the page are cancelled: link clicks (`<a href>`, unless
 
 ## Pipes
 
-Built-in pipes, registered by `registerPipes()` in `main.ts` (args in `data-pipe="name:arg1,arg2"`):
+Built-in pipes (args in `data-pipe="name:arg1,arg2"`). A new app registers none: call `registerPipes()` in `main.ts` for all of them, or register only the ones used, e.g. `AppPipeRegistry.register('date', datePipe)`. Each one is exported from core as `<name>Pipe` (`datePipe`, `capitalizeAllPipe`…), and the bundle leaves out the ones never registered:
 
 - `currency:currency,locale` (defaults `USD`, the page's language), `date:locale,format,time,pattern` (defaults the page's language, `long`), `number:decimals` (`toFixed`, default `0`). The page's language is `<html lang>` (set by i18n), else `en`; leave the locale empty to keep it (`date:,short`). `date` formats: `long`, `short`, `numeric`, `time`. `numeric` follows the locale's order (`10/28/2026` in `en-US`) unless a pattern gives it, with `YYYY`/`YY`/`MM`/`DD` and any separator (`date:,numeric,false,DD/MM/YYYY`).
 - `uppercase`, `lowercase`, `capitalize`, `capitalizeAll`, `truncate:length,suffix` (defaults `50`, `...`)
@@ -183,7 +184,7 @@ Central options/tools config (see the inline comments for details):
 - `tailwind`, `generateSEOFiles` — top-level feature toggles.
 - `dockerPorts`, `markdownSources` — options of the `docker`/`markdown` features, only present once added with `nutin-add <feature>`.
 - `builder.{sass.paths, esbuild}` — build pipeline behavior.
-- `testinNutin.{includeFramework, includeTools, includeApp, jsdomOptions}` — test discovery/environment.
+- `testinNutin.{includeFramework, includeTools, includeApp, isolate, jsdomOptions}` — test discovery/environment (`isolate`: test files run each in their own worker and jsdom window, e.g. for custom elements).
 
 {{#unless extension}}
 ### `config/seo.json`
@@ -199,7 +200,7 @@ Every `render()` also sanitizes the template (`SecurityHelper.sanitizeToFragment
 
 ## Testing (testin-nutin)
 
-Nutin's own hand-built test runner + jsdom - not Jest. Tests are plain JavaScript (`*.test.js` importing the compiled `#root/dist/...` output){{#if (eq lang "ts")}}, so they aren't type-checked{{/if}}. `describe`/`it` only (**no `test()` alias**), `beforeAll`/`beforeEach`/`afterEach`/`afterAll` (one of each per suite, no stacking - anywhere inside the `describe` statement, not top-level). `it.todo(name)` lists a pending test. All globals — no imports needed in test files.
+Nutin's own hand-built test runner + jsdom - not Jest. Tests are plain JavaScript (`*.test.js` importing the compiled `#root/dist/...` output){{#if (eq lang "ts")}}, so they aren't type-checked{{/if}}. `describe`/`it` (`test` is an alias of `it`), `beforeAll`/`beforeEach`/`afterEach`/`afterAll` (one of each per suite, no stacking - anywhere inside the `describe` statement, not top-level). `it.todo(name)` lists a pending test; `it.skip`/`describe.skip` skip, `it.only`/`describe.only` run only those tests (any `.only` skips the rest of the run, don't leave one in). All globals — no imports needed in test files.
 
 - Matchers: `toBe`, `toEqual`, `toContain`, `toBeTruthy`/`toBeFalsy`, `toBeDefined`/`toBeUndefined`, `toBeInstanceOf`, `toHaveBeenCalled`/`toHaveBeenCalledWith`, `toBeLessThan`/`toBeGreaterThan`, `toThrow` — each has a `.not` counterpart.
 - `spyOn(obj, 'method')` returns `.calls`/`.callCount`/`.lastCall`, `.andCallFake(fn)`/`.andReturn(v)`, `.restore()` — unlike mocks, calls pass through by default. Core helpers exported as namespaces (`NavigationManager`, `SecurityHelper`, `TokenHelper`) are read-only modules and can't be spied on: spy on what they call (e.g. `window.history.replaceState`) or check the effect.

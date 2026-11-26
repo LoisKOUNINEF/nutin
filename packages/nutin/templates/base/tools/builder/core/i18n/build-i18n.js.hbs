@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { getFilesRecursive, print, errorExit } from '../../../utils/index.js';
+import { getFilesRecursive, print, errorExit, UserError } from '../../../utils/index.js';
 import { PATHS } from '../app/paths.js';
 // Imported directly, not via the utils barrel: it reads nutin.config.js "i18n" on load.
 import { LANGUAGES } from '../../../utils/languages.js';
@@ -44,7 +44,7 @@ function combineJsonFiles(locale, files) {
     const key = getKeyForFile(file);
     // Keys are folder names, so e.g. admin/user/ and public/user/ would share "user".
     if (sources[key]) {
-      throw new Error(
+      throw new UserError(
         `Translation key "${key}" (${locale}) is defined by two folders:\n  ${path.relative(process.cwd(), sources[key])}\n  ${path.relative(process.cwd(), file)}\n` +
         `One would silently overwrite the other — rename one of the folders.`
       );

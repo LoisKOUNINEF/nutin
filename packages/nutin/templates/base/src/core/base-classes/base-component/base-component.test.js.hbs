@@ -216,12 +216,30 @@ describe('BaseComponent', () => {
     }
     const component = new Broken({});
     const error = spyOn(console, 'error').andCallFake(() => {});
+    try {
+      expect(() => component.render()).toThrow('Invalid time value');
 
-    expect(() => component.render()).toThrow('Invalid time value');
+      expect(error.calls[0][0]).toContain('Broken.generateTemplate() threw');
+      expect(error.calls[0][1]).toBeInstanceOf(RangeError);
+    } finally {
+      error.restore();
+    }
+  });
 
-    error.restore();
-    expect(error.calls[0][0]).toContain('Broken.generateTemplate() threw');
-    expect(error.calls[0][1]).toBeInstanceOf(RangeError);
+  it('render() in prod bundles (globalThis.__NUTIN_PROD__) rethrows without the report', () => {
+    class Broken extends BaseComponent {
+      generateTemplate() { throw new RangeError('Invalid time value'); }
+    }
+    const component = new Broken({});
+    const error = spyOn(console, 'error').andCallFake(() => {});
+    globalThis.__NUTIN_PROD__ = true;
+    try {
+      expect(() => component.render()).toThrow('Invalid time value');
+    } finally {
+      delete globalThis.__NUTIN_PROD__;
+      error.restore();
+    }
+    expect(error.callCount).toBe(0);
   });
 
   it('render() reports only the child whose template threw, not its parents', () => {
@@ -236,12 +254,14 @@ describe('BaseComponent', () => {
     }
     const parent = new Parent({});
     const error = spyOn(console, 'error').andCallFake(() => {});
+    try {
+      expect(() => parent.render()).toThrow('bad child');
 
-    expect(() => parent.render()).toThrow('bad child');
-
-    error.restore();
-    expect(error.callCount).toBe(1);
-    expect(error.calls[0][0]).toContain('BrokenChild.generateTemplate() threw');
+      expect(error.callCount).toBe(1);
+      expect(error.calls[0][0]).toContain('BrokenChild.generateTemplate() threw');
+    } finally {
+      error.restore();
+    }
   });
 
   it('isDestroyed is false until destroy() runs', () => {
@@ -258,13 +278,15 @@ describe('BaseComponent', () => {
     parent.render();
     parent.destroy();
     const warn = spyOn(console, 'warn').andCallFake(() => {});
+    try {
+      const result = parent.render();
 
-    const result = parent.render();
-
-    warn.restore();
-    expect(result).toBe(parent.getElement());
-    expect(parent.created.length).toBe(1);
-    expect(warn.calls[0][0]).toContain('destroyed KeepingParent');
+      expect(result).toBe(parent.getElement());
+      expect(parent.created.length).toBe(1);
+      expect(warn.calls[0][0]).toContain('destroyed KeepingParent');
+    } finally {
+      warn.restore();
+    }
   });
 
   it('render() after destroy() binds no data-event listeners', () => {

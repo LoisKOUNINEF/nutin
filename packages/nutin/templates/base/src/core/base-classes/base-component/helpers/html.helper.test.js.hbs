@@ -267,72 +267,81 @@ describe('html', () => {
 
   it('html replaces a javascript: URL from data in a URL attribute and warns', () => {
     const warnSpy = spyOn(console, 'warn').andCallFake(() => {});
-    const bad = 'javascript:alert(1)';
-    const results = [
-      String(html`<a href="${bad}">x</a>`),
-      String(html`<a href='${bad}'>x</a>`),
-      String(html`<a href=${bad}>x</a>`),
-      String(html`<a href=" ${bad}">x</a>`),
-      String(html`<a HREF="${'java\tscript:x'}">x</a>`),
-      String(html`<a href="${'JavaScript:x'}">x</a>`),
-      String(html`<button formaction="${bad}">x</button>`),
-      String(html`<svg><a xlink:href="${bad}">x</a></svg>`),
-      String(html`<a href="${html`${bad}`}">x</a>`),
-      String(html`<a href="${raw(bad)}">x</a>`),
-      String(html`<a href="${'java'}${'script:x'}">x</a>`),
-    ];
-    warnSpy.restore();
+    try {
+      const bad = 'javascript:alert(1)';
+      const results = [
+        String(html`<a href="${bad}">x</a>`),
+        String(html`<a href='${bad}'>x</a>`),
+        String(html`<a href=${bad}>x</a>`),
+        String(html`<a href=" ${bad}">x</a>`),
+        String(html`<a HREF="${'java\tscript:x'}">x</a>`),
+        String(html`<a href="${'JavaScript:x'}">x</a>`),
+        String(html`<button formaction="${bad}">x</button>`),
+        String(html`<svg><a xlink:href="${bad}">x</a></svg>`),
+        String(html`<a href="${html`${bad}`}">x</a>`),
+        String(html`<a href="${raw(bad)}">x</a>`),
+        String(html`<a href="${'java'}${'script:x'}">x</a>`),
+      ];
 
-    expect(results).toEqual([
-      '<a href="about:invalid#nutin-blocked">x</a>',
-      "<a href='about:invalid#nutin-blocked'>x</a>",
-      '<a href="about:invalid#nutin-blocked">x</a>',
-      '<a href=" about:invalid#nutin-blocked">x</a>',
-      '<a HREF="about:invalid#nutin-blocked">x</a>',
-      '<a href="about:invalid#nutin-blocked">x</a>',
-      '<button formaction="about:invalid#nutin-blocked">x</button>',
-      '<svg><a xlink:href="about:invalid#nutin-blocked">x</a></svg>',
-      '<a href="about:invalid#nutin-blocked">x</a>',
-      '<a href="about:invalid#nutin-blocked">x</a>',
-      '<a href="javaabout:invalid#nutin-blocked">x</a>',
-    ]);
-    expect(warnSpy.callCount).toBe(11);
+      expect(results).toEqual([
+        '<a href="about:invalid#nutin-blocked">x</a>',
+        "<a href='about:invalid#nutin-blocked'>x</a>",
+        '<a href="about:invalid#nutin-blocked">x</a>',
+        '<a href=" about:invalid#nutin-blocked">x</a>',
+        '<a HREF="about:invalid#nutin-blocked">x</a>',
+        '<a href="about:invalid#nutin-blocked">x</a>',
+        '<button formaction="about:invalid#nutin-blocked">x</button>',
+        '<svg><a xlink:href="about:invalid#nutin-blocked">x</a></svg>',
+        '<a href="about:invalid#nutin-blocked">x</a>',
+        '<a href="about:invalid#nutin-blocked">x</a>',
+        '<a href="javaabout:invalid#nutin-blocked">x</a>',
+      ]);
+      expect(warnSpy.callCount).toBe(11);
+    } finally {
+      warnSpy.restore();
+    }
   });
 
   it('html gives the same result each time one template literal is called with new values', () => {
     const warnSpy = spyOn(console, 'warn').andCallFake(() => {});
-    const link = (href, label, title) => html`<a href="${href}" title=${title}>${label}</a>`;
-    const results = [
-      String(link('/a', '<b>', 'x y')),
-      String(link('javascript:x', 'b', undefined)),
-      String(link('/c', html`<i>c</i>`, 't')),
-    ];
-    warnSpy.restore();
+    try {
+      const link = (href, label, title) => html`<a href="${href}" title=${title}>${label}</a>`;
+      const results = [
+        String(link('/a', '<b>', 'x y')),
+        String(link('javascript:x', 'b', undefined)),
+        String(link('/c', html`<i>c</i>`, 't')),
+      ];
 
-    expect(results).toEqual([
-      '<a href="/a" title="x y">&lt;b&gt;</a>',
-      '<a href="about:invalid#nutin-blocked" title="">b</a>',
-      '<a href="/c" title="t"><i>c</i></a>',
-    ]);
-    expect(warnSpy.callCount).toBe(1);
+      expect(results).toEqual([
+        '<a href="/a" title="x y">&lt;b&gt;</a>',
+        '<a href="about:invalid#nutin-blocked" title="">b</a>',
+        '<a href="/c" title="t"><i>c</i></a>',
+      ]);
+      expect(warnSpy.callCount).toBe(1);
+    } finally {
+      warnSpy.restore();
+    }
   });
 
   it('html checks a URL built from several values with static text between them as one value', () => {
     const warnSpy = spyOn(console, 'warn').andCallFake(() => {});
-    const url = (a, b, c) => html`<a href="${a}:${b}" title="${c}">x</a><a href="${c}">y</a>`;
-    const results = [
-      String(url('javascript', 'x', 'ok')),
-      String(url('https', '//example.com', '/ok')),
-      String(url('/p', 'javascript:x', 'javascript:x')),
-    ];
-    warnSpy.restore();
+    try {
+      const url = (a, b, c) => html`<a href="${a}:${b}" title="${c}">x</a><a href="${c}">y</a>`;
+      const results = [
+        String(url('javascript', 'x', 'ok')),
+        String(url('https', '//example.com', '/ok')),
+        String(url('/p', 'javascript:x', 'javascript:x')),
+      ];
 
-    expect(results).toEqual([
-      '<a href="javascript:about:invalid#nutin-blocked" title="ok">x</a><a href="ok">y</a>',
-      '<a href="https://example.com" title="/ok">x</a><a href="/ok">y</a>',
-      '<a href="/p:javascript:x" title="javascript:x">x</a><a href="about:invalid#nutin-blocked">y</a>',
-    ]);
-    expect(warnSpy.callCount).toBe(2);
+      expect(results).toEqual([
+        '<a href="javascript:about:invalid#nutin-blocked" title="ok">x</a><a href="ok">y</a>',
+        '<a href="https://example.com" title="/ok">x</a><a href="/ok">y</a>',
+        '<a href="/p:javascript:x" title="javascript:x">x</a><a href="about:invalid#nutin-blocked">y</a>',
+      ]);
+      expect(warnSpy.callCount).toBe(2);
+    } finally {
+      warnSpy.restore();
+    }
   });
 
   it('a javascript: URL from data is blocked at the trusted level too', () => {
@@ -349,25 +358,28 @@ describe('html', () => {
 
   it('html keeps URLs whose scheme is fixed by the template, other schemes and non-URL attributes', () => {
     const warnSpy = spyOn(console, 'warn').andCallFake(() => {});
-    const results = [
-      String(html`<a href="/p/${'javascript:x'}">x</a>`),
-      String(html`<a href="#${'javascript:x'}">x</a>`),
-      String(html`<a href="${'https://example.com/a'}">x</a>`),
-      String(html`<a title="${'javascript:x'}" data-x=${'javascript:x'}>x</a>`),
-      String(html`<a href="javascript:go(${1})">x</a>`),
-      String(html`<a title="t"href="${'/ok'}">x</a>`),
-    ];
-    warnSpy.restore();
+    try {
+      const results = [
+        String(html`<a href="/p/${'javascript:x'}">x</a>`),
+        String(html`<a href="#${'javascript:x'}">x</a>`),
+        String(html`<a href="${'https://example.com/a'}">x</a>`),
+        String(html`<a title="${'javascript:x'}" data-x=${'javascript:x'}>x</a>`),
+        String(html`<a href="javascript:go(${1})">x</a>`),
+        String(html`<a title="t"href="${'/ok'}">x</a>`),
+      ];
 
-    expect(results).toEqual([
-      '<a href="/p/javascript:x">x</a>',
-      '<a href="#javascript:x">x</a>',
-      '<a href="https://example.com/a">x</a>',
-      '<a title="javascript:x" data-x="javascript:x">x</a>',
-      '<a href="javascript:go(1)">x</a>',
-      '<a title="t"href="/ok">x</a>',
-    ]);
-    expect(warnSpy.callCount).toBe(0);
+      expect(results).toEqual([
+        '<a href="/p/javascript:x">x</a>',
+        '<a href="#javascript:x">x</a>',
+        '<a href="https://example.com/a">x</a>',
+        '<a title="javascript:x" data-x="javascript:x">x</a>',
+        '<a href="javascript:go(1)">x</a>',
+        '<a title="t"href="/ok">x</a>',
+      ]);
+      expect(warnSpy.callCount).toBe(0);
+    } finally {
+      warnSpy.restore();
+    }
   });
 
   it('raw in a textarea or title is inserted as text, with entities decoded', () => {

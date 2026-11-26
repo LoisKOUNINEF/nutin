@@ -2,6 +2,7 @@ import { DEFAULT_LANGUAGE, LANGUAGES } from './languages.js';
 import { AppEventBus } from '../event-bus/event-bus.js';
 import { Service } from '../../base-classes/service/service.js';
 import { CONFIG } from '../../config.js';
+import { fetchDataFile } from '../data-files/data-files.js';
 
 export class I18n extends Service<I18n> {
   private readonly _DEFAULT_LANGUAGE: Nutin.Language = DEFAULT_LANGUAGE;
@@ -42,7 +43,7 @@ export class I18n extends Service<I18n> {
 
   public async loadTranslations(lang: Nutin.Language): Promise<void> {
     try {
-      const response = await fetch(`/locales/${lang}.json`);
+      const response = await fetchDataFile(`/locales/${lang}.json`);
       
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       
@@ -55,7 +56,7 @@ export class I18n extends Service<I18n> {
       
       document.documentElement.lang = lang;
     } catch (error) {
-      console.error('Translation load error:', error);
+      console.error(`[i18n] Failed to load the "${lang}" translations.`, error);
     }
   }
 
@@ -129,13 +130,13 @@ export class I18n extends Service<I18n> {
 
   private async loadDefaultTranslations(): Promise<void> {
     try {
-      const response = await fetch(`/locales/${this._DEFAULT_LANGUAGE}.json`);
+      const response = await fetchDataFile(`/locales/${this._DEFAULT_LANGUAGE}.json`);
       
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       
       this._defaultTranslations = await response.json();
     } catch (error) {
-      console.error('Default translation load error:', error);
+      console.error(`[i18n] Failed to load the "${this._DEFAULT_LANGUAGE}" (default language) translations.`, error);
     }
   }
 

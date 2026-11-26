@@ -8,8 +8,8 @@ const fs = fsExtra.default;
 
 export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm', 'bun'];
 
-// How to run a package.json script with flags: npm needs "--" before them (without it, npm reads
-// e.g. -y or -d as its own options); yarn, pnpm and bun pass them on as they are.
+// How to run a package.json script with flags: npm needs "--" before them.
+// yarn, pnpm and bun pass them on as they are.
 export function runScriptCommand(packageManager, script, flags = '') {
   if (!flags) return `${packageManager} run ${script}`;
   return packageManager === 'npm' ? `npm run ${script} -- ${flags}` : `${packageManager} run ${script} ${flags}`;
@@ -18,7 +18,7 @@ export function runScriptCommand(packageManager, script, flags = '') {
 export async function detectPackageManager(projectPath) {
   if (await fs.pathExists(path.join(projectPath, 'pnpm-lock.yaml'))) return 'pnpm';
   if (await fs.pathExists(path.join(projectPath, 'yarn.lock'))) return 'yarn';
-  // bun 1.x switched its default lockfile from the binary bun.lockb to a text-based bun.lock —
+  // bun 1.x switched its default lockfile from the binary bun.lockb to a text-based bun.lock.
   // check both since either can be present depending on the bun version that created the project.
   if (await fs.pathExists(path.join(projectPath, 'bun.lock'))) return 'bun';
   if (await fs.pathExists(path.join(projectPath, 'bun.lockb'))) return 'bun';
@@ -34,10 +34,10 @@ export async function installDependencies(projectPath, packageManager) {
   } catch (err) {
     const output = `${err.stdout ?? ''}\n${err.stderr ?? ''}`;
 
-    // pnpm >=10 refuses to run devDependency postinstall/build scripts (e.g. esbuild's,
-    // chokidar's optional native watcher backends) by default and exits non-zero even though
-    // every package installed successfully. Recover by approving them here (writes pnpm-workspace.yaml,
-    // which also stops every later `pnpm run <script>` from re-triggering the same check).
+    // pnpm >=10 refuses to run devDependency postinstall/build scripts by default.
+    // It exits non-zero even though every package installed successfully.
+    // Recover by approving them here (writes pnpm-workspace.yaml,
+    // also stops every later `pnpm run <script>` from re-triggering the same check).
     if (packageManager === 'pnpm' && /ERR_PNPM_IGNORED_BUILDS/.test(output)) {
       print.warn('⚠️ pnpm flagged some build scripts as needing approval — approving automatically...');
       try {
@@ -111,28 +111,29 @@ export function getExtensionScripts() {
 }
 
 export function getAllScripts(context) {
-  const { packageManager, docker, markdown, lang, extension } = context;
+  const { docker, markdown, lang, extension } = context;
+  const build = 'node tools/builder/builder.js';
 
   const baseScripts = {
-    "build": "node tools/builder/builder.js",
-    "build:prod": "node tools/builder/builder.js --prod",
-    ...(lang === 'js' ? {} : { "typecheck": "node tools/builder/builder.js --typecheck" }),
-    "serve": `${packageManager} run build && node tools/dev/serve.js`,
+    "build": `${build}`,
+    "build:prod": `${build} --prod`,
+    ...(lang === 'js' ? {} : { "typecheck": `${build} --typecheck` }),
+    "serve": `${build} && node tools/dev/serve.js`,
     "serve:only": "node tools/dev/serve.js",
-    "serve:prod": `${packageManager} run build:prod && node tools/dev/serve.js`,
+    "serve:prod": `${build} --prod && node tools/dev/serve.js`,
     "dev": "node tools/dev/dev-serve.js",
     "generate": "node tools/generator/generator.js",
-    "testin-nutin": `${packageManager} run build && node tools/testin-nutin/runner.js`,
+    "testin-nutin": `${build} && node tools/testin-nutin/runner.js`,
     "testin-nutin:only": "node tools/testin-nutin/runner.js",
-    "testin-nutin:watch": `${packageManager} run build && node tools/testin-nutin/watch-tests.js`,
-    "testin-nutin:coverage": `${packageManager} run build && node tools/testin-nutin/runner.js --coverage`,
-    "testin-nutin:verbose": `${packageManager} run build && node tools/testin-nutin/runner.js --verbose`
+    "testin-nutin:watch": `${build} && node tools/testin-nutin/watch-tests.js`,
+    "testin-nutin:coverage": `${build} && node tools/testin-nutin/runner.js --coverage`,
+    "testin-nutin:verbose": `${build} && node tools/testin-nutin/runner.js --verbose`
   };
 
   let scripts = { ...baseScripts };
 
-  // An extension page needs the browser's extension APIs (chrome.*): served over HTTP it can't
-  // work, so there's no dev server. Build, then reload the extension in the browser.
+  // An extension page needs the browser's extension APIs (chrome.*), so there's no dev server.
+  // Build, then reload the extension in the browser.
   if (extension) {
     ['serve', 'serve:only', 'serve:prod', 'dev'].forEach((name) => delete scripts[name]);
     scripts = { ...scripts, ...getExtensionScripts() };

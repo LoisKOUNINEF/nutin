@@ -5,30 +5,38 @@ export { chalk, print } from '../../utils/index.js';
 
 const verboseEnabled = process.argv.includes('--verbose');
 
-export function printSummary(todo, passed, failed, time) {
+export function printSummary({ todo, skipped, passed, failed, time, onlyActive = false }) {
   const totalTime = time.toFixed(2);
   const total = passed + failed;
 
   print.boldBlue(`Test Summary`);
   print.boldInfo(`✓ ${passed} passed`);
-  print.boldError(`✗ ${failed} failed`);
+  if (failed > 0) print.boldError(`✗ ${failed} failed`);
+  else print.gray(`✗ 0 failed`);
   print.info(`📖 ${total} total`);
   print.info(`⌚️ Time: ${totalTime}ms\n`);
-  if (todo > 0) print.boldWarn(`⚠️ To do: ${todo}\n`);
+  if (skipped > 0) print.warn(`⏭ Skipped: ${skipped}`);
+  if (todo > 0) print.boldWarn(`⚠️ To do: ${todo}`);
+  // A .only left in a test file would otherwise pass the run with most tests unrun.
+  if (onlyActive) print.boldWarn('⚠️ .only is active: other tests were skipped');
+  if (skipped > 0 || todo > 0 || onlyActive) console.log();
 }
 
 export function printResults(results) {
-  const statusOrder = { passed: 0, todo: 1, failed: 2 };
+  const statusOrder = { passed: 0, skipped: 1, todo: 2, failed: 3 };
   const sortedResults = results.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
 
   sortedResults.forEach(result => {
     if (result.status === 'passed') {
       if (verboseEnabled) console.log(`${chalk.green('✓')} ${chalk.cyan(`${result.suiteName}`)} - ${chalk.green(`${result.name}`)}`);
+    } else if (result.status === 'skipped') {
+      // Tests left out by a .only are only counted (see printSummary).
+      if (result.explicit) print.warn(`SKIPPED: ${result.suiteName} - ${result.name} in ${toTsPath(result.file)}`);
     } else if (result.status === 'todo') {
       print.warn(`TODO: ${result.name} in ${toTsPath(result.file)}`);
     } else {
       print.error(`✗ ${result.suiteName} - ${result.name}`);
-      print.grayError(result.error);
+      print.grayError(result.error + '\n');
     }
   });
 }
@@ -40,7 +48,8 @@ export function printStart() {
 export function printCoverageReport(report) {
   if (!report.length) {
     // 0, not 100: an empty report must not pass a coverage threshold by default.
-    print.warn('No source files were covered.');
+    // Coverage measures the built app and framework (dist/src/app, dist/src/core), not tools/.
+    print.warn('No source files were covered: coverage only measures "testinNutin.includeApp" and "includeFramework" code.');
     return { globalLinesPct: 0, globalFunctionsPct: 0, globalBranchesPct: 0 };
   }
 

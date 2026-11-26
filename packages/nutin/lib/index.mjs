@@ -11,8 +11,8 @@ import { EXTENSION_SURFACES } from './src/common/extension.mjs';
 import { addFeatureToProject, addAllFeatures } from './src/add-feature/feature-adder.mjs';
 import { updateProject } from './src/update-app/project-updater.mjs';
 
-// --debug, on every command: stacks for every error, and the detail lines. Set as NUTIN_DEBUG=1, which
-// the generated project's tools read too (e.g. NUTIN_DEBUG=1 nutin-update in CI).
+// --debug, on every command: stacks for every error, and the detail lines.
+// Set as NUTIN_DEBUG=1, which the generated project's tools read too.
 function withDebugOption(command) {
   return command
     .option('--debug', 'Show stack traces and detail lines (same as NUTIN_DEBUG=1)')
@@ -60,15 +60,18 @@ export function addFeatureCommand(command) {
       helpWidth: 100
     })
     .argument('<feature>', `Feature to add to the current project: ${featureChoices.join(', ')}`)
-    .action(action('Error adding feature', async (featureArg) => {
+    .option('-y, --yes', 'Add without asking when the project isn\'t in a git repository or git isn\'t installed (it then can\'t be undone with git)')
+    .option('--allow-dirty', 'Add even with uncommitted changes or untracked files (it then can\'t be undone with git)')
+    .option('--dry-run', 'Show what adding the feature would change, without writing anything')
+    .action(action('Error adding feature', async (featureArg, cliOptions) => {
       if (!featureChoices.includes(featureArg)) {
         throw new UserError(`Unknown feature "${featureArg}".`, { hint: `Choose one of: ${featureChoices.join(', ')}.` });
       }
 
       if (featureArg === 'all') {
-        await addAllFeatures();
+        await addAllFeatures(cliOptions);
       } else {
-        await addFeatureToProject(findFeatureByCli(featureArg).key);
+        await addFeatureToProject(findFeatureByCli(featureArg).key, cliOptions);
       }
     }));
 }
@@ -82,6 +85,7 @@ export function updateAppCommand(command) {
     .option('-y, --yes', 'Skip the confirmation prompt and apply safe updates immediately')
     .option('--from <path>', 'Use a local templates/ directory as the old baseline instead of fetching from npm')
     .option('--allow-dirty', 'Update even with uncommitted changes or untracked files, or outside a git repository (the update then can\'t be undone with git)')
+    .option('--dry-run', 'Show what the update would change, including which files you edited would get conflict markers, without writing anything')
     .action(action('Error updating project', async (cliOptions) => {
       print.boldSuccess('🚀 nutin — update');
       await updateProject(process.cwd(), cliOptions);

@@ -7,6 +7,7 @@ import { isDebug } from '../utils/errors.mjs';
 import { FEATURES } from './feature-registry.mjs';
 import { toJsOutput } from './transpile-ts.mjs';
 import { NOT_IN_EXTENSIONS } from './extension.mjs';
+import { realWriter } from './project-writer.mjs';
 
 const fs = fsExtra.default;
 const __filename = fileURLToPath(import.meta.url);
@@ -19,8 +20,7 @@ const BINARY_EXTENSIONS = new Set([
   '.pdf', '.zip', '.tar', '.gz'
 ]);
 
-// Template-repo housekeeping, never generated. .gitkeep only keeps otherwise-empty
-// template folders in git/npm; the folder itself is still created (ensureDir).
+// Template-repo housekeeping, never generated; the folder itself is still created (ensureDir).
 const IGNORED_TEMPLATE_FILES = new Set(['.DS_Store', '.gitkeep']);
 
 // Templates that only make sense in a TypeScript project — not generated for JS-only ones.
@@ -28,7 +28,6 @@ const TS_ONLY_TEMPLATES = [
   path.join('tools', 'builder', 'core', 'app', 'compile-ts.js.hbs'),
   path.join('tools', 'builder', 'core', 'app', 'handler-refs.js.hbs'),
   path.join('tools', 'builder', 'core', 'app', 'handler-refs.test.js.hbs'),
-  // Only compile-ts imports it.
   path.join('tools', 'builder', 'core', 'app', 'ts-errors.js.hbs'),
   path.join('tools', 'builder', 'core', 'app', 'ts-errors.test.js.hbs'),
 ];
@@ -66,6 +65,7 @@ export class FileGenerator {
     return path.join(__dirname, '..', '..', '..', 'templates');
   }
 
+  // options.writer: see project-writer.mjs (nutin-add --dry-run records the writes instead).
   async processTemplateDirectory(templateDir, outputDir, context, options = {}) {
     if (!(await fs.pathExists(templateDir))) {
       throw new Error(`Template directory not found: ${templateDir}`);
@@ -82,7 +82,7 @@ export class FileGenerator {
         // A skipped folder isn't created empty either.
         if (context.extension && isNotInExtensions(`${templatePath}${path.sep}`)) continue;
         const outputPath = path.join(outputDir, entry.name);
-        await fs.ensureDir(outputPath);
+        await (options.writer ?? realWriter).ensureDir(outputPath);
         await this.processTemplateDirectory(templatePath, outputPath, context, options);
       } else {
         await this.processTemplateFile(templatePath, outputDir, entry.name, context, options);
@@ -109,8 +109,7 @@ export class FileGenerator {
     }
   }
 
-  // options.includeExtensionExclusions: render the templates NOT_IN_EXTENSIONS lists anyway (see
-  // collectTemplateTree).
+  // options.includeExtensionExclusions: render the templates NOT_IN_EXTENSIONS lists anyway.
   async isRenderTemplateFile(templatePath, fileName, context, options = {}) {
     const isJsOnly = context.lang === 'js';
     if (isJsOnly && TS_ONLY_TEMPLATES.some((template) => templatePath.endsWith(template))) {
@@ -155,19 +154,19 @@ export class FileGenerator {
     }
 
     const outputPath = path.join(outputDir, rendered.outputFileName);
+    const writer = options.writer ?? realWriter;
 
-    if (options.skipExisting && await fs.pathExists(outputPath)) {
+    if (options.skipExisting && await writer.pathExists(outputPath)) {
       // Collected for one summary line (options.skipped); listed one by one with --debug.
       options.skipped?.push(outputPath);
       if (isDebug()) print.gray(`Skipped (already exists): ${outputPath}`);
       return;
     }
 
-    await fs.writeFile(outputPath, rendered.content);
+    await writer.writeFile(outputPath, rendered.content);
   }
 
-  // options.includeExtensionExclusions: for an older version's tree. NOT_IN_EXTENSIONS is this CLI's
-  // list, and an older version may have generated what it now leaves out: kept in that tree,
+  // options.includeExtensionExclusions: for an older version's tree.
   // nutin-update reports such files (when they're on disk) as no longer generated.
   async collectTemplateTree(templatesRoot, context, options = {}) {
     const result = new Map();

@@ -18,71 +18,78 @@ function currentPathAndQuery(): string {
 }
 
 class Router extends Service<Router> {
-  private _currentView: View | null = null;
-  private _currentParams: Record<string, string> = {};
-  private _currentQuery: Record<string, string> = {};
-  private onPopState = () => this.handlePopState();
-  private onNavigate = (data: { path: string }) => this.navigate(data.path);
-  private onReload = () => this.reload();
-  private _busSubscriptions: Array<() => void> = [];
+  #currentView: View | null = null;
+  #currentParams: Record<string, string> = {};
+  #currentQuery: Record<string, string> = {};
+  #onPopState = () => this.#handlePopState();
+  #onUnhandledRejection = (event: PromiseRejectionEvent) => this.#handleUnhandledRejection(event);
+  #onNavigate = (data: { path: string }) => this.navigate(data.path);
+  #onReload = () => this.reload();
+  #busSubscriptions: Array<() => void> = [];
   // Bumped by every navigation: one whose guards resolve after a newer navigation started
   // is dropped instead of rendering over it.
-  private _navId = 0;
+  #navId = 0;
   // False until the first view is rendered: the first load leaves focus to the browser.
-  private _hasRendered = false;
+  #hasRendered = false;
   // Path and query string of the URL the current view was rendered for (after its onEnter()
   // rewrites): a popstate back to it, with only the hash changed, has nothing to render.
-  private _renderedUrl: string | null = null;
+  #renderedUrl: string | null = null;
 
-  constructor(private routes: Nutin.Routes) {
+  #routes: Nutin.Routes;
+
+  constructor(routes: Nutin.Routes) {
     super();
-    this.initializeEventListeners();
-    this.navigate(this.currentLocation());
+    this.#routes = routes;
+    this.#initializeEventListeners();
+    // The first load never adds a history entry: a URL the router rewrites (a trailing slash,
+    // a missing locale prefix) replaces the one the browser opened.
+    this.#navigateWithMode(this.#currentLocation(), 'replace', false);
     this.registerCleanup(this.removeEventListeners);
   }
 
   public removeEventListeners(): void {
-    this._busSubscriptions.forEach((callback) => {
+    this.#busSubscriptions.forEach((callback) => {
       callback();
     });
-    this._busSubscriptions = [];
-    window.removeEventListener('popstate', this.onPopState);
+    this.#busSubscriptions = [];
+    window.removeEventListener('popstate', this.#onPopState);
+    window.removeEventListener('unhandledrejection', this.#onUnhandledRejection);
   }
 
   // Re-renders the current page, so focus isn't moved (see focusView()).
   public async reload(): Promise<void> {
-    await this.navigateWithMode(this.currentLocation(), 'none', false);
+    await this.#navigateWithMode(this.#currentLocation(), 'none', false);
   }
 
   public async navigate(path: string | '', pushState: boolean = true): Promise<void> {
-    await this.navigateWithMode(path, pushState ? 'push' : 'none', this._hasRendered);
+    await this.#navigateWithMode(path, pushState ? 'push' : 'none', this.#hasRendered);
   }
 
   public getCurrentParams(): Record<string, string> {
-    return { ...this._currentParams };
+    return { ...this.#currentParams };
   }
 
   public getParam(key: string): string | undefined {
-    return this._currentParams[key];
+    return this.#currentParams[key];
   }
 
   // The URL's query string, parsed: a repeated key keeps its last value.
   public getQueryParams(): Record<string, string> {
-    return { ...this._currentQuery };
+    return { ...this.#currentQuery };
   }
 
   public getQueryParam(key: string): string | undefined {
-    return this._currentQuery[key];
+    return this.#currentQuery[key];
   }
 
   // Path, query and hash of the current URL, as navigate() takes them.
-  private currentLocation(): string {
+  #currentLocation(): string {
     return NavigationManager.getCurrentPath() + window.location.search + window.location.hash;
   }
 
-  private async navigateWithMode(path: string, mode: HistoryMode, moveFocus: boolean): Promise<void> {
-    const navId = ++this._navId;
-    const isStale = () => navId !== this._navId;
+  async #navigateWithMode(path: string, mode: HistoryMode, moveFocus: boolean): Promise<void> {
+    const navId = ++this.#navId;
+    const isStale = () => navId !== this.#navId;
     const [pathAndQuery = '', hash] = path.split('#');
     const [rawPath = '', query] = pathAndQuery.split('?');
     const search = query ? `?${query}` : '';
@@ -91,49 +98,53 @@ class Router extends Service<Router> {
     const currentPath = NavigationManager.getCurrentPath();
 
     // Try to match the route with parameters
-    const routeMatch = this.matchRoute(normalizedPath);
+    const routeMatch = this.#matchRoute(normalizedPath);
 
     if (!routeMatch) {
-      await this.handleNotFound(normalizedPath, mode, isStale, moveFocus);
+      await this.#handleNotFound(normalizedPath, mode, isStale, moveFocus, search, hash);
       return;
     }
 
-    const guardResult = await this.handleGuards(
+    const guardResult = await this.#handleGuards(
       normalizedPath,
       routeMatch.route,
       routeMatch.params,
       queryParams,
       currentPath,
       mode,
-      moveFocus
+      moveFocus,
+      isStale,
+      search,
+      hash
     );
 
     if (!guardResult || isStale()) return;
 
     // Before the current view is torn down: it stays up while a lazy route's chunk loads.
-    const view = await this.resolveView(guardResult.viewConstructor!, NavigationManager.localizedUrl(normalizedPath, search, hash), isStale);
+    const view = await this.#resolveView(guardResult.viewConstructor!, NavigationManager.localizedUrl(normalizedPath, search, hash), isStale);
     if (!view) return;
 
-    this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
-    this._currentParams = routeMatch.params;
-    this._currentQuery = queryParams;
+    this.#currentView = await ViewRenderManager.transitionOutCurrentView(this.#currentView);
+    this.#currentParams = routeMatch.params;
+    this.#currentQuery = queryParams;
 
     // Must run before renderNewView(): a view's onEnter() may rewrite the URL via NavigationManager.replaceState(), 
     // which acts on whatever history entry is current. This ensures current before onEnter() fires.
     NavigationManager.updateHistory(normalizedPath, mode, hash, search);
 
-    this._currentView = ViewRenderManager.renderNewView(view, routeMatch.params, this._currentQuery);
+    this.#currentView = ViewRenderManager.renderNewView(view, routeMatch.params, this.#currentQuery);
 
-    NavigationManager.updateDocumentTitle(this._currentView, routeMatch.pattern);
+    NavigationManager.updateDocumentTitle(this.#currentView, routeMatch.pattern);
+    NavigationManager.setNoIndex(false);
     NavigationManager.scrollToHash(hash);
-    this.afterRender(moveFocus);
+    this.#afterRender(moveFocus);
   }
 
   // Runs a route's view factory. A sync one behaves as it always did (its errors propagate).
   // A lazy one is awaited: if it fails to load, recoverFromFailedViewLoad() takes over; if a
   // newer navigation started meanwhile, the view (already mounted, empty, by its
   // constructor) is destroyed and dropped.
-  private async resolveView(factory: Nutin.ViewFactory, url: string, isStale: () => boolean): Promise<View | null> {
+  async #resolveView(factory: Nutin.ViewFactory, url: string, isStale: () => boolean): Promise<View | null> {
     if (isStale()) return null;
     const result = factory();
     if (!isPromise(result)) return result;
@@ -153,47 +164,57 @@ class Router extends Service<Router> {
   }
 
   // After updateDocumentTitle(): focusView() announces document.title when the view has no h1.
-  private afterRender(moveFocus: boolean): void {
-    if (moveFocus && this._currentView) NavigationManager.focusView(this._currentView);
-    this._hasRendered = true;
-    this._renderedUrl = currentPathAndQuery();
+  #afterRender(moveFocus: boolean): void {
+    if (moveFocus && this.#currentView) NavigationManager.focusView(this.#currentView);
+    this.#hasRendered = true;
+    this.#renderedUrl = currentPathAndQuery();
   }
 
-  private initializeEventListeners(): void {
-    this.initializeNavigationEvents();
-    this.initializeI18nEvents();
+  #initializeEventListeners(): void {
+    this.#initializeNavigationEvents();
+    this.#initializeI18nEvents();
   }
 
-  private initializeNavigationEvents(): void {
-    window.addEventListener('popstate', this.onPopState);
-    const unsubOnNav = Navigation.onNavigate(this.onNavigate);
-    const unsubOnReload = Navigation.onReload(this.onReload);
-    this._busSubscriptions.push(unsubOnNav, unsubOnReload); 
+  #initializeNavigationEvents(): void {
+    window.addEventListener('popstate', this.#onPopState);
+    window.addEventListener('unhandledrejection', this.#onUnhandledRejection);
+    const unsubOnNav = Navigation.onNavigate(this.#onNavigate);
+    const unsubOnReload = Navigation.onReload(this.#onReload);
+    this.#busSubscriptions.push(unsubOnNav, unsubOnReload); 
   }
 
-  private initializeI18nEvents(): void {
+  #initializeI18nEvents(): void {
     // The view stays, under its new locale's URL.
     const onLangChanged = () => {
       NavigationManager.updateLocaleInUrl();
-      if (this._renderedUrl !== null) this._renderedUrl = currentPathAndQuery();
+      if (this.#renderedUrl !== null) this.#renderedUrl = currentPathAndQuery();
     };
     AppEventBus.subscribe('language-changed', onLangChanged);
     const unsubOnLang = () => AppEventBus.off('language-changed', onLangChanged);
-    this._busSubscriptions.push(unsubOnLang);    
+    this.#busSubscriptions.push(unsubOnLang);    
   }
 
-  private async handlePopState(): Promise<void> {
+  // An import() the app doesn't catch (a component's lazy module), failing because its file is
+  // gone: the same recovery as a lazy route, a full page load of the current URL, once. A caught
+  // import() error is the app's to handle; the error still reaches the console either way.
+  #handleUnhandledRejection(event: PromiseRejectionEvent): void {
+    if (!NavigationManager.isModuleLoadError(event.reason)) return;
+    const { pathname, search, hash } = window.location;
+    NavigationManager.reloadOnce(pathname + search + hash, event.reason, 'a module');
+  }
+
+  async #handlePopState(): Promise<void> {
     // Back/forward across a same-page link: only the hash changed, and the view is already this
     // URL's. Left to the browser, as without a router: it restores the scroll position, and the
     // view isn't rebuilt (focus stays, no re-render cost).
-    if (this._currentView && currentPathAndQuery() === this._renderedUrl) return;
+    if (this.#currentView && currentPathAndQuery() === this.#renderedUrl) return;
     if (globalThis.__NUTIN_I18N__ ?? CONFIG.i18n) {
       const newLocale = NavigationManager.getCurrentLocale();
       if (newLocale && newLocale !== I18nService.currentLanguage) {
         await I18nService.setCurrentLanguage(newLocale as Nutin.Language);
       }
     }
-    this.navigateWithMode(this.currentLocation(), 'none', this._hasRendered);
+    this.#navigateWithMode(this.#currentLocation(), 'none', this.#hasRendered);
   }
 
   /**
@@ -202,8 +223,8 @@ class Router extends Service<Router> {
    * - '/users/:id?' matches '/users' and '/users/123'
    * - '/posts/:id' matches '/posts/123' but not '/posts'
    */
-  private matchRoute(path: string): Nutin.RouteMatch | null {
-    for (const [pattern, routeConfig] of Object.entries(this.routes)) {
+  #matchRoute(path: string): Nutin.RouteMatch | null {
+    for (const [pattern, routeConfig] of Object.entries(this.#routes)) {
       const match = NavigationManager.matchPattern(pattern, path);
       if (match) {
         return { route: routeConfig, params: match, pattern };
@@ -212,51 +233,65 @@ class Router extends Service<Router> {
     return null;
   }
 
-  private async handleNotFound(
-    normalizedPath: string, 
+  // The 404 view renders at the URL that was asked for (query and hash included): the user can
+  // see and fix it, and Back returns to the previous page.
+  async #handleNotFound(
+    normalizedPath: string,
     mode: HistoryMode,
     isStale: () => boolean,
-    moveFocus: boolean
+    moveFocus: boolean,
+    search: string = '',
+    hash?: string
   ): Promise<void> {
-    const notFoundRoute = this.routes['/404'];
+    const notFoundRoute = this.#routes['/404'];
 
     if (!notFoundRoute) {
-      console.error('No 404 route defined');
+      console.error(`[router] No route matches "${normalizedPath}" and there is no '/404' route — add one to appRoutes.`);
       return;
     }
 
     const notFoundFactory = RouteGuardsManager.getViewConstructor(notFoundRoute);
-    const view = await this.resolveView(notFoundFactory, NavigationManager.localizedUrl(normalizedPath), isStale);
+    const view = await this.#resolveView(notFoundFactory, NavigationManager.localizedUrl(normalizedPath, search, hash), isStale);
     if (!view) return;
 
-    this._currentView = await ViewRenderManager.transitionOutCurrentView(this._currentView);
-    this._currentParams = {};
-    this._currentQuery = {};
-    this._currentView = ViewRenderManager.renderNewView(view, {});
+    this.#currentView = await ViewRenderManager.transitionOutCurrentView(this.#currentView);
+    this.#currentParams = {};
+    this.#currentQuery = {};
+    // Before renderNewView(), as for a matched route: onEnter() acts on the current entry.
+    NavigationManager.updateHistory(normalizedPath, mode, hash, search);
+    this.#currentView = ViewRenderManager.renderNewView(view, {});
 
-    NavigationManager.updateDocumentTitle(this._currentView, '/404');
-    NavigationManager.updateHistory(normalizedPath, mode);
-    this.afterRender(moveFocus);
+    NavigationManager.updateDocumentTitle(this.#currentView, '/404');
+    NavigationManager.setNoIndex(true);
+    NavigationManager.scrollToHash(hash);
+    this.#afterRender(moveFocus);
   }
 
-  private async handleGuards(
+  async #handleGuards(
     normalizedPath: string,
     routeConfig: Nutin.RouteConfig,
     params: Record<string, string>,
     query: Record<string, string>,
     currentPath: string,
     mode: HistoryMode,
-    moveFocus: boolean
+    moveFocus: boolean,
+    isStale: () => boolean,
+    search: string,
+    hash?: string
   ): Promise<GuardResult | false> {
     const guardResult = await RouteGuardsManager.processRouteGuards(routeConfig, params, query);
 
     if (!guardResult.allowed) {
-      if (guardResult.redirectTo) {
+      if (guardResult.redirectTo && NavigationManager.normalizePath(guardResult.redirectTo) === '/404') {
+        // Not a redirect: the 404 view renders at the URL that was asked for, as for one that
+        // matches no route.
+        await this.#handleNotFound(normalizedPath, mode, isStale, moveFocus, search, hash);
+      } else if (guardResult.redirectTo) {
         // A guarded URL that's already the current history entry (back/forward,
         // reload, first load) is replaced by the redirect target, so the address
         // bar matches what's rendered and Back doesn't land on the guarded URL again.
         const redirectMode = mode === 'push' && normalizedPath !== currentPath ? 'push' : 'replace';
-        await this.navigateWithMode(guardResult.redirectTo, redirectMode, moveFocus);
+        await this.#navigateWithMode(guardResult.redirectTo, redirectMode, moveFocus);
       }
       // If no redirect, stay on current route (guard blocked navigation)
       return false;

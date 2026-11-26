@@ -96,8 +96,10 @@ describe('HttpClient', () => {
     expect(HttpClient.getInstance()).toBe(HttpClient.getInstance());
   });
 
-  it('should start without default headers', () => {
-    expect(Object.keys(httpClient._defaultHeaders).length).toBe(0);
+  it('should start without default headers', async () => {
+    await httpClient.get('/users');
+
+    expect([...new Headers(fetchMock.last().options.headers).keys()]).toEqual([]);
   });
 
   it('should make a GET request and parse the JSON response', async () => {
@@ -433,14 +435,18 @@ describe('HttpClient', () => {
     expect(HttpClient.getInstance()).not.toBe(client1);
   });
 
-  it('should cleanup on destroy', () => {
+  it('should cleanup on destroy', async () => {
     const Api = clientClass('https://api.example.com', { A: '1' }, { trustedAPIs: ['https://api.example.com/'] });
     const api = Api.getInstance();
 
     api.onDestroy();
 
-    expect(api._baseUrl).toBe('');
-    expect(Object.keys(api._defaultHeaders).length).toBe(0);
-    expect(api._trustedAPIs.length).toBe(0);
+    // No base URL: a relative endpoint goes to the page's origin, without the default headers.
+    await api.get('/users');
+    expect(fetchMock.last().url).toBe(`${window.location.origin}/users`);
+    expect(header(fetchMock.last(), 'A')).toBe(null);
+    // No trusted APIs: an encoded separator is refused again.
+    const error = await errorOf(api.get('https://api.example.com/a%2Fb'));
+    expect(error.message).toContain('trustedAPIs');
   });
 });

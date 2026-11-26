@@ -223,47 +223,64 @@ describe('i18n module', async () => {
 
   it('loadDefaultTranslations logs and leaves default translations empty when the fetch fails', async () => {
     Object.defineProperty(navigator, 'language', { writable: true, configurable: true, value: 'fr-FR' });
-    const errSpy = spyOn(console, 'error');
-    errSpy.andCallFake(() => {});
+    // Restored in `finally`: a failure while it's stubbed would also silence the runner's own report.
+    const errSpy = spyOn(console, 'error').andCallFake(() => {});
     fetchMock.mockError('/locales/en.json', 500);
 
-    await I18nService.initTranslations();
+    try {
+      await I18nService.initTranslations();
+    } finally {
+      errSpy.restore();
+    }
 
     // loadDefaultTranslations is attempted twice: once explicitly by initTranslations,
     // and again from within loadTranslations('fr') since _defaultTranslations is still
     // empty after the first failure — each attempt logs its own error.
     expect(errSpy.callCount).toBe(2);
     expect(I18nService.currentLanguage).toBe('fr');
-
-    errSpy.restore();
   });
 
   it('loadTranslations logs and leaves the language unchanged when the fetch rejects', async () => {
     Object.defineProperty(navigator, 'language', { writable: true, configurable: true, value: 'en-US' });
-    const errSpy = spyOn(console, 'error');
-    errSpy.andCallFake(() => {});
+    // Restored in `finally`: a failure while it's stubbed would also silence the runner's own report.
+    const errSpy = spyOn(console, 'error').andCallFake(() => {});
     global.fetch = () => Promise.reject(new Error('network down'));
 
-    await I18nService.initTranslations();
+    try {
+      await I18nService.initTranslations();
+    } finally {
+      errSpy.restore();
+    }
 
     expect(errSpy.callCount).toBe(1);
     expect(I18nService.currentLanguage).toBe('en');
-
-    errSpy.restore();
   });
 
   it('loadTranslations logs and leaves state unchanged when the response is not ok', async () => {
     Object.defineProperty(navigator, 'language', { writable: true, configurable: true, value: 'en-US' });
-    const errSpy = spyOn(console, 'error');
-    errSpy.andCallFake(() => {});
+    // Restored in `finally`: a failure while it's stubbed would also silence the runner's own report.
+    const errSpy = spyOn(console, 'error').andCallFake(() => {});
     fetchMock.mockError('/locales/en.json', 500);
 
-    await I18nService.initTranslations();
+    try {
+      await I18nService.initTranslations();
+    } finally {
+      errSpy.restore();
+    }
 
     expect(errSpy.callCount).toBe(1);
     expect(I18nService.currentLanguage).toBe('en');
+  });
 
-    errSpy.restore();
+  it('loads the translations from the plain file when their content-hashed copy is gone (a tab from before a deploy)', async () => {
+    globalThis.__NUTIN_DATA_FILES__ = JSON.stringify({ '/locales/fr.json': '/locales/fr.0123abcd.json' });
+    fetchMock.mockError('/locales/fr.0123abcd.json', 404);
+    try {
+      await I18nService.setCurrentLanguage('fr');
+      expect(I18nService.translate('home.title')).toBe('Mon App');
+    } finally {
+      delete globalThis.__NUTIN_DATA_FILES__;
+    }
   });
 
   it('onDestroy clears translations but keeps the saved language preference', async () => {

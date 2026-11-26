@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { captureCommand, errorExit } from "../../../utils/index.js";
+import { captureCommand, errorExit, UserError } from "../../../utils/index.js";
 import { builderConfig } from '../../builder.config.js';
 import { PATHS } from './paths.js';
 import { readTemplateMap } from '../html-templates/merge-templates.js';
@@ -34,7 +34,8 @@ async function compileTS() {
 
   // On stdout, where tsc itself writes its diagnostics.
   if (report) console.log(report);
-  if (code !== 0) throw new Error(`tsc exited with code ${code}`);
+  // tsc's report is above: the summary only (a UserError has no stack to show).
+  if (code !== 0) throw new UserError(`Type errors: see the report above (tsc exited with code ${code}).`);
 }
 
 function writeBuildTsconfig() {

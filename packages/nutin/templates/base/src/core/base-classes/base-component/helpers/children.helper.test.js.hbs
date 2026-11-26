@@ -256,21 +256,24 @@ describe('ChildrenHelper', () => {
 
   it('warns about a duplicate keep value and recreates the duplicate on every render', () => {
     const warnSpy = spyOn(console, 'warn').andCallFake(() => {});
-    const component = {
-      registerChildren: () => [
-        { selector: 'widget', keep: 'w', factory: (el) => new Widget({ mountTarget: el }) },
-        { selector: 'widget', keep: 'w', factory: (el) => new Widget({ mountTarget: el }) },
-      ],
-    };
-    const registry = ChildrenHelper.createRegistry();
+    try {
+      const component = {
+        registerChildren: () => [
+          { selector: 'widget', keep: 'w', factory: (el) => new Widget({ mountTarget: el }) },
+          { selector: 'widget', keep: 'w', factory: (el) => new Widget({ mountTarget: el }) },
+        ],
+      };
+      const registry = ChildrenHelper.createRegistry();
 
-    element.innerHTML = '<div data-component="widget"></div>';
-    ChildrenHelper.addChildren(component, element, registry);
-    warnSpy.restore();
+      element.innerHTML = '<div data-component="widget"></div>';
+      ChildrenHelper.addChildren(component, element, registry);
 
-    expect(warnSpy.callCount).toBe(1);
-    expect(registry.keepable.size).toBe(1);
-    expect(registry.rebuilt.length).toBe(1);
+      expect(warnSpy.callCount).toBe(1);
+      expect(registry.keepable.size).toBe(1);
+      expect(registry.rebuilt.length).toBe(1);
+    } finally {
+      warnSpy.restore();
+    }
   });
 
   it('keptCount a catalog-style child only when its keepIf item, options and component are shallow-equal', () => {

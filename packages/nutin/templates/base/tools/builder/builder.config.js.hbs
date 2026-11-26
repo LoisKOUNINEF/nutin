@@ -1,46 +1,61 @@
 import process from 'process';
 import nutinConfig from '../../nutin.config.js';
-import { errorExit } from '../utils/index.js';
+import { errorExit, UserError } from '../utils/index.js';
+import { NATIVE_CLASS_FEATURES } from './core/prod-bundle/bundle-options.js';
 // Validates "i18n" on load (an invalid value stops the build there).
 import { I18N_ENABLED, LANGUAGES, DEFAULT_LANGUAGE, I18N_LISTS_NO_LANGUAGE } from '../utils/languages.js';
 
 function validateConfig(config) {
   if (!config || typeof config !== 'object') {
-    errorExit(new Error('nutin.config.js must export a default object.'), 'builder.config');
+    errorExit(new UserError('nutin.config.js must export a default object.'), 'builder.config');
   }
   if (!config.builder || typeof config.builder !== 'object') {
-    errorExit(new Error('nutin.config.js is missing the required "builder" object.'), 'builder.config');
+    errorExit(new UserError('nutin.config.js is missing the required "builder" object.'), 'builder.config');
   }
   if (!Array.isArray(config.builder.sass?.paths)) {
-    errorExit(new Error('nutin.config.js is missing "builder.sass.paths" (expected an array).'), 'builder.config');
+    errorExit(new UserError('nutin.config.js is missing "builder.sass.paths" (expected an array).'), 'builder.config');
   }
   if (!config.builder.esbuild || typeof config.builder.esbuild !== 'object') {
-    errorExit(new Error('nutin.config.js is missing the required "builder.esbuild" object.'), 'builder.config');
+    errorExit(new UserError('nutin.config.js is missing the required "builder.esbuild" object.'), 'builder.config');
   }
+  validateLowerClassFeatures(config.builder.esbuild.lowerClassFeatures);
 {{#if extension}}
   validateExtensionConfig(config);
 {{/if}}
+}
+
+// Optional, not in the generated nutin.config.js: the class features to lower for the target
+// (see NATIVE_CLASS_FEATURES).
+function validateLowerClassFeatures(lowered) {
+  if (lowered === undefined) return;
+  const valid = `expected an array of: ${NATIVE_CLASS_FEATURES.join(', ')}`;
+  if (!Array.isArray(lowered)) {
+    errorExit(new UserError(`nutin.config.js "builder.esbuild.lowerClassFeatures" must be an array (${valid}).`), 'builder.config');
+  }
+  const unknown = lowered.find((feature) => !NATIVE_CLASS_FEATURES.includes(feature));
+  if (unknown !== undefined) {
+    errorExit(new UserError(`nutin.config.js "builder.esbuild.lowerClassFeatures" has an unknown feature ${JSON.stringify(unknown)} (${valid}).`), 'builder.config');
+  }
 }
 {{#if extension}}
 
 const EXTENSION_BROWSERS = ['chrome', 'firefox'];
 
-// An extension page is chrome-extension://<id>/index.html: no /<lang>/ URL prefixes, and nothing
-// to prerender or index.
+// An extension page is chrome-extension://<id>/index.html: no i18 and no SEO.
 function validateExtensionConfig(config) {
   const { extension } = config;
   const browsers = extension?.browsers;
   if (!Array.isArray(browsers) || !browsers.length || browsers.some((browser) => !EXTENSION_BROWSERS.includes(browser))) {
-    errorExit(new Error(`nutin.config.js "extension.browsers" must list one or more of: ${EXTENSION_BROWSERS.join(', ')}.`), 'builder.config');
+    errorExit(new UserError(`nutin.config.js "extension.browsers" must list one or more of: ${EXTENSION_BROWSERS.join(', ')}.`), 'builder.config');
   }
   if (browsers.includes('firefox') && !extension.geckoId) {
-    errorExit(new Error('nutin.config.js "extension.geckoId" is required to build for Firefox (e.g. "name@your-domain").'), 'builder.config');
+    errorExit(new UserError('nutin.config.js "extension.geckoId" is required to build for Firefox (e.g. "name@your-domain").'), 'builder.config');
   }
   if (I18N_ENABLED) {
-    errorExit(new Error('"i18n" can\'t be on in an extension: it puts the language in the URL (/<lang>/...), which an extension page doesn\'t have.'), 'builder.config');
+    errorExit(new UserError('"i18n" can\'t be on in an extension: it puts the language in the URL (/<lang>/...), which an extension page doesn\'t have.'), 'builder.config');
   }
   if (config.generateSEOFiles) {
-    errorExit(new Error('"generateSEOFiles" can\'t be on in an extension: there are no routes to prerender, and no site to index.'), 'builder.config');
+    errorExit(new UserError('"generateSEOFiles" can\'t be on in an extension: there are no routes to prerender, and no site to index.'), 'builder.config');
   }
 }
 {{/if}}
@@ -64,8 +79,14 @@ const wellKnownNonSEORoutes = [
   '/504',
 ]
 
+// lowerClassFeatures is Nutin's, not an esbuild option: esbuild would reject it in every build
+// that spreads builderConfig.esbuild (client, SSR, extension worker).
+const { lowerClassFeatures = [], ...esbuildOptions } = nutinConfig.builder.esbuild;
+
 export const builderConfig = {
   ...nutinConfig.builder,
+  esbuild: esbuildOptions,
+  lowerClassFeatures,
   isProd: process.env.NODE_ENV === 'production',
   typecheckOnly: process.env.NUTIN_TYPECHECK === '1',
   // "i18n" resolved (see utils/languages.js): `i18n: []` is off, though an empty array is truthy.

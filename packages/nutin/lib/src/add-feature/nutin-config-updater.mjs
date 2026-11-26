@@ -1,8 +1,7 @@
 import path from 'path';
-import * as fsExtra from 'fs-extra';
 import { print } from '../utils/print.mjs';
 
-const fs = fsExtra.default;
+import { realWriter } from '../common/project-writer.mjs';
 
 const GENERATE_SEO_LINE_RE = /^([ \t]*generateSEOFiles:[^\n]*\n)/m;
 const FEATURES_HEADER_RE = /^([ \t]*\/\/ Nutin features[^\n]*\n)/m;
@@ -26,20 +25,19 @@ const FEATURE_CONFIGS = {
   },
 };
 
-export async function updateNutinConfig(projectPath, feature) {
+export async function updateNutinConfig(projectPath, feature, writer = realWriter) {
   const featureConfig = FEATURE_CONFIGS[feature.key];
   if (!featureConfig) return;
 
   const configPath = path.join(projectPath, 'nutin.config.js');
-  const content = await fs.readFile(configPath, 'utf-8');
+  const content = await writer.readFile(configPath, 'utf-8');
 
   if (new RegExp(`${featureConfig.key}\\s*:`).test(content)) {
     print.info(`Kept your existing "${featureConfig.key}" in nutin.config.js.`);
     return;
   }
 
-  // Features share one "// Nutin features" block, created after generateSEOFiles by
-  // whichever feature is added first.
+  // Features share one "// Nutin features" block, created by whichever feature is added first.
   let updated;
   if (FEATURES_HEADER_RE.test(content)) {
     updated = content.replace(FEATURES_HEADER_RE, `$1${featureConfig.lines}`);
@@ -50,6 +48,6 @@ export async function updateNutinConfig(projectPath, feature) {
     return;
   }
 
-  await fs.writeFile(configPath, updated);
-  print.info(featureConfig.added);
+  await writer.writeFile(configPath, updated);
+  writer.info(featureConfig.added);
 }

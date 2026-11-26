@@ -9,24 +9,24 @@ export type EventBusApi = Pick<EventBus, 'subscribe' | 'once' | 'emit' | 'off'>;
 // Set by useEventBus() (tests): the bus every call is routed to instead.
 let delegate: EventBusApi | null = null;
 
+// One subscription; `once` ones are removed after their first call.
+type Handler = { callback: (data: any) => void; once: boolean };
+
 export class EventBus extends Service<EventBus> {
-  private _subscriptions: Nutin.Subscription[] = [];
+  // In subscription order, per event.
+  #handlers: Partial<Record<Nutin.EventKey, Handler[]>> = {};
 
   constructor() {
     super();
     this.registerCleanup(this.cleanupEventListeners);
   }
 
-  private handlers: {
-    [K in Nutin.EventKey]?: Array<(data: Nutin.EventMap[K]) => void>;
-  } = {};
-
   public subscribe<K extends Nutin.EventKey>(
     event: K,
     callback: (data: Nutin.EventMap[K]) => void
   ): void {
     if (delegate && delegate !== this) return delegate.subscribe(event, callback);
-    this.addHandler(event, callback, false);
+    this.#addHandler(event, callback, false);
   }
 
   public once<K extends Nutin.EventKey>(
@@ -34,29 +34,21 @@ export class EventBus extends Service<EventBus> {
     callback: (data: Nutin.EventMap[K]) => void
   ): void {
     if (delegate && delegate !== this) return delegate.once(event, callback);
-    this.addHandler(event, callback, true);
+    this.#addHandler(event, callback, true);
   }
 
   public emit<K extends Nutin.EventKey>(event: K, ...[data]: EventArgs<K>): void {
     if (delegate && delegate !== this) return delegate.emit(event, ...([data] as EventArgs<K>));
-    const callbacks = this.handlers[event];
-    if (!callbacks) return;
-
-    callbacks.slice().forEach(callback => {
-      // A failing listener is reported but doesn't keep the others (the router's
-      // included) from receiving the event.
+    // A copy: handlers may subscribe or unsubscribe while the event is dispatched.
+    this.#handlers[event]?.slice().forEach(({ callback, once }) => {
+      // A failing listener is reported but doesn't keep the others from receiving the event.
       try {
-        callback(data as Nutin.EventMap[K]);
+        callback(data);
       } catch (error) {
         console.error(`Error in a "${event}" listener:`, error);
       }
-
-      const subIndex = this._subscriptions.findIndex(
-        sub => sub.event === event && sub.callback === callback && sub.once
-      );
-      if (subIndex > -1) {
-        this.off(event, callback);
-      }
+      // Like off(event, callback): every subscription of this callback to the event goes.
+      if (once) this.off(event, callback);
     });
   }
 
@@ -65,51 +57,32 @@ export class EventBus extends Service<EventBus> {
     callback?: (data: Nutin.EventMap[K]) => void
   ): void {
     if (delegate && delegate !== this) return delegate.off(event, callback);
-    const handlers = this.handlers[event];
+    const handlers = this.#handlers[event];
     if (!handlers) return;
 
     if (callback) {
-      (this.handlers as Record<
-        Nutin.EventKey,
-        Array<(data: Nutin.EventMap[K]) => void>
-      >)[event] = handlers.filter(h => h !== callback);
+      this.#handlers[event] = handlers.filter((handler) => handler.callback !== callback);
     } else {
-      delete this.handlers[event];
+      delete this.#handlers[event];
     }
-
-    this._subscriptions = this._subscriptions.filter(
-      sub => sub.event !== event || (callback && sub.callback !== callback)
-    );
   }
 
-  private addHandler<K extends Nutin.EventKey>(
-    event: K,
-    callback: (data: Nutin.EventMap[K]) => void,
-    once: boolean
-  ): void {
-    if (!this.handlers[event]) {
-      this.handlers[event] = [];
-    }
-    (
-      this.handlers as Record<Nutin.EventKey, Array<(data: Nutin.EventMap[K]) => void>>
-    )[event].push(callback);
-    this._subscriptions.push({ event, callback, once } as Nutin.Subscription);
+  #addHandler(event: Nutin.EventKey, callback: (data: any) => void, once: boolean): void {
+    (this.#handlers[event] ??= []).push({ callback, once });
   }
 
+  // TypeScript-private rather than #private: tests call it to reset the shared bus.
   private cleanupEventListeners = (): void => {
-    this._subscriptions.forEach(({ event, callback }) => {
-      this.off(event, callback);
-    });
-    this._subscriptions = [];
+    this.#handlers = {};
   };
 }
 
 export const AppEventBus = /* @__PURE__ */ EventBus.getInstance();
 
 /**
- * For tests: routes every subscribe/once/emit/off made through AppEventBus to `bus`, e.g.
- * testin-nutin's MockEventBus. That covers components' `listen()`, the Navigation and Lifecycle
- * facades, the router, i18n and app services alike. Pass null to restore the real bus.
+ * For tests: routes every subscribe/once/emit/off made through AppEventBus to `bus`.
+ * That covers components' `listen()`, the Navigation and Lifecycle facades, the router, i18n and app services alike.
+ * Pass null to restore the real bus.
  * A subscription stays on the bus it was made on: set it before mounting, restore after destroying.
  */
 export function useEventBus(bus: EventBusApi | null): void {

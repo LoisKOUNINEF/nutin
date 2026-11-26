@@ -86,18 +86,18 @@ describe('globals (registerGlobals)', () => {
   });
 
   it('registering a duplicate id warns and skips the second mount', () => {
-    const warnSpy = spyOn(console, 'warn');
-    warnSpy.andCallFake(() => {});
+    const warnSpy = spyOn(console, 'warn').andCallFake(() => {});
+    try {
+      registerGlobals({ before: [{ component: makeComponent('header'), id: 'dup' }] });
+      registerGlobals({ after: [{ component: makeComponent('footer'), id: 'dup' }] });
 
-    registerGlobals({ before: [{ component: makeComponent('header'), id: 'dup' }] });
-    registerGlobals({ after: [{ component: makeComponent('footer'), id: 'dup' }] });
-
-    const matches = [...document.body.children].filter((el) => el.id === 'dup');
-    expect(matches.length).toBe(1);
-    expect(matches[0].tagName).toBe('HEADER');
-    expect(warnSpy.callCount).toBe(1);
-
-    warnSpy.restore();
+      const matches = [...document.body.children].filter((el) => el.id === 'dup');
+      expect(matches.length).toBe(1);
+      expect(matches[0].tagName).toBe('HEADER');
+      expect(warnSpy.callCount).toBe(1);
+    } finally {
+      warnSpy.restore();
+    }
   });
 });
 

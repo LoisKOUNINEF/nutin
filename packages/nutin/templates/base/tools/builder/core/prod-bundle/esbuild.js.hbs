@@ -1,9 +1,10 @@
 import esbuild from 'esbuild';
 import path from 'path';
-import { errorExit } from '../../../utils/index.js';
+import { errorExit, UserError } from '../../../utils/index.js';
 import { PATHS } from '../app/paths.js';
 import { builderConfig } from '../../builder.config.js';
-import { sharedDefine, slimConfigPlugin, DEV_OVERRIDES } from './bundle-options.js';
+import { clientDefine, slimConfigPlugin, DEV_OVERRIDES, classFeatureSupport } from './bundle-options.js';
+import { readDataFilesMap } from './data-files.js';
 
 {{#if (eq lang "js")}}
 // Bundles the copied .js sources; in dev they're also kept on disk for testin-nutin.
@@ -18,13 +19,14 @@ async function build() {
   await esbuild.build({
     ...builderConfig.esbuild,
     ...(builderConfig.isProd ? {} : DEV_OVERRIDES),
+    supported: { ...classFeatureSupport(builderConfig.lowerClassFeatures), ...builderConfig.esbuild.supported },
     platform: 'browser',
     format: 'esm',
     legalComments: 'none',
     loader: {
       '.json': 'json',
     },
-    define: sharedDefine(builderConfig),
+    define: clientDefine({ ...builderConfig, dataFiles: readDataFilesMap() }),
     plugins: [slimConfigPlugin({ generateSEO: builderConfig.generateSEO })],
     // Code splitting: each dynamic import() becomes a chunk in chunks/, only fetched
     // the first time it runs. The entry still comes out as bundle.js (see add-tags.js).
@@ -37,5 +39,6 @@ async function build() {
 }
 
 build().catch((err) => {
-  errorExit(err, 'esbuild');
+  // A build failure (err.errors): esbuild has printed each error with its file and line.
+  errorExit(Array.isArray(err.errors) ? new UserError(`${err.errors.length} bundling error(s): see above.`) : err, 'esbuild');
 });

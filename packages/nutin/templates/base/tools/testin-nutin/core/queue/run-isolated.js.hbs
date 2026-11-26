@@ -1,0 +1,87 @@
+import path from 'path';
+import { Worker } from 'node:worker_threads';
+import { formatError } from '../clean-stack.js';
+
+const WORKER_ENTRY = new URL('./isolated-file.js', import.meta.url);
+
+const emptyRun = () => ({ results: [], todo: 0, skipped: 0, passed: 0, failed: 0, coverage: [] });
+
+/**
+ * Starts one worker per test file of testinNutin.isolate (see isolated-file.js):
+ * each imports its file, then waits for run(). Every worker starts at once, since each one
+ * must have imported its file before the run knows whether a .only applies.
+ * - loaded: resolves to [{ file, hasOnly, loadError }], loadError being null or a trace.
+ * - run(onlyActive): runs their tests, and resolves to their results.
+ * coverageDirs: the dirs whose coverage the workers collect, or null for none.
+ */
+export function startIsolatedFiles(files, { coverageDirs = null } = {}) {
+  const workers = files.map((file) => startWorker(file, coverageDirs));
+
+  return {
+    loaded: Promise.all(workers.map((worker) => worker.loaded)),
+    run: (onlyActive) => Promise.all(workers.map((worker) => worker.run(onlyActive))),
+  };
+}
+
+function startWorker(file, coverageDirs) {
+  const displayFile = path.relative(process.cwd(), file);
+  // Forwarded so that --verbose applies in the worker too.
+  const worker = new Worker(WORKER_ENTRY, {
+    workerData: { file, coverageDirs },
+    argv: process.argv.slice(2),
+  });
+
+  let state = 'loading';
+  let finished = null;
+  let resolveLoaded;
+  let resolveDone;
+  const loaded = new Promise((resolve) => { resolveLoaded = resolve; });
+  const done = new Promise((resolve) => { resolveDone = resolve; });
+
+  const fail = (error) => {
+    if (state === 'loading') {
+      // Reported as a file that failed to load, like an in-process one.
+      resolveLoaded({ file, hasOnly: false, loadError: error });
+      resolveDone(emptyRun());
+    } else if (state !== 'done') {
+      resolveDone({
+        ...emptyRun(),
+        failed: 1,
+        results: [{ suiteName: displayFile, status: 'failed', name: 'worker', error }],
+      });
+    }
+    state = 'done';
+  };
+
+  worker.on('message', (message) => {
+    if (message.type === 'loaded') {
+      state = 'loaded';
+      resolveLoaded({ file, hasOnly: message.hasOnly, loadError: message.loadError });
+    } else if (message.type === 'done') {
+      // Kept until the worker exits: what its tests printed is relayed until then,
+      // and belongs before the report.
+      const { type, ...run } = message;
+      finished = run;
+    }
+  });
+  worker.on('error', (err) => fail(formatError(err)));
+  worker.on('exit', (code) => {
+    if (finished) {
+      state = 'done';
+      resolveDone(finished);
+    } else {
+      fail(`The worker stopped (exit code ${code}) before its tests finished.`);
+    }
+  });
+
+  return {
+    loaded,
+    run: (onlyActive) => {
+      if (state === 'loaded') {
+        state = 'running';
+        worker.postMessage({ type: 'run', onlyActive });
+      }
+      return done;
+    },
+  };
+}

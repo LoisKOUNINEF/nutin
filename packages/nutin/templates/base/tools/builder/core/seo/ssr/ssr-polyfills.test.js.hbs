@@ -31,6 +31,23 @@ describe('resolveFetch (SSR fetch shim)', () => {
     expect(await response.json()).toEqual({ pages: { a: 1 } });
   });
 
+  it('resolves a content-hashed data file URL to its mockFetch entry or its plain file', async () => {
+    const mocked = await resolveFetch('/generated/docs.0123abcd.json', { mockFetch: { '/generated/docs.json': { mocked: true } }, staticDir });
+    expect(await mocked.json()).toEqual({ mocked: true });
+
+    const built = await resolveFetch('/generated/docs.0123abcd.json', { staticDir });
+    expect(await built.json()).toEqual({ pages: { a: 1 } });
+  });
+
+  it('reads a content-hashed locale URL from the locales folder', async () => {
+    const localesDir = path.join(staticDir, 'locales');
+    fs.mkdirSync(localesDir);
+    fs.writeFileSync(path.join(localesDir, 'en.json'), '{"title":"Hi"}');
+
+    const response = await resolveFetch('/locales/en.0123abcd.json', { localesDir, staticDir });
+    expect(await response.json()).toEqual({ title: 'Hi' });
+  });
+
   it('serves other built files as text', async () => {
     const response = await resolveFetch('/notes.txt', { staticDir });
 

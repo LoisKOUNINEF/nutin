@@ -1,7 +1,7 @@
 import * as sass from 'sass';
 import * as fs from 'fs';
 import path from 'path';
-import { getFilesRecursive, errorExit } from '../../../utils/index.js';
+import { getFilesRecursive, errorExit, UserError } from '../../../utils/index.js';
 import { PATHS } from '../app/paths.js';
 import { builderConfig } from '../../builder.config.js';
 
@@ -38,5 +38,6 @@ try {
     fs.appendFileSync(stylesOutput, result.css);
   }
 } catch (err) {
-  errorExit(err, 'sass');
+  // A stylesheet error (sassMessage set): its message already shows the file and line, so no stack.
+  errorExit(err.sassMessage ? new UserError(err.message) : err, 'sass');
 }

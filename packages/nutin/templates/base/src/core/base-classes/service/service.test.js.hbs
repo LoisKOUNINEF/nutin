@@ -41,6 +41,17 @@ describe('Service', () => {
     expect(() => new TestService()).toThrow('TestService is a Service. Use TestService.getInstance() instead.');
   });
 
+  it('throws short messages in prod bundles (globalThis.__NUTIN_PROD__)', () => {
+    globalThis.__NUTIN_PROD__ = true;
+    try {
+      expect(() => new TestService()).toThrow('Use getInstance()');
+      TestService.getInstance();
+      expect(() => TestService.getInstance('arg')).toThrow('Already initialized');
+    } finally {
+      delete globalThis.__NUTIN_PROD__;
+    }
+  });
+
   it('creates the instance lazily on first getInstance call', () => {
     expect(Service.hasInstance(TestService)).toBe(false);
     const instance = TestService.getInstance();

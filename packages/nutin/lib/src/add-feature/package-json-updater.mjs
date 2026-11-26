@@ -1,9 +1,8 @@
 import path from 'path';
-import * as fsExtra from 'fs-extra';
 import { print } from '../utils/print.mjs';
 import { getDockerScripts, getMarkdownScripts } from '../common/package-json-helper.mjs';
 
-const fs = fsExtra.default;
+import { realWriter } from '../common/project-writer.mjs';
 
 function mergeAdditive(target, additions) {
   const merged = { ...target };
@@ -22,9 +21,9 @@ function mergeAdditive(target, additions) {
   return { merged, added, skipped };
 }
 
-export async function updatePackageJson(projectPath, feature) {
+export async function updatePackageJson(projectPath, feature, writer = realWriter) {
   const packageJsonPath = path.join(projectPath, 'package.json');
-  const packageJson = await fs.readJSON(packageJsonPath);
+  const packageJson = await writer.readJSON(packageJsonPath);
   
   const featureScripts = {
     docker: getDockerScripts,
@@ -42,6 +41,6 @@ export async function updatePackageJson(projectPath, feature) {
   if (skipped.length === Object.keys(scripts).length) return;
 
   packageJson.scripts = scriptsResult.merged;
-  await fs.writeJSON(packageJsonPath, packageJson, { spaces: 2 });
-  print.info('Updated package.json.');
+  await writer.writeJSON(packageJsonPath, packageJson);
+  writer.info('Updated package.json.');
 }

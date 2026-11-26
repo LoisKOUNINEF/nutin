@@ -5,10 +5,12 @@ import * as tar from 'tar';
 import { promiseExec } from '../utils/promise-exec-alias.mjs';
 import { PACKAGE_NAME } from '../common/package-data.mjs';
 import { UserError } from '../utils/errors.mjs';
+import { assertValidVersion } from './version-compare.mjs';
 
 const fs = fsExtra.default;
 
 export async function fetchOldTemplates(version, { from } = {}) {
+  assertValidVersion(version);
   if (from) {
     const templatesRoot = path.resolve(from);
     if (!(await fs.pathExists(templatesRoot))) {
@@ -23,7 +25,7 @@ export async function fetchOldTemplates(version, { from } = {}) {
   try {
     const { stdout } = await promiseExec(
       `npm pack ${PACKAGE_NAME}@${version} --pack-destination "${tmpDir}" --json`,
-      { maxBuffer: 1024 * 1024 * 10 },
+      { cwd: tmpDir, maxBuffer: 1024 * 1024 * 10 },
     );
     const parsed = JSON.parse(stdout);
     const packResult = Array.isArray(parsed) ? parsed[0] : Object.values(parsed)[0];

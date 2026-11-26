@@ -2,10 +2,9 @@
 // The first surface is the default.
 export const EXTENSION_SURFACES = ['side-panel', 'popup'];
 
-// Base templates an extension project doesn't get. Its page only ever shows index.html, as
-// chrome-extension://<id>/index.html, which no route matches; and it can't run on a dev server,
-// since the extension APIs (chrome.*) don't exist over HTTP. Nor does it have SEO pages or
-// i18n, which its build refuses, nor compressed files (the browser reads the plain ones).
+// Base templates an extension project doesn't get.
+// Its page only ever shows index.html, which no route matches. It also can't run on a dev server.
+// Nor does it have SEO pages or i18n, which its build refuses, nor compressed files.
 export const NOT_IN_EXTENSIONS = [
   'src/app/routes.ts.hbs',
   'src/app/guards.ts.hbs',

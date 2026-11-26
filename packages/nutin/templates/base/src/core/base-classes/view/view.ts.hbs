@@ -1,10 +1,10 @@
 import { BaseComponent } from '../base-component/base-component.js';
 
 export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComponent<T> {
-  private _viewName: string;
+  #viewName: string;
   protected routeParams: Record<string, string> = {};
   protected queryParams: Record<string, string> = {};
-  private _template: Nutin.Template;
+  #template: Nutin.Template;
 
   constructor({
     template,
@@ -14,17 +14,18 @@ export abstract class View<T extends HTMLElement = HTMLElement> extends BaseComp
     trustLevel,
   }: Nutin.ViewOptions) {
     super({ mountTarget, tagName, trustLevel });
-    if (!viewName) throw new Error('View requires a viewName.');
-    this._template = template ?? '';
-    this._viewName = viewName;
+    // Prod bundles: a short message, as Service's.
+    if (!viewName) throw new Error(globalThis.__NUTIN_PROD__ ? 'viewName' : 'View requires a viewName.');
+    this.#template = template ?? '';
+    this.#viewName = viewName;
   }
 
   public get viewName(): string {
-    return this._viewName;
+    return this.#viewName;
   }
 
   protected override generateTemplate(): Nutin.Template {
-    return this._template;
+    return this.#template;
   }
 
   public setRouteParams(params: Record<string, string>): void {

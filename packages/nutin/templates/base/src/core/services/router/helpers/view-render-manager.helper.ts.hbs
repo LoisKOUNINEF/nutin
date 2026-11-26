@@ -1,5 +1,5 @@
 import type { View } from '../../../base-classes/view/view.js';
-import { Lifecycle } from '../../event-bus/lifecycle.facade.js';
+import * as Lifecycle from '../../event-bus/lifecycle.facade.js';
 
 /**
  * handles all view rendering.

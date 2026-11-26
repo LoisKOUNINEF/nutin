@@ -1,61 +1,58 @@
 import { AppEventBus } from "./event-bus.js";
 
-class LifecycleFacade {
-  constructor(private bus: Nutin.EventBus) {}
+// Module functions, re-exported as the `Lifecycle` namespace (see index.ts):
+// the ones nothing calls are left out of the bundle.
 
-  beforeRender(): void {
-    this.bus.emit('before-render');
-  }
-
-  onBeforeRender(callback: () => void): () => void {
-    this.bus.subscribe('before-render', callback);
-    return () => this.bus.off('before-render', callback);
-  }
-
-  afterRender(): void {
-    this.bus.emit('after-render');
-  }
-
-  onAfterRender(callback: () => void): () => void {
-    this.bus.subscribe('after-render', callback);
-    return () => this.bus.off('after-render', callback);
-  }
-
-  beforeDestroy(): void {
-    this.bus.emit('before-destroy');
-  }
-
-  onBeforeDestroy(callback: () => void): () => void {
-    this.bus.subscribe('before-destroy', callback);
-    return () => this.bus.off('before-destroy', callback);
-  }
-
-  afterDestroy(): void {
-    this.bus.emit('after-destroy');
-  }
-
-  onAfterDestroy(callback: () => void): () => void {
-    this.bus.subscribe('after-destroy', callback);
-    return () => this.bus.off('after-destroy', callback);
-  }
-
-  viewMount(viewName: string): void {
-    this.bus.emit('view-mount', {viewName});
-  }
-
-  onViewMount(callback: (data: { viewName: string }) => void): () => void {
-    this.bus.subscribe('view-mount', callback);
-    return () => this.bus.off('view-mount', callback);
-  }
-
-  viewUnmount(viewName: string): void {
-    this.bus.emit('view-unmount', { viewName });
-  }
-
-  onViewUnmount(callback: (data: { viewName: string }) => void): () => void {
-    this.bus.subscribe('view-unmount', callback);
-    return () => this.bus.off('view-unmount', callback);
-  }
+export function beforeRender(): void {
+  AppEventBus.emit('before-render');
 }
 
-export const Lifecycle = /* @__PURE__ */ new LifecycleFacade(AppEventBus);
+export function onBeforeRender(callback: () => void): () => void {
+  AppEventBus.subscribe('before-render', callback);
+  return () => AppEventBus.off('before-render', callback);
+}
+
+export function afterRender(): void {
+  AppEventBus.emit('after-render');
+}
+
+export function onAfterRender(callback: () => void): () => void {
+  AppEventBus.subscribe('after-render', callback);
+  return () => AppEventBus.off('after-render', callback);
+}
+
+export function beforeDestroy(): void {
+  AppEventBus.emit('before-destroy');
+}
+
+export function onBeforeDestroy(callback: () => void): () => void {
+  AppEventBus.subscribe('before-destroy', callback);
+  return () => AppEventBus.off('before-destroy', callback);
+}
+
+export function afterDestroy(): void {
+  AppEventBus.emit('after-destroy');
+}
+
+export function onAfterDestroy(callback: () => void): () => void {
+  AppEventBus.subscribe('after-destroy', callback);
+  return () => AppEventBus.off('after-destroy', callback);
+}
+
+export function viewMount(viewName: string): void {
+  AppEventBus.emit('view-mount', { viewName });
+}
+
+export function onViewMount(callback: (data: { viewName: string }) => void): () => void {
+  AppEventBus.subscribe('view-mount', callback);
+  return () => AppEventBus.off('view-mount', callback);
+}
+
+export function viewUnmount(viewName: string): void {
+  AppEventBus.emit('view-unmount', { viewName });
+}
+
+export function onViewUnmount(callback: (data: { viewName: string }) => void): () => void {
+  AppEventBus.subscribe('view-unmount', callback);
+  return () => AppEventBus.off('view-unmount', callback);
+}

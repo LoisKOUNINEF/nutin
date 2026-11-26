@@ -15,7 +15,7 @@ async function validateHtml() {
   try {
     htmlContent = await readFile(filePath, 'utf-8');
   } catch {
-    errorExit(`Failed to read ${filePath}`);
+    errorExit(`Failed to read ${filePath}.`, 'validate-html');
   }
 
   // The router mounts views into #app, and generateSEOFiles prerenders into it. An app without
@@ -23,16 +23,16 @@ async function validateHtml() {
   const needsApp = builderConfig.generateSEO || readRoutesImporters(PATHS.sourceApp, ROUTES_FILE).length > 0;
   if (needsApp && !htmlContent.includes('id="app"')) {
     const reason = builderConfig.generateSEO ? 'generateSEOFiles prerenders pages into it' : 'the router mounts views into it';
-    errorExit(`Missing #app container in index.html: ${reason}.`);
+    errorExit(`Missing #app container in index.html: ${reason}.`, 'validate-html');
   }
 
-  htmlContent = await addTags(htmlContent, filePath).catch(err => errorExit(err.message));
+  htmlContent = await addTags(htmlContent, filePath).catch(err => errorExit(err.message, 'validate-html'));
 
   if (!/<script[^>]*type=["']module["']/.test(htmlContent)) {
-    errorExit('No module scripts found in HTML');
+    errorExit('No module script found in index.html.', 'validate-html');
   }
   if (!/<link[^>]*rel=["']stylesheet["']/.test(htmlContent)) {
-    errorExit('No stylesheet found in HTML');
+    errorExit('No stylesheet found in index.html.', 'validate-html');
   }
 }
 

@@ -21,12 +21,23 @@ export async function findDuplicateRouteKeys(source, { loader, sourcefile }) {
   return [...duplicates].map(([key, line]) => ({ key, line }));
 }
 
+/**
+ * Whether the file defines `key` as an object key ('/404': …, "/404": …, ['/404']: …).
+ * Checked on esbuild's output.
+ * A heuristic: a route defined in another file and spread into appRoutes isn't seen.
+ */
+export async function hasRouteKey(source, key, { loader, sourcefile }) {
+  const { code } = await esbuild.transform(source, { loader, sourcefile });
+  const quoted = JSON.stringify(key).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`[{,]\\s*\\[?\\s*${quoted}\\s*\\]?\\s*:`).test(code);
+}
+
 // Static, bare and dynamic imports: from '…', import '…', import('…').
 const IMPORT_SPECIFIER = /(?:\bfrom\s*|\bimport\s*\(?\s*)(['"`])([^'"`]+)\1/g;
 const CODE_EXTENSION = /\.(ts|js)$/;
 
-// The app files that import the routes module. Without one, the app doesn't use the router
-// (e.g. components mounted into a page), so routes.ts and #app aren't required.
+// The app files that import the routes module. Without one, the app doesn't use the router,
+// so routes.ts and #app aren't required.
 //   files: [{ path, content }], absolute paths; routesFile: the routes module's absolute path.
 export function findRoutesImporters(files, routesFile) {
   const routesModule = routesFile.replace(CODE_EXTENSION, '');
