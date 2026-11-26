@@ -36,7 +36,7 @@ Nutin is a good fit when you:
 * want framework code and abstractions to remain visible and editable;
 * prefer a small set of explicit concepts over a larger framework ecosystem.
 
-This can include internal tools, dashboards, CRUD applications, documentation and content sites, and other small-to-medium applications. Nutin can also be a guest on someone else's page (a widget, a browser extension's popup...).
+This can include internal tools, dashboards, CRUD applications, documentation and content sites, and other small-to-medium applications. Nutin can also be used to build browser extension's.
 
 ## When not to use Nutin?
 
