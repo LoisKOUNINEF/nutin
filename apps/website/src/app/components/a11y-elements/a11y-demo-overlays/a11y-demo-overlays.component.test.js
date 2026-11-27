@@ -115,7 +115,7 @@ describe('A11yDemoOverlaysComponent', () => {
     expect(options.actionText).toBe(t('snackbar-undo'));
 
     options.onAction();
-    expect(calls[4]).toEqual([t('snackbar-restored'), { type: 'success' }]);
+    expect(calls[4]).toEqual([t('snackbar-restored'), { position: 'bottom', type: 'success' }]);
     component.destroy();
   });
 
@@ -147,7 +147,7 @@ describe('A11yDemoOverlaysComponent', () => {
     expect(actionOptions.actionText).toBe(t('banner-reload'));
     expect(actionOptions.onClose).toBeUndefined();
     actionOptions.onAction();
-    expect(notified[0]).toEqual([t('banner-reloaded'), { type: 'success' }]);
+    expect(notified[0]).toEqual([t('banner-reloaded'), { position: 'bottom', type: 'success' }]);
 
     component.element.querySelector('[data-event="click:showBannerWithClose"]').click();
     const [closeMessage, closeOptions] = shown[1];
@@ -155,7 +155,64 @@ describe('A11yDemoOverlaysComponent', () => {
     expect(closeOptions.type).toBe('warning');
     expect(closeOptions.onAction).toBeUndefined();
     closeOptions.onClose();
-    expect(notified[1]).toEqual([t('banner-closed'), undefined]);
+    expect(notified[1]).toEqual([t('banner-closed'), { position: 'bottom' }]);
+    component.destroy();
+  });
+
+  it('shows a toast with onClose that reports through another toast', () => {
+    const component = mount();
+    const calls = [];
+    document.getElementById('a11y-demo-snackbar').notify = (message, options) => calls.push([message, options]);
+
+    component.element.querySelector('[data-event="click:showSnackbarWithClose"]').click();
+    const [message, options] = calls[0];
+    expect(message).toBe(t('snackbar-closable'));
+    expect(options.type).toBe('warning');
+    expect(options.onAction).toBeUndefined();
+
+    options.onClose();
+    expect(calls[1]).toEqual([t('snackbar-closed'), { position: 'bottom' }]);
+    component.destroy();
+  });
+
+  it("doesn't notify from the onClose toast when the snackbar's removal runs it on destroy", () => {
+    const component = mount();
+    const snackbar = document.getElementById('a11y-demo-snackbar');
+    const notified = [];
+    let onClose;
+    snackbar.notify = (message, options) => { notified.push(message); onClose = options.onClose; };
+    // Removing the upgraded region calls dismissAll(), which runs onClose.
+    const remove = snackbar.remove.bind(snackbar);
+    snackbar.remove = () => { onClose?.(); remove(); };
+
+    component.element.querySelector('[data-event="click:showSnackbarWithClose"]').click();
+    component.destroy();
+    expect(typeof onClose).toBe('function');
+    expect(notified).toEqual([t('snackbar-closable')]);
+  });
+
+  it('shows toasts and banners at the position picked in their selects', () => {
+    const component = mount();
+    const notified = [];
+    const shown = [];
+    document.getElementById('a11y-demo-snackbar').notify = (message, options) => notified.push(options.position);
+    document.getElementById('a11y-demo-banner').show = (message, options) => shown.push(options.position);
+    const snackbarSelect = component.element.querySelector('select[name="a11y-demo-snackbar-position"]');
+    const bannerSelect = component.element.querySelector('select[name="a11y-demo-banner-position"]');
+    expect([...snackbarSelect.options].map((option) => option.value))
+      .toEqual(['top-left', 'top', 'top-right', 'bottom-right', 'bottom', 'bottom-left']);
+    expect([...bannerSelect.options].map((option) => option.value)).toEqual(['top', 'bottom']);
+
+    component.element.querySelector('[data-event="click:showSnackbar:info"]').click();
+    component.element.querySelector('[data-event="click:showBanner:info"]').click();
+    snackbarSelect.value = 'top-right';
+    bannerSelect.value = 'bottom';
+    component.element.querySelector('[data-event="click:showSnackbarWithAction"]').click();
+    component.element.querySelector('[data-event="click:showBannerWithClose"]').click();
+    component.element.querySelector('[data-event="click:showBannerWithAction"]').click();
+
+    expect(notified).toEqual(['bottom', 'top-right']);
+    expect(shown).toEqual(['top', 'bottom', 'bottom']);
     component.destroy();
   });
 

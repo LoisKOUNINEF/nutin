@@ -132,6 +132,14 @@
     <h2><code>&lt;a11y-notification-banner&gt;</code></h2>
     <p data-i18n="a11y-demo-overlays.banner-desc"></p>
     <div class="a11y-demo__stage">
+      <a11y-select id="a11y-demo-banner-position" label="${translate('banner-position')}">
+        <select name="a11y-demo-banner-position">
+          <option value="top" selected>${translate('position-top')}</option>
+          <option value="bottom">${translate('position-bottom')}</option>
+        </select>
+      </a11y-select>
+    </div>
+    <div class="a11y-demo__stage">
       <button type="button" class="a11y-demo__button" data-event="click:showBanner:info" data-i18n="a11y-demo-overlays.banner-open-info"></button>
       <button type="button" class="a11y-demo__button" data-event="click:showBanner:success" data-i18n="a11y-demo-overlays.banner-open-success"></button>
       <button type="button" class="a11y-demo__button" data-event="click:showBanner:error" data-i18n="a11y-demo-overlays.banner-open-error"></button>
@@ -157,10 +165,23 @@
     <h2><code>&lt;a11y-snackbar&gt;</code></h2>
     <p data-i18n="a11y-demo-overlays.snackbar-desc"></p>
     <div class="a11y-demo__stage">
+      <a11y-select id="a11y-demo-snackbar-position" label="${translate('snackbar-position')}">
+        <select name="a11y-demo-snackbar-position">
+          <option value="top-left">${translate('position-top-left')}</option>
+          <option value="top">${translate('position-top')}</option>
+          <option value="top-right">${translate('position-top-right')}</option>
+          <option value="bottom-right">${translate('position-bottom-right')}</option>
+          <option value="bottom" selected>${translate('position-bottom')}</option>
+          <option value="bottom-left">${translate('position-bottom-left')}</option>
+        </select>
+      </a11y-select>
+    </div>
+    <div class="a11y-demo__stage">
       <button type="button" class="a11y-demo__button" data-event="click:showSnackbar:info" data-i18n="a11y-demo-overlays.snackbar-open-info"></button>
       <button type="button" class="a11y-demo__button" data-event="click:showSnackbar:success" data-i18n="a11y-demo-overlays.snackbar-open-success"></button>
       <button type="button" class="a11y-demo__button" data-event="click:showSnackbar:error" data-i18n="a11y-demo-overlays.snackbar-open-error"></button>
       <button type="button" class="a11y-demo__button" data-event="click:showSnackbarWithAction" data-i18n="a11y-demo-overlays.snackbar-open-action"></button>
+      <button type="button" class="a11y-demo__button" data-event="click:showSnackbarWithClose" data-i18n="a11y-demo-overlays.snackbar-open-close"></button>
     </div>
     <a11y-snackbar id="a11y-demo-snackbar"></a11y-snackbar>
   </section>

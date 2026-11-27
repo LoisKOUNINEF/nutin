@@ -1,5 +1,5 @@
 import type { FloatingCloseReason, FloatingElement } from 'a11y-elements/overlays/floating/element';
-import type { NotificationBannerElement, NotificationBannerType } from 'a11y-elements/overlays/notification-banner/element';
+import type { NotificationBannerElement, NotificationBannerOptions, NotificationBannerType } from 'a11y-elements/overlays/notification-banner/element';
 import type { NotifyOptions, SnackbarElement, SnackbarType } from 'a11y-elements/overlays/snackbar/element';
 import { Component, I18nService, Navigation, html } from '../../../../core/index.js';
 import { loadConfirmDialog } from '../../../helpers/a11y-elements/load-a11y-elements.helper.js';
@@ -33,6 +33,9 @@ const OVERLAY_IDS = [
 ];
 
 const BLOCKING_LOADER_DURATION = 2500;
+
+type SnackbarPosition = NonNullable<NotifyOptions['position']>;
+type BannerPosition = NonNullable<NotificationBannerOptions['position']>;
 
 // Overlays are opened/closed through the `open` attribute rather than the
 // property, and floating elements shown through `hidden`: it also works before
@@ -160,8 +163,17 @@ export class A11yDemoOverlaysComponent extends Component {
     }, BLOCKING_LOADER_DURATION);
   }
 
+  // The position pickers sit in this.element (not portaled). Read when an item
+  // is shown, so the pick needs no state of its own.
+  private selectedPosition<T extends string>(name: string): T | undefined {
+    return this.element.querySelector<HTMLSelectElement>(`select[name="${name}"]`)?.value as T | undefined;
+  }
+
+  // Every toast on the page follows the snackbar's position picker, not only
+  // the snackbar section's own: they share one region.
   private notify(message: string, options?: NotifyOptions): void {
-    (this.overlay('a11y-demo-snackbar') as SnackbarElement | null)?.notify?.(message, options);
+    const position = this.selectedPosition<SnackbarPosition>('a11y-demo-snackbar-position');
+    (this.overlay('a11y-demo-snackbar') as SnackbarElement | null)?.notify?.(message, { position, ...options });
   }
 
   private showSnackbar(type: SnackbarType): void {
@@ -175,18 +187,33 @@ export class A11yDemoOverlaysComponent extends Component {
     });
   }
 
+  // Called however the toast goes away, timeout included. The toast it shows has
+  // no onClose, so it doesn't chain. On leaving the page, the snackbar's removal
+  // runs it too, but the snackbar is released by then, so it notifies nothing.
+  private showSnackbarWithClose(): void {
+    this.notify(translate('snackbar-closable'), {
+      type: 'warning',
+      onClose: () => this.notify(translate('snackbar-closed')),
+    });
+  }
+
   private banner(): NotificationBannerElement | null {
     return this.overlay('a11y-demo-banner') as NotificationBannerElement | null;
   }
 
+  private showBannerItem(message: string, options: NotificationBannerOptions): void {
+    const position = this.selectedPosition<BannerPosition>('a11y-demo-banner-position');
+    this.banner()?.show?.(message, { position, ...options });
+  }
+
   private showBanner(type: NotificationBannerType): void {
-    this.banner()?.show?.(translate(`banner-${type}`), { type });
+    this.showBannerItem(translate(`banner-${type}`), { type });
   }
 
   // The action button also dismisses the item, which would call onClose too:
   // each demo sets only one of the two callbacks.
   private showBannerWithAction(): void {
-    this.banner()?.show?.(translate('banner-update'), {
+    this.showBannerItem(translate('banner-update'), {
       actionText: translate('banner-reload'),
       onAction: () => this.notify(translate('banner-reloaded'), { type: 'success' }),
     });
@@ -195,7 +222,7 @@ export class A11yDemoOverlaysComponent extends Component {
   // Called however the item goes away. On leaving the page, dismissAll() runs it
   // too, but the snackbar is released by then, so it notifies nothing.
   private showBannerWithClose(): void {
-    this.banner()?.show?.(translate('banner-cookies'), {
+    this.showBannerItem(translate('banner-cookies'), {
       type: 'warning',
       onClose: () => this.notify(translate('banner-closed')),
     });
