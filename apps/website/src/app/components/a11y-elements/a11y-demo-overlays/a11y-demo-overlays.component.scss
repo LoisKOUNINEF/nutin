@@ -1,0 +1,10 @@
+// <a11y-select> is display: contents and its inner field is width: 100%, so in
+// the flex stage each picker would take a whole row. Grid columns keep the
+// pickers on one line, capped in width and shrinking on narrow screens.
+// Doubled class: .a11y-demo__stage (view styles) comes later in main.css.
+.a11y-demo__stage.a11y-demo__stage--pickers {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 14rem);
+    justify-content: start;
+}

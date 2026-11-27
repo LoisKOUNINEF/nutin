@@ -131,11 +131,20 @@
   <section class="a11y-demo__section">
     <h2><code>&lt;a11y-notification-banner&gt;</code></h2>
     <p data-i18n="a11y-demo-overlays.banner-desc"></p>
-    <div class="a11y-demo__stage">
+    <div class="a11y-demo__stage a11y-demo__stage--pickers">
       <a11y-select id="a11y-demo-banner-position" label="${translate('banner-position')}">
         <select name="a11y-demo-banner-position">
           <option value="top" selected>${translate('position-top')}</option>
           <option value="bottom">${translate('position-bottom')}</option>
+        </select>
+      </a11y-select>
+      <a11y-select id="a11y-demo-banner-max-stack" label="${translate('max-stack')}">
+        <select name="a11y-demo-banner-max-stack">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
         </select>
       </a11y-select>
     </div>
@@ -164,7 +173,7 @@
   <section class="a11y-demo__section">
     <h2><code>&lt;a11y-snackbar&gt;</code></h2>
     <p data-i18n="a11y-demo-overlays.snackbar-desc"></p>
-    <div class="a11y-demo__stage">
+    <div class="a11y-demo__stage a11y-demo__stage--pickers">
       <a11y-select id="a11y-demo-snackbar-position" label="${translate('snackbar-position')}">
         <select name="a11y-demo-snackbar-position">
           <option value="top-left">${translate('position-top-left')}</option>
@@ -173,6 +182,15 @@
           <option value="bottom-right">${translate('position-bottom-right')}</option>
           <option value="bottom" selected>${translate('position-bottom')}</option>
           <option value="bottom-left">${translate('position-bottom-left')}</option>
+        </select>
+      </a11y-select>
+      <a11y-select id="a11y-demo-snackbar-max-stack" label="${translate('max-stack')}">
+        <select name="a11y-demo-snackbar-max-stack">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
         </select>
       </a11y-select>
     </div>

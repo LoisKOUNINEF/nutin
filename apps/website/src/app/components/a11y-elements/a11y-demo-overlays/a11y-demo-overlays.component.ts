@@ -163,17 +163,29 @@ export class A11yDemoOverlaysComponent extends Component {
     }, BLOCKING_LOADER_DURATION);
   }
 
-  // The position pickers sit in this.element (not portaled). Read when an item
-  // is shown, so the pick needs no state of its own.
-  private selectedPosition<T extends string>(name: string): T | undefined {
-    return this.element.querySelector<HTMLSelectElement>(`select[name="${name}"]`)?.value as T | undefined;
+  // The position and max-stack pickers sit in this.element (not portaled). Read
+  // when an item is shown, so the pick needs no state of its own.
+  private selectedValue(name: string): string | undefined {
+    return this.element.querySelector<HTMLSelectElement>(`select[name="${name}"]`)?.value;
   }
 
-  // Every toast on the page follows the snackbar's position picker, not only
-  // the snackbar section's own: they share one region.
+  private selectedPosition<T extends string>(name: string): T | undefined {
+    return this.selectedValue(name) as T | undefined;
+  }
+
+  // maxStack is sticky on the region: each item shown re-applies the current pick.
+  // Lowering it doesn't hide items already showing; extra ones wait in the queue.
+  private selectedMaxStack(name: string): number | undefined {
+    const value = Number(this.selectedValue(name));
+    return value > 0 ? value : undefined;
+  }
+
+  // Every toast on the page follows the snackbar's position and max-stack
+  // pickers, not only the snackbar section's own: they share one region.
   private notify(message: string, options?: NotifyOptions): void {
     const position = this.selectedPosition<SnackbarPosition>('a11y-demo-snackbar-position');
-    (this.overlay('a11y-demo-snackbar') as SnackbarElement | null)?.notify?.(message, { position, ...options });
+    const maxStack = this.selectedMaxStack('a11y-demo-snackbar-max-stack');
+    (this.overlay('a11y-demo-snackbar') as SnackbarElement | null)?.notify?.(message, { position, maxStack, ...options });
   }
 
   private showSnackbar(type: SnackbarType): void {
@@ -203,7 +215,8 @@ export class A11yDemoOverlaysComponent extends Component {
 
   private showBannerItem(message: string, options: NotificationBannerOptions): void {
     const position = this.selectedPosition<BannerPosition>('a11y-demo-banner-position');
-    this.banner()?.show?.(message, { position, ...options });
+    const maxStack = this.selectedMaxStack('a11y-demo-banner-max-stack');
+    this.banner()?.show?.(message, { position, maxStack, ...options });
   }
 
   private showBanner(type: NotificationBannerType): void {

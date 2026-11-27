@@ -73,6 +73,7 @@
   "banner-cookies": "This demo banner reports through the snackbar when you dismiss it.",
   "banner-closed": "Banner closed.",
   "banner-position": "Position",
+  "max-stack": "Max stacking items",
   "position-top": "Top",
   "position-bottom": "Bottom",
   "position-top-left": "Top left",

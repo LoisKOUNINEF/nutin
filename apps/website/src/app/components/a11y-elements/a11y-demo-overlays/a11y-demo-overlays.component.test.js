@@ -115,7 +115,7 @@ describe('A11yDemoOverlaysComponent', () => {
     expect(options.actionText).toBe(t('snackbar-undo'));
 
     options.onAction();
-    expect(calls[4]).toEqual([t('snackbar-restored'), { position: 'bottom', type: 'success' }]);
+    expect(calls[4]).toEqual([t('snackbar-restored'), { position: 'bottom', maxStack: 3, type: 'success' }]);
     component.destroy();
   });
 
@@ -147,7 +147,7 @@ describe('A11yDemoOverlaysComponent', () => {
     expect(actionOptions.actionText).toBe(t('banner-reload'));
     expect(actionOptions.onClose).toBeUndefined();
     actionOptions.onAction();
-    expect(notified[0]).toEqual([t('banner-reloaded'), { position: 'bottom', type: 'success' }]);
+    expect(notified[0]).toEqual([t('banner-reloaded'), { position: 'bottom', maxStack: 3, type: 'success' }]);
 
     component.element.querySelector('[data-event="click:showBannerWithClose"]').click();
     const [closeMessage, closeOptions] = shown[1];
@@ -155,7 +155,7 @@ describe('A11yDemoOverlaysComponent', () => {
     expect(closeOptions.type).toBe('warning');
     expect(closeOptions.onAction).toBeUndefined();
     closeOptions.onClose();
-    expect(notified[1]).toEqual([t('banner-closed'), { position: 'bottom' }]);
+    expect(notified[1]).toEqual([t('banner-closed'), { position: 'bottom', maxStack: 3 }]);
     component.destroy();
   });
 
@@ -171,7 +171,7 @@ describe('A11yDemoOverlaysComponent', () => {
     expect(options.onAction).toBeUndefined();
 
     options.onClose();
-    expect(calls[1]).toEqual([t('snackbar-closed'), { position: 'bottom' }]);
+    expect(calls[1]).toEqual([t('snackbar-closed'), { position: 'bottom', maxStack: 3 }]);
     component.destroy();
   });
 
@@ -213,6 +213,29 @@ describe('A11yDemoOverlaysComponent', () => {
 
     expect(notified).toEqual(['bottom', 'top-right']);
     expect(shown).toEqual(['top', 'bottom', 'bottom']);
+    component.destroy();
+  });
+
+  it('passes the max stacking items picked in their selects', () => {
+    const component = mount();
+    const notified = [];
+    const shown = [];
+    document.getElementById('a11y-demo-snackbar').notify = (message, options) => notified.push(options.maxStack);
+    document.getElementById('a11y-demo-banner').show = (message, options) => shown.push(options.maxStack);
+    const snackbarSelect = component.element.querySelector('select[name="a11y-demo-snackbar-max-stack"]');
+    const bannerSelect = component.element.querySelector('select[name="a11y-demo-banner-max-stack"]');
+    expect([...snackbarSelect.options].map((option) => option.value)).toEqual(['1', '2', '3', '4', '5']);
+    expect([...bannerSelect.options].map((option) => option.value)).toEqual(['1', '2', '3', '4', '5']);
+
+    component.element.querySelector('[data-event="click:showSnackbar:info"]').click();
+    component.element.querySelector('[data-event="click:showBanner:info"]').click();
+    snackbarSelect.value = '1';
+    bannerSelect.value = '5';
+    component.element.querySelector('[data-event="click:showSnackbar:error"]').click();
+    component.element.querySelector('[data-event="click:showBanner:error"]').click();
+
+    expect(notified).toEqual([3, 1]);
+    expect(shown).toEqual([3, 5]);
     component.destroy();
   });
 
