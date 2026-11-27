@@ -32,4 +32,4 @@ Only relevant when Check 1 doesn't already force removal:
 | `<audio>` / `<video>` / `<source>` | the `src` **attribute** is missing (checked as an attribute, not the resolved property) |
 | anything else | trimmed `textContent` is empty, or literally `"undefined"` or `"null"` |
 
-To decide from data before render instead, see [data-optional or nutinIf?](./HOWDOI_USE_NUTINIF_NUTINFOR_AND_NUTINELSE.md#data-optional-or-nutinif).
+To decide from data before render instead, see [data-optional or nutinIf?](./HOWDOI_USE_CONDITIONAL_AND_ITERATIVE_RENDERING.md#data-optional-or-nutinif).

@@ -1,4 +1,4 @@
-# How do I use `nutinIf`, `nutinFor` and `nutinElse`?
+# How do I use conditional and iterative rendering?
 
 ## `nutinIf`
 
@@ -32,7 +32,7 @@ Costs:
 - an allocation per call
 - the `.nutinElse` property name can't be shortened (about 10 B per use)
 
-### data-optional or nutinIf?
+### `data-optional` or `nutinIf`?
 
 - **[`data-optional`](./HOWDOI_REMOVE_EMPTY_ELEMENTS.md)** is for emptiness that is only known *after hydration*: text produced by `data-i18n`/`data-pipe`, an `<input>`'s resulting value, an `<img>` whose `src` ends up empty. The element is rendered, its children are mounted, then it's removed if empty.
 - **`nutinIf`** is for a decision made from data before render: either/or markup, a boolean flag, which child placeholder to render. The untaken branch is never rendered, so the children in it never mount.
@@ -67,7 +67,6 @@ For lists, `nutinFor()` maps items to markup, with the same [`.nutinElse()`](#nu
 - Each item renders exactly as an element of an array in a `${}` would: a plain string is escaped, `html`/`raw()`/`trustedRaw()`/`nutinIf` keep their rules. This holds when `nutinFor` is returned directly from `generateTemplate()` too.
 - The markup is exactly what you write, with no wrappers, so `<option>`s, table rows and `<dt>`/`<dd>` pairs work as they are.
 - `data-event` in items binds to the component's own handlers. Pass the item's id with `@dataset:` (`data-id="${item.id}"` + `click:_pick:@dataset:id`).
-- The items are rebuilt on every render. For items with their own state, or that must survive a re-render, use a catalog: see [Catalog or nutinFor?](./HOWDOI_REGISTER_CHILD_COMPONENTS.md#catalog-or-nutinfor).
 - Each item's markup is built once, nested `nutinFor`s included: the top-level markup of a `nutinIf`/`nutinFor` is only built when it's returned directly from `generateTemplate()`.
 
 ### What `nutinFor` adds over `.map()`
@@ -84,6 +83,10 @@ Costs:
 - an allocation per call, as with nutinIf
 - about 40 B gzip when used, none when unused
 
+### Catalog or `nutinFor`?
+
+The items are rebuilt on every render. For items with their own state, or that must survive a re-render, use a catalog: see [Catalog or nutinFor?](./HOWDOI_REGISTER_CHILD_COMPONENTS.md#catalog-or-nutinfor).
+
 ## `nutinElse`
 
 `.nutinElse(branch)` follows `nutinIf()` or `nutinFor()`. It renders `branch` when the condition is false or the list is empty:
@@ -91,7 +94,7 @@ Costs:
 - It's optional: without it, a false condition or an empty list renders nothing.
 - Its branch follows the same rules as a `nutinIf` branch: a plain string, `html`, `raw()`, `trustedRaw()`, or a thunk returning one. The thunk is called only when the else is taken.
 - It ends the chain: its result is the template to render, so **don't chain anything after it**.
-- Else-if: pass a thunk that returns another `nutinIf`, `nutinIf(a, x).nutinElse(() => nutinIf(b, y).nutinElse(z))`.
+- Else-if: pass a thunk that returns another `nutinIf`: `nutinIf(a, x).nutinElse(() => nutinIf(b, y).nutinElse(z))`.
 
 ### Why no `.nutinElseIf()`?
 
@@ -102,7 +105,7 @@ Costs:
     - The size is paid by every app that uses nutinIf or nutinFor, whether or not it calls else-if (apps that use neither pay nothing).
     - There's an extra cost per use, like `nutinElse`.
  3. It shows up on nutinFor results too.
-    - `nutinFor(items, …).nutinElseIf(cond, …)` would mean "empty list and cond": valid but odd.
+    - `nutinFor(items, …).nutinElseIf(cond, …)` would mean "empty list and cond": valid, but odd.
  4. It covers limited use cases.
  5. Maintenance: less is more.
 

@@ -73,5 +73,5 @@ protected override generateTemplate(): Nutin.Template {
 
 - [How do I create a component?](./HOWDOI_CREATE_A_COMPONENT.md)
 - [How do I pass data to a component?](./HOWDOI_PASS_DATA_TO_A_COMPONENT.md)
-- [How do I use `nutinIf`, `nutinFor` and `nutinElse`?](./HOWDOI_USE_NUTINIF_NUTINFOR_AND_NUTINELSE.md)
+- [How do I use conditional and iterative rendering?](./HOWDOI_USE_CONDITIONAL_AND_ITERATIVE_RENDERING.md)
 - [What lifecycle hooks are available?](../LIFECYCLE_HOOKS/WHAT_LIFECYCLE_HOOKS_ARE_AVAILABLE.md)

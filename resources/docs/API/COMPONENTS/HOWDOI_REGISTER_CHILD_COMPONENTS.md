@@ -48,7 +48,7 @@ Children without `keep` are destroyed and recreated on every render — see [Kee
 
 ## Catalog or nutinFor?
 
-A list doesn't always need child components. `nutinFor()` writes the items' markup in the parent's template (see [How do I use `nutinIf`, `nutinFor` and `nutinElse`?](./HOWDOI_USE_NUTINIF_NUTINFOR_AND_NUTINELSE.md)):
+A list doesn't always need child components. `nutinFor()` writes the items' markup in the parent's template (see [How do I use conditional and iterative rendering?](./HOWDOI_USE_CONDITIONAL_AND_ITERATIVE_RENDERING.md):
 
 | | Catalog | `nutinFor` |
 |---|---|---|

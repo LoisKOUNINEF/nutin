@@ -7,10 +7,10 @@
 - **`nutinIf(condition, branch)` and `.nutinElse(branch)`:** If/else in templates, exported from core.
     - `${nutinIf(user.isAdmin, () => html`<div data-component="admin"></div>`).nutinElse(html`<p>Read-only</p>`)}`. Without `.nutinElse()`, a false condition renders nothing.
     - `data-optional` stays, for emptiness after hydration.
-    - See [How do I use `nutinIf`, `nutinFor` and `nutinElse`?](https://www.nutin.dev/docs/api/use-nutinif-nutinfor-and-nutinelse).
+    - See [How do I use conditional and iterative rendering?](https://www.nutin.dev/docs/api/use-conditional-and-iterative-rendering).
 
 - **`nutinFor(items, render)` and `.nutinElse(branch)`:** Lists of markup in templates, exported from core.
-    - `${nutinFor(task.tags, (tag) => html`<li>${tag}</li>`).nutinElse(html`<li>No tags</li>`)}`. `items` is any iterable; `null`/`undefined` are empty. See [How do I use `nutinIf`, `nutinFor` and `nutinElse`?](https://www.nutin.dev/docs/api/use-nutinif-nutinfor-and-nutinelse#nutinfor).
+    - `${nutinFor(task.tags, (tag) => html`<li>${tag}</li>`).nutinElse(html`<li>No tags</li>`)}`. `items` is any iterable; `null`/`undefined` are empty. See [How do I use conditional and iterative rendering?](https://www.nutin.dev/docs/api/use-conditional-and-iterative-rendering#nutinfor).
     - Catalogs stay for items with their own behaviour or state, or kept across renders. See [Catalog or nutinFor?](https://www.nutin.dev/docs/api/register-child-components#catalog-or-nutinfor).
 
 - **`getCatalogComponents(parent, selector)`:** The instances of a catalog's items, exported from core.
@@ -47,8 +47,7 @@
 
 - **`docker` feature:**
     - Docker scripts: `docker:build` and `docker:run` now take flags. `--help` lists them. With npm, pass them after `--`: `npm run docker:run -- -d`. Ports stay in `nutin.config.js`: `dockerPorts`. `-p`/`--publish` are refused.
-    - New `--dry-run` flag for `docker:build` and `docker:run`: prints the docker command without running it. `docker:build --dry-run` checks the Docker configuration (ports...). `docker:run --dry-run` with a taken container name warns instead of stopping. New `tools/utils/dry-run.js`.
-    - `docker:build`, `docker:run` and `generate` ignore a leading `--`. pnpm passes it on to the script, so npm's form (`pnpm run docker:run -- -d`) was refused with "Unexpected argument".
+    - New `--dry-run` flag for `docker:build` and `docker:run`.
     - New defaults for `docker:run`: the container is named after the project, and a foreground run is removed when it stops. If the name is already taken, `docker:run` says how to free it.
     - Scoped package names now work.
     - nginx caching: changed translations and Markdown pages now show right after a deploy. Production builds now write a content-hashed copy of `/locales/*.json` and `/generated/*.json` (new `tools/builder/core/prod-bundle/hash-data-files.js`).
@@ -60,10 +59,10 @@
         - The i18n redirects are cached for an hour instead of indefinitely.
         - `nutin-update` never changes `src/app/`, so an updated project's `MarkdownManifest` keeps fetching the plain `/generated/*.json`. The file is kept next to its hashed copy, and is now revalidated. To use the cached copy, wrap the URL in `MarkdownManifest.urlFor()` with `dataFileUrl()`.
 
-- **`nutin-update --dry-run`:** shows what the update would do, without writing anything
+- **`nutin-update --dry-run`:** shows what the update would do, without writing anything.
 
 - **`nutin-add` can be undone with git, like `nutin-update`:**
-    - Before writing anything, it checks that the repo is clean: no changes and no untracked files. When feature have been added, it prints the undo command `git checkout -- . && git clean -fd`.
+    - Before writing anything, it checks that the repo is clean: no changes and no untracked files. When feature(s) have been added, it prints the undo command `git checkout -- . && git clean -fd`.
     - Without git, or outside a git repository, it warns and asks to confirm. `-y`/`--yes` adds without asking; without it, a non-interactive shell changes nothing.
     - New `--allow-dirty` flag to add with uncommitted changes.
     - `nutin-add all` checks once, and prints the undo command once.
@@ -84,7 +83,7 @@
     - New `testinNutin.isolate` in `nutin.config.js` (default `{ loadTimeout: 30, files: [] }`, or the files alone as an array): `files` lists test files (path substrings) that each run in their own worker thread, with their own modules and one jsdom window for their import and all their suites. Use it for custom elements. Each isolated file loads jsdom again (a few hundred milliseconds; the workers run in parallel). See [How do I write a test?](https://www.nutin.dev/docs/testing/write-a-test). New `tools/testin-nutin/core/queue/run-isolated.js` and `isolated-file.js`.
     - `loadTimeout`: seconds each isolated file may take to load (30 by default). One still loading after that (a top-level `await` still pending, on a request or a timer that keeps its worker alive) is stopped and reported as a file that failed to load, instead of holding the whole run forever. See [How do I configure testin-nutin?](https://www.nutin.dev/docs/testing/configure-testin-nutin).
 
-- **Dependencies:** new apps get `jsdom` 31, `sass` 1.108, `linkedom` 0.18.15. Extensions get `@types/chrome` 0.3.8. The markdown feature installs `marked` 18.3, and Tailwind CSS installs `tailwindcss` and `@tailwindcss/cli` 4.3.5. *Note: Since sass 1.92, declarations written after a nested rule are emitted after it, in source order, like native CSS nesting.*
+- **Dev Dependencies:** new apps get `jsdom` 31, `sass` 1.108, `linkedom` 0.18.15. Extensions get `@types/chrome` 0.3.8. The markdown feature installs `marked` 18.3, and Tailwind CSS installs `tailwindcss` and `@tailwindcss/cli` 4.3.5. *Note: Since sass 1.92, declarations written after a nested rule are emitted after it, in source order, like native CSS nesting.*
 
 ### Fixes
 

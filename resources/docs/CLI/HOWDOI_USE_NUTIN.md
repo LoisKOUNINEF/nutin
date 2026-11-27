@@ -1,4 +1,4 @@
-# How do I install Nutin?
+# How do I use Nutin?
 
 Nutin is a command-line tool, `@nutin/cli`. It generates your project, and updates it later. 
 

@@ -12,7 +12,7 @@ title: API
 - [How do I create a component?](./API/COMPONENTS/HOWDOI_CREATE_A_COMPONENT.md)
 - [How do I register child components?](./API/COMPONENTS/HOWDOI_REGISTER_CHILD_COMPONENTS.md)
 - [How do I pass data to a component?](./API/COMPONENTS/HOWDOI_PASS_DATA_TO_A_COMPONENT.md)
-- [How do I use `nutinIf`, `nutinFor` and `nutinElse`?](./API/COMPONENTS/HOWDOI_USE_NUTINIF_NUTINFOR_AND_NUTINELSE.md)
+- [How do I use conditional and iterative rendering?](./API/COMPONENTS/HOWDOI_USE_CONDITIONAL_AND_ITERATIVE_RENDERING.md)
 - [How do I generate a template?](./API/COMPONENTS/HOWDOI_GENERATE_A_TEMPLATE.md)
 - [How do I update a component on state change?](./API/COMPONENTS/HOWDOI_UPDATE_A_COMPONENT_ON_STATE_CHANGE.md)
 - [How do I remove empty elements?](./API/COMPONENTS/HOWDOI_REMOVE_EMPTY_ELEMENTS.md)
