@@ -19,6 +19,56 @@ describe('CatalogHelper', () => {
     expect(CatalogHelper.generateCatalog({ selector: 'x', elementName: 'item' }, scope)).toEqual([]);
   });
 
+  it('warns in dev for items without a numeric length (Set, Map, generator) and renders nothing', () => {
+    scope.innerHTML = '<div data-catalog="list"><p class="empty">No items</p></div>';
+    const warn = spyOn(console, 'warn').andCallFake(() => {});
+    try {
+      const inputs = [new Set([{ id: 1 }]), new Map([[1, { id: 1 }]]), (function* () { yield { id: 1 }; })()];
+      inputs.forEach(items => {
+        expect(CatalogHelper.generateCatalog({ items, selector: 'list', elementName: 'item', component: class {} }, scope)).toEqual([]);
+      });
+
+      expect(warn.calls.length).toBe(3);
+      expect(warn.calls[0][0]).toContain('createCatalogComponents() expects an array of items, got [object Set]');
+      expect(warn.calls[0][0]).toContain('Array.from(set)');
+      expect(warn.calls[1][0]).toContain('[object Map]');
+      // Like an empty array: the container's template content stays.
+      expect(scope.querySelector('.empty')).not.toBe(null);
+    } finally {
+      warn.restore();
+    }
+  });
+
+  it('warns in dev for a string, which would render one item per character', () => {
+    scope.innerHTML = '<div data-catalog="list"></div>';
+    const warn = spyOn(console, 'warn').andCallFake(() => {});
+    try {
+      CatalogHelper.generateCatalog({ items: 'ab', selector: 'list', elementName: 'item', component: class {} }, scope);
+      expect(warn.calls.length).toBe(1);
+      expect(warn.calls[0][0]).toContain('[object String]');
+    } finally {
+      warn.restore();
+    }
+  });
+
+  it('does not warn for an array, null/undefined or an array-like such as a NodeList', () => {
+    scope.innerHTML = '<div data-catalog="list"></div><span></span><span></span>';
+    const warn = spyOn(console, 'warn').andCallFake(() => {});
+    try {
+      CatalogHelper.generateCatalog({ items: [], selector: 'list', elementName: 'item' }, scope);
+      CatalogHelper.generateCatalog({ items: null, selector: 'list', elementName: 'item' }, scope);
+      CatalogHelper.generateCatalog({ selector: 'list', elementName: 'item' }, scope);
+      const configs = CatalogHelper.generateCatalog(
+        { items: scope.querySelectorAll('span'), selector: 'list', elementName: 'item', component: class {} },
+        scope
+      );
+      expect(configs.length).toBe(2);
+      expect(warn.calls.length).toBe(0);
+    } finally {
+      warn.restore();
+    }
+  });
+
   it('returns an empty array when no matching [data-catalog] container exists', () => {
     const configs = CatalogHelper.generateCatalog(
       { items: [{ id: 1 }], selector: 'missing', elementName: 'item' },

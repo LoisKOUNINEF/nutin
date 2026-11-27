@@ -88,6 +88,8 @@
 
 ### Fixes
 
+- **Catalogs warn instead of rendering nothing silently:** `createCatalogComponents()` given a `Set`, a `Map`, a generator or another value without a numeric `length` rendered an empty catalog with no warning. Dev builds now warn and point to `Array.from(set)` / `[...map.values()]`, and do the same for a string.
+
 - **Tabs left open across a deploy no longer hit 404s on the previous build's files:**
     - Translations and Markdown manifests fall back to their plain URL when their content-hashed copy is gone.
     - An uncaught `import()` that can't fetch one of the app's own chunks now gets the same recovery as a lazy route: one full page load of the current URL. A failure at the same URL afterwards only logs, however late: Safari's error doesn't name the module, so a third-party one can't be told apart.

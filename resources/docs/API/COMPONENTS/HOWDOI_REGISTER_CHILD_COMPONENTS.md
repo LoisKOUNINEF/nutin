@@ -88,7 +88,7 @@ public override registerChildren(): Nutin.ComponentConfig[] {
 ```ts
 // Nutin.CatalogConfig
 interface CatalogConfig {
-  items: Nutin.CatalogItemConfig[];
+  items?: readonly unknown[] | null;  // null/undefined: an empty catalog
   elementName: string;
   elementTag?: keyof HTMLElementTagNameMap;
   selector: string;
@@ -97,7 +97,9 @@ interface CatalogConfig {
 }
 ```
 
-For every `[data-catalog="selector"]` container found (there can be more than one), the container's existing `innerHTML` is **cleared entirely**, then one wrapper element is generated per item — each wrapping a `<div data-component="elementName-i">` and stamped with `data-index="i"` — which then flows through the exact same child-mounting path as single children.
+For every `[data-catalog="selector"]` container found (there can be more than one), the container's existing `innerHTML` is **cleared entirely**, then one wrapper element is generated per item, each wrapping a `<div data-component="elementName-i">` and stamped with `data-index="i"`, which then flows through the exact same child-mounting path as single children. An empty list leaves the containers as they are.
+
+`items` is an array. For a `Set`, a `Map` or another iterable, pass `Array.from(set)` or `[...map.values()]`. In dev builds, a value without a numeric `length` (which would render nothing) or a string (one item per character) logs a warning.
 
 ### Object vs. primitive items
 

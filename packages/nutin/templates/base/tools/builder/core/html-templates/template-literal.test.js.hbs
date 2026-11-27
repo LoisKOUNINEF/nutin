@@ -1,4 +1,4 @@
-import { scanTemplate, minifyTemplateBody } from './template-literal.js';
+import { scanTemplate, minifyTemplateBody, findHtmlTemplates, minifyTemplatesIn } from './template-literal.js';
 
 // Scans `source` from just past its first backtick and returns the literal's body.
 function bodyOf(source) {
@@ -65,5 +65,48 @@ describe('template-literal', () => {
   it('minifyTemplateBody keeps a nested html`` it cannot minify as written', async () => {
     const body = '<ul>  ${items.map((i) => html`<li style="${i}">x</li>`)}  </ul>';
     expect(await minifyTemplateBody(body)).toBe('<ul>${items.map((i) => html`<li style="${i}">x</li>`)}</ul>');
+  });
+
+  it('findHtmlTemplates lists every top-level html`` literal, each holding its nested ones', () => {
+    const source = [
+      'const tip = `not ${html`<i>a</i>`} html`;',
+      '// html`<b>comment</b>`',
+      'class X extends Component {',
+      '  override generateTemplate() {',
+      "    if (this.a) return html`<p>${'}'}</p>`;",
+      '    return html`<ul>${this.items.map((i) => html`<li>${i}</li>`)}</ul>`;',
+      '  }',
+      '}',
+    ].join('\n');
+    const templates = findHtmlTemplates(source);
+    expect(templates.map((t) => t.body)).toEqual([
+      "<p>${'}'}</p>",
+      '<ul>${this.items.map((i) => html`<li>${i}</li>`)}</ul>',
+    ]);
+    expect(source.slice(templates[1].open, templates[1].end)).toBe(templates[1].body);
+    expect(templates[0].tagged).toBe(true);
+  });
+
+  it('findHtmlTemplates returns null when the scanner cannot follow the file', () => {
+    expect(findHtmlTemplates('const a = html`<p>${b</p>`;')).toBe(null);
+    expect(findHtmlTemplates('function f() { return html`<p></p>`;')).toBe(null);
+    expect(findHtmlTemplates('const a = 1;')).toEqual([]);
+  });
+
+  it('minifyTemplatesIn minifies every template, keeps one it cannot as written, and skips overlaps', async () => {
+    const source = 'a(html`<p>  x  </p>`); b(html`<p>${a</p>`); c(html`<div>\n  <b>y</b>\n</div>`);';
+    const open = (needle) => source.indexOf(needle) + needle.length;
+    const span = (start, body) => ({ open: start, end: start + body.length, body });
+    const first = span(open('a(html`'), '<p>  x  </p>');
+    const broken = span(open('b(html`'), '<p>${a</p>');
+    const last = span(open('c(html`'), '<div>\n  <b>y</b>\n</div>');
+    const overlap = span(first.open + 1, 'p>  x');
+
+    const result = await minifyTemplatesIn(source, [last, overlap, broken, first]);
+    expect(result.content).toBe('a(html`<p>x</p>`); b(html`<p>${a</p>`); c(html`<div><b>y</b></div>`);');
+    expect(result.unminified).toBe(true);
+
+    const clean = await minifyTemplatesIn(source, [first]);
+    expect(clean.unminified).toBe(false);
   });
 });

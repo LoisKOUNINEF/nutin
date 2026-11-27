@@ -83,7 +83,8 @@ declare namespace Nutin {
   }
 
   interface CatalogConfig extends ComponentOptions {
-    items: CatalogItemConfig[];
+    // An array: Array.from() a Set, a Map's values or another iterable. null/undefined are empty.
+    items?: readonly unknown[] | null;
     elementName: string;
     elementTag?: keyof HTMLElementTagNameMap;
     selector: string;

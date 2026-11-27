@@ -45,6 +45,10 @@ ${nutinIf(user.isAdmin, () => html`<div data-component="admin-panel"></div>`).nu
 <p data-optional data-i18n="promo-banner"></p>
 ```
 
+### Limitation
+
+`nutinIf` can't narrow types, because its condition is just an argument, so you'll need `button!.label` even right after `button !== undefined`.
+
 ## `nutinFor`
 
 For lists, `nutinFor()` maps items to markup, with the same [`.nutinElse()`](#nutinelse) for the empty state:

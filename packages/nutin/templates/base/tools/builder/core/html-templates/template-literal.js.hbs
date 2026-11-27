@@ -76,7 +76,7 @@ export function scanTemplate(src, start) {
 }
 
 // Index just past the "}" closing the expression that starts at `i`, or -1.
-function scanExpression(src, i, nested) {
+export function scanExpression(src, i, nested) {
   let depth = 0;
   let previous = '('; // the expression start behaves like an opening parenthesis
 
@@ -171,6 +171,35 @@ async function minifyNested(body, start, end, nested) {
     last = close;
   }
   return out + body.slice(last, end);
+}
+
+// Every html``-tagged literal of a code file that isn't inside another one:
+// the const template, generateTemplate()'s returns, helpers'.
+// Each is { tagged, open, end, body }, in source order.
+// null when the scanner can't follow the file.
+export function findHtmlTemplates(content) {
+  const literals = [];
+  // The whole file read as one expression, closed by the "}" added after it.
+  if (scanExpression(`${content}\n}`, 0, literals) !== content.length + 2) return null;
+  return literals.map(({ open, end }) => ({ tagged: true, open, end, body: content.slice(open, end) }));
+}
+
+// Minifies each of `templates` ({ open, end, body } of `content`) that can be.
+// Where two overlap, the first one is kept. Returns the content and whether a template was kept as written.
+export async function minifyTemplatesIn(content, templates) {
+  const kept = [];
+  for (const template of [...templates].sort((a, b) => a.open - b.open)) {
+    if (!kept.length || template.open >= kept[kept.length - 1].end) kept.push(template);
+  }
+
+  let out = content;
+  let unminified = false;
+  for (const { open, end, body } of kept.reverse()) {
+    const minified = await minifyTemplateBody(body);
+    if (minified === null) unminified = true;
+    else out = out.slice(0, open) + minified + out.slice(end);
+  }
+  return { content: out, unminified };
 }
 
 // Up to the opening backtick; scanTemplate() finds the closing one, past any nested html``.

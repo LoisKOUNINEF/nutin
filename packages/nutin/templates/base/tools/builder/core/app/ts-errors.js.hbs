@@ -4,7 +4,7 @@ import path from 'path';
 // back to the project's own file: the .html template when the position falls inside a merged
 // template, the source .ts otherwise (its lines after the template shifted back up).
 //   templateMap: { 'src/…/x.component.ts': { html, line, col, lines } } (see merge-templates)
-//   handlerRefs: { 'src/…/x.component.ts': { className, line, col, segment, handlers } } (see handler-refs):
+//   handlerRefs: { 'src/…/x.component.ts': [{ className, line, col, segment, handlers }, …] } (see handler-refs):
 //   an error in the injected handler references is reported where the handler is named in the template.
 const LOCATION = /^(.+?)\((\d+),(\d+)\)(: .*)$/;
 
@@ -19,7 +19,7 @@ export function remapTscOutput(output, { cwd, tempDir, templateMap, handlerRefs 
       if (!absolute.startsWith(tempDir + path.sep)) return line;
 
       const relPath = path.relative(tempDir, absolute);
-      const handlerRef = mapHandlerRef(handlerRefs[toPosix(relPath)], Number(lineNo), Number(colNo));
+      const handlerRef = mapHandlerRefs(handlerRefs[toPosix(relPath)], Number(lineNo), Number(colNo));
       const { file: mappedFile, line: mappedLine, col: mappedCol } = mapPosition(relPath, handlerRef.line, handlerRef.col, templateMap);
       // A private handler declared in a parent class: TS2341 names the parent; say what to do.
       const hint = handlerRef.note && rest.includes('TS2341') ? ' Declare it protected to use it in a subclass template.' : '';
@@ -40,14 +40,24 @@ export function mapPosition(relPath, line, col, templateMap) {
   return { file: entry.html, line: htmlLine, col: htmlLine === 1 ? col - entry.col + 1 : col };
 }
 
-// A position on a line where handler references were injected: inside them, the handler's place
-// in the template (or the class, for an error about the injection itself); after them, shifted back.
-export function mapHandlerRef(entry, line, col) {
-  if (!entry || line !== entry.line || col < entry.col) return { line, col, note: '' };
-  if (col >= entry.col + entry.segment.length) return { line, col: col - entry.segment.length, note: '' };
+// A position in a file with injected handler references (one entry per class):
+// inside one of them, the handler's place in the template;
+// after them on the same line, shifted back by the references before it.
+export function mapHandlerRefs(entries = [], line, col) {
+  let shift = 0;
+  for (const entry of entries) {
+    if (entry.line !== line || col < entry.col) continue;
+    if (col < entry.col + entry.segment.length) return mapHandlerRef(entry, line, col, shift);
+    shift += entry.segment.length;
+  }
+  return { line, col: col - shift, note: '' };
+}
 
+// A position inside one class's injected references;
+// `shift` is the length of the ones injected before it on the same line.
+export function mapHandlerRef(entry, line, col, shift = 0) {
   const handler = entry.handlers.find((h) => col >= h.col && col < h.col + h.name.length);
-  if (!handler) return { line, col: Math.max(entry.col - 1, 1), note: ` (data-event handlers of ${entry.className})` };
+  if (!handler) return { line, col: Math.max(entry.col - shift - 1, 1), note: ` (data-event handlers of ${entry.className})` };
   return {
     line: handler.templateLine,
     col: handler.templateCol,

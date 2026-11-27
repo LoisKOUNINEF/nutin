@@ -5,26 +5,32 @@ import * as SafeDom from './safe-dom.helper.js';
 import * as DomHelper from './dom.helper.js';
 
 export function generateCatalog(config: Nutin.CatalogConfig, scope: Element = document.documentElement): Nutin.ComponentConfig[] {
-  if (!config.items || config.items.length < 1) return [];
+  const items = config.items;
+  // A Set, a Map or a generator has no .length, so it renders nothing; a string renders one item per character.
+  if (!globalThis.__NUTIN_PROD__ && items != null && (typeof items === 'string' || typeof items.length !== 'number')) {
+    console.warn(`createCatalogComponents() expects an array of items, got ${Object.prototype.toString.call(items)} - use Array.from(set) or [...map.values()].`);
+  }
+  // !(length > 0) also covers a value without a length: like an empty array, it leaves the containers as they are.
+  if (!items || !(items.length > 0)) return [];
 
   const componentConfigs: Nutin.ComponentConfig[] = [];
   const containers = SafeDom.querySelectorAllOf(scope, `[data-catalog="${config.selector}"]`);
 
   containers.forEach((container) => {
     if (!container || !(container instanceof HTMLElement)) return;
-    componentConfigs.push(...getComponentConfigItems(config, container))
+    componentConfigs.push(...getComponentConfigItems(config, items, container))
   })
 
   return componentConfigs;
 }
 
-function getComponentConfigItems(config: Nutin.CatalogConfig, container: HTMLElement): Nutin.ComponentConfig[] {
+function getComponentConfigItems(config: Nutin.CatalogConfig, items: readonly unknown[], container: HTMLElement): Nutin.ComponentConfig[] {
   // SafeDom: a container that is a <form> may hold a control named innerHTML/appendChild.
   SafeDom.assign(container, 'innerHTML', '');
   const componentConfigs: Nutin.ComponentConfig[] = [];
-  for (let i = 0; i < config.items.length; i++) {
+  for (let i = 0; i < items.length; i++) {
     createElements(i, config, container);
-    pushConfig(i, componentConfigs, config);
+    pushConfig(i, items[i], componentConfigs, config);
   }
   return componentConfigs;
 }
@@ -38,8 +44,8 @@ function createElements(index: number, config: Nutin.CatalogConfig, container: H
   if (container) SafeDom.invoke(container, 'appendChild', wrapper);
 }
 
-function pushConfig(index: number, componentConfigs: Nutin.ComponentConfig[], config: Nutin.CatalogConfig): void {
-  const configWithIndex = getConfigWithIndex(config, index)
+function pushConfig(index: number, item: unknown, componentConfigs: Nutin.ComponentConfig[], config: Nutin.CatalogConfig): void {
+  const configWithIndex = getConfigWithIndex(item, index)
 
   const { props, defaults } = config;
   const options = { ...props, ...defaults };
@@ -50,7 +56,6 @@ function pushConfig(index: number, componentConfigs: Nutin.ComponentConfig[], co
   };
 
   if (config.keepBy) {
-    const item = config.items[index];
     componentConfig.keep = config.keepBy(item, index);
     componentConfig.scope = `catalog:${config.selector}:${config.elementName}`;
     componentConfig.keepIf = { item, options, component: config.component };
@@ -59,11 +64,10 @@ function pushConfig(index: number, componentConfigs: Nutin.ComponentConfig[], co
   componentConfigs.push(componentConfig);
 }
 
-function getConfigWithIndex(config: Nutin.CatalogConfig, index: number): Nutin.CatalogItemConfig {
-  const item = config.items[index];
+function getConfigWithIndex(item: unknown, index: number): Nutin.CatalogItemConfig {
   return (item && typeof item === 'object')
     ? { ...(item as object), index: index }
-    : { value: item, index: index };    
+    : { value: item as Nutin.CatalogItemPrimitive['value'], index: index };
 }
 
 // The instances of the catalog items in parent's [data-catalog="selector"] containers, in DOM order:
